@@ -82,15 +82,6 @@ void ffPrintSound(FFSoundOptions* options)
     }
 }
 
-
-void ffInitSoundOptions(FFSoundOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SOUND_MODULE_NAME, ffParseSoundCommandOptions, ffParseSoundJsonObject, ffPrintSound, ffGenerateSoundJson, ffPrintSoundHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->soundType = FF_SOUND_TYPE_MAIN;
-}
-
 bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SOUND_MODULE_NAME);
@@ -110,11 +101,6 @@ bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroySoundOptions(FFSoundOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
@@ -150,7 +136,31 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateSoundJson(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroySoundOptions))) FFSoundOptions defaultOptions;
+    ffInitSoundOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.soundType != options->soundType)
+    {
+        switch (options->soundType)
+        {
+            case FF_SOUND_TYPE_MAIN:
+                yyjson_mut_obj_add_str(doc, module, "soundType", "main");
+                break;
+            case FF_SOUND_TYPE_ACTIVE:
+                yyjson_mut_obj_add_str(doc, module, "soundType", "active");
+                break;
+            case FF_SOUND_TYPE_ALL:
+                yyjson_mut_obj_add_str(doc, module, "soundType", "all");
+                break;
+        }
+    }
+}
+
+void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
     const char* error = ffDetectSound(&result);
@@ -198,4 +208,26 @@ void ffPrintSoundHelpFormat(void)
         "Volume",
         "Identifier"
     });
+}
+
+void ffInitSoundOptions(FFSoundOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SOUND_MODULE_NAME,
+        ffParseSoundCommandOptions,
+        ffParseSoundJsonObject,
+        ffPrintSound,
+        ffGenerateSoundJsonResult,
+        ffPrintSoundHelpFormat,
+        ffGenerateSoundJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->soundType = FF_SOUND_TYPE_MAIN;
+}
+
+void ffDestroySoundOptions(FFSoundOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -17,13 +17,6 @@ void ffPrintCustom(FFCustomOptions* options)
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffInitCustomOptions(FFCustomOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CUSTOM_MODULE_NAME, ffParseCustomCommandOptions, ffParseCustomJsonObject, ffPrintCustom, NULL, NULL);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
-}
-
 bool ffParseCustomCommandOptions(FFCustomOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CUSTOM_MODULE_NAME);
@@ -34,9 +27,12 @@ bool ffParseCustomCommandOptions(FFCustomOptions* options, const char* key, cons
     return false;
 }
 
-void ffDestroyCustomOptions(FFCustomOptions* options)
+void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    ffOptionDestroyModuleArg(&options->moduleArgs);
+    __attribute__((__cleanup__(ffDestroyCustomOptions))) FFCustomOptions defaultOptions;
+    ffInitCustomOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 }
 
 void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)
@@ -54,4 +50,25 @@ void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)
 
         ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
+}
+
+void ffInitCustomOptions(FFCustomOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CUSTOM_MODULE_NAME,
+        ffParseCustomCommandOptions,
+        ffParseCustomJsonObject,
+        ffPrintCustom,
+        NULL,
+        NULL,
+        ffGenerateCustomJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+}
+
+void ffDestroyCustomOptions(FFCustomOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

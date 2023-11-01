@@ -40,15 +40,6 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     ffStrbufDestroy(&result.location);
 }
 
-void ffInitPublicIpOptions(FFPublicIpOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PUBLICIP_MODULE_NAME, ffParsePublicIpCommandOptions, ffParsePublicIpJsonObject, ffPrintPublicIp, ffGeneratePublicIpJson, ffPrintPublicIpHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->url);
-    options->timeout = 0;
-}
-
 bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_PUBLICIP_MODULE_NAME);
@@ -69,13 +60,6 @@ bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, 
     }
 
     return false;
-}
-
-void ffDestroyPublicIpOptions(FFPublicIpOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    ffStrbufDestroy(&options->url);
 }
 
 void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
@@ -107,7 +91,18 @@ void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
     }
 }
 
-void ffGeneratePublicIpJson(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGeneratePublicIpJsonConfig(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIpOptions defaultOptions;
+    ffInitPublicIpOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (!ffStrbufEqual(&options->url, &defaultOptions.url))
+        yyjson_mut_obj_add_strbuf(doc, module, "url", &options->url);
+}
+
+void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPublicIpResult result;
     ffStrbufInit(&result.ip);
@@ -134,4 +129,29 @@ void ffPrintPublicIpHelpFormat(void)
         "Public IP address",
         "Location"
     });
+}
+
+void ffInitPublicIpOptions(FFPublicIpOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_PUBLICIP_MODULE_NAME,
+        ffParsePublicIpCommandOptions,
+        ffParsePublicIpJsonObject,
+        ffPrintPublicIp,
+        ffGeneratePublicIpJsonResult,
+        ffPrintPublicIpHelpFormat,
+        ffGeneratePublicIpJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->url);
+    options->timeout = 0;
+}
+
+void ffDestroyPublicIpOptions(FFPublicIpOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    ffStrbufDestroy(&options->url);
 }

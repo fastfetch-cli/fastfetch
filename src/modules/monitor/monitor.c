@@ -75,12 +75,6 @@ void ffPrintMonitor(FFMonitorOptions* options)
     }
 }
 
-void ffInitMonitorOptions(FFMonitorOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_MONITOR_MODULE_NAME, ffParseMonitorCommandOptions, ffParseMonitorJsonObject, ffPrintMonitor, ffGenerateMonitorJson, ffPrintMonitorHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_MONITOR_MODULE_NAME);
@@ -89,11 +83,6 @@ bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyMonitorOptions(FFMonitorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
@@ -113,7 +102,15 @@ void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateMonitorJson(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateMonitorJsonConfig(FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyMonitorOptions))) FFMonitorOptions defaultOptions;
+    ffInitMonitorOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFMonitorResult));
 
@@ -159,4 +156,24 @@ void ffPrintMonitorHelpFormat(void)
         "Display physical diagonal length in inches",
         "Display physical pixels per inch (PPI)"
     });
+}
+
+void ffInitMonitorOptions(FFMonitorOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_MONITOR_MODULE_NAME,
+        ffParseMonitorCommandOptions,
+        ffParseMonitorJsonObject,
+        ffPrintMonitor,
+        ffGenerateMonitorJsonResult,
+        ffPrintMonitorHelpFormat,
+        ffGenerateMonitorJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyMonitorOptions(FFMonitorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

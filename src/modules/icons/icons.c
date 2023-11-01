@@ -30,12 +30,6 @@ void ffPrintIcons(FFIconsOptions* options)
     }
 }
 
-void ffInitIconsOptions(FFIconsOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_ICONS_MODULE_NAME, ffParseIconsCommandOptions, ffParseIconsJsonObject, ffPrintIcons, ffGenerateIconsJson, ffPrintIconsHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_ICONS_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyIconsOptions(FFIconsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
@@ -68,7 +57,15 @@ void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateIconsJson(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateIconsJsonConfig(FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyIconsOptions))) FFIconsOptions defaultOptions;
+    ffInitIconsOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
     const char* error = ffDetectIcons(&icons);
@@ -87,4 +84,24 @@ void ffPrintIconsHelpFormat(void)
     ffPrintModuleFormatHelp(FF_ICONS_MODULE_NAME, "{1}", FF_ICONS_NUM_FORMAT_ARGS, (const char* []) {
         "Combined icons"
     });
+}
+
+void ffInitIconsOptions(FFIconsOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_ICONS_MODULE_NAME,
+        ffParseIconsCommandOptions,
+        ffParseIconsJsonObject,
+        ffPrintIcons,
+        ffGenerateIconsJsonResult,
+        ffPrintIconsHelpFormat,
+        ffGenerateIconsJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyIconsOptions(FFIconsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

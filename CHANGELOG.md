@@ -1,3 +1,47 @@
+# 2.2.0
+
+This release introduces a new option `--migrate-config`, which migrates old flag based config file to new JSONC format
+
+Changes:
+* `--pipe` and `--stat` are moved from `general` options to `display` options. This affects cjson configuration.
+* Display keys `percent*` and `size*` in JSON config are restructured. e.g. `{ "sizeNdigits": 1 }` is now `{ "size": { "ndigits": 1 } }`
+* With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in 3.0.0 (next major version)
+* Support of `--gen-config conf` is deprecated accordingly, and will be removed in 2.3.0 (next minor version)
+* The global flag `--allow-slow-operations` is splitted into some explicit flags in differnet modules
+    * `--packages-winget`: control whether `winget` packages count should be detected. Note it's a very slow operation, please enable it with caution.
+    * `--chassis-use-wmi`: control whether `WMI` query should be used to detect chassis type, which detects more information, but slower. This flag only affects `--chassis-format` and `--format json`.
+    * `--battery-use-setup-api`: control whether `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower.
+    * `--wm-detect-plugin`: control whether WM plugins should be detected. Note it's implemented with global processes enumeration and can report false results.
+    * `--de-slow-version-detection`: control DE version should be detected with slow operations. It's usually not necessary and only provided as a backup.
+* `--localip-default-route-only` and `--netio-default-route-only` defaults to true to avoid large number of results
+
+Features:
+* Quirks for MIPS platforms (CPU, Linux)
+* Use devicetree path for OBP hosts (Host, Linux)
+* Detect `tmux: server` as tmux (Terminal, Linux)
+* Support urxvt version detection (Terminal, Linux)
+* Support st version detection (Terminal, Linux)
+* Support st terminal font detection (TerminalFont, Linux)
+* Support xfce4-terminal 1.1.0+ terminal font detection (TerminalFont, Linux)
+* Add option `--migrate-config <?target-file-path>`
+* Support Nvidia GPU temp and cuda core count detection via nvml. Use `--gpu-use-nvml` to enable it (GPU)
+* Try supporting Wifi authentication type detection in macOS Sonoma. Please file a feature request if you get `to be supported (num)` with result of `/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport -I | grep auth` (Wifi, macOS)
+
+Bugfixes:
+* Better GPU memory and type detection (GPU, Windows)
+* Don't print display type twice (Display)
+* Detect BSSID instead of Wifi MAC address to align with other platforms (Wifi, macOS)
+* Remove support of used GPU memory detection, which is not reliable and only supported with `--gpu-force-vulkan`. (GPU)
+* Fix flag `--brightness-ddcci-sleep` (Brightness, Linux)
+* Fix hanging if a child process prints to both stdout and stderr (Linux)
+
+Logos:
+* Add Black Mesa
+* Add cycledream
+* Add Evolinx
+* Add azos
+* Add Interix
+
 # 2.1.2
 
 Bugfixes:
@@ -27,6 +71,8 @@ Logo:
 * Add Chimera Linux
 * Add EndeavourSmall
 * Add Xenia
+* Add MainsailOS
+* Fix phyOS
 
 # 2.1.0
 

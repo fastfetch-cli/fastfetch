@@ -30,12 +30,6 @@ void ffPrintLocale(FFLocaleOptions* options)
     }
 }
 
-void ffInitLocaleOptions(FFLocaleOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALE_MODULE_NAME, ffParseLocaleCommandOptions, ffParseLocaleJsonObject, ffPrintLocale, ffGenerateLocaleJson, ffPrintLocaleHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_LOCALE_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyLocaleOptions(FFLocaleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
@@ -68,7 +57,15 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateLocaleJson(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateLocaleJsonConfig(FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyLocaleOptions))) FFLocaleOptions defaultOptions;
+    ffInitLocaleOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
 
@@ -87,4 +84,24 @@ void ffPrintLocaleHelpFormat(void)
     ffPrintModuleFormatHelp(FF_LOCALE_MODULE_NAME, "{1}", FF_LOCALE_NUM_FORMAT_ARGS, (const char* []) {
         "Locale code"
     });
+}
+
+void ffInitLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_LOCALE_MODULE_NAME,
+        ffParseLocaleCommandOptions,
+        ffParseLocaleJsonObject,
+        ffPrintLocale,
+        ffGenerateLocaleJsonResult,
+        ffPrintLocaleHelpFormat,
+        ffGenerateLocaleJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -44,12 +44,6 @@ void ffPrintVulkan(FFVulkanOptions* options)
     }
 }
 
-void ffInitVulkanOptions(FFVulkanOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VULKAN_MODULE_NAME, ffParseVulkanCommandOptions, ffParseVulkanJsonObject, ffPrintVulkan, ffGenerateVulkanJson, ffPrintVulkanHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseVulkanCommandOptions(FFVulkanOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_VULKAN_MODULE_NAME);
@@ -58,11 +52,6 @@ bool ffParseVulkanCommandOptions(FFVulkanOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyVulkanOptions(FFVulkanOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
@@ -82,7 +71,15 @@ void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateVulkanJson(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateVulkanJsonConfig(FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyVulkanOptions))) FFVulkanOptions defaultOptions;
+    ffInitVulkanOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFVulkanResult* result = ffDetectVulkan();
 
@@ -144,4 +141,24 @@ void ffPrintVulkanHelpFormat(void)
         "API version",
         "Conformance version"
     });
+}
+
+void ffInitVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_VULKAN_MODULE_NAME,
+        ffParseVulkanCommandOptions,
+        ffParseVulkanJsonObject,
+        ffPrintVulkan,
+        ffGenerateVulkanJsonResult,
+        ffPrintVulkanHelpFormat,
+        ffGenerateVulkanJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

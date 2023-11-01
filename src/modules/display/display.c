@@ -49,9 +49,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
         ffStrbufClear(&key);
         if(options->moduleArgs.key.length == 0)
         {
-            const char* subkey = result->name.length ? result->name.chars : displayType;
-            if (subkey)
-                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, subkey);
+            if (result->name.length)
+                ffStrbufAppendF(&key, "%s (%s)", FF_DISPLAY_MODULE_NAME, result->name.chars);
             else if (moduleIndex > 0)
                 ffStrbufAppendF(&key, "%s (%d)", FF_DISPLAY_MODULE_NAME, moduleIndex);
             else
@@ -110,14 +109,6 @@ void ffPrintDisplay(FFDisplayOptions* options)
     }
 }
 
-void ffInitDisplayOptions(FFDisplayOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISPLAY_MODULE_NAME, ffParseDisplayCommandOptions, ffParseDisplayJsonObject, ffPrintDisplay, ffGenerateDisplayJson, ffPrintDisplayHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    options->preciseRefreshRate = false;
-}
-
 bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DISPLAY_MODULE_NAME);
@@ -143,11 +134,6 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyDisplayOptions(FFDisplayOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
@@ -189,7 +175,34 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateDisplayJson(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyDisplayOptions))) FFDisplayOptions defaultOptions;
+    ffInitDisplayOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->compactType != defaultOptions.compactType)
+    {
+        switch (options->compactType)
+        {
+            case FF_DISPLAY_COMPACT_TYPE_NONE:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "none");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "original");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "scaled");
+                break;
+        }
+    }
+
+    if (options->preciseRefreshRate != defaultOptions.preciseRefreshRate)
+        yyjson_mut_obj_add_bool(doc, module, "preciseRefreshRate", options->preciseRefreshRate);
+}
+
+void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
@@ -238,4 +251,26 @@ void ffPrintDisplayHelpFormat(void)
         "Screen type (builtin, external or unknown)",
         "Screen rotation (in degrees)",
     });
+}
+
+void ffInitDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DISPLAY_MODULE_NAME,
+        ffParseDisplayCommandOptions,
+        ffParseDisplayJsonObject,
+        ffPrintDisplay,
+        ffGenerateDisplayJsonResult,
+        ffPrintDisplayHelpFormat,
+        ffGenerateDisplayJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+    options->preciseRefreshRate = false;
+}
+
+void ffDestroyDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -50,12 +50,12 @@ void ffPrintBrightness(FFBrightnessOptions* options)
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            if (instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, percent, 0, 100, 100);
             }
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -84,14 +84,6 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     }
 }
 
-void ffInitBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BRIGHTNESS_MODULE_NAME, ffParseBrightnessCommandOptions, ffParseBrightnessJsonObject, ffPrintBrightness, ffGenerateBrightnessJson, ffPrintBrightnessHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->ddcciSleep = 10;
-}
-
 bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BRIGHTNESS_MODULE_NAME);
@@ -99,18 +91,13 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(key, "ddcci-sleep"))
+    if (ffStrEqualsIgnCase(subKey, "ddcci-sleep"))
     {
         options->ddcciSleep = ffOptionParseUInt32(key, value);
         return true;
     }
 
     return false;
-}
-
-void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
@@ -136,7 +123,18 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
     }
 }
 
-void ffGenerateBrightnessJson(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBrightnessOptions))) FFBrightnessOptions defaultOptions;
+    ffInitBrightnessOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.ddcciSleep != options->ddcciSleep)
+        yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+}
+
+void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
@@ -181,4 +179,26 @@ void ffPrintBrightnessHelpFormat(void)
         "Minimum brightness value",
         "Current brightness value",
     });
+}
+
+void ffInitBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BRIGHTNESS_MODULE_NAME,
+        ffParseBrightnessCommandOptions,
+        ffParseBrightnessJsonObject,
+        ffPrintBrightness,
+        ffGenerateBrightnessJsonResult,
+        ffPrintBrightnessHelpFormat,
+        ffGenerateBrightnessJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->ddcciSleep = 10;
+}
+
+void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

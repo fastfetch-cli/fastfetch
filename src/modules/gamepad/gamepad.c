@@ -49,12 +49,6 @@ void ffPrintGamepad(FFGamepadOptions* options)
     }
 }
 
-void ffInitGamepadOptions(FFGamepadOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GAMEPAD_MODULE_NAME, ffParseGamepadCommandOptions, ffParseGamepadJsonObject, ffPrintGamepad, ffGenerateGamepadJson, ffPrintGamepadHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseGamepadCommandOptions(FFGamepadOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_GAMEPAD_MODULE_NAME);
@@ -63,11 +57,6 @@ bool ffParseGamepadCommandOptions(FFGamepadOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyGamepadOptions(FFGamepadOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
@@ -87,7 +76,15 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateGamepadJson(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyGamepadOptions))) FFGamepadOptions defaultOptions;
+    ffInitGamepadOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFGamepadDevice));
 
@@ -126,4 +123,24 @@ void ffPrintGamepadHelpFormat(void)
         "Name",
         "Identifier"
     });
+}
+
+void ffInitGamepadOptions(FFGamepadOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_GAMEPAD_MODULE_NAME,
+        ffParseGamepadCommandOptions,
+        ffParseGamepadJsonObject,
+        ffPrintGamepad,
+        ffGenerateGamepadJsonResult,
+        ffPrintGamepadHelpFormat,
+        ffGenerateGamepadJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyGamepadOptions(FFGamepadOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

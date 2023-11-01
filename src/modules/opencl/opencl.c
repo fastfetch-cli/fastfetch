@@ -39,12 +39,6 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
     ffStrbufDestroy(&opencl.vendor);
 }
 
-void ffInitOpenCLOptions(FFOpenCLOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OPENCL_MODULE_NAME, ffParseOpenCLCommandOptions, ffParseOpenCLJsonObject, ffPrintOpenCL, ffGenerateOpenCLJson, ffPrintOpenCLHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_OPENCL_MODULE_NAME);
@@ -53,11 +47,6 @@ bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
@@ -77,7 +66,15 @@ void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateOpenCLJson(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateOpenCLJsonConfig(FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyOpenCLOptions))) FFOpenCLOptions defaultOptions;
+    ffInitOpenCLOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFOpenCLResult opencl;
     ffStrbufInit(&opencl.version);
@@ -110,4 +107,24 @@ void ffPrintOpenCLHelpFormat(void)
         "device",
         "vendor"
     });
+}
+
+void ffInitOpenCLOptions(FFOpenCLOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_OPENCL_MODULE_NAME,
+        ffParseOpenCLCommandOptions,
+        ffParseOpenCLJsonObject,
+        ffPrintOpenCL,
+        ffGenerateOpenCLJsonResult,
+        ffPrintOpenCLHelpFormat,
+        ffGenerateOpenCLJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

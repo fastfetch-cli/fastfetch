@@ -13,7 +13,7 @@ void ffPrintChassis(FFChassisOptions* options)
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
 
-    const char* error = ffDetectChassis(&result);
+    const char* error = ffDetectChassis(&result, options);
 
     if(error)
     {
@@ -50,12 +50,6 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-void ffInitChassisOptions(FFChassisOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CHASSIS_MODULE_NAME, ffParseChassisCommandOptions, ffParseChassisJsonObject, ffPrintChassis, ffGenerateChassisJson, ffPrintChassisHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseChassisCommandOptions(FFChassisOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CHASSIS_MODULE_NAME);
@@ -63,12 +57,15 @@ bool ffParseChassisCommandOptions(FFChassisOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    return false;
-}
+    #ifdef _WIN32
+    if (ffStrEqualsIgnCase(subKey, "use-wmi"))
+    {
+        options->useWmi = ffOptionParseBoolean(value);
+        return true;
+    }
+    #endif
 
-void ffDestroyChassisOptions(FFChassisOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
+    return false;
 }
 
 void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
@@ -84,18 +81,39 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "useWmi"))
+        {
+            options->useWmi = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         ffPrintError(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
 
-void ffGenerateChassisJson(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyChassisOptions))) FFChassisOptions defaultOptions;
+    ffInitChassisOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef _WIN32
+    if (options->useWmi != defaultOptions.useWmi)
+        yyjson_mut_obj_add_bool(doc, module, "useWmi", options->useWmi);
+    #endif
+}
+
+void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFChassisResult result;
     ffStrbufInit(&result.type);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
 
-    const char* error = ffDetectChassis(&result);
+    const char* error = ffDetectChassis(&result, options);
 
     if (error)
     {
@@ -127,4 +145,28 @@ void ffPrintChassisHelpFormat(void)
         "chassis vendor",
         "chassis version"
     });
+}
+
+void ffInitChassisOptions(FFChassisOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CHASSIS_MODULE_NAME,
+        ffParseChassisCommandOptions,
+        ffParseChassisJsonObject,
+        ffPrintChassis,
+        ffGenerateChassisJsonResult,
+        ffPrintChassisHelpFormat,
+        ffGenerateChassisJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    #ifdef _WIN32
+    options->useWmi = false;
+    #endif
+}
+
+void ffDestroyChassisOptions(FFChassisOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -30,12 +30,6 @@ void ffPrintTheme(FFThemeOptions* options)
     }
 }
 
-void ffInitThemeOptions(FFThemeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_THEME_MODULE_NAME, ffParseThemeCommandOptions, ffParseThemeJsonObject, ffPrintTheme, ffGenerateThemeJson, ffPrintThemeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_THEME_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyThemeOptions(FFThemeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
@@ -68,7 +57,15 @@ void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateThemeJson(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateThemeJsonConfig(FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyThemeOptions))) FFThemeOptions defaultOptions;
+    ffInitThemeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY theme = ffStrbufCreate();
     const char* error = ffDetectTheme(&theme);
@@ -87,4 +84,24 @@ void ffPrintThemeHelpFormat(void)
     ffPrintModuleFormatHelp(FF_THEME_MODULE_NAME, "{1}", FF_THEME_NUM_FORMAT_ARGS, (const char* []) {
         "Combined themes"
     });
+}
+
+void ffInitThemeOptions(FFThemeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_THEME_MODULE_NAME,
+        ffParseThemeCommandOptions,
+        ffParseThemeJsonObject,
+        ffPrintTheme,
+        ffGenerateThemeJsonResult,
+        ffPrintThemeHelpFormat,
+        ffGenerateThemeJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyThemeOptions(FFThemeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

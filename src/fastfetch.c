@@ -236,18 +236,24 @@ static bool parseConfigFile(FFdata* data, const char* path)
 
 static void generateConfigFile(bool force, const char* type)
 {
+    if (!type)
+    {
+        fputs("Error: the config type (`jsonc` or `conf`) must be specified\n", stderr);
+        exit(1);
+    }
+
     FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0);
     // Paths generated in `init.c/initConfigDirs` end with `/`
-    bool isJsonc = false;
-    if (type)
+    bool isJsonc = ffStrEqualsIgnCase(type, "jsonc");
+    if (!isJsonc)
     {
-        if (ffStrEqualsIgnCase(type, "jsonc"))
-            isJsonc = true;
-        else if (!ffStrEqualsIgnCase(type, "conf"))
+        if (!ffStrEqualsIgnCase(type, "conf"))
         {
-            fputs("config type can only be `jsonc` or `conf`\n", stderr);
+            fputs("Error: config type can only be `jsonc` or `conf`\n", stderr);
             exit(1);
         }
+        else
+            fputs("Warning: support of flag based config type `conf` is deprecated, and may be removed in the future\n", stderr);
     }
 
     ffStrbufAppendS(filename, isJsonc ? "fastfetch/config.jsonc" : "fastfetch/config.conf");
@@ -330,16 +336,6 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     fprintf(stderr, "Error: couldn't find config: %s\n", value);
     exit(414);
-}
-
-static inline void optionCheckString(const char* key, const char* value, FFstrbuf* buffer)
-{
-    if(value == NULL)
-    {
-        fprintf(stderr, "Error: usage: %s <str>\n", key);
-        exit(477);
-    }
-    ffStrbufEnsureFree(buffer, 63); //This is not needed, as ffStrbufSetS will resize capacity if needed, but giving a higher start should improve performance
 }
 
 static void printVersion()
@@ -471,9 +467,9 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         customValue->printKey = key[5] == '\0';
     }
 
-    ///////////////////
-    //General options//
-    ///////////////////
+    ////////////
+    //Switches//
+    ////////////
 
     else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
@@ -481,23 +477,30 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         generateConfigFile(false, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
         generateConfigFile(true, value);
-    else if(ffStrEqualsIgnCase(key, "--thread") || ffStrEqualsIgnCase(key, "--multithreading"))
-        instance.config.multithreading = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--stat"))
+    else if (ffStrEqualsIgnCase(key, "--migrate-config"))
     {
-        if((instance.config.stat = ffOptionParseBoolean(value)))
-            instance.config.showErrors = true;
+        if (instance.state.configDoc)
+        {
+            fputs("Error: existing jsonc config detected. Aborting\n", stderr);
+            exit(477);
+        }
+
+        if (!value)
+        {
+            ffStrbufSet(&instance.state.migrateConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
+            ffStrbufAppendS(&instance.state.migrateConfigPath, "fastfetch/config.jsonc");
+        }
+        else
+            ffStrbufSetS(&instance.state.migrateConfigPath, value);
+
+        if (ffPathExists(instance.state.migrateConfigPath.chars, FF_PATHTYPE_ANY))
+        {
+            fprintf(stderr, "Error: file `%s` exists. Aborting\n", instance.state.migrateConfigPath.chars);
+            exit(477);
+        }
     }
-    else if(ffStrEqualsIgnCase(key, "--allow-slow-operations"))
-        instance.config.allowSlowOperations = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
-        instance.config.escapeBedrock = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--pipe"))
-        instance.config.pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
-        instance.config.processingTimeout = ffOptionParseInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--format"))
     {
         switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
@@ -522,188 +525,20 @@ static void parseOption(FFdata* data, const char* key, const char* value)
                 break;
         }
     }
-
-    #if defined(__linux__) || defined(__FreeBSD__)
-    else if(ffStrEqualsIgnCase(key, "--player-name"))
-        ffOptionParseString(key, value, &instance.config.playerName);
-    else if (ffStrEqualsIgnCase(key, "--os-file"))
-        ffOptionParseString(key, value, &instance.config.osFile);
-    else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
-        instance.config.dsForceDrm = ffOptionParseBoolean(value);
-    #elif defined(_WIN32)
-    else if (ffStrEqualsIgnCase(key, "--wmi-timeout"))
-        instance.config.wmiTimeout = ffOptionParseInt32(key, value);
-    #endif
-
-    ////////////////
-    //Logo options//
-    ////////////////
-
-    else if(ffParseLogoCommandOptions(&instance.config.logo, key, value)) {}
-
-    ///////////////////
-    //Display options//
-    ///////////////////
-
-    else if(ffStrEqualsIgnCase(key, "--show-errors"))
-        instance.config.showErrors = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
-        instance.config.disableLinewrap = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--hide-cursor"))
-        instance.config.hideCursor = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
         ffOptionParseString(key, value, &data->structure);
-    else if(ffStrEqualsIgnCase(key, "--separator"))
-        ffOptionParseString(key, value, &instance.config.keyValueSeparator);
-    else if(ffStrEqualsIgnCase(key, "--color"))
-    {
-        optionCheckString(key, value, &instance.config.colorKeys);
-        ffOptionParseColor(value, &instance.config.colorKeys);
-        ffStrbufSet(&instance.config.colorTitle, &instance.config.colorKeys);
-    }
-    else if(ffStrStartsWithIgnCase(key, "--color-"))
-    {
-        const char* subkey = key + strlen("--color-");
-        if(ffStrEqualsIgnCase(subkey, "keys"))
-        {
-            optionCheckString(key, value, &instance.config.colorKeys);
-            ffOptionParseColor(value, &instance.config.colorKeys);
-        }
-        else if(ffStrEqualsIgnCase(subkey, "title"))
-        {
-            optionCheckString(key, value, &instance.config.colorTitle);
-            ffOptionParseColor(value, &instance.config.colorTitle);
-        }
-        else
-            goto error;
-    }
-    else if(ffStrEqualsIgnCase(key, "--key-width"))
-        instance.config.keyWidth = ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--bright-color"))
-        instance.config.brightColor = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--binary-prefix"))
-    {
-        instance.config.binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-            { "si", FF_BINARY_PREFIX_TYPE_SI },
-            { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
-            {}
-        });
-    }
-    else if(ffStrEqualsIgnCase(key, "--size-ndigits"))
-        instance.config.sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--size-max-prefix"))
-    {
-        instance.config.sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "B", 0 },
-            { "kB", 1 },
-            { "MB", 2 },
-            { "GB", 3 },
-            { "TB", 4 },
-            { "PB", 5 },
-            { "EB", 6 },
-            { "ZB", 7 },
-            { "YB", 8 },
-            {}
-        });
-    }
-    else if(ffStrEqualsIgnCase(key, "--temperature-unit"))
-    {
-        instance.config.temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
-            { "C", FF_TEMPERATURE_UNIT_CELSIUS },
-            { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-            { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-            { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
-            { "K", FF_TEMPERATURE_UNIT_KELVIN },
-            {},
-        });
-    }
-    else if(ffStrEqualsIgnCase(key, "--percent-type"))
-        instance.config.percentType = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--percent-ndigits"))
-        instance.config.percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--no-buffer"))
-        instance.config.noBuffer = ffOptionParseBoolean(value);
-    else if(ffStrStartsWithIgnCase(key, "--bar-"))
-    {
-        const char* subkey = key + strlen("--bar-");
-        if(ffStrEqualsIgnCase(subkey, "char-elapsed"))
-            ffOptionParseString(key, value, &instance.config.barCharElapsed);
-        else if(ffStrEqualsIgnCase(subkey, "char-total"))
-            ffOptionParseString(key, value, &instance.config.barCharTotal);
-        else if(ffStrEqualsIgnCase(subkey, "width"))
-            instance.config.barWidth = (uint8_t) ffOptionParseUInt32(key, value);
-        else if(ffStrEqualsIgnCase(subkey, "border"))
-            instance.config.barBorder = ffOptionParseBoolean(value);
-        else
-            goto error;
-    }
 
-    ///////////////////
-    //Library options//
-    ///////////////////
+    ///////////
+    //Options//
+    ///////////
 
-    else if(ffStrStartsWithIgnCase(key, "--lib-"))
-    {
-        const char* subkey = key + strlen("--lib-");
-        if(ffStrEqualsIgnCase(subkey, "PCI"))
-            ffOptionParseString(key, value, &instance.config.libPCI);
-        else if(ffStrEqualsIgnCase(subkey, "vulkan"))
-            ffOptionParseString(key, value, &instance.config.libVulkan);
-        else if(ffStrEqualsIgnCase(subkey, "freetype"))
-            ffOptionParseString(key, value, &instance.config.libfreetype);
-        else if(ffStrEqualsIgnCase(subkey, "wayland"))
-            ffOptionParseString(key, value, &instance.config.libWayland);
-        else if(ffStrEqualsIgnCase(subkey, "xcb-randr"))
-            ffOptionParseString(key, value, &instance.config.libXcbRandr);
-        else if(ffStrEqualsIgnCase(subkey, "xcb"))
-            ffOptionParseString(key, value, &instance.config.libXcb);
-        else if(ffStrEqualsIgnCase(subkey, "Xrandr"))
-            ffOptionParseString(key, value, &instance.config.libXrandr);
-        else if(ffStrEqualsIgnCase(subkey, "X11"))
-            ffOptionParseString(key, value, &instance.config.libX11);
-        else if(ffStrEqualsIgnCase(subkey, "gio"))
-            ffOptionParseString(key, value, &instance.config.libGIO);
-        else if(ffStrEqualsIgnCase(subkey, "DConf"))
-            ffOptionParseString(key, value, &instance.config.libDConf);
-        else if(ffStrEqualsIgnCase(subkey, "dbus"))
-            ffOptionParseString(key, value, &instance.config.libDBus);
-        else if(ffStrEqualsIgnCase(subkey, "XFConf"))
-            ffOptionParseString(key, value, &instance.config.libXFConf);
-        else if(ffStrEqualsIgnCase(subkey, "sqlite") || ffStrEqualsIgnCase(subkey, "sqlite3"))
-            ffOptionParseString(key, value, &instance.config.libSQLite3);
-        else if(ffStrEqualsIgnCase(subkey, "rpm"))
-            ffOptionParseString(key, value, &instance.config.librpm);
-        else if(ffStrEqualsIgnCase(subkey, "imagemagick"))
-            ffOptionParseString(key, value, &instance.config.libImageMagick);
-        else if(ffStrEqualsIgnCase(subkey, "z"))
-            ffOptionParseString(key, value, &instance.config.libZ);
-        else if(ffStrEqualsIgnCase(subkey, "chafa"))
-            ffOptionParseString(key, value, &instance.config.libChafa);
-        else if(ffStrEqualsIgnCase(subkey, "egl"))
-            ffOptionParseString(key, value, &instance.config.libEGL);
-        else if(ffStrEqualsIgnCase(subkey, "glx"))
-            ffOptionParseString(key, value, &instance.config.libGLX);
-        else if(ffStrEqualsIgnCase(subkey, "osmesa"))
-            ffOptionParseString(key, value, &instance.config.libOSMesa);
-        else if(ffStrEqualsIgnCase(subkey, "opencl"))
-            ffOptionParseString(key, value, &instance.config.libOpenCL);
-        else if(ffStrEqualsIgnCase(subkey, "pulse"))
-            ffOptionParseString(key, value, &instance.config.libPulse);
-        else if(ffStrEqualsIgnCase(subkey, "nm"))
-            ffOptionParseString(key, value, &instance.config.libnm);
-        else if(ffStrEqualsIgnCase(subkey, "ddcutil"))
-            ffOptionParseString(key, value, &instance.config.libDdcutil);
-        else
-            goto error;
-    }
-
-    ///////////////////////
-    //Module args options//
-    ///////////////////////
-
-    else if(ffParseModuleOptions(key, value)) {}
+    else if(
+        ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
+        ffOptionsParseLogoCommandLine(&instance.config.logo, key, value) ||
+        ffOptionsParseDisplayCommandLine(&instance.config.display, key, value) ||
+        ffOptionsParseLibraryCommandLine(&instance.config.library, key, value) ||
+        ffParseModuleOptions(key, value)
+    ) {}
 
     //////////////////
     //Unknown option//
@@ -719,20 +554,22 @@ error:
 
 static void parseConfigFiles(FFdata* data)
 {
-    for(uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
     {
-        FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
-        uint32_t dirLength = dir->length;
+        for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+        {
+            FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
+            uint32_t dirLength = dir->length;
 
-        ffStrbufAppendS(dir, "fastfetch/config.jsonc");
-        bool success = parseJsoncFile(dir->chars);
-        ffStrbufSubstrBefore(dir, dirLength);
-        if (success) return;
+            ffStrbufAppendS(dir, "fastfetch/config.jsonc");
+            bool success = parseJsoncFile(dir->chars);
+            ffStrbufSubstrBefore(dir, dirLength);
+            if (success) return;
+        }
     }
-
-    for(uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+    for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
     {
-        if(!data->loadUserConfig)
+        if (!data->loadUserConfig)
             return;
 
         FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
@@ -773,60 +610,101 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
     }
 }
 
+static void run(FFdata* data)
+{
+    if (instance.state.configDoc)
+    {
+        const char* error = NULL;
+
+        yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
+        if (!yyjson_is_obj(root))
+            error = "Invalid JSON config format. Root value must be an object";
+
+        if (
+            error ||
+            (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
+            (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
+            (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
+            (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
+            false
+        ) {
+            fprintf(stderr, "JsonConfig Error: %s\n", error);
+            exit(477);
+        }
+    }
+
+    const bool useJsonConfig = data->structure.length == 0 && instance.state.configDoc;
+
+    if (useJsonConfig)
+        ffPrintJsonConfig(true /* prepare */, instance.state.resultDoc);
+    else
+        ffPrepareCommandOption(data);
+
+    ffStart();
+
+    #if defined(_WIN32)
+        if (!instance.config.display.noBuffer) fflush(stdout);
+    #endif
+
+    if (useJsonConfig)
+        ffPrintJsonConfig(false, instance.state.resultDoc);
+    else
+        ffPrintCommandOption(data, instance.state.resultDoc);
+
+    if (instance.state.resultDoc)
+        yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+    else
+        ffFinish();
+}
+
+static void migrateConfig(FFdata* data, const FFstrbuf* filename)
+{
+    yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
+    yyjson_mut_val* root = yyjson_mut_obj(doc);
+    yyjson_mut_doc_set_root(doc, root);
+    yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json");
+
+    ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
+    ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
+    ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
+    ffOptionsGenerateLibraryJsonConfig(&instance.config.library, doc);
+    ffMigrateCommandOptionToJsonc(data, doc);
+
+    if (ffStrbufEqualS(filename, "-"))
+        yyjson_mut_write_fp(stdout, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+    else
+    {
+        if (yyjson_mut_write_file(filename->chars, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL))
+            printf("The migrated config file has been written in `%s`\nYou may remove the old config file if everything works fine\n", filename->chars);
+        else
+        {
+            printf("Error: failed to write file in `%s`\n", filename->chars);
+            exit(1);
+        }
+    }
+
+    yyjson_mut_doc_free(doc);
+}
+
 int main(int argc, const char** argv)
 {
     ffInitInstance();
 
     //Data stores things only needed for the configuration of fastfetch
-    FFdata data;
-    ffStrbufInit(&data.structure);
-    ffListInit(&data.customValues, sizeof(FFCustomValue));
-    data.loadUserConfig = true;
+    FFdata data = {
+        .structure = ffStrbufCreate(),
+        .customValues = ffListCreate(sizeof(FFCustomValue)),
+        .loadUserConfig = true,
+    };
 
     if(!getenv("NO_CONFIG"))
         parseConfigFiles(&data);
     parseArguments(&data, argc, argv);
 
-    if (instance.state.configDoc)
-    {
-        const char* error = NULL;
-
-        if (
-            (error = ffParseLogoJsonConfig()) ||
-            (error = ffParseGeneralJsonConfig()) ||
-            (error = ffParseDisplayJsonConfig()) ||
-            (error = ffParseLibraryJsonConfig()) ||
-            false
-        ) {
-            fputs(error, stderr);
-            exit(477);
-        }
-    }
-
-    const bool useJsonConfig = data.structure.length == 0 && instance.state.configDoc;
-
-    if(useJsonConfig)
-        ffPrintJsonConfig(true /* prepare */);
+    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
+        run(&data);
     else
-        ffPrepareCommandOption(&data);
-
-    ffStart();
-
-    #if defined(_WIN32)
-        if (!instance.config.noBuffer) fflush(stdout);
-    #endif
-
-    if (useJsonConfig)
-        ffPrintJsonConfig(false);
-    else
-        ffPrintCommandOption(&data);
-
-    if (instance.state.resultDoc)
-    {
-        yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
-    }
-
-    ffFinish();
+        migrateConfig(&data, &instance.state.migrateConfigPath);
 
     ffStrbufDestroy(&data.structure);
     FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)

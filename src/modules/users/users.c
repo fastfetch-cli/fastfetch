@@ -6,6 +6,8 @@
 
 #include <time.h>
 
+#pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
+
 #define FF_USERS_NUM_FORMAT_ARGS 1
 
 void ffPrintUsers(FFUsersOptions* options)
@@ -91,14 +93,6 @@ void ffPrintUsers(FFUsersOptions* options)
     }
 }
 
-void ffInitUsersOptions(FFUsersOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_USERS_MODULE_NAME, ffParseUsersCommandOptions, ffParseUsersJsonObject, ffPrintUsers, ffGenerateUsersJson, ffPrintUsersHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->compact = false;
-}
-
 bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_USERS_MODULE_NAME);
@@ -113,11 +107,6 @@ bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroyUsersOptions(FFUsersOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
@@ -143,7 +132,18 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateUsersJson(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyUsersOptions))) FFUsersOptions defaultOptions;
+    ffInitUsersOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->compact != defaultOptions.compact)
+        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+}
+
+void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
 
@@ -185,4 +185,26 @@ void ffPrintUsersHelpFormat(void)
         "Client IP",
         "Login Time"
     });
+}
+
+void ffInitUsersOptions(FFUsersOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_USERS_MODULE_NAME,
+        ffParseUsersCommandOptions,
+        ffParseUsersJsonObject,
+        ffPrintUsers,
+        ffGenerateUsersJsonResult,
+        ffPrintUsersHelpFormat,
+        ffGenerateUsersJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->compact = false;
+}
+
+void ffDestroyUsersOptions(FFUsersOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

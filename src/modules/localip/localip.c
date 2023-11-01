@@ -105,7 +105,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
             if(options->moduleArgs.outputFormat.length == 0)
             {
                 ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
-                printIp(ip, !options->defaultRouteOnly);
+                printIp(ip, true);
                 putchar('\n');
             }
             else
@@ -129,16 +129,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
         ffStrbufDestroy(&ip->ipv6);
         ffStrbufDestroy(&ip->mac);
     }
-}
-
-void ffInitLocalIpOptions(FFLocalIpOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LOCALIP_MODULE_NAME, ffParseLocalIpCommandOptions, ffParseLocalIpJsonObject, ffPrintLocalIp, ffGenerateLocalIpJson, ffPrintLocalIpHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = false;
 }
 
 bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, const char* value)
@@ -206,12 +196,6 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
 }
 
 void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
@@ -288,7 +272,39 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateLocalIpJson(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyLocalIpOptions))) FFLocalIpOptions defaultOptions;
+    ffInitLocalIpOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.showType != options->showType)
+    {
+        if (options->showType & FF_LOCALIP_TYPE_IPV4_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showIpv4", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showIpv6", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_MAC_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showMac", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_LOOP_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showLoop", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "compact", true);
+    }
+
+    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
+        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+
+    if (options->defaultRouteOnly != defaultOptions.defaultRouteOnly)
+        yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", options->defaultRouteOnly);
+}
+
+void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
 
@@ -336,4 +352,29 @@ void ffPrintLocalIpHelpFormat(void)
         "Interface name",
         "Is default route"
     });
+}
+
+void ffInitLocalIpOptions(FFLocalIpOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_LOCALIP_MODULE_NAME,
+        ffParseLocalIpCommandOptions,
+        ffParseLocalIpJsonObject,
+        ffPrintLocalIp,
+        ffGenerateLocalIpJsonResult,
+        ffPrintLocalIpHelpFormat,
+        ffGenerateLocalIpJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly = true;
+}
+
+void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
 }

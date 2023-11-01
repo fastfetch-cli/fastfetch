@@ -11,7 +11,7 @@ void ffPrintPackages(FFPackagesOptions* options)
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
-    const char* error = ffDetectPackages(&counts);
+    const char* error = ffDetectPackages(&counts, options);
 
     if(error)
     {
@@ -102,12 +102,6 @@ void ffPrintPackages(FFPackagesOptions* options)
     ffStrbufDestroy(&counts.pacmanBranch);
 }
 
-void ffInitPackagesOptions(FFPackagesOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_PACKAGES_MODULE_NAME, ffParsePackagesCommandOptions, ffParsePackagesJsonObject, ffPrintPackages, ffGeneratePackagesJson, ffPrintPackagesHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_PACKAGES_MODULE_NAME);
@@ -115,12 +109,15 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    return false;
-}
+    #ifdef _WIN32
+    if(ffStrEqualsIgnCase(subKey, "winget"))
+    {
+        options->winget = ffOptionParseBoolean(value);
+        return true;
+    }
+    #endif
 
-void ffDestroyPackagesOptions(FFPackagesOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
+    return false;
 }
 
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
@@ -136,16 +133,37 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "winget"))
+        {
+            options->winget = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
 
-void ffGeneratePackagesJson(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyPackagesOptions))) FFPackagesOptions defaultOptions;
+    ffInitPackagesOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef _WIN32
+    if (options->winget != defaultOptions.winget)
+        yyjson_mut_obj_add_bool(doc, module, "winget", options->winget);
+    #endif
+}
+
+void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
 
-    const char* error = ffDetectPackages(&counts);
+    const char* error = ffDetectPackages(&counts, options);
 
     if(error)
     {
@@ -213,4 +231,28 @@ void ffPrintPackagesHelpFormat(void)
         "Number of winget packages",
         "Number of opkg packages"
     });
+}
+
+void ffInitPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_PACKAGES_MODULE_NAME,
+        ffParsePackagesCommandOptions,
+        ffParsePackagesJsonObject,
+        ffPrintPackages,
+        ffGeneratePackagesJsonResult,
+        ffPrintPackagesHelpFormat,
+        ffGeneratePackagesJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    #ifdef _WIN32
+    options->winget = false;
+    #endif
+}
+
+void ffDestroyPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

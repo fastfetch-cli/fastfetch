@@ -524,6 +524,15 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Azos
+    {
+        .names = {"Azos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AZOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_RED,
+        }
+    },
     // LAST
     {},
 };
@@ -573,6 +582,16 @@ static const FFlogo B[] = {
         },
         .colorKeys = FF_COLOR_FG_LIGHT_RED,
         .colorTitle = FF_COLOR_FG_RED,
+    },
+    // BlackMesa
+    {
+        .names = {"BlackMesa", "black-mesa"},
+        .lines = FASTFETCH_DATATEXT_LOGO_BLACKMESA,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_BLACK,
+        .colorTitle = FF_COLOR_FG_WHITE,
     },
     // BlackPanther
     {
@@ -1034,6 +1053,16 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // cycledream
+    {
+        .names = {"cycledream"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CYCLEDREAM,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
     // LAST
     {},
 };
@@ -1319,6 +1348,16 @@ static const FFlogo E[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // evolinx
+    {
+        .names = {"Evolinx"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EVOLINX,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // EvolutionOS
     {
@@ -1828,6 +1867,18 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Interix
+    {
+        .names = {"Interix"},
+        .lines = FASTFETCH_DATATEXT_LOGO_INTERIX,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+        },
+    },
     // IRIX
     {
         .names = {"IRIX"},
@@ -2255,6 +2306,23 @@ static const FFlogo M[] = {
         },
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // MainsailOS
+    {
+        .names = {"MainsailOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MAINSAILOS,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+    },
+    // MainsailOSSmall
+    {
+        .names = {"MainsailOS_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_MAINSAILOS_SMALL,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
     },
     // Mageia
     {

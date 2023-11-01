@@ -6,6 +6,8 @@
 
 #include <time.h>
 
+#pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
+
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
 #define FF_DATETIME_NUM_FORMAT_ARGS 20
 
@@ -141,12 +143,6 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     puts(buffer);
 }
 
-void ffInitDateTimeOptions(FFDateTimeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DATETIME_MODULE_NAME, ffParseDateTimeCommandOptions, ffParseDateTimeJsonObject, ffPrintDateTime, ffGenerateDateTimeJson, ffPrintDateTimeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DATETIME_MODULE_NAME);
@@ -155,11 +151,6 @@ bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, 
         return true;
 
     return false;
-}
-
-void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
@@ -179,7 +170,15 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateDateTimeJson(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDateTimeJsonConfig(FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyDateTimeOptions))) FFDateTimeOptions defaultOptions;
+    ffInitDateTimeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_obj_add_uint(doc, module, "result", ffTimeGetNow());
 }
@@ -208,4 +207,24 @@ void ffPrintDateTimeHelpFormat(void)
         "second",
         "second with leading zero"
     });
+}
+
+void ffInitDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DATETIME_MODULE_NAME,
+        ffParseDateTimeCommandOptions,
+        ffParseDateTimeJsonObject,
+        ffPrintDateTime,
+        ffGenerateDateTimeJsonResult,
+        ffPrintDateTimeHelpFormat,
+        ffGenerateDateTimeJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

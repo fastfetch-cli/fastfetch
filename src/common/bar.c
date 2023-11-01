@@ -6,15 +6,17 @@ void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
 {
     assert(green <= 100 && yellow <= 100 && red <= 100);
 
-    uint32_t blocksPercent = (uint32_t) (percent / 100.0 * instance.config.barWidth + 0.5);
-    uint32_t blocksGreen = (uint32_t) (green / 100.0 * instance.config.barWidth + 0.5);
-    uint32_t blocksYellow = (uint32_t) (yellow / 100.0 * instance.config.barWidth + 0.5);
-    uint32_t blocksRed = (uint32_t) (red / 100.0 * instance.config.barWidth + 0.5);
-    assert(blocksPercent <= instance.config.barWidth);
+    const FFOptionsDisplay* options = &instance.config.display;
 
-    if(instance.config.barBorder)
+    uint32_t blocksPercent = (uint32_t) (percent / 100.0 * options->barWidth + 0.5);
+    uint32_t blocksGreen = (uint32_t) (green / 100.0 * options->barWidth + 0.5);
+    uint32_t blocksYellow = (uint32_t) (yellow / 100.0 * options->barWidth + 0.5);
+    uint32_t blocksRed = (uint32_t) (red / 100.0 * options->barWidth + 0.5);
+    assert(blocksPercent <= options->barWidth);
+
+    if(options->barBorder)
     {
-        if(!instance.config.pipe)
+        if(!options->pipe)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m[ ");
         else
             ffStrbufAppendS(buffer, "[ ");
@@ -22,7 +24,7 @@ void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
 
     for (uint32_t i = 0; i < blocksPercent; ++i)
     {
-        if(!instance.config.pipe)
+        if(!options->pipe)
         {
             if (i == blocksGreen)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
@@ -31,26 +33,26 @@ void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
             else if (i == blocksRed)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
         }
-        ffStrbufAppend(buffer, &instance.config.barCharElapsed);
+        ffStrbufAppend(buffer, &options->barCharElapsed);
     }
 
-    if (blocksPercent < instance.config.barWidth)
+    if (blocksPercent < options->barWidth)
     {
-        if(!instance.config.pipe)
+        if(!options->pipe)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
-        for (uint32_t i = blocksPercent; i < instance.config.barWidth; ++i)
-            ffStrbufAppend(buffer, &instance.config.barCharTotal);
+        for (uint32_t i = blocksPercent; i < options->barWidth; ++i)
+            ffStrbufAppend(buffer, &options->barCharTotal);
     }
 
-    if(instance.config.barBorder)
+    if(options->barBorder)
     {
-        if(!instance.config.pipe)
+        if(!options->pipe)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m ]");
         else
             ffStrbufAppendS(buffer, " ]");
     }
 
-    if(!instance.config.pipe)
+    if(!options->pipe)
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
@@ -67,12 +69,14 @@ void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
 {
     assert(green <= 100 && yellow <= 100);
 
-    bool colored = !!(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT);
+    const FFOptionsDisplay* options = &instance.config.display;
+
+    bool colored = !!(options->percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT);
 
     if (parentheses)
         ffStrbufAppendC(buffer, '(');
 
-    if (colored && !instance.config.pipe)
+    if (colored && !options->pipe)
     {
         if(green < yellow)
         {
@@ -93,9 +97,9 @@ void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
         }
     }
-    ffStrbufAppendF(buffer, "%.*f%%", instance.config.percentNdigits, percent);
+    ffStrbufAppendF(buffer, "%.*f%%", options->percentNdigits, percent);
 
-    if (colored && !instance.config.pipe)
+    if (colored && !options->pipe)
     {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
     }

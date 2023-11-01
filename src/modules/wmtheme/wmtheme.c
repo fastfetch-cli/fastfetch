@@ -30,12 +30,6 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
     }
 }
 
-void ffInitWMThemeOptions(FFWMThemeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WMTHEME_MODULE_NAME, ffParseWMThemeCommandOptions, ffParseWMThemeJsonObject, ffPrintWMTheme, ffGenerateWMThemeJson, ffPrintWMthemeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseWMThemeCommandOptions(FFWMThemeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_WMTHEME_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseWMThemeCommandOptions(FFWMThemeOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyWMThemeOptions(FFWMThemeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
@@ -68,7 +57,15 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateWMThemeJson(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWMThemeJsonConfig(FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyWMThemeOptions))) FFWMThemeOptions defaultOptions;
+    ffInitWMThemeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY themeOrError = ffStrbufCreate();
     if(!ffDetectWmTheme(&themeOrError))
@@ -85,4 +82,24 @@ void ffPrintWMthemeHelpFormat(void)
     ffPrintModuleFormatHelp(FF_WMTHEME_MODULE_NAME, "{1}", FF_WMTHEME_NUM_FORMAT_ARGS, (const char* []) {
         "WM theme"
     });
+}
+
+void ffInitWMThemeOptions(FFWMThemeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WMTHEME_MODULE_NAME,
+        ffParseWMThemeCommandOptions,
+        ffParseWMThemeJsonObject,
+        ffPrintWMTheme,
+        ffGenerateWMThemeJsonResult,
+        ffPrintWMthemeHelpFormat,
+        ffGenerateWMThemeJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyWMThemeOptions(FFWMThemeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

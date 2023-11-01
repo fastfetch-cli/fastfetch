@@ -53,12 +53,6 @@ exit:
     ffStrbufDestroy(&bios.version);
 }
 
-void ffInitBiosOptions(FFBiosOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BIOS_MODULE_NAME, ffParseBiosCommandOptions, ffParseBiosJsonObject, ffPrintBios, ffGenerateBiosJson, ffPrintBiosHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BIOS_MODULE_NAME);
@@ -67,11 +61,6 @@ bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyBiosOptions(FFBiosOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
@@ -91,7 +80,15 @@ void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateBiosJson(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBiosJsonConfig(FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBiosOptions))) FFBiosOptions defaultOptions;
+    ffInitBiosOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFBiosResult bios;
     ffStrbufInit(&bios.date);
@@ -134,4 +131,24 @@ void ffPrintBiosHelpFormat(void)
         "bios vendor",
         "bios version"
     });
+}
+
+void ffInitBiosOptions(FFBiosOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BIOS_MODULE_NAME,
+        ffParseBiosCommandOptions,
+        ffParseBiosJsonObject,
+        ffPrintBios,
+        ffGenerateBiosJsonResult,
+        ffPrintBiosHelpFormat,
+        ffGenerateBiosJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyBiosOptions(FFBiosOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

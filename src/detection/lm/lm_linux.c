@@ -55,13 +55,13 @@ static const char* getSshdVersion(FFstrbuf* version)
 
 static const char* getSddmVersion(FFstrbuf* version)
 {
-    FF_LIBRARY_LOAD(zlib, &instance.config.libZ, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzopen);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzread);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzerror);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gztell);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzrewind);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzclose);
+    FF_LIBRARY_LOAD(zlib, &instance.config.library.libZ, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzopen)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzread)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzerror)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gztell)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzrewind)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(zlib, gzclose)
 
     gzFile file = ffgzopen("/usr/share/man/man1/sddm.1.gz", "rb");
     if (file == Z_NULL)

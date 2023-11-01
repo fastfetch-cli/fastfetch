@@ -47,7 +47,8 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
-            (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) //For POWER
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) || //For POWER
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu model               :", &cpu->name)) //For MIPS
         );
     }
 
@@ -114,6 +115,10 @@ static void parseIsa(FFstrbuf* cpuIsa)
             cpuIsa->chars[4] = 'g';
         }
         // The final ISA output of the above example is "rv64gch".
+    }
+    if(ffStrbufStartsWithS(cpuIsa, "mips"))
+    {
+        ffStrbufSubstrAfterLastC(cpuIsa, ' ');
     }
 }
 

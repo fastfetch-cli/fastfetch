@@ -8,4 +8,6 @@ typedef struct FFWMOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    bool detectPlugin;
 } FFWMOptions;

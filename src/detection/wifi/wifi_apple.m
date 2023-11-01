@@ -3,6 +3,27 @@
 
 #import <CoreWLAN/CoreWLAN.h>
 
+struct Apple80211; // https://code.google.com/archive/p/iphone-wireless/wikis/Apple80211.wiki
+
+// 0 is sucessful; < 0 is failure
+int Apple80211Open(struct Apple80211 **handle) __attribute__((weak_import));
+int Apple80211BindToInterface(struct Apple80211 *handle, CFStringRef interface) __attribute__((weak_import));
+int Apple80211GetInfoCopy(struct Apple80211 *handle, CFDictionaryRef *info) __attribute__((weak_import));
+int Apple80211Close(struct Apple80211 *handle) __attribute__((weak_import));
+
+static NSDictionary* getWifiInfoByApple80211(NSString* ifName)
+{
+    if (!Apple80211Open || !Apple80211BindToInterface || !Apple80211GetInfoCopy || !Apple80211Close) return NULL;
+
+    struct Apple80211* handle = NULL;
+    if (Apple80211Open(&handle) < 0) return NULL;
+    if (Apple80211BindToInterface(handle, (CFStringRef)ifName) < 0) return NULL;
+    CFDictionaryRef result;
+    if (Apple80211GetInfoCopy(handle, &result) < 0) return NULL;
+    Apple80211Close(handle);
+    return CFBridgingRelease(result);
+}
+
 const char* ffDetectWifi(FFlist* result)
 {
     NSArray<CWInterface*>* interfaces = CWWiFiClient.sharedWiFiClient.interfaces;
@@ -24,56 +45,53 @@ const char* ffDetectWifi(FFlist* result)
         item->conn.txRate = 0.0/0.0;
 
         ffStrbufAppendS(&item->inf.description, inf.interfaceName.UTF8String);
-        ffStrbufAppendS(&item->inf.status, inf.powerOn ? "Power On" : "Power Off");
+        ffStrbufSetStatic(&item->inf.status, inf.powerOn ? "Power On" : "Power Off");
         if(!inf.powerOn)
             continue;
 
-        ffStrbufAppendS(&item->conn.status, inf.serviceActive ? "Active" : "Inactive");
+        ffStrbufSetStatic(&item->conn.status, inf.interfaceMode != kCWInterfaceModeNone ? "Active" : "Inactive");
         if(!inf.serviceActive)
             continue;
 
-        if (inf.ssid)
+        NSDictionary* apple = NULL;
+
+        if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        else if (!ffProcessAppendStdOut(&item->conn.ssid, (char* []) {
-            "/usr/sbin/networksetup",
-            "-getairportnetwork",
-            item->inf.description.chars,
-            NULL
-        }) && item->conn.ssid.length > 0)
-        {
-            uint32_t index = ffStrbufFirstIndexC(&item->conn.ssid, ':');
-            if (index < item->conn.ssid.length)
-                ffStrbufSubstrAfter(&item->conn.ssid, index + 1);
-        }
+        else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+            ffStrbufAppendS(&item->conn.ssid, [[apple valueForKey:@"SSID_STR"] UTF8String]);
         else
             ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
 
-        ffStrbufAppendS(&item->conn.macAddress, inf.hardwareAddress.UTF8String);
+        if (inf.bssid)
+            ffStrbufAppendS(&item->conn.macAddress, inf.bssid.UTF8String);
+        else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+            ffStrbufAppendS(&item->conn.macAddress, [[apple valueForKey:@"BSSID"] UTF8String]);
+
         switch(inf.activePHYMode)
         {
             case kCWPHYModeNone:
-                ffStrbufAppendS(&item->conn.protocol, "none");
+                ffStrbufSetStatic(&item->conn.protocol, "none");
                 break;
             case kCWPHYMode11a:
-                ffStrbufAppendS(&item->conn.protocol, "802.11a");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11a");
                 break;
             case kCWPHYMode11b:
-                ffStrbufAppendS(&item->conn.protocol, "802.11b");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11b");
                 break;
             case kCWPHYMode11g:
-                ffStrbufAppendS(&item->conn.protocol, "802.11g");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11g");
                 break;
             case kCWPHYMode11n:
-                ffStrbufAppendS(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
                 break;
             case kCWPHYMode11ac:
-                ffStrbufAppendS(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
                 break;
             case 6 /*kCWPHYMode11ax*/:
-                ffStrbufAppendS(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
                 break;
             case 7 /*kCWPHYMode11be?*/:
-                ffStrbufAppendS(&item->conn.protocol, "802.11be (Wi-Fi 7)");
+                ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
                 break;
             default:
                 ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
@@ -85,55 +103,86 @@ const char* ffDetectWifi(FFlist* result)
         switch(inf.security)
         {
             case kCWSecurityNone:
-                ffStrbufAppendS(&item->conn.security, "Insecure");
+                ffStrbufSetStatic(&item->conn.security, "Insecure");
                 break;
             case kCWSecurityWEP:
-                ffStrbufAppendS(&item->conn.security, "WEP");
+                ffStrbufSetStatic(&item->conn.security, "WEP");
                 break;
             case kCWSecurityWPAPersonal:
-                ffStrbufAppendS(&item->conn.security, "WPA Personal");
+                ffStrbufSetStatic(&item->conn.security, "WPA Personal");
                 break;
             case kCWSecurityWPAPersonalMixed:
-                ffStrbufAppendS(&item->conn.security, "WPA Persional Mixed");
+                ffStrbufSetStatic(&item->conn.security, "WPA Persional Mixed");
                 break;
             case kCWSecurityWPA2Personal:
-                ffStrbufAppendS(&item->conn.security, "WPA2 Personal");
+                ffStrbufSetStatic(&item->conn.security, "WPA2 Personal");
                 break;
             case kCWSecurityPersonal:
-                ffStrbufAppendS(&item->conn.security, "Personal");
+                ffStrbufSetStatic(&item->conn.security, "Personal");
                 break;
             case kCWSecurityDynamicWEP:
-                ffStrbufAppendS(&item->conn.security, "Dynamic WEP");
+                ffStrbufSetStatic(&item->conn.security, "Dynamic WEP");
                 break;
             case kCWSecurityWPAEnterprise:
-                ffStrbufAppendS(&item->conn.security, "WPA Enterprise");
+                ffStrbufSetStatic(&item->conn.security, "WPA Enterprise");
                 break;
             case kCWSecurityWPAEnterpriseMixed:
-                ffStrbufAppendS(&item->conn.security, "WPA Enterprise Mixed");
+                ffStrbufSetStatic(&item->conn.security, "WPA Enterprise Mixed");
                 break;
             case kCWSecurityWPA2Enterprise:
-                ffStrbufAppendS(&item->conn.security, "WPA2 Enterprise");
+                ffStrbufSetStatic(&item->conn.security, "WPA2 Enterprise");
                 break;
             case kCWSecurityEnterprise:
-                ffStrbufAppendS(&item->conn.security, "Enterprise");
+                ffStrbufSetStatic(&item->conn.security, "Enterprise");
                 break;
             case kCWSecurityWPA3Personal:
-                ffStrbufAppendS(&item->conn.security, "WPA3 Personal");
+                ffStrbufSetStatic(&item->conn.security, "WPA3 Personal");
                 break;
             case kCWSecurityWPA3Enterprise:
-                ffStrbufAppendS(&item->conn.security, "WPA3 Enterprise");
+                ffStrbufSetStatic(&item->conn.security, "WPA3 Enterprise");
                 break;
             case kCWSecurityWPA3Transition:
-                ffStrbufAppendS(&item->conn.security, "WPA3 Transition");
+                ffStrbufSetStatic(&item->conn.security, "WPA3 Transition");
                 break;
             case 14 /*kCWSecurityOWE*/:
-                ffStrbufAppendS(&item->conn.security, "OWE");
+                ffStrbufSetStatic(&item->conn.security, "OWE");
                 break;
             case 15 /*kCWSecurityOWETransition*/:
-                ffStrbufAppendS(&item->conn.security, "OWE Transition");
+                ffStrbufSetStatic(&item->conn.security, "OWE Transition");
                 break;
             case kCWSecurityUnknown:
-                // Ignore
+                // Sonoma...
+                if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+                {
+                    NSDictionary* authType = [apple valueForKey:@"AUTH_TYPE"];
+                    if (authType)
+                    {
+                        if ([[authType valueForKey:@"AUTH_LOWER"] intValue] != 1) break; // APPLE80211_AUTH_TYPE_UNICAST?
+
+                        NSNumber* authUpper = [authType valueForKey:@"AUTH_UPPER"];
+                        if (!authUpper)
+                            ffStrbufSetStatic(&item->conn.security, "Insecure");
+                        else
+                        {
+                            int authUpperValue = [authUpper intValue];
+                            switch (authUpperValue)
+                            {
+                                case 4096:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA3-SAE");
+                                    break;
+                                case 8:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA2-PSK");
+                                    break;
+                                case 4:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA2");
+                                    break;
+                                default: // TODO: support more auth types
+                                    ffStrbufAppendF(&item->conn.security, "To be supported (%d)", authUpperValue);
+                                    break;
+                            }
+                        }
+                    }
+                }
                 break;
             default:
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);

@@ -7,22 +7,29 @@ void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
     putchar('\n');
 }
 
-void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BREAK_MODULE_NAME, ffParseBreakCommandOptions, ffParseBreakJsonObject, ffPrintBreak, NULL, NULL);
-}
-
 bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED const char* key, FF_MAYBE_UNUSED const char* value)
 {
     return false;
 }
 
-void ffDestroyBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
+void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
 {
 }
 
-void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
+void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
-    ffPrintBreak(options);
-    return;
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BREAK_MODULE_NAME,
+        ffParseBreakCommandOptions,
+        ffParseBreakJsonObject,
+        ffPrintBreak,
+        NULL,
+        NULL,
+        NULL
+    );
+}
+
+void ffDestroyBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
+{
 }

@@ -22,7 +22,7 @@
 
 static const char* detectWifiWithLibnm(FFlist* result)
 {
-    FF_LIBRARY_LOAD(nm, &instance.config.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
+    FF_LIBRARY_LOAD(nm, &instance.config.library.libnm, "dlopen libnm failed", "libnm" FF_LIBRARY_EXTENSION, 0);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_new);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_client_get_devices);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(nm, nm_device_get_iface);

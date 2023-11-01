@@ -1,7 +1,6 @@
 #include "displayserver_linux.h"
 #include "common/io/io.h"
 #include "common/properties.h"
-#include "common/parsing.h"
 #include "common/processing.h"
 #include "util/stringUtils.h"
 
@@ -131,177 +130,6 @@ static void applyBetterWM(FFDisplayServerResult* result, const char* processName
         ffStrbufAppend(&result->wmPrettyName, &result->wmProcessName);
 }
 
-static void getKDE(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "plasmashell");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_PLASMA);
-
-    ffParsePropFileValues("/usr/share/xsessions/plasmax11.desktop", 1, (FFpropquery[]) {
-        {"X-KDE-PluginInfo-Version =", &result->deVersion}
-    });
-    if(result->deVersion.length == 0)
-        ffParsePropFileData("xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-    if(result->deVersion.length == 0)
-        ffParsePropFileData("xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-    if(result->deVersion.length == 0)
-    {
-        ffParsePropFileValues("/usr/share/wayland-sessions/plasma.desktop", 1, (FFpropquery[]) {
-            {"X-KDE-PluginInfo-Version =", &result->deVersion}
-        });
-    }
-    if(result->deVersion.length == 0)
-        ffParsePropFileData("wayland-sessions/plasmawayland.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-    if(result->deVersion.length == 0)
-        ffParsePropFileData("wayland-sessions/plasmawayland5.desktop", "X-KDE-PluginInfo-Version =", &result->deVersion);
-
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
-    {
-        if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
-            "plasmashell",
-            "--version",
-            NULL
-        }) == NULL) // plasmashell 5.27.5
-            ffStrbufSubstrAfterLastC(&result->deVersion, ' ');
-    }
-
-
-    applyBetterWM(result, getenv("KDEWM"));
-}
-
-static void getGnome(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "gnome-shell");
-    const char* sessionMode = getenv("GNOME_SHELL_SESSION_MODE");
-    if (sessionMode && ffStrEquals(sessionMode, "classic"))
-        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC);
-    else
-        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_GNOME);
-
-    ffParsePropFileData("gnome-shell/org.gnome.Extensions", "version :", &result->deVersion);
-
-    if (result->deVersion.length == 0)
-    {
-        if (ffProcessAppendStdOut(&result->deVersion, (char* const[]){
-            "gnome-shell",
-            "--version",
-            NULL
-        }) == NULL) // GNOME Shell 44.1
-            ffStrbufSubstrAfterLastC(&result->deVersion, ' ');
-    }
-}
-
-static void getCinnamon(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "cinnamon");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CINNAMON);
-    ffParsePropFileData("applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", &result->deVersion);
-}
-
-static void getMate(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "mate-session");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_MATE);
-
-    FF_STRBUF_AUTO_DESTROY major = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY minor = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY micro = ffStrbufCreate();
-
-    ffParsePropFileDataValues("mate-about/mate-version.xml", 3, (FFpropquery[]) {
-        {"<platform>", &major},
-        {"<minor>", &minor},
-        {"<micro>", &micro}
-    });
-
-    ffParseSemver(&result->deVersion, &major, &minor, &micro);
-
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
-    {
-        ffProcessAppendStdOut(&result->deVersion, (char* const[]){
-            "mate-session",
-            "--version",
-            NULL
-        });
-
-        ffStrbufSubstrAfterFirstC(&result->deVersion, ' ');
-        ffStrbufTrim(&result->deVersion, ' ');
-    }
-}
-
-static void getXFCE4(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "xfce4-session");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_XFCE4);
-    ffParsePropFileData("gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", &result->deVersion);
-
-    #ifdef __FreeBSD__
-    if(result->deVersion.length == 0)
-    {
-        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/usr/local/share/licenses/");
-        if (dirp)
-        {
-            struct dirent* entry;
-            while((entry = readdir(dirp)) != NULL)
-            {
-                if(!ffStrStartsWith(entry->d_name, "xfce-") || !isdigit(entry->d_name[5]))
-                    continue;
-                ffStrbufAppendS(&result->deVersion, &entry->d_name[5]);
-            }
-        }
-    }
-    #endif
-
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
-    {
-        //This is somewhat slow
-        ffProcessAppendStdOut(&result->deVersion, (char* const[]){
-            "xfce4-session",
-            "--version",
-            NULL
-        });
-
-        ffStrbufSubstrBeforeFirstC(&result->deVersion, '(');
-        ffStrbufSubstrAfterFirstC(&result->deVersion, ' ');
-        ffStrbufTrim(&result->deVersion, ' ');
-    }
-}
-
-static void getLXQt(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "lxqt-session");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
-    ffParsePropFileData("gconfig/lxqt.pc", "Version:", &result->deVersion);
-
-    if(result->deVersion.length == 0)
-        ffParsePropFileData("cmake/lxqt/lxqt-config.cmake", "set ( LXQT_VERSION", &result->deVersion);
-    if(result->deVersion.length == 0)
-        ffParsePropFileData("cmake/lxqt/lxqt-config-version.cmake", "set ( PACKAGE_VERSION", &result->deVersion);
-
-    if(result->deVersion.length == 0 && instance.config.allowSlowOperations)
-    {
-        //This is really, really, really slow. Thank you, LXQt developers
-        ffProcessAppendStdOut(&result->deVersion, (char* const[]){
-            "lxqt-session",
-            "-v",
-            NULL
-        });
-
-        result->deVersion.length = 0; //don't set '\0' byte
-        ffParsePropLines(result->deVersion.chars , "liblxqt", &result->deVersion);
-    }
-
-    FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
-
-    ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
-    applyBetterWM(result, wmProcessNameBuffer.chars);
-}
-
-static void getBudgie(FFDisplayServerResult* result)
-{
-    ffStrbufSetS(&result->deProcessName, "budgie-desktop");
-    ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_BUDGIE);
-    ffParsePropFileData("budgie/budgie-version.xml", "<str>", &result->deVersion);
-}
-
 static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 {
     if(!ffStrSet(name))
@@ -312,19 +140,33 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         strcasecmp(name, "plasma") == 0 ||
         strcasecmp(name, "plasmashell") == 0 ||
         strcasecmp(name, "plasmawayland") == 0
-    ) getKDE(result);
+    ) {
+        ffStrbufSetStatic(&result->deProcessName, "plasmashell");
+        ffStrbufSetStatic(&result->dePrettyName, FF_DE_PRETTY_PLASMA);
+        applyBetterWM(result, getenv("KDEWM"));
+    }
 
     else if(
         strcasecmp(name, "Gnome") == 0 ||
         strcasecmp(name, "ubuntu:GNOME") == 0 ||
         strcasecmp(name, "ubuntu") == 0 ||
         strcasecmp(name, "gnome-shell") == 0
-    ) getGnome(result);
+    ) {
+        ffStrbufSetStatic(&result->deProcessName, "gnome-shell");
+        const char* sessionMode = getenv("GNOME_SHELL_SESSION_MODE");
+        if (sessionMode && ffStrEquals(sessionMode, "classic"))
+            ffStrbufSetStatic(&result->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC);
+        else
+            ffStrbufSetStatic(&result->dePrettyName, FF_DE_PRETTY_GNOME);
+    }
 
     else if(
         strcasecmp(name, "X-Cinnamon") == 0 ||
         strcasecmp(name, "Cinnamon") == 0
-    ) getCinnamon(result);
+    ) {
+        ffStrbufSetS(&result->deProcessName, "cinnamon");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CINNAMON);
+    }
 
     else if(
         strcasecmp(name, "XFCE") == 0 ||
@@ -332,26 +174,41 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         strcasecmp(name, "XFCE4") == 0 ||
         strcasecmp(name, "X-XFCE4") == 0 ||
         strcasecmp(name, "xfce4-session") == 0
-    ) getXFCE4(result);
+    ) {
+        ffStrbufSetS(&result->deProcessName, "xfce4-session");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_XFCE4);
+    }
 
     else if(
         strcasecmp(name, "MATE") == 0 ||
         strcasecmp(name, "X-MATE") == 0 ||
         strcasecmp(name, "mate-session") == 0
-    ) getMate(result);
+    ) {
+        ffStrbufSetS(&result->deProcessName, "mate-session");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_MATE);
+    }
 
     else if(
         strcasecmp(name, "LXQt") == 0 ||
         strcasecmp(name, "X-LXQT") == 0 ||
         strcasecmp(name, "lxqt-session") == 0
-    ) getLXQt(result);
+    ) {
+        ffStrbufSetS(&result->deProcessName, "lxqt-session");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
+        FF_STRBUF_AUTO_DESTROY wmProcessNameBuffer = ffStrbufCreate();
+        ffParsePropFileConfig("lxqt/session.conf", "window_manager =", &wmProcessNameBuffer);
+        applyBetterWM(result, wmProcessNameBuffer.chars);
+    }
 
     else if(
         strcasecmp(name, "Budgie") == 0 ||
         strcasecmp(name, "X-Budgie") == 0 ||
         strcasecmp(name, "budgie-desktop") == 0 ||
         strcasecmp(name, "Budgie:GNOME") == 0
-    ) getBudgie(result);
+    ) {
+        ffStrbufSetS(&result->deProcessName, "budgie-desktop");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_BUDGIE);
+    }
 }
 
 static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)

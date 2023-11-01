@@ -34,10 +34,11 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     //Child
     if(childPid == 0)
     {
+        int nullFile = open("/dev/null", O_WRONLY);
         dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
+        dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
         close(pipes[0]);
         close(pipes[1]);
-        close(useStdErr ? STDOUT_FILENO : STDERR_FILENO);
         setenv("LANG", "C", 1);
         execvp(argv[0], argv);
         exit(901);
@@ -48,7 +49,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
 
-    int timeout = instance.config.processingTimeout;
+    int timeout = instance.config.general.processingTimeout;
     if (timeout >= 0)
         fcntl(childPipeFd, F_SETFL, fcntl(childPipeFd, F_GETFL) | O_NONBLOCK);
 

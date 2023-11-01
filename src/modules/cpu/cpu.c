@@ -77,15 +77,7 @@ void ffPrintCPU(FFCPUOptions* options)
     ffStrbufDestroy(&cpu.vendor);
 }
 
-void ffInitCPUOptions(FFCPUOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPU_MODULE_NAME, ffParseCPUCommandOptions, ffParseCPUJsonObject, ffPrintCPU, ffGenerateCPUJson, ffPrintCPUHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->temp = false;
-    options->freqNdigits = 2;
-}
-
-bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value)
+bool ffParseCPUCPUOptions(FFCPUOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CPU_MODULE_NAME);
     if (!subKey) return false;
@@ -105,11 +97,6 @@ bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char
     }
 
     return false;
-}
-
-void ffDestroyCPUOptions(FFCPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
@@ -141,7 +128,21 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateCPUJson(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyCPUOptions))) FFCPUOptions defaultOptions;
+    ffInitCPUOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.temp != options->temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+
+    if (defaultOptions.freqNdigits != options->freqNdigits)
+        yyjson_mut_obj_add_uint(doc, module, "freqNdigits", options->freqNdigits);
+}
+
+void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFCPUResult cpu;
     cpu.temperature = FF_CPU_TEMP_UNSET;
@@ -194,4 +195,26 @@ void ffPrintCPUHelpFormat(void)
         "Max frequency",
         "Temperature"
     });
+}
+
+void ffInitCPUOptions(FFCPUOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CPU_MODULE_NAME,
+        ffParseCPUCPUOptions,
+        ffParseCPUJsonObject,
+        ffPrintCPU,
+        ffGenerateCPUJsonResult,
+        ffPrintCPUHelpFormat,
+        ffGenerateCPUJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->temp = false;
+    options->freqNdigits = 2;
+}
+
+void ffDestroyCPUOptions(FFCPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

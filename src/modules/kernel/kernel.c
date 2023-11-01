@@ -30,12 +30,6 @@ void ffPrintKernel(FFKernelOptions* options)
     }
 }
 
-void ffInitKernelOptions(FFKernelOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_KERNEL_MODULE_NAME, ffParseKernelCommandOptions, ffParseKernelJsonObject, ffPrintKernel, ffGenerateKernelJson, ffPrintKernelHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseKernelCommandOptions(FFKernelOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_KERNEL_MODULE_NAME);
@@ -44,11 +38,6 @@ bool ffParseKernelCommandOptions(FFKernelOptions* options, const char* key, cons
         return true;
 
     return false;
-}
-
-void ffDestroyKernelOptions(FFKernelOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
@@ -68,7 +57,15 @@ void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateKernelJson(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateKernelJsonConfig(FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyKernelOptions))) FFKernelOptions defaultOptions;
+    ffInitKernelOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "architecture", &instance.state.platform.systemArchitecture);
@@ -85,4 +82,24 @@ void ffPrintKernelHelpFormat(void)
         "Kernel release",
         "Kernel version"
     });
+}
+
+void ffInitKernelOptions(FFKernelOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_KERNEL_MODULE_NAME,
+        ffParseKernelCommandOptions,
+        ffParseKernelJsonObject,
+        ffPrintKernel,
+        ffGenerateKernelJsonResult,
+        ffPrintKernelHelpFormat,
+        ffGenerateKernelJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyKernelOptions(FFKernelOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

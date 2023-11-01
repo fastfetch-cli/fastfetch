@@ -5,32 +5,32 @@ static FFModuleBaseInfo* A[] = {
 };
 
 static FFModuleBaseInfo* B[] = {
-    (void*) &instance.config.battery,
-    (void*) &instance.config.bios,
-    (void*) &instance.config.bluetooth,
-    (void*) &instance.config.board,
-    (void*) &instance.config.break_,
-    (void*) &instance.config.brightness,
+    (void*) &instance.config.modules.battery,
+    (void*) &instance.config.modules.bios,
+    (void*) &instance.config.modules.bluetooth,
+    (void*) &instance.config.modules.board,
+    (void*) &instance.config.modules.break_,
+    (void*) &instance.config.modules.brightness,
     NULL,
 };
 
 static FFModuleBaseInfo* C[] = {
-    (void*) &instance.config.chassis,
-    (void*) &instance.config.command,
-    (void*) &instance.config.colors,
-    (void*) &instance.config.cpu,
-    (void*) &instance.config.cpuUsage,
-    (void*) &instance.config.cursor,
-    (void*) &instance.config.custom,
+    (void*) &instance.config.modules.chassis,
+    (void*) &instance.config.modules.command,
+    (void*) &instance.config.modules.colors,
+    (void*) &instance.config.modules.cpu,
+    (void*) &instance.config.modules.cpuUsage,
+    (void*) &instance.config.modules.cursor,
+    (void*) &instance.config.modules.custom,
     NULL,
 };
 
 static FFModuleBaseInfo* D[] = {
-    (void*) &instance.config.dateTime,
-    (void*) &instance.config.de,
-    (void*) &instance.config.display,
-    (void*) &instance.config.disk,
-    (void*) &instance.config.diskIo,
+    (void*) &instance.config.modules.dateTime,
+    (void*) &instance.config.modules.de,
+    (void*) &instance.config.modules.display,
+    (void*) &instance.config.modules.disk,
+    (void*) &instance.config.modules.diskIo,
     NULL,
 };
 
@@ -39,23 +39,23 @@ static FFModuleBaseInfo* E[] = {
 };
 
 static FFModuleBaseInfo* F[] = {
-    (void*) &instance.config.font,
+    (void*) &instance.config.modules.font,
     NULL,
 };
 
 static FFModuleBaseInfo* G[] = {
-    (void*) &instance.config.gamepad,
-    (void*) &instance.config.gpu,
+    (void*) &instance.config.modules.gamepad,
+    (void*) &instance.config.modules.gpu,
     NULL,
 };
 
 static FFModuleBaseInfo* H[] = {
-    (void*) &instance.config.host,
+    (void*) &instance.config.modules.host,
     NULL,
 };
 
 static FFModuleBaseInfo* I[] = {
-    (void*) &instance.config.icons,
+    (void*) &instance.config.modules.icons,
     NULL,
 };
 
@@ -64,42 +64,42 @@ static FFModuleBaseInfo* J[] = {
 };
 
 static FFModuleBaseInfo* K[] = {
-    (void*) &instance.config.kernel,
+    (void*) &instance.config.modules.kernel,
     NULL,
 };
 
 static FFModuleBaseInfo* L[] = {
-    (void*) &instance.config.lm,
-    (void*) &instance.config.locale,
-    (void*) &instance.config.localIP,
+    (void*) &instance.config.modules.lm,
+    (void*) &instance.config.modules.locale,
+    (void*) &instance.config.modules.localIP,
     NULL,
 };
 
 static FFModuleBaseInfo* M[] = {
-    (void*) &instance.config.media,
-    (void*) &instance.config.memory,
-    (void*) &instance.config.monitor,
+    (void*) &instance.config.modules.media,
+    (void*) &instance.config.modules.memory,
+    (void*) &instance.config.modules.monitor,
     NULL,
 };
 
 static FFModuleBaseInfo* N[] = {
-    (void*) &instance.config.netIo,
+    (void*) &instance.config.modules.netIo,
     NULL,
 };
 
 static FFModuleBaseInfo* O[] = {
-    (void*) &instance.config.openCL,
-    (void*) &instance.config.openGL,
-    (void*) &instance.config.os,
+    (void*) &instance.config.modules.openCL,
+    (void*) &instance.config.modules.openGL,
+    (void*) &instance.config.modules.os,
     NULL,
 };
 
 static FFModuleBaseInfo* P[] = {
-    (void*) &instance.config.packages,
-    (void*) &instance.config.player,
-    (void*) &instance.config.powerAdapter,
-    (void*) &instance.config.processes,
-    (void*) &instance.config.publicIP,
+    (void*) &instance.config.modules.packages,
+    (void*) &instance.config.modules.player,
+    (void*) &instance.config.modules.powerAdapter,
+    (void*) &instance.config.modules.processes,
+    (void*) &instance.config.modules.publicIP,
     NULL,
 };
 
@@ -112,40 +112,40 @@ static FFModuleBaseInfo* R[] = {
 };
 
 static FFModuleBaseInfo* S[] = {
-    (void*) &instance.config.separator,
-    (void*) &instance.config.shell,
-    (void*) &instance.config.sound,
-    (void*) &instance.config.swap,
+    (void*) &instance.config.modules.separator,
+    (void*) &instance.config.modules.shell,
+    (void*) &instance.config.modules.sound,
+    (void*) &instance.config.modules.swap,
     NULL,
 };
 
 static FFModuleBaseInfo* T[] = {
-    (void*) &instance.config.terminal,
-    (void*) &instance.config.terminalFont,
-    (void*) &instance.config.terminalSize,
-    (void*) &instance.config.title,
-    (void*) &instance.config.theme,
+    (void*) &instance.config.modules.terminal,
+    (void*) &instance.config.modules.terminalFont,
+    (void*) &instance.config.modules.terminalSize,
+    (void*) &instance.config.modules.title,
+    (void*) &instance.config.modules.theme,
     NULL,
 };
 
 static FFModuleBaseInfo* U[] = {
-    (void*) &instance.config.uptime,
-    (void*) &instance.config.users,
+    (void*) &instance.config.modules.uptime,
+    (void*) &instance.config.modules.users,
     NULL,
 };
 
 static FFModuleBaseInfo* V[] = {
-    (void*) &instance.config.version,
-    (void*) &instance.config.vulkan,
+    (void*) &instance.config.modules.version,
+    (void*) &instance.config.modules.vulkan,
     NULL,
 };
 
 static FFModuleBaseInfo* W[] = {
-    (void*) &instance.config.wallpaper,
-    (void*) &instance.config.weather,
-    (void*) &instance.config.wm,
-    (void*) &instance.config.wifi,
-    (void*) &instance.config.wmTheme,
+    (void*) &instance.config.modules.wallpaper,
+    (void*) &instance.config.modules.weather,
+    (void*) &instance.config.modules.wm,
+    (void*) &instance.config.modules.wifi,
+    (void*) &instance.config.modules.wmTheme,
     NULL,
 };
 

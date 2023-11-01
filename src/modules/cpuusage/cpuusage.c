@@ -47,9 +47,9 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (!options->separate)
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                 ffAppendPercentBar(&str, avgValue, 0, 50, 80);
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -85,12 +85,6 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
 }
 
-void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_CPUUSAGE_MODULE_NAME, ffParseCPUUsageCommandOptions, ffParseCPUUsageJsonObject, ffPrintCPUUsage, ffGenerateCPUUsageJson, ffPrintCPUUsageHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CPUUSAGE_MODULE_NAME);
@@ -105,11 +99,6 @@ bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, 
     }
 
     return false;
-}
-
-void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
@@ -135,7 +124,18 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateCPUUsageJson(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyCPUUsageOptions))) FFCPUUsageOptions defaultOptions;
+    ffInitCPUUsageOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->separate != defaultOptions.separate)
+        yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
+}
+
+void ffGenerateCPUUsageJsonResult(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
     const char* error = ffGetCpuUsageResult(&percentages);
@@ -161,4 +161,24 @@ void ffPrintCPUUsageHelpFormat(void)
         "CPU usage (percentage, minimum)",
         "CPU core index of minimum usage",
     });
+}
+
+void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_CPUUSAGE_MODULE_NAME,
+        ffParseCPUUsageCommandOptions,
+        ffParseCPUUsageJsonObject,
+        ffPrintCPUUsage,
+        ffGenerateCPUUsageJsonResult,
+        ffPrintCPUUsageHelpFormat,
+        ffGenerateCPUUsageJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

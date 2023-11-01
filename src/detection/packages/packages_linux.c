@@ -226,7 +226,7 @@ static uint32_t getFlatpak(FFstrbuf* baseDir, const char* dirname)
 
 static uint32_t getRpmFromLibrpm(void)
 {
-    FF_LIBRARY_LOAD(rpm, &instance.config.librpm, 0, "librpm" FF_LIBRARY_EXTENSION, 12)
+    FF_LIBRARY_LOAD(rpm, &instance.config.library.librpm, 0, "librpm" FF_LIBRARY_EXTENSION, 12)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmReadConfigFiles, 0)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsCreate, 0)
     FF_LIBRARY_LOAD_SYMBOL(rpm, rpmtsInitIterator, 0)
@@ -327,7 +327,7 @@ static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* package
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
-void ffDetectPackagesImpl(FFPackagesResult* result)
+void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);

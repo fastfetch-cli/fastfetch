@@ -242,35 +242,32 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    FFpropquery fontQuery[] = {
-        {"font_family ", &fontName},
-        {"font_size ", &fontSize},
-    };
-
-    if(instance.config.allowSlowOperations)
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    if(!ffProcessAppendStdOut(&buf, (char* const[]){
+        exe->chars,
+        "+kitten",
+        "query-terminal",
+        NULL,
+    }))
     {
-        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-        if(!ffProcessAppendStdOut(&buf, (char* const[]){
-            exe->chars,
-            "+kitten",
-            "query-terminal",
-            NULL,
-        }))
-        {
-            ffParsePropLines(buf.chars, "font_family: ", &fontName);
-            ffParsePropLines(buf.chars, "font_size: ", &fontSize);
-            ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
-            return true;
-        }
+        ffParsePropLines(buf.chars, "font_family: ", &fontName);
+        ffParsePropLines(buf.chars, "font_size: ", &fontSize);
+    }
+    else
+    {
+        FFpropquery fontQuery[] = {
+            {"font_family ", &fontName},
+            {"font_size ", &fontSize},
+        };
+
+        ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
+
+        if(fontName.length == 0)
+            ffStrbufSetS(&fontName, "monospace");
+        if(fontSize.length == 0)
+            ffStrbufSetS(&fontSize, "11.0");
     }
 
-    if(!ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery))
-        return false;
-
-    if(fontName.length == 0)
-        ffStrbufSetS(&fontName, "monospace");
-    if(fontSize.length == 0)
-        ffStrbufSetS(&fontSize, "11.0");
 
     ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
 

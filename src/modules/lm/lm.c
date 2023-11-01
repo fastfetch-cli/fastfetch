@@ -49,12 +49,6 @@ void ffPrintLM(FFLMOptions* options)
     ffStrbufDestroy(&result.version);
 }
 
-void ffInitLMOptions(FFLMOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_LM_MODULE_NAME, ffParseLMCommandOptions, ffParseLMJsonObject, ffPrintLM, ffGenerateLMJson, ffPrintLMHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseLMCommandOptions(FFLMOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_LM_MODULE_NAME);
@@ -63,11 +57,6 @@ bool ffParseLMCommandOptions(FFLMOptions* options, const char* key, const char* 
         return true;
 
     return false;
-}
-
-void ffDestroyLMOptions(FFLMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
@@ -87,7 +76,15 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateLMJson(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyLMOptions))) FFLMOptions defaultOptions;
+    ffInitLMOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFLMResult result;
     ffStrbufInit(&result.service);
@@ -125,4 +122,24 @@ void ffPrintLMHelpFormat(void)
         "LM type",
         "LM version"
     });
+}
+
+void ffInitLMOptions(FFLMOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_LM_MODULE_NAME,
+        ffParseLMCommandOptions,
+        ffParseLMJsonObject,
+        ffPrintLM,
+        ffGenerateLMJsonResult,
+        ffPrintLMHelpFormat,
+        ffGenerateLMJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyLMOptions(FFLMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

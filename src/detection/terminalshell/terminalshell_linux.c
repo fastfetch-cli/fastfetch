@@ -139,6 +139,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "sshd")                 == 0 ||
         strcasecmp(name, "gdb")                  == 0 ||
         strcasecmp(name, "lldb")                 == 0 ||
+        strcasecmp(name, "login")                == 0 ||
         strcasecmp(name, "guake-wrapped")        == 0 ||
         strcasestr(name, "debug")             != NULL ||
         strcasestr(name, "command-not-found") != NULL ||
@@ -236,8 +237,7 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     //Termux
     if(!ffStrSet(term) && (
         getenv("TERMUX_VERSION") != NULL ||
-        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL ||
-        getenv("TMUX_TMPDIR") != NULL
+        getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL
     )) term = "com.termux";
     #endif
 
@@ -251,6 +251,9 @@ static void getTerminalFromEnv(FFTerminalShellResult* result)
     //MacOS, mintty
     if(!ffStrSet(term))
         term = getenv("TERM_PROGRAM");
+
+    if(!ffStrSet(term))
+        term = getenv("LC_TERMINAL");
 
     //Normal Terminal
     if(!ffStrSet(term))
@@ -311,15 +314,10 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* vers
 
 const FFTerminalShellResult* ffDetectTerminalShell()
 {
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static FFTerminalShellResult result;
     static bool init = false;
-    ffThreadMutexLock(&mutex);
     if(init)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
     init = true;
 
     #ifdef __APPLE__
@@ -373,9 +371,10 @@ const FFTerminalShellResult* ffDetectTerminalShell()
             result.terminalExeName + 1);
     }
 
-
     if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
         ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
+    if(ffStrbufStartsWithS(&result.terminalProcessName, "tmux:"))
+        ffStrbufInitStatic(&result.terminalPrettyName, "tmux");
 
     #if defined(__ANDROID__)
 
@@ -388,6 +387,11 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Terminal");
     else if(ffStrbufStartsWithS(&result.terminalProcessName, "kgx"))
         ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Console");
+    else if(ffStrbufEqualS(&result.terminalProcessName, "urxvt") ||
+        ffStrbufEqualS(&result.terminalProcessName, "urxvtd") ||
+        ffStrbufEqualS(&result.terminalProcessName, "rxvt")
+    )
+        ffStrbufInitStatic(&result.terminalPrettyName, "rxvt-unicode");
 
     #elif defined(__APPLE__)
 
@@ -408,6 +412,5 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     ffStrbufInit(&result.terminalVersion);
     fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
 
-    ffThreadMutexUnlock(&mutex);
     return &result;
 }

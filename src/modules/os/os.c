@@ -136,12 +136,6 @@ void ffPrintOS(FFOSOptions* options)
     }
 }
 
-void ffInitOSOptions(FFOSOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_OS_MODULE_NAME, ffParseOSCommandOptions, ffParseOSJsonObject, ffPrintOS, ffGenerateOSJson, ffPrintOSHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_OS_MODULE_NAME);
@@ -150,11 +144,6 @@ bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* 
         return true;
 
     return false;
-}
-
-void ffDestroyOSOptions(FFOSOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
@@ -174,7 +163,15 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateOSJson(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateOSJsonConfig(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyOSOptions))) FFOSOptions defaultOptions;
+    ffInitOSOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFOSResult* os = ffDetectOS();
 
@@ -213,4 +210,24 @@ void ffPrintOSHelpFormat(void)
         "Build ID of the OS",
         "Architecture of the OS"
     });
+}
+
+void ffInitOSOptions(FFOSOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_OS_MODULE_NAME,
+        ffParseOSCommandOptions,
+        ffParseOSJsonObject,
+        ffPrintOS,
+        ffGenerateOSJsonResult,
+        ffPrintOSHelpFormat,
+        ffGenerateOSJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyOSOptions(FFOSOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -37,7 +37,7 @@ static FFstrbuf base64Encode(const FFstrbuf* in)
 
 static bool printImageIterm(void)
 {
-    const FFLogoOptions* options = &instance.config.logo;
+    const FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     if(!ffAppendFileBuffer(options->source.chars, &buf))
     {
@@ -118,7 +118,7 @@ static bool printImageIterm(void)
 
 static bool printImageKittyDirect(void)
 {
-    const FFLogoOptions* options = &instance.config.logo;
+    const FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&options->source);
 
     if (!options->width || !options->height)
@@ -222,7 +222,7 @@ static inline char* realpath(const char* restrict file_name, char* restrict reso
 
 static bool compressBlob(void** blob, size_t* length)
 {
-    FF_LIBRARY_LOAD(zlib, &instance.config.libZ, false, "libz" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(zlib, &instance.config.library.libZ, false, "libz" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compressBound, false)
     FF_LIBRARY_LOAD_SYMBOL(zlib, compress2, false)
 
@@ -296,7 +296,7 @@ static void writeCacheUint32(FFLogoRequestData* requestData, uint32_t value, con
 
 static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* result, const char* cacheFileName)
 {
-    const FFLogoOptions* options = &instance.config.logo;
+    const FFOptionsLogo* options = &instance.config.logo;
     //Calculate character dimensions
     instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
     instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop - 1;
@@ -398,7 +398,7 @@ static bool printImageKitty(FFLogoRequestData* requestData, const ImageData* ima
 #include <chafa.h>
 static bool printImageChafa(FFLogoRequestData* requestData, const ImageData* imageData)
 {
-    FF_LIBRARY_LOAD(chafa, &instance.config.libChafa, false,
+    FF_LIBRARY_LOAD(chafa, &instance.config.library.libChafa, false,
         "libchafa" FF_LIBRARY_EXTENSION, 1,
         "libchafa-0" FF_LIBRARY_EXTENSION, -1 // Required for Windows
     )

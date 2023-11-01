@@ -1,7 +1,9 @@
 #include "detection/gpu/gpu.h"
+#include "detection/gpu/gpu_nvidia.h"
 #include "detection/vulkan/vulkan.h"
 
 #ifdef FF_HAVE_LIBPCI
+#include "common/io/io.h"
 #include "common/library.h"
 #include "common/properties.h"
 #include "common/parsing.h"
@@ -35,7 +37,7 @@ typedef struct PCIData
 
 static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
 {
-    ffStrbufAppendS(&gpu->vendor, ffGetGPUVendorString(device->vendor_id));
+    ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(device->vendor_id));
 
     if(gpu->vendor.length > 0)
         return;
@@ -45,11 +47,11 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufRecalculateLength(&gpu->vendor);
 
     if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
-        ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
     else if(ffStrbufContainS(&gpu->vendor, "Intel"))
-        ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
     else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
-        ffStrbufSetS(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
 }
 
 static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
@@ -110,24 +112,28 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     #if PCI_LIB_VERSION >= 0x030800
         pci->ffpci_fill_info(device, PCI_FILL_DRIVER);
         ffStrbufAppendS(&gpu->driver, pci->ffpci_get_string_property(device, PCI_FILL_DRIVER));
-
-        if(gpu->driver.length > 0)
-            return;
     #endif
 
     const char* base = pci->ffpci_get_param(pci->access, "sysfs.path");
     if(!ffStrSet(base))
         return;
-
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateF("%s/devices/%04x:%02x:%02x.%d/driver", base, device->domain, device->bus, device->dev, device->func);
-    ffStrbufEnsureFree(&gpu->driver, 1023);
-    ssize_t resultLength = readlink(path.chars, gpu->driver.chars, gpu->driver.allocated - 1); //-1 for null terminator
-    if(resultLength > 0)
+    if (gpu->driver.length == 0)
     {
-        gpu->driver.length = (uint32_t) resultLength;
-        gpu->driver.chars[resultLength] = '\0';
-        ffStrbufSubstrAfterLastC(&gpu->driver, '/');
+        ffStrbufEnsureFree(&gpu->driver, 1023);
+        ssize_t resultLength = readlink(path.chars, gpu->driver.chars, gpu->driver.allocated - 1); //-1 for null terminator
+        if(resultLength > 0)
+        {
+            gpu->driver.length = (uint32_t) resultLength;
+            gpu->driver.chars[resultLength] = '\0';
+            ffStrbufSubstrAfterLastC(&gpu->driver, '/');
+        }
     }
+
+    ffStrbufAppendC(&gpu->driver, ' ');
+    ffStrbufAppendS(&path, "/module/version");
+    ffAppendFileBuffer(path.chars, &gpu->driver);
+    ffStrbufTrimRight(&gpu->driver, ' ');
 }
 
 FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, struct pci_dev* device)
@@ -236,8 +242,23 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->temperature = FF_GPU_TEMP_UNSET;
 
+    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->useNvml))
+    {
+        char pciDeviceId[32];
+        snprintf(pciDeviceId, sizeof(pciDeviceId) - 1, "%04x:%02x:%02x.%d", device->domain, device->bus, device->dev, device->func);
+
+        ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) { .pciBusId = pciDeviceId }, (FFGpuNvidiaResult) {
+            .temp = options->temp ? &gpu->temperature : NULL,
+            .memory = options->useNvml ? &gpu->dedicated : NULL,
+            .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
+        }, "libnvidia-ml.so");
+
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
+            gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+    }
+
     #ifdef __linux__
-    if(options->temp)
+    if(options->temp && gpu->temperature != gpu->temperature)
         pciDetectTemp(gpu, device);
     #endif
 }
@@ -270,7 +291,7 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 {
     PCIData pci;
 
-    FF_LIBRARY_LOAD(libpci, &instance.config.libPCI, "dlopen libpci.so failed", "libpci" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_LOAD(libpci, &instance.config.library.libPCI, "dlopen libpci.so failed", "libpci" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_alloc);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_init);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libpci, pci_scan_bus);

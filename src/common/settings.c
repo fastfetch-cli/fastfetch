@@ -15,18 +15,14 @@ typedef enum FFInitState
 
 #define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
     static dataObject data; \
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER; \
     static FFInitState initState = FF_INITSTATE_UNINITIALIZED; \
-    ffThreadMutexLock(&mutex); \
     if(initState != FF_INITSTATE_UNINITIALIZED) {\
-        ffThreadMutexUnlock(&mutex); \
         return initState == FF_INITSTATE_SUCCESSFUL ? &data : NULL; \
     } \
     initState = FF_INITSTATE_SUCCESSFUL; \
     void* libraryHandle = ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL); \
     if(libraryHandle == NULL) { \
         initState = FF_INITSTATE_FAILED; \
-        ffThreadMutexUnlock(&mutex); \
         return NULL; \
     } \
 
@@ -35,20 +31,17 @@ typedef enum FFInitState
     if(data.ff ## symbolName == NULL) { \
         dlclose(libraryHandle); \
         initState = FF_INITSTATE_FAILED; \
-        ffThreadMutexUnlock(&mutex); \
         return NULL; \
     }
 
 #define FF_LIBRARY_DATA_LOAD_RETURN \
     initState = FF_INITSTATE_SUCCESSFUL; \
-    ffThreadMutexUnlock(&mutex); \
     return &data;
 
 #define FF_LIBRARY_DATA_LOAD_ERROR \
     { \
         dlclose(libraryHandle); \
         initState = FF_INITSTATE_FAILED; \
-        ffThreadMutexUnlock(&mutex); \
         return NULL; \
     }
 
@@ -99,7 +92,7 @@ typedef struct GSettingsData
 
 static const GSettingsData* getGSettingsData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance.config.libGIO, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance.config.library.libGIO, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
     FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
@@ -172,7 +165,7 @@ typedef struct DConfData
 
 static const DConfData* getDConfData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance.config.libDConf, "libdconf" FF_LIBRARY_EXTENSION, 2);
+    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance.config.library.libDConf, "libdconf" FF_LIBRARY_EXTENSION, 2);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
     FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
@@ -243,7 +236,7 @@ typedef struct XFConfData
 
 static const XFConfData* getXFConfData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance.config.libXFConf, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance.config.library.libXFConf, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
     FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)
@@ -305,7 +298,7 @@ typedef struct SQLiteData
 
 static const SQLiteData* getSQLiteData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance.config.libSQLite3, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance.config.library.libSQLite3, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
 
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_open_v2)
     FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_prepare_v2)

@@ -35,26 +35,26 @@ void ffPrintSwap(FFSwapOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (storage.bytesTotal == 0)
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, 0, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
-            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendS(&str, "Disabled");
         }
         else
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffAppendPercentBar(&str, percentage, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffAppendPercentNum(&str, percentage, 50, 80, str.length > 0);
         }
 
@@ -73,12 +73,6 @@ void ffPrintSwap(FFSwapOptions* options)
     }
 }
 
-void ffInitSwapOptions(FFSwapOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SWAP_MODULE_NAME, ffParseSwapCommandOptions, ffParseSwapJsonObject, ffPrintSwap, ffGenerateSwapJson, ffPrintSwapHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SWAP_MODULE_NAME);
@@ -87,11 +81,6 @@ bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroySwapOptions(FFSwapOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
@@ -111,7 +100,15 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateSwapJson(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroySwapOptions))) FFSwapOptions defaultOptions;
+    ffInitSwapOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFSwapResult storage;
     const char* error = ffDetectSwap(&storage);
@@ -134,4 +131,24 @@ void ffPrintSwapHelpFormat(void)
         "Total size",
         "Percentage used"
     });
+}
+
+void ffInitSwapOptions(FFSwapOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SWAP_MODULE_NAME,
+        ffParseSwapCommandOptions,
+        ffParseSwapJsonObject,
+        ffPrintSwap,
+        ffGenerateSwapJsonResult,
+        ffPrintSwapHelpFormat,
+        ffGenerateSwapJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroySwapOptions(FFSwapOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

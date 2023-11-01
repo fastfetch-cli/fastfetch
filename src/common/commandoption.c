@@ -1,43 +1,13 @@
 #include "commandoption.h"
 #include "common/printing.h"
 #include "common/time.h"
+#include "common/jsonconfig.h"
 #include "fastfetch_datatext.h"
 #include "modules/modules.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <inttypes.h>
-
-static inline yyjson_mut_val* genJson(FFModuleBaseInfo* baseInfo)
-{
-    yyjson_mut_doc* doc = instance.state.resultDoc;
-    if (__builtin_expect(!doc, true)) return NULL;
-
-    yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
-    yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
-    if (baseInfo->generateJson)
-        baseInfo->generateJson(baseInfo, doc, module);
-    else
-        yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
-    return module;
-}
-
-bool ffParseModuleCommand(const char* type)
-{
-    if(!isalpha(type[0])) return false;
-
-    for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(type[0]) - 'A']; *modules; ++modules)
-    {
-        FFModuleBaseInfo* baseInfo = *modules;
-        if (ffStrEqualsIgnCase(type, baseInfo->name))
-        {
-            if (!genJson(baseInfo))
-                baseInfo->printModule(baseInfo);
-            return true;
-        }
-    }
-    return false;
-}
 
 bool ffParseModuleOptions(const char* key, const char* value)
 {
@@ -53,6 +23,7 @@ bool ffParseModuleOptions(const char* key, const char* value)
 
 void ffPrepareCommandOption(FFdata* data)
 {
+    FFOptionsModules* const options = &instance.config.modules;
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
         ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
@@ -61,22 +32,57 @@ void ffPrepareCommandOption(FFdata* data)
         ffPrepareCPUUsage();
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME))
-        ffPrepareDiskIO(&instance.config.diskIo);
+        ffPrepareDiskIO(&options->diskIo);
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
-        ffPrepareNetIO(&instance.config.netIo);
+        ffPrepareNetIO(&options->netIo);
 
-    if(instance.config.multithreading)
+    if(instance.config.general.multithreading)
     {
         if(ffStrbufContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME))
-            ffPreparePublicIp(&instance.config.publicIP);
+            ffPreparePublicIp(&options->publicIP);
 
         if(ffStrbufContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME))
-            ffPrepareWeather(&instance.config.weather);
+            ffPrepareWeather(&options->weather);
     }
 }
 
-static void parseStructureCommand(const char* line, FFlist* customValues)
+static void genJsonConfig(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
+{
+    yyjson_mut_val* modules = yyjson_mut_obj_get(doc->root, "modules");
+    if (!modules)
+        modules = yyjson_mut_obj_add_arr(doc, doc->root, "modules");
+
+    yyjson_mut_val* module = yyjson_mut_obj(doc);
+    FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
+    ffStrbufLowerCase(&type);
+    yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
+
+    if (baseInfo->generateJsonConfig)
+        baseInfo->generateJsonConfig(baseInfo, doc, module);
+
+    if (yyjson_mut_obj_size(module) > 1)
+        yyjson_mut_arr_add_val(modules, module);
+    else
+        yyjson_mut_arr_add_strbuf(doc, modules, &type);
+}
+
+static void genJsonResult(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
+{
+    yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
+    yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
+    if (baseInfo->generateJsonResult)
+        baseInfo->generateJsonResult(baseInfo, doc, module);
+    else
+        yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
+}
+
+static void parseStructureCommand(
+    const char* line,
+    FFlist* customValues,
+    void (*fn)(FFModuleBaseInfo *baseInfo, yyjson_mut_doc* jsonDoc),
+    yyjson_mut_doc* jsonDoc
+)
 {
     // handle `--set` and `--set-keyless`
     FF_LIST_FOR_EACH(FFCustomValue, customValue, *customValues)
@@ -88,19 +94,35 @@ static void parseStructureCommand(const char* line, FFlist* customValues)
             if (customValue->printKey)
                 ffStrbufAppend(&options.moduleArgs.key, &customValue->key);
             ffStrbufAppend(&options.moduleArgs.outputFormat, &customValue->value);
-            ffPrintCustom(&options);
+            if (__builtin_expect(jsonDoc != NULL, false))
+                fn((FFModuleBaseInfo*) &options, jsonDoc);
+            else
+                ffPrintCustom(&options);
             return;
         }
     }
 
-    if(!ffParseModuleCommand(line))
-        ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
+    if(isalpha(line[0]))
+    {
+        for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(line[0]) - 'A']; *modules; ++modules)
+        {
+            FFModuleBaseInfo* baseInfo = *modules;
+            if (ffStrEqualsIgnCase(line, baseInfo->name))
+            {
+                if (__builtin_expect(jsonDoc != NULL, false))
+                    fn(baseInfo, jsonDoc);
+                else
+                    baseInfo->printModule(baseInfo);
+                return;
+            }
+        }
+    }
+
+    ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
-void ffPrintCommandOption(FFdata* data)
+void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
 {
-    yyjson_mut_doc* resultDoc = instance.state.resultDoc;
-
     //Parse the structure and call the modules
     uint32_t startIndex = 0;
     while (startIndex < data->structure.length)
@@ -109,25 +131,25 @@ void ffPrintCommandOption(FFdata* data)
         data->structure.chars[colonIndex] = '\0';
 
         uint64_t ms = 0;
-        if(instance.config.stat)
+        if(instance.config.display.stat)
             ms = ffTimeGetTick();
 
-        parseStructureCommand(data->structure.chars + startIndex, &data->customValues);
+        parseStructureCommand(data->structure.chars + startIndex, &data->customValues, genJsonResult, jsonDoc);
 
-        if(instance.config.stat)
+        if(instance.config.display.stat)
         {
             ms = ffTimeGetTick() - ms;
 
-            if (resultDoc)
+            if (jsonDoc)
             {
-                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(resultDoc->root);
-                yyjson_mut_obj_add_uint(resultDoc, moduleJson, "stat", ms);
+                yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(jsonDoc->root);
+                yyjson_mut_obj_add_uint(jsonDoc, moduleJson, "stat", ms);
             }
             else
             {
                 char str[32];
                 int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
-                if(instance.config.pipe)
+                if(instance.config.display.pipe)
                     puts(str);
                 else
                     printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
@@ -135,8 +157,27 @@ void ffPrintCommandOption(FFdata* data)
         }
 
         #if defined(_WIN32)
-            if (!instance.config.noBuffer) fflush(stdout);
+            if (!jsonDoc && !instance.config.display.noBuffer) fflush(stdout);
         #endif
+
+        startIndex = colonIndex + 1;
+    }
+}
+
+void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
+{
+    //If we don't have a custom structure, use the default one
+    if(data->structure.length == 0)
+        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
+
+    //Parse the structure and call the modules
+    uint32_t startIndex = 0;
+    while (startIndex < data->structure.length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
+        data->structure.chars[colonIndex] = '\0';
+
+        parseStructureCommand(data->structure.chars + startIndex, &data->customValues, genJsonConfig, jsonDoc);
 
         startIndex = colonIndex + 1;
     }

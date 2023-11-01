@@ -85,10 +85,9 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     ffStrbufInit(&ds->wmProtocolName);
     ffStrbufInit(&ds->deProcessName);
     ffStrbufInit(&ds->dePrettyName);
-    ffStrbufInit(&ds->deVersion);
     ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
 
-    if (!instance.config.dsForceDrm)
+    if (!instance.config.general.dsForceDrm)
     {
         //We try wayland as our prefered display server, as it supports the most features.
         //This method can't detect the name of our WM / DE

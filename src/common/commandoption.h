@@ -20,9 +20,9 @@ typedef struct FFdata
     bool loadUserConfig;
 } FFdata;
 
-bool ffParseModuleCommand(const char* type);
 bool ffParseModuleOptions(const char* key, const char* value);
 void ffPrepareCommandOption(FFdata* data);
-void ffPrintCommandOption(FFdata* data);
+void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc);
+void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc);
 
 #endif

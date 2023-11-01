@@ -21,7 +21,7 @@ static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate
 void ffPrintSeparator(FFSeparatorOptions* options)
 {
     mbstate_t state = {};
-    bool fqdn = instance.config.title.fqdn;
+    bool fqdn = instance.config.modules.title.fqdn;
     const FFPlatform* platform = &instance.state.platform;
 
     FF_AUTO_FREE wchar_t* wstr = malloc((max(
@@ -75,12 +75,6 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     putchar('\n');
 }
 
-void ffInitSeparatorOptions(FFSeparatorOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_SEPARATOR_MODULE_NAME, ffParseSeparatorCommandOptions, ffParseSeparatorJsonObject, ffPrintSeparator, NULL, NULL);
-    ffStrbufInit(&options->string);
-}
-
 bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_SEPARATOR_MODULE_NAME);
@@ -93,11 +87,6 @@ bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key
     }
 
     return false;
-}
-
-void ffDestroySeparatorOptions(FFSeparatorOptions* options)
-{
-    ffStrbufDestroy(&options->string);
 }
 
 void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
@@ -118,4 +107,33 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 
         ffPrintErrorString(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroySeparatorOptions))) FFSeparatorOptions defaultOptions;
+    ffInitSeparatorOptions(&defaultOptions);
+
+    if (!ffStrbufEqual(&options->string, &defaultOptions.string))
+        yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
+}
+
+void ffInitSeparatorOptions(FFSeparatorOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_SEPARATOR_MODULE_NAME,
+        ffParseSeparatorCommandOptions,
+        ffParseSeparatorJsonObject,
+        ffPrintSeparator,
+        NULL,
+        NULL,
+        ffGenerateSeparatorJsonConfig
+    );
+    ffStrbufInit(&options->string);
+}
+
+void ffDestroySeparatorOptions(FFSeparatorOptions* options)
+{
+    ffStrbufDestroy(&options->string);
 }

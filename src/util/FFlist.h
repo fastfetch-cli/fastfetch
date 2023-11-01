@@ -103,4 +103,11 @@ static inline void ffListClear(FFlist* list)
 
 #define FF_LIST_AUTO_DESTROY FFlist __attribute__((__cleanup__(ffListDestroy)))
 
+#define FF_LIST_GET(itemType, listVar, index) \
+    ({ \
+        assert(sizeof(itemType) == (listVar).elementSize); \
+        assert((listVar).capacity > (index)); \
+        (itemType*)(listVar).data + (index); \
+    })
+
 #endif

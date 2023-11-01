@@ -43,12 +43,6 @@ void ffPrintFont(FFFontOptions* options)
         ffStrbufDestroy(&font.fonts[i]);
 }
 
-void ffInitFontOptions(FFFontOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_FONT_MODULE_NAME, ffParseFontCommandOptions, ffParseFontJsonObject, ffPrintFont, ffGenerateFontJson, ffPrintFontHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseFontCommandOptions(FFFontOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_FONT_MODULE_NAME);
@@ -57,11 +51,6 @@ bool ffParseFontCommandOptions(FFFontOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyFontOptions(FFFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
@@ -81,7 +70,15 @@ void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateFontJson(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateFontJsonConfig(FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyFontOptions))) FFFontOptions defaultOptions;
+    ffInitFontOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFFontResult font;
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
@@ -116,4 +113,24 @@ void ffPrintFontHelpFormat(void)
         "Font 4",
         "Combined fonts"
     });
+}
+
+void ffInitFontOptions(FFFontOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_FONT_MODULE_NAME,
+        ffParseFontCommandOptions,
+        ffParseFontJsonObject,
+        ffPrintFont,
+        ffGenerateFontJsonResult,
+        ffPrintFontHelpFormat,
+        ffGenerateFontJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyFontOptions(FFFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

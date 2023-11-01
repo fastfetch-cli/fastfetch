@@ -1,10 +1,11 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/displayserver/displayserver.h"
+#include "detection/wm/wm.h"
 #include "modules/wm/wm.h"
 #include "util/stringUtils.h"
 
-#define FF_WM_NUM_FORMAT_ARGS 3
+#define FF_WM_NUM_FORMAT_ARGS 4
 
 void ffPrintWM(FFWMOptions* options)
 {
@@ -15,6 +16,10 @@ void ffPrintWM(FFWMOptions* options)
         ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "No WM found");
         return;
     }
+
+    FF_STRBUF_AUTO_DESTROY pluginName = ffStrbufCreate();
+    if(options->detectPlugin)
+        ffDetectWMPlugin(&pluginName);
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -29,6 +34,13 @@ void ffPrintWM(FFWMOptions* options)
             putchar(')');
         }
 
+        if(pluginName.length > 0)
+        {
+            fputs(" (with ", stdout);
+            ffStrbufWriteTo(&pluginName, stdout);
+            putchar(')');
+        }
+
         putchar('\n');
     }
     else
@@ -36,15 +48,10 @@ void ffPrintWM(FFWMOptions* options)
         ffPrintFormat(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &pluginName},
         });
     }
-}
-
-void ffInitWMOptions(FFWMOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WM_MODULE_NAME, ffParseWMCommandOptions, ffParseWMJsonObject, ffPrintWM, ffGenerateWMJson, ffPrintWMHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
 }
 
 bool ffParseWMCommandOptions(FFWMOptions* options, const char* key, const char* value)
@@ -54,12 +61,13 @@ bool ffParseWMCommandOptions(FFWMOptions* options, const char* key, const char* 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    return false;
-}
+    if (ffStrEqualsIgnCase(subKey, "detect-plugin"))
+    {
+        options->detectPlugin = ffOptionParseBoolean(value);
+        return true;
+    }
 
-void ffDestroyWMOptions(FFWMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
+    return false;
 }
 
 void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
@@ -75,11 +83,28 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffStrEqualsIgnCase(key, "detectPlugin"))
+        {
+            options->detectPlugin = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
 
-void ffGenerateWMJson(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWMJsonConfig(FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyWMOptions))) FFWMOptions defaultOptions;
+    ffInitWMOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->detectPlugin != defaultOptions.detectPlugin)
+        yyjson_mut_obj_add_bool(doc, module, "detectPlugin", options->detectPlugin);
+}
+
+void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
@@ -88,10 +113,16 @@ void ffGenerateWMJson(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_str(doc, module, "error", "No WM found");
         return;
     }
+
+    FF_STRBUF_AUTO_DESTROY pluginName = ffStrbufCreate();
+    if(options->detectPlugin)
+        ffDetectWMPlugin(&pluginName);
+
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->wmProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->wmPrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "protocolName", &result->wmProtocolName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "pluginName", &pluginName);
 }
 
 void ffPrintWMHelpFormat(void)
@@ -99,6 +130,27 @@ void ffPrintWMHelpFormat(void)
     ffPrintModuleFormatHelp(FF_WM_MODULE_NAME, "{2} ({3})", FF_WM_NUM_FORMAT_ARGS, (const char* []) {
         "WM process name",
         "WM pretty name",
-        "WM protocol name"
+        "WM protocol name",
+        "WM plugin name"
     });
+}
+
+void ffInitWMOptions(FFWMOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WM_MODULE_NAME,
+        ffParseWMCommandOptions,
+        ffParseWMJsonObject,
+        ffPrintWM,
+        ffGenerateWMJsonResult,
+        ffPrintWMHelpFormat,
+        ffGenerateWMJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyWMOptions(FFWMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

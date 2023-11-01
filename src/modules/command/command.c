@@ -45,22 +45,6 @@ void ffPrintCommand(FFCommandOptions* options)
     }
 }
 
-void ffInitCommandOptions(FFCommandOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COMMAND_MODULE_NAME, ffParseCommandCommandOptions, ffParseCommandJsonObject, ffPrintCommand, ffGenerateCommandJson, ffPrintCommandHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInitStatic(&options->shell,
-        #ifdef _WIN32
-        "cmd.exe"
-        #else
-        "/bin/sh"
-        #endif
-    );
-
-    ffStrbufInit(&options->text);
-}
-
 bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_COMMAND_MODULE_NAME);
@@ -81,13 +65,6 @@ bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, co
     }
 
     return false;
-}
-
-void ffDestroyCommandOptions(FFCommandOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->shell);
-    ffStrbufDestroy(&options->text);
 }
 
 void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
@@ -119,7 +96,21 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateCommandJson(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyCommandOptions))) FFCommandOptions defaultOptions;
+    ffInitCommandOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (!ffStrbufEqual(&defaultOptions.shell, &options->shell))
+        yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
+
+    if (!ffStrbufEqual(&defaultOptions.text, &options->text))
+        yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
+}
+
+void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&result, (char* const[]){
@@ -153,4 +144,36 @@ void ffPrintCommandHelpFormat(void)
     ffPrintModuleFormatHelp(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, (const char* []) {
         "Command result"
     });
+}
+
+void ffInitCommandOptions(FFCommandOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_COMMAND_MODULE_NAME,
+        ffParseCommandCommandOptions,
+        ffParseCommandJsonObject,
+        ffPrintCommand,
+        ffGenerateCommandJsonResult,
+        ffPrintCommandHelpFormat,
+        ffGenerateCommandJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInitStatic(&options->shell,
+        #ifdef _WIN32
+        "cmd.exe"
+        #else
+        "/bin/sh"
+        #endif
+    );
+
+    ffStrbufInit(&options->text);
+}
+
+void ffDestroyCommandOptions(FFCommandOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->shell);
+    ffStrbufDestroy(&options->text);
 }

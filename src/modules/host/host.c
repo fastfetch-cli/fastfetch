@@ -65,12 +65,6 @@ exit:
     ffStrbufDestroy(&host.sysVendor);
 }
 
-void ffInitHostOptions(FFHostOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_HOST_MODULE_NAME, ffParseHostCommandOptions, ffParseHostJsonObject, ffPrintHost, ffGenerateHostJson, ffPrintHostHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_HOST_MODULE_NAME);
@@ -79,11 +73,6 @@ bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyHostOptions(FFHostOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
@@ -103,7 +92,15 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateHostJson(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyHostOptions))) FFHostOptions defaultOptions;
+    ffInitHostOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFHostResult host;
     ffStrbufInit(&host.productFamily);
@@ -149,4 +146,24 @@ void ffPrintHostHelpFormat(void)
         "product sku",
         "sys vendor"
     });
+}
+
+void ffInitHostOptions(FFHostOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_HOST_MODULE_NAME,
+        ffParseHostCommandOptions,
+        ffParseHostJsonObject,
+        ffPrintHost,
+        ffGenerateHostJsonResult,
+        ffPrintHostHelpFormat,
+        ffGenerateHostJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyHostOptions(FFHostOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -4,6 +4,7 @@
 extern "C" {
 #include "common/library.h"
 #include "detection/gpu/gpu.h"
+#include "detection/gpu/gpu_nvidia.h"
 }
 
 #include <wsl/winadapter.h>
@@ -92,7 +93,20 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         if (SUCCEEDED(adapter->GetProperty(DXCoreAdapterProperty::HardwareID, sizeof(hardwareId), &hardwareId)))
         {
             const char* vendorStr = ffGetGPUVendorString((unsigned) hardwareId.vendorID);
-            ffStrbufAppendS(&gpu->vendor, vendorStr);
+            ffStrbufSetStatic(&gpu->vendor, vendorStr);
+
+            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && options->useNvml)
+            {
+                ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) {
+                    .pciBusId = nullptr,
+                    .pciDeviceId = (hardwareId.deviceID << 16) | hardwareId.vendorID,
+                    .pciSubSystemId = hardwareId.subSysID
+                }, (FFGpuNvidiaResult) {
+                    .temp = options->temp ? &gpu->temperature : NULL,
+                    .memory = options->useNvml ? &gpu->dedicated : NULL,
+                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
+                }, "/usr/lib/wsl/lib/libnvidia-ml.so");
+            }
         }
     }
 

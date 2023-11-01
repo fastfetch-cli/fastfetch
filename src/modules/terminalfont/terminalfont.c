@@ -47,12 +47,6 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
     ffFontDestroy(&terminalFont.fallback);
 }
 
-void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALFONT_MODULE_NAME, ffParseTerminalFontCommandOptions, ffParseTerminalFontJsonObject, ffPrintTerminalFont, ffGenerateTerminalFontJson, ffPrintTerminalFontHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TERMINALFONT_MODULE_NAME);
@@ -61,11 +55,6 @@ bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const cha
         return true;
 
     return false;
-}
-
-void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module)
@@ -85,7 +74,15 @@ void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* m
     }
 }
 
-void ffGenerateTerminalFontJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyTerminalFontOptions))) FFTerminalFontOptions defaultOptions;
+    ffInitTerminalFontOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalFontResult result;
     ffFontInit(&result.font);
@@ -93,32 +90,31 @@ void ffGenerateTerminalFontJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjs
     ffStrbufInit(&result.error);
 
     if(!ffDetectTerminalFont(&result))
-    {
         yyjson_mut_obj_add_strbuf(doc, module, "error", &result.error);
-        return;
-    }
-
-    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-
-    yyjson_mut_val* font = yyjson_mut_obj_add_obj(doc, obj, "font");
-    yyjson_mut_obj_add_strbuf(doc, font, "name", &result.font.name);
-    yyjson_mut_obj_add_strbuf(doc, font, "size", &result.font.size);
-    yyjson_mut_val* fontStyles = yyjson_mut_obj_add_arr(doc, font, "styles");
-    FF_LIST_FOR_EACH(FFstrbuf, style, result.font.styles)
+    else
     {
-        yyjson_mut_arr_add_strbuf(doc, fontStyles, style);
-    }
-    yyjson_mut_obj_add_strbuf(doc, font, "pretty", &result.font.pretty);
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
 
-    yyjson_mut_val* fallback = yyjson_mut_obj_add_obj(doc, obj, "fallback");
-    yyjson_mut_obj_add_strbuf(doc, fallback, "name", &result.fallback.name);
-    yyjson_mut_obj_add_strbuf(doc, fallback, "size", &result.fallback.size);
-    yyjson_mut_val* fallbackStyles = yyjson_mut_obj_add_arr(doc, fallback, "styles");
-    FF_LIST_FOR_EACH(FFstrbuf, style, result.fallback.styles)
-    {
-        yyjson_mut_arr_add_strbuf(doc, fallbackStyles, style);
+        yyjson_mut_val* font = yyjson_mut_obj_add_obj(doc, obj, "font");
+        yyjson_mut_obj_add_strbuf(doc, font, "name", &result.font.name);
+        yyjson_mut_obj_add_strbuf(doc, font, "size", &result.font.size);
+        yyjson_mut_val* fontStyles = yyjson_mut_obj_add_arr(doc, font, "styles");
+        FF_LIST_FOR_EACH(FFstrbuf, style, result.font.styles)
+        {
+            yyjson_mut_arr_add_strbuf(doc, fontStyles, style);
+        }
+        yyjson_mut_obj_add_strbuf(doc, font, "pretty", &result.font.pretty);
+
+        yyjson_mut_val* fallback = yyjson_mut_obj_add_obj(doc, obj, "fallback");
+        yyjson_mut_obj_add_strbuf(doc, fallback, "name", &result.fallback.name);
+        yyjson_mut_obj_add_strbuf(doc, fallback, "size", &result.fallback.size);
+        yyjson_mut_val* fallbackStyles = yyjson_mut_obj_add_arr(doc, fallback, "styles");
+        FF_LIST_FOR_EACH(FFstrbuf, style, result.fallback.styles)
+        {
+            yyjson_mut_arr_add_strbuf(doc, fallbackStyles, style);
+        }
+        yyjson_mut_obj_add_strbuf(doc, fallback, "pretty", &result.fallback.pretty);
     }
-    yyjson_mut_obj_add_strbuf(doc, fallback, "pretty", &result.fallback.pretty);
 
     ffStrbufDestroy(&result.error);
     ffFontDestroy(&result.font);
@@ -133,4 +129,24 @@ void ffPrintTerminalFontHelpFormat(void)
         "Terminal font size",
         "Terminal font styles"
     });
+}
+
+void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TERMINALFONT_MODULE_NAME,
+        ffParseTerminalFontCommandOptions,
+        ffParseTerminalFontJsonObject,
+        ffPrintTerminalFont,
+        ffGenerateTerminalFontJsonResult,
+        ffPrintTerminalFontHelpFormat,
+        ffGenerateTerminalFontJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

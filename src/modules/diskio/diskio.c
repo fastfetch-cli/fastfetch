@@ -112,14 +112,6 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
     }
 }
 
-void ffInitDiskIOOptions(FFDiskIOOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_DISKIO_MODULE_NAME, ffParseDiskIOCommandOptions, ffParseDiskIOJsonObject, ffPrintDiskIO, ffGenerateDiskIOJson, ffPrintDiskIOHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->namePrefix);
-}
-
 bool ffParseDiskIOCommandOptions(FFDiskIOOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_DISKIO_MODULE_NAME);
@@ -134,12 +126,6 @@ bool ffParseDiskIOCommandOptions(FFDiskIOOptions* options, const char* key, cons
     }
 
     return false;
-}
-
-void ffDestroyDiskIOOptions(FFDiskIOOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
 }
 
 void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
@@ -165,7 +151,18 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateDiskIOJson(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDiskIOJsonConfig(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions defaultOptions;
+    ffInitDiskIOOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
+        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+}
+
+void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFDiskIOResult));
     const char* error = ffDetectDiskIO(&result, options);
@@ -225,4 +222,27 @@ void ffPrintDiskIOHelpFormat(void)
         "Number of reads",
         "Number of writes",
     });
+}
+
+void ffInitDiskIOOptions(FFDiskIOOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_DISKIO_MODULE_NAME,
+        ffParseDiskIOCommandOptions,
+        ffParseDiskIOJsonObject,
+        ffPrintDiskIO,
+        ffGenerateDiskIOJsonResult,
+        ffPrintDiskIOHelpFormat,
+        ffGenerateDiskIOJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->namePrefix);
+}
+
+void ffDestroyDiskIOOptions(FFDiskIOOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
 }

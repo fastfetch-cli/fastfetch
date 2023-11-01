@@ -133,13 +133,13 @@ static void getDebianVersion(FFOSResult* result)
 
 static void detectOS(FFOSResult* os)
 {
-    if(instance.config.osFile.length > 0)
+    if(instance.config.general.osFile.length > 0)
     {
-        parseFile(instance.config.osFile.chars, os);
+        parseFile(instance.config.general.osFile.chars, os);
         return;
     }
 
-    if(instance.config.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
+    if(instance.config.general.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
     {
         if(os->id.length == 0)
             ffStrbufAppendS(&os->id, "bedrock");

@@ -70,12 +70,6 @@ void ffPrintWifi(FFWifiOptions* options)
     }
 }
 
-void ffInitWifiOptions(FFWifiOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_WIFI_MODULE_NAME, ffParseWifiCommandOptions, ffParseWifiJsonObject, ffPrintWifi, ffGenerateWifiJson, ffPrintWifiHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_WIFI_MODULE_NAME);
@@ -84,11 +78,6 @@ bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const ch
         return true;
 
     return false;
-}
-
-void ffDestroyWifiOptions(FFWifiOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
@@ -108,7 +97,15 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateWifiJson(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyWifiOptions))) FFWifiOptions defaultOptions;
+    ffInitWifiOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
     const char* error = ffDetectWifi(&result);
@@ -135,8 +132,9 @@ void ffGenerateWifiJson(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* 
         yyjson_mut_val* conn = yyjson_mut_obj_add_obj(doc, obj, "conn");
         yyjson_mut_obj_add_strbuf(doc, conn, "status", &wifi->conn.status);
         yyjson_mut_obj_add_strbuf(doc, conn, "ssid", &wifi->conn.ssid);
-        yyjson_mut_obj_add_strbuf(doc, conn, "macAddress", &wifi->conn.macAddress);
+        yyjson_mut_obj_add_strbuf(doc, conn, "bssid", &wifi->conn.macAddress);
         yyjson_mut_obj_add_strbuf(doc, conn, "protocol", &wifi->conn.protocol);
+        yyjson_mut_obj_add_strbuf(doc, conn, "security", &wifi->conn.security);
         yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
         yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
         yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
@@ -161,11 +159,31 @@ void ffPrintWifiHelpFormat(void)
         "Interface status",
         "Connection status",
         "Connection SSID",
-        "Connection mac address",
+        "Connection BSSID",
         "Connection protocol",
         "Connection signal quality (percentage)",
         "Connection RX rate",
         "Connection TX rate",
         "Connection Security algorithm"
     });
+}
+
+void ffInitWifiOptions(FFWifiOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_WIFI_MODULE_NAME,
+        ffParseWifiCommandOptions,
+        ffParseWifiJsonObject,
+        ffPrintWifi,
+        ffGenerateWifiJsonResult,
+        ffPrintWifiHelpFormat,
+        ffGenerateWifiJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyWifiOptions(FFWifiOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

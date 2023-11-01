@@ -23,7 +23,7 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_NONE,        //--logo none
 } FFLogoType;
 
-typedef struct FFLogoOptions
+typedef struct FFOptionsLogo
 {
     FFstrbuf source;
     FFLogoType type;
@@ -43,4 +43,10 @@ typedef struct FFLogoOptions
     uint32_t chafaCanvasMode;
     uint32_t chafaColorSpace;
     uint32_t chafaDitherMode;
-} FFLogoOptions;
+} FFOptionsLogo;
+
+void ffOptionsInitLogo(FFOptionsLogo* options);
+bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value);
+void ffOptionsDestroyLogo(FFOptionsLogo* options);
+const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* root);
+void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc);

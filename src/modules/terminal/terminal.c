@@ -40,12 +40,6 @@ void ffPrintTerminal(FFTerminalOptions* options)
     }
 }
 
-void ffInitTerminalOptions(FFTerminalOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINAL_MODULE_NAME, ffParseTerminalCommandOptions, ffParseTerminalJsonObject, ffPrintTerminal, ffGenerateTerminalJson, ffPrintTerminalHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseTerminalCommandOptions(FFTerminalOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TERMINAL_MODULE_NAME);
@@ -54,11 +48,6 @@ bool ffParseTerminalCommandOptions(FFTerminalOptions* options, const char* key, 
         return true;
 
     return false;
-}
-
-void ffDestroyTerminalOptions(FFTerminalOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
@@ -78,7 +67,15 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateTerminalJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyTerminalOptions))) FFTerminalOptions defaultOptions;
+    ffInitTerminalOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFTerminalShellResult* result = ffDetectTerminalShell();
 
@@ -107,4 +104,24 @@ void ffPrintTerminalHelpFormat(void)
         "Terminal pretty name",
         "Terminal version"
     });
+}
+
+void ffInitTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TERMINAL_MODULE_NAME,
+        ffParseTerminalCommandOptions,
+        ffParseTerminalJsonObject,
+        ffPrintTerminal,
+        ffGenerateTerminalJsonResult,
+        ffPrintTerminalHelpFormat,
+        ffGenerateTerminalJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

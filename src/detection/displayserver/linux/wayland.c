@@ -202,9 +202,6 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
     if(display.width <= 0 || display.height <= 0)
         return;
 
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
-    ffThreadMutexLock(&mutex);
-
     switch(display.transform)
     {
         case WL_OUTPUT_TRANSFORM_90:
@@ -262,8 +259,6 @@ static void waylandOutputHandler(WaylandData* wldata, struct wl_registry* regist
     ffStrbufDestroy(&display.vendorAndModelId);
     ffStrbufDestroy(&display.name);
     ffStrbufDestroy(&display.edidName);
-
-    ffThreadMutexUnlock(&mutex);
 }
 
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)
@@ -276,7 +271,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
 
 bool detectWayland(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(wayland, &instance.config.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(wayland, &instance.config.library.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
     FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)

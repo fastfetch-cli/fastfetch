@@ -7,7 +7,7 @@
 
 static bool loadLibSymbols(FFDBusLibrary* lib)
 {
-    FF_LIBRARY_LOAD(dbus, &instance.config.libDBus, false, "libdbus-1" FF_LIBRARY_EXTENSION, 4);
+    FF_LIBRARY_LOAD(dbus, &instance.config.library.libDBus, false, "libdbus-1" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_bus_get, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_new_method_call, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_init, false)
@@ -33,9 +33,6 @@ static const FFDBusLibrary* loadLib(void)
     static FFDBusLibrary lib;
     static bool loaded = false;
     static bool loadSuccess = false;
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
-
-    ffThreadMutexLock(&mutex);
 
     if(!loaded)
     {
@@ -43,7 +40,6 @@ static const FFDBusLibrary* loadLib(void)
         loadSuccess = loadLibSymbols(&lib);
     }
 
-    ffThreadMutexUnlock(&mutex);
     return loadSuccess ? &lib : NULL;
 }
 

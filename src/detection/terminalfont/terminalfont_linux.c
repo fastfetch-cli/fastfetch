@@ -2,6 +2,7 @@
 #include "common/settings.h"
 #include "common/properties.h"
 #include "common/parsing.h"
+#include "common/io/io.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/mallocHelper.h"
@@ -124,15 +125,36 @@ static void detectXFCETerminal(FFTerminalFontResult* terminalFont)
     FF_STRBUF_AUTO_DESTROY useSysFont = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
-    ffParsePropFileConfigValues("xfce4/terminal/terminalrc", 2, (FFpropquery[]) {
-        {"FontUseSystem = ", &useSysFont},
-        {"FontName = ", &fontName}
+    const char* path = "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml";
+    bool configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) {
+        {"<property name=\"font-use-system\" type=\"bool\" value=\"", &useSysFont},
+        {"<property name=\"font-name\" type=\"string\" value=\"", &fontName}
     });
+
+    if (configFound)
+    {
+        ffStrbufSubstrBeforeLastC(&useSysFont, '"');
+        ffStrbufSubstrBeforeLastC(&fontName, '"');
+    }
+    else
+    {
+        path = "xfce4/terminal/terminalrc";
+        configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) {
+            {"FontUseSystem = ", &useSysFont},
+            {"FontName = ", &fontName}
+        });
+    }
+
+    if (!configFound)
+    {
+        ffStrbufSetStatic(&terminalFont->error, "Couldn't find xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml or xfce4/terminal/terminalrc");
+        return;
+    }
 
     if(useSysFont.length == 0 || ffStrbufIgnCaseCompS(&useSysFont, "false") == 0)
     {
         if(fontName.length == 0)
-            ffStrbufAppendS(&terminalFont->error, "Couldn't find FontName in .config/xfce4/terminal/terminalrc");
+            ffStrbufAppendF(&terminalFont->error, "Couldn't find FontName in %s", path);
         else
             ffFontInitPango(&terminalFont->font, fontName.chars);
     }
@@ -250,6 +272,38 @@ static void detectXterm(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
+static void detectSt(FFTerminalFontResult* terminalFont, uint32_t pid)
+{
+    FF_STRBUF_AUTO_DESTROY size = ffStrbufCreateF("/proc/%u/cmdline", pid);
+    FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
+    if (!ffAppendFileBuffer(size.chars, &font))
+    {
+        ffStrbufAppendF(&terminalFont->error, "Failed to open %s", size.chars);
+        return;
+    }
+
+    const char* p = memmem(font.chars, font.length, "\0-f", sizeof("\0-f")); // find parameter of `-f`
+    if (!p)
+    {
+        ffStrbufAppendF(&terminalFont->error, "st was not executed with `-f` parameter");
+        return;
+    }
+
+    ffStrbufSubstrAfter(&font, (uint32_t) (p + (sizeof("\0-f") - 1) - font.chars));
+    ffStrbufRecalculateLength(&font);
+
+    // `monospace:size=15` || `monospace` || `:size=15`
+    uint32_t index = ffStrbufFirstIndexS(&font, ":size=");
+    if (index != font.length)
+    {
+        ffStrbufSetS(&size, font.chars + index + strlen(":size="));
+        ffStrbufSubstrBefore(&font, index);
+    }
+    else
+        ffStrbufClear(&size);
+    ffFontInitValues(&terminalFont->font, font.chars, size.chars);
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "konsole"))
@@ -276,4 +330,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalShellResult* terminalShell, FF
         detectQTerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "xterm"))
         detectXterm(terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminalShell->terminalProcessName, "st"))
+        detectSt(terminalFont, terminalShell->terminalPid);
 }

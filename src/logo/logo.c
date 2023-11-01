@@ -18,7 +18,7 @@ typedef enum FFLogoSize
 
 static void ffLogoPrintCharsRaw(const char* data, size_t length)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
     if (!options->width || !options->height)
@@ -55,13 +55,13 @@ static void ffLogoPrintCharsRaw(const char* data, size_t length)
 
 void ffLogoPrintChars(const char* data, bool doColorReplacement)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     uint32_t currentlineLength = 0;
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
 
-    if (instance.config.brightColor)
+    if (instance.config.display.brightColor)
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
 
     ffStrbufAppendNC(&result, options->paddingTop, '\n');
@@ -212,11 +212,11 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
 static void logoApplyColors(const FFlogo* logo)
 {
-    if(instance.config.colorTitle.length == 0)
-        ffStrbufAppendS(&instance.config.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
+    if(instance.config.display.colorTitle.length == 0)
+        ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
 
-    if(instance.config.colorKeys.length == 0)
-        ffStrbufAppendS(&instance.config.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
+    if(instance.config.display.colorKeys.length == 0)
+        ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
 }
 
 static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small)
@@ -301,7 +301,7 @@ static void logoPrintStruct(const FFlogo* logo)
 {
     logoApplyColors(logo);
 
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     const char* const* colors = logo->colors;
     for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
@@ -344,7 +344,7 @@ static inline void logoPrintDetected(FFLogoSize size)
 
 static bool logoPrintData(bool doColorReplacement)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
     if(options->source.length == 0)
         return false;
 
@@ -355,7 +355,7 @@ static bool logoPrintData(bool doColorReplacement)
 
 static void updateLogoPath(void)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     if(ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
         return;
@@ -384,7 +384,7 @@ static void updateLogoPath(void)
 
 static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
 
@@ -417,7 +417,7 @@ static bool logoPrintImageIfExists(FFLogoType logo, bool printError)
 
 static bool logoTryKnownType(void)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     if(options->type == FF_LOGO_TYPE_NONE)
     {
@@ -462,14 +462,14 @@ void ffLogoPrint(void)
     //In pipe mode, we don't have a logo or padding.
     //We also don't need to set main color, because it won't be printed anyway.
     //So we can return quickly here.
-    if(instance.config.pipe || instance.state.resultDoc)
+    if(instance.config.display.pipe || instance.state.resultDoc)
     {
         instance.state.logoHeight = 0;
         instance.state.logoWidth = 0;
         return;
     }
 
-    const FFLogoOptions* options = &instance.config.logo;
+    const FFOptionsLogo* options = &instance.config.logo;
 
     if (options->type == FF_LOGO_TYPE_NONE)
     {
@@ -535,7 +535,7 @@ void ffLogoPrintRemaining(void)
 
 void ffLogoBuiltinPrint(void)
 {
-    FFLogoOptions* options = &instance.config.logo;
+    FFOptionsLogo* options = &instance.config.logo;
 
     for(uint8_t ch = 0; ch < 26; ++ch)
     {

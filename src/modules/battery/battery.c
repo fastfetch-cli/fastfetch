@@ -16,13 +16,13 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         bool showStatus =
-            !(instance.config.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
+            !(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
         if(result->capacity >= 0)
         {
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 if(result->capacity <= 20)
                     ffAppendPercentBar(&str, result->capacity, 100, 100, 0);
@@ -32,7 +32,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                     ffAppendPercentBar(&str, result->capacity, 0, 100, 100);
             }
 
-            if(instance.config.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -101,17 +101,6 @@ void ffPrintBattery(FFBatteryOptions* options)
     }
 }
 
-void ffInitBatteryOptions(FFBatteryOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BATTERY_MODULE_NAME, ffParseBatteryCommandOptions, ffParseBatteryJsonObject, ffPrintBattery, ffGenerateBatteryJson, ffPrintBatteryHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    options->temp = false;
-
-    #ifdef __linux__
-        ffStrbufInit(&options->dir);
-    #endif
-}
-
 bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BATTERY_MODULE_NAME);
@@ -133,16 +122,15 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
         }
     #endif
 
-    return false;
-}
-
-void ffDestroyBatteryOptions(FFBatteryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    #ifdef __linux__
-        ffStrbufDestroy(&options->dir);
+    #ifdef _WIN32
+        if (ffStrEqualsIgnCase(subKey, "use-setup-api"))
+        {
+            options->useSetupApi = ffOptionParseBoolean(value);
+            return true;
+        }
     #endif
+
+    return false;
 }
 
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
@@ -166,6 +154,14 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         }
         #endif
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "useSetupApi"))
+        {
+            options->useSetupApi = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         if (ffStrEqualsIgnCase(key, "temp"))
         {
             options->temp = yyjson_get_bool(val);
@@ -176,7 +172,28 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateBatteryJson(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBatteryOptions))) FFBatteryOptions defaultOptions;
+    ffInitBatteryOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef __linux__
+    if (!ffStrbufEqual(&defaultOptions.dir, &options->dir))
+        yyjson_mut_obj_add_strbuf(doc, module, "dir", &options->dir);
+    #endif
+
+    #ifdef _WIN32
+    if (defaultOptions.useSetupApi != options->useSetupApi)
+        yyjson_mut_obj_add_bool(doc, module, "useSetupApi", options->useSetupApi);
+    #endif
+
+    if (options->temp != defaultOptions.temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+}
+
+void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 
@@ -218,4 +235,35 @@ void ffPrintBatteryHelpFormat(void)
         "Battery capacity (percentage)",
         "Battery status"
     });
+}
+
+void ffInitBatteryOptions(FFBatteryOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BATTERY_MODULE_NAME,
+        ffParseBatteryCommandOptions,
+        ffParseBatteryJsonObject,
+        ffPrintBattery,
+        ffGenerateBatteryJsonResult,
+        ffPrintBatteryHelpFormat,
+        ffGenerateBatteryJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+    options->temp = false;
+
+    #ifdef __linux__
+        ffStrbufInit(&options->dir);
+    #elif defined(_WIN32)
+        options->useSetupApi = false;
+    #endif
+}
+
+void ffDestroyBatteryOptions(FFBatteryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    #ifdef __linux__
+        ffStrbufDestroy(&options->dir);
+    #endif
 }

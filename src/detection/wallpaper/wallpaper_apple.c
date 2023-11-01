@@ -24,7 +24,7 @@ const char* ffDetectWallpaper(FFstrbuf* result)
     #endif
 
     if (!ffOsascript("tell application \"Finder\" to get POSIX path of (get desktop picture as alias)", result))
-        return "ffOsascript() failed";
+        return "ffOsascript(get desktop picture) failed";
 
     return NULL;
 }

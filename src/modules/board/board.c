@@ -49,12 +49,6 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-void ffInitBoardOptions(FFBoardOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_BOARD_MODULE_NAME, ffParseBoardCommandOptions, ffParseBoardJsonObject, ffPrintBoard, ffGenerateBoardJson, ffPrintBoardHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_BOARD_MODULE_NAME);
@@ -63,11 +57,6 @@ bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const 
         return true;
 
     return false;
-}
-
-void ffDestroyBoardOptions(FFBoardOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
@@ -87,7 +76,15 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateBoardJson(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyBoardOptions))) FFBoardOptions defaultOptions;
+    ffInitBoardOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFBoardResult board;
     ffStrbufInit(&board.name);
@@ -126,4 +123,24 @@ void ffPrintBoardHelpFormat(void)
         "board vendor",
         "board version"
     });
+}
+
+void ffInitBoardOptions(FFBoardOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_BOARD_MODULE_NAME,
+        ffParseBoardCommandOptions,
+        ffParseBoardJsonObject,
+        ffPrintBoard,
+        ffGenerateBoardJsonResult,
+        ffPrintBoardHelpFormat,
+        ffGenerateBoardJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyBoardOptions(FFBoardOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

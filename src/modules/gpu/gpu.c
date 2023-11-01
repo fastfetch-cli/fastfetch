@@ -123,22 +123,18 @@ void ffPrintGPU(FFGPUOptions* options)
     }
 }
 
-void ffInitGPUOptions(FFGPUOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_GPU_MODULE_NAME, ffParseGPUCommandOptions, ffParseGPUJsonObject, ffPrintGPU, ffGenerateGPUJson, ffPrintGPUHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    options->forceVulkan = false;
-    options->temp = false;
-    options->hideType = FF_GPU_TYPE_UNKNOWN;
-}
-
 bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_GPU_MODULE_NAME);
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
+
+    if (ffStrEqualsIgnCase(subKey, "use-nvml"))
+    {
+        options->useNvml = ffOptionParseBoolean(value);
+        return true;
+    }
 
     if (ffStrEqualsIgnCase(subKey, "force-vulkan"))
     {
@@ -165,11 +161,6 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     return false;
 }
 
-void ffDestroyGPUOptions(FFGPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}
-
 void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 {
     yyjson_val *key_, *val;
@@ -186,6 +177,12 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "temp"))
         {
             options->temp = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "useNvml"))
+        {
+            options->useNvml = yyjson_get_bool(val);
             continue;
         }
 
@@ -215,7 +212,40 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyGPUOptions))) FFGPUOptions defaultOptions;
+    ffInitGPUOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (options->useNvml != defaultOptions.useNvml)
+        yyjson_mut_obj_add_bool(doc, module, "useNvml", options->useNvml);
+
+    if (options->forceVulkan != defaultOptions.forceVulkan)
+        yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
+
+    if (options->temp != defaultOptions.temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+
+    if (options->hideType != defaultOptions.hideType)
+    {
+        switch (options->hideType)
+        {
+            case FF_GPU_TYPE_UNKNOWN:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "none");
+                break;
+            case FF_GPU_TYPE_INTEGRATED:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "intergrated");
+                break;
+            case FF_GPU_TYPE_DISCRETE:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
+                break;
+        }
+    }
+}
+
+void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);
@@ -260,7 +290,10 @@ void ffGenerateGPUJson(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_va
         else
             yyjson_mut_obj_add_null(doc, sharedObj, "used");
 
-        yyjson_mut_obj_add_null(doc, obj, "temperature");
+        if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
+            yyjson_mut_obj_add_real(doc, obj, "temperature", gpu->temperature);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "temperature");
 
         const char* type;
         switch (gpu->type)
@@ -296,4 +329,29 @@ void ffPrintGPUHelpFormat(void)
         "GPU total shared memory",
         "GPU used shared memory",
     });
+}
+
+void ffInitGPUOptions(FFGPUOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_GPU_MODULE_NAME,
+        ffParseGPUCommandOptions,
+        ffParseGPUJsonObject,
+        ffPrintGPU,
+        ffGenerateGPUJsonResult,
+        ffPrintGPUHelpFormat,
+        ffGenerateGPUJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->useNvml = false;
+    options->forceVulkan = false;
+    options->temp = false;
+    options->hideType = FF_GPU_TYPE_UNKNOWN;
+}
+
+void ffDestroyGPUOptions(FFGPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

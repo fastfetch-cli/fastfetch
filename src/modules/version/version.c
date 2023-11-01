@@ -45,12 +45,6 @@ void ffPrintVersion(FFVersionOptions* options)
     }
 }
 
-void ffInitVersionOptions(FFVersionOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_VERSION_MODULE_NAME, ffParseVersionCommandOptions, ffParseVersionJsonObject, ffPrintVersion, ffGenerateVersionJson, ffPrintVersionHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseVersionCommandOptions(FFVersionOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_VERSION_MODULE_NAME);
@@ -59,11 +53,6 @@ bool ffParseVersionCommandOptions(FFVersionOptions* options, const char* key, co
         return true;
 
     return false;
-}
-
-void ffDestroyVersionOptions(FFVersionOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
@@ -83,7 +72,15 @@ void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateVersionJson(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyVersionOptions))) FFVersionOptions defaultOptions;
+    ffInitVersionOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFVersionResult result;
     ffDetectVersion(&result);
@@ -128,4 +125,24 @@ void ffPrintVersionHelpFormat(void)
         "Compiler used",
         "Libc used"
     });
+}
+
+void ffInitVersionOptions(FFVersionOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_VERSION_MODULE_NAME,
+        ffParseVersionCommandOptions,
+        ffParseVersionJsonObject,
+        ffPrintVersion,
+        ffGenerateVersionJsonResult,
+        ffPrintVersionHelpFormat,
+        ffGenerateVersionJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyVersionOptions(FFVersionOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

@@ -39,12 +39,6 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
     }
 }
 
-void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TERMINALSIZE_MODULE_NAME, ffParseTerminalSizeCommandOptions, ffParseTerminalSizeJsonObject, ffPrintTerminalSize, ffGenerateTerminalSizeJson, ffPrintTerminalSizeHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-}
-
 bool ffParseTerminalSizeCommandOptions(FFTerminalSizeOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_TERMINALSIZE_MODULE_NAME);
@@ -53,11 +47,6 @@ bool ffParseTerminalSizeCommandOptions(FFTerminalSizeOptions* options, const cha
         return true;
 
     return false;
-}
-
-void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* module)
@@ -77,7 +66,15 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
     }
 }
 
-void ffGenerateTerminalSizeJson(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyTerminalSizeOptions))) FFTerminalSizeOptions defaultOptions;
+    ffInitTerminalSizeOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+}
+
+void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalSizeResult result;
 
@@ -102,4 +99,24 @@ void ffPrintTerminalSizeHelpFormat(void)
         "Terminal width (in pixels)",
         "Terminal height (in pixels)"
     });
+}
+
+void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TERMINALSIZE_MODULE_NAME,
+        ffParseTerminalSizeCommandOptions,
+        ffParseTerminalSizeJsonObject,
+        ffPrintTerminalSize,
+        ffGenerateTerminalSizeJsonResult,
+        ffPrintTerminalSizeHelpFormat,
+        ffGenerateTerminalSizeJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+}
+
+void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

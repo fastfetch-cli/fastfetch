@@ -6,7 +6,7 @@
 
 void ffPrintColors(FFColorsOptions* options)
 {
-    if(instance.config.pipe)
+    if(instance.config.display.pipe)
         return;
 
     ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -55,15 +55,6 @@ void ffPrintColors(FFColorsOptions* options)
     puts(FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffInitColorsOptions(FFColorsOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_COLORS_MODULE_NAME, ffParseColorsCommandOptions, ffParseColorsJsonObject, ffPrintColors, NULL, NULL);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
-    options->symbol = FF_COLORS_SYMBOL_BLOCK;
-    options->paddingLeft = 0;
-}
-
 bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_COLORS_MODULE_NAME);
@@ -92,11 +83,6 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
     }
 
     return false;
-}
-
-void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
 }
 
 void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
@@ -139,4 +125,51 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 
         ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
+}
+
+void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyColorsOptions))) FFColorsOptions defaultOptions;
+    ffInitColorsOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.symbol != options->symbol)
+    {
+        switch (options->symbol)
+        {
+            case FF_COLORS_SYMBOL_CIRCLE: yyjson_mut_obj_add_str(doc, module, "symbol", "circle"); break;
+            case FF_COLORS_SYMBOL_DIAMOND: yyjson_mut_obj_add_str(doc, module, "symbol", "diamond"); break;
+            case FF_COLORS_SYMBOL_TRIANGLE: yyjson_mut_obj_add_str(doc, module, "symbol", "triangle"); break;
+            case FF_COLORS_SYMBOL_SQUARE: yyjson_mut_obj_add_str(doc, module, "symbol", "square"); break;
+            case FF_COLORS_SYMBOL_STAR: yyjson_mut_obj_add_str(doc, module, "symbol", "star"); break;
+            default: yyjson_mut_obj_add_str(doc, module, "symbol", "block"); break;
+        }
+    }
+
+    if (defaultOptions.paddingLeft != options->paddingLeft)
+        yyjson_mut_obj_add_uint(doc, module, "paddingLeft", options->paddingLeft);
+}
+
+void ffInitColorsOptions(FFColorsOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_COLORS_MODULE_NAME,
+        ffParseColorsCommandOptions,
+        ffParseColorsJsonObject,
+        ffPrintColors,
+        NULL,
+        NULL,
+        ffGenerateColorsJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+    options->symbol = FF_COLORS_SYMBOL_BLOCK;
+    options->paddingLeft = 0;
+}
+
+void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
 }

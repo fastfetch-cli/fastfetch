@@ -8,19 +8,19 @@
 
 static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
 {
-    if (!instance.config.pipe)
+    if (!instance.config.display.pipe)
     {
-        if (instance.config.brightColor)
+        if (instance.config.display.brightColor)
             ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_BOLT);
         if (color->length > 0)
             ffStrbufAppendF(output, "\e[%sm", color->chars);
-        else if (instance.config.colorTitle.length > 0)
-            ffStrbufAppendF(output, "\e[%sm", instance.config.colorTitle.chars);
+        else if (instance.config.display.colorTitle.length > 0)
+            ffStrbufAppendF(output, "\e[%sm", instance.config.display.colorTitle.chars);
     }
 
     ffStrbufAppend(output, text);
 
-    if(!instance.config.pipe)
+    if(!instance.config.display.pipe)
         ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
@@ -37,7 +37,7 @@ void ffPrintTitle(FFTitleOptions* options)
     appendText(&hostNameColored, &hostName, &options->colorHost);
 
     FF_STRBUF_AUTO_DESTROY atColored = ffStrbufCreate();
-    if (!instance.config.pipe && options->colorAt.length > 0)
+    if (!instance.config.display.pipe && options->colorAt.length > 0)
     {
         ffStrbufAppendF(&atColored, "\e[%sm", options->colorAt.chars);
         ffStrbufAppendC(&atColored, '@');
@@ -67,18 +67,6 @@ void ffPrintTitle(FFTitleOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &hostNameColored},
         });
     }
-}
-
-void ffInitTitleOptions(FFTitleOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_TITLE_MODULE_NAME, ffParseTitleCommandOptions, ffParseTitleJsonObject, ffPrintTitle, ffGenerateTitleJson, ffPrintTitleHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
-
-    options->fqdn = false;
-    ffStrbufInit(&options->colorUser);
-    ffStrbufInit(&options->colorAt);
-    ffStrbufInit(&options->colorHost);
 }
 
 bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value)
@@ -113,14 +101,6 @@ bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroyTitleOptions(FFTitleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->colorUser);
-    ffStrbufDestroy(&options->colorAt);
-    ffStrbufDestroy(&options->colorHost);
 }
 
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
@@ -163,7 +143,32 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateTitleJson(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyTitleOptions))) FFTitleOptions defaultOptions;
+    ffInitTitleOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.fqdn != options->fqdn)
+        yyjson_mut_obj_add_bool(doc, module, "fqdn", options->fqdn);
+
+    yyjson_mut_val* color = yyjson_mut_obj(doc);
+
+    if (!ffStrbufEqual(&options->colorUser, &defaultOptions.colorUser))
+        yyjson_mut_obj_add_strbuf(doc, color, "user", &options->colorUser);
+
+    if (!ffStrbufEqual(&options->colorAt, &defaultOptions.colorAt))
+        yyjson_mut_obj_add_strbuf(doc, color, "at", &options->colorAt);
+
+    if (!ffStrbufEqual(&options->colorHost, &defaultOptions.colorHost))
+        yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
+
+    if (yyjson_mut_obj_size(color))
+        yyjson_mut_obj_add_val(doc, module, "color", color);
+}
+
+void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
@@ -185,4 +190,33 @@ void ffPrintTitleHelpFormat(void)
         "@ symbol (colored)",
         "Host name (colored)"
     });
+}
+
+void ffInitTitleOptions(FFTitleOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_TITLE_MODULE_NAME,
+        ffParseTitleCommandOptions,
+        ffParseTitleJsonObject,
+        ffPrintTitle,
+        ffGenerateTitleJsonResult,
+        ffPrintTitleHelpFormat,
+        ffGenerateTitleJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+
+    options->fqdn = false;
+    ffStrbufInit(&options->colorUser);
+    ffStrbufInit(&options->colorAt);
+    ffStrbufInit(&options->colorHost);
+}
+
+void ffDestroyTitleOptions(FFTitleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->colorUser);
+    ffStrbufDestroy(&options->colorAt);
+    ffStrbufDestroy(&options->colorHost);
 }

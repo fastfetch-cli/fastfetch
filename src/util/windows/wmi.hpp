@@ -162,7 +162,7 @@ struct FFWmiRecord
         if(!pEnumerator) return;
 
         ULONG ret;
-        bool ok = SUCCEEDED(pEnumerator->Next(instance.config.wmiTimeout, 1, &obj, &ret)) && ret;
+        bool ok = SUCCEEDED(pEnumerator->Next(instance.config.general.wmiTimeout, 1, &obj, &ret)) && ret;
         if(!ok) obj = nullptr;
     }
     FFWmiRecord(const FFWmiRecord&) = delete;

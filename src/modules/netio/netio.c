@@ -99,15 +99,6 @@ void ffPrintNetIO(FFNetIOOptions* options)
     }
 }
 
-void ffInitNetIOOptions(FFNetIOOptions* options)
-{
-    ffOptionInitModuleBaseInfo(&options->moduleInfo, FF_NETIO_MODULE_NAME, ffParseNetIOCommandOptions, ffParseNetIOJsonObject, ffPrintNetIO, ffGenerateNetIOJson, ffPrintNetIOHelpFormat);
-    ffOptionInitModuleArg(&options->moduleArgs);
-
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = false;
-}
-
 bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_NETIO_MODULE_NAME);
@@ -128,12 +119,6 @@ bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const 
     }
 
     return false;
-}
-
-void ffDestroyNetIOOptions(FFNetIOOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
 }
 
 void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
@@ -165,7 +150,21 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
     }
 }
 
-void ffGenerateNetIOJson(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateNetIOJsonConfig(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+{
+    __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions defaultOptions;
+    ffInitNetIOOptions(&defaultOptions);
+
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
+        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+
+    if (options->defaultRouteOnly != defaultOptions.defaultRouteOnly)
+        yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", options->defaultRouteOnly);
+}
+
+void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
     const char* error = ffDetectNetIO(&result, options);
@@ -214,4 +213,28 @@ void ffPrintNetIOHelpFormat(void)
         "Number of packets dropped when receiving per second",
         "Number of packets dropped when sending per second",
     });
+}
+
+void ffInitNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionInitModuleBaseInfo(
+        &options->moduleInfo,
+        FF_NETIO_MODULE_NAME,
+        ffParseNetIOCommandOptions,
+        ffParseNetIOJsonObject,
+        ffPrintNetIO,
+        ffGenerateNetIOJsonResult,
+        ffPrintNetIOHelpFormat,
+        ffGenerateNetIOJsonConfig
+    );
+    ffOptionInitModuleArg(&options->moduleArgs);
+
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly = true;
+}
+
+void ffDestroyNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
 }

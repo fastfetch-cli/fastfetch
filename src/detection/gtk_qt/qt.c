@@ -138,14 +138,9 @@ const FFQtResult* ffDetectQt(void)
 {
     static FFQtResult result;
 
-    static FFThreadMutex mutex = FF_THREAD_MUTEX_INITIALIZER;
     static bool init = false;
-    ffThreadMutexLock(&mutex);
     if(init)
-    {
-        ffThreadMutexUnlock(&mutex);
         return &result;
-    }
     init = true;
 
     ffStrbufInit(&result.widgetStyle);
@@ -161,6 +156,5 @@ const FFQtResult* ffDetectQt(void)
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT) == 0)
         detectLXQt(&result);
 
-    ffThreadMutexUnlock(&mutex);
     return &result;
 }

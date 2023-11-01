@@ -171,11 +171,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: run VM
-        uses: vmactions/freebsd-vm@v0
+        uses: cross-platform-actions/action@v0.21.0
         with:
-          prepare: |
-            pkg install -y cmake git pkgconf binutils pciutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
+          operating_system: freebsd
+          version: '13.2'
           run: |
+            sudo pkg install -y cmake git pkgconf binutils pciutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package
             ./fastfetch --list-features
