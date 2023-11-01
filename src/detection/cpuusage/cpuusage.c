@@ -40,11 +40,12 @@ retry:
         FFCpuUsageInfo* cpuTime2 = ffListGet(&cpuTimes2, i);
         if (cpuTime2->totalAll <= cpuTime1->totalAll)
         {
-            ffListClear(&cpuTimes2);
-            ffTimeSleep(200);
-            if (++retryCount >= 10)
-                return "Retry count exceeded";
-            goto retry;
+            if (++retryCount <= 3)
+            {
+                ffListClear(&cpuTimes2);
+                ffTimeSleep(200);
+                goto retry;
+            }
         }
     }
 

@@ -78,7 +78,9 @@ void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
 
     if (colored && !options->pipe)
     {
-        if(green < yellow)
+        if(percent != percent)
+            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
+        else if(green < yellow)
         {
             if (percent <= green)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
