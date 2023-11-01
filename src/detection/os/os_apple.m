@@ -35,10 +35,10 @@ static bool detectOSCodeName(FFOSResult* os)
 
     switch (num)
     {
-        case 14: ffStrbufAppendS(&os->codename, "Sonoma"); return true;
-        case 13: ffStrbufAppendS(&os->codename, "Ventura"); return true;
-        case 12: ffStrbufAppendS(&os->codename, "Monterey"); return true;
-        case 11: ffStrbufAppendS(&os->codename, "Big Sur"); return true;
+        case 14: ffStrbufSetStatic(&os->codename, "Sonoma"); return true;
+        case 13: ffStrbufSetStatic(&os->codename, "Ventura"); return true;
+        case 12: ffStrbufSetStatic(&os->codename, "Monterey"); return true;
+        case 11: ffStrbufSetStatic(&os->codename, "Big Sur"); return true;
         case 10: {
             version = str_end + 1;
             num = strtoul(version, &str_end, 10);
@@ -46,23 +46,23 @@ static bool detectOSCodeName(FFOSResult* os)
 
             switch (num)
             {
-                case 16: ffStrbufAppendS(&os->codename, "Big Sur"); return true;
-                case 15: ffStrbufAppendS(&os->codename, "Catalina"); return true;
-                case 14: ffStrbufAppendS(&os->codename, "Mojave"); return true;
-                case 13: ffStrbufAppendS(&os->codename, "High Sierra"); return true;
-                case 12: ffStrbufAppendS(&os->codename, "Sierra"); return true;
-                case 11: ffStrbufAppendS(&os->codename, "El Capitan"); return true;
-                case 10: ffStrbufAppendS(&os->codename, "Yosemite"); return true;
-                case 9: ffStrbufAppendS(&os->codename, "Mavericks"); return true;
-                case 8: ffStrbufAppendS(&os->codename, "Mountain Lion"); return true;
-                case 7: ffStrbufAppendS(&os->codename, "Lion"); return true;
-                case 6: ffStrbufAppendS(&os->codename, "Snow Leopard"); return true;
-                case 5: ffStrbufAppendS(&os->codename, "Leopard"); return true;
-                case 4: ffStrbufAppendS(&os->codename, "Tiger"); return true;
-                case 3: ffStrbufAppendS(&os->codename, "Panther"); return true;
-                case 2: ffStrbufAppendS(&os->codename, "Jaguar"); return true;
-                case 1: ffStrbufAppendS(&os->codename, "Puma"); return true;
-                case 0: ffStrbufAppendS(&os->codename, "Cheetah"); return true;
+                case 16: ffStrbufSetStatic(&os->codename, "Big Sur"); return true;
+                case 15: ffStrbufSetStatic(&os->codename, "Catalina"); return true;
+                case 14: ffStrbufSetStatic(&os->codename, "Mojave"); return true;
+                case 13: ffStrbufSetStatic(&os->codename, "High Sierra"); return true;
+                case 12: ffStrbufSetStatic(&os->codename, "Sierra"); return true;
+                case 11: ffStrbufSetStatic(&os->codename, "El Capitan"); return true;
+                case 10: ffStrbufSetStatic(&os->codename, "Yosemite"); return true;
+                case 9: ffStrbufSetStatic(&os->codename, "Mavericks"); return true;
+                case 8: ffStrbufSetStatic(&os->codename, "Mountain Lion"); return true;
+                case 7: ffStrbufSetStatic(&os->codename, "Lion"); return true;
+                case 6: ffStrbufSetStatic(&os->codename, "Snow Leopard"); return true;
+                case 5: ffStrbufSetStatic(&os->codename, "Leopard"); return true;
+                case 4: ffStrbufSetStatic(&os->codename, "Tiger"); return true;
+                case 3: ffStrbufSetStatic(&os->codename, "Panther"); return true;
+                case 2: ffStrbufSetStatic(&os->codename, "Jaguar"); return true;
+                case 1: ffStrbufSetStatic(&os->codename, "Puma"); return true;
+                case 0: ffStrbufSetStatic(&os->codename, "Cheetah"); return true;
             }
         }
     }
@@ -113,7 +113,7 @@ void ffDetectOSImpl(FFOSResult* os)
     parseSystemVersion(os);
 
     if(ffStrbufStartsWithIgnCaseS(&os->name, "MacOS"))
-        ffStrbufAppendS(&os->id, "macos");
+        ffStrbufSetStatic(&os->id, "macos");
 
     if(os->version.length == 0)
         ffSysctlGetString("kern.osproductversion", &os->version);
