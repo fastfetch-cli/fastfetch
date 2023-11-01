@@ -22,23 +22,27 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     double maxValue = -999, minValue = 999, sumValue = 0;
     uint32_t maxIndex = 999, minIndex = 999;
 
-    uint32_t index = 0;
+    uint32_t index = 0, valueCount = 0;
     FF_LIST_FOR_EACH(double, percent, percentages)
     {
-        sumValue += *percent;
-        if (*percent > maxValue)
+        if (*percent == *percent)
         {
-            maxValue = *percent;
-            maxIndex = index;
-        }
-        if (*percent < minValue)
-        {
-            minValue = *percent;
-            minIndex = index;
+            sumValue += *percent;
+            if (*percent > maxValue)
+            {
+                maxValue = *percent;
+                maxIndex = index;
+            }
+            if (*percent < minValue)
+            {
+                minValue = *percent;
+                minIndex = index;
+            }
+            ++valueCount;
         }
         ++index;
     }
-    double avgValue = sumValue / (double) percentages.length;
+    double avgValue = sumValue / (double) valueCount;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {

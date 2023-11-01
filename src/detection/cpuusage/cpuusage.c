@@ -27,6 +27,7 @@ const char* ffGetCpuUsageResult(FFlist* result)
     if(cpuTimes1.length == 0) return "No CPU cores found";
 
     FF_LIST_AUTO_DESTROY cpuTimes2 = ffListCreate(sizeof(FFCpuUsageInfo));
+    uint32_t retryCount = 0;
 
 retry:
     error = ffGetCpuUsageInfo(&cpuTimes2);
@@ -39,9 +40,12 @@ retry:
         FFCpuUsageInfo* cpuTime2 = ffListGet(&cpuTimes2, i);
         if (cpuTime2->totalAll <= cpuTime1->totalAll)
         {
-            ffListClear(&cpuTimes2);
-            ffTimeSleep(200);
-            goto retry;
+            if (++retryCount <= 3)
+            {
+                ffListClear(&cpuTimes2);
+                ffTimeSleep(200);
+                goto retry;
+            }
         }
     }
 
