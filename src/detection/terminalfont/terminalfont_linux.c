@@ -146,7 +146,10 @@ static void detectXFCETerminal(FFTerminalFontResult* terminalFont)
     }
 
     if (!configFound)
+    {
         ffStrbufSetStatic(&terminalFont->error, "Couldn't find xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml or xfce4/terminal/terminalrc");
+        return;
+    }
 
     if(useSysFont.length == 0 || ffStrbufIgnCaseCompS(&useSysFont, "false") == 0)
     {
