@@ -22,6 +22,7 @@ Features:
 * Support urxvt version detection (Terminal, Linux)
 * Support st version detection (Terminal, Linux)
 * Support st terminal font detection (TerminalFont, Linux)
+* Support xfce4-terminal 1.1.0+ terminal font detection (TerminalFont, Linux)
 * Add option `--migrate-config <?target-file-path>`
 * Support Nvidia GPU temp and cuda core count detection via nvml. Use `--gpu-use-nvml` to enable it (GPU)
 * Try supporting Wifi authentication type detection in macOS Sonoma. Please file a feature request if you get `to be supported (num)` with result of `/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport -I | grep auth` (Wifi, macOS)

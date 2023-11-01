@@ -125,15 +125,33 @@ static void detectXFCETerminal(FFTerminalFontResult* terminalFont)
     FF_STRBUF_AUTO_DESTROY useSysFont = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
-    ffParsePropFileConfigValues("xfce4/terminal/terminalrc", 2, (FFpropquery[]) {
-        {"FontUseSystem = ", &useSysFont},
-        {"FontName = ", &fontName}
+    const char* path = "xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml";
+    bool configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) {
+        {"<property name=\"font-use-system\" type=\"bool\" value=\"", &useSysFont},
+        {"<property name=\"font-name\" type=\"string\" value=\"", &fontName}
     });
+
+    if (configFound)
+    {
+        ffStrbufSubstrBeforeLastC(&useSysFont, '"');
+        ffStrbufSubstrBeforeLastC(&fontName, '"');
+    }
+    else
+    {
+        path = "xfce4/terminal/terminalrc";
+        configFound = ffParsePropFileConfigValues(path, 2, (FFpropquery[]) {
+            {"FontUseSystem = ", &useSysFont},
+            {"FontName = ", &fontName}
+        });
+    }
+
+    if (!configFound)
+        ffStrbufSetStatic(&terminalFont->error, "Couldn't find xfce4/xfconf/xfce-perchannel-xml/xfce4-terminal.xml or xfce4/terminal/terminalrc");
 
     if(useSysFont.length == 0 || ffStrbufIgnCaseCompS(&useSysFont, "false") == 0)
     {
         if(fontName.length == 0)
-            ffStrbufAppendS(&terminalFont->error, "Couldn't find FontName in .config/xfce4/terminal/terminalrc");
+            ffStrbufAppendF(&terminalFont->error, "Couldn't find FontName in %s", path);
         else
             ffFontInitPango(&terminalFont->font, fontName.chars);
     }
