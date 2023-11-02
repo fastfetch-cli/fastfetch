@@ -4,12 +4,14 @@
         "type": "small"
     },
     "display": {
-        "percentType": 6,
         "keyWidth": 11,
         "bar": {
             "charElapsed": "=",
             "charTotal": "-",
             "width": 13
+        },
+        "percent": {
+            "type": 9
         }
     },
     "modules": [

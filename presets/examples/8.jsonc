@@ -8,9 +8,13 @@
         "color": {
             "keys": "magenta"
         },
-        "sizeNdigits": 0,
-        "sizeMaxPrefix": "MB",
-        "percentType": 9
+        "size": {
+            "ndigits": 0,
+            "maxPrefix": "MB"
+        },
+        "percent": {
+            "type": 9
+        }
     },
     "modules": [
         {

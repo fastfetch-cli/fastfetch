@@ -9,7 +9,9 @@
         }
     },
     "display": {
-        "percentType": 9 // colored percent number
+        "percent": {
+            "type": 9
+        } // colored percent number
     },
     "modules": [
         "title",

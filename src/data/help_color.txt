@@ -1,6 +1,6 @@
-usage: fastfetch --color <color>
+Usage: fastfetch --color <color>
 
-<color> must be a color encoding for linux terminals. It is inserted between "ESC[" and "m".
+<color> must be a color encoding as ANSI escape sequences. It is inserted between "ESC[" and "m".
 Infos about them can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
 Examples:
    --color 35:    sets the color to pink

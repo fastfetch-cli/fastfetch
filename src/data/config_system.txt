@@ -2,7 +2,7 @@
 # This file sets the default config for all users of the system.
 
 # For more information about how configuration files work,
-# see ~/.config/fastfetch/config.conf, generated during first run.
+# see ~/.config/fastfetch/config.conf.
 # All options that can be put there (or passed as argument) can be put here too.
 
 # Use fastfetch --print-config-system > /etc/fastfetch/config.conf
