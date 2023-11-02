@@ -45,7 +45,7 @@ static void printCommandHelp(const char* command)
     if(command == NULL)
     {
         static char input[] = FASTFETCH_DATATEXT_HELP;
-        if (isatty(STDOUT_FILENO))
+        if (!instance.config.display.pipe)
         {
             char* token = strtok(input, "\n");
             puts(token);
