@@ -2639,6 +2639,18 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // NixOsSmall2
+    {
+        .names = {"nixos2_small", "nix2-small", "nixos2-small", "nix2_small", "nix-os-2-small", "nix_os_2_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_NIXOS2_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // NetBSD
     {
         .names = {"netbsd"},
