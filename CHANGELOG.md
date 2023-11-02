@@ -1,3 +1,13 @@
+# 2.2.1
+
+Hotfix release for #606
+
+Bugfixes:
+* Fix broken presets due to the breaking changes introduced in 2.2.0
+
+Features:
+* Pretty print `fastfetch --help`
+
 # 2.2.0
 
 This release introduces a new option `--migrate-config`, which migrates old flag based config file to new JSONC format
