@@ -40,10 +40,93 @@ static void printCommandFormatHelp(const char* command)
     fprintf(stderr, "Error: Module '%s' is not supported\n", type.chars);
 }
 
-static inline void printCommandHelp(const char* command)
+static void printCommandHelp(const char* command)
 {
     if(command == NULL)
-        puts(FASTFETCH_DATATEXT_HELP);
+    {
+        static char input[] = FASTFETCH_DATATEXT_HELP;
+        if (isatty(STDOUT_FILENO))
+        {
+            char* token = strtok(input, "\n");
+            puts(token);
+
+            while ((token = strtok(NULL, "\n")))
+            {
+                // handle empty lines
+                char* back = token;
+                while (*--back != '\0');
+                ffPrintCharTimes('\n', (uint32_t) (token - back - 1));
+
+                if (isalpha(*token)) // highlight subjects
+                {
+                    char* colon = strchr(token, ':');
+                    if (colon)
+                    {
+                        fputs("\e[1;4m", stdout); // Bold + Underline
+                        fwrite(token, 1, (uint32_t) (colon - token), stdout);
+                        fputs("\e[m", stdout);
+
+                        if (colon - token == 5 && memcmp(token, "Usage", 5) == 0)
+                        {
+                            char* cmd = strstr(colon, "fastfetch ");
+                            if (cmd)
+                            {
+                                fwrite(colon, 1, (uint32_t) (cmd - colon), stdout);
+                                fputs("\e[1mfastfetch \e[m", stdout);
+                                cmd += strlen("fastfetch ");
+                                if (*cmd == '<')
+                                {
+                                    char* gt = strchr(cmd, '>');
+                                    if (gt)
+                                    {
+                                        fputs("\e[3m", stdout);
+                                        fwrite(cmd, 1, (uint32_t) (gt - cmd + 1), stdout);
+                                        fputs("\e[m", stdout);
+                                        cmd = gt + 1;
+                                    }
+                                }
+                                puts(cmd);
+                                continue;
+                            }
+                        }
+                        puts(colon);
+                        continue;
+                    }
+                }
+                else if (*token == ' ') // highlight options. All options are indented
+                {
+                    char* dash = strchr(token, '-'); // start of an option
+                    if (dash)
+                    {
+                        char* colon = strchr(dash, ':'); // end of an option
+                        if (colon)
+                        {
+                            *colon = '\0';
+                            char* lt = strrchr(dash, '<');
+                            *colon = ':';
+                            fputs("\e[1m", stdout); // Bold
+                            fwrite(token, 1, (uint32_t) ((lt ? lt : colon) - token), stdout);
+                            fputs("\e[m", stdout);
+                            if (lt)
+                            {
+                                fputs("\e[3m", stdout);
+                                fwrite(lt, 1, (uint32_t) (colon - lt), stdout);
+                                fputs("\e[m", stdout);
+                            }
+                            puts(colon);
+                            continue;
+                        }
+                    }
+                }
+
+                puts(token);
+            }
+        }
+        else
+        {
+            puts(input);
+        }
+    }
     else if(ffStrEqualsIgnCase(command, "color"))
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
