@@ -2639,7 +2639,7 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // NixOsSmall2
+    // NixOs2Small
     {
         .names = {"nixos2_small", "nix2-small", "nixos2-small", "nix2_small", "nix-os-2-small", "nix_os_2_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
