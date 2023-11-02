@@ -1,4 +1,4 @@
-usage: fastfetch --load-config <file>
+Usage: fastfetch -c <file>
 
 Loads a config file. A config file contains one flag per line. Empty lines or lines starting with # are ignored.
 If the file is relative it looks in the following order:

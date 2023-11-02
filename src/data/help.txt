@@ -1,9 +1,11 @@
-Usage: fastfetch <options>
+Fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way
+
+Usage: fastfetch <?options>
 
 Informative options:
-    -h,--help:                  Show this message
-    -h,--help <command>:        Show help for a specific command
-    -v,--version:               Show the version of fastfetch
+    -h, --help:                 Show this message
+    -h, --help <command>:       Show help for a specific command
+    -v, --version:              Show the version of fastfetch
     --list-config-paths:        List search paths of config files
     --list-data-paths:          List search paths of presets and logos
     --list-logos:               List available logos
@@ -16,21 +18,20 @@ Informative options:
     --print-structure:          Print the default structure
 
 Config options:
-    --load-config,--config,-c <file>:   Load a config file or preset (+)
-    --gen-config <type>:                Generate a sample config file in the default path. Param `type` can be `jsonc` or deprecated `conf`
-    --gen-config-force <type>:          Generate a sample config file in the default path. Overwrite the existing one
-    --migrate-config <?path>:           Migrate old flag based config file to new JSONC format. Optional param `path` is the file path that new file should be write to
+    -c, --load-config <file>:   Load a config file or preset (+)
+    --gen-config <type>:        Generate a sample config file in the default path. Param `type` can be `jsonc` or deprecated `conf`
+    --gen-config-force <type>:  Generate a sample config file in the default path. Overwrite the existing one
+    --migrate-config <?path>:   Migrate old flag based config file to new JSONC format. Optional param `path` is the file path that new file should be write to
 
 General options:
-    --multithreading,--thread <?value>: Use multiple threads to detect values
-    --allow-slow-operations <?value>:   Allow operations that are usually very slow for more detailed output
-    --escape-bedrock <?value>:          On Bedrock Linux, whether to escape the bedrock jail
-    --wmi-timeout <num>:                Set the timeout (ms) for WMI queries. Windows only. Default is 5000
-    --processing-timeout <num>:         Set the timeout (ms) when waiting for child processes. Default is 1000
-    --ds-force-drm <?value>:            Set if only DRM should be used to detect displays. Default is false. Linux only
+    --thread <?value>:                Use separate threads to send HTTP requests
+    --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
+    --wmi-timeout <num>:              Set the timeout (ms) for WMI queries. Windows only. Default is 5000
+    --processing-timeout <num>:       Set the timeout (ms) when waiting for child processes. Default is 1000
+    --ds-force-drm <?value>:          Set if only DRM should be used to detect displays. Default is false. Linux only
 
 Logo options:
-    -l,--logo <logo>:                      Set the logo; if default, the name of a builtin logo or a path to a file
+    -l, --logo <logo>:                     Set the logo; if default, the name of a builtin logo or a path to a file
     --logo-type <type>:                    Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty, iterm or chafa
     --logo-width <width>:                  Set the width of the logo (in characters), if it is an image. Required for iTerm image protocol
     --logo-height <height>:                Set the height of the logo (in characters), if it is an image. Required for iTerm image protocol
@@ -58,7 +59,7 @@ Logo options:
     --chafa-dither-mode <value>:           Set output dither mode (No effect with 24-bit color). This value maps the int value of enum ChafaDitherMode. See chafa document for detail
 
 Display options:
-    -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
+    -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use `fastfetch --list-modules` to see the ones available.
     --stat <?value>:             Show time usage (in ms) for individual modules
     --pipe <?value>:             Disable logo and all escape sequences
     --color-keys <color>:        Set the color of the keys
@@ -86,8 +87,8 @@ Display options:
 
 General module options:
     --<module>-format <format>:    Set the format string to use for each specific module.
-                                   To see how a format string works, use fastfetch --help format.
-                                   To see help about a specific format string, use fastfetch --help <module>-format.
+                                   To see how a format string works, use `fastfetch --help format`.
+                                   To see help about a specific format string, use `fastfetch --help <module>-format`.
 
     --<module>-key <key>:          Set the key to use for each specific module.
                                    For modules which print multiple lines, the string is parsed as a format string with the index as first character.
@@ -96,29 +97,30 @@ General module options:
     --<module>-key-width <num>:    Override the global `--key-width` option for each specific module.
 
 Library options: Set the path of a library to load
-    --lib-PCI <path>
-    --lib-vulkan <path>
-    --lib-wayland <path>
-    --lib-xcb-randr <path>
-    --lib-xcb <path>
-    --lib-Xrandr <path>
-    --lib-X11 <path>
-    --lib-gio <path>
-    --lib-DConf <path>
-    --lib-DBus <path>
-    --lib-XFConf <path>
-    --lib-sqlite3 <path>
-    --lib-rpm <path>
-    --lib-imagemagick <path>
-    --lib-z <path>
-    --lib-chafa <path>
-    --lib-egl <path>
-    --lib-glx <path>
-    --lib-osmesa <path>
-    --lib-opencl <path>
-    --lib-pulse <path>
-    --lib-freetype <path>
-    --lib-ddcutil <path>
+    --lib-PCI <path>:           GPU output
+    --lib-vulkan <path>:        Vulkan module & fallback for GPU output
+    --lib-wayland <path>:       Better display performance and output in wayland sessions
+    --lib-xcb-randr <path>:     X11 sessions for better display detection and faster WM detection
+    --lib-xcb <path>:           X11 sessions for better display detection and faster WM detection
+    --lib-Xrandr <path>:        X11 sessions for better display detection and faster WM detection
+    --lib-X11 <path>:           X11 sessions for better display detection and faster WM detection
+    --lib-gio <path>:           Needed for values that are only stored GSettings
+    --lib-DConf <path>:         Needed for values that are only stored in DConf + Fallback for GSettings
+    --lib-DBus <path>:          Bluetooth, Player & Media detection
+    --lib-XFConf <path>:        Needed for XFWM theme and XFCE Terminal font
+    --lib-sqlite3 <path>:       Needed for pkg & rpm package count
+    --lib-rpm <path>:           Slower fallback for rpm package count
+    --lib-imagemagick <path>:   Images in terminal using sixel or kitty graphics protocol
+    --lib-z <path>:             Libz. Faster image output when using kitty graphics protocol
+    --lib-chafa <path>:         Image output as ascii art
+    --lib-egl <path>:           Needed by the OpenGL module for gl context creation
+    --lib-glx <path>:           Needed by the OpenGL module for gl context creation
+    --lib-osmesa <path>:        Needed by the OpenGL module for gl context creation
+    --lib-opencl <path>:        OpenCL module
+    --lib-pulse <path>:         Pulseaudio. Used for Sound detection
+    --lib-nm:                   NetworkManager. Used for Wifi detection
+    --lib-freetype <path>:      Used for Termux font detection
+    --lib-ddcutil <path>:       Used for brightness detection of external displays
 
 Module specific options:
     --title-fqdn <?value>:                   Set if the title should use fully qualified domain name. Default is false
@@ -137,13 +139,13 @@ Module specific options:
     --disk-show-unknown <?value>:            Set if unknown (unable to detect sizes) volumes should be printed. Default is false
     --disk-use-available <?value>:           Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes. Default is false
     --diskio-name-prefix <str>:              Show disks with given name prefix only. Default is empty
-    --bluetooth-show-disconnected: <?value>: Set if disconnected bluetooth devices should be printed. Default is false
-    --packages-winget: <?value>:             Set if winget package count should be detected. Default is false
-    --display-compact-type: <?string>:       Set if all displays should be printed in one line. Default is none
-    --display-detect-name: <?value>:         Set if display name should be detected and printed (if supported). Default is false
-    --display-precise-refresh-rate: <?value>:Set if decimal refresh rates should not be rounded into integers when printing. Default is true
-    --brightness-ddcci-sleep: <num>          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
-    --sound-type: <value>:                   Set what type of sound devices should be printed. Should be either main, active or all. Default is main
+    --bluetooth-show-disconnected <?value>:  Set if disconnected bluetooth devices should be printed. Default is false
+    --packages-winget <?value>:              Set if winget package count should be detected. Default is false
+    --display-compact-type <?string>:        Set if all displays should be printed in one line. Default is none
+    --display-detect-name <?value>:          Set if display name should be detected and printed (if supported). Default is false
+    --display-precise-refresh-rate <?value>: Set if decimal refresh rates should not be rounded into integers when printing. Default is true
+    --brightness-ddcci-sleep <num>:          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
+    --sound-type <value>:                    Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only
     --battery-use-setup-api <?value>:        Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
     --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
@@ -164,14 +166,14 @@ Module specific options:
     --localip-compact <?value>:              Show all IPs in one line. Default is false
     --netio-name-prefix <str>:               Show interfaces with given name prefix only. Default is empty
     --netio-default-route-only <?value>:     Show the interfac that is used for default routing only. Default is true
-    --publicip-timeout:                      Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
-    --publicip-url:                          The URL of public IP detection server to be used.
-    --weather-location:                      Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
-    --weather-timeout:                       Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
-    --weather-output-format:                 The output weather format to be used. It must be URI encoded.
-    --wm-detect-plugin:                      Set if window manager plugin should be detected on supported platforms. Default is false
-    --player-name:                           The name of the player to use for module Media and Player. Linux only
-    --opengl-library <value>:                Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
+    --publicip-timeout <num>:                Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
+    --publicip-url <str>:                    The URL of public IP detection server to be used.
+    --weather-location <str>:                Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
+    --weather-timeout <num>:                 Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
+    --weather-output-format <str>:           The output weather format to be used. It must be URI encoded.
+    --wm-detect-plugin <?value>:             Set if window manager plugin should be detected on supported platforms. Default is false
+    --player-name <str>:                     The name of the player to use for module Media and Player. Linux only
+    --opengl-library <str>:                  Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, /bin/sh for *nix
     --command-key <str>:                     Set the module key to display
     --command-text <str>:                    Set the command text to be executed
@@ -181,4 +183,4 @@ Module specific options:
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.
 A (+) at the end indicates that more help can be printed with --help <option>
-All options can be made permanent in $XDG_CONFIG_HOME/fastfetch/config.conf
+All options can be made permanent with command `fastfetch <options> --migrate-config`

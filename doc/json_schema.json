@@ -452,7 +452,7 @@
                 },
                 "wayland": {
                     "type": "string",
-                    "description": "Better display performance and output in wayland sessions.\nSupports different refresh rates per monitor.\n(Linux)"
+                    "description": "Better display performance and output in wayland sessions.\nSupports different refresh rates per monitor.\n(Linux, FreeBSD)"
                 },
                 "xcbRandr": {
                     "type": "string",
