@@ -148,6 +148,7 @@ void ffInitWMOptions(FFWMOptions* options)
         ffGenerateWMJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+    options->detectPlugin = false;
 }
 
 void ffDestroyWMOptions(FFWMOptions* options)
