@@ -1,4 +1,12 @@
-# TBD
+# 2.2.2
+
+Changes:
+* `--percent-type` now defaults to 9 (colored percentage numbers)
+* `fastfetch` now prints LocalIp module by default
+* LocalIp module now prints netmask in CIDR format
+
+Bugfixes:
+* Fix unitialized variables (#609)
 
 Logos:
 
