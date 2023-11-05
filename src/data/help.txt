@@ -74,7 +74,7 @@ Display options:
     --disable-linewrap <?value>: Whether to disable line wrap during the run
     --hide-cursor <?value>:      Whether to hide the cursor during the run
     --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
-    --percent-type <value>:      Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 1
+    --percent-type <value>:      Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 9
     --percent-ndigits <value>:   Set the number of digits to keep after the decimal point when formatting percentage numbers. Default is 0
     --bar-char-elapsed <str>:    Set the character to use in elapsed part. Default is '■'
     --bar-char-total <str>:      Set the character to use in total part. Default is '-'

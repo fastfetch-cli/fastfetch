@@ -45,13 +45,13 @@ int main(void)
     ffPrintMemory(&options->memory);
     ffPrintSwap(&options->swap);
     ffPrintDisk(&options->disk);
+    ffPrintLocalIp(&options->localIP);
+    // ffPrintPublicIp(&options->publicIP);
+    //ffPrintWifi(&options->wifi);
     ffPrintBattery(&options->battery);
     ffPrintPowerAdapter(&options->powerAdapter);
     //ffPrintPlayer(&options->player);
     //ffPrintMedia(&options->media);
-    //ffPrintLocalIp(&options->localIp);
-    //ffPrintPublicIp(&options->publicIp);
-    //ffPrintWifi(&options->wifi);
     //ffPrintCPUUsage(&options->cpuUsage);
     ffPrintLocale(&options->locale);
     //ffPrintDateTime(&options->dateTime);
