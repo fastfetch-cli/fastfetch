@@ -8,11 +8,6 @@
             "top": 2
         }
     },
-    "display": {
-        "percent": {
-            "type": 9
-        } // colored percent number
-    },
     "modules": [
         "title",
         "separator",

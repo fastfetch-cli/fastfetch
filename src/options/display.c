@@ -303,7 +303,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->barCharTotal, "-");
     options->barWidth = 10;
     options->barBorder = true;
-    options->percentType = 1;
+    options->percentType = 9;
     options->percentNdigits = 0;
 }
 
