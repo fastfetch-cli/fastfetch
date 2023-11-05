@@ -76,7 +76,7 @@ jobs:
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
-        run: cmake --build . --target package
+        run: cmake --build . --target package --verbose
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -131,7 +131,7 @@ jobs:
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' .
 
       - name: build project
-        run: cmake --build . --target package
+        run: cmake --build . --target package --verbose
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -178,7 +178,7 @@ jobs:
           run: |
             sudo pkg install -y cmake git pkgconf binutils pciutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-            cmake --build . --target package
+            cmake --build . --target package --verbose
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci
             time ./fastfetch -c presets/ci --format json
@@ -224,7 +224,7 @@ jobs:
         run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build .
+        run: cmake --build . --verbose
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
@@ -294,7 +294,7 @@ jobs:
         run: env PKG_CONFIG_PATH=/clang32/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build .
+        run: cmake --build . --verbose
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v2
