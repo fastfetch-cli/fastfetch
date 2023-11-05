@@ -36,6 +36,7 @@
         "gpu",
         "memory",
         "disk",
+        "localip",
         "battery",
         "poweradapter",
         "locale",
