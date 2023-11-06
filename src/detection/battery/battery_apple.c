@@ -5,16 +5,6 @@
 
 #include <IOKit/IOKitLib.h>
 
-static double detectBatteryTemp(void)
-{
-    double result = 0;
-
-    if(ffDetectCoreTemps(FF_TEMP_BATTERY, &result))
-        return FF_BATTERY_TEMP_UNSET;
-
-    return result;
-}
-
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
     io_iterator_t iterator;
@@ -24,7 +14,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
     io_registry_entry_t registryEntry;
     while((registryEntry = IOIteratorNext(iterator)) != 0)
     {
-        CFMutableDictionaryRef properties;
+        FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
         {
             IOObjectRelease(registryEntry);
@@ -35,7 +25,13 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         const char* error;
 
         FFBatteryResult* battery = ffListAdd(results);
+        battery->temperature = FF_BATTERY_TEMP_UNSET;
+        ffStrbufInit(&battery->manufacturer);
+        ffStrbufInit(&battery->modelName);
+        ffStrbufInit(&battery->technology);
+        ffStrbufInit(&battery->status);
         battery->capacity = 0.0/0.0;
+
         int currentCapacity, maxCapacity;
 
         if ((error = ffCfDictGetInt(properties, CFSTR("MaxCapacity"), &maxCapacity)))
@@ -50,33 +46,36 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 
         battery->capacity = currentCapacity * 100.0 / maxCapacity;
 
-        ffStrbufInit(&battery->manufacturer);
-        ffStrbufInit(&battery->modelName);
-        ffStrbufInit(&battery->technology);
+        ffCfDictGetString(properties, CFSTR("DeviceName"), &battery->modelName);
+
         if (!ffCfDictGetBool(properties, CFSTR("built-in"), &boolValue) && boolValue)
         {
             ffStrbufAppendS(&battery->manufacturer, "Apple Inc.");
-            ffStrbufAppendS(&battery->modelName, "Builtin");
             ffStrbufAppendS(&battery->technology, "Lithium");
+            if (!battery->modelName.length)
+                ffStrbufAppendS(&battery->modelName, "Built-in");
         }
-        else
+
+        ffCfDictGetInt(properties, CFSTR("CycleCount"), &battery->cycleCount);
+
+        if (!ffCfDictGetBool(properties, CFSTR("ExternalConnected"), &boolValue) && boolValue)
+            ffStrbufAppendS(&battery->status, "AC connected, ");
+        if (!ffCfDictGetBool(properties, CFSTR("IsCharging"), &boolValue) && boolValue)
+            ffStrbufAppendS(&battery->status, "Charging, ");
+        if (!ffCfDictGetBool(properties, CFSTR("AtCriticalLevel"), &boolValue) && boolValue)
+            ffStrbufAppendS(&battery->status, "Critical, ");
+        ffStrbufTrimRight(&battery->status, ' ');
+        ffStrbufTrimRight(&battery->status, ',');
+
+        if (options->temp)
         {
-            ffStrbufAppendS(&battery->manufacturer, "Unknown");
-            ffStrbufAppendS(&battery->modelName, "Unknown");
-            ffStrbufAppendS(&battery->technology, "Unknown");
+            int64_t temp;
+            if (!ffCfDictGetInt64(properties, CFSTR("Temperature"), &temp))
+                battery->temperature = (double) temp / 10 - 273.15;
+            else
+                ffDetectCoreTemps(FF_TEMP_BATTERY, &battery->temperature);
         }
 
-        ffStrbufInit(&battery->status);
-        if (!ffCfDictGetBool(properties, CFSTR("FullyCharged"), &boolValue) && boolValue)
-            ffStrbufAppendS(&battery->status, "Fully charged");
-        else if (!ffCfDictGetBool(properties, CFSTR("IsCharging"), &boolValue) && boolValue)
-            ffStrbufAppendS(&battery->status, "Charging");
-        else
-            ffStrbufAppendS(&battery->status, "");
-
-        battery->temperature = options->temp ? detectBatteryTemp() : FF_BATTERY_TEMP_UNSET;
-
-        CFRelease(properties);
         IOObjectRelease(registryEntry);
     }
 
