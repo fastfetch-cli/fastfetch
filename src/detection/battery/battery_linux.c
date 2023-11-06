@@ -69,7 +69,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     ffReadFileBuffer(dir->chars, &testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
     if(dir->length)
-        result->cycleCount = (int32_t) ffStrbufToUInt(&testBatteryBuffer, 0);
+        result->cycleCount = (uint32_t) ffStrbufToUInt(&testBatteryBuffer, 0);
 
     result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp)

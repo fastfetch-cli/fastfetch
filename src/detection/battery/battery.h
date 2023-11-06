@@ -15,7 +15,7 @@ typedef struct FFBatteryResult
     double capacity;
     FFstrbuf status;
     double temperature;
-    int32_t cycleCount;
+    uint32_t cycleCount;
 } FFBatteryResult;
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results);
