@@ -138,12 +138,10 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
 
 FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, struct pci_dev* device)
 {
-    const FFTempsResult* tempsResult = ffDetectTemps();
+    const FFlist* tempsResult = ffDetectTemps();
 
-    for(uint32_t i = 0; i < tempsResult->values.length; i++)
+    FF_LIST_FOR_EACH(FFTempValue, tempValue, *tempsResult)
     {
-        FFTempValue* tempValue = ffListGet(&tempsResult->values, i);
-
         //The kernel exposes the device class multiplied by 256 for some reason
         if(tempValue->deviceClass == device->device_class * 256)
         {

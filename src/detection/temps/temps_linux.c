@@ -41,23 +41,21 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
     return value->name.length > 0 || value->deviceClass > 0;
 }
 
-const FFTempsResult* ffDetectTemps(void)
+const FFlist* ffDetectTemps(void)
 {
-    static FFTempsResult result;
-    static bool init = false;
+    static FFlist result;
 
-    if(init)
+    if(result.elementSize > 0)
         return &result;
-    init = true;
 
-    ffListInitA(&result.values, sizeof(FFTempValue), 16);
+    ffListInitA(&result, sizeof(FFTempValue), 16);
 
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
     ffStrbufAppendS(&baseDir, "/sys/class/hwmon/");
 
     uint32_t baseDirLength = baseDir.length;
 
-    DIR* dirp = opendir(baseDir.chars);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
         return &result;
 
@@ -70,19 +68,17 @@ const FFTempsResult* ffDetectTemps(void)
         ffStrbufAppendS(&baseDir, entry->d_name);
         ffStrbufAppendC(&baseDir, '/');
 
-        FFTempValue* temp = ffListAdd(&result.values);
+        FFTempValue* temp = ffListAdd(&result);
         ffStrbufInit(&temp->name);
         temp->deviceClass = 0;
         if(!parseHwmonDir(&baseDir, temp))
         {
             ffStrbufDestroy(&temp->name);
-            --result.values.length;
+            --result.length;
         }
 
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
-
-    closedir(dirp);
 
     return &result;
 }

@@ -12,11 +12,6 @@ typedef struct FFTempValue
     double value;
 } FFTempValue;
 
-typedef struct FFTempsResult
-{
-    FFlist values; //List of FFTempValue
-} FFTempsResult;
-
-const FFTempsResult* ffDetectTemps();
+const FFlist* /* List of FFTempValue */ ffDetectTemps();
 
 #endif
