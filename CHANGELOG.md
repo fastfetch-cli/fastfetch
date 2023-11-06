@@ -3,7 +3,10 @@
 Changes:
 * `--percent-type` now defaults to 9 (colored percentage numbers)
 * `fastfetch` now prints LocalIp module by default
-* LocalIp module now prints netmask in CIDR format
+
+Features:
+* LocalIP module now prints netmask in CIDR format for IPv4 (LocalIP)
+* Bios module now detects system firmware type (Bios)
 
 Bugfixes:
 * Fix unitialized variables (#609)

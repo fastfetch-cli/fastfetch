@@ -1,6 +1,7 @@
 #include "bios.h"
 
 #include "common/settings.h"
+#include "common/sysctl.h"
 #include "util/smbiosHelper.h"
 
 const char* ffDetectBios(FFBiosResult* result)
@@ -13,5 +14,6 @@ const char* ffDetectBios(FFBiosResult* result)
     ffCleanUpSmbiosValue(&result->vendor);
     ffSettingsGetFreeBSDKenv("smbios.bios.version", &result->version);
     ffCleanUpSmbiosValue(&result->version);
+    ffSysctlGetString("machdep.bootmethod", &result->type);
     return NULL;
 }

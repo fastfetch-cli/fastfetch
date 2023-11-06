@@ -23,7 +23,7 @@ const char* ffDetectBios(FFBiosResult* bios)
         ffCfDictGetString(properties, CFSTR("vendor"), &bios->vendor);
         ffCfDictGetString(properties, CFSTR("version"), &bios->version);
         ffCfDictGetString(properties, CFSTR("release-date"), &bios->date);
-        ffStrbufAppendS(&bios->release, "Efi");
+        ffStrbufSetStatic(&bios->type, "UEFI");
 
         CFRelease(properties);
         IOObjectRelease(registryEntry);
@@ -54,12 +54,12 @@ const char* ffDetectBios(FFBiosResult* bios)
             uint32_t index = ffStrbufFirstIndexC(&bios->version, '-');
             if (index != bios->version.length)
             {
-                ffStrbufAppendNS(&bios->release, index, bios->version.chars);
+                ffStrbufAppendNS(&bios->type, index, bios->version.chars);
                 ffStrbufRemoveSubstr(&bios->version, 0, index + 1);
             }
             else
             {
-                ffStrbufAppendS(&bios->release, "iBoot");
+                ffStrbufSetStatic(&bios->type, "iBoot");
             }
             CFRelease(properties);
         }

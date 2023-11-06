@@ -2,6 +2,30 @@
 #include "util/windows/registry.h"
 #include "util/smbiosHelper.h"
 
+#include <ntstatus.h>
+#include <winternl.h>
+
+typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
+{
+    GUID BootIdentifier;
+    FIRMWARE_TYPE FirmwareType;
+    union
+    {
+        ULONGLONG BootFlags;
+        struct
+        {
+            ULONGLONG DbgMenuOsSelection : 1; // REDSTONE4
+            ULONGLONG DbgHiberBoot : 1;
+            ULONGLONG DbgSoftBoot : 1;
+            ULONGLONG DbgMeasuredLaunch : 1;
+            ULONGLONG DbgMeasuredLaunchCapable : 1; // 19H1
+            ULONGLONG DbgSystemHiveReplace : 1;
+            ULONGLONG DbgMeasuredLaunchSmmProtections : 1;
+            ULONGLONG DbgMeasuredLaunchSmmLevel : 7; // 20H1
+        };
+    };
+} SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
+
 const char* ffDetectBios(FFBiosResult* bios)
 {
     FF_HKEY_AUTO_DESTROY hKey = NULL;
@@ -23,6 +47,19 @@ const char* ffDetectBios(FFBiosResult* bios)
         ffRegReadUint(hKey, L"BiosMinorRelease", &minor, NULL)
     )
         ffStrbufAppendF(&bios->release, "%u.%u", (unsigned)major, (unsigned)minor);
+
+    // Same as GetFirmwareType, but support (?) Windows 7
+    // https://ntdoc.m417z.com/system_information_class
+    SYSTEM_BOOT_ENVIRONMENT_INFORMATION sbei;
+    if (NT_SUCCESS(NtQuerySystemInformation(90 /*SystemBootEnvironmentInformation*/, &sbei, sizeof(sbei), NULL)))
+    {
+        switch (sbei.FirmwareType)
+        {
+            case FirmwareTypeBios: ffStrbufSetStatic(&bios->type, "BIOS"); break;
+            case FirmwareTypeUefi: ffStrbufSetStatic(&bios->type, "UEFI"); break;
+            default: break;
+        }
+    }
 
     return NULL;
 }
