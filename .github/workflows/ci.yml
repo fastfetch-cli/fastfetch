@@ -190,7 +190,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: run VM
-        uses: cross-platform-actions/action@v0.21.0
+        uses: cross-platform-actions/action@v0.21.1
         with:
           operating_system: freebsd
           version: '13.2'
