@@ -140,7 +140,7 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
     return NULL;
 }
 
-static const char* detectWithNtApi(FFBatteryOptions* options, FFlist* results)
+static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
 {
     SYSTEM_BATTERY_STATE info;
     if (NT_SUCCESS(NtPowerInformation(SystemBatteryState, NULL, 0, &info, sizeof(info))) && info.BatteryPresent)
