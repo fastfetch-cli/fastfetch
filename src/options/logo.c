@@ -15,7 +15,7 @@ void ffOptionsInitLogo(FFOptionsLogo* options)
     options->paddingLeft = 0;
     options->paddingRight = 4;
     options->printRemaining = true;
-    options->preserveAspectRadio = false;
+    options->preserveAspectRatio = false;
     options->recache = false;
     options->separate = false;
 
@@ -113,8 +113,8 @@ logoType:
             options->paddingRight = ffOptionParseUInt32(key, value);
         else if(strcasecmp(subKey, "print-remaining") == 0)
             options->printRemaining = ffOptionParseBoolean(value);
-        else if(strcasecmp(subKey, "preserve-aspect-radio") == 0)
-            options->preserveAspectRadio = ffOptionParseBoolean(value);
+        else if(strcasecmp(subKey, "preserve-aspect-ratio") == 0)
+            options->preserveAspectRatio = ffOptionParseBoolean(value);
         else if(strcasecmp(subKey, "recache") == 0)
             options->recache = ffOptionParseBoolean(value);
         else if(strcasecmp(subKey, "separate") == 0)
@@ -327,9 +327,9 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->printRemaining = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "preserveAspectRadio") == 0)
+        else if (strcasecmp(key, "preserveAspectRatio") == 0)
         {
-            options->preserveAspectRadio = yyjson_get_bool(val);
+            options->preserveAspectRatio = yyjson_get_bool(val);
             continue;
         }
         else if (strcasecmp(key, "recache") == 0)
@@ -504,8 +504,8 @@ void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc
     if (options->printRemaining != defaultOptions.printRemaining)
         yyjson_mut_obj_add_bool(doc, obj, "printRemaining", options->printRemaining);
 
-    if (options->preserveAspectRadio != defaultOptions.preserveAspectRadio)
-        yyjson_mut_obj_add_bool(doc, obj, "preserveAspectRadio", options->preserveAspectRadio);
+    if (options->preserveAspectRatio != defaultOptions.preserveAspectRatio)
+        yyjson_mut_obj_add_bool(doc, obj, "preserveAspectRatio", options->preserveAspectRatio);
 
     if (options->recache != defaultOptions.recache)
         yyjson_mut_obj_add_bool(doc, obj, "recache", options->recache);

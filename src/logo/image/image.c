@@ -95,7 +95,7 @@ static bool printImageIterm(void)
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
             (unsigned) options->width,
             (unsigned) options->height,
-            (unsigned) options->preserveAspectRadio,
+            (unsigned) options->preserveAspectRatio,
             base64.chars
         );
 

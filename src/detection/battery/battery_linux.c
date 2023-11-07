@@ -1,11 +1,11 @@
-#include "fastfetch.h"
-#include "common/io/io.h"
 #include "battery.h"
+#include "common/io/io.h"
+#include "detection/temps/temps_linux.h"
 #include "util/stringUtils.h"
 
 #include <dirent.h>
 
-static void parseBattery(FFstrbuf* dir, FFlist* results)
+static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* options, FFlist* results)
 {
     uint32_t dirLength = dir->length;
 
@@ -65,7 +65,26 @@ static void parseBattery(FFstrbuf* dir, FFlist* results)
     ffReadFileBuffer(dir->chars, &result->status);
     ffStrbufSubstrBefore(dir, dirLength);
 
+    ffStrbufAppendS(dir, "/cycle_count");
+    ffReadFileBuffer(dir->chars, &testBatteryBuffer);
+    ffStrbufSubstrBefore(dir, dirLength);
+    if(dir->length)
+        result->cycleCount = (uint32_t) ffStrbufToUInt(&testBatteryBuffer, 0);
+
     result->temperature = FF_BATTERY_TEMP_UNSET;
+    if (options->temp)
+    {
+        const FFlist* tempsResult = ffDetectTemps();
+
+        FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
+        {
+            if (ffStrbufEqualS(&value->name, id))
+            {
+                result->temperature = value->value;
+                break;
+            }
+        }
+    }
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
@@ -84,7 +103,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 
     uint32_t baseDirLength = baseDir.length;
 
-    DIR* dirp = opendir(baseDir.chars);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
         return "opendir(batteryDir) == NULL";
 
@@ -95,11 +114,9 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
             continue;
 
         ffStrbufAppendS(&baseDir, entry->d_name);
-        parseBattery(&baseDir, results);
+        parseBattery(&baseDir, entry->d_name, options, results);
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
-
-    closedir(dirp);
 
     if(results->length == 0)
         return "batteryDir doesn't contain any battery folder";

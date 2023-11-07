@@ -1,3 +1,26 @@
+# 2.2.2
+
+Changes:
+* `--percent-type` now defaults to 9 (colored percentage numbers)
+* `fastfetch` now prints LocalIp module by default
+
+Features:
+* LocalIP module now prints netmask in CIDR format for IPv4 (LocalIP)
+* Bios module now detects system firmware type (Bios)
+* Improve detection of `Battery`
+    * Detect cycle count on supported platforms
+    * Detect temperature on Linux when supported
+    * Status detection on macOS has been adjusted to be consistant with other platforms
+* Linux binaries are built with imagemagick7 support
+
+Bugfixes:
+* Fix unitialized variables (#609)
+* Fix spelling of `--preserve-aspect-ratio` (#614)
+
+Logos:
+
+* Update NixOS_small
+
 # 2.2.1
 
 Hotfix release for #606

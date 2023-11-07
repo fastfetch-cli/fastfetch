@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.2.1
+    VERSION 2.2.2
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -234,14 +234,11 @@ endif()
 
 function(fastfetch_load_raw_text FILENAME OUTVAR)
     file(READ "${FILENAME}" TEMP)
-    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}")                                  # Remove trailing newline
-    string(JSON TEMP SET "{}" "${TEMP}" "0")                                       # Encode raw strings using JSON_SET
-    string(REGEX REPLACE "^\\{[ \t\r\n]*" "" TEMP "${TEMP}")                       # Remove JSON braces
-    string(REGEX REPLACE "[ \t\r\n]*:[ \t\r\n]*0[ \t\r\n]*\\}$" "" TEMP "${TEMP}") # Remove trailing ` : 0 }`
-    if(NOT "${TEMP}" MATCHES "^\"[^\n]*\"")
-        message(FATAL_ERROR "Internal error: unexpected output: '${TEMP}'")
-    endif()
-    set(${OUTVAR} "${TEMP}" PARENT_SCOPE)
+    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
+    string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
+    string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
+    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
+    set(${OUTVAR} "\"${TEMP}\"" PARENT_SCOPE)
 endfunction(fastfetch_load_raw_text)
 
 file(GLOB LOGO_FILES "src/logo/ascii/*.txt")

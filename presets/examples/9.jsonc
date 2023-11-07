@@ -9,9 +9,6 @@
             "charElapsed": "=",
             "charTotal": "-",
             "width": 13
-        },
-        "percent": {
-            "type": 9
         }
     },
     "modules": [

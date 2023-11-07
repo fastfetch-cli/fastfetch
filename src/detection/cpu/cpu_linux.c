@@ -83,12 +83,10 @@ static double getFrequency(const char* info, const char* scaling)
 
 static double detectCPUTemp(void)
 {
-    const FFTempsResult* temps = ffDetectTemps();
+    const FFlist* tempsResult = ffDetectTemps();
 
-    for(uint32_t i = 0; i < temps->values.length; i++)
+    FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
     {
-        FFTempValue* value = ffListGet(&temps->values, i);
-
         if(
             ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
             ffStrbufCompS(&value->name, "k10temp") == 0 ||

@@ -4,7 +4,7 @@
 #include "modules/bios/bios.h"
 #include "util/stringUtils.h"
 
-#define FF_BIOS_NUM_FORMAT_ARGS 4
+#define FF_BIOS_NUM_FORMAT_ARGS 5
 
 void ffPrintBios(FFBiosOptions* options)
 {
@@ -13,8 +13,11 @@ void ffPrintBios(FFBiosOptions* options)
     ffStrbufInit(&bios.release);
     ffStrbufInit(&bios.vendor);
     ffStrbufInit(&bios.version);
+    ffStrbufInit(&bios.type);
 
     const char* error = ffDetectBios(&bios);
+
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     if(error)
     {
@@ -28,21 +31,40 @@ void ffPrintBios(FFBiosOptions* options)
         goto exit;
     }
 
-    if(options->moduleArgs.outputFormat.length == 0)
+    if(options->moduleArgs.key.length == 0)
     {
-        ffPrintLogoAndKey(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&bios.version, stdout);
-        if (bios.release.length)
-            printf(" (%s)", bios.release.chars);
-        putchar('\n');
+        if(bios.type.length == 0)
+            ffStrbufSetStatic(&bios.type, "Unknown");
+        else if (ffStrbufIgnCaseEqualS(&bios.type, "BIOS"))
+            ffStrbufSetStatic(&bios.type, "Legacy");
+
+        ffStrbufSetF(&key, FF_BIOS_MODULE_NAME " (%s)", bios.type.chars);
     }
     else
     {
-        ffPrintFormat(FF_BIOS_MODULE_NAME, 0, &options->moduleArgs, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        ffStrbufClear(&key);
+        ffParseFormatString(&key, &options->moduleArgs.key, 3, (FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type},
+        });
+    }
+
+    if(options->moduleArgs.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffStrbufWriteTo(&bios.version, stdout);
+        if (bios.release.length)
+            printf(" (%s)\n", bios.release.chars);
+        else
+            putchar('\n');
+    }
+    else
+    {
+        ffPrintFormat(key.chars, 0, &options->moduleArgs, FF_BIOS_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.date},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.release},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type},
         });
     }
 
@@ -51,6 +73,7 @@ exit:
     ffStrbufDestroy(&bios.release);
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
+    ffStrbufDestroy(&bios.type);
 }
 
 bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const char* value)
@@ -95,6 +118,7 @@ void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut
     ffStrbufInit(&bios.release);
     ffStrbufInit(&bios.vendor);
     ffStrbufInit(&bios.version);
+    ffStrbufInit(&bios.type);
 
     const char* error = ffDetectBios(&bios);
 
@@ -115,12 +139,14 @@ void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "release", &bios.release);
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &bios.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &bios.version);
+    yyjson_mut_obj_add_strbuf(doc, obj, "type", &bios.type);
 
 exit:
     ffStrbufDestroy(&bios.date);
     ffStrbufDestroy(&bios.release);
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
+    ffStrbufDestroy(&bios.type);
 }
 
 void ffPrintBiosHelpFormat(void)
@@ -129,7 +155,8 @@ void ffPrintBiosHelpFormat(void)
         "bios date",
         "bios release",
         "bios vendor",
-        "bios version"
+        "bios version",
+        "firmware type",
     });
 }
 

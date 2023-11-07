@@ -34,6 +34,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
 
         FFBatteryResult* battery = ffListAdd(results);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
+        battery->cycleCount = 0;
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->status);

@@ -9,5 +9,7 @@ const char* ffDetectBios(FFBiosResult* bios)
     if (ffStrbufIgnCaseEqualS(&bios->version, "unknown"))
         ffStrbufClear(&bios->version);
 
+    ffStrbufSetStatic(&bios->type, "Bootloader");
+
     return NULL;
 }

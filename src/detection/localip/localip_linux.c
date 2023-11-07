@@ -80,8 +80,17 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in* ipv4 = (struct sockaddr_in*) ifa->ifa_addr;
-            char addressBuffer[INET_ADDRSTRLEN];
+            char addressBuffer[INET_ADDRSTRLEN + 4];
             inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
+
+            struct sockaddr_in* netmask = (struct sockaddr_in*) ifa->ifa_netmask;
+            int cidr = __builtin_popcount(inet_netof(netmask->sin_addr));
+            if (cidr != 0)
+            {
+                size_t len = strlen(addressBuffer);
+                snprintf(addressBuffer + len, 4, "/%d", cidr);
+            }
+
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute);
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)

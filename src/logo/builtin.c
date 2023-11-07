@@ -2596,48 +2596,41 @@ static const FFlogo N[] = {
     },
     // NixOS
     {
-        .names = {"NixOS", "nix", "nixos-linux", "nix-linux", "nix-os", "nix_os", "nix_os_linux"},
+        .names = {"NixOS", "nix", "nixos-linux", "nix-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // NixOS_small
+    // NixOSSmall
     {
-        .names = {"NixOS_small", "nix_small"},
+        .names = {"NixOS_small", "nix_small", "nixos-linux-small", "nix-linux-small"},
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // NixOsOld
+    // NixOSOld
     {
-        .names = {"nixos_old", "nix-old", "nixos-old", "nix_old", "nix-os-old", "nix_os_old"},
+        .names = {"nixos_old", "nix-old", "nixos-old", "nix_old"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_OLD,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // NixOsSmall
+    // NixOsOldSmall
     {
-        .names = {"nixos_small", "nix-small", "nixos-small", "nix_small", "nix-os-small", "nix_os_small"},
-        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_SMALL,
+        .names = {"nixos_old_small", "nix-old-small", "nixos-old-small", "nix_old_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_OLD_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // NetBSD
     {

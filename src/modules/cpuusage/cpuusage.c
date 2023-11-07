@@ -180,6 +180,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
         ffGenerateCPUUsageJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+    options->separate = false;
 }
 
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)

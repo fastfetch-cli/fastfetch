@@ -11,6 +11,7 @@ typedef struct FFBiosResult
     FFstrbuf release;
     FFstrbuf vendor;
     FFstrbuf version;
+    FFstrbuf type;
 } FFBiosResult;
 
 const char* ffDetectBios(FFBiosResult* bios);
