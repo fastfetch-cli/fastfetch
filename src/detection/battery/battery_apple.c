@@ -60,6 +60,8 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 
         if (!ffCfDictGetBool(properties, CFSTR("ExternalConnected"), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "AC connected, ");
+        else
+            ffStrbufAppendS(&battery->status, "Discharging, ");
         if (!ffCfDictGetBool(properties, CFSTR("IsCharging"), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "Charging, ");
         if (!ffCfDictGetBool(properties, CFSTR("AtCriticalLevel"), &boolValue) && boolValue)
