@@ -230,7 +230,13 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = true;
+    options->defaultRouteOnly =
+        #ifdef __ANDROID__
+            false
+        #else
+            true
+        #endif
+    ;
 }
 
 void ffDestroyNetIOOptions(FFNetIOOptions* options)
