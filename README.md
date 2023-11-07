@@ -20,6 +20,7 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 <img src="screenshots/example2.png" width="48%" align="top" />
 <img src="screenshots/example3.png" width="48%" align="top" />
 <img src="screenshots/example5.png" height="15%" align="top" />
+<img src="screenshots/example6.png" width="48%" align="top" />
 
 There are [screenshots on different platforms](https://github.com/fastfetch-cli/fastfetch/wiki)
 
@@ -31,6 +32,16 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 * Arch Linux: `sudo pacman -S fastfetch`
 * Fedora: `sudo dnf install fastfetch`
 * Gentoo: `sudo emerge --ask app-misc/fastfetch`
+* NixOS: Add
+```nix
+(pkgs.fetchFromGithub {
+  owner = "fastfetch-cli";
+  repo = "fastfetch";
+  rev = "LATEST_COMMIT_SHA";
+  sha256 = "SHA256_HASH";
+})
+```
+to `environment.systemPackages` in your `configuration.nix` file.
 
 [See also if fastfetch has been packaged for your favorite Linux distro](#Packaging)
 
