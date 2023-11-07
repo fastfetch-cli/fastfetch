@@ -7,6 +7,11 @@ Changes:
 Features:
 * LocalIP module now prints netmask in CIDR format for IPv4 (LocalIP)
 * Bios module now detects system firmware type (Bios)
+* Improve detection of `Battery`
+    * Detect cycle count on supported platforms
+    * Detect temperature on Linux when supported
+    * Status detection on macOS has been adjusted to be consistant with other platforms
+* Linux binaries are built with imagemagick7 support
 
 Bugfixes:
 * Fix unitialized variables (#609)
