@@ -183,9 +183,9 @@ static void getSystemReleaseAndVersion(FFPlatform* platform)
     }
 }
 
-static void getSystemArchitecture(FFPlatform* platform)
+static void getSystemArchitectureAndPageSize(FFPlatform* platform)
 {
-    SYSTEM_INFO sysInfo = {0};
+    SYSTEM_INFO sysInfo;
     GetNativeSystemInfo(&sysInfo);
 
     switch(sysInfo.wProcessorArchitecture)
@@ -215,6 +215,8 @@ static void getSystemArchitecture(FFPlatform* platform)
         default:
             break;
     }
+
+    platform->pageSize = sysInfo.dwPageSize;
 }
 
 void ffPlatformInitImpl(FFPlatform* platform)
@@ -230,5 +232,5 @@ void ffPlatformInitImpl(FFPlatform* platform)
     getUserShell(platform);
 
     getSystemReleaseAndVersion(platform);
-    getSystemArchitecture(platform);
+    getSystemArchitectureAndPageSize(platform);
 }
