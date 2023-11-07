@@ -156,7 +156,7 @@
                             "description": "Whether to print the remaining logo, if it has more lines than modules to display",
                             "default": false
                         },
-                        "preserveAspectRadio": {
+                        "preserveAspectRatio": {
                             "type": "boolean",
                             "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
                             "default": false

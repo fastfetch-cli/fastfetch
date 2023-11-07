@@ -34,7 +34,7 @@ typedef struct FFOptionsLogo
     uint32_t paddingLeft;
     uint32_t paddingRight;
     bool printRemaining;
-    bool preserveAspectRadio;
+    bool preserveAspectRatio;
     bool recache;
     bool separate;
 

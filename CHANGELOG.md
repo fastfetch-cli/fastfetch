@@ -10,6 +10,7 @@ Features:
 
 Bugfixes:
 * Fix unitialized variables (#609)
+* Fix spelling of `--preserve-aspect-ratio` (#614)
 
 Logos:
 

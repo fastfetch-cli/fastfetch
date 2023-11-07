@@ -35,7 +35,7 @@ Logo options:
     --logo-type <type>:                    Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty, iterm or chafa
     --logo-width <width>:                  Set the width of the logo (in characters), if it is an image. Required for iTerm image protocol
     --logo-height <height>:                Set the height of the logo (in characters), if it is an image. Required for iTerm image protocol
-    --logo-preserve-aspect-radio <?value>: Set if the logo should fill the specified width and height as much as possible without stretching. Supported by iTerm image protocol
+    --logo-preserve-aspect-ratio <?value>: Set if the logo should fill the specified width and height as much as possible without stretching. Supported by iTerm image protocol
     --logo-color-[1-9] <color>:            Overwrite a color in the logo
     --logo-padding <padding>:              Set the padding on the left and the right of the logo
     --logo-padding-left <padding>:         Set the padding on the left of the logo
