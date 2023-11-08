@@ -7,9 +7,6 @@
 
 const char* ffDetectSwap(FFSwapResult* swap)
 {
-    SYSTEM_INFO sysInfo;
-    GetNativeSystemInfo(&sysInfo);
-
     ULONG size = sizeof(SYSTEM_PAGEFILE_INFORMATION);
     SYSTEM_PAGEFILE_INFORMATION* FF_AUTO_FREE pstart = (SYSTEM_PAGEFILE_INFORMATION*)malloc(size);
     while(true)
@@ -24,8 +21,10 @@ const char* ffDetectSwap(FFSwapResult* swap)
             return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
         break;
     }
-    swap->bytesUsed = (uint64_t)pstart->TotalUsed * sysInfo.dwPageSize;
-    swap->bytesTotal = (uint64_t)pstart->CurrentSize * sysInfo.dwPageSize;
+
+    uint32_t pageSize = instance.state.platform.pageSize;
+    swap->bytesUsed = (uint64_t)pstart->TotalUsed * pageSize;
+    swap->bytesTotal = (uint64_t)pstart->CurrentSize * pageSize;
 
     return NULL;
 }

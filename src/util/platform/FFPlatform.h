@@ -22,6 +22,8 @@ typedef struct FFPlatform {
     FFstrbuf systemVersion;
     FFstrbuf systemArchitecture;
     FFstrbuf systemDisplayVersion;
+
+    uint32_t pageSize;
 } FFPlatform;
 
 void ffPlatformInit(FFPlatform* platform);

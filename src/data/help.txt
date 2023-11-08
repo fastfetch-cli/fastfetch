@@ -162,10 +162,10 @@ Module specific options:
     --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
     --localip-show-loop <?value>:            Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --localip-name-prefix <str>:             Show interfaces with given interface name prefix only. Default is empty
-    --localip-default-route-only <?value>:   Show the interface that is used for default routing only. Default is true
+    --localip-default-route-only <?value>:   Show the interface that is used for default routing only. Default is true on non-android platforms
     --localip-compact <?value>:              Show all IPs in one line. Default is false
     --netio-name-prefix <str>:               Show interfaces with given name prefix only. Default is empty
-    --netio-default-route-only <?value>:     Show the interfac that is used for default routing only. Default is true
+    --netio-default-route-only <?value>:     Show the interfac that is used for default routing only. Default is true on non-android platforms
     --publicip-timeout <num>:                Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url <str>:                    The URL of public IP detection server to be used.
     --weather-location <str>:                Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).

@@ -11,27 +11,45 @@
     #include <windows.h>
 #endif
 
+// https://github.com/kostya/benchmarks/blob/master/base64/test-nolib.c#L145
+static void base64EncodeRaw(uint32_t size, const char *str, uint32_t *out_size, char *output)
+{
+    static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    char *out = output;
+    const char *ends = str + (size - size % 3);
+    while (str != ends) {
+        uint32_t n = __builtin_bswap32(*(uint32_t*) str);
+        *out++ = chars[(n >> 26) & 63];
+        *out++ = chars[(n >> 20) & 63];
+        *out++ = chars[(n >> 14) & 63];
+        *out++ = chars[(n >> 8) & 63];
+        str += 3;
+    }
+
+    if (size % 3 == 1) {
+        uint64_t n = (uint64_t)*str << 16;
+        *out++ = chars[(n >> 18) & 63];
+        *out++ = chars[(n >> 12) & 63];
+        *out++ = '=';
+        *out++ = '=';
+    } else if (size % 3 == 2) {
+        uint64_t n = (uint64_t)*str++ << 16;
+        n |= (uint64_t)*str << 8;
+        *out++ = chars[(n >> 18) & 63];
+        *out++ = chars[(n >> 12) & 63];
+        *out++ = chars[(n >> 6) & 63];
+        *out++ = '=';
+    }
+    *out = '\0';
+    *out_size = (uint32_t) (out - output);
+}
+
 static FFstrbuf base64Encode(const FFstrbuf* in)
 {
-    const char* base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    FFstrbuf out = ffStrbufCreateA(10 + in->length * 4 / 3);
+    base64EncodeRaw(in->length, in->chars, &out.length, out.chars);
+    assert(out.length < out.allocated);
 
-    FFstrbuf out = ffStrbufCreateA(8 * (1 + in->length / 6));
-
-    unsigned val = 0;
-    int valb = -6;
-    for (uint32_t i = 0; i < in->length; ++i)
-    {
-        unsigned char c = (unsigned char) in->chars[i];
-        val = (val << 8) + c;
-        valb += 8;
-        while (valb >= 0)
-        {
-            ffStrbufAppendC(&out, base64Chars[(val>>valb)&0x3F]);
-            valb -= 6;
-        }
-    }
-    if (valb > -6) ffStrbufAppendC(&out, base64Chars[((val<<8)>>(valb+8))&0x3F]);
-    while (out.length % 4) ffStrbufAppendC(&out, '=');
     return out;
 }
 

@@ -10,6 +10,7 @@
 
 #ifdef __APPLE__
     #include <libproc.h>
+    #include <sys/sysctl.h>
 #elif defined(__FreeBSD__)
     #include <sys/sysctl.h>
 #endif
@@ -153,6 +154,16 @@ static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
     ffStrbufAppendS(&platform->userShell, shell);
 }
 
+static void getPageSize(FFPlatform* platform)
+{
+    #if defined(__FreeBSD__) || defined(__APPLE__)
+    size_t length = sizeof(platform->pageSize);
+    sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &platform->pageSize, &length, NULL, 0);
+    #else
+    platform->pageSize = (uint32_t) sysconf(_SC_PAGESIZE);
+    #endif
+}
+
 void ffPlatformInitImpl(FFPlatform* platform)
 {
     struct passwd* pwd = getpwuid(getuid());
@@ -176,4 +187,6 @@ void ffPlatformInitImpl(FFPlatform* platform)
     ffStrbufAppendS(&platform->systemVersion, uts.version);
     ffStrbufAppendS(&platform->systemArchitecture, uts.machine);
     ffStrbufInit(&platform->systemDisplayVersion);
+
+    getPageSize(platform);
 }

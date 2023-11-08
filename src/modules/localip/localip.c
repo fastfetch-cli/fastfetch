@@ -370,7 +370,13 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
     ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly = true;
+    options->defaultRouteOnly =
+        #ifdef __ANDROID__
+            false
+        #else
+            true
+        #endif
+    ;
 }
 
 void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
