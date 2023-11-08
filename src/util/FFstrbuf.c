@@ -167,8 +167,11 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
     va_list arguments;
     va_start(arguments, format);
 
-    if(strbuf->allocated == 0)
-        return ffStrbufInitVF(strbuf, format, arguments);
+    if(strbuf->allocated == 0) {
+        ffStrbufInitVF(strbuf, format, arguments);
+        va_end(arguments);
+        return;
+    }
 
     ffStrbufClear(strbuf);
     ffStrbufAppendVF(strbuf, format, arguments);
