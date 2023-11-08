@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_gpu_gpu
-#define FF_INCLUDED_detection_gpu_gpu
-
 #include "fastfetch.h"
 
 #define FF_GPU_TEMP_UNSET (0/0.0)
@@ -42,5 +39,3 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result);
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus);
 
 const char* ffGetGPUVendorString(unsigned vendorId);
-
-#endif

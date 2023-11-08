@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_processing
-#define FF_INCLUDED_common_processing
-
 #include "util/FFstrbuf.h"
 
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr);
@@ -28,5 +25,3 @@ static inline const char* ffProcessAppendStdErr(FFstrbuf* buffer, char* const ar
     }
     return error;
 }
-
-#endif

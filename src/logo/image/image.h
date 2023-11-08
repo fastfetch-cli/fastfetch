@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_LOGO_SIXEL_sixel
-#define FF_INCLUDED_LOGO_SIXEL_sixel
-
 #include "../logo.h"
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
@@ -46,6 +43,4 @@ FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData);
 #ifdef FF_HAVE_IMAGEMAGICK6
 #include <math.h>
 FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData);
-#endif
-
 #endif

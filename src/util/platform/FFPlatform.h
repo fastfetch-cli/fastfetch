@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_util_platform_FFPlatform
-#define FF_INCLUDED_util_platform_FFPlatform
-
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 
@@ -28,5 +25,3 @@ typedef struct FFPlatform {
 
 void ffPlatformInit(FFPlatform* platform);
 void ffPlatformDestroy(FFPlatform* platform);
-
-#endif

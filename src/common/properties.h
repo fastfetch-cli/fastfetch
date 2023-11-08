@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_properties
-#define FF_INCLUDED_common_properties
-
 #include "fastfetch.h"
 
 typedef struct FFpropquery
@@ -51,5 +48,3 @@ static inline bool ffParsePropFileData(const char* relativeFile, const char* sta
 {
     return ffParsePropFileDataValues(relativeFile, 1, (FFpropquery[]){{start, buffer}});
 }
-
-#endif

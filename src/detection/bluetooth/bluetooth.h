@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_bluetooth_bluetooth
-#define FF_INCLUDED_detection_bluetooth_bluetooth
-
 #include "fastfetch.h"
 
 typedef struct FFBluetoothResult
@@ -15,5 +12,3 @@ typedef struct FFBluetoothResult
 } FFBluetoothResult;
 
 const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */);
-
-#endif

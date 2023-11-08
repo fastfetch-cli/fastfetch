@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_parsing_h
-#define FF_INCLUDED_parsing_h
-
 #include "fastfetch.h"
 
 #include <stdint.h>
@@ -24,5 +21,3 @@ int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
 
 void ffParseSize(uint64_t bytes, FFstrbuf* result);
 void ffParseTemperature(double celsius, FFstrbuf* buffer);
-
-#endif

@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_settings
-#define FF_INCLUDED_common_settings
-
 #include "fastfetch.h"
 
 typedef enum FFvarianttype
@@ -37,6 +34,4 @@ bool ffSettingsGetSQLite3String(const char* dbPath, const char* query, FFstrbuf*
 bool ffSettingsGetAndroidProperty(const char* propName, FFstrbuf* result);
 #elif defined(__FreeBSD__)
 bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result);
-#endif
-
 #endif

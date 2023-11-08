@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_font_font
-#define FF_INCLUDED_detection_font_font
-
 #include "fastfetch.h"
 
 #define FF_DETECT_FONT_NUM_FONTS 4
@@ -20,5 +17,3 @@ typedef struct FFFontResult
 } FFFontResult;
 
 const char* ffDetectFont(FFFontResult* font);
-
-#endif

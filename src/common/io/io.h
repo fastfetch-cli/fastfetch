@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_io_io
-#define FF_INCLUDED_common_io_io
-
 #include "util/FFstrbuf.h"
 
 #ifdef _WIN32
@@ -153,5 +150,3 @@ static inline bool wrapClosedir(HANDLE* pdir)
 }
 #endif
 #define FF_AUTO_CLOSE_DIR __attribute__((__cleanup__(wrapClosedir)))
-
-#endif // FF_INCLUDED_common_io_io

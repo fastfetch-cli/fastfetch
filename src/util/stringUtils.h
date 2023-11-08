@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_util_stringUtils_h
-#define FF_INCLUDED_util_stringUtils_h
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -47,5 +44,3 @@ static inline bool ffStrEquals(const char* str, const char* compareTo)
 {
     return strcmp(str, compareTo) == 0;
 }
-
-#endif

@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_util_windows_wmi
-#define FF_INCLUDED_util_windows_wmi
-
 #ifdef __cplusplus
 
 extern "C" {
@@ -215,5 +212,3 @@ struct FFWmiQuery
     // Win32 COM headers requires C++ compiler
     #error Must be included in C++ source file
 #endif //__cplusplus
-
-#endif //FF_INCLUDED_util_windows_wmi

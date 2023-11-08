@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_gtkqt_gtkqt
-#define FF_INCLUDED_detection_gtkqt_gtkqt
-
 #include "fastfetch.h"
 
 typedef struct FFGTKResult
@@ -28,5 +25,3 @@ const FFGTKResult* ffDetectGTK2(void);
 const FFGTKResult* ffDetectGTK4(void);
 const FFGTKResult* ffDetectGTK3(void);
 const FFQtResult* ffDetectQt(void);
-
-#endif

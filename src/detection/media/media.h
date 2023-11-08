@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_media
-#define FF_INCLUDED_detection_media
-
 #include "fastfetch.h"
 
 typedef struct FFMediaResult
@@ -18,5 +15,3 @@ typedef struct FFMediaResult
 } FFMediaResult;
 
 const FFMediaResult* ffDetectMedia();
-
-#endif

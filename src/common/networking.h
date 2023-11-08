@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_networking
-#define FF_INCLUDED_common_networking
-
 #include "common/thread.h"
 #include "util/FFstrbuf.h"
 
@@ -35,5 +32,3 @@ static inline bool ffNetworkingGetHttp(const char* host, const char* path, uint3
         return ffNetworkingRecvHttpResponse(&state, buffer, timeout);
     return false;
 }
-
-#endif

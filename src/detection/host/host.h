@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_host_host
-#define FF_INCLUDED_detection_host_host
-
 #include "fastfetch.h"
 
 typedef struct FFHostResult
@@ -15,5 +12,3 @@ typedef struct FFHostResult
 } FFHostResult;
 
 const char* ffDetectHost(FFHostResult* result);
-
-#endif
