@@ -1,3 +1,9 @@
+# 2.2.3
+
+Bugfixes:
+* Fix local ips detection on Android. Regression from `2.0.0` (LocalIP, Android)
+* Fix terminal detection on NixOS (Terminal)
+
 # 2.2.2
 
 Changes:
