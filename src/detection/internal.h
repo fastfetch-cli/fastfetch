@@ -9,4 +9,4 @@
         return &result; \
     init = true; \
     __VA_ARGS__; \
-    return &result; \
+    return &result;
