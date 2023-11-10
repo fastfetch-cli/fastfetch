@@ -47,7 +47,7 @@ typedef struct FFstate
     FFPlatform platform;
     yyjson_doc* configDoc;
     yyjson_mut_doc* resultDoc;
-    FFstrbuf migrateConfigPath;
+    FFstrbuf genConfigPath;
 } FFstate;
 
 typedef struct FFinstance

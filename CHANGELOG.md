@@ -1,3 +1,9 @@
+# 2.3.0
+
+Changes:
+* The deprecated flag `--gen-config conf` is removed
+* Flag `--gen-config` now does the same thing as `--migrate-config`, which can be used as config migration and default config file generation. Flag `--migrate-config` is removed
+
 # 2.2.3
 
 Features:
@@ -8,7 +14,7 @@ Bugfixes:
 * Fix terminal detection on NixOS (Terminal)
 
 # 2.2.2
-
+g
 Changes:
 * `--percent-type` now defaults to 9 (colored percentage numbers)
 * `fastfetch` now prints LocalIp module by default

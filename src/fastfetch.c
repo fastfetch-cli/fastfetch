@@ -317,42 +317,27 @@ static bool parseConfigFile(FFdata* data, const char* path)
     return true;
 }
 
-static void generateConfigFile(bool force, const char* type)
+static void generateConfigFile(bool force, const char* filePath)
 {
-    if (!type)
+    if (!filePath)
     {
-        fputs("Error: the config type (`jsonc` or `conf`) must be specified\n", stderr);
-        exit(1);
-    }
-
-    FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0);
-    // Paths generated in `init.c/initConfigDirs` end with `/`
-    bool isJsonc = ffStrEqualsIgnCase(type, "jsonc");
-    if (!isJsonc)
-    {
-        if (!ffStrEqualsIgnCase(type, "conf"))
-        {
-            fputs("Error: config type can only be `jsonc` or `conf`\n", stderr);
-            exit(1);
-        }
-        else
-            fputs("Warning: support of flag based config type `conf` is deprecated, and may be removed in the future\n", stderr);
-    }
-
-    ffStrbufAppendS(filename, isJsonc ? "fastfetch/config.jsonc" : "fastfetch/config.conf");
-
-    if (!force && ffPathExists(filename->chars, FF_PATHTYPE_FILE))
-    {
-        fprintf(stderr, "Config file exists in `%s`, use `--gen-config-force` to overwrite\n", filename->chars);
-        exit(1);
+        ffStrbufSet(&instance.state.genConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
+        ffStrbufAppendS(&instance.state.genConfigPath, "fastfetch/config.jsonc");
     }
     else
     {
-        ffWriteFileData(
-            filename->chars,
-            isJsonc ? strlen(FASTFETCH_DATATEXT_CONFIG_USER_JSONC) : strlen(FASTFETCH_DATATEXT_CONFIG_USER),
-            isJsonc ? FASTFETCH_DATATEXT_CONFIG_USER_JSONC : FASTFETCH_DATATEXT_CONFIG_USER);
-        printf("A sample config file has been written in `%s`\n", filename->chars);
+        if (ffStrEqualsIgnCase(filePath, "conf") || ffStrEqualsIgnCase(filePath, "jsonc"))
+        {
+            fputs("Error: specifying file type is no longer supported\n", stderr);
+            exit(477);
+        }
+        ffStrbufSetS(&instance.state.genConfigPath, filePath);
+    }
+
+    if (!force && ffPathExists(instance.state.genConfigPath.chars, FF_PATHTYPE_ANY))
+    {
+        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config-force` to overwrite\n", instance.state.genConfigPath.chars);
+        exit(477);
     }
 }
 
@@ -493,31 +478,9 @@ static void parseCommand(FFdata* data, char* key, char* value)
         exit(0);
     }
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
-    {
         generateConfigFile(false, value);
-        exit(0);
-    }
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
-    {
         generateConfigFile(true, value);
-        exit(0);
-    }
-    else if (ffStrEqualsIgnCase(key, "--migrate-config"))
-    {
-        if (!value)
-        {
-            ffStrbufSet(&instance.state.migrateConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
-            ffStrbufAppendS(&instance.state.migrateConfigPath, "fastfetch/config.jsonc");
-        }
-        else
-            ffStrbufSetS(&instance.state.migrateConfigPath, value);
-
-        if (ffPathExists(instance.state.migrateConfigPath.chars, FF_PATHTYPE_ANY))
-        {
-            fprintf(stderr, "Error: file `%s` exists. Aborting\n", instance.state.migrateConfigPath.chars);
-            exit(477);
-        }
-    }
     else if(ffStrEqualsIgnCase(key, "--load-user-config"))
         data->loadUserConfig = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--format"))
@@ -609,7 +572,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
 
 static void parseConfigFiles(FFdata* data)
 {
-    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
+    if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
     {
         for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
         {
@@ -712,7 +675,7 @@ static void run(FFdata* data)
         ffFinish();
 }
 
-static void migrateConfig(FFdata* data, const FFstrbuf* filename)
+static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
 {
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val* root = yyjson_mut_obj(doc);
@@ -730,7 +693,7 @@ static void migrateConfig(FFdata* data, const FFstrbuf* filename)
     else
     {
         if (yyjson_mut_write_file(filename->chars, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL))
-            printf("The migrated config file has been written in `%s`\nYou may remove the old config file if everything works fine\n", filename->chars);
+            printf("The generated config file has been written in `%s`\n", filename->chars);
         else
         {
             printf("Error: failed to write file in `%s`\n", filename->chars);
@@ -757,10 +720,10 @@ int main(int argc, char** argv)
         parseConfigFiles(&data);
     parseArguments(&data, argc, argv, (void*) parseOption);
 
-    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
+    if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
         run(&data);
     else
-        migrateConfig(&data, &instance.state.migrateConfigPath);
+        writeConfigFile(&data, &instance.state.genConfigPath);
 
     ffStrbufDestroy(&data.structure);
     FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)
