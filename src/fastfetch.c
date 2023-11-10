@@ -353,7 +353,6 @@ static void generateConfigFile(bool force, const char* type)
             isJsonc ? strlen(FASTFETCH_DATATEXT_CONFIG_USER_JSONC) : strlen(FASTFETCH_DATATEXT_CONFIG_USER),
             isJsonc ? FASTFETCH_DATATEXT_CONFIG_USER_JSONC : FASTFETCH_DATATEXT_CONFIG_USER);
         printf("A sample config file has been written in `%s`\n", filename->chars);
-        exit(0);
     }
 }
 
@@ -428,12 +427,8 @@ static void printVersion()
     printf("%s %s%s%s (%s)\n", result.projectName, result.version, result.versionTweak, result.debugMode ? "-debug" : "", result.architecture);
 }
 
-static void parseOption(FFdata* data, const char* key, const char* value)
+static void parseCommand(FFdata* data, char* key, char* value)
 {
-    ///////////////////////
-    //Informative options//
-    ///////////////////////
-
     if(ffStrEqualsIgnCase(key, "-h") || ffStrEqualsIgnCase(key, "--help"))
     {
         printCommandHelp(value);
@@ -453,121 +448,62 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     {
         const char* subkey = key + strlen("--print-");
         if(ffStrEqualsIgnCase(subkey, "config-system"))
-        {
             puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "config-user"))
-        {
             puts(FASTFETCH_DATATEXT_CONFIG_USER);
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "structure"))
-        {
             puts(FASTFETCH_DATATEXT_STRUCTURE);
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "logos"))
-        {
             ffLogoBuiltinPrint();
-            exit(0);
-        }
         else
-            goto error;
+        {
+            fprintf(stderr, "Error: unsupported print option: %s\n", key);
+            exit(415);
+        }
+        exit(0);
     }
     else if(ffStrStartsWithIgnCase(key, "--list-"))
     {
         const char* subkey = key + strlen("--list-");
         if(ffStrEqualsIgnCase(subkey, "modules"))
-        {
             listModules();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "presets"))
-        {
             listAvailablePresets();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "config-paths"))
-        {
             listConfigPaths();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "data-paths"))
-        {
             listDataPaths();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "features"))
-        {
             ffListFeatures();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "logos"))
         {
             puts("Builtin logos:");
             ffLogoBuiltinList();
             puts("\nCustom logos:");
             listAvailableLogos();
-            exit(0);
         }
         else if(ffStrEqualsIgnCase(subkey, "logos-autocompletion"))
-        {
             ffLogoBuiltinListAutocompletion();
-            exit(0);
-        }
         else
-            goto error;
-    }
-    else if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
-    {
-        FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
-        ffOptionParseString(key, value, &customValueStr);
-        uint32_t index = ffStrbufFirstIndexC(&customValueStr, '=');
-        if(index == 0 || index == customValueStr.length)
         {
-            fprintf(stderr, "Error: usage: %s <key>=<str>\n", key);
-            exit(477);
+            fprintf(stderr, "Error: unsupported list option: %s\n", key);
+            exit(415);
         }
 
-        FF_STRBUF_AUTO_DESTROY customKey = ffStrbufCreateNS(index, customValueStr.chars);
-
-        FFCustomValue* customValue = NULL;
-        FF_LIST_FOR_EACH(FFCustomValue, x, data->customValues)
-        {
-            if(ffStrbufEqual(&x->key, &customKey))
-            {
-                ffStrbufDestroy(&x->key);
-                ffStrbufDestroy(&x->value);
-                customValue = x;
-                break;
-            }
-        }
-        if(!customValue) customValue = (FFCustomValue*) ffListAdd(&data->customValues);
-        ffStrbufInitMove(&customValue->key, &customKey);
-        ffStrbufSubstrAfter(&customValueStr, index);
-        ffStrbufInitMove(&customValue->value, &customValueStr);
-        customValue->printKey = key[5] == '\0';
+        exit(0);
     }
-
-    ////////////
-    //Switches//
-    ////////////
-
-    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
-        optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
+    {
         generateConfigFile(false, value);
+        exit(0);
+    }
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
+    {
         generateConfigFile(true, value);
+        exit(0);
+    }
     else if (ffStrEqualsIgnCase(key, "--migrate-config"))
     {
-        if (instance.state.configDoc)
-        {
-            fputs("Error: existing jsonc config detected. Aborting\n", stderr);
-            exit(477);
-        }
-
         if (!value)
         {
             ffStrbufSet(&instance.state.migrateConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
@@ -608,12 +544,53 @@ static void parseOption(FFdata* data, const char* key, const char* value)
                 break;
         }
     }
+    else
+        return;
+
+    // Don't parse it again in parseOption.
+    // This is necessary because parseOption doesn't understand this option and will result in an unknown option error.
+    key[0] = '\0';
+    if (value) value[0] = '\0';
+}
+
+static void parseOption(FFdata* data, const char* key, const char* value)
+{
+    if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+        optionParseConfigFile(data, key, value);
+
+    else if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
+    {
+        FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
+        ffOptionParseString(key, value, &customValueStr);
+        uint32_t index = ffStrbufFirstIndexC(&customValueStr, '=');
+        if(index == 0 || index == customValueStr.length)
+        {
+            fprintf(stderr, "Error: usage: %s <key>=<str>\n", key);
+            exit(477);
+        }
+
+        FF_STRBUF_AUTO_DESTROY customKey = ffStrbufCreateNS(index, customValueStr.chars);
+
+        FFCustomValue* customValue = NULL;
+        FF_LIST_FOR_EACH(FFCustomValue, x, data->customValues)
+        {
+            if(ffStrbufEqual(&x->key, &customKey))
+            {
+                ffStrbufDestroy(&x->key);
+                ffStrbufDestroy(&x->value);
+                customValue = x;
+                break;
+            }
+        }
+        if(!customValue) customValue = (FFCustomValue*) ffListAdd(&data->customValues);
+        ffStrbufInitMove(&customValue->key, &customKey);
+        ffStrbufSubstrAfter(&customValueStr, index);
+        ffStrbufInitMove(&customValue->value, &customValueStr);
+        customValue->printKey = key[5] == '\0';
+    }
+
     else if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
         ffOptionParseString(key, value, &data->structure);
-
-    ///////////
-    //Options//
-    ///////////
 
     else if(
         ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
@@ -623,13 +600,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffParseModuleOptions(key, value)
     ) {}
 
-    //////////////////
-    //Unknown option//
-    //////////////////
-
     else
     {
-error:
         fprintf(stderr, "Error: unknown option: %s\n", key);
         exit(400);
     }
@@ -664,14 +636,14 @@ static void parseConfigFiles(FFdata* data)
     }
 }
 
-static void parseArguments(FFdata* data, int argc, const char** argv)
+static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(FFdata* data, char* key, char* value))
 {
-    if(!data->loadUserConfig)
-        return;
-
     for(int i = 1; i < argc; i++)
     {
         const char* key = argv[i];
+        if(*key == '\0')
+            continue; // has been handled by parseCommand
+
         if(*key != '-')
         {
             fprintf(stderr, "Error: invalid option: %s. An option must start with `-`\n", key);
@@ -683,11 +655,11 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
             argv[i + 1][1] != '\0' && // `-` is used as an alias for `/dev/stdin`
             strcasecmp(argv[i], "--separator-string") != 0 // Separator string can start with a -
         )) {
-            parseOption(data, argv[i], NULL);
+            parser(data, argv[i], NULL);
         }
         else
         {
-            parseOption(data, argv[i], argv[i + 1]);
+            parser(data, argv[i], argv[i + 1]);
             ++i;
         }
     }
@@ -769,7 +741,7 @@ static void migrateConfig(FFdata* data, const FFstrbuf* filename)
     yyjson_mut_doc_free(doc);
 }
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     ffInitInstance();
 
@@ -780,9 +752,10 @@ int main(int argc, const char** argv)
         .loadUserConfig = true,
     };
 
-    if(!getenv("NO_CONFIG"))
+    parseArguments(&data, argc, argv, parseCommand);
+    if(!getenv("NO_CONFIG") && data.loadUserConfig)
         parseConfigFiles(&data);
-    parseArguments(&data, argc, argv);
+    parseArguments(&data, argc, argv, (void*) parseOption);
 
     if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
         run(&data);
