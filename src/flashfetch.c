@@ -17,54 +17,39 @@ int main(void)
     ffStart();
 
     //Printing
-    ffPrintTitle(&options->title);
-    ffPrintSeparator(&options->separator);
-    ffPrintOS(&options->os);
-    ffPrintHost(&options->host);
-    //ffPrintBios(&options->bios);
-    //ffPrintBoard(&options->board);
-    //ffPrintChassis(&options->chassis);
-    ffPrintKernel(&options->kernel);
-    //ffPrintProcesses(&options->processes);
-    ffPrintUptime(&options->uptime);
-    ffPrintPackages(&options->packages);
-    ffPrintShell(&options->shell);
-    ffPrintDisplay(&options->display);
-    // ffPrintBrightness(&options->brightness);
-    ffPrintDE(&options->de);
-    ffPrintWM(&options->wm);
-    ffPrintWMTheme(&options->wmTheme);
-    ffPrintTheme(&options->theme);
-    ffPrintIcons(&options->icons);
-    ffPrintFont(&options->font);
-    ffPrintCursor(&options->cursor);
-    ffPrintTerminal(&options->terminal);
-    ffPrintTerminalFont(&options->terminalFont);
-    ffPrintCPU(&options->cpu);
-    ffPrintGPU(&options->gpu);
-    ffPrintMemory(&options->memory);
-    ffPrintSwap(&options->swap);
-    ffPrintDisk(&options->disk);
-    ffPrintLocalIp(&options->localIP);
-    // ffPrintPublicIp(&options->publicIP);
-    //ffPrintWifi(&options->wifi);
-    ffPrintBattery(&options->battery);
-    ffPrintPowerAdapter(&options->powerAdapter);
-    //ffPrintPlayer(&options->player);
-    //ffPrintMedia(&options->media);
-    //ffPrintCPUUsage(&options->cpuUsage);
-    ffPrintLocale(&options->locale);
-    //ffPrintDateTime(&options->dateTime);
-    //ffPrintVulkan(&options->vulkan);
-    //ffPrintOpenGL(&options->openGL);
-    //ffPrintOpenCL(&options->openCL);
-    //ffPrintUsers(&options->users);
-    //ffPrintWeather(&options->weather);
-    //ffPrintBluetooth(&options->bluetooth);
-    //ffPrintSound(&options->sound);
-    //ffPrintGamepad(&options->gamepad);
-    ffPrintBreak(&options->break_);
-    ffPrintColors(&options->colors);
+    void* const modules[] = {
+        &options->title,
+        &options->separator,
+        &options->os,
+        &options->kernel,
+        &options->uptime,
+        &options->packages,
+        &options->shell,
+        &options->display,
+        &options->de,
+        &options->wm,
+        &options->wmTheme,
+        &options->theme,
+        &options->icons,
+        &options->font,
+        &options->cursor,
+        &options->terminal,
+        &options->terminalFont,
+        &options->cpu,
+        &options->gpu,
+        &options->memory,
+        &options->swap,
+        &options->disk,
+        &options->localIP,
+        &options->battery,
+        &options->powerAdapter,
+        &options->locale,
+        &options->break_,
+        &options->colors,
+    };
+
+    for (size_t i = 0; i < sizeof(modules) / sizeof(modules[0]); i++)
+        ((const FFModuleBaseInfo*) modules[i])->printModule(modules[i]);
 
     ffFinish();
     ffDestroyInstance();
