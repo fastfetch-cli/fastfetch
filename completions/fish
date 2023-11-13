@@ -1,0 +1,53 @@
+#!/usr/bin/env fish
+
+set -l whole_text (fastfetch --pipe --help)
+set -l modules (string lower (string sub -s 5 (fastfetch --list-modules)))
+
+complete -c fastfetch -f
+
+for line in (string match -- '    -*' $whole_text)
+    set -l kv (string split -n ':' $line -m1)
+    set -l args (string trim -- $kv[1])
+    set -l desc (string trim -- $kv[2])
+
+    set -l res -c fastfetch
+
+    switch (string match -r -- '<\??\w+>' $args)
+    case '<\?command>'
+        set -l modules_format $modules-format"\tModule_format"
+        set res $res -x -a "color\tSupported_colors format\tCustom_format config\tConfiguration $modules_format"
+    case '<\?bool>'
+        set res $res -x -a "true\tBool false\tBool"
+    case '<path>'
+        set res $res -F -r
+    case '<file>'
+        if string match -q -- '*--config*' $args
+            set -l presets (fastfetch --list-presets false)"\tPreset"
+            set res $res -r -a "$presets"
+        else
+            set res $res -F -r
+        end
+    case '<num>'
+        set res $res -x -a "0\tNumber 1\tNumber 2\tNumber 3\tNumber 4\tNumber 5\tNumber 6\tNumber 7\tNumber 8\tNumber 9\tNumber"
+    case '<\?num>'
+        set res $res -x -a "0\tNumber 1\tNumber 2\tNumber 3\tNumber 4\tNumber 5\tNumber 6\tNumber 7\tNumber 8\tNumber 9\tNumber"
+    case '<structure>'
+        set temp $modules"\tModule"
+        set res $res -x -a "$temp"
+    case '<logo>'
+        set res $res -x -a "none\tNone small\tSmall"
+    case '<*>'
+        set res $res -x
+    end
+
+    set args (string trim -- (string split -- ',' (string replace -r -- '<\??\w+>' '' $args)))
+
+    for arg in $args
+        if string match -q -- '--*' $arg
+            set res $res -l (string sub -s 3 -- $arg)
+        else
+            set res $res -o (string sub -s 2 -- $arg)
+        end
+    end
+    complete $res -d (string replace -- ' (+)' '' $desc)
+end

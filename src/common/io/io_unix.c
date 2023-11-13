@@ -199,7 +199,7 @@ bool ffSuppressIO(bool suppress)
     return true;
 }
 
-void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
+void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
 {
     DIR* dir = opendir(folder->chars);
     if(dir == NULL)
@@ -207,8 +207,12 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
     uint32_t folderLength = folder->length;
 
-    if(folderName != NULL)
+    if(pretty && folderName != NULL)
+    {
+        for(uint8_t i = 0; i < indentation - 1; i++)
+            fputs("  | ", stdout);
         printf("%s/\n", folderName);
+    }
 
     struct dirent* entry;
 
@@ -221,13 +225,20 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
             ffStrbufAppendS(folder, entry->d_name);
             ffStrbufAppendC(folder, '/');
-            listFilesRecursively(folder, (uint8_t) (indentation + 1), entry->d_name);
+            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), entry->d_name, pretty);
             ffStrbufSubstrBefore(folder, folderLength);
             continue;
         }
 
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
+        if (pretty)
+        {
+            for(uint8_t i = 0; i < indentation; i++)
+                fputs("  | ", stdout);
+        }
+        else
+        {
+            fputs(folder->chars + baseLength, stdout);
+        }
 
         puts(entry->d_name);
     }
@@ -235,9 +246,9 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
     closedir(dir);
 }
 
-void ffListFilesRecursively(const char* path)
+void ffListFilesRecursively(const char* path, bool pretty)
 {
     FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
-    listFilesRecursively(&folder, 0, NULL);
+    listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
 }

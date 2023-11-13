@@ -99,7 +99,7 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 #define FF_SUPPRESS_IO() bool __attribute__((__cleanup__(ffUnsuppressIO), __unused__)) io_suppressed__ = ffSuppressIO(true)
 
-void ffListFilesRecursively(const char* path);
+void ffListFilesRecursively(const char* path, bool pretty);
 
 static inline bool wrapClose(FFNativeFD* pfd)
 {

@@ -3,8 +3,7 @@ Fastfetch is a neofetch-like tool for fetching system information and displaying
 Usage: fastfetch <?options>
 
 Informative options:
-    -h, --help:                 Show this message
-    -h, --help <command>:       Show help for a specific command
+    -h, --help <?command>:      Show this message, or help for a specific command
     -v, --version:              Show the version of fastfetch
     --list-config-paths:        List search paths of config files
     --list-data-paths:          List search paths of presets and logos
@@ -18,31 +17,31 @@ Informative options:
     --print-structure:          Print the default structure
 
 Config options:
-    -c, --load-config <file>:   Load a config file or preset (+)
+    -c, --config <file>:        Load a config file or preset (+)
     --gen-config <?file>:       Generate a config file (or print the file if <file> is `-`), with options specified in the command line (if any)
     --gen-config-force <?file>: Generate a config file. Overwrite the existing one
 
 General options:
-    --thread <?value>:                Use separate threads to send HTTP requests
-    --escape-bedrock <?value>:        On Bedrock Linux, whether to escape the bedrock jail
+    --thread <?bool>:                 Use separate threads to send HTTP requests
+    --escape-bedrock <?bool>:         On Bedrock Linux, whether to escape the bedrock jail
     --wmi-timeout <num>:              Set the timeout (ms) for WMI queries. Windows only. Default is 5000
     --processing-timeout <num>:       Set the timeout (ms) when waiting for child processes. Default is 1000
-    --ds-force-drm <?value>:          Set if only DRM should be used to detect displays. Default is false. Linux only
+    --ds-force-drm <?bool>:           Set if only DRM should be used to detect displays. Default is false. Linux only
 
 Logo options:
     -l, --logo <logo>:                     Set the logo; if default, the name of a builtin logo or a path to a file
     --logo-type <type>:                    Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty, iterm or chafa
     --logo-width <width>:                  Set the width of the logo (in characters), if it is an image. Required for iTerm image protocol
     --logo-height <height>:                Set the height of the logo (in characters), if it is an image. Required for iTerm image protocol
-    --logo-preserve-aspect-ratio <?value>: Set if the logo should fill the specified width and height as much as possible without stretching. Supported by iTerm image protocol
+    --logo-preserve-aspect-ratio <?bool>:  Set if the logo should fill the specified width and height as much as possible without stretching. Supported by iTerm image protocol
     --logo-color-[1-9] <color>:            Overwrite a color in the logo
-    --logo-padding <padding>:              Set the padding on the left and the right of the logo
-    --logo-padding-left <padding>:         Set the padding on the left of the logo
-    --logo-padding-right <padding>:        Set the padding on the right of the logo
-    --logo-padding-top <padding>:          Set the padding on the top of the logo
-    --logo-print-remaining <?value>:       Whether to print the remaining logo, if it has more lines than modules to display
-    --logo-separate <?value>:              If true, print modules at bottom of the logo
-    --logo-recache <?value>:               If true, regenerate image logo cache
+    --logo-padding <num>:                  Set the padding on the left and the right of the logo
+    --logo-padding-left <num>:             Set the padding on the left of the logo
+    --logo-padding-right <num>:            Set the padding on the right of the logo
+    --logo-padding-top <num>:              Set the padding on the top of the logo
+    --logo-print-remaining <?bool>:        Whether to print the remaining logo, if it has more lines than modules to display
+    --logo-separate <?bool>:               If true, print modules at bottom of the logo
+    --logo-recache <?bool>:                If true, regenerate image logo cache
     --file <file>:                         Short for --logo-type file --logo <file>
     --file-raw <file>:                     Short for --logo-type file-raw --logo <file>
     --data <data>:                         Short for --logo-type data --logo <data>
@@ -51,36 +50,36 @@ Logo options:
     --kitty <file>:                        Short for --logo-type kitty --logo <file>
     --iterm <file>:                        Short for --logo-type iterm --logo <file>
     --chafa <file>:                        Short for --logo-type chafa --logo <file>
-    --chafa-fg-only <?value>:              Produce character-cell output using foreground colors only. See chafa document for detail
+    --chafa-fg-only <?bool>:               Produce character-cell output using foreground colors only. See chafa document for detail
     --chafa-symbols <str>:                 Specify character symbols to employ in final output. See chafa document for detail
-    --chafa-canvas-mode <value>:           Determine how colors are used in the output. This value maps the int value of enum ChafaCanvasMode. See chafa document for detail
+    --chafa-canvas-mode <num>:             Determine how colors are used in the output. This value maps the int value of enum ChafaCanvasMode. See chafa document for detail
     --chafa-color-space <value>:           Set color space used for quantization. 0 for RGB; 1 for DIN99d. See chafa document for detail
-    --chafa-dither-mode <value>:           Set output dither mode (No effect with 24-bit color). This value maps the int value of enum ChafaDitherMode. See chafa document for detail
+    --chafa-dither-mode <num>:             Set output dither mode (No effect with 24-bit color). This value maps the int value of enum ChafaDitherMode. See chafa document for detail
 
 Display options:
-    -s,--structure <structure>:  Set the structure of the fetch. Must be a colon separated list of keys. Use `fastfetch --list-modules` to see the ones available.
-    --stat <?value>:             Show time usage (in ms) for individual modules
-    --pipe <?value>:             Disable logo and all escape sequences
+    -s, --structure <structure>: Set the structure of the fetch. Must be a colon separated list of keys. Use `fastfetch --list-modules` to see the ones available.
+    --stat <?bool>:              Show time usage (in ms) for individual modules
+    --pipe <?bool>:              Disable logo and all escape sequences
     --color-keys <color>:        Set the color of the keys
     --color-title <color>:       Set the color of the title
     --color <color>:             Set the color of both the keys and title
     --key-width <num>:           Align the width of keys to <num> characters
-    --bright-color <?value>:     Set if the keys, title and ASCII logo should be printed in bright color. Default is true
+    --bright-color <?bool>:      Set if the keys, title and ASCII logo should be printed in bright color. Default is true
     --separator <str>:           Set the separator between key and value. Default is a colon with a space
     --set <key=value>:           Hard set the value of a key
     --set-keyless <key=value>:   Hard set the value of a key, but don't print the key or the separator
-    --show-errors <?value>:      Print occurring errors
-    --disable-linewrap <?value>: Whether to disable line wrap during the run
-    --hide-cursor <?value>:      Whether to hide the cursor during the run
+    --show-errors <?bool>:       Print occurring errors
+    --disable-linewrap <?bool>:  Whether to disable line wrap during the run
+    --hide-cursor <?bool>:       Whether to hide the cursor during the run
     --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
     --percent-type <value>:      Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 9
-    --percent-ndigits <value>:   Set the number of digits to keep after the decimal point when formatting percentage numbers. Default is 0
+    --percent-ndigits <num>:     Set the number of digits to keep after the decimal point when formatting percentage numbers. Default is 0
     --bar-char-elapsed <str>:    Set the character to use in elapsed part. Default is '■'
     --bar-char-total <str>:      Set the character to use in total part. Default is '-'
     --bar-width <?num>:          Set the width of the bar, in number of characters. Default is 10
-    --bar-border <?value>:       Whether to show a border around the bar. Default is true
-    --no-buffer <?value>:        Set if the stdout application buffer should be disabled. Default is false
-    --size-ndigits <value>:      Set the number of digits to keep after the decimal point when formatting sizes
+    --bar-border <?bool>:        Whether to show a border around the bar. Default is true
+    --no-buffer <?bool>:         Set if the stdout application buffer should be disabled. Default is false
+    --size-ndigits <num>:        Set the number of digits to keep after the decimal point when formatting sizes
     --size-max-prefix <value>:   Set the largest binary prefix to use when formatting sizes. Default is YB
     --temperature-unit <value>:  Set the unit of the temperature. Must be one of C, F and K. Default is C
 
@@ -122,62 +121,62 @@ Library options: Set the path of a library to load
     --lib-ddcutil <path>:       Used for brightness detection of external displays
 
 Module specific options:
-    --title-fqdn <?value>:                   Set if the title should use fully qualified domain name. Default is false
+    --title-fqdn <?bool>:                    Set if the title should use fully qualified domain name. Default is false
     --title-color-user <color>:              Set color of the user name (left part). Default is empty (use color of `--color-title`).
     --title-color-at <color>:                Set color of the @ symbol (middle part). Default is empty (use color of `--color-title`)
     --title-color-host <color>:              Set color of the host name (right part). Default is empty (use color of `--color-title`)
-    --chassis-use-wmi <?value>:              Set if WMI query should be used on Windows, which detects more information but slower. Default is false
+    --chassis-use-wmi <?bool>:               Set if WMI query should be used on Windows, which detects more information but slower. Default is false
     --separator-string <str>:                Set the string printed by the separator module
     --os-file <path>:                        Set the path to the file containing OS information. Linux only
     --disk-folders <folders>:                A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
-    --disk-show-regular <?value>:            Set if regular volume should be printed. Default is true
-    --disk-show-external <?value>:           Set if external volume should be printed. Default is true
-    --disk-show-hidden <?value>:             Set if hidden volumes should be printed. Default is false
-    --disk-show-subvolumes <?value>:         Set if subvolumes should be printed. Default is false
-    --disk-show-readonly <?value>:           Set if read only volumes should be printed. Default is false
-    --disk-show-unknown <?value>:            Set if unknown (unable to detect sizes) volumes should be printed. Default is false
-    --disk-use-available <?value>:           Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes. Default is false
+    --disk-show-regular <?bool>:             Set if regular volume should be printed. Default is true
+    --disk-show-external <?bool>:            Set if external volume should be printed. Default is true
+    --disk-show-hidden <?bool>:              Set if hidden volumes should be printed. Default is false
+    --disk-show-subvolumes <?bool>:          Set if subvolumes should be printed. Default is false
+    --disk-show-readonly <?bool>:            Set if read only volumes should be printed. Default is false
+    --disk-show-unknown <?bool>:             Set if unknown (unable to detect sizes) volumes should be printed. Default is false
+    --disk-use-available <?bool>:            Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes. Default is false
     --diskio-name-prefix <str>:              Show disks with given name prefix only. Default is empty
-    --bluetooth-show-disconnected <?value>:  Set if disconnected bluetooth devices should be printed. Default is false
-    --packages-winget <?value>:              Set if winget package count should be detected. Default is false
+    --bluetooth-show-disconnected <?bool>:   Set if disconnected bluetooth devices should be printed. Default is false
+    --packages-winget <?bool>:               Set if winget package count should be detected. Default is false
     --display-compact-type <?string>:        Set if all displays should be printed in one line. Default is none
-    --display-detect-name <?value>:          Set if display name should be detected and printed (if supported). Default is false
-    --display-precise-refresh-rate <?value>: Set if decimal refresh rates should not be rounded into integers when printing. Default is true
+    --display-detect-name <?bool>:           Set if display name should be detected and printed (if supported). Default is false
+    --display-precise-refresh-rate <?bool>:  Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --brightness-ddcci-sleep <num>:          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
     --sound-type <value>:                    Set what type of sound devices should be printed. Should be either main, active or all. Default is main
     --battery-dir <folder>:                  The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only
-    --battery-use-setup-api <?value>:        Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
-    --cpu-temp <?value>:                     Detect and display CPU temperature if supported. Default is false
+    --battery-use-setup-api <?bool>:         Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
+    --cpu-temp <?bool>:                      Detect and display CPU temperature if supported. Default is false
     --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
-    --cpuusage-separate <?value>:            Display CPU usage per CPU logical core, instead of an average result. Default is false
-    --de-slow-version-detection <?value>:    Set if DE version should be detected with slow operations. Default is false
-    --gpu-temp <?value>:                     Detect and display GPU temperature if supported. Default is false
-    --gpu-use-nvml <?value>:                 Use nvml (NVIDIA Management Library) to detect more detailed GPU information (memory usage, CUDA core count, etc). Default is false
-    --gpu-force-vulkan <?value>:             Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
-    --gpu-hide-type <?value>:                Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
-    --battery-temp <?value>:                 Detect and display Battery temperature if supported. Default is false
-    --localip-show-ipv4 <?value>:            Show IPv4 addresses in local ip module. Default is true
-    --localip-show-ipv6 <?value>:            Show IPv6 addresses in local ip module. Default is false
-    --localip-show-mac <?value>:             Show mac addresses in local ip module. Default is false
-    --localip-show-loop <?value>:            Show loop back addresses (127.0.0.1) in local ip module. Default is false
+    --cpuusage-separate <?bool>:             Display CPU usage per CPU logical core, instead of an average result. Default is false
+    --de-slow-version-detection <?bool>:     Set if DE version should be detected with slow operations. Default is false
+    --gpu-temp <?bool>:                      Detect and display GPU temperature if supported. Default is false
+    --gpu-use-nvml <?bool>:                  Use nvml (NVIDIA Management Library) to detect more detailed GPU information (memory usage, CUDA core count, etc). Default is false
+    --gpu-force-vulkan <?bool>:              Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
+    --gpu-hide-type <?bool>:                 Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
+    --battery-temp <?bool>:                  Detect and display Battery temperature if supported. Default is false
+    --localip-show-ipv4 <?bool>:             Show IPv4 addresses in local ip module. Default is true
+    --localip-show-ipv6 <?bool>:             Show IPv6 addresses in local ip module. Default is false
+    --localip-show-mac <?bool>:              Show mac addresses in local ip module. Default is false
+    --localip-show-loop <?bool>:             Show loop back addresses (127.0.0.1) in local ip module. Default is false
     --localip-name-prefix <str>:             Show interfaces with given interface name prefix only. Default is empty
-    --localip-default-route-only <?value>:   Show the interface that is used for default routing only. Default is true on non-android platforms
-    --localip-compact <?value>:              Show all IPs in one line. Default is false
+    --localip-default-route-only <?bool>:    Show the interface that is used for default routing only. Default is true on non-android platforms
+    --localip-compact <?bool>:               Show all IPs in one line. Default is false
     --netio-name-prefix <str>:               Show interfaces with given name prefix only. Default is empty
-    --netio-default-route-only <?value>:     Show the interfac that is used for default routing only. Default is true on non-android platforms
+    --netio-default-route-only <?bool>:      Show the interfac that is used for default routing only. Default is true on non-android platforms
     --publicip-timeout <num>:                Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url <str>:                    The URL of public IP detection server to be used.
     --weather-location <str>:                Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
     --weather-timeout <num>:                 Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format <str>:           The output weather format to be used. It must be URI encoded.
-    --wm-detect-plugin <?value>:             Set if window manager plugin should be detected on supported platforms. Default is false
+    --wm-detect-plugin <?bool>:              Set if window manager plugin should be detected on supported platforms. Default is false
     --player-name <str>:                     The name of the player to use for module Media and Player. Linux only
     --opengl-library <str>:                  Set the OpenGL context creation library to use. Must be auto, egl, glx or osmesa. Default is auto
     --command-shell <str>:                   Set the shell program to execute the command text. Default is cmd for Windows, /bin/sh for *nix
     --command-key <str>:                     Set the module key to display
     --command-text <str>:                    Set the command text to be executed
     --colors-symbol <str>:                   Set the symbol to be printed by Colors module. Default is block
-    --colors-padding-left <value>:           Set the number of white spaces to print before the symbol. Default is 0
+    --colors-padding-left <num>:             Set the number of white spaces to print before the symbol. Default is 0
 
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.

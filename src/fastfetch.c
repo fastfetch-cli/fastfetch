@@ -19,8 +19,6 @@
     #include "util/windows/getline.h"
 #endif
 
-#include "modules/modules.h"
-
 static void printCommandFormatHelp(const char* command)
 {
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateNS((uint32_t) (strlen(command) - strlen("-format")), command);
@@ -139,12 +137,12 @@ static void printCommandHelp(const char* command)
         fprintf(stderr, "Error: No specific help for command '%s' provided\n", command);
 }
 
-static void listAvailablePresets(void)
+static void listAvailablePresets(bool pretty)
 {
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/presets/");
-        ffListFilesRecursively(path->chars);
+        ffListFilesRecursively(path->chars, pretty);
     }
 }
 
@@ -153,7 +151,7 @@ static void listAvailableLogos(void)
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/logos/");
-        ffListFilesRecursively(path->chars);
+        ffListFilesRecursively(path->chars, true);
     }
 }
 
@@ -453,7 +451,7 @@ static void parseCommand(FFdata* data, char* key, char* value)
         if(ffStrEqualsIgnCase(subkey, "modules"))
             listModules();
         else if(ffStrEqualsIgnCase(subkey, "presets"))
-            listAvailablePresets();
+            listAvailablePresets(ffOptionParseBoolean(value));
         else if(ffStrEqualsIgnCase(subkey, "config-paths"))
             listConfigPaths();
         else if(ffStrEqualsIgnCase(subkey, "data-paths"))
