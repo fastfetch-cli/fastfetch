@@ -20,6 +20,7 @@ Config options:
     -c, --config <file>:        Load a config file or preset (+)
     --gen-config <?file>:       Generate a config file (or print the file if <file> is `-`), with options specified in the command line (if any)
     --gen-config-force <?file>: Generate a config file. Overwrite the existing one
+    --load-user-config <?bool>: Set if user config should be loaded. Default is true if env-var `NO_CONFIG` is not set
 
 General options:
     --thread <?bool>:                 Use separate threads to send HTTP requests

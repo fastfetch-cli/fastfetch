@@ -160,6 +160,7 @@ static void listConfigPaths(void)
     FF_LIST_FOR_EACH(FFstrbuf, folder, instance.state.platform.configDirs)
     {
         bool exists = false;
+        uint32_t length = folder->length + sizeof("fastfetch");
         ffStrbufAppendS(folder, "fastfetch/config.jsonc");
         exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
         if (!exists)
@@ -168,6 +169,7 @@ static void listConfigPaths(void)
             ffStrbufAppendS(folder, "conf");
             exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
         }
+        ffStrbufSubstrBefore(folder, length);
         printf("%s%s\n", folder->chars, exists ? " (*)" : "");
     }
 }
@@ -218,7 +220,7 @@ static bool parseJsoncFile(const char* path)
 
 static bool parseConfigFile(FFdata* data, const char* path)
 {
-    FILE* file = fopen(path, "r");
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(path, "r");
     if(file == NULL)
         return false;
 
@@ -311,7 +313,6 @@ static bool parseConfigFile(FFdata* data, const char* path)
     if(line != NULL)
         free(line);
 
-    fclose(file);
     return true;
 }
 
@@ -572,9 +573,8 @@ static void parseConfigFiles(FFdata* data)
 {
     if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
     {
-        for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+        FF_LIST_FOR_EACH(FFstrbuf, dir, instance.state.platform.configDirs)
         {
-            FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
             uint32_t dirLength = dir->length;
 
             ffStrbufAppendS(dir, "fastfetch/config.jsonc");
@@ -583,17 +583,14 @@ static void parseConfigFiles(FFdata* data)
             if (success) return;
         }
     }
-    for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+    FF_LIST_FOR_EACH(FFstrbuf, dir, instance.state.platform.configDirs)
     {
-        if (!data->loadUserConfig)
-            return;
-
-        FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
         uint32_t dirLength = dir->length;
 
         ffStrbufAppendS(dir, "fastfetch/config.conf");
-        parseConfigFile(data, dir->chars);
+        bool success = parseConfigFile(data, dir->chars);
         ffStrbufSubstrBefore(dir, dirLength);
+        if (success) return;
     }
 }
 
@@ -710,11 +707,11 @@ int main(int argc, char** argv)
     FFdata data = {
         .structure = ffStrbufCreate(),
         .customValues = ffListCreate(sizeof(FFCustomValue)),
-        .loadUserConfig = true,
+        .loadUserConfig = !getenv("NO_CONFIG"),
     };
 
     parseArguments(&data, argc, argv, parseCommand);
-    if(!getenv("NO_CONFIG") && data.loadUserConfig)
+    if(data.loadUserConfig)
         parseConfigFiles(&data);
     parseArguments(&data, argc, argv, (void*) parseOption);
 
