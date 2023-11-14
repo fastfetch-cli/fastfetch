@@ -39,10 +39,8 @@ void ffPrintHost(FFHostOptions* options)
         else
             ffStrbufAppend(&output, &host.productFamily);
 
-        if(host.productVersion.length > 0 && !ffStrbufIgnCaseEqualS(&host.productVersion, "none"))
-        {
+        if(host.productVersion.length > 0)
             ffStrbufAppendF(&output, " (%s)", host.productVersion.chars);
-        }
 
         ffStrbufPutTo(&output, stdout);
     }
