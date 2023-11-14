@@ -17,9 +17,9 @@ Informative options:
     --print-structure:          Print the default structure
 
 Config options:
-    -c, --config <file>:        Load a config file or preset (+)
-    --gen-config <?file>:       Generate a config file (or print the file if <file> is `-`), with options specified in the command line (if any)
-    --gen-config-force <?file>: Generate a config file. Overwrite the existing one
+    -c, --config <config>:      Load a config file or preset (+)
+    --gen-config <?path>:       Generate a config file (or print it if <path> is `-`), with options specified in the command line (if any)
+    --gen-config-force <?path>: Generate a config file. Overwrite the existing one
     --load-user-config <?bool>: Set if user config should be loaded. Default is true if env-var `NO_CONFIG` is not set
 
 General options:
@@ -31,9 +31,9 @@ General options:
 
 Logo options:
     -l, --logo <logo>:                     Set the logo; if default, the name of a builtin logo or a path to a file
-    --logo-type <type>:                    Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty, iterm or chafa
-    --logo-width <width>:                  Set the width of the logo (in characters), if it is an image. Required for iTerm image protocol
-    --logo-height <height>:                Set the height of the logo (in characters), if it is an image. Required for iTerm image protocol
+    --logo-type <str>:                     Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty, iterm or chafa
+    --logo-width <num>:                    Set the width of the logo (in characters), if it is an image. Required for iTerm image protocol
+    --logo-height <num>:                   Set the height of the logo (in characters), if it is an image. Required for iTerm image protocol
     --logo-preserve-aspect-ratio <?bool>:  Set if the logo should fill the specified width and height as much as possible without stretching. Supported by iTerm image protocol
     --logo-color-[1-9] <color>:            Overwrite a color in the logo
     --logo-padding <num>:                  Set the padding on the left and the right of the logo
@@ -43,18 +43,18 @@ Logo options:
     --logo-print-remaining <?bool>:        Whether to print the remaining logo, if it has more lines than modules to display
     --logo-separate <?bool>:               If true, print modules at bottom of the logo
     --logo-recache <?bool>:                If true, regenerate image logo cache
-    --file <file>:                         Short for --logo-type file --logo <file>
-    --file-raw <file>:                     Short for --logo-type file-raw --logo <file>
+    --file <path>:                         Short for --logo-type file --logo <path>
+    --file-raw <path>:                     Short for --logo-type file-raw --logo <path>
     --data <data>:                         Short for --logo-type data --logo <data>
     --data-raw <data>:                     Short for --logo-type data-raw --logo <data>
-    --sixel <file>:                        Short for --logo-type sixel --logo <file>
-    --kitty <file>:                        Short for --logo-type kitty --logo <file>
-    --iterm <file>:                        Short for --logo-type iterm --logo <file>
-    --chafa <file>:                        Short for --logo-type chafa --logo <file>
+    --sixel <path>:                        Short for --logo-type sixel --logo <path>
+    --kitty <path>:                        Short for --logo-type kitty --logo <path>
+    --iterm <path>:                        Short for --logo-type iterm --logo <path>
+    --chafa <path>:                        Short for --logo-type chafa --logo <path>
     --chafa-fg-only <?bool>:               Produce character-cell output using foreground colors only. See chafa document for detail
     --chafa-symbols <str>:                 Specify character symbols to employ in final output. See chafa document for detail
     --chafa-canvas-mode <num>:             Determine how colors are used in the output. This value maps the int value of enum ChafaCanvasMode. See chafa document for detail
-    --chafa-color-space <value>:           Set color space used for quantization. 0 for RGB; 1 for DIN99d. See chafa document for detail
+    --chafa-color-space <num>:             Set color space used for quantization. 0 for RGB; 1 for DIN99d. See chafa document for detail
     --chafa-dither-mode <num>:             Set output dither mode (No effect with 24-bit color). This value maps the int value of enum ChafaDitherMode. See chafa document for detail
 
 Display options:
@@ -72,8 +72,8 @@ Display options:
     --show-errors <?bool>:       Print occurring errors
     --disable-linewrap <?bool>:  Whether to disable line wrap during the run
     --hide-cursor <?bool>:       Whether to hide the cursor during the run
-    --binary-prefix <value>:     Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
-    --percent-type <value>:      Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 9
+    --binary-prefix <str>:       Set the binary prefix to used. Must be IEC, SI or JEDEC. Default is IEC
+    --percent-type <num>:        Set the percentage output type. 1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number. Default is 9
     --percent-ndigits <num>:     Set the number of digits to keep after the decimal point when formatting percentage numbers. Default is 0
     --bar-char-elapsed <str>:    Set the character to use in elapsed part. Default is '■'
     --bar-char-total <str>:      Set the character to use in total part. Default is '-'
@@ -81,8 +81,8 @@ Display options:
     --bar-border <?bool>:        Whether to show a border around the bar. Default is true
     --no-buffer <?bool>:         Set if the stdout application buffer should be disabled. Default is false
     --size-ndigits <num>:        Set the number of digits to keep after the decimal point when formatting sizes
-    --size-max-prefix <value>:   Set the largest binary prefix to use when formatting sizes. Default is YB
-    --temperature-unit <value>:  Set the unit of the temperature. Must be one of C, F and K. Default is C
+    --size-max-prefix <str>:     Set the largest binary prefix to use when formatting sizes. Default is YB
+    --temperature-unit <str>:    Set the unit of the temperature. Must be one of C, F and K. Default is C
 
 General module options:
     --<module>-format <format>:    Set the format string to use for each specific module.
@@ -117,7 +117,7 @@ Library options: Set the path of a library to load
     --lib-osmesa <path>:        Needed by the OpenGL module for gl context creation
     --lib-opencl <path>:        OpenCL module
     --lib-pulse <path>:         Pulseaudio. Used for Sound detection
-    --lib-nm:                   NetworkManager. Used for Wifi detection
+    --lib-nm <path>:            NetworkManager. Used for Wifi detection
     --lib-freetype <path>:      Used for Termux font detection
     --lib-ddcutil <path>:       Used for brightness detection of external displays
 
@@ -128,8 +128,8 @@ Module specific options:
     --title-color-host <color>:              Set color of the host name (right part). Default is empty (use color of `--color-title`)
     --chassis-use-wmi <?bool>:               Set if WMI query should be used on Windows, which detects more information but slower. Default is false
     --separator-string <str>:                Set the string printed by the separator module
-    --os-file <path>:                        Set the path to the file containing OS information. Linux only
-    --disk-folders <folders>:                A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
+    --os-file <path>:                        Set the file path which containing OS information. Linux only
+    --disk-folders <path>:                   A colon (semicolon on Windows) separated list of folder paths for the disk output. Default is "/:/home" ("C:\\;D:\\ ..." on Windows)
     --disk-show-regular <?bool>:             Set if regular volume should be printed. Default is true
     --disk-show-external <?bool>:            Set if external volume should be printed. Default is true
     --disk-show-hidden <?bool>:              Set if hidden volumes should be printed. Default is false
@@ -140,12 +140,12 @@ Module specific options:
     --diskio-name-prefix <str>:              Show disks with given name prefix only. Default is empty
     --bluetooth-show-disconnected <?bool>:   Set if disconnected bluetooth devices should be printed. Default is false
     --packages-winget <?bool>:               Set if winget package count should be detected. Default is false
-    --display-compact-type <?string>:        Set if all displays should be printed in one line. Default is none
+    --display-compact-type <?str>:           Set if all displays should be printed in one line. Must be one of `none`, `original` and `scaled`. Default is none
     --display-detect-name <?bool>:           Set if display name should be detected and printed (if supported). Default is false
     --display-precise-refresh-rate <?bool>:  Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --brightness-ddcci-sleep <num>:          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
-    --sound-type <value>:                    Set what type of sound devices should be printed. Should be either main, active or all. Default is main
-    --battery-dir <folder>:                  The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only
+    --sound-type <str>:                      Set what type of sound devices should be printed. Should be either main, active or all. Default is main
+    --battery-dir <path>:                    The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only
     --battery-use-setup-api <?bool>:         Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
     --cpu-temp <?bool>:                      Detect and display CPU temperature if supported. Default is false
     --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
