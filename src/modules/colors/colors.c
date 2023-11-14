@@ -19,7 +19,7 @@ void ffPrintColors(FFColorsOptions* options)
         // 4%d: Set the background color
         // 3%d: Set the foreground color
         for(uint8_t i = 0; i < 8; i++)
-            printf("\033[4%d;3%dm███", i, i);
+            printf("\033[3%dm███", i);
 
         puts(FASTFETCH_TEXT_MODIFIER_RESET);
 
@@ -34,7 +34,7 @@ void ffPrintColors(FFColorsOptions* options)
         // 10%d: Set the background to the bright color
         // 9%d: Set the foreground to the bright color
         for(uint8_t i = 0; i < 8; i++)
-            printf("\033[1;4%d;3%d;10%d;9%dm███", i, i, i, i);
+            printf("\033[1;3%d;9%dm███", i, i);
     }
     else
     {
