@@ -31,7 +31,7 @@ General options:
 
 Logo options:
     -l, --logo <logo>:                     Set the logo; if default, the name of a builtin logo or a path to a file
-    --logo-type <str>:                     Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, sixel, kitty, iterm or chafa
+    --logo-type <str>:                     Set the type of the logo given; must be auto, builtin, file, file-raw, data, data-raw, raw, sixel, kitty, kitty-direct, iterm or chafa
     --logo-width <num>:                    Set the width of the logo (in characters), if it is an image. Required for iTerm image protocol
     --logo-height <num>:                   Set the height of the logo (in characters), if it is an image. Required for iTerm image protocol
     --logo-preserve-aspect-ratio <?bool>:  Set if the logo should fill the specified width and height as much as possible without stretching. Supported by iTerm image protocol
@@ -43,14 +43,16 @@ Logo options:
     --logo-print-remaining <?bool>:        Whether to print the remaining logo, if it has more lines than modules to display
     --logo-separate <?bool>:               If true, print modules at bottom of the logo
     --logo-recache <?bool>:                If true, regenerate image logo cache
-    --file <path>:                         Short for --logo-type file --logo <path>
-    --file-raw <path>:                     Short for --logo-type file-raw --logo <path>
-    --data <data>:                         Short for --logo-type data --logo <data>
-    --data-raw <data>:                     Short for --logo-type data-raw --logo <data>
-    --sixel <path>:                        Short for --logo-type sixel --logo <path>
-    --kitty <path>:                        Short for --logo-type kitty --logo <path>
-    --iterm <path>:                        Short for --logo-type iterm --logo <path>
-    --chafa <path>:                        Short for --logo-type chafa --logo <path>
+    --file <path>:                         Short for --logo-type file --logo <path>. Text file, printed with color code replacement
+    --file-raw <path>:                     Short for --logo-type file-raw --logo <path>. Text file, printed as is (with escaped chars replacement)
+    --data <data>:                         Short for --logo-type data --logo <data>. Text data, printed with color code replacement
+    --data-raw <data>:                     Short for --logo-type data-raw --logo <data>. Text data, printed as is (with escaped chars replacement)
+    --raw <path>:                          Short for --logo-type raw --logo <path>. Image file, printed as raw binary string
+    --sixel <path>:                        Short for --logo-type sixel --logo <path>. Image file, printed as sixel codes
+    --kitty <path>:                        Short for --logo-type kitty --logo <path>. Image file, printed as kitty graphics protocol
+    --kitty-direct <path>:                 Short for --logo-type kitty-direct --logo <path>. Image file, tell the terminal emulator to read image data from the specified file
+    --iterm <path>:                        Short for --logo-type iterm --logo <path>. Image file, printed as iterm graphics protocol
+    --chafa <path>:                        Short for --logo-type chafa --logo <path>. Image file, printed as ascii art using libchafa
     --chafa-fg-only <?bool>:               Produce character-cell output using foreground colors only. See chafa document for detail
     --chafa-symbols <str>:                 Specify character symbols to employ in final output. See chafa document for detail
     --chafa-canvas-mode <num>:             Determine how colors are used in the output. This value maps the int value of enum ChafaCanvasMode. See chafa document for detail
