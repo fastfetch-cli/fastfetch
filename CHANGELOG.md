@@ -6,6 +6,9 @@ Changes:
 * Fastfetch now searchs for config files in the order of `fastfetch --list-config-paths`, and won't load other config if one is found.
 * Flag `--load-user-config` now works in command line flags, but not in config file.
 
+Features:
+* Support Oils and elvish shell version detection (Shell)
+
 # 2.2.3
 
 Features:

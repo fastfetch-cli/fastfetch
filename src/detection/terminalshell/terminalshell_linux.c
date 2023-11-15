@@ -164,6 +164,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "pwsh")      == 0 ||
         strcasecmp(name, "nu")        == 0 ||
         strcasecmp(name, "git-shell") == 0 ||
+        strcasecmp(name, "elvish")    == 0 ||
+        strcasecmp(name, "oil.ovm")   == 0 ||
         (strcasecmp(name, "python") == 0 && getenv("XONSH_VERSION"))
     ) {
         if (result->shellProcessName.length == 0)
@@ -355,6 +357,8 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufInitStatic(&result.shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
         ffStrbufInitStatic(&result.shellPrettyName, "xonsh");
+    else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "oil.ovm"))
+        ffStrbufInitStatic(&result.shellPrettyName, "Oils");
     else
     {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
