@@ -40,7 +40,9 @@ for line in (string match -- '    -*' $whole_text)
         set temp $modules"\tModule"
         set res $res -x -a "$temp"
     case '<logo>'
-        set res $res -x -a "none\tNone small\tSmall"
+        set -l builtin_logos (fastfetch --list-logos-autocompletion)
+        set -l temp $builtin_logos"\tBuiltin"
+        set res $res -x -a "none\tNone small\tSmall $temp"
     case '<color>'
         set res $res -x -a "black\tColor red\tColor green\tColor yellow\tColor blue\tColor magenta\tColor cyan\tColor white\tColor default\tColor"
     case '<*>'
