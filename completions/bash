@@ -5,7 +5,7 @@ __fastfetch_complete_help()
     local __ff_helps=(
         "color"
         "format"
-        "load-config"
+        "config"
         "os-format"
         "host-format"
         "kernel-format"
@@ -66,7 +66,7 @@ __fastfetch_complete_path()
 
 __fastfetch_complete_logo()
 {
-    COMPREPLY=($(compgen -W "$(fastfetch --list-logos-autocompletion)" -- "$CURRENT_WORD"))
+    COMPREPLY=($(compgen -W "$(fastfetch --list-logos autocompletion)" -- "$CURRENT_WORD"))
 }
 
 __fastfetch_complete_logo_type()
@@ -218,10 +218,9 @@ __fastfetch_completion()
         "--logo-color-6"
         "--logo-color-7"
         "--logo-color-8"
+        "--logo-color-9"
         "--logo-width"
         "--logo-height"
-        "--logo-color-9"
-        "-c"
         "--color"
         "--color-keys"
         "--color-title"
@@ -360,7 +359,8 @@ __fastfetch_completion()
     )
 
     local FF_OPTIONS_PATH=(
-        "--load-config"
+        "-c"
+        "--config"
         "--os-file"
         "--lib-pci"
         "--lib-vulkan"

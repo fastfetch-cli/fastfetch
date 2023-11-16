@@ -183,7 +183,7 @@ static void listDataPaths(void)
     }
 }
 
-static void listModules()
+static void listModules(bool pretty)
 {
     unsigned count = 0;
     for (int i = 0; i <= 'Z' - 'A'; ++i)
@@ -191,7 +191,10 @@ static void listModules()
         for (FFModuleBaseInfo** modules = ffModuleInfos[i]; *modules; ++modules)
         {
             ++count;
-            printf("%d)%s%s\n", count, count > 9 ? " " : "  ", (*modules)->name);
+            if (pretty)
+                printf("%d)%s%s\n", count, count > 9 ? " " : "  ", (*modules)->name);
+            else
+                puts((*modules)->name);
         }
     }
 }
@@ -450,9 +453,9 @@ static void parseCommand(FFdata* data, char* key, char* value)
     {
         const char* subkey = key + strlen("--list-");
         if(ffStrEqualsIgnCase(subkey, "modules"))
-            listModules();
+            listModules(!value || !ffStrEqualsIgnCase(value, "autocompletion"));
         else if(ffStrEqualsIgnCase(subkey, "presets"))
-            listAvailablePresets(ffOptionParseBoolean(value));
+            listAvailablePresets(!value || !ffStrEqualsIgnCase(value, "autocompletion"));
         else if(ffStrEqualsIgnCase(subkey, "config-paths"))
             listConfigPaths();
         else if(ffStrEqualsIgnCase(subkey, "data-paths"))
@@ -461,13 +464,28 @@ static void parseCommand(FFdata* data, char* key, char* value)
             ffListFeatures();
         else if(ffStrEqualsIgnCase(subkey, "logos"))
         {
-            puts("Builtin logos:");
-            ffLogoBuiltinList();
-            puts("\nCustom logos:");
-            listAvailableLogos();
+            if (value)
+            {
+                if (ffStrEqualsIgnCase(value, "autocompletion"))
+                    ffLogoBuiltinListAutocompletion();
+                else if (ffStrEqualsIgnCase(value, "builtin"))
+                    ffLogoBuiltinList();
+                else if (ffStrEqualsIgnCase(value, "custom"))
+                    listAvailableLogos();
+                else
+                {
+                    fprintf(stderr, "Error: unsupported logo type: %s\n", value);
+                    exit(415);
+                }
+            }
+            else
+            {
+                puts("Builtin logos:");
+                ffLogoBuiltinList();
+                puts("\nCustom logos:");
+                listAvailableLogos();
+            }
         }
-        else if(ffStrEqualsIgnCase(subkey, "logos-autocompletion"))
-            ffLogoBuiltinListAutocompletion();
         else
         {
             fprintf(stderr, "Error: unsupported list option: %s\n", key);
