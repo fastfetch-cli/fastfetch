@@ -17,10 +17,9 @@ Informative options:
     --print-structure:          Print the default structure
 
 Config options:
-    -c, --config <config>:      Load a config file or preset (+)
+    -c, --config <config>:      Specify the config file or preset to be loaded. If `none`, disable futher config loading (+)
     --gen-config <?path>:       Generate a config file (or print it if <path> is `-`), with options specified in the command line (if any)
     --gen-config-force <?path>: Generate a config file. Overwrite the existing one
-    --load-user-config <?bool>: Set if user config should be loaded. Default is true if env-var `NO_CONFIG` is not set
 
 General options:
     --thread <?bool>:                 Use separate threads to send HTTP requests
@@ -184,4 +183,4 @@ Module specific options:
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.
 A (+) at the end indicates that more help can be printed with --help <option>
-All options can be made permanent with command `fastfetch <options> --migrate-config`
+All options can be made permanent with command `fastfetch <options> --gen-config`

@@ -30,7 +30,7 @@ for line in (string match -- '    -*' $whole_text)
         set res $res -x -a "true\tBool false\tBool"
     case '<config>'
         set -l presets (fastfetch --list-presets autocompletion)"\tPreset"
-        set res $res -r -a "$presets"
+        set res $res -r -a "none\tDisable $presets"
     case '<path>'
         set res $res -F -r
     case '<num>'

@@ -14,7 +14,7 @@ typedef struct FFdata
 {
     FFstrbuf structure;
     FFlist customValues; // List of FFCustomValue
-    bool loadUserConfig;
+    bool configLoaded;
 } FFdata;
 
 bool ffParseModuleOptions(const char* key, const char* value);

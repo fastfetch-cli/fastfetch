@@ -1,10 +1,14 @@
 # 2.3.0
 
-Changes:
+Config related changes:
 * The deprecated flag `--gen-config conf` is removed
 * Flag `--gen-config` now does the same thing as `--migrate-config`, which can be used as config migration and default config file generation. Flag `--migrate-config` is removed
 * Fastfetch now searchs for config files in the order of `fastfetch --list-config-paths`, and won't load other config if one is found.
-* Flag `--load-user-config` now works in command line flags, but not in config file.
+* The undocumented flag `--load-user-config` is removed. As an alternative, `--config none` can be used to disable loading config files.
+* `--config` (previously named `--load-config`) is now supported for command line arguments only. If specified, other config files won't be loaded, which works like other programs.
+* Config files will always be loaded before other command line flags being parsed. That is to say, command line flags will always override options defined in config files.
+
+We are deprecating flags based config files (will be removed in v3.0.0). We suggest you migrate to json based config files.
 
 Features:
 * Support Oils and elvish shell version detection (Shell)
@@ -19,7 +23,7 @@ Bugfixes:
 * Fix terminal detection on NixOS (Terminal)
 
 # 2.2.2
-g
+
 Changes:
 * `--percent-type` now defaults to 9 (colored percentage numbers)
 * `fastfetch` now prints LocalIp module by default

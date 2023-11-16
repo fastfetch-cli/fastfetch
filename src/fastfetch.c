@@ -345,17 +345,28 @@ static void generateConfigFile(bool force, const char* filePath)
 
 static void optionParseConfigFile(FFdata* data, const char* key, const char* value)
 {
+    if (data->configLoaded)
+    {
+        fprintf(stderr, "Error: only one config file can be loaded\n");
+        exit(413);
+    }
+
+    data->configLoaded = true;
+
     if(value == NULL)
     {
-        fprintf(stderr, "Error: usage: %s <file>\n", key);
+        fprintf(stderr, "Error: usage: %s <config>\n", key);
         exit(413);
     }
     uint32_t fileNameLen = (uint32_t) strlen(value);
     if(fileNameLen == 0)
     {
-        fprintf(stderr, "Error: usage: %s <file>\n", key);
+        fprintf(stderr, "Error: usage: %s <config>\n", key);
         exit(413);
     }
+
+    if (ffStrEqualsIgnCase(value, "none"))
+        return;
 
     bool isJsonConfig = fileNameLen > strlen(".jsonc") && strcasecmp(value + fileNameLen - strlen(".jsonc"), ".jsonc") == 0;
 
@@ -498,8 +509,8 @@ static void parseCommand(FFdata* data, char* key, char* value)
         generateConfigFile(false, value);
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
         generateConfigFile(true, value);
-    else if(ffStrEqualsIgnCase(key, "--load-user-config"))
-        data->loadUserConfig = ffOptionParseBoolean(value);
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+        optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--format"))
     {
         switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
@@ -535,10 +546,7 @@ static void parseCommand(FFdata* data, char* key, char* value)
 
 static void parseOption(FFdata* data, const char* key, const char* value)
 {
-    if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
-        optionParseConfigFile(data, key, value);
-
-    else if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
+    if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
     {
         FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
         ffOptionParseString(key, value, &customValueStr);
@@ -725,11 +733,11 @@ int main(int argc, char** argv)
     FFdata data = {
         .structure = ffStrbufCreate(),
         .customValues = ffListCreate(sizeof(FFCustomValue)),
-        .loadUserConfig = !getenv("NO_CONFIG"),
+        .configLoaded = false,
     };
 
     parseArguments(&data, argc, argv, parseCommand);
-    if(data.loadUserConfig)
+    if(!data.configLoaded && !getenv("NO_CONFIG"))
         parseConfigFiles(&data);
     parseArguments(&data, argc, argv, (void*) parseOption);
 
