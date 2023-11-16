@@ -50,10 +50,10 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci
+        run: time ./fastfetch -c presets/ci.jsonc
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -99,10 +99,10 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci
+        run: time ./fastfetch -c presets/ci.jsonc
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -159,10 +159,10 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci
+        run: time ./fastfetch -c presets/ci.jsonc
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -201,8 +201,8 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose
             ./fastfetch --list-features
-            time ./fastfetch -c presets/ci
-            time ./fastfetch -c presets/ci --format json
+            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
             ctest
@@ -249,10 +249,10 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci
+        run: time ./fastfetch -c presets/ci.jsonc
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
 
       - name: run flashfetch
         run: time ./flashfetch
@@ -316,10 +316,10 @@ jobs:
         run: cp /clang32/bin/{OpenCL,vulkan-1}.dll .
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci
+        run: time ./fastfetch -c presets/ci.jsonc
 
       - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
 
       - name: run flashfetch
         run: time ./flashfetch
