@@ -1,12 +1,12 @@
 #include "packages.h"
+#include "common/io/io.h"
 #include "common/parsing.h"
+#include "common/processing.h"
 #include "util/stringUtils.h"
-
-#include <dirent.h>
 
 static uint32_t getNumElements(const char* dirname, unsigned char type)
 {
-    DIR* dirp = opendir(dirname);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
     if(dirp == NULL)
         return 0;
 
@@ -20,8 +20,6 @@ static uint32_t getNumElements(const char* dirname, unsigned char type)
 
     if(type == DT_DIR)
         num_elements -= 2; // accounting for . and ..
-
-    closedir(dirp);
 
     return num_elements;
 }
@@ -68,8 +66,47 @@ static uint32_t getMacPortsPackages()
     return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/local");
 }
 
+static uint32_t getNixPackagesImpl(char* path)
+{
+    //Nix detection is kinda slow, so we only do it if the dir exists
+    if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
+        return 0;
+
+    FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(128);
+
+    //https://github.com/fastfetch-cli/fastfetch/issues/195#issuecomment-1191748222
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(255);
+    ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
+    ffStrbufAppendS(&command, path);
+    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq | wc -l");
+
+    ffProcessAppendStdOut(&output, (char* const[]) {
+        "/bin/sh",
+        "-c",
+        command.chars,
+        NULL
+    });
+
+    return (uint32_t) strtol(output.chars, NULL, 10);
+}
+
+static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    uint32_t num_elements = getNixPackagesImpl(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return num_elements;
+}
+
 void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
 {
     getBrewPackages(result);
     result->port = getMacPortsPackages();
+
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(FASTFETCH_TARGET_DIR_ROOT);
+    result->nixDefault += getNixPackages(&baseDir, "/nix/var/nix/profiles/default");
+    result->nixSystem += getNixPackages(&baseDir, "/run/current-system");
+    ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
+    result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
 }
