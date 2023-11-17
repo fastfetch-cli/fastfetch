@@ -61,10 +61,10 @@ static const char* detectWifiWithLibnm(FFlist* result)
             gboolean return_value;
             if (!inst)
                 return_value = FALSE;
-            else if (inst->g_class && inst->g_class->g_type == )
+            else if (inst->g_class && inst->g_class->g_type == type)
                 return_value = TRUE;
             else
-                return_value = ffg_type_check_instance_is_a (inst, );
+                return_value = ffg_type_check_instance_is_a (inst, type);
             return_value;
             }) //NM_IS_DEVICE_WIFI(device)
         )
