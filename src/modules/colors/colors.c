@@ -156,6 +156,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_COLORS_MODULE_NAME,
+        "Print some colored blocks",
         ffParseColorsCommandOptions,
         ffParseColorsJsonObject,
         ffPrintColors,

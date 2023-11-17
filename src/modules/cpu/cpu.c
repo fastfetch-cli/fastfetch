@@ -202,6 +202,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_CPU_MODULE_NAME,
+        "Print CPU name, frequency, etc",
         ffParseCPUCPUOptions,
         ffParseCPUJsonObject,
         ffPrintCPU,

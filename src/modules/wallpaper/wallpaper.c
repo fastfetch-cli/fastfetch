@@ -101,6 +101,7 @@ void ffInitWallpaperOptions(FFWallpaperOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_WALLPAPER_MODULE_NAME,
+        "Print image file path of current wallpaper",
         ffParseWallpaperCommandOptions,
         ffParseWallpaperJsonObject,
         ffPrintWallpaper,

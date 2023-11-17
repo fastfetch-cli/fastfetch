@@ -246,6 +246,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BATTERY_MODULE_NAME,
+        "Print battery capacity, status, etc",
         ffParseBatteryCommandOptions,
         ffParseBatteryJsonObject,
         ffPrintBattery,

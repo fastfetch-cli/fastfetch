@@ -198,6 +198,7 @@ void ffInitTitleOptions(FFTitleOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_TITLE_MODULE_NAME,
+        "Print title, which contains your user name, hostname",
         ffParseTitleCommandOptions,
         ffParseTitleJsonObject,
         ffPrintTitle,

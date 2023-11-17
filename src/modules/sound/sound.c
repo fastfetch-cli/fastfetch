@@ -215,6 +215,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_SOUND_MODULE_NAME,
+        "Print sound devices, volume, etc",
         ffParseSoundCommandOptions,
         ffParseSoundJsonObject,
         ffPrintSound,

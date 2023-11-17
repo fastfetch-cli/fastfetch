@@ -111,6 +111,7 @@ void ffInitTerminalOptions(FFTerminalOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_TERMINAL_MODULE_NAME,
+        "Print current terminal name and version",
         ffParseTerminalCommandOptions,
         ffParseTerminalJsonObject,
         ffPrintTerminal,

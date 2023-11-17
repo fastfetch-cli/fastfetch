@@ -220,6 +220,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_NETIO_MODULE_NAME,
+        "Print network I/O throughput",
         ffParseNetIOCommandOptions,
         ffParseNetIOJsonObject,
         ffPrintNetIO,

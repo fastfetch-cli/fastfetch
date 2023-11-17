@@ -139,6 +139,7 @@ void ffInitPlayerOptions(FFPlayerOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_PLAYER_MODULE_NAME,
+        "Print music player name",
         ffParsePlayerCommandOptions,
         ffParsePlayerJsonObject,
         ffPrintPlayer,

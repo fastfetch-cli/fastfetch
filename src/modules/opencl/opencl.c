@@ -114,6 +114,7 @@ void ffInitOpenCLOptions(FFOpenCLOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_OPENCL_MODULE_NAME,
+        "Print highest OpenCL version supported by the GPU",
         ffParseOpenCLCommandOptions,
         ffParseOpenCLJsonObject,
         ffPrintOpenCL,

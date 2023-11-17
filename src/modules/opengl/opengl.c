@@ -173,6 +173,7 @@ void ffInitOpenGLOptions(FFOpenGLOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_OPENGL_MODULE_NAME,
+        "Print highest OpenGL version supported by the GPU",
         ffParseOpenGLCommandOptions,
         ffParseOpenGLJsonObject,
         ffPrintOpenGL,

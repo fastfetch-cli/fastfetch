@@ -214,6 +214,7 @@ void ffInitDateTimeOptions(FFDateTimeOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_DATETIME_MODULE_NAME,
+        "Print current date and time",
         ffParseDateTimeCommandOptions,
         ffParseDateTimeJsonObject,
         ffPrintDateTime,

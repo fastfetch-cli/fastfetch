@@ -171,6 +171,7 @@ void ffInitBluetoothOptions(FFBluetoothOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BLUETOOTH_MODULE_NAME,
+        "List bluetooth devices",
         ffParseBluetoothCommandOptions,
         ffParseBluetoothJsonObject,
         ffPrintBluetooth,

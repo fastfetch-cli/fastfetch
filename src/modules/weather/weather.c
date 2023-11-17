@@ -137,6 +137,7 @@ void ffInitWeatherOptions(FFWeatherOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_WEATHER_MODULE_NAME,
+        "Print weather information",
         ffParseWeatherCommandOptions,
         ffParseWeatherJsonObject,
         ffPrintWeather,

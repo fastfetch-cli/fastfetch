@@ -165,6 +165,7 @@ void ffInitBiosOptions(FFBiosOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BIOS_MODULE_NAME,
+        "Print BIOS name, version, release date, etc",
         ffParseBiosCommandOptions,
         ffParseBiosJsonObject,
         ffPrintBios,

@@ -140,6 +140,7 @@ void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_POWERADAPTER_MODULE_NAME,
+        "Print power adapter name and charging watts",
         ffParsePowerAdapterCommandOptions,
         ffParsePowerAdapterJsonObject,
         ffPrintPowerAdapter,

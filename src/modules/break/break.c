@@ -21,6 +21,7 @@ void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BREAK_MODULE_NAME,
+        "Print a empty line",
         ffParseBreakCommandOptions,
         ffParseBreakJsonObject,
         ffPrintBreak,

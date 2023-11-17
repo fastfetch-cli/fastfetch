@@ -130,6 +130,7 @@ void ffInitGamepadOptions(FFGamepadOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_GAMEPAD_MODULE_NAME,
+        "List connected gamepads",
         ffParseGamepadCommandOptions,
         ffParseGamepadJsonObject,
         ffPrintGamepad,

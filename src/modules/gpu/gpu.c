@@ -336,6 +336,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_GPU_MODULE_NAME,
+        "Print GPU names, graphic memory size, type, etc",
         ffParseGPUCommandOptions,
         ffParseGPUJsonObject,
         ffPrintGPU,

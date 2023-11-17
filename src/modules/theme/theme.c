@@ -91,6 +91,7 @@ void ffInitThemeOptions(FFThemeOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_THEME_MODULE_NAME,
+        "Print current theme of desktop environment",
         ffParseThemeCommandOptions,
         ffParseThemeJsonObject,
         ffPrintTheme,

@@ -129,6 +129,7 @@ void ffInitLMOptions(FFLMOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_LM_MODULE_NAME,
+        "Print login manager (desktop manager) name and version",
         ffParseLMCommandOptions,
         ffParseLMJsonObject,
         ffPrintLM,

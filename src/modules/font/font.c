@@ -120,6 +120,7 @@ void ffInitFontOptions(FFFontOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_FONT_MODULE_NAME,
+        "Print system font name",
         ffParseFontCommandOptions,
         ffParseFontJsonObject,
         ffPrintFont,

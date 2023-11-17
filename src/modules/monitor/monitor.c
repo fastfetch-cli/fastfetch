@@ -163,6 +163,7 @@ void ffInitMonitorOptions(FFMonitorOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_MONITOR_MODULE_NAME,
+        "Print connected physical monitor information",
         ffParseMonitorCommandOptions,
         ffParseMonitorJsonObject,
         ffPrintMonitor,

@@ -172,6 +172,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_CPUUSAGE_MODULE_NAME,
+        "Print CPU usage. Costs some time to collect data",
         ffParseCPUUsageCommandOptions,
         ffParseCPUUsageJsonObject,
         ffPrintCPUUsage,

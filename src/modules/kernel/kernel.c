@@ -89,6 +89,7 @@ void ffInitKernelOptions(FFKernelOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_KERNEL_MODULE_NAME,
+        "Print system kernel version",
         ffParseKernelCommandOptions,
         ffParseKernelJsonObject,
         ffPrintKernel,

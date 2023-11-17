@@ -192,9 +192,9 @@ static void listModules(bool pretty)
         {
             ++count;
             if (pretty)
-                printf("%d)%s%s\n", count, count > 9 ? " " : "  ", (*modules)->name);
+                printf("%d)%s%-13s: %s\n", count, count > 9 ? " " : "  ", (*modules)->name, (*modules)->description);
             else
-                puts((*modules)->name);
+                printf("%s:%s\n", (*modules)->name, (*modules)->description);
         }
     }
 }

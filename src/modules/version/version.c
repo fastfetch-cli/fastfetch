@@ -132,6 +132,7 @@ void ffInitVersionOptions(FFVersionOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_VERSION_MODULE_NAME,
+        "Print Fastfetch version",
         ffParseVersionCommandOptions,
         ffParseVersionJsonObject,
         ffPrintVersion,

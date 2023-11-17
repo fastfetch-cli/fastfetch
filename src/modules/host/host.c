@@ -151,6 +151,7 @@ void ffInitHostOptions(FFHostOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_HOST_MODULE_NAME,
+        "Print product name of your computer",
         ffParseHostCommandOptions,
         ffParseHostJsonObject,
         ffPrintHost,

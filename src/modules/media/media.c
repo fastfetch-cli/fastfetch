@@ -173,6 +173,7 @@ void ffInitMediaOptions(FFMediaOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_MEDIA_MODULE_NAME,
+        "Print playing song name",
         ffParseMediaCommandOptions,
         ffParseMediaJsonObject,
         ffPrintMedia,

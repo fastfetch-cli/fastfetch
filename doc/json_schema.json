@@ -729,15 +729,15 @@
                                             },
                                             {
                                                 "const": "theme",
-                                                "description": "Print current theme information"
+                                                "description": "Print current theme of desktop environment"
                                             },
                                             {
                                                 "const": "uptime",
-                                                "description": "Print system uptime"
+                                                "description": "Print how long system has been running"
                                             },
                                             {
                                                 "const": "users",
-                                                "description": "List users currently logged in"
+                                                "description": "Print users currently logged in"
                                             },
                                             {
                                                 "const": "version",
@@ -844,7 +844,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "brightness",
-                                        "description": "Print current brightness / luminance of your monitors"
+                                        "description": "Print current brightness level of your monitors"
                                     },
                                     "ddcciSleep": {
                                         "type": "integer",

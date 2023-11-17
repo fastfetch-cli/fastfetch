@@ -148,6 +148,7 @@ void ffInitVulkanOptions(FFVulkanOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_VULKAN_MODULE_NAME,
+        "Print highest Vulkan version supported by the GPU",
         ffParseVulkanCommandOptions,
         ffParseVulkanJsonObject,
         ffPrintVulkan,

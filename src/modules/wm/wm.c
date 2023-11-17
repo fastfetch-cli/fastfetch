@@ -140,6 +140,7 @@ void ffInitWMOptions(FFWMOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_WM_MODULE_NAME,
+        "Print window manager name and version",
         ffParseWMCommandOptions,
         ffParseWMJsonObject,
         ffPrintWM,

@@ -152,6 +152,7 @@ void ffInitChassisOptions(FFChassisOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_CHASSIS_MODULE_NAME,
+        "Print chassis type (desktop, laptop, etc)",
         ffParseChassisCommandOptions,
         ffParseChassisJsonObject,
         ffPrintChassis,

@@ -238,6 +238,7 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_PACKAGES_MODULE_NAME,
+        "List installed package managers and count of installed packages",
         ffParsePackagesCommandOptions,
         ffParsePackagesJsonObject,
         ffPrintPackages,

@@ -192,6 +192,7 @@ void ffInitUsersOptions(FFUsersOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_USERS_MODULE_NAME,
+        "Print users currently logged in",
         ffParseUsersCommandOptions,
         ffParseUsersJsonObject,
         ffPrintUsers,

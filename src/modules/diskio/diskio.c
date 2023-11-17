@@ -229,6 +229,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_DISKIO_MODULE_NAME,
+        "Print physical disk I/O throughput",
         ffParseDiskIOCommandOptions,
         ffParseDiskIOJsonObject,
         ffPrintDiskIO,

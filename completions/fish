@@ -5,7 +5,7 @@ if not test -x fastfetch
 end
 
 set -l whole_text (fastfetch --pipe --help)
-set -l modules (fastfetch --list-modules autocompletion)
+set modules_complex (fastfetch --list-modules autocompletion)
 
 complete -c fastfetch -f
 
@@ -23,7 +23,7 @@ for line in (string match -- '    -*' $whole_text)
 
     switch (string match -r -- $regexp $args)
     case '<\?command>'
-        set -l temp (string lower $modules)
+        set -l temp (string match -r "\\w+" $modules_complex | string lower)
         set -l temp $temp-format"\tModule\\ format"
         set res $res -x -a "color\tSupported\\ colors format\tCustom\\ format config\tConfiguration $temp"
     case '<\?bool>'
@@ -38,8 +38,13 @@ for line in (string match -- '    -*' $whole_text)
     case '<\?num>'
         set res $res -x -a "0\tNumber 1\tNumber 2\tNumber 3\tNumber 4\tNumber 5\tNumber 6\tNumber 7\tNumber 8\tNumber 9\tNumber"
     case '<structure>'
-        set temp $modules"\tModule"
-        set res $res -x -a "$temp"
+        function __fastfetch_complete_structure
+            for line in $modules_complex
+                set -l pair (string split -m 2 : $line)
+                echo -e "$pair[1]\t$pair[2]"
+            end
+        end
+        set res $res -x -a "(__fish_complete_list : __fastfetch_complete_structure)"
     case '<logo>'
         set -l temp (fastfetch --list-logos autocompletion)
         set -l temp (string replace -- ' ' '\\ ' $temp)

@@ -112,6 +112,7 @@ void ffInitShellOptions(FFShellOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_SHELL_MODULE_NAME,
+        "Print current shell name and version",
         ffParseShellCommandOptions,
         ffParseShellJsonObject,
         ffPrintShell,

@@ -138,6 +138,7 @@ void ffInitSwapOptions(FFSwapOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_SWAP_MODULE_NAME,
+        "Print swap (paging file) space usage",
         ffParseSwapCommandOptions,
         ffParseSwapJsonObject,
         ffPrintSwap,

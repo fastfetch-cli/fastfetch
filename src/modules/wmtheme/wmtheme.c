@@ -89,6 +89,7 @@ void ffInitWMThemeOptions(FFWMThemeOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_WMTHEME_MODULE_NAME,
+        "Print current theme of window manager",
         ffParseWMThemeCommandOptions,
         ffParseWMThemeJsonObject,
         ffPrintWMTheme,
