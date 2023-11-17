@@ -60,7 +60,7 @@ static void* xcbGetProperty(XcbPropertyData* data, xcb_connection_t* connection,
     }
 
     //Why are xcb property strings not null terminated???
-    void* replyValue = malloc((size_t) (length + 1));
+    void* replyValue = malloc((size_t)length + 1);
     memcpy(replyValue, data->ffxcb_get_property_value(propertyReply), (size_t) length);
     ((char*) replyValue)[length] = '\0';
 
