@@ -13,7 +13,7 @@
 
 enum { FF_PIPE_BUFSIZ = 4096 };
 
-static inline void waitpid_wrapper(pid_t* pid)
+static inline void waitpid_wrapper(const pid_t* pid)
 {
     // remove zombie processes
     if (*pid > 0)
