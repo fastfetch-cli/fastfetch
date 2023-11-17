@@ -59,8 +59,6 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 #if defined(_WIN32) || defined(__linux__)
 
 #include "common/library.h"
-#include "common/processing.h"
-
 #include <stdlib.h>
 
 static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* size)
