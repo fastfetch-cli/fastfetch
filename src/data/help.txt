@@ -17,8 +17,8 @@ Informative options:
     --print-structure:          Print the default structure
 
 Config options:
-    -c, --config <config>:      Specify the config file or preset to be loaded. If `none`, disable futher config loading (+)
-    --gen-config <?path>:       Generate a config file (or print it if <path> is `-`), with options specified in the command line (if any)
+    -c, --config <config>:      Specify the config file or preset to be loaded. If "none", disable futher config loading (+)
+    --gen-config <?path>:       Generate a config file (or print it if <path> is "-"), with options specified in the command line (if any)
     --gen-config-force <?path>: Generate a config file. Overwrite the existing one
 
 General options:
@@ -59,7 +59,7 @@ Logo options:
     --chafa-dither-mode <num>:             Set output dither mode (No effect with 24-bit color). This value maps the int value of enum ChafaDitherMode. See chafa document for detail
 
 Display options:
-    -s, --structure <structure>: Set the structure of the fetch. Must be a colon separated list of keys. Use `fastfetch --list-modules` to see the ones available.
+    -s, --structure <structure>: Set the structure of the fetch. Must be a colon separated list of keys. Use "fastfetch --list-modules" to see the ones available.
     --stat <?bool>:              Show time usage (in ms) for individual modules
     --pipe <?bool>:              Disable logo and all escape sequences
     --color-keys <color>:        Set the color of the keys
@@ -78,7 +78,7 @@ Display options:
     --percent-ndigits <num>:     Set the number of digits to keep after the decimal point when formatting percentage numbers. Default is 0
     --bar-char-elapsed <str>:    Set the character to use in elapsed part. Default is '■'
     --bar-char-total <str>:      Set the character to use in total part. Default is '-'
-    --bar-width <?num>:          Set the width of the bar, in number of characters. Default is 10
+    --bar-width <num>:           Set the width of the bar, in number of characters. Default is 10
     --bar-border <?bool>:        Whether to show a border around the bar. Default is true
     --no-buffer <?bool>:         Set if the stdout application buffer should be disabled. Default is false
     --size-ndigits <num>:        Set the number of digits to keep after the decimal point when formatting sizes
@@ -87,27 +87,27 @@ Display options:
 
 General module options:
     --<module>-format <format>:    Set the format string to use for each specific module.
-                                   To see how a format string works, use `fastfetch --help format`.
-                                   To see help about a specific format string, use `fastfetch --help <module>-format`.
+                                   To see how a format string works, use "fastfetch --help format".
+                                   To see help about a specific format string, use "fastfetch --help <module>-format".
 
     --<module>-key <key>:          Set the key to use for each specific module.
                                    For modules which print multiple lines, the string is parsed as a format string with the index as first character.
 
-    --<module>-key-color <format>: Override the global `--color-keys` option for each specific module.
-    --<module>-key-width <num>:    Override the global `--key-width` option for each specific module.
+    --<module>-key-color <format>: Override the global "--color-keys" option for each specific module.
+    --<module>-key-width <num>:    Override the global "--key-width" option for each specific module.
 
-Library options: Set the path of a library to load
-    --lib-PCI <path>:           GPU output
+Library path options:
+    --lib-pci <path>:           Pciutils. Used for GPU output
     --lib-vulkan <path>:        Vulkan module & fallback for GPU output
     --lib-wayland <path>:       Better display performance and output in wayland sessions
     --lib-xcb-randr <path>:     X11 sessions for better display detection and faster WM detection
     --lib-xcb <path>:           X11 sessions for better display detection and faster WM detection
-    --lib-Xrandr <path>:        X11 sessions for better display detection and faster WM detection
-    --lib-X11 <path>:           X11 sessions for better display detection and faster WM detection
+    --lib-xrandr <path>:        X11 sessions for better display detection and faster WM detection
+    --lib-x11 <path>:           X11 sessions for better display detection and faster WM detection
     --lib-gio <path>:           Needed for values that are only stored GSettings
-    --lib-DConf <path>:         Needed for values that are only stored in DConf + Fallback for GSettings
-    --lib-DBus <path>:          Bluetooth, Player & Media detection
-    --lib-XFConf <path>:        Needed for XFWM theme and XFCE Terminal font
+    --lib-dconf <path>:         Needed for values that are only stored in DConf + Fallback for GSettings
+    --lib-dbus <path>:          Bluetooth, Player & Media detection
+    --lib-xfconf <path>:        Needed for XFWM theme and XFCE Terminal font
     --lib-sqlite3 <path>:       Needed for pkg & rpm package count
     --lib-rpm <path>:           Slower fallback for rpm package count
     --lib-imagemagick <path>:   Images in terminal using sixel or kitty graphics protocol
@@ -124,9 +124,9 @@ Library options: Set the path of a library to load
 
 Module specific options:
     --title-fqdn <?bool>:                    Set if the title should use fully qualified domain name. Default is false
-    --title-color-user <color>:              Set color of the user name (left part). Default is empty (use color of `--color-title`).
-    --title-color-at <color>:                Set color of the @ symbol (middle part). Default is empty (use color of `--color-title`)
-    --title-color-host <color>:              Set color of the host name (right part). Default is empty (use color of `--color-title`)
+    --title-color-user <color>:              Set color of the user name (left part). Default is empty (use color of "--color-title").
+    --title-color-at <color>:                Set color of the @ symbol (middle part). Default is empty (use color of "--color-title")
+    --title-color-host <color>:              Set color of the host name (right part). Default is empty (use color of "--color-title")
     --chassis-use-wmi <?bool>:               Set if WMI query should be used on Windows, which detects more information but slower. Default is false
     --separator-string <str>:                Set the string printed by the separator module
     --os-file <path>:                        Set the file path which containing OS information. Linux only
@@ -141,21 +141,21 @@ Module specific options:
     --diskio-name-prefix <str>:              Show disks with given name prefix only. Default is empty
     --bluetooth-show-disconnected <?bool>:   Set if disconnected bluetooth devices should be printed. Default is false
     --packages-winget <?bool>:               Set if winget package count should be detected. Default is false
-    --display-compact-type <?str>:           Set if all displays should be printed in one line. Must be one of `none`, `original` and `scaled`. Default is none
+    --display-compact-type <str>:           Set if all displays should be printed in one line. Must be one of "none", "original" and "scaled". Default is none
     --display-detect-name <?bool>:           Set if display name should be detected and printed (if supported). Default is false
     --display-precise-refresh-rate <?bool>:  Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --brightness-ddcci-sleep <num>:          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
     --sound-type <str>:                      Set what type of sound devices should be printed. Should be either main, active or all. Default is main
-    --battery-dir <path>:                    The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only
-    --battery-use-setup-api <?bool>:         Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
+    --battery-dir <path>:                    The directory where the battery folders are. Standard: "/sys/class/power_supply/". Linux only
+    --battery-use-setup-api <?bool>:         Set if "SetupAPI" should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only
     --cpu-temp <?bool>:                      Detect and display CPU temperature if supported. Default is false
     --cpu-freq-ndigits <num>:                Set the number of digits to keep after the decimal point when printing CPU frequency. Default is 2
     --cpuusage-separate <?bool>:             Display CPU usage per CPU logical core, instead of an average result. Default is false
     --de-slow-version-detection <?bool>:     Set if DE version should be detected with slow operations. Default is false
     --gpu-temp <?bool>:                      Detect and display GPU temperature if supported. Default is false
     --gpu-use-nvml <?bool>:                  Use nvml (NVIDIA Management Library) to detect more detailed GPU information (memory usage, CUDA core count, etc). Default is false
-    --gpu-force-vulkan <?bool>:              Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`. Default is false
-    --gpu-hide-type <?bool>:                 Specify the type of GPUs should not be printed. Must be `integrated`, `discrete` or `none`. Default is none
+    --gpu-force-vulkan <?bool>:              Force using vulkan to detect GPUs, which support video memory usage detection with "--allow-slow-operations". Default is false
+    --gpu-hide-type <?bool>:                 Specify the type of GPUs should not be printed. Must be "integrated", "discrete" or "none". Default is none
     --battery-temp <?bool>:                  Detect and display Battery temperature if supported. Default is false
     --localip-show-ipv4 <?bool>:             Show IPv4 addresses in local ip module. Default is true
     --localip-show-ipv6 <?bool>:             Show IPv6 addresses in local ip module. Default is false
@@ -168,7 +168,7 @@ Module specific options:
     --netio-default-route-only <?bool>:      Show the interfac that is used for default routing only. Default is true on non-android platforms
     --publicip-timeout <num>:                Time in milliseconds to wait for the public ip server to respond. Default is disabled (0)
     --publicip-url <str>:                    The URL of public IP detection server to be used.
-    --weather-location <str>:                Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as `+`).
+    --weather-location <str>:                Set the location to be used. It must be URI encoded (eg a whitespace must be encoded as "+").
     --weather-timeout <num>:                 Time in milliseconds to wait for the weather server to respond. Default is disabled (0)
     --weather-output-format <str>:           The output weather format to be used. It must be URI encoded.
     --wm-detect-plugin <?bool>:              Set if window manager plugin should be detected on supported platforms. Default is false
@@ -183,4 +183,4 @@ Module specific options:
 Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
 If a value starts with a ?, it is optional. "true" will be used if not set.
 A (+) at the end indicates that more help can be printed with --help <option>
-All options can be made permanent with command `fastfetch <options> --gen-config`
+All options can be made permanent with command "fastfetch <options> --gen-config"
