@@ -8,4 +8,4 @@ typedef struct FFSwapResult
     uint64_t bytesTotal;
 } FFSwapResult;
 
-const char* ffDetectSwap(FFSwapResult* result);
+const char* ffDetectSwap(FFSwapResult* swap);
