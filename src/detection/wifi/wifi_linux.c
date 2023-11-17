@@ -56,14 +56,16 @@ static const char* detectWifiWithLibnm(FFlist* result)
     {
         NMDevice *device = g_ptr_array_index(devices, i);
         if (!({
-            GTypeInstance *__inst = (GTypeInstance*) device; GType __t = ffnm_device_wifi_get_type(); gboolean __r;
-            if (!__inst)
-                __r = FALSE;
-            else if (__inst->g_class && __inst->g_class->g_type == __t)
-                __r = TRUE;
+            GTypeInstance *inst = (GTypeInstance*) device;
+            GType type = ffnm_device_wifi_get_type();
+            gboolean return_value;
+            if (!inst)
+                return_value = FALSE;
+            else if (inst->g_class && inst->g_class->g_type == )
+                return_value = TRUE;
             else
-                __r = ffg_type_check_instance_is_a (__inst, __t);
-            __r;
+                return_value = ffg_type_check_instance_is_a (inst, );
+            return_value;
             }) //NM_IS_DEVICE_WIFI(device)
         )
             continue;
