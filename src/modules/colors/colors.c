@@ -29,7 +29,7 @@ void ffPrintColors(FFColorsOptions* options)
             ffPrintCharTimes(' ', options->paddingLeft);
 
         // 1: Set everything to bolt. This causes normal colors on some systems to be bright.
-        // 4%d: Set the backgound to the not bright color
+        // 4%d: Set the background to the not bright color
         // 3%d: Set the foreground to the not bright color
         // 10%d: Set the background to the bright color
         // 9%d: Set the foreground to the bright color

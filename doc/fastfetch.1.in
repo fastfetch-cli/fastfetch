@@ -18,7 +18,7 @@ Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 
 .SH "EXIT STATUS"
 
-On successfull execution, fastfetch returns zero. If any error happened,
+On successful execution, fastfetch returns zero. If any error happened,
 the exit code will be non\-zero.
 
 .SH OPTIONS

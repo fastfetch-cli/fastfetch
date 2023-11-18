@@ -45,7 +45,7 @@ static void detectKgx(FFTerminalFontResult* terminalFont)
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else
-            ffStrbufAppendS(&terminalFont->error, "Could't get system monospace font name from GSettings / DConf");
+            ffStrbufAppendS(&terminalFont->error, "Couldn't get system monospace font name from GSettings / DConf");
     }
 }
 
@@ -77,7 +77,7 @@ static void detectFromGSettings(const char* profilePath, const char* profileList
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else
-            ffStrbufAppendS(&terminalFont->error, "Could't get system monospace font name from GSettings / DConf");
+            ffStrbufAppendS(&terminalFont->error, "Couldn't get system monospace font name from GSettings / DConf");
     }
 }
 

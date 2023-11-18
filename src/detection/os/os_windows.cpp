@@ -58,7 +58,7 @@ void ffDetectOSImpl(FFOSResult* os)
 
     ffStrbufTrimRight(&os->variant, ' ');
 
-    //WMI returns the "Microsoft" prefix while BrandingFormatString doesn't. Make them consistant.
+    //WMI returns the "Microsoft" prefix while BrandingFormatString doesn't. Make them consistent.
     if(ffStrbufStartsWithS(&os->variant, "Microsoft "))
         ffStrbufSubstrAfter(&os->variant, strlen("Microsoft ") - 1);
 

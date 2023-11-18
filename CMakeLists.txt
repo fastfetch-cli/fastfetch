@@ -71,7 +71,7 @@ cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" O
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 
-option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embeded) yyjson library" OFF)
+option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds

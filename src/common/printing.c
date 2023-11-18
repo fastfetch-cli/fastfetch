@@ -6,7 +6,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
 {
     ffLogoPrintLine();
 
-    //This is used by --set-keyless, in this case we wan't neither the module name nor the separator
+    //This is used by --set-keyless, in this case we want neither the module name nor the separator
     if(moduleName == NULL)
         return;
 

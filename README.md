@@ -85,7 +85,7 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 ## FAQ
 
 Q: Why do you need a very performant version of neofetch?
-> I like putting neofetch in my ~/.bashrc to have a system overwiew whenever I use the terminal, but the slow speed annoyed me, so I created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
+> I like putting neofetch in my ~/.bashrc to have a system overview whenever I use the terminal, but the slow speed annoyed me, so I created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
 
 Q: It does not display [*] correctly for me, what can I do?
 > This is most likely because your system is not implemented (yet). At the moment I am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration

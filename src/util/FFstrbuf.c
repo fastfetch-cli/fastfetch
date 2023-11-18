@@ -305,7 +305,7 @@ uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 {
     assert(start <= strbuf->length);
 
-    //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true
+    //We need to loop one higher than the actual index, because uint32_t is guaranteed to be >= 0, so this statement would always be true
     for(uint32_t i = start + 1; i > 0; i--)
     {
         if(strbuf->chars[i - 1] == c)

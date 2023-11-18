@@ -44,7 +44,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 
 bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
-    ssize_t readed = 0;
+    ssize_t bytesRead = 0;
 
     struct stat fileInfo;
     if(fstat(fd, &fileInfo) != 0)
@@ -54,10 +54,10 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
     uint32_t free = ffStrbufGetFree(buffer);
 
     while(
-        (readed = read(fd, buffer->chars + buffer->length, free)) > 0
+        (bytesRead = read(fd, buffer->chars + buffer->length, free)) > 0
     ) {
-        buffer->length += (uint32_t) readed;
-        if((uint32_t) readed == free)
+        buffer->length += (uint32_t) bytesRead;
+        if((uint32_t) bytesRead == free)
             ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
@@ -153,14 +153,14 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     }
 
     char buffer[512];
-    ssize_t readed = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
+    ssize_t bytesRead = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
 
-    if(readed <= 0)
+    if(bytesRead <= 0)
         return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
 
-    buffer[readed] = '\0';
+    buffer[bytesRead] = '\0';
 
     va_list args;
     va_start(args, format);

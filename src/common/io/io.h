@@ -49,11 +49,11 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
     #ifndef _WIN32
         return read(fd, data, dataSize);
     #else
-        DWORD readed;
-        if(!ReadFile(fd, data, (DWORD)dataSize, &readed, NULL))
+        DWORD bytesRead;
+        if(!ReadFile(fd, data, (DWORD)dataSize, &bytesRead, NULL))
             return -1;
 
-        return (ssize_t)readed;
+        return (ssize_t)bytesRead;
     #endif
 }
 

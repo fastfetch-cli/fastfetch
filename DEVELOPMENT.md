@@ -16,7 +16,7 @@ Here i just add things that are easy to forget.
 - [ ] ZSH completions
 - [ ] Fish completions
 - [ ] Make CPU usage detection much faster and more accurate
-- [ ] Detect CPU usage in a common detection methode and expose it both to the cpuUsage module and the cpu format string
+- [ ] Detect CPU usage in a common detection method and expose it both to the cpuUsage module and the cpu format string
 - [ ] Per session caching
 
 ### General
