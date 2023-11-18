@@ -1,7 +1,7 @@
 A format string is a string that contains placeholders for values.
 These placeholders begin with a '{', containing the index of the value, and end with a '}'.
 For example the format string "Values: {1} ({2})", with the values "First" and "My second val", will produce
-The format string can contain placeholders in any order and have multiple occurences.
+The format string can contain placeholders in any order and have multiple occurrences.
 To include spaces when setting from the command line, surround the whole string with double quotes (").
 
 If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.

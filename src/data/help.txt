@@ -15,7 +15,7 @@ Informative options:
     --print-structure:          Print the default structure
 
 Config options:
-    -c, --config <config>:      Specify the config file or preset to be loaded. If "none", disable futher config loading (+)
+    -c, --config <config>:      Specify the config file or preset to be loaded. If "none", disable further config loading (+)
     --gen-config <?path>:       Generate a config file (or print it if <path> is "-"), with options specified in the command line (if any)
     --gen-config-force <?path>: Generate a config file. Overwrite the existing one
 
