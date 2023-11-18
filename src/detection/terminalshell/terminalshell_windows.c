@@ -305,6 +305,7 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell")     ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell_ise") ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "wsl")            || // running inside wsl
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "servercoreshell")   || // ServerCore Shell Launcher
         ffStrbufStartsWithIgnCaseS(&result->terminalPrettyName, "ConEmuC") // wrapper process of ConEmu
     ) {
         //We are nested shell
