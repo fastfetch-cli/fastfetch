@@ -112,7 +112,7 @@ configuration files and a JSONC based format.
 
 A JSONC config file is a JSON file that also supports comments with (//). Those
 files must have the extension '.jsonc'. You can migrate a legacy config
-file to the JSONC format by using \fB\-\-migrate\-config\fR.
+file to the JSONC format by using \fB\-\-gen\-config\fR.
 
 The specified configuration/preset files are searched in the following order:
 
