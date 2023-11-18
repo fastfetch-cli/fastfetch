@@ -62,7 +62,7 @@ List the supported features fastfetch was compiled with
 Print available logos
 .TP
 
-.B \-\-print\-default\-structure
+.B \-\-print\-structure
 Print the default structure
 
 
