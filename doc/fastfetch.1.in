@@ -118,10 +118,6 @@ To list all available modules, use \fB \-\-list\-modules \fR
 fastfetch supports two types of config files. The legacy
 configuration files and a JSONC based format.
 
-A legacy fastfetch config file contains one command line flag on each
-line. If the line starts with an '#' it is ignored. The files must have
-the '.conf' extension.
-
 A JSONC config file is a JSON file that also supports comments with (//). Those
 files must have the extension '.jsonc'. You can migrate a legacy config
 file to the JSONC format by using \fB\-\-migrate\-config\fR.
