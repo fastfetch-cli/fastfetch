@@ -1,7 +1,7 @@
 .TH FASTFETCH 1 "@FASTFETCH_BUILD_DATE@" "@CMAKE_PROJECT_NAME@ @CMAKE_PROJECT_VERSION@"
 
 .SH NAME
-fastfetch - a neofetch-like tool for fetching system information and
+fastfetch \- a neofetch\-like tool for fetching system information and
 displaying them in a pretty way
 
 .SH SYNOPSIS
@@ -11,7 +11,7 @@ displaying them in a pretty way
 
 .SH DESCRIPTION
 
-Fastfetch is a neofetch-like tool for fetching system information and
+Fastfetch is a neofetch\-like tool for fetching system information and
 displaying them in a pretty way. It is written mainly in C, with performance
 and customizability in mind.
 Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
@@ -19,7 +19,7 @@ Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
 .SH "EXIT STATUS"
 
 On successfull execution, fastfetch returns zero. If any error happened,
-the exit code will be non-zero.
+the exit code will be non\-zero.
 
 .SH OPTIONS
 
@@ -46,19 +46,19 @@ List search paths of presets and logos
 List available logos, they can be loaded with \fI \-\-logo
 .TP
 
-.B \-\-list-modules
+.B \-\-list\-modules
 List available modules
 .TP
 
-.B \-\-list-presets
+.B \-\-list\-presets
 List available presets, they can be loaded with \fI \-\-config
 .TP
 
-.B \-\-list-features
+.B \-\-list\-features
 List the supported features fastfetch was compiled with
 .TP
 
-.B \-\-print-logos
+.B \-\-print\-logos
 Print available logos
 .TP
 
@@ -131,4 +131,4 @@ Fastfetch provides some default presets. List them with \fB \-\-print\-available
 .BR neofetch (1)
 
 .SH BUGS
-Please report bugs to:\fI https://github.com/fastfetch-cli/fastfetch/issues \fR
+Please report bugs to:\fI https://github.com/fastfetch\-cli/fastfetch/issues \fR
