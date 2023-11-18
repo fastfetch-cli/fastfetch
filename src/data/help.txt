@@ -12,8 +12,6 @@ Informative options:
     --list-presets:             List presets fastfetch knows about; they can be loaded with --config (+)
     --list-features:            List the supported features fastfetch was compiled with (mainly for development)
     --print-logos:              Print available logos
-    --print-config-system:      Print the default system config
-    --print-config-user:        Print the default user config
     --print-structure:          Print the default structure
 
 Config options:
