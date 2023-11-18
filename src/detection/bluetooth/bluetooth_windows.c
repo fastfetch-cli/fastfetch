@@ -1,14 +1,20 @@
 #include "bluetooth.h"
+#include "common/library.h"
 #include "util/windows/unicode.h"
 
 #include <windows.h>
 #include <bluetoothapis.h>
 
-#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-sign"
 
 const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 {
+    // Actually bluetoothapis.dll, but it's missing on Windows 7
+    FF_LIBRARY_LOAD(bluetoothapis, NULL, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstDevice)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextDevice)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindDeviceClose)
+
     BLUETOOTH_DEVICE_SEARCH_PARAMS btsp = {
         .fReturnConnected = TRUE,
         .fReturnRemembered = TRUE,
@@ -20,9 +26,14 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
     BLUETOOTH_DEVICE_INFO btdi = {
         .dwSize = sizeof(btdi)
     };
-    HBLUETOOTH_DEVICE_FIND hFind = BluetoothFindFirstDevice(&btsp, &btdi);
+    HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstDevice(&btsp, &btdi);
     if(!hFind)
-        return "BluetoothFindFirstDevice() failed or no devices found";
+    {
+        if (GetLastError() == ERROR_NO_MORE_ITEMS)
+            return "No Bluetooth devices found";
+        else
+            return "BluetoothFindFirstDevice() failed";
+    }
 
     do {
         FFBluetoothResult* device = ffListAdd(devices);
@@ -114,9 +125,9 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
             ffStrbufTrimRight(&device->type, ' ');
             ffStrbufTrimRight(&device->type, ',');
         }
-    } while (BluetoothFindNextDevice(hFind, &btdi));
+    } while (ffBluetoothFindNextDevice(hFind, &btdi));
+
+    ffBluetoothFindDeviceClose(hFind);
 
     return NULL;
 }
-
-#pragma GCC diagnostic pop
