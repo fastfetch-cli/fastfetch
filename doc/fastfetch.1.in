@@ -81,14 +81,6 @@ see the CONFIGURATION section.
 .SS "Config Options"
 .TP
 
-.B \-\-print\-config\-system
-Print the default system config
-.TP
-
-.B \-\-print\-config\-user
-Print the default user config
-.TP
-
 .B \-c, \-\-config \fI <config>
 Use the specified config file or preset. If "none", disable further config
 loading. For details about config files, see the CONFIGURATION section
