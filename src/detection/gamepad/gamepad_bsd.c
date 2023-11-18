@@ -20,9 +20,9 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         report_desc_t repDesc = hid_get_report_desc(fd);
         if (!repDesc) continue;
 
-        int repId = hid_get_report_id(fd);
+        int reportId = hid_get_report_id(fd);
 
-        struct hid_data* hData = hid_start_parse(repDesc, 0, repId);
+        struct hid_data* hData = hid_start_parse(repDesc, 0, reportId);
         if (hData)
         {
             struct hid_item hItem;

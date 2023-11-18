@@ -333,7 +333,7 @@ void ffdsDetectWMDE(FFDisplayServerResult* result)
     applyPrettyNameIfDE(result, env);
 
     //If WM was found by connection to the sever, and DE in the environment, we can return
-    //This way we never call getFromProcDir(), which has slow initalization time
+    //This way we never call getFromProcDir(), which has slow initialization time
     if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
         return;
 

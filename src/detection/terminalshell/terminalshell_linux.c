@@ -368,7 +368,7 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     if(result.terminalExeName[0] == '.' && ffStrEndsWith(result.terminalExeName, "-wrapped"))
     {
         // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
-        // We use terminalProcessName when detecting version and font, overriding it for simplication
+        // We use terminalProcessName when detecting version and font, overriding it for simplification
         ffStrbufSetNS(
             &result.terminalProcessName,
             (uint32_t) (strlen(result.terminalExeName) - strlen(".-wrapped")),

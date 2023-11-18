@@ -89,7 +89,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 
     if (!instance.config.general.dsForceDrm)
     {
-        //We try wayland as our prefered display server, as it supports the most features.
+        //We try wayland as our preferred display server, as it supports the most features.
         //This method can't detect the name of our WM / DE
         ffdsConnectWayland(ds);
 

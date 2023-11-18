@@ -55,7 +55,7 @@ static const char* detectVulkan(FFVulkanResult* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE2(vulkan, vkEnumeratePhysicalDevices, vkEnumeratePhysicalDevices@12)
 
     //Some drivers (nvdc) print messages to stdout
-    //and thats the best way i found to disable that
+    //and that is the best way I found to disable that
     FF_SUPPRESS_IO();
 
     FFVersion instanceVersion = FF_VERSION_INIT;

@@ -388,7 +388,7 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
 
 void ffdsConnectXrandr(FFDisplayServerResult* result)
 {
-    //Do nothing here. There are more x11 implementaions to come.
+    //Do nothing here. There are more x11 implementations to come.
     FF_UNUSED(result);
 }
 

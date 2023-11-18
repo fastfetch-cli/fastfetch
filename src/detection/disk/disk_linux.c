@@ -20,7 +20,7 @@
 
 static bool isPhysicalDevice(const struct mntent* device)
 {
-    #ifndef __ANDROID__ //On Android, `/dev` is not accessable, so that the following checks always fail
+    #ifndef __ANDROID__ //On Android, `/dev` is not accessible, so that the following checks always fail
 
     //Always show the root path
     if(ffStrEquals(device->mnt_dir, "/"))

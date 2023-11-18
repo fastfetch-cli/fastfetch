@@ -24,7 +24,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         if (part && isdigit(part[strlen("-part")]))
             continue;
 
-        if (ffStrStartsWith(entry->d_name, "nvme-eui.")) // NVMe drive indentifier
+        if (ffStrStartsWith(entry->d_name, "nvme-eui.")) // NVMe drive identifier
             continue;
 
         // Other exceptions?
