@@ -91,7 +91,7 @@ bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer)
 
 // The following functions return true if the file was found, independently if start was found
 // Buffers which already contain content are not overwritten
-// The last occurence of start in the first file will be the one used
+// The last occurrence of start in the first file will be the one used
 
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries)
 {

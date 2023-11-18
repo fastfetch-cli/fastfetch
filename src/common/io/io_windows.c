@@ -32,7 +32,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 
 bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
 {
-    DWORD readed = 0;
+    DWORD bytesRead = 0;
 
     LARGE_INTEGER fileSize;
     if(!GetFileSizeEx(handle, &fileSize))
@@ -43,11 +43,11 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
 
     bool success;
     while(
-        (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &readed, NULL)) &&
-        readed > 0
+        (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &bytesRead, NULL)) &&
+        bytesRead > 0
     ) {
-        buffer->length += (uint32_t) readed;
-        if((uint32_t) readed == free)
+        buffer->length += (uint32_t) bytesRead;
+        if((uint32_t) bytesRead == free)
             ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }

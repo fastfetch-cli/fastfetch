@@ -203,7 +203,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             }
 
             // fastforward to the end of the if without printing the in between
-            i = ffStrbufNextIndexS(formatstr, i, "{?}") + 2; // 2 is the length of "{?}" - 1 because the loop will increament it again directly after continue
+            i = ffStrbufNextIndexS(formatstr, i, "{?}") + 2; // 2 is the length of "{?}" - 1 because the loop will increment it again directly after continue
             continue;
         }
 
@@ -229,7 +229,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             }
 
             // fastforward to the end of the if without printing the in between
-            i = ffStrbufNextIndexS(formatstr, i, "{/}") + 2; // 2 is the length of "{/}" - 1 because the loop will increament it again directly after continue
+            i = ffStrbufNextIndexS(formatstr, i, "{/}") + 2; // 2 is the length of "{/}" - 1 because the loop will increment it again directly after continue
             continue;
         }
 
