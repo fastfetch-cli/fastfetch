@@ -1,0 +1,133 @@
+.TH FASTFETCH 1 "18 November 2023" "fastfetch VERSION"
+
+.SH NAME
+fastfetch - a neofetch-like tool for fetching system information and
+displaying them in a pretty way
+
+.SH SYNOPSIS
+
+.B fastfetch
+.I [options...]
+
+.SH DESCRIPTION
+
+Fastfetch is a neofetch-like tool for fetching system information and
+displaying them in a pretty way. It is written mainly in C, with performance
+and customizability in mind.
+Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
+
+.SH "EXIT STATUS"
+
+On successfull execution, fastfetch returns zero. If any error happened,
+the exit code will be non-zero.
+
+.SH OPTIONS
+
+.SS "Informative Options"
+.TP
+
+.B \-\-help \fI [command]
+Show help output, displaying all available options or help for given command
+.TP
+
+.B \-\-version
+Show version of fastfetch
+.TP
+
+.B \-\-list\-config\-paths
+List search paths of config files
+.TP
+
+.B \-\-list\-data\-paths
+List search paths of presets and logos
+.TP
+
+.B \-\-list\-logos
+List available logos, they can be loaded with \fI \-\-logo
+.TP
+
+.B \-\-list-modules
+List available modules
+.TP
+
+.B \-\-list-presets
+List available presets, they can be loaded with \fI \-\-load\-config
+.TP
+
+.B \-\-list-features
+List the supported features fastfetch was compiled with
+.TP
+
+.B \-\-print-logos
+Print available logos
+.TP
+
+.B \-\-print\-default\-structure
+Print the default structure
+
+
+.SS "Display Options"
+.TP
+
+.B \-l, \-\-logo \fI <logo>
+Set the logo to display
+.TP
+
+.B \-c, \-\-structure \fI <structure>
+Set the structure of the fetch. For details about the structure,
+see the CONFIGURATION section.
+
+
+.SS "Config Options"
+.TP
+
+.B \-\-print\-config\-system
+Print the default system config
+.TP
+
+.B \-\-print\-config\-user
+Print the default user config
+.TP
+
+.B \-c, \-\-config \fI <config>
+Use the specified config file or preset. If "none", disable further config
+loading. For details about config files, see the CONFIGURATION section
+.TP
+
+.B \-\-gen\-config \fI [file]
+Generate a config file with options specified on the command line.
+If \fI file \fR is specified, the configuration will written to the
+file, otherwise it will be written to stdout.
+.TP
+
+.B \-\-gen\-config\-force \fI [file]
+Same as \fB \-\-gen\-config\fR, but overwrites existing config
+.TP
+
+
+To list all options, use \fB \-\-help\fR this will also print all available module options.
+
+.SH CONFIGURATION
+.SS "Fetch Structure"
+The structure of a fetch describes the modules that should be included in
+the output. It consists of a string of modules, separated by a colon (:).
+To list all available modules, use \fB \-\-list\-modules \fR
+
+.SS "Config Files"
+A fastfetch config file contains one command line flag on each
+line. If the line starts with an '#' it is ignored. The specified
+configuration/preset files are searched in the following order:
+
+1. relative to the current working directory
+
+2. relative to ~/.local/share/fastfetch/presets/
+
+3. relative to /usr/share/fastfetch/presets/
+
+Fastfetch provides some default presets. List them with \fB \-\-print\-available\-presets\fR.
+
+.SH "SEE ALSO"
+.BR neofetch (1)
+
+.SH BUGS
+Please report bugs to:\fI https://github.com/fastfetch-cli/fastfetch/issues \fR
