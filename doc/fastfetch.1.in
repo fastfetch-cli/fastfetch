@@ -30,7 +30,7 @@ the exit code will be non-zero.
 Show help output, displaying all available options or help for given command
 .TP
 
-.B \-\-version
+.B \-v, \-\-version
 Show version of fastfetch
 .TP
 
@@ -51,7 +51,7 @@ List available modules
 .TP
 
 .B \-\-list-presets
-List available presets, they can be loaded with \fI \-\-load\-config
+List available presets, they can be loaded with \fI \-\-config
 .TP
 
 .B \-\-list-features
