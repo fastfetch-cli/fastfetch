@@ -114,15 +114,28 @@ the output. It consists of a string of modules, separated by a colon (:).
 To list all available modules, use \fB \-\-list\-modules \fR
 
 .SS "Config Files"
-A fastfetch config file contains one command line flag on each
-line. If the line starts with an '#' it is ignored. The specified
-configuration/preset files are searched in the following order:
+
+fastfetch supports two types of config files. The legacy
+configuration files and a JSONC based format.
+
+A legacy fastfetch config file contains one command line flag on each
+line. If the line starts with an '#' it is ignored. The files must have
+the '.conf' extension.
+
+A JSONC config file is a JSON file that also supports comments with (//). Those
+files must have the extension '.jsonc'. You can migrate a legacy config
+file to the JSONC format by using \fB\-\-migrate\-config\fR.
+
+The specified configuration/preset files are searched in the following order:
 
 1. relative to the current working directory
 
 2. relative to ~/.local/share/fastfetch/presets/
 
 3. relative to /usr/share/fastfetch/presets/
+
+When both a '.jsonc' and a '.conf' file with the same name is found,
+the '.jsonc' file is preferred.
 
 Fastfetch provides some default presets. List them with \fB \-\-print\-available\-presets\fR.
 
