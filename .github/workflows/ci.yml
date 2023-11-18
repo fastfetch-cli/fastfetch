@@ -5,6 +5,20 @@ on:
   - pull_request
 
 jobs:
+  spellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install codespell
+        shell: bash
+        run: sudo apt update && sudo apt install -y codespell
+
+      - name: Run Spellchecker
+        run: codespell
+
   linux-buildtest:
     name: Linux build test
     permissions:
