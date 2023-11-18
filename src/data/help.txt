@@ -9,11 +9,9 @@ Informative options:
     --list-data-paths:          List search paths of presets and logos
     --list-logos:               List available logos
     --list-modules:             List available modules
-    --list-presets:             List presets fastfetch knows about; they can be loaded with --load-config (+)
+    --list-presets:             List presets fastfetch knows about; they can be loaded with --config (+)
     --list-features:            List the supported features fastfetch was compiled with (mainly for development)
     --print-logos:              Print available logos
-    --print-config-system:      Print the default system config
-    --print-config-user:        Print the default user config
     --print-structure:          Print the default structure
 
 Config options:
