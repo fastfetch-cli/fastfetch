@@ -9,4 +9,4 @@ typedef struct FFBoardResult
     FFstrbuf version;
 } FFBoardResult;
 
-const char* ffDetectBoard(FFBoardResult* result);
+const char* ffDetectBoard(FFBoardResult* board);

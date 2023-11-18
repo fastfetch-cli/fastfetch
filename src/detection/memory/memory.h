@@ -8,4 +8,4 @@ typedef struct FFMemoryResult
     uint64_t bytesTotal;
 } FFMemoryResult;
 
-const char* ffDetectMemory(FFMemoryResult* result);
+const char* ffDetectMemory(FFMemoryResult* ram);

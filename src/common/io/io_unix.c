@@ -94,7 +94,7 @@ bool ffPathExists(const char* path, FFPathType type)
     if(stat(path, &fileStat) != 0)
         return false;
 
-    int mode = fileStat.st_mode & S_IFMT;
+    unsigned int mode = fileStat.st_mode & S_IFMT;
 
     if(type & FF_PATHTYPE_REGULAR && mode == S_IFREG)
         return true;
