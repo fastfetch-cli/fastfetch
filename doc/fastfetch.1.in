@@ -73,7 +73,7 @@ Print the default structure
 Set the logo to display
 .TP
 
-.B \-c, \-\-structure \fI <structure>
+.B \-s, \-\-structure \fI <structure>
 Set the structure of the fetch. For details about the structure,
 see the CONFIGURATION section.
 
