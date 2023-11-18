@@ -12,6 +12,7 @@ We are deprecating flags based config files (will be removed in v3.0.0). We sugg
 
 Features:
 * Support Oils and elvish shell version detection (Shell)
+* Support Windows Server Core (Windows)
 
 # 2.2.3
 
