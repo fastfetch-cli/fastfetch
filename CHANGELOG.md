@@ -7,6 +7,7 @@ Config related changes:
 * The undocumented flag `--load-user-config` is removed. As an alternative, `--config none` can be used to disable loading config files.
 * `--config` (previously named `--load-config`) is now supported for command line arguments only. If specified, other config files won't be loaded, which works like other programs.
 * Config files will always be loaded before other command line flags being parsed. That is to say, command line flags will always override options defined in config files.
+* the value of GPUType `integrated` contained a typo and was fixed. Existing config files may need to be updated.
 
 We are deprecating flags based config files (will be removed in v3.0.0). We suggest you migrate to json based config files.
 

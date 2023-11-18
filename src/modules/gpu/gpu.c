@@ -151,7 +151,6 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     {
         options->hideType = (FFGPUType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "none", FF_GPU_TYPE_UNKNOWN },
-            { "intergrated", FF_GPU_TYPE_INTEGRATED }, // for backward compatibility only
             { "integrated", FF_GPU_TYPE_INTEGRATED },
             { "discrete", FF_GPU_TYPE_DISCRETE },
             {},
@@ -197,7 +196,6 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
                 { "none", FF_GPU_TYPE_UNKNOWN },
-                { "intergrated", FF_GPU_TYPE_INTEGRATED },  // for backward compatibility only
                 { "integrated", FF_GPU_TYPE_INTEGRATED },
                 { "discrete", FF_GPU_TYPE_DISCRETE },
                 {},
