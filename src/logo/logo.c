@@ -105,7 +105,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
             continue;
         }
 
-        //We have an escape sequence direclty as bytes. We print it, but don't increase the line length
+        //We have an escape sequence directly as bytes. We print it, but don't increase the line length
         if(*data == '\e' && *(data + 1) == '[')
         {
             const char* start = data;

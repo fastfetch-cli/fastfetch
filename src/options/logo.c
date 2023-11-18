@@ -291,7 +291,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         {
             uint32_t value = (uint32_t) yyjson_get_uint(val);
             if (value == 0)
-                return "Logo width must be a possitive integer";
+                return "Logo width must be a positive integer";
             options->width = value;
             continue;
         }
@@ -299,7 +299,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         {
             uint32_t value = (uint32_t) yyjson_get_uint(val);
             if (value == 0)
-                return "Logo height must be a possitive integer";
+                return "Logo height must be a positive integer";
             options->height = value;
             continue;
         }
@@ -313,7 +313,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 if (pos) \
                 { \
                     if (!yyjson_is_uint(pos)) \
-                        return "Logo padding values must be possitive integers"; \
+                        return "Logo padding values must be positive integers"; \
                     options->paddingPos = (uint32_t) yyjson_get_uint(pos); \
                 }
             FF_PARSE_PADDING_POSITON(left, paddingLeft);

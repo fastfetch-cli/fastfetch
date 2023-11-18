@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    ffInitInstance(); //This also applys default configuration to instance.config
+    ffInitInstance(); //This also applies default configuration to instance.config
 
     //Modify instance.config here
     FFOptionsModules* const options = &instance.config.modules;
