@@ -153,17 +153,14 @@ static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version)
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
-    if(ffProcessAppendStdOut(version, (char* const[]) {
+    return ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-NoLogo",
         "-NoProfile",
         "-Command",
         "$PSVersionTable.PSVersion.ToString()",
         NULL
-    })) return false;
-
-    ffStrbufSubstrAfterLastC(version, ' ');
-    return true;
+    }) == NULL;
 }
 #endif
 
