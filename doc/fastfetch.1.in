@@ -1,4 +1,4 @@
-.TH FASTFETCH 1 "18 November 2023" "fastfetch VERSION"
+.TH FASTFETCH 1 "@FASTFETCH_BUILD_DATE@" "@CMAKE_PROJECT_NAME@ @CMAKE_PROJECT_VERSION@"
 
 .SH NAME
 fastfetch - a neofetch-like tool for fetching system information and

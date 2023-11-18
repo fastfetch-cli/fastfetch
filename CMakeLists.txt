@@ -225,6 +225,9 @@ if(APPLE)
     configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
 endif()
 
+string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y")
+configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
+
 ####################
 # Ascii image data #
 ####################
@@ -1031,6 +1034,11 @@ install(
 install(
     FILES "${CMAKE_SOURCE_DIR}/LICENSE"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}"
+)
+
+install(
+    FILES "${PROJECT_BINARY_DIR}/fastfetch.1"
+    DESTINATION "${CMAKE_INSTALL_MANDIR}"
 )
 
 ##################
