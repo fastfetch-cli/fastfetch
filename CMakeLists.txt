@@ -896,7 +896,6 @@ elseif(WIN32)
         PRIVATE "iphlpapi"
         PRIVATE "ole32"
         PRIVATE "oleaut32"
-        PRIVATE "opengl32"
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
         PRIVATE "version"
