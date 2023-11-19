@@ -129,7 +129,7 @@ static void printCommandHelp(const char* command)
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "config"))
+    else if(ffStrEqualsIgnCase(command, "config"))
         puts(FASTFETCH_DATATEXT_HELP_CONFIG);
     else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // x-format
         printCommandFormatHelp(command);
@@ -445,11 +445,7 @@ static void parseCommand(FFdata* data, char* key, char* value)
     else if(ffStrStartsWithIgnCase(key, "--print-"))
     {
         const char* subkey = key + strlen("--print-");
-        if(ffStrEqualsIgnCase(subkey, "config-system"))
-            puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
-        else if(ffStrEqualsIgnCase(subkey, "config-user"))
-            puts(FASTFETCH_DATATEXT_CONFIG_USER);
-        else if(ffStrEqualsIgnCase(subkey, "structure"))
+        if(ffStrEndsWithIgnCase(subkey, "structure"))
             puts(FASTFETCH_DATATEXT_STRUCTURE);
         else if(ffStrEqualsIgnCase(subkey, "logos"))
             ffLogoBuiltinPrint();
