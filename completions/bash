@@ -182,7 +182,6 @@ __fastfetch_completion()
         "--cpu-temp"
         "--gpu-temp"
         "--battery-temp"
-        "--display-detect-name"
         "--display-precise-refresh-rate"
         "--localip-show-ipv4"
         "--localip-show-ipv6"
