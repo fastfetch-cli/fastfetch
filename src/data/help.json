@@ -916,7 +916,7 @@
         {
             "long": "disk-use-available",
             "desc": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
-            "remark": "Maybe required for macOS to print currect results",
+            "remark": "Maybe required for macOS to print correct results",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -943,7 +943,7 @@
         {
             "long": "packages-winget",
             "desc": "Set if winget package count should be detected",
-            "remark": "This option is extremely slow. You may need to increase value of '--processing-timeout' to make it actuall work",
+            "remark": "This option is extremely slow. You may need to increase value of '--processing-timeout' to make it actually work",
             "arg": {
                 "type": "bool",
                 "optional": true,
