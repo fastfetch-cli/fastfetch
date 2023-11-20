@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "common/color.h"
 #include "common/commandoption.h"
 #include "common/printing.h"
 #include "common/parsing.h"
@@ -43,7 +42,7 @@ static void printFullHelp()
 {
     fputs("Fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way\n\n", stdout);
     if (!instance.config.display.pipe)
-        fputs("\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE "mUsage:\e[" FF_COLOR_MODE_RESET "m \e[" FF_COLOR_MODE_BOLD "mfastfetch\e[" FF_COLOR_MODE_RESET "m \e[" FF_COLOR_MODE_ITALIC "m<?options>\e[" FF_COLOR_MODE_RESET "m\n\n", stdout);
+        fputs("\e[1;4mUsage:\e[m \e[1mfastfetch\e[m \e[3m<?options>\e[m\n\n", stdout);
     else
         fputs("Usage: fastfetch <?options>\n\n", stdout);
 
@@ -54,10 +53,10 @@ static void printFullHelp()
     yyjson_obj_foreach(yyjson_doc_get_root(doc), groupIdx, groupMax, groupKey, flagArr)
     {
         if (!instance.config.display.pipe)
-            fputs("\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE "m", stdout);
+            fputs("\e[1;4m", stdout);
         printf("%s options:", yyjson_get_str(groupKey));
         if (!instance.config.display.pipe)
-            fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+            fputs("\e[m", stdout);
         putchar('\n');
 
         yyjson_val* flagObj;
@@ -69,10 +68,10 @@ static void printFullHelp()
             {
                 fputs("  ", stdout);
                 if (!instance.config.display.pipe)
-                    fputs("\e[" FF_COLOR_MODE_BOLD "m", stdout);
+                    fputs("\e[1m", stdout);
                 printf("-%s", yyjson_get_str(shortKey));
                 if (!instance.config.display.pipe)
-                    fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+                    fputs("\e[m", stdout);
                 fputs(", ", stdout);
             }
             else
@@ -82,10 +81,10 @@ static void printFullHelp()
             yyjson_val* longKey = yyjson_obj_get(flagObj, "long");
             assert(longKey);
             if (!instance.config.display.pipe)
-                fputs("\e[" FF_COLOR_MODE_BOLD "m", stdout);
+                fputs("\e[1m", stdout);
             printf("--%s", yyjson_get_str(longKey));
             if (!instance.config.display.pipe)
-                fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+                fputs("\e[m", stdout);
 
             yyjson_val* argObj = yyjson_obj_get(flagObj, "arg");
             if (argObj)
@@ -96,10 +95,10 @@ static void printFullHelp()
                 bool optional = optionalKey && yyjson_get_bool(optionalKey);
                 putchar(' ');
                 if (!instance.config.display.pipe)
-                    fputs("\e[" FF_COLOR_MODE_ITALIC "m", stdout);
+                    fputs("\e[4m", stdout);
                 printf("<%s%s>", optional ? "?" : "", yyjson_get_str(typeKey));
                 if (!instance.config.display.pipe)
-                    fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+                    fputs("\e[m", stdout);
             }
 
             yyjson_val* descKey = yyjson_obj_get(flagObj, "desc");
