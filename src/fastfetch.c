@@ -95,7 +95,7 @@ static void printFullHelp()
                 bool optional = optionalKey && yyjson_get_bool(optionalKey);
                 putchar(' ');
                 if (!instance.config.display.pipe)
-                    fputs("\e[4m", stdout);
+                    fputs("\e[3m", stdout);
                 printf("<%s%s>", optional ? "?" : "", yyjson_get_str(typeKey));
                 if (!instance.config.display.pipe)
                     fputs("\e[m", stdout);
