@@ -140,7 +140,6 @@ Module specific options:
     --bluetooth-show-disconnected <?bool>:   Set if disconnected bluetooth devices should be printed. Default is false
     --packages-winget <?bool>:               Set if winget package count should be detected. Default is false
     --display-compact-type <str>:           Set if all displays should be printed in one line. Must be one of "none", "original" and "scaled". Default is none
-    --display-detect-name <?bool>:           Set if display name should be detected and printed (if supported). Default is false
     --display-precise-refresh-rate <?bool>:  Set if decimal refresh rates should not be rounded into integers when printing. Default is true
     --brightness-ddcci-sleep <num>:          Set the sleep times (in ms) when sending DDC/CI requests. See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail. Default is 10
     --sound-type <str>:                      Set what type of sound devices should be printed. Should be either main, active or all. Default is main

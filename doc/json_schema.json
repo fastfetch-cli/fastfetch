@@ -1033,7 +1033,7 @@
                                     "preciseRefreshRate": {
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",
                                         "type": "boolean",
-                                        "default": true
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1059,7 +1059,7 @@
                                     },
                                     "folders": {
                                         "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: \"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points"
                                     },
                                     "showExternal": {
                                         "type": "boolean",
