@@ -213,6 +213,16 @@ function(fastfetch_load_text FILENAME OUTVAR)
     set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
 endfunction(fastfetch_load_text)
 
+function(fastfetch_load_raw_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
+    string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
+    string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
+    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
+    set(${OUTVAR} "\"${TEMP}\"" PARENT_SCOPE)
+endfunction(fastfetch_load_raw_text)
+
+fastfetch_load_raw_text(src/data/help.json DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
@@ -231,15 +241,6 @@ configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 ####################
 # Ascii image data #
 ####################
-
-function(fastfetch_load_raw_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
-    string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
-    string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
-    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
-    set(${OUTVAR} "\"${TEMP}\"" PARENT_SCOPE)
-endfunction(fastfetch_load_raw_text)
 
 file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
 set(LOGO_BUILTIN_H "#pragma once\n\n")

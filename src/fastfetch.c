@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/color.h"
 #include "common/commandoption.h"
 #include "common/printing.h"
 #include "common/parsing.h"
@@ -38,102 +39,142 @@ static void printCommandFormatHelp(const char* command)
     fprintf(stderr, "Error: Module '%s' is not supported\n", type.chars);
 }
 
+static void printFullHelp()
+{
+    fputs("Fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way\n\n", stdout);
+    if (!instance.config.display.pipe)
+        fputs("\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE "mUsage:\e[" FF_COLOR_MODE_RESET "m \e[" FF_COLOR_MODE_BOLD "mfastfetch\e[" FF_COLOR_MODE_RESET "m \e[" FF_COLOR_MODE_ITALIC "m<?options>\e[" FF_COLOR_MODE_RESET "m\n\n", stdout);
+    else
+        fputs("Usage: fastfetch <?options>\n\n", stdout);
+
+    yyjson_doc* doc = yyjson_read(FASTFETCH_DATATEXT_JSON_HELP, strlen(FASTFETCH_DATATEXT_JSON_HELP), YYJSON_READ_NOFLAG);
+    assert(doc);
+    yyjson_val *groupKey, *flagArr;
+    size_t groupIdx, groupMax;
+    yyjson_obj_foreach(yyjson_doc_get_root(doc), groupIdx, groupMax, groupKey, flagArr)
+    {
+        if (!instance.config.display.pipe)
+            fputs("\e[" FF_COLOR_MODE_BOLD FF_COLOR_MODE_UNDERLINE "m", stdout);
+        printf("%s options:", yyjson_get_str(groupKey));
+        if (!instance.config.display.pipe)
+            fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+        putchar('\n');
+
+        yyjson_val* flagObj;
+        size_t flagIdx, flagMax;
+        yyjson_arr_foreach(flagArr, flagIdx, flagMax, flagObj)
+        {
+            yyjson_val* shortKey = yyjson_obj_get(flagObj, "short");
+            if (shortKey)
+            {
+                fputs("  ", stdout);
+                if (!instance.config.display.pipe)
+                    fputs("\e[" FF_COLOR_MODE_BOLD "m", stdout);
+                printf("-%s", yyjson_get_str(shortKey));
+                if (!instance.config.display.pipe)
+                    fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+                fputs(", ", stdout);
+            }
+            else
+            {
+                fputs("      ", stdout);
+            }
+            yyjson_val* longKey = yyjson_obj_get(flagObj, "long");
+            assert(longKey);
+            if (!instance.config.display.pipe)
+                fputs("\e[" FF_COLOR_MODE_BOLD "m", stdout);
+            printf("--%s", yyjson_get_str(longKey));
+            if (!instance.config.display.pipe)
+                fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+
+            yyjson_val* argObj = yyjson_obj_get(flagObj, "arg");
+            if (argObj)
+            {
+                yyjson_val* typeKey = yyjson_obj_get(argObj, "type");
+                assert(typeKey);
+                yyjson_val* optionalKey = yyjson_obj_get(argObj, "optional");
+                bool optional = optionalKey && yyjson_get_bool(optionalKey);
+                putchar(' ');
+                if (!instance.config.display.pipe)
+                    fputs("\e[" FF_COLOR_MODE_ITALIC "m", stdout);
+                printf("<%s%s>", optional ? "?" : "", yyjson_get_str(typeKey));
+                if (!instance.config.display.pipe)
+                    fputs("\e[" FF_COLOR_MODE_RESET "m", stdout);
+            }
+
+            yyjson_val* descKey = yyjson_obj_get(flagObj, "desc");
+            assert(descKey);
+            if (yyjson_is_arr(descKey))
+            {
+                if (instance.config.display.pipe)
+                    putchar(':');
+
+                yyjson_val* descStr;
+                size_t descIdx, descMax;
+                yyjson_arr_foreach(descKey, descIdx, descMax, descStr)
+                {
+                    if (!instance.config.display.pipe)
+                        printf("\e[46G%s\n", yyjson_get_str(descStr));
+                    else
+                        printf(" %s", yyjson_get_str(descStr));
+                }
+                if (instance.config.display.pipe)
+                    putchar('\n');
+            }
+            else
+            {
+                if (!instance.config.display.pipe)
+                    fputs("\e[46G", stdout);
+                else
+                    fputs(": ", stdout);
+                puts(yyjson_get_str(descKey));
+            }
+        }
+
+        putchar('\n');
+    }
+    yyjson_doc_free(doc);
+}
+
+static bool printSpecificCommandHelp(const char* command)
+{
+    yyjson_doc* doc = yyjson_read(FASTFETCH_DATATEXT_JSON_HELP, strlen(FASTFETCH_DATATEXT_JSON_HELP), YYJSON_READ_NOFLAG);
+    assert(doc);
+    yyjson_val *groupKey, *flagArr;
+    size_t groupIdx, groupMax;
+    yyjson_obj_foreach(yyjson_doc_get_root(doc), groupIdx, groupMax, groupKey, flagArr)
+    {
+        yyjson_val* flagObj;
+        size_t flagIdx, flagMax;
+        yyjson_arr_foreach(flagArr, flagIdx, flagMax, flagObj)
+        {
+            yyjson_val* pseudo = yyjson_obj_get(flagObj, "pseudo");
+            if (pseudo && yyjson_get_bool(pseudo))
+                continue;
+
+            yyjson_val* longKey = yyjson_obj_get(flagObj, "long");
+            assert(longKey);
+            if (ffStrEqualsIgnCase(command, yyjson_get_str(longKey)))
+            {
+                printf("Usage: --%s\n", command);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 static void printCommandHelp(const char* command)
 {
     if(command == NULL)
-    {
-        static char input[] = FASTFETCH_DATATEXT_HELP;
-        if (!instance.config.display.pipe)
-        {
-            char* token = strtok(input, "\n");
-            puts(token);
-
-            while ((token = strtok(NULL, "\n")))
-            {
-                // handle empty lines
-                char* back = token;
-                while (*--back != '\0');
-                ffPrintCharTimes('\n', (uint32_t) (token - back - 1));
-
-                if (isalpha(*token)) // highlight subjects
-                {
-                    char* colon = strchr(token, ':');
-                    if (colon)
-                    {
-                        fputs("\e[1;4m", stdout); // Bold + Underline
-                        fwrite(token, 1, (uint32_t) (colon - token), stdout);
-                        fputs("\e[m", stdout);
-
-                        if (colon - token == 5 && memcmp(token, "Usage", 5) == 0)
-                        {
-                            char* cmd = strstr(colon, "fastfetch ");
-                            if (cmd)
-                            {
-                                fwrite(colon, 1, (uint32_t) (cmd - colon), stdout);
-                                fputs("\e[1mfastfetch \e[m", stdout);
-                                cmd += strlen("fastfetch ");
-                                if (*cmd == '<')
-                                {
-                                    char* gt = strchr(cmd, '>');
-                                    if (gt)
-                                    {
-                                        fputs("\e[3m", stdout);
-                                        fwrite(cmd, 1, (uint32_t) (gt - cmd + 1), stdout);
-                                        fputs("\e[m", stdout);
-                                        cmd = gt + 1;
-                                    }
-                                }
-                                puts(cmd);
-                                continue;
-                            }
-                        }
-                        puts(colon);
-                        continue;
-                    }
-                }
-                else if (*token == ' ') // highlight options. All options are indented
-                {
-                    char* dash = strchr(token, '-'); // start of an option
-                    if (dash)
-                    {
-                        char* colon = strchr(dash, ':'); // end of an option
-                        if (colon)
-                        {
-                            *colon = '\0';
-                            char* lt = strrchr(dash, '<');
-                            *colon = ':';
-                            fputs("\e[1m", stdout); // Bold
-                            fwrite(token, 1, (uint32_t) ((lt ? lt : colon) - token), stdout);
-                            fputs("\e[m", stdout);
-                            if (lt)
-                            {
-                                fputs("\e[3m", stdout);
-                                fwrite(lt, 1, (uint32_t) (colon - lt), stdout);
-                                fputs("\e[m", stdout);
-                            }
-                            puts(colon);
-                            continue;
-                        }
-                    }
-                }
-
-                puts(token);
-            }
-        }
-        else
-        {
-            puts(input);
-        }
-    }
+        printFullHelp();
     else if(ffStrEqualsIgnCase(command, "color"))
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(ffStrEqualsIgnCase(command, "config"))
-        puts(FASTFETCH_DATATEXT_HELP_CONFIG);
-    else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // x-format
+    else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
         printCommandFormatHelp(command);
-    else
+    else if(!printSpecificCommandHelp(command))
         fprintf(stderr, "Error: No specific help for command '%s' provided\n", command);
 }
 
