@@ -22,7 +22,7 @@ For example to print a fallback for a second value if it is not set, use "{?2}{2
 To stop formatting at any point in the format string, use "{-}".
 
 To print something with color, start a placeholder with a '#' and then the linux terminal color encoding.
-"\\033[" at the start, and an 'm' at the end is automatically added, so don't do that.
+"\033[" at the start, and an 'm' at the end is automatically added, so don't do that.
 A "{#}" is equivalent to a "{#0}" and resets everything to normal.
 For example to print something pink and underline, use "{#4;35}...{#}".
 Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Sele

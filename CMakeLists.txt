@@ -204,25 +204,31 @@ endif()
 # Text data #
 #############
 
-function(fastfetch_load_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
-    string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
-    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
-    string(REPLACE "$\\" "" TEMP "${TEMP}")       # Remove $\, so we can unescape some things
-    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
-endfunction(fastfetch_load_text)
-
-function(fastfetch_load_raw_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
+function(fastfetch_encode_c_string STR OUTVAR)
+    string(REGEX REPLACE "\n$" "" TEMP "${STR}") # Remove trailing newline
     string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
     string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
     string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
     set(${OUTVAR} "\"${TEMP}\"" PARENT_SCOPE)
-endfunction(fastfetch_load_raw_text)
+endfunction(fastfetch_encode_c_string)
 
-fastfetch_load_raw_text(src/data/help.json DATATEXT_JSON_HELP)
+function(fastfetch_load_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    fastfetch_encode_c_string("${TEMP}" TEMP)
+    set(${OUTVAR} "${TEMP}" PARENT_SCOPE)
+endfunction(fastfetch_load_text)
+
+find_package(Python)
+if(Python_FOUND)
+    # Minify JSON string. `io.open(0,encoding='utf-8')` is needed to avoid encoding issues on Windows
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import io,json,sys;json.dump(json.load(io.open(0,encoding='utf-8')),sys.stdout,separators=(',', ':'),ensure_ascii=False)"
+                    INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
+                    OUTPUT_VARIABLE DATATEXT_JSON_HELP)
+else()
+    file(READ "src/data/help.json" TEMP)
+endif()
+
+fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
@@ -245,7 +251,7 @@ configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
 set(LOGO_BUILTIN_H "#pragma once\n\n")
 foreach(file ${LOGO_FILES})
-    fastfetch_load_raw_text("${file}" content)
+    fastfetch_load_text("${file}" content)
     get_filename_component(file "${file}" NAME_WLE)
     string(TOUPPER "${file}" file)
     string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" content "${content}")
