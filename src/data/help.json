@@ -471,6 +471,7 @@
         {
             "long": "set",
             "desc": "Hard set the value of a key",
+            "remark": "Deprecated. Use \"Custom\" module instead",
             "arg": {
                 "type": "key=value"
             }
@@ -478,6 +479,7 @@
         {
             "long": "set-keyless",
             "desc": "Hard set the value of a key, but don't print the key or the separator",
+            "remark": "Deprecated. Use \"Custom\" module instead",
             "arg": {
                 "type": "key=value"
             }
@@ -517,7 +519,7 @@
                 "enum": {
                     "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
                     "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
-                    "JEDEC": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
+                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
                 },
                 "default": "IEC"
             }
