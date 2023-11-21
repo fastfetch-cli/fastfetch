@@ -592,7 +592,7 @@
             "long": "size-max-prefix",
             "desc": "Set the largest binary prefix to use when formatting sizes",
             "arg": {
-                "type": "str",
+                "type": "enum",
                 "enum": {
                     "B": "Bytes",
                     "kB": "KiB",
@@ -611,7 +611,7 @@
             "long": "temperature-unit",
             "desc": "Set the unit of the temperature",
             "arg": {
-                "type": "str",
+                "type": "enum",
                 "enum": {
                     "C": "Celsius",
                     "F": "Fahrenheit",
@@ -1241,7 +1241,7 @@
             "long": "opengl-library",
             "desc": "Set the OpenGL context creation library to use",
             "arg": {
-                "type": "str",
+                "type": "enum",
                 "enum": {
                     "auto": "Auto detection",
                     "egl": "EGL",
@@ -1277,7 +1277,7 @@
             "long": "colors-symbol",
             "desc": "Set the symbol to be printed by Colors module",
             "arg": {
-                "type": "str",
+                "type": "enum",
                 "enum": {
                     "block": "███",
                     "circle": "●",

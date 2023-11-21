@@ -155,7 +155,72 @@ static bool printSpecificCommandHelp(const char* command)
             assert(longKey);
             if (ffStrEqualsIgnCase(command, yyjson_get_str(longKey)))
             {
-                printf("Usage: --%s\n", command);
+                puts(yyjson_get_str(yyjson_obj_get(flagObj, "desc")));
+
+                printf("%10s: ", "Usage");
+                yyjson_val* shortKey = yyjson_obj_get(flagObj, "short");
+                if (shortKey)
+                {
+                    if (!instance.config.display.pipe)
+                        fputs("\e[1m", stdout);
+                    printf("-%s", yyjson_get_str(shortKey));
+                    if (!instance.config.display.pipe)
+                        fputs("\e[m", stdout);
+                    fputs(", ", stdout);
+                }
+                if (!instance.config.display.pipe)
+                    fputs("\e[1m", stdout);
+                printf("--%s", yyjson_get_str(longKey));
+                if (!instance.config.display.pipe)
+                    fputs("\e[m", stdout);
+
+                yyjson_val* argObj = yyjson_obj_get(flagObj, "arg");
+                if (argObj)
+                {
+                    yyjson_val* typeKey = yyjson_obj_get(argObj, "type");
+                    assert(typeKey);
+                    yyjson_val* optionalKey = yyjson_obj_get(argObj, "optional");
+                    bool optional = optionalKey && yyjson_get_bool(optionalKey);
+                    putchar(' ');
+                    if (!instance.config.display.pipe)
+                        fputs("\e[3m", stdout);
+                    printf("<%s%s>", optional ? "?" : "", yyjson_get_str(typeKey));
+                    if (!instance.config.display.pipe)
+                        fputs("\e[m", stdout);
+                    putchar('\n');
+
+                    yyjson_val* defaultKey = yyjson_obj_get(argObj, "default");
+                    if (defaultKey)
+                    {
+                        if (ffStrEqualsIgnCase(yyjson_get_str(typeKey), "structure"))
+                            printf("%10s: %s\n", "Default", FASTFETCH_DATATEXT_STRUCTURE);
+                        else if (yyjson_is_bool(defaultKey))
+                            printf("%10s: %s\n", "Default", yyjson_get_bool(defaultKey) ? "true" : "false");
+                        else if (yyjson_is_num(defaultKey))
+                            printf("%10s: %g\n", "Default", yyjson_get_num(defaultKey));
+                        else if (yyjson_is_str(defaultKey))
+                            printf("%10s: %s\n", "Default", yyjson_get_str(defaultKey));
+                        else
+                            printf("%10s: Unknown\n", "Default");
+                    }
+
+                    yyjson_val* enumKey = yyjson_obj_get(argObj, "enum");
+                    if (enumKey)
+                    {
+                        printf("%10s:\n", "Options");
+                        yyjson_val *optKey, *optVal;
+                        size_t optIdx, optMax;
+                        yyjson_obj_foreach(enumKey, optIdx, optMax, optKey, optVal)
+                            printf("%12s: %s\n", yyjson_get_str(optKey), yyjson_get_str(optVal));
+                    }
+                }
+                else
+                    putchar('\n');
+
+                yyjson_val* remarkKey = yyjson_obj_get(flagObj, "remark");
+                if (remarkKey)
+                    printf("%10s: %s\n", "Remark", yyjson_get_str(remarkKey));
+
                 return true;
             }
         }
