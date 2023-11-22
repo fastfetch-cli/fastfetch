@@ -58,7 +58,7 @@
             "short": "c",
             "long": "config",
             "desc": "Specify the config file or preset to be loaded",
-            "remark": "The file will be searched in the order of \"fastfetch --list-config-paths\". If \"none\", disable further config loading. Refer to https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for more info",
+            "remark": "The file will be searched in the order of \"fastfetch --list-config-paths\". If \"none\", disable further config loading. See also https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for more info",
             "arg": {
                 "type": "config"
             }
@@ -135,7 +135,7 @@
             "short": "l",
             "long": "logo",
             "desc": "Set the logo source",
-            "remark": "Should be the name of a builtin logo, or a path to an image file",
+            "remark": "Should be the name of a builtin logo, or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "logo"
             }
@@ -143,6 +143,7 @@
         {
             "long": "logo-type",
             "desc": "Set the type of the logo given in \"--logo\"",
+            "remark": "See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -929,8 +930,7 @@
             "long": "diskio-name-prefix",
             "desc": "Show disks with given name prefix only",
             "arg": {
-                "type": "str",
-                "default": ""
+                "type": "str"
             }
         },
         {

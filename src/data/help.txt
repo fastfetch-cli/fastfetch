@@ -1,4 +1,4 @@
-1. Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
-2. If a value starts with a ?, it is optional. An optional boolean value defaults to true if not specified.
-3. More help can be printed with "-h <option>"
-4. All options can be made permanent with command "fastfetch <options> --gen-config"
+Parsing is not case sensitive. E.g. "--lib-PCI" is equal to "--Lib-Pci"
+If a value starts with a ?, it is optional. An optional boolean value defaults to true if not specified.
+More detailed help messages for each options can be printed with "-h <option_without_dash_prefix>"
+All options can be made permanent with command "fastfetch <options> --gen-config"

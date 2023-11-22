@@ -133,6 +133,8 @@ static void printFullHelp()
         putchar('\n');
     }
     yyjson_doc_free(doc);
+
+    puts("\n" FASTFETCH_DATATEXT_HELP);
 }
 
 static bool printSpecificCommandHelp(const char* command)
