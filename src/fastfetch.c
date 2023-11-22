@@ -199,7 +199,7 @@ static bool printSpecificCommandHelp(const char* command)
                         else if (yyjson_is_bool(defaultKey))
                             printf("%10s: %s\n", "Default", yyjson_get_bool(defaultKey) ? "true" : "false");
                         else if (yyjson_is_num(defaultKey))
-                            printf("%10s: %g\n", "Default", yyjson_get_num(defaultKey));
+                            printf("%10s: %d\n", "Default", yyjson_get_int(defaultKey));
                         else if (yyjson_is_str(defaultKey))
                             printf("%10s: %s\n", "Default", yyjson_get_str(defaultKey));
                         else

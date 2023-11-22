@@ -191,11 +191,12 @@
             }
         },
         {
-            "long": "logo-color-<1-9>",
+            "long": "logo-color-[1-9]",
             "desc": "Overwrite a color in the logo",
             "arg": {
                 "type": "color"
-            }
+            },
+            "pseudo": true
         },
         {
             "long": "logo-padding",
@@ -417,10 +418,10 @@
         {
             "long": "pipe",
             "desc": "Disable logo and all escape sequences",
+            "remark": "Auto detection based on isatty(1)",
             "arg": {
                 "type": "bool",
-                "optional": true,
-                "default": "Auto detection based on isatty(1)"
+                "optional": true
             }
         },
         {
@@ -1187,7 +1188,7 @@
             "remark": "0 to disable timeout",
             "arg": {
                 "type": "num",
-                "default": "0"
+                "default": 0
             }
         },
         {
@@ -1211,7 +1212,7 @@
             "remark": "0 to disable timeout",
             "arg": {
                 "type": "num",
-                "default": "0"
+                "default": 0
             }
         },
         {
