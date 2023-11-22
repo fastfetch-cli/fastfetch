@@ -3080,6 +3080,14 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Peropesis
+    {
+        .names = {"Peropesis", "Peropesis Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PEROPESIS,
+        .colors = {
+            FF_COLOR_FG_WHITE
+        },
+    },
     // PhyOS
     {
         .names = {"PhyOS"},
