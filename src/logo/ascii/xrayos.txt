@@ -1,0 +1,21 @@
+               ${c1}rrrrrraaaaaaaaaaaayyyy
+           ${c1}xxrrrrrrrraaaaaaaaaaaayyyyyyyyy
+        ${c1}xxxxxrrrrrrrraaaaaaaaaaaayyyyyyy${c3}yyyyy${c2}yyyyyyyyyy
+      ${c1}xxxxxxxrrrrrrrraaaaa ${c2}aaaaayyyyyyyyyyyyyyyyyyy
+    ${c1}xxxxxx${c3}xxx${c1}rrrrrrrraaaa ${c2}aaaaaaayyyyyyyyyyyyyyyyy
+  ${c1}xxxxxx${c3}xxxxxr${c1}rrrrrrraa ${c2}aaaaaaaaay${c3}yyyyyyyyy${c2}yyyy ${c1}yy
+ ${c1}xxxxxxx${c3}xxx${c1}xxrrrrrrrra ${c2}aaaaaaaaa${c3}ayyyyyyyyyyyy${c1}yyyyyy
+ ${c1}xxxxxxxxxxxxrrrrrrrr ${c2}aaaaaaaaaaa${c3}yyyyyyyyyyyy${c1}yyyyyyy
+${c1}xxxxxxxxxxxxxrrrrrr ${c2}raaaaaaaaaaaayyy${c3}yyyyyyyy${c1}yyyyyy${c1}yyy
+${c1}xxxxxxxxxxxxxrrrrr ${c2}rraaaaaaaaaaaayyyyy${c3}yy${c2}yyyyyy ${c1}yyyyyy
+${c1}xxxxxxxx${c3}xxxx${c1}xrrrrr${c2}rr${c3}raaaaaaa${c2}aaaaayyyyyyyyyy ${c1}yyyyyyyyy
+${c1}xxxxxxx${c3}xxxx${c1}xxrrrrrrr${c3}raaaaaa${c2}aaaaaayyyyyyy ${c1}yyyyyyyyyyyy
+${c1}xxxxxxx${c3}xxx${c1}xxxrrrrrrrr${c3}aaaaaa${c2}aaaaaayyyy ${c1}yyyyyyyyyyyyyy
+ ${c1}xxxxxxxxxxxxrrrrrrrra ${c2}aaaaaaaaaay ${c1}yyyyyyyyyyyyyyyy
+  ${c1}xxxxxxxxxxxrrrrrrr ${c2}aaaaaaaaaaaayyyy${c1}yyyyyyyyyyyyy
+   ${c1}xxxxxxx${c3}xxxrr${c1}rrrr ${c2}raaaaaaaaaaaa ${c1}yyyyyyyyyyyyyyy
+     ${c1}xxxxxxxxrrrr ${c2}rrraaaaaaaaa ${c1}aayyyyyyyyyyyyyy
+       ${c1}xxxxxxrrrrrrr ${c2}aaaaaa  ${c1}aaaayyyyyyyyyyyy
+          ${c1}xxxrrrrrr ${c2}raaa  ${c1}aaaaaaayyyyyyyyy
+              ${c1}rrrr ${c2}rr  ${c1}aaaaaaaaaayyyyyy
+                 ${c2}r   ${c1}aaaaaaaaaa

@@ -4240,6 +4240,16 @@ static const FFlogo X[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    //XrayOS
+    {
+        .names = {"XrayOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XRAYOS,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+        }
+    },
     // LAST
     {},
 };
