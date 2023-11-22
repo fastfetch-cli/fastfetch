@@ -537,6 +537,11 @@ static void parseCommand(FFdata* data, char* key, char* value)
         printCommandHelp(value);
         exit(0);
     }
+    if(ffStrEqualsIgnCase(key, "--help-raw"))
+    {
+        puts(FASTFETCH_DATATEXT_JSON_HELP);
+        exit(0);
+    }
     else if(ffStrEqualsIgnCase(key, "-v") || ffStrEqualsIgnCase(key, "--version"))
     {
         printVersion();
