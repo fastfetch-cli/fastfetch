@@ -1,13 +1,18 @@
 #include "uptime.h"
 #include "common/time.h"
+#include "common/io/io.h"
+
+#include <inttypes.h>
 
 const char* ffDetectUptime(FFUptimeResult* result)
 {
-    struct timespec uptime;
-    if (clock_gettime(CLOCK_BOOTTIME, &uptime) != 0)
-        return "clock_gettime(CLOCK_BOOTTIME) failed";
+    // #620
+    FF_AUTO_CLOSE_FILE FILE* uptime = fopen("/proc/uptime", "r");
+    if (!uptime) return "fopen(\"/proc/uptime\", \"r\") failed";
 
-    result->uptime = (uint64_t) uptime.tv_sec * 1000 + (uint64_t) uptime.tv_nsec / 1000000;
+    double sec;
+    if (fscanf(uptime, "%lf", &sec) > 0)
+        result->uptime = (uint64_t) (sec * 1000);
 
     result->bootTime = ffTimeGetNow() + result->uptime;
 
