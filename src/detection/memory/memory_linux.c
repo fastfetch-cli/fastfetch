@@ -34,11 +34,11 @@ const char* ffDetectMemory(FFMemoryResult* ram)
                     if (++count >= 6) goto done;
                 break;
             case 'M':
-                if(sscanf(line, "MemTotal: %" PRIu64, &memTotal) > 0 || sscanf(line, "MemFree: %u", &memFree) > 0)
+                if(sscanf(line, "MemTotal: %" PRIu64, &memTotal) > 0 || sscanf(line, "MemFree: %" PRIu64, &memFree) > 0)
                     if (++count >= 6) goto done;
                 break;
             case 'S':
-                if(sscanf(line, "Shmem: %" PRIu64, &shmem) > 0 || sscanf(line, "SReclaimable: %u", &sReclaimable) > 0)
+                if(sscanf(line, "Shmem: %" PRIu64, &shmem) > 0 || sscanf(line, "SReclaimable: %" PRIu64, &sReclaimable) > 0)
                     if (++count >= 6) goto done;
                 break;
         }
