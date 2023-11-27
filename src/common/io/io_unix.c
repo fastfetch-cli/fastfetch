@@ -16,12 +16,12 @@ static void createSubfolders(const char* fileName)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
-    while(*fileName != '\0')
+    char *token = NULL;
+    while((token = strchr(fileName, '/')) != NULL)
     {
-        ffStrbufAppendC(&path, *fileName);
-        if(*fileName == '/')
-            mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
-        ++fileName;
+        ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);
+        mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
+        fileName = token + 1;
     }
 }
 
