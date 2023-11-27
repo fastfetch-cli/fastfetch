@@ -3799,6 +3799,16 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // TileOS
+    {
+        .names = {"TileOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TILEOS,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
+    },
     // TorizonCore
     {
         .names = {"TorizonCore"},
