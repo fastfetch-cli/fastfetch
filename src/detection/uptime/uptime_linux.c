@@ -13,6 +13,8 @@ const char* ffDetectUptime(FFUptimeResult* result)
     double sec;
     if (fscanf(uptime, "%lf", &sec) > 0)
         result->uptime = (uint64_t) (sec * 1000);
+    else
+        return "fscanf(\"%lf\", &sec) failed";
 
     result->bootTime = ffTimeGetNow() + result->uptime;
 
