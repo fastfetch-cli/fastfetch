@@ -4,68 +4,103 @@ if not test -x fastfetch
     return
 end
 
-set -l whole_text (fastfetch --pipe --help)
-set modules_complex (fastfetch --list-modules autocompletion)
-
 complete -c fastfetch -f
 
-for line in (string match -- '    -*' $whole_text)
-    set -l kv (string split -n ':' $line -m1)
-    set -l args (string trim -- $kv[1])
-    set -l desc (string trim -- $kv[2])
-
-    if string match -q -- '--<*' $args # ignore --<module>-*
-        continue
-    end
-
-    set -l res -c fastfetch
-    set -l regexp '<\??[\w=]+>'
-
-    switch (string match -r -- $regexp $args)
-    case '<\?command>'
-        set -l temp (string match -r "\\w+" $modules_complex | string lower)
-        set -l temp $temp-format"\tModule\\ format"
-        set res $res -x -a "color\tSupported\\ colors format\tCustom\\ format config\tConfiguration $temp"
-    case '<\?bool>'
-        set res $res -x -a "true\tBool false\tBool"
-    case '<config>'
-        set -l presets (fastfetch --list-presets autocompletion)"\tPreset"
-        set res $res -r -a "none\tDisable $presets"
-    case '<path>'
-        set res $res -F -r
-    case '<num>'
-        set res $res -x -a "0\tNumber 1\tNumber 2\tNumber 3\tNumber 4\tNumber 5\tNumber 6\tNumber 7\tNumber 8\tNumber 9\tNumber"
-    case '<\?num>'
-        set res $res -x -a "0\tNumber 1\tNumber 2\tNumber 3\tNumber 4\tNumber 5\tNumber 6\tNumber 7\tNumber 8\tNumber 9\tNumber"
-    case '<structure>'
-        function __fastfetch_complete_structure
-            for line in $modules_complex
-                set -l pair (string split -m 2 : $line)
-                echo -e "$pair[1]\t$pair[2]"
-            end
-        end
-        set res $res -x -a "(__fish_complete_list : __fastfetch_complete_structure)"
-    case '<logo>'
-        set -l temp (fastfetch --list-logos autocompletion)
-        set -l temp (string replace -- ' ' '\\ ' $temp)
-        set -l temp $temp"\tBuiltin"
-        set res $res -x -a "none\tNone small\tSmall $temp"
-    case '<color>'
-        set res $res -x -a "black\tColor red\tColor green\tColor yellow\tColor blue\tColor magenta\tColor cyan\tColor white\tColor default\tColor"
-    case '<*>'
-        set res $res -x
-    case '*'
-        set res $res -f
-    end
-
-    set args (string replace -r -- $regexp '' $args | string split ',' | string trim)
-
-    for arg in $args
-        if string match -q -- '--*' $arg
-            set res $res -l (string sub -s 3 -- $arg)
-        else
-            set res $res -o (string sub -s 2 -- $arg)
-        end
-    end
-    complete $res -d (string replace -- ' (+)' '' $desc)
+function __fastfetch_complete_bool
+    echo -e "true\tBool"
+    echo -e "false\tBool"
 end
+
+function __fastfetch_complete_color
+    echo -e "black\tColor"
+    echo -e "red\tColor"
+    echo -e "green\tColor"
+    echo -e "yellow\tColor"
+    echo -e "blue\tColor"
+    echo -e "magenta\tColor"
+    echo -e "cyan\tColor"
+    echo -e "white\tColor"
+    echo -e "default\tColor"
+end
+
+function __fastfetch_complete_command
+    for line in (fastfetch --list-modules autocompletion)
+        set -l pair (string split -m 2 : $line)
+        set -l module (string lower $pair[1])
+
+        echo -e "$module-format\tModule format"
+    end
+    echo -e "format\tCustom format"
+    echo -e "color\tColor format"
+end
+
+function __fastfetch_complete_config
+    for line in (fastfetch --list-presets autocompletion)
+        echo -e "$line\tPreset"
+    end
+    echo -e "none\tDisable loading config file"
+end
+
+function __fastfetch_complete_logo
+    for line in (fastfetch --list-logos autocompletion)
+        echo -e "$line\tBuiltin logo"
+    end
+    echo -e "none\tDon't print logo"
+    echo -e "small\tPrint small ascii logo if available"
+end
+
+function __fastfetch_complete_structure
+    for line in (fastfetch --list-modules autocompletion)
+        set -l pair (string split -m 2 : $line)
+        echo -e "$pair[1]\t$pair[2]"
+    end
+end
+
+python3 -c (grep "^###>" (status -f) | cut -c 6- | string collect) | source
+
+###> #!/usr/bin/env python3
+###>
+###> import json, subprocess, sys
+###>
+###> def main():
+###>     data: dict[str, list[dict]] = json.loads(subprocess.check_output(['fastfetch', '--help-raw']))
+###>
+###>     for key in data:
+###>         for flag in data[key]:
+###>             if flag.get('pseudo', False):
+###>                 continue
+###>
+###>             command_prefix: str = f'complete -c fastfetch -d "{flag["desc"]}" -l "{flag["long"]}"';
+###>             if 'short' in flag:
+###>                 command_prefix += f' -o "{flag["short"]}"'
+###>
+###>             if 'arg' in flag:
+###>                 type: str = flag['arg']['type'];
+###>                 if type == 'bool':
+###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_bool)"')
+###>                 elif type == 'color':
+###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_color)"')
+###>                 elif type == 'command':
+###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_command)"')
+###>                 elif type == 'config':
+###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_config)"')
+###>                 elif type == 'enum':
+###>                     temp: str = ' '.join(map(lambda x: f"{x[0]}\\t{x[1]}", flag["arg"]["enum"].items()))
+###>                     print(f'{command_prefix} -x -a "{temp}"')
+###>                 elif type == 'logo':
+###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_logo)"')
+###>                 elif type == 'structure':
+###>                     print(f'{command_prefix} -x -a "(__fish_complete_list : __fastfetch_complete_structure)"')
+###>                 elif type == 'path':
+###>                     print(f'{command_prefix} -r -F')
+###>                 else:
+###>                     print(f'{command_prefix} -x')
+###>             else:
+###>                 print(f'{command_prefix} -f')
+###>
+###> if __name__ == "__main__":
+###>     try:
+###>         main()
+###>     except:
+###>         sys.exit(1)
+###>
