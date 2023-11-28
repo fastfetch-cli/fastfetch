@@ -1,8 +1,11 @@
 #include "host.h"
 #include "common/sysctl.h"
+#include "util/apple/cf_helpers.h"
 #include "util/stringUtils.h"
 
-static const char* getProductName(const FFstrbuf* hwModel)
+#include <IOKit/IOKitLib.h>
+
+static const char* getProductNameWithHwModel(const FFstrbuf* hwModel)
 {
     // Macbook Pro: https://support.apple.com/en-us/HT201300
     // Macbook Air: https://support.apple.com/en-us/HT201862
@@ -161,15 +164,44 @@ static const char* getProductName(const FFstrbuf* hwModel)
         if(ffStrEquals(version, "10,1"))        return "iMac (27/21.5-inch, Late 2009)";
         if(ffStrEquals(version, "9,1"))         return "iMac (24/20-inch, Early 2009)";
     }
-    return hwModel->chars;
+    return NULL;
+}
+
+const char* getProductNameWithIokit(FFstrbuf* result)
+{
+    io_iterator_t iterator;
+    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceNameMatching("product"), &iterator) != kIOReturnSuccess)
+        return "IOServiceGetMatchingServices() failed";
+
+    io_registry_entry_t registryEntry;
+    while((registryEntry = IOIteratorNext(iterator)) != 0)
+    {
+        FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
+        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+        {
+            IOObjectRelease(registryEntry);
+            continue;
+        }
+
+        if (ffCfDictGetString(properties, CFSTR("product-name"), result))
+            break;
+    }
+
+    IOObjectRelease(registryEntry);
 }
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufAppendS(&host->sysVendor, "Apple");
+    ffStrbufSetStatic(&host->sysVendor, "Apple");
 
     const char* error = ffSysctlGetString("hw.model", &host->productFamily);
     if (error) return error;
-    ffStrbufAppendS(&host->productName, getProductName(&host->productFamily));
+
+    ffStrbufSetStatic(&host->productName, getProductNameWithHwModel(&host->productFamily));
+    if (host->productName.length == 0)
+        getProductNameWithIokit(&host->productName);
+    if (host->productName.length == 0)
+        ffStrbufSet(&host->productName, &host->productFamily);
+
     return NULL;
 }
