@@ -188,6 +188,7 @@ const char* getProductNameWithIokit(FFstrbuf* result)
     }
 
     IOObjectRelease(registryEntry);
+    return NULL;
 }
 
 const char* ffDetectHost(FFHostResult* host)
