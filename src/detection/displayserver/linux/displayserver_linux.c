@@ -9,7 +9,7 @@ static void parseDRM(FFDisplayServerResult* result)
 {
     const char* drmDirPath = "/sys/class/drm/";
 
-    DIR* dirp = opendir(drmDirPath);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
     if(dirp == NULL)
         return;
 
@@ -25,10 +25,22 @@ static void parseDRM(FFDisplayServerResult* result)
             continue;
 
         ffStrbufAppendS(&drmDir, entry->d_name);
+        uint32_t drmDirWithDnameLength = drmDir.length;
+
+        ffStrbufAppendS(&drmDir, "/enabled");
+        char enabled = 'd'; // disabled
+        ffReadFileData(drmDir.chars, sizeof(enabled), &enabled);
+        if (enabled != 'e') // enabled
+        {
+            ffStrbufSubstrBefore(&drmDir, drmDirLength);
+            continue;
+        }
+
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
         ffStrbufAppendS(&drmDir, "/modes");
 
-        FILE* modeFile = fopen(drmDir.chars, "r");
-        if(modeFile == NULL)
+        char modes[32];
+        if (ffReadFileData(drmDir.chars, sizeof(modes), modes) < 3)
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             continue;
@@ -36,7 +48,7 @@ static void parseDRM(FFDisplayServerResult* result)
 
         uint32_t width = 0, height = 0;
 
-        int scanned = fscanf(modeFile, "%ux%u", &width, &height);
+        int scanned = sscanf(modes, "%ux%u", &width, &height);
         if(scanned == 2 && width > 0 && height > 0)
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
@@ -71,11 +83,8 @@ static void parseDRM(FFDisplayServerResult* result)
             );
         }
 
-        fclose(modeFile);
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
     }
-
-    closedir(dirp);
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
