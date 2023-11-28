@@ -140,6 +140,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "gdb")                  == 0 ||
         strcasecmp(name, "lldb")                 == 0 ||
         strcasecmp(name, "login")                == 0 ||
+        strcasecmp(name, "ltrace")               == 0 ||
+        strcasecmp(name, "perf")                 == 0 ||
         strcasecmp(name, "guake-wrapped")        == 0 ||
         strcasestr(name, "debug")             != NULL ||
         strcasestr(name, "command-not-found") != NULL ||
@@ -348,7 +350,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     getTerminalFromEnv(&result);
     getUserShellFromEnv(&result);
 
-    ffStrbufClear(&result.shellVersion);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
