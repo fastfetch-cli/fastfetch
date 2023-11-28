@@ -4,6 +4,10 @@
 #include "util/stringUtils.h"
 
 #include <dirent.h>
+#include <fcntl.h>
+
+// 2 * (uint32_t string max length is 10 bytes) + 'x' + NUL
+#define MODE_FILE_CONTENT_LENGTH 22
 
 static void parseDRM(FFDisplayServerResult* result)
 {
@@ -27,8 +31,8 @@ static void parseDRM(FFDisplayServerResult* result)
         ffStrbufAppendS(&drmDir, entry->d_name);
         ffStrbufAppendS(&drmDir, "/modes");
 
-        FILE* modeFile = fopen(drmDir.chars, "r");
-        if(modeFile == NULL)
+        int FF_AUTO_CLOSE_FD modeFileFd = open(drmDir.chars, O_RDONLY);
+        if(modeFileFd < 0)
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             continue;
@@ -36,8 +40,17 @@ static void parseDRM(FFDisplayServerResult* result)
 
         uint32_t width = 0, height = 0;
 
-        int scanned = fscanf(modeFile, "%ux%u", &width, &height);
-        if(scanned == 2 && width > 0 && height > 0)
+        char buf[MODE_FILE_CONTENT_LENGTH] = {0x00};
+        if (read(modeFileFd, buf, sizeof(char) * (MODE_FILE_CONTENT_LENGTH - 1)) > 0) {
+            char *sep = strchr(buf, 'x');
+            if (sep != NULL) {
+                *sep = '\0';
+                width = (uint32_t)atoi(buf);
+                height = (uint32_t)atoi(sep + 1);
+            }
+        }
+
+        if(width > 0 && height > 0)
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             ffStrbufAppendS(&drmDir, entry->d_name);
@@ -71,7 +84,6 @@ static void parseDRM(FFDisplayServerResult* result)
             );
         }
 
-        fclose(modeFile);
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
     }
 
