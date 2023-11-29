@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-enum { FF_PIPE_BUFSIZ = 4096 };
+#define FF_PIPE_BUFSIZ 4096
 
 static inline void waitpid_wrapper(const pid_t* pid)
 {
@@ -20,16 +20,33 @@ static inline void waitpid_wrapper(const pid_t* pid)
         waitpid(*pid, NULL, 0);
 }
 
+static inline int ffPipe2(int *fds, int flags) {
+    #ifdef __APPLE__
+        if(pipe(fds) == -1)
+            return -1;
+        fcntl(fds[0], F_SETFL, fcntl(fds[0], F_GETFL) | flags);
+        fcntl(fds[1], F_SETFL, fcntl(fds[1], F_GETFL) | flags);
+        return 0;
+    #else
+        return pipe2(fds, flags);
+    #endif
+}
+
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
     int pipes[2];
+    const int timeout = instance.config.general.processingTimeout;
+    const int pipeFlags = O_CLOEXEC | (timeout >= 0 ? O_NONBLOCK : 0);
 
-    if(pipe(pipes) == -1)
+    if(ffPipe2(pipes, pipeFlags) == -1)
         return "pipe() failed";
 
     __attribute__((__cleanup__(waitpid_wrapper))) pid_t childPid = fork();
-    if(childPid == -1)
+    if(childPid == -1) {
+        close(pipes[0]);
+        close(pipes[1]);
         return "fork() failed";
+    }
 
     //Child
     if(childPid == 0)
@@ -37,21 +54,15 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         int nullFile = open("/dev/null", O_WRONLY);
         dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
-        close(pipes[0]);
-        close(pipes[1]);
         setenv("LANG", "C", 1);
         execvp(argv[0], argv);
-        exit(901);
+        _exit(127);
     }
 
     //Parent
     close(pipes[1]);
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
-
-    int timeout = instance.config.general.processingTimeout;
-    if (timeout >= 0)
-        fcntl(childPipeFd, F_SETFL, fcntl(childPipeFd, F_GETFL) | O_NONBLOCK);
 
     do
     {
