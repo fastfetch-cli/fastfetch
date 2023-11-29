@@ -181,6 +181,9 @@ void ffListFeatures(void)
         #ifdef FF_HAVE_X11
             "x11\n"
         #endif
+        #ifdef FF_HAVE_DRM
+            "drm\n"
+        #endif
         #ifdef FF_HAVE_GIO
             "gio\n"
         #endif

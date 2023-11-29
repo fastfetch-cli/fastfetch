@@ -470,6 +470,10 @@
                     "type": "string",
                     "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
+                "drm": {
+                    "type": "string",
+                    "description": "Used for fast resolution and refresh rate detection (Linux)"
+                },
                 "gio": {
                     "type": "string",
                     "description": "Needed for values that are only stored GSettings (Linux, FreeBSD)"

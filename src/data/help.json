@@ -676,6 +676,14 @@
             }
         },
         {
+            "long": "lib-drm",
+            "desc": "Used for fast resolution and refresh rate detection",
+            "remark": "Linux only",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
             "long": "lib-gio",
             "desc": "Needed for values that are only stored GSettings",
             "arg": {

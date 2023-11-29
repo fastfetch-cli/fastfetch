@@ -49,6 +49,7 @@ cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR BSD" OFF)
@@ -392,6 +393,7 @@ if(LINUX)
         src/detection/disk/disk_linux.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -785,6 +787,10 @@ ff_lib_enable(XRANDR
 ff_lib_enable(X11
     "x11"
     "X11"
+)
+ff_lib_enable(DRM
+    "libdrm"
+    "Libdrm"
 )
 ff_lib_enable(GIO
     "gio-2.0"
