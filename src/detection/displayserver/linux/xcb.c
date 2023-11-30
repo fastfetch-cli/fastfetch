@@ -1,5 +1,6 @@
 #include "displayserver_linux.h"
 #include "util/mallocHelper.h"
+#include "common/time.h"
 
 #ifdef FF_HAVE_XCB
 #include "common/library.h"
@@ -159,11 +160,9 @@ void ffdsConnectXcb(FFDisplayServerResult* result)
 
 typedef struct XcbRandrData
 {
-    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources)
-    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_reply)
-    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_modes_iterator)
-    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_info)
-    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_info_reply)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_current)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_current_reply)
+    FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_current_modes_iterator)
     FF_LIBRARY_SYMBOL(xcb_randr_mode_info_next)
     FF_LIBRARY_SYMBOL(xcb_randr_get_monitors)
     FF_LIBRARY_SYMBOL(xcb_randr_get_monitors_reply)
@@ -189,9 +188,7 @@ typedef struct XcbRandrData
     XcbPropertyData propData;
 
     //init per screen
-    uint32_t defaultRefreshRate;
-    uint32_t defaultRotation;
-    xcb_randr_get_screen_resources_reply_t* screenResources;
+    xcb_randr_get_screen_resources_current_reply_t* screenResources;
 } XcbRandrData;
 
 static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation, bool primary)
@@ -202,7 +199,7 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         data->result,
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
-        refreshRate == 0 ? data->defaultRefreshRate : refreshRate,
+        refreshRate,
         (uint32_t) modeInfo->width,
         (uint32_t) modeInfo->height,
         rotation,
@@ -219,7 +216,7 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrb
     if(data->screenResources == NULL)
         return false;
 
-    xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_modes_iterator(data->screenResources);
+    xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(data->screenResources);
 
     while(modesIterator.rem > 0)
     {
@@ -260,7 +257,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
         data->result,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
-        data->defaultRefreshRate,
+        0,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
         rotation,
@@ -334,10 +331,10 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         data->result,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
-        data->defaultRefreshRate,
+        0,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
-        data->defaultRotation,
+        0,
         &name,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitor->primary,
@@ -370,38 +367,10 @@ static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
 
 static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
 {
-    //Init screen info. This is used to get the default refresh rate. If this fails, default refresh rate is simply 0.
-    xcb_randr_get_screen_info_cookie_t screenInfoCookie = data->ffxcb_randr_get_screen_info(data->connection, screen->root);
-    xcb_randr_get_screen_info_reply_t* screenInfoReply = data->ffxcb_randr_get_screen_info_reply(data->connection, screenInfoCookie, NULL);
-
-    if(screenInfoReply != NULL)
-    {
-        data->defaultRefreshRate = screenInfoReply->rate;
-        switch (screenInfoReply->rotation)
-        {
-            case XCB_RANDR_ROTATION_ROTATE_90:
-                data->defaultRotation = 90;
-                break;
-            case XCB_RANDR_ROTATION_ROTATE_180:
-                data->defaultRotation = 180;
-                break;
-            case XCB_RANDR_ROTATION_ROTATE_270:
-                data->defaultRotation = 270;
-                break;
-            default:
-                data->defaultRotation = 0;
-                break;
-        }
-        free(screenInfoReply);
-    }
-    else
-    {
-        data->defaultRefreshRate = 0;
-        data->defaultRotation = 0;
-    }
     //Init screen resources. They are used to iterate over all modes. xcbRandrHandleMode checks for " == NULL", to fail as late as possible.
-    xcb_randr_get_screen_resources_cookie_t screenResourcesCookie = data->ffxcb_randr_get_screen_resources(data->connection, screen->root);
-    data->screenResources = data->ffxcb_randr_get_screen_resources_reply(data->connection, screenResourcesCookie, NULL);
+    xcb_randr_get_screen_resources_current_cookie_t screenResourcesCookie = data->ffxcb_randr_get_screen_resources_current(data->connection, screen->root);
+
+    data->screenResources = data->ffxcb_randr_get_screen_resources_current_reply(data->connection, screenResourcesCookie, NULL);
 
     //With all the initialisation done, start the detection
     bool ret = xcbRandrHandleMonitors(data, screen);
@@ -416,10 +385,10 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         data->result,
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,
-        data->defaultRefreshRate,
+        0,
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,
-        data->defaultRotation,
+        0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
@@ -440,11 +409,9 @@ void ffdsConnectXcbRandr(FFDisplayServerResult* result)
 
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_intern_atom,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_intern_atom_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_reply,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_modes_iterator,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_info,)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_info_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_current,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_current_reply,)
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_screen_resources_current_modes_iterator,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_mode_info_next,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_monitors,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xcbRandr, data, xcb_randr_get_monitors_reply,)
@@ -464,16 +431,20 @@ void ffdsConnectXcbRandr(FFDisplayServerResult* result)
 
     bool propertyDataInitialized = xcbInitPropertyData(xcbRandr, &data.propData);
 
+
     data.connection = ffxcb_connect(NULL, NULL);
     if(data.connection == NULL)
         return;
+
 
     data.result = result;
 
     xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(data.connection));
 
+
     if(iterator.rem > 0 && propertyDataInitialized)
         xcbDetectWMfromEWMH(&data.propData, data.connection, iterator.data->root, result);
+
 
     while(iterator.rem > 0)
     {
@@ -482,6 +453,7 @@ void ffdsConnectXcbRandr(FFDisplayServerResult* result)
     }
 
     ffxcb_disconnect(data.connection);
+
 
     //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
     if(result->wmProtocolName.length == 0)
