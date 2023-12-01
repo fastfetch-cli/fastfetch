@@ -56,7 +56,7 @@ function __fastfetch_complete_structure
     end
 end
 
-python3 -c (grep "^###>" (status -f) | cut -c 6- | string collect) | source
+string match -r -a -g "^###> ?(.*)" < (status -f) | string collect | python3 | source
 
 ###> #!/usr/bin/env python3
 ###>
