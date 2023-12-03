@@ -50,14 +50,29 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
     if(fstat(fd, &fileInfo) != 0)
         return false;
 
-    ffStrbufEnsureFree(buffer, fileInfo.st_size > 0 ? (uint32_t)fileInfo.st_size : 31);
+    if (fileInfo.st_size > 0)
+    {
+        // optimize for files has a fixed length,
+        // file can be very large, only keep necessary memory to save time and resources.
+        ffStrbufEnsureFixedLengthFree(buffer, (uint32_t)fileInfo.st_size);
+    }
+    else
+        ffStrbufEnsureFree(buffer, 31);
     uint32_t free = ffStrbufGetFree(buffer);
+    // procfs file's st_size is always zero
+    // choose a signed int type so that can store a native number
+    ssize_t remain = fileInfo.st_size;
 
     while(
         (bytesRead = read(fd, buffer->chars + buffer->length, free)) > 0
     ) {
         buffer->length += (uint32_t) bytesRead;
-        if((uint32_t) bytesRead == free)
+        // if remain > 0, it means there is some data left in the file.
+        // if remain == 0, it means reading has completed, no need to grow up the buffer.
+        // if remain < 0, we are reading a file from procfs/sysfs and its st_size is zero,
+        // we cannot detect how many data remains in the file, we only can call ffStrbufEnsureFree and read again.
+        remain -= bytesRead;
+        if((uint32_t) bytesRead == free && remain != 0)
             ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
