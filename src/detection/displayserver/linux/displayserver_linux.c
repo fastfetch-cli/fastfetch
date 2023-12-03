@@ -33,12 +33,10 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
             ffdsConnectXlib(ds);
     }
 
-    #ifdef __linux__
     //This display detection method is display server independent.
     //Use it if all connections failed
     if(ds->displays.length == 0)
         ffdsConnectDrm(ds);
-    #endif
 
     //This fills in missing information about WM / DE by using env vars and iterating processes
     ffdsDetectWMDE(ds);
