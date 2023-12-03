@@ -49,6 +49,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
         device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        device->size = 0;
 
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey), (int64_t*) &device->bytesRead);
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey), (int64_t*) &device->bytesWritten);

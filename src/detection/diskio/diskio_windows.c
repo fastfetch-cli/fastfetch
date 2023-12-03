@@ -82,6 +82,20 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 device->type = dspd.IncursSeekPenalty ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
             else
                 device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+
+            DISK_GEOMETRY_EX dge = {};
+            if(DeviceIoControl(
+                hDevice,
+                IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+                NULL,
+                0,
+                &dge,
+                sizeof(dge),
+                &retSize,
+                NULL))
+                device->size = (uint64_t) dge.DiskSize.QuadPart;
+            else
+                device->size = 0;
         }
     }
 

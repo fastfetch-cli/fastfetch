@@ -27,6 +27,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        device->size = 0;
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInitF(&device->devPath, "/dev/%s", deviceName);
         device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;

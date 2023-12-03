@@ -102,6 +102,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             device->type = ffStrbufEqualS(&buffer, "1") ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
         else
             device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+
+        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/size", devName);
+        if (ffReadFileBuffer(pathSysBlock, &buffer))
+            device->size = ffStrbufToUInt(&buffer, 0);
+        else
+            device->size = 0;
     }
 
     return NULL;
