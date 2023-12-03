@@ -37,9 +37,17 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
     LARGE_INTEGER fileSize;
     if(!GetFileSizeEx(handle, &fileSize))
         fileSize.QuadPart = 0;
-
-    ffStrbufEnsureFree(buffer, fileSize.QuadPart > 0 ? (uint32_t)fileSize.QuadPart : 31);
+    
+    if (fileSize.QuadPart > 0)
+    {
+        // optimize for files has a fixed length,
+        // file can be very large, only keep necessary memory to save time and resources.
+        ffStrbufEnsureFixedLengthFree(buffer, (uint32_t)fileSize.QuadPart);
+    }
+    else
+        ffStrbufEnsureFree(buffer, 31);
     uint32_t free = ffStrbufGetFree(buffer);
+    ssize_t remain = fileSize.QuadPart;
 
     bool success;
     while(
@@ -47,7 +55,8 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
         bytesRead > 0
     ) {
         buffer->length += (uint32_t) bytesRead;
-        if((uint32_t) bytesRead == free)
+        remain -= (ssize_t)bytesRead;
+        if((uint32_t) bytesRead == free && remain != 0)
             ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }

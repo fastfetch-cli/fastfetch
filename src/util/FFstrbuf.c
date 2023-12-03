@@ -54,6 +54,30 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
     strbuf->allocated = allocate;
 }
 
+void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
+{
+    uint32_t oldFree = ffStrbufGetFree(strbuf);
+    if (oldFree >= free && !(strbuf->allocated == 0 && strbuf->length > 0))
+        return;
+    
+    uint32_t newCap = strbuf->allocated + (free - oldFree);
+    
+    if(strbuf->allocated == 0)
+    {
+        newCap += strbuf->length + 1; // +1 for the NUL
+        char* newbuf = malloc(sizeof(*strbuf->chars) * newCap);
+        if(strbuf->length == 0)
+            *newbuf = '\0';
+        else
+            memcpy(newbuf, strbuf->chars, strbuf->length + 1);
+        strbuf->chars = newbuf;
+    }
+    else
+        strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * newCap);
+    
+    strbuf->allocated = newCap;
+}
+
 void ffStrbufClear(FFstrbuf* strbuf)
 {
     assert(strbuf != NULL);
