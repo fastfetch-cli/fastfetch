@@ -58,7 +58,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(snap)
         FF_PRINT_PACKAGE(brew)
         FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
-        FF_PRINT_PACKAGE(port)
+        FF_PRINT_PACKAGE(macports)
         FF_PRINT_PACKAGE(scoop)
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(pkgtool)
@@ -89,7 +89,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.snap},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.brew},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.brewCask},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts.port},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.macports},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.scoop},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.choco},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pkgtool},
@@ -192,7 +192,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(paludis)
     FF_APPEND_PACKAGE_COUNT(pkg)
     FF_APPEND_PACKAGE_COUNT(pkgtool)
-    FF_APPEND_PACKAGE_COUNT(port)
+    FF_APPEND_PACKAGE_COUNT(macports)
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoop)
     FF_APPEND_PACKAGE_COUNT(snap)
@@ -204,7 +204,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
 
 void ffPrintPackagesHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (port), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg)", FF_PACKAGES_NUM_FORMAT_ARGS, (const char* []) {
+    ffPrintModuleFormatHelp(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg)", FF_PACKAGES_NUM_FORMAT_ARGS, (const char* []) {
         "Number of all packages",
         "Number of pacman packages",
         "Pacman branch on manjaro",

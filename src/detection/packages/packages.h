@@ -21,7 +21,7 @@ typedef struct FFPackagesResult
     uint32_t paludis;
     uint32_t pkg;
     uint32_t pkgtool;
-    uint32_t port;
+    uint32_t macports;
     uint32_t rpm;
     uint32_t scoop;
     uint32_t snap;

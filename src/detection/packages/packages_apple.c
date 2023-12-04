@@ -102,7 +102,7 @@ static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
 void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
 {
     getBrewPackages(result);
-    result->port = getMacPortsPackages();
+    result->macports = getMacPortsPackages();
 
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(FASTFETCH_TARGET_DIR_ROOT);
     result->nixDefault += getNixPackages(&baseDir, "/nix/var/nix/profiles/default");
