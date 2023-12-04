@@ -7,14 +7,17 @@
 const char* ffDetectUptime(FFUptimeResult* result)
 {
     // #620
-    FF_AUTO_CLOSE_FILE FILE* uptime = fopen("/proc/uptime", "r");
-    if (!uptime) return "fopen(\"/proc/uptime\", \"r\") failed";
+    char buf[64];
+    ssize_t nRead = ffReadFileData("/proc/uptime", sizeof(buf) - 1, buf);
+    if(nRead < 0)
+        return "ffReadFileData(\"/proc/uptime\", sizeof(buf) - 1, buf) failed";
+    buf[nRead] = '\0';
 
     double sec;
-    if (fscanf(uptime, "%lf", &sec) > 0)
+    if(sscanf(buf, "%lf", &sec) > 0)
         result->uptime = (uint64_t) (sec * 1000);
     else
-        return "fscanf(\"%lf\", &sec) failed";
+        return "sscanf(buf.chars, \"%lf\", &sec) failed";
 
     result->bootTime = ffTimeGetNow() + result->uptime;
 
