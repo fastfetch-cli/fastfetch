@@ -4,7 +4,7 @@
 
 #include <Windows.h>
 
-enum { FF_PIPE_BUFSIZ = 4096 };
+enum { FF_PIPE_BUFSIZ = 8192 };
 
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {

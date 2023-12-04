@@ -11,7 +11,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 
-#define FF_PIPE_BUFSIZ 4096
+enum { FF_PIPE_BUFSIZ = 8192 };
 
 static inline void waitpid_wrapper(const pid_t* pid)
 {
@@ -52,7 +52,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     //Child
     if(childPid == 0)
     {
-        int nullFile = open("/dev/null", O_WRONLY|O_CLOEXEC);
+        int nullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
         dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
         setenv("LANG", "C", 1);
