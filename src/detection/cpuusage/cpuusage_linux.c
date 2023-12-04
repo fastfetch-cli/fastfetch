@@ -41,7 +41,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
             };
         }
         else
-            break; // because we read the whole /proc/stat, we can safely quit when the line does not start with "cpuN" 
+            break;
         start = token + 1;
     }
 
