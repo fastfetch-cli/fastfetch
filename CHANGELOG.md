@@ -14,6 +14,31 @@ We are deprecating flags based config files (will be removed in v3.0.0). We sugg
 Features:
 * Support Oils and elvish shell version detection (Shell)
 * Support Windows Server Core (Windows)
+* Better ddcutil 2.x compatibility (Brightness, Linux)
+* Add completion support for fish (natively) and nushell (via [carapace-bin](https://github.com/rsteube/carapace-bin))
+* Support nix in macOS (Packages, macOS)
+* Print module description for `--list-modules`
+* Support `alacritty.toml` (TerminalFont)
+* Support board detection on macOS. It simplily prints machine model identifier as for now (Board, macOS)
+* Add general method to query product name (Host, macOS)
+* Use `libdrm` as a better fall back for detecting displays, which correctly detects current mode; supports refresh rate detection and maybe also faster than using `/sys/class/drm` (Display, Linux)
+* Support physical disk size detection (DiskIO)
+* Support physical disk name and type detection (DiskIO, FreeBSD)
+
+Bugfixes:
+* End `va_list` before returning (@VoltrexKeyva)
+* Don't use background color when printing blocks (Color)
+* Fix lots of typos
+* Fix compatibility with Linux containers (Linux)
+* Don't report disabled monitors when using DRM (Linux)
+* Fix bad performance in some cases when using X11 (Display, Linux)
+* Fix some memory leaks
+* Fix used swap space detection (Swap, FreeBSD)
+* Don't leak fds to child processes (Linux)
+
+Logos:
+* Add Adelie, Ironclad
+* Update parch
 
 # 2.2.3
 
