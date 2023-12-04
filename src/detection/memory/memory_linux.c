@@ -6,12 +6,11 @@
 
 const char* ffDetectMemory(FFMemoryResult* ram)
 {
-    FF_AUTO_CLOSE_FILE FILE* meminfo = fopen("/proc/meminfo", "r");
-    if(meminfo == NULL)
-        return "Failed to open /proc/meminfo";
-
-    char* FF_AUTO_FREE line = NULL;
-    size_t len = 0;
+    char buf[PROC_FILE_BUFFSIZ];
+    ssize_t nRead = ffReadFileData("/proc/meminfo", sizeof(buf) - 1, buf);
+    if(nRead < 0)
+        return "ffReadFileData(\"/proc/meminfo\", sizeof(buf)-1, buf)";
+    buf[nRead] = '\0';
 
     uint64_t memTotal = 0,
              shmem = 0,
@@ -19,32 +18,26 @@ const char* ffDetectMemory(FFMemoryResult* ram)
              buffers = 0,
              cached = 0,
              sReclaimable = 0;
-    uint8_t count = 0;
+    
+    char *token = NULL;
+    if((token = strstr(buf, "MemTotal:")) != NULL)
+        sscanf(token, "MemTotal: %" PRIu64, &memTotal);
 
-    while (getline(&line, &len, meminfo) != EOF)
-    {
-        switch (line[0])
-        {
-            case 'B':
-                if (sscanf(line, "Buffers: %" PRIu64, &buffers) > 0)
-                    if (++count >= 6) goto done;
-                break;
-            case 'C':
-                if (sscanf(line, "Cached: %" PRIu64, &cached) > 0)
-                    if (++count >= 6) goto done;
-                break;
-            case 'M':
-                if(sscanf(line, "MemTotal: %" PRIu64, &memTotal) > 0 || sscanf(line, "MemFree: %" PRIu64, &memFree) > 0)
-                    if (++count >= 6) goto done;
-                break;
-            case 'S':
-                if(sscanf(line, "Shmem: %" PRIu64, &shmem) > 0 || sscanf(line, "SReclaimable: %" PRIu64, &sReclaimable) > 0)
-                    if (++count >= 6) goto done;
-                break;
-        }
-    }
+    if((token = strstr(buf, "MemFree:")) != NULL)
+        sscanf(token, "MemFree: %" PRIu64, &memFree);
 
-done:
+    if((token = strstr(buf, "Buffers:")) != NULL)
+        sscanf(token, "Buffers: %" PRIu64, &buffers);
+    
+    if((token = strstr(buf, "Cached:")) != NULL)
+        sscanf(token, "Cached: %" PRIu64, &cached);
+    
+    if((token = strstr(buf, "Shmem:")) != NULL)
+        sscanf(token, "Shmem: %" PRIu64, &shmem);
+    
+    if((token = strstr(buf, "SReclaimable:")) != NULL)
+        sscanf(token, "SReclaimable: %" PRIu64, &sReclaimable);
+
     ram->bytesTotal = memTotal * 1024lu;
     ram->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * 1024lu;
 
