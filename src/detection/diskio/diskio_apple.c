@@ -63,6 +63,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             ffStrbufPrependS(&device->devPath, "/dev/");
         }
 
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef mediaSize = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOMediaSizeKey), kCFAllocatorDefault, kNilOptions);
+        if (mediaSize)
+            ffCfNumGetInt64(mediaSize, (int64_t*) &device->size);
+        else
+            device->size = 0;
+
         ffStrbufInit(&device->interconnect);
         FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryPhysical = 0;
         if (IORegistryEntryGetParentEntry(entryDriver, kIOServicePlane, &entryPhysical) == KERN_SUCCESS)
