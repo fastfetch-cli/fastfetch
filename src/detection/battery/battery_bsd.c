@@ -20,9 +20,9 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
     if(units == 0)
         return NULL;
 
-    FF_AUTO_CLOSE_FD int acpifd = open("/dev/acpi", O_RDONLY);
+    FF_AUTO_CLOSE_FD int acpifd = open("/dev/acpi", O_RDONLY | O_CLOEXEC);
     if(acpifd < 0)
-        return "open(\"/dev/acpi\", O_RDONLY) failed";
+        return "open(\"/dev/acpi\", O_RDONLY | O_CLOEXEC) failed";
 
     for(int i = 0; i < units; ++i)
     {

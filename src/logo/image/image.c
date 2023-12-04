@@ -620,7 +620,7 @@ static int getCacheFD(FFLogoRequestData* requestData, const char* fileName)
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, fileName);
-    int fd = open(requestData->cacheDir.chars, O_RDONLY);
+    int fd = open(requestData->cacheDir.chars, O_RDONLY | O_CLOEXEC);
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
     return fd;
 }

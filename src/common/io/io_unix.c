@@ -27,7 +27,7 @@ static void createSubfolders(const char* fileName)
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
-    int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
+    int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC;
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
     int FF_AUTO_CLOSE_FD fd = open(fileName, openFlagsModes, openFlagsRights);
@@ -87,7 +87,7 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
-    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY | O_CLOEXEC);
     if(fd == -1)
         return -1;
 
@@ -96,7 +96,7 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
-    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY | O_CLOEXEC);
     if(fd == -1)
         return false;
 
@@ -199,7 +199,7 @@ bool ffSuppressIO(bool suppress)
 
         origOut = dup(STDOUT_FILENO);
         origErr = dup(STDERR_FILENO);
-        nullFile = open("/dev/null", O_WRONLY);
+        nullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
         init = true;
     }
 
