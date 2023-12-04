@@ -3000,7 +3000,8 @@ static const FFlogo P[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_PARCH,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
         },
     },
     // Pardus
