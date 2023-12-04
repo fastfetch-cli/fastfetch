@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_DISKIO_DISPLAY_NAME "Disk IO"
-#define FF_DISKIO_NUM_FORMAT_ARGS 10
+#define FF_DISKIO_NUM_FORMAT_ARGS 11
 
 static int sortDevices(const FFDiskIOResult* left, const FFDiskIOResult* right)
 {
