@@ -13,6 +13,16 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
+    // Adélie
+    {
+        .names = {"Adélie", "Adelie"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ADELIE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // AerOS
     {
         .names = {"aerOS"},
