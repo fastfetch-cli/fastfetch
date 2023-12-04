@@ -1899,6 +1899,16 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Ironclad
+    {
+        .names = {"Ironclad"},
+        .lines = FASTFETCH_DATATEXT_LOGO_IRONCLAD,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
     // Itc
     {
         .names = {"Itc"},
