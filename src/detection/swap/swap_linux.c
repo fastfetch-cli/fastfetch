@@ -18,10 +18,10 @@ const char* ffDetectSwap(FFSwapResult* swap)
 
     char *token = NULL;
     if ((token = strstr(buf, "SwapTotal:")) != NULL)
-        sscanf(token, "SwapTotal: %" PRIu64, &swapTotal);
+        swapTotal = strtoul(token + strlen("SwapTotal:"), NULL, 10);
     
     if ((token = strstr(buf, "SwapFree:")) != NULL)
-        sscanf(token, "SwapFree: %" PRIu64, &swapFree);
+        swapFree = strtoul(token + strlen("SwapFree:"), NULL, 10);
 
     swap->bytesTotal = swapTotal * 1024lu;
     swap->bytesUsed = (swapTotal - swapFree) * 1024lu;

@@ -13,11 +13,12 @@ const char* ffDetectUptime(FFUptimeResult* result)
         return "ffReadFileData(\"/proc/uptime\", sizeof(buf) - 1, buf) failed";
     buf[nRead] = '\0';
 
-    double sec;
-    if(sscanf(buf, "%lf", &sec) > 0)
+    char *err = NULL;
+    double sec = strtod(buf, &err);
+    if(err != buf)
         result->uptime = (uint64_t) (sec * 1000);
     else
-        return "sscanf(buf.chars, \"%lf\", &sec) failed";
+        return "strtod(buf, &err) failed";
 
     result->bootTime = ffTimeGetNow() + result->uptime;
 
