@@ -152,7 +152,7 @@ jobs:
 
       - name: install required packages
         run: |
-          brew uninstall aws-sam-cli azure-cli gnutls qemu lima colima gradle kotlin maven php pipx aria2 || true
+          brew uninstall aws-sam-cli azure-cli qemu lima colima gradle kotlin maven pipx aria2 || true
           brew update
           brew install vulkan-loader vulkan-headers molten-vk imagemagick chafa
 
