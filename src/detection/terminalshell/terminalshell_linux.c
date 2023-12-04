@@ -74,19 +74,19 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 
     char statFilePath[64];
     snprintf(statFilePath, sizeof(statFilePath), "/proc/%d/stat", (int)pid);
-    FILE* stat = fopen(statFilePath, "r");
-    if(stat == NULL)
-        return "fopen(statFilePath, \"r\") failed";
+    char buf[PROC_FILE_BUFFSIZ];
+    ssize_t nRead = ffReadFileData(statFilePath, sizeof(buf) - 1, buf);
+    if(nRead < 0)
+        return "ffReadFileData(statFilePath, sizeof(buf)-1, buf)";
+    buf[nRead] = '\0';
 
     *ppid = 0;
     if(
-        fscanf(stat, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
+        sscanf(buf, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
         !ffStrSet(name) ||
         *ppid == 0
     )
-        error = "fscanf(stat) failed";
-
-    fclose(stat);
+        error = "sscanf(stat) failed";
 
     #elif defined(__APPLE__)
 
