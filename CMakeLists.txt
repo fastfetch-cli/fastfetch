@@ -250,7 +250,7 @@ configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 ####################
 
 file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
-set(LOGO_BUILTIN_H "#pragma once\n\n")
+set(LOGO_BUILTIN_H "#pragma once\n#pragma GCC diagnostic ignored \"-Wtrigraphs\"\n\n")
 foreach(file ${LOGO_FILES})
     fastfetch_load_text("${file}" content)
     get_filename_component(file "${file}" NAME_WLE)
