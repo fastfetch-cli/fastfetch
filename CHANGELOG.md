@@ -35,6 +35,7 @@ Bugfixes:
 * Fix some memory leaks
 * Fix used swap space detection (Swap, FreeBSD)
 * Don't leak fds to child processes (Linux)
+* Fix possible issues when reading procfs (Linux)
 
 Logos:
 * Add Adelie, Ironclad
