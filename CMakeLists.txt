@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.3.0
+    VERSION 2.3.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1052,7 +1052,7 @@ install(
 
 install(
     FILES "${PROJECT_BINARY_DIR}/fastfetch.1"
-    DESTINATION "${CMAKE_INSTALL_MANDIR}"
+    DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
 )
 
 ##################
