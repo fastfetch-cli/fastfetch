@@ -106,6 +106,7 @@ void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_TERMINALSIZE_MODULE_NAME,
+        "Print current terminal size",
         ffParseTerminalSizeCommandOptions,
         ffParseTerminalSizeJsonObject,
         ffPrintTerminalSize,

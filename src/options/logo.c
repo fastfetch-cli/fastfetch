@@ -189,11 +189,36 @@ logoType:
         else if(strcasecmp(subKey, "symbols") == 0)
             ffOptionParseString(key, value, &options->chafaSymbols);
         else if(strcasecmp(subKey, "canvas-mode") == 0)
-            options->chafaCanvasMode = ffOptionParseUInt32(key, value);
+        {
+            options->chafaCanvasMode = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "TRUECOLOR", 0 },
+                { "INDEXED_256", 1 },
+                { "INDEXED_240", 2 },
+                { "INDEXED_16", 3 },
+                { "FGBG_BGFG", 4 },
+                { "FGBG", 5 },
+                { "INDEXED_8", 6 },
+                { "INDEXED_16_8", 7 },
+                {},
+            });
+        }
         else if(strcasecmp(subKey, "color-space") == 0)
-            options->chafaColorSpace = ffOptionParseUInt32(key, value);
+        {
+            options->chafaColorSpace = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "RGB", 0 },
+                { "DIN99D", 1 },
+                {},
+            });
+        }
         else if(strcasecmp(subKey, "dither-mode") == 0)
-            options->chafaDitherMode = ffOptionParseUInt32(key, value);
+        {
+            options->chafaDitherMode = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "NONE", 0 },
+                { "ORDERED", 1 },
+                { "DIFFUSION", 2 },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -291,7 +316,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         {
             uint32_t value = (uint32_t) yyjson_get_uint(val);
             if (value == 0)
-                return "Logo width must be a possitive integer";
+                return "Logo width must be a positive integer";
             options->width = value;
             continue;
         }
@@ -299,7 +324,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         {
             uint32_t value = (uint32_t) yyjson_get_uint(val);
             if (value == 0)
-                return "Logo height must be a possitive integer";
+                return "Logo height must be a positive integer";
             options->height = value;
             continue;
         }
@@ -313,7 +338,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 if (pos) \
                 { \
                     if (!yyjson_is_uint(pos)) \
-                        return "Logo padding values must be possitive integers"; \
+                        return "Logo padding values must be positive integers"; \
                     options->paddingPos = (uint32_t) yyjson_get_uint(pos); \
                 }
             FF_PARSE_PADDING_POSITON(left, paddingLeft);

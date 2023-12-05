@@ -217,6 +217,7 @@ void ffInitOSOptions(FFOSOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_OS_MODULE_NAME,
+        "Print operating system name and version",
         ffParseOSCommandOptions,
         ffParseOSJsonObject,
         ffPrintOS,

@@ -155,7 +155,7 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
 {
     if (ffStrbufEqualS(deName, FF_DE_PRETTY_PLASMA))
         getKDE(result, options);
-    else if (ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME) || ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME))
+    else if (ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME))
         getGnome(result, options);
     else if (ffStrbufEqualS(deName, FF_DE_PRETTY_CINNAMON))
         getCinnamon(result, options);

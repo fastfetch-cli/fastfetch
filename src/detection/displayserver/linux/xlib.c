@@ -117,11 +117,9 @@ typedef struct XrandrData
     FF_LIBRARY_SYMBOL(XInternAtom)
     FF_LIBRARY_SYMBOL(XGetAtomName);
     FF_LIBRARY_SYMBOL(XFree);
-    FF_LIBRARY_SYMBOL(XRRGetScreenInfo)
-    FF_LIBRARY_SYMBOL(XRRConfigCurrentConfiguration)
     FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
     FF_LIBRARY_SYMBOL(XRRGetMonitors)
-    FF_LIBRARY_SYMBOL(XRRGetScreenResources)
+    FF_LIBRARY_SYMBOL(XRRGetScreenResourcesCurrent)
     FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
     FF_LIBRARY_SYMBOL(XRRGetOutputProperty)
     FF_LIBRARY_SYMBOL(XRRGetCrtcInfo)
@@ -129,15 +127,12 @@ typedef struct XrandrData
     FF_LIBRARY_SYMBOL(XRRFreeOutputInfo)
     FF_LIBRARY_SYMBOL(XRRFreeScreenResources)
     FF_LIBRARY_SYMBOL(XRRFreeMonitors)
-    FF_LIBRARY_SYMBOL(XRRFreeScreenConfigInfo)
 
     //Init once
     Display* display;
     FFDisplayServerResult* result;
 
     //Init per screen
-    uint32_t defaultRefreshRate;
-    uint32_t defaultRotation;
     XRRScreenResources* screenResources;
 } XrandrData;
 
@@ -151,7 +146,7 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
             return (double) modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
         }
     }
-    return data->defaultRefreshRate;
+    return 0;
 }
 
 static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary)
@@ -246,10 +241,10 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         data->result,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
-        data->defaultRefreshRate,
+        0,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
-        data->defaultRotation,
+        0,
         &name,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitorInfo->primary,
@@ -279,39 +274,8 @@ static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
 
 static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 {
-    //Init screen configuration. This is used to get the default refresh rate. If this fails, default refresh rate is simply 0.
-    XRRScreenConfiguration* screenConfiguration = data->ffXRRGetScreenInfo(data->display, RootWindowOfScreen(screen));
-
-    if(screenConfiguration != NULL)
-    {
-        data->defaultRefreshRate = (uint32_t) data->ffXRRConfigCurrentRate(screenConfiguration);
-        Rotation rotation = 0;
-        data->ffXRRConfigCurrentConfiguration(screenConfiguration, &rotation);
-        switch (rotation)
-        {
-            case RR_Rotate_90:
-                data->defaultRotation = 90;
-                break;
-            case RR_Rotate_180:
-                data->defaultRotation = 180;
-                break;
-            case RR_Rotate_270:
-                data->defaultRotation = 270;
-                break;
-            default:
-                data->defaultRotation = 0;
-                break;
-        }
-        data->ffXRRFreeScreenConfigInfo(screenConfiguration);
-    }
-    else
-    {
-        data->defaultRefreshRate = 0;
-        data->defaultRotation = 0;
-    }
-
     //Init screen resources
-    data->screenResources = data->ffXRRGetScreenResources(data->display, RootWindowOfScreen(screen));
+    data->screenResources = data->ffXRRGetScreenResourcesCurrent(data->display, RootWindowOfScreen(screen));
 
     bool ret = xrandrHandleMonitors(data, screen);
 
@@ -325,10 +289,10 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         data->result,
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
-        data->defaultRefreshRate,
+        0,
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
-        data->defaultRotation,
+        0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
@@ -348,11 +312,9 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XInternAtom,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XGetAtomName,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XFree,);
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenInfo,)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentConfiguration,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResources,);
+    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResourcesCurrent,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputProperty,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetCrtcInfo,);
@@ -360,7 +322,6 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeOutputInfo,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeScreenResources,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeMonitors,);
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRFreeScreenConfigInfo,);
 
     X11PropertyData propertyData;
     bool propertyDataInitialized = x11InitPropertyData(xrandr, &propertyData);
@@ -388,7 +349,7 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
 
 void ffdsConnectXrandr(FFDisplayServerResult* result)
 {
-    //Do nothing here. There are more x11 implementaions to come.
+    //Do nothing here. There are more x11 implementations to come.
     FF_UNUSED(result);
 }
 

@@ -235,7 +235,7 @@ static bool detectDefaultTerminal(FFTerminalShellResult* result)
     {
         if(wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0)
         {
-            // Let Windows deside
+            // Let Windows decide
             return false;
         }
         if(wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0)
@@ -305,6 +305,7 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell")     ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "powershell_ise") ||
         ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "wsl")            || // running inside wsl
+        ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "servercoreshell")   || // ServerCore Shell Launcher
         ffStrbufStartsWithIgnCaseS(&result->terminalPrettyName, "ConEmuC") // wrapper process of ConEmu
     ) {
         //We are nested shell

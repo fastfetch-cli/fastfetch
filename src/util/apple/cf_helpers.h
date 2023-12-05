@@ -8,6 +8,7 @@
 
 //Return error info if failed, NULL otherwise
 const char* ffCfStrGetString(CFStringRef str, FFstrbuf* result);
+const char* ffCfNumGetInt64(CFTypeRef cf, int64_t* result);
 const char* ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result);
 const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result);
 const char* ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result);

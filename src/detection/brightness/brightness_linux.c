@@ -96,6 +96,8 @@ static const char* detectWithBacklight(FFlist* result)
 // Try to be compatible with ddcutil 2.0
 #if DDCUTIL_VMAJOR >= 2
 double ddca_set_default_sleep_multiplier(double multiplier); // ddcutil 1.4
+#else
+DDCA_Status ddca_init(const char *libopts, int syslog_level, int opts);
 #endif
 
 static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
@@ -107,11 +109,22 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
 
-    __typeof__(&ddca_set_default_sleep_multiplier) ffddca_set_default_sleep_multiplier = dlsym(libddcutil, "ddca_set_default_sleep_multiplier");
-    if (ffddca_set_default_sleep_multiplier)
-        ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
+    __typeof__(&ddca_init) ffddca_init = dlsym(libddcutil, "ddca_init");
+    if (ffddca_init)
+    {
+        FF_SUPPRESS_IO();
+        // Ref: https://github.com/rockowitz/ddcutil/issues/344
+        if (ffddca_init("--disable-watch-displays", -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0)
+            return "ddca_init() failed";
+    }
+    else
+    {
+        __typeof__(&ddca_set_default_sleep_multiplier) ffddca_set_default_sleep_multiplier = dlsym(libddcutil, "ddca_set_default_sleep_multiplier");
+        if (ffddca_set_default_sleep_multiplier)
+            ffddca_set_default_sleep_multiplier(options->ddcciSleep / 40.0);
 
-    libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
+        libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
+    }
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (ffddca_get_display_info_list2(false, &infoList) < 0)

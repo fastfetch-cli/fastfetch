@@ -5,7 +5,7 @@
 
 struct Apple80211; // https://code.google.com/archive/p/iphone-wireless/wikis/Apple80211.wiki
 
-// 0 is sucessful; < 0 is failure
+// 0 is successful; < 0 is failure
 int Apple80211Open(struct Apple80211 **handle) __attribute__((weak_import));
 int Apple80211BindToInterface(struct Apple80211 *handle, CFStringRef interface) __attribute__((weak_import));
 int Apple80211GetInfoCopy(struct Apple80211 *handle, CFDictionaryRef *info) __attribute__((weak_import));

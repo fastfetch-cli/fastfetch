@@ -74,19 +74,19 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 
     char statFilePath[64];
     snprintf(statFilePath, sizeof(statFilePath), "/proc/%d/stat", (int)pid);
-    FILE* stat = fopen(statFilePath, "r");
-    if(stat == NULL)
-        return "fopen(statFilePath, \"r\") failed";
+    char buf[PROC_FILE_BUFFSIZ];
+    ssize_t nRead = ffReadFileData(statFilePath, sizeof(buf) - 1, buf);
+    if(nRead < 0)
+        return "ffReadFileData(statFilePath, sizeof(buf)-1, buf)";
+    buf[nRead] = '\0';
 
     *ppid = 0;
     if(
-        fscanf(stat, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
+        sscanf(buf, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
         !ffStrSet(name) ||
         *ppid == 0
     )
-        error = "fscanf(stat) failed";
-
-    fclose(stat);
+        error = "sscanf(stat) failed";
 
     #elif defined(__APPLE__)
 
@@ -140,6 +140,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "gdb")                  == 0 ||
         strcasecmp(name, "lldb")                 == 0 ||
         strcasecmp(name, "login")                == 0 ||
+        strcasecmp(name, "ltrace")               == 0 ||
+        strcasecmp(name, "perf")                 == 0 ||
         strcasecmp(name, "guake-wrapped")        == 0 ||
         strcasestr(name, "debug")             != NULL ||
         strcasestr(name, "command-not-found") != NULL ||
@@ -164,6 +166,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "pwsh")      == 0 ||
         strcasecmp(name, "nu")        == 0 ||
         strcasecmp(name, "git-shell") == 0 ||
+        strcasecmp(name, "elvish")    == 0 ||
+        strcasecmp(name, "oil.ovm")   == 0 ||
         (strcasecmp(name, "python") == 0 && getenv("XONSH_VERSION"))
     ) {
         if (result->shellProcessName.length == 0)
@@ -346,7 +350,6 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     getTerminalFromEnv(&result);
     getUserShellFromEnv(&result);
 
-    ffStrbufClear(&result.shellVersion);
     getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
@@ -355,6 +358,8 @@ const FFTerminalShellResult* ffDetectTerminalShell()
         ffStrbufInitStatic(&result.shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
         ffStrbufInitStatic(&result.shellPrettyName, "xonsh");
+    else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "oil.ovm"))
+        ffStrbufInitStatic(&result.shellPrettyName, "Oils");
     else
     {
         // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
@@ -364,7 +369,7 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     if(result.terminalExeName[0] == '.' && ffStrEndsWith(result.terminalExeName, "-wrapped"))
     {
         // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
-        // We use terminalProcessName when detecting version and font, overriding it for simplication
+        // We use terminalProcessName when detecting version and font, overriding it for simplification
         ffStrbufSetNS(
             &result.terminalProcessName,
             (uint32_t) (strlen(result.terminalExeName) - strlen(".-wrapped")),

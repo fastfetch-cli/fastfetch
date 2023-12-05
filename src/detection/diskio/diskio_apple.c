@@ -49,6 +49,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
         device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        device->size = 0;
 
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey), (int64_t*) &device->bytesRead);
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey), (int64_t*) &device->bytesWritten);
@@ -61,6 +62,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             ffCfStrGetString(bsdName, &device->devPath);
             ffStrbufPrependS(&device->devPath, "/dev/");
         }
+
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef mediaSize = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOMediaSizeKey), kCFAllocatorDefault, kNilOptions);
+        if (mediaSize)
+            ffCfNumGetInt64(mediaSize, (int64_t*) &device->size);
+        else
+            device->size = 0;
 
         ffStrbufInit(&device->interconnect);
         FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryPhysical = 0;

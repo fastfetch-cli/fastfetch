@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_bar
-#define FF_INCLUDED_common_bar
-
 #include "fastfetch.h"
 
 enum
@@ -15,5 +12,3 @@ enum
 
 void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, uint8_t red);
 void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses);
-
-#endif

@@ -128,6 +128,21 @@ static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool getShellVersionOils(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    // Oils 0.18.0		https://www.oilshell.org/...
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, '\t');
+    return true;
+}
+
 static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version)
 {
     ffStrbufSetS(version, getenv("NU_VERSION"));
@@ -138,17 +153,14 @@ static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version)
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
-    if(ffProcessAppendStdOut(version, (char* const[]) {
+    return ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-NoLogo",
         "-NoProfile",
         "-Command",
         "$PSVersionTable.PSVersion.ToString()",
         NULL
-    })) return false;
-
-    ffStrbufSubstrAfterLastC(version, ' ');
-    return true;
+    }) == NULL;
 }
 #endif
 
@@ -170,6 +182,10 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getShellVersionKsh(exe, version);
     if(strcasecmp(exeName, "oksh") == 0)
         return getShellVersionOksh(exe, version);
+    if(strcasecmp(exeName, "oil.ovm") == 0)
+        return getShellVersionOils(exe, version);
+    if(strcasecmp(exeName, "elvish") == 0)
+        return getExeVersionRaw(exe, version);
     if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
     {
         ffStrbufSetS(version, getenv("XONSH_VERSION"));

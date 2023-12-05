@@ -27,6 +27,18 @@ const char* ffDetectMonitor(FFlist* results)
             continue;
 
         ffStrbufAppendS(&drmDir, entry->d_name);
+        uint32_t drmDirWithDnameLength = drmDir.length;
+
+        ffStrbufAppendS(&drmDir, "/enabled");
+        char enabled = 'd'; // disabled
+        ffReadFileData(drmDir.chars, sizeof(enabled), &enabled);
+        if (enabled != 'e') // enabled
+        {
+            ffStrbufSubstrBefore(&drmDir, drmDirLength);
+            continue;
+        }
+
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
         ffStrbufAppendS(&drmDir, "/edid");
 
         uint8_t edidData[512];

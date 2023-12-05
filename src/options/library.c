@@ -65,6 +65,8 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
             ffStrbufSetS(&options->libnm, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "ddcutil"))
             ffStrbufSetS(&options->libDdcutil, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "drm"))
+            ffStrbufSetS(&options->libdrm, yyjson_get_str(val));
 #endif
 
         else
@@ -129,6 +131,8 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libnm);
         else if(ffStrEqualsIgnCase(subkey, "ddcutil"))
             ffOptionParseString(key, value, &options->libDdcutil);
+        else if(ffStrEqualsIgnCase(subkey, "drm"))
+            ffOptionParseString(key, value, &options->libdrm);
 #endif
 
         else
@@ -142,64 +146,15 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
 
 void ffOptionsInitLibrary(FFOptionsLibrary* options)
 {
-    ffStrbufInit(&options->libVulkan);
-    ffStrbufInit(&options->libOpenCL);
-    ffStrbufInit(&options->libSQLite3);
-    ffStrbufInit(&options->libImageMagick);
-    ffStrbufInit(&options->libChafa);
-    ffStrbufInit(&options->libZ);
-
-#if defined(__linux__) || defined(__FreeBSD__)
-    ffStrbufInit(&options->libPCI);
-    ffStrbufInit(&options->libWayland);
-    ffStrbufInit(&options->libXcbRandr);
-    ffStrbufInit(&options->libXcb);
-    ffStrbufInit(&options->libXrandr);
-    ffStrbufInit(&options->libX11);
-    ffStrbufInit(&options->libGIO);
-    ffStrbufInit(&options->libDConf);
-    ffStrbufInit(&options->libDBus);
-    ffStrbufInit(&options->libXFConf);
-    ffStrbufInit(&options->librpm);
-    ffStrbufInit(&options->libEGL);
-    ffStrbufInit(&options->libGLX);
-    ffStrbufInit(&options->libOSMesa);
-    ffStrbufInit(&options->libfreetype);
-    ffStrbufInit(&options->libPulse);
-    ffStrbufInit(&options->libnm);
-    ffStrbufInit(&options->libDdcutil);
-#endif
+    static_assert(sizeof(*options) % sizeof(FFstrbuf) == 0, "FFOptionsLibrary is not aligned");
+    for (FFstrbuf* pBuf = (void*) options; pBuf < (FFstrbuf*) (options + 1); pBuf++)
+        ffStrbufInit(pBuf);
 }
 
 void ffOptionsDestroyLibrary(FFOptionsLibrary* options)
 {
-    ffStrbufDestroy(&options->libVulkan);
-    ffStrbufDestroy(&options->libOpenCL);
-    ffStrbufDestroy(&options->libSQLite3);
-    ffStrbufDestroy(&options->libImageMagick);
-    ffStrbufDestroy(&options->libChafa);
-    ffStrbufDestroy(&options->libZ);
-
-#if defined(__linux__) || defined(__FreeBSD__)
-    ffStrbufDestroy(&options->libPCI);
-    ffStrbufDestroy(&options->libWayland);
-    ffStrbufDestroy(&options->libXcbRandr);
-    ffStrbufDestroy(&options->libXcb);
-    ffStrbufDestroy(&options->libXrandr);
-    ffStrbufDestroy(&options->libX11);
-    ffStrbufDestroy(&options->libGIO);
-    ffStrbufDestroy(&options->libDConf);
-    ffStrbufDestroy(&options->libDBus);
-    ffStrbufDestroy(&options->libXFConf);
-    ffStrbufDestroy(&options->librpm);
-    ffStrbufDestroy(&options->libEGL);
-    ffStrbufDestroy(&options->libGLX);
-    ffStrbufDestroy(&options->libOSMesa);
-    ffStrbufDestroy(&options->libfreetype);
-    ffStrbufDestroy(&options->libPulse);
-    ffStrbufDestroy(&options->libnm);
-    ffStrbufDestroy(&options->libDdcutil);
-#endif
+    for (FFstrbuf* pBuf = (void*) options; pBuf < (FFstrbuf*) (options + 1); pBuf++)
+        ffStrbufDestroy(pBuf);
 }
 
 void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_doc* doc)
@@ -278,6 +233,9 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
 
     if (!ffStrbufEqual(&options->libDdcutil, &defaultOptions.libDdcutil))
         yyjson_mut_obj_add_strbuf(doc, obj, "ddcutil", &options->libDdcutil);
+
+    if (!ffStrbufEqual(&options->libdrm, &defaultOptions.libdrm))
+        yyjson_mut_obj_add_strbuf(doc, obj, "drm", &options->libdrm);
 #endif
 
     if (yyjson_mut_obj_size(obj) > 0)

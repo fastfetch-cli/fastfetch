@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_gamepad_gamepad
-#define FF_INCLUDED_detection_gamepad_gamepad
-
 #include "fastfetch.h"
 
 typedef struct FFGamepadDevice
@@ -12,5 +9,3 @@ typedef struct FFGamepadDevice
 } FFGamepadDevice;
 
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */);
-
-#endif

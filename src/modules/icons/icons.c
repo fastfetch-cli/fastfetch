@@ -91,6 +91,7 @@ void ffInitIconsOptions(FFIconsOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_ICONS_MODULE_NAME,
+        "Print icon style name",
         ffParseIconsCommandOptions,
         ffParseIconsJsonObject,
         ffPrintIcons,

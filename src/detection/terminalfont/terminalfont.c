@@ -9,17 +9,33 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont)
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    FFpropquery fontQuery[] = {
-        {"family:", &fontName},
-        {"size:", &fontSize},
-    };
+    do {
+        // Latest alacritty uses toml instead of yaml
+        FFpropquery fontQueryToml[] = {
+            {"family =", &fontName},
+            {"size =", &fontSize},
+        };
 
-    // alacritty parses config files in this order
-    ffParsePropFileConfigValues("alacritty/alacritty.yml", 2, fontQuery);
-    if(fontName.length == 0 || fontSize.length == 0)
-        ffParsePropFileConfigValues("alacritty.yml", 2, fontQuery);
-    if(fontName.length == 0 || fontSize.length == 0)
-        ffParsePropFileConfigValues(".alacritty.yml", 2, fontQuery);
+        // alacritty parses config files in this order
+        if(ffParsePropFileConfigValues("alacritty/alacritty.toml", 2, fontQueryToml))
+            break;
+        if(ffParsePropFileConfigValues("alacritty.toml", 2, fontQueryToml))
+            break;
+        if(ffParsePropFileConfigValues(".alacritty.toml", 2, fontQueryToml))
+            break;
+
+        FFpropquery fontQueryYaml[] = {
+            {"family:", &fontName},
+            {"size:", &fontSize},
+        };
+
+        if(ffParsePropFileConfigValues("alacritty/alacritty.yml", 2, fontQueryYaml))
+            break;
+        if(ffParsePropFileConfigValues("alacritty.yml", 2, fontQueryYaml))
+            break;
+        if(ffParsePropFileConfigValues(".alacritty.yml", 2, fontQueryYaml))
+            break;
+    } while (false);
 
     //by default alacritty uses its own font called alacritty
     if(fontName.length == 0)
@@ -59,8 +75,6 @@ FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 #if defined(_WIN32) || defined(__linux__)
 
 #include "common/library.h"
-#include "common/processing.h"
-
 #include <stdlib.h>
 
 static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* size)

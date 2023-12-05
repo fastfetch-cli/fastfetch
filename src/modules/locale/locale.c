@@ -91,6 +91,7 @@ void ffInitLocaleOptions(FFLocaleOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_LOCALE_MODULE_NAME,
+        "Print system locale name",
         ffParseLocaleCommandOptions,
         ffParseLocaleJsonObject,
         ffPrintLocale,

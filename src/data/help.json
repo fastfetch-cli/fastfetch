@@ -1,0 +1,1354 @@
+{
+    "Informative": [
+        {
+            "short": "h",
+            "long": "help",
+            "desc": "Show this message, or help for a specific command",
+            "arg": {
+                "type": "command",
+                "optional": true
+            }
+        },
+        {
+            "short": "v",
+            "long": "version",
+            "desc": "Show the full version of fastfetch"
+        },
+        {
+            "long": "version-raw",
+            "desc": "Show the raw version string (major.minor.patch)"
+        },
+        {
+            "long": "list-config-paths",
+            "desc": "List search paths of config files"
+        },
+        {
+            "long": "list-data-paths",
+            "desc": "List search paths of presets and logos"
+        },
+        {
+            "long": "list-logos",
+            "desc": "List available logos"
+        },
+        {
+            "long": "list-modules",
+            "desc": "List available modules"
+        },
+        {
+            "long": "list-presets",
+            "desc": "List presets fastfetch knows about",
+            "remark": "Presets can be loaded with \"--config <preset-name>\""
+        },
+        {
+            "long": "list-features",
+            "desc": "List the supported features fastfetch was compiled with",
+            "remark": "Mainly for development"
+        },
+        {
+            "long": "print-logos",
+            "desc": "Print available logos"
+        },
+        {
+            "long": "print-structure",
+            "desc": "Print the default structure"
+        }
+    ],
+    "Config": [
+        {
+            "short": "c",
+            "long": "config",
+            "desc": "Specify the config file or preset to be loaded",
+            "remark": "The file will be searched in the order of \"fastfetch --list-config-paths\". If \"none\", disable further config loading. See also https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for more info",
+            "arg": {
+                "type": "config"
+            }
+        },
+        {
+            "long": "gen-config",
+            "desc": "Generate a config file to specified path with options specified in the command line (if any)",
+            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will Print the generated config if <path> is \"-\"",
+            "arg": {
+                "type": "path",
+                "optional": true
+            }
+        },
+        {
+            "long": "gen-config-force",
+            "desc": "Generate a config file to specified path. Overwrite the existing one",
+            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\"",
+            "arg": {
+                "type": "path",
+                "optional": true
+            }
+        }
+    ],
+    "pseudo": [
+        {
+            "long": "thread",
+            "desc": "Use separate threads to send HTTP requests",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "escape-bedrock",
+            "desc": "On Bedrock Linux, whether to escape the bedrock jail",
+            "remark": "Linux only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "wmi-timeout",
+            "desc": "Set the timeout (ms) for WMI queries",
+            "remark": "Windows only",
+            "arg": {
+                "type": "num",
+                "default": 5000
+            }
+        },
+        {
+            "long": "processing-timeout",
+            "desc": "Set the timeout (ms) when waiting for child processes",
+            "arg": {
+                "type": "num",
+                "default": 1000
+            }
+        },
+        {
+            "long": "ds-force-drm",
+            "desc": "Set if only DRM should be used to detect displays",
+            "remark": "Use this option if you encountered problems with other detection method. Linux only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        }
+    ],
+    "Logo": [
+        {
+            "short": "l",
+            "long": "logo",
+            "desc": "Set the logo source",
+            "remark": "Should be the name of a builtin logo, or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
+            "arg": {
+                "type": "logo"
+            }
+        },
+        {
+            "long": "logo-type",
+            "desc": "Set the type of the logo given in \"--logo\"",
+            "remark": "See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "auto": "If something is given, first try builtin, then file. Otherwise detect logo",
+                    "builtin": "Builtin ascii art",
+                    "small": "Builtin ascii art, small version",
+                    "file": "Text file, printed with color code replacement",
+                    "file-raw": "Text file, printed as is",
+                    "data": "Text data, printed with color code replacement",
+                    "data-raw": "Text data, printed as is",
+                    "sixel": "Image file, printed as sixel codes",
+                    "kitty": "Image file, printed as kitty graphics protocol",
+                    "kitty_direct": "Image file, tell the terminal emulator to read image data from the specified file (Supported by kitty and wezterm)",
+                    "iterm": "Image file, printed as iterm graphics protocol",
+                    "chafa": "Image file, printed as ascii art using libchafa",
+                    "raw": "Image file, printed as raw binary string",
+                    "none": "Disable logo printing"
+                }
+            }
+        },
+        {
+            "long": "logo-width",
+            "desc": "Set the width of the logo (in characters), if it is an image",
+            "remark": "Required for iTerm image protocol",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-height",
+            "desc": "Set the height of the logo (in characters), if it is an image",
+            "remark": "Required for iTerm image protocol",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-preserve-aspect-ratio",
+            "desc": "Set if the logo should fill the specified width and height as much as possible without stretching",
+            "remark": "Supported by iTerm image protocol only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "logo-color-[1-9]",
+            "desc": "Overwrite a color in the logo",
+            "arg": {
+                "type": "color"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "logo-padding",
+            "desc": "Set the padding on the left and the right of the logo",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-padding-left",
+            "desc": "Set the padding on the left of the logo",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-padding-right",
+            "desc": "Set the padding on the right of the logo",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-padding-top",
+            "desc": "Set the padding on the top of the logo",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "logo-print-remaining",
+            "desc": "Whether to print the remaining logo, if it has more lines than modules to display",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "logo-separate",
+            "desc": "If true, print modules at bottom of the logo",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "logo-recache",
+            "desc": "If true, regenerate image logo cache",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "file",
+            "desc": "Short for --logo-type file --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "file-raw",
+            "desc": "Short for --logo-type file-raw --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "data",
+            "desc": "Short for --logo-type data --logo <data>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "data"
+            }
+        },
+        {
+            "long": "data-raw",
+            "desc": "Short for --logo-type data-raw --logo <data>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "data"
+            }
+        },
+        {
+            "long": "raw",
+            "desc": "Short for --logo-type raw --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "sixel",
+            "desc": "Short for --logo-type sixel --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "kitty",
+            "desc": "Short for --logo-type kitty --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "kitty-direct",
+            "desc": "Short for --logo-type kitty-direct --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "iterm",
+            "desc": "Short for --logo-type iterm --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "chafa",
+            "desc": "Short for --logo-type chafa --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "chafa-fg-only",
+            "desc": "Produce character-cell output using foreground colors only",
+            "remark": "See chafa document for detail",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "chafa-symbols",
+            "desc": "Specify character symbols to employ in final output",
+            "remark": "See chafa document for detail",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "chafa-canvas-mode",
+            "desc": "Determine how colors are used in the output",
+            "remark": "This value maps the int value of enum ChafaCanvasMode. See chafa document for detail",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "TRUECOLOR": "Truecolor",
+                    "INDEXED_256": "256 colors",
+                    "INDEXED_240": "256 colors, but avoid using the lower 16 whose values vary between terminal environments",
+                    "INDEXED_16": "16 colors using the aixterm ANSI extension",
+                    "FGBG_BGFG": "Default foreground and background colors, plus inversion",
+                    "FGBG": "Default foreground and background colors. No ANSI codes will be used",
+                    "INDEXED_8": "8 colors, compatible with original ANSI X3.64",
+                    "INDEXED_16_8": "16 FG colors (8 of which enabled with bold/bright) and 8 BG colors"
+                }
+            }
+        },
+        {
+            "long": "chafa-color-space",
+            "desc": "Set color space used for quantization",
+            "remark": "This value maps the int value of enum ChafaColorSpace. See chafa document for detail",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "RGB": "RGB color space. Fast but imprecise",
+                    "DIN99D": "DIN99d color space. Slower, but good perceptual color precision"
+                }
+            }
+        },
+        {
+            "long": "chafa-dither-mode",
+            "desc": "Set output dither mode (No effect with 24-bit color)",
+            "remark": "This value maps the int value of enum ChafaDitherMode. See chafa document for detail",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "NONE": "No dithering",
+                    "ORDERED": "Ordered dithering (Bayer or similar)",
+                    "DIFFUSION": "Error diffusion dithering (Floyd-Steinberg or similar)"
+                }
+            }
+        }
+    ],
+    "Display": [
+        {
+            "short": "s",
+            "long": "structure",
+            "desc": "Set the structure of the fetch",
+            "remark": "Must be a colon separated list of keys. Use \"fastfetch --list-modules\" to see the ones available",
+            "arg": {
+                "type": "structure",
+                "default": "\"fastfetch --print-structure\""
+            }
+        },
+        {
+            "long": "stat",
+            "desc": "Show time usage (in ms) for individual modules",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "pipe",
+            "desc": "Disable logo and all escape sequences",
+            "remark": "Auto detection based on isatty(1)",
+            "arg": {
+                "type": "bool",
+                "optional": true
+            }
+        },
+        {
+            "long": "color-keys",
+            "desc": "Set the color of the keys",
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
+            "long": "color-title",
+            "desc": "Set the color of the title",
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
+            "long": "color",
+            "desc": "Set the color of both the keys and title",
+            "remark": "Shortcut of \"--color-keys <color>\" and \"--color-title <color>\"",
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
+            "long": "key-width",
+            "desc": "Align the width of keys to <num> characters",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "bright-color",
+            "desc": "Set if the keys, title and ASCII logo should be printed in bright color",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "separator",
+            "desc": "Set the separator between key and value",
+            "arg": {
+                "type": "str",
+                "default": ": "
+            }
+        },
+        {
+            "long": "set",
+            "desc": "Hard set the value of a key",
+            "remark": "Deprecated. Use \"Custom\" module instead",
+            "arg": {
+                "type": "key=value"
+            }
+        },
+        {
+            "long": "set-keyless",
+            "desc": "Hard set the value of a key, but don't print the key or the separator",
+            "remark": "Deprecated. Use \"Custom\" module instead",
+            "arg": {
+                "type": "key=value"
+            }
+        },
+        {
+            "long": "show-errors",
+            "desc": "Print occurring errors",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "disable-linewrap",
+            "desc": "Whether to disable line wrap during the run",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "hide-cursor",
+            "desc": "Whether to hide the cursor during the run",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "binary-prefix",
+            "desc": "Set the binary prefix to used",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
+                    "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
+                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
+                },
+                "default": "IEC"
+            }
+        },
+        {
+            "long": "percent-type",
+            "desc": "Set the percentage output type",
+            "remark": "1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
+            "arg": {
+                "type": "num",
+                "default": 9
+            }
+        },
+        {
+            "long": "percent-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when formatting percentage numbers",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
+            "long": "bar-char-elapsed",
+            "desc": "Set the character to use in elapsed part",
+            "arg": {
+                "type": "str",
+                "default": "■"
+            }
+        },
+        {
+            "long": "bar-char-total",
+            "desc": "Set the character to use in total part",
+            "arg": {
+                "type": "str",
+                "default": "-"
+            }
+        },
+        {
+            "long": "bar-width",
+            "desc": "Set the width of the bar, in number of characters",
+            "arg": {
+                "type": "num",
+                "default": 10
+            }
+        },
+        {
+            "long": "bar-border",
+            "desc": "Whether to show a border around the bar",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "no-buffer",
+            "desc": "Set if the stdout application buffer should be disabled",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "size-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when formatting sizes",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "size-max-prefix",
+            "desc": "Set the largest binary prefix to use when formatting sizes",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "B": "Bytes",
+                    "kB": "KiB",
+                    "MB": "MiB",
+                    "GB": "GiB",
+                    "TB": "TiB",
+                    "PB": "PiB",
+                    "EB": "EiB",
+                    "ZB": "ZiB",
+                    "YB": "YiB"
+                },
+                "default": "YB"
+            }
+        },
+        {
+            "long": "temperature-unit",
+            "desc": "Set the unit of the temperature",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "C": "Celsius",
+                    "F": "Fahrenheit",
+                    "K": "Kelvin"
+                },
+                "default": "C"
+            }
+        }
+    ],
+    "Library path": [
+        {
+            "long": "lib-pci",
+            "desc": "Pciutils. Used for GPU output",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-vulkan",
+            "desc": "Vulkan module & fallback for GPU output",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-wayland",
+            "desc": "Better display performance and output in wayland sessions",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-xcb-randr",
+            "desc": "X11 sessions for better display detection and faster WM detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-xcb",
+            "desc": "X11 sessions for better display detection and faster WM detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-xrandr",
+            "desc": "X11 sessions for better display detection and faster WM detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-x11",
+            "desc": "X11 sessions for better display detection and faster WM detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-drm",
+            "desc": "Used for fast resolution and refresh rate detection",
+            "remark": "Linux only",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-gio",
+            "desc": "Needed for values that are only stored GSettings",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-dconf",
+            "desc": "Needed for values that are only stored in DConf + Fallback for GSettings",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-dbus",
+            "desc": "Bluetooth, Player & Media detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-xfconf",
+            "desc": "Needed for XFWM theme and XFCE Terminal font",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-sqlite3",
+            "desc": "Needed for pkg & rpm package count",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-rpm",
+            "desc": "Slower fallback for rpm package count",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-imagemagick",
+            "desc": "Images in terminal using sixel or kitty graphics protocol",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-z",
+            "desc": "Libz. Faster image output when using kitty graphics protocol",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-chafa",
+            "desc": "Image output as ascii art",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-egl",
+            "desc": "Needed by the OpenGL module for gl context creation",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-glx",
+            "desc": "Needed by the OpenGL module for gl context creation",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-osmesa",
+            "desc": "Needed by the OpenGL module for gl context creation",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-opencl",
+            "desc": "OpenCL module",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-pulse",
+            "desc": "Pulseaudio. Used for Sound detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-nm",
+            "desc": "NetworkManager. Used for Wifi detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-freetype",
+            "desc": "Used for Termux font detection",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "lib-ddcutil",
+            "desc": "Used for brightness detection of external displays",
+            "arg": {
+                "type": "path"
+            }
+        }
+    ],
+    "Module specific": [
+        {
+            "long": "title-fqdn",
+            "desc": "Set if the title should use fully qualified domain name",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "title-color-user",
+            "desc": "Set color of the user name (left part)",
+            "arg": {
+                "type": "color",
+                "default": "Use color of \"--color-title\""
+            }
+        },
+        {
+            "long": "title-color-at",
+            "desc": "Set color of the @ symbol (middle part)",
+            "arg": {
+                "type": "color",
+                "default": "Use color of \"--color-title\""
+            }
+        },
+        {
+            "long": "title-color-host",
+            "desc": "Set color of the host name (right part)",
+            "arg": {
+                "type": "color",
+                "default": "default"
+            }
+        },
+        {
+            "long": "chassis-use-wmi",
+            "desc": "Set if WMI query should be used on Windows",
+            "remark": "WMI query detects more information but is slower. Windows only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "separator-string",
+            "desc": "Set the string printed by the separator module",
+            "arg": {
+                "type": "str",
+                "default": "-"
+            }
+        },
+        {
+            "long": "os-file",
+            "desc": "Set the additional file path which containing OS information",
+            "remark": "Linux only",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "disk-folders",
+            "desc": "A colon (semicolon on Windows) separated list of folder paths for the disk output",
+            "arg": {
+                "type": "path",
+                "default": "Auto detection using mount-points"
+            }
+        },
+        {
+            "long": "disk-show-regular",
+            "desc": "Set if regular volume should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "disk-show-external",
+            "desc": "Set if external volume should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "disk-show-hidden",
+            "desc": "Set if hidden volumes should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "disk-show-subvolumes",
+            "desc": "Set if subvolumes should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "disk-show-readonly",
+            "desc": "Set if read only volumes should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "disk-show-unknown",
+            "desc": "Set if unknown (unable to detect sizes) volumes should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "disk-use-available",
+            "desc": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
+            "remark": "Maybe required for macOS to print correct results",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "diskio-name-prefix",
+            "desc": "Show disks with given name prefix only",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "bluetooth-show-disconnected",
+            "desc": "Set if disconnected bluetooth devices should be printed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "packages-winget",
+            "desc": "Set if winget package count should be detected",
+            "remark": "This option is extremely slow. You may need to increase value of '--processing-timeout' to make it actually work",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "display-compact-type",
+            "desc": "Set if all displays should be printed in one line",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "none": "Disable this compact mode",
+                    "original": "Print original resolutions",
+                    "scaled": "Print scaled resolutions"
+                },
+                "default": "none"
+            }
+        },
+        {
+            "long": "display-precise-refresh-rate",
+            "desc": "Set if decimal refresh rates should not be rounded into integers when printing",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "brightness-ddcci-sleep",
+            "desc": "Set the sleep times (in ms) when sending DDC/CI requests",
+            "remark": "See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail",
+            "arg": {
+                "type": "num",
+                "default": 10
+            }
+        },
+        {
+            "long": "sound-type",
+            "desc": "Set what type of sound devices should be printed",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "main": "Print only main sound devices",
+                    "active": "Print only active sound devices",
+                    "all": "Print all sound devices"
+                },
+                "default": "main"
+            }
+        },
+        {
+            "long": "battery-dir",
+            "desc": "The directory where the battery folders are",
+            "remark": "Linux only",
+            "arg": {
+                "type": "path",
+                "default": "/sys/class/power_supply/"
+            }
+        },
+        {
+            "long": "battery-use-setup-api",
+            "desc": "Set if \"SetupAPI\" should be used on Windows to detect battery info",
+            "remark": "SetupAPI supports multi batteries, but slower. Windows only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "cpu-temp",
+            "desc": "Detect and display CPU temperature if supported",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "cpu-freq-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing CPU frequency",
+            "arg": {
+                "type": "num",
+                "default": 2
+            }
+        },
+        {
+            "long": "cpuusage-separate",
+            "desc": "Display CPU usage per CPU logical core, instead of an average result",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "de-slow-version-detection",
+            "desc": "Set if DE version should be detected with slow operations",
+            "remark": "Usually is not necessary. Linux only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "gpu-temp",
+            "desc": "Detect and display GPU temperature if supported",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "gpu-use-nvml",
+            "desc": "Use nvml (NVIDIA Management Library) to detect more detailed GPU information",
+            "remark": "Detects memory usage, CUDA core count, etc. Requires NVIDIA proprietary driver installed",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "gpu-force-vulkan",
+            "desc": "Force using vulkan to detect GPUs",
+            "remark": "Vulkan supports video memory usage detection",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "gpu-hide-type",
+            "desc": "Specify the type of GPUs should not be printed",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "integrated": "Hide integrated GPUs",
+                    "discrete": "Hide discrete GPUs",
+                    "none": "Do not hide any GPUs"
+                },
+                "default": "none"
+            }
+        },
+        {
+            "long": "battery-temp",
+            "desc": "Detect and display Battery temperature if supported",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "localip-show-ipv4",
+            "desc": "Show IPv4 addresses in local ip module",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "localip-show-ipv6",
+            "desc": "Show IPv6 addresses in local ip module",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "localip-show-mac",
+            "desc": "Show mac addresses in local ip module",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "localip-show-loop",
+            "desc": "Show loop back addresses (127.0.0.1) in local ip module",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "localip-name-prefix",
+            "desc": "Show interfaces with given interface name prefix only",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "localip-default-route-only",
+            "desc": "Show the interface that is used for default routing only",
+            "remark": "Doesn't work on Android",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "localip-compact",
+            "desc": "Show all IPs in one line",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "netio-name-prefix",
+            "desc": "Show interfaces with given name prefix only",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "netio-default-route-only",
+            "desc": "Show the interfac that is used for default routing only",
+            "remark": "Doesn't work on Android",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
+            "long": "publicip-timeout",
+            "desc": "Time in milliseconds to wait for the public ip server to respond",
+            "remark": "0 to disable timeout",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
+            "long": "publicip-url",
+            "desc": "The URL of public IP detection server to be used",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "weather-location",
+            "desc": "Set the location to be used",
+            "remark": "Must be URI encoded (e.g. a whitespace must be encoded as \"+\")",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "weather-timeout",
+            "desc": "Time in milliseconds to wait for the weather server to respond",
+            "remark": "0 to disable timeout",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
+            "long": "weather-output-format",
+            "desc": "The output weather format to be used",
+            "remark": "Must be URI encoded",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "wm-detect-plugin",
+            "desc": "Set if window manager plugin should be detected on supported platforms",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "player-name",
+            "desc": "The name of the player to use for module Media and Player",
+            "remark": "Linux only",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "opengl-library",
+            "desc": "Set the OpenGL context creation library to use",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "auto": "Auto detection",
+                    "egl": "EGL",
+                    "glx": "GLX",
+                    "osmesa": "OSMesa"
+                },
+                "default": "auto"
+            }
+        },
+        {
+            "long": "command-shell",
+            "desc": "Set the shell program to execute the command text",
+            "arg": {
+                "type": "str",
+                "default": "\"cmd\" for Windows; \"/bin/sh\" for *nix"
+            }
+        },
+        {
+            "long": "command-key",
+            "desc": "Set the module key to display",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "command-text",
+            "desc": "Set the command text to be executed",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
+            "long": "colors-symbol",
+            "desc": "Set the symbol to be printed by Colors module",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "block": "███",
+                    "circle": "●",
+                    "diamond": "◆",
+                    "triangle": "▲",
+                    "square": "■",
+                    "star": "★"
+                },
+                "default": "block"
+            }
+        },
+        {
+            "long": "colors-padding-left",
+            "desc": "Set the number of white spaces to print before the symbol",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        }
+    ],
+    "General module": [
+        {
+            "long": "<module>-format",
+            "desc": [
+                "Set the format string to use for each specific module",
+                "To see how a format string works, use \"fastfetch -h format\".",
+                "To see help about a specific format string, use \"fastfetch -h <module>-format\""
+            ],
+            "arg": {
+                "type": "format"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-key",
+            "desc": [
+                "Set the key to use for each specific module.",
+                "For modules which print multiple lines, the string is parsed",
+                "as a format string with the index as first character"
+            ],
+            "arg": {
+                "type": "key"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-key-color",
+            "desc": "Override the global \"--color-keys\" option for each specific module",
+            "arg": {
+                "type": "color"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-key-width",
+            "desc": "Override the global \"--key-width\" option for each specific module",
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        }
+    ]
+}

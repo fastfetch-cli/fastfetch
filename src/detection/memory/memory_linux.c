@@ -1,42 +1,45 @@
 #include "memory.h"
+#include "common/io/io.h"
 #include "util/mallocHelper.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <inttypes.h>
 
 const char* ffDetectMemory(FFMemoryResult* ram)
 {
-    FILE* meminfo = fopen("/proc/meminfo", "r");
-    if(meminfo == NULL)
-        return "Failed to open /proc/meminfo";
+    char buf[PROC_FILE_BUFFSIZ];
+    ssize_t nRead = ffReadFileData("/proc/meminfo", sizeof(buf) - 1, buf);
+    if(nRead < 0)
+        return "ffReadFileData(\"/proc/meminfo\", sizeof(buf)-1, buf)";
+    buf[nRead] = '\0';
 
-    char* FF_AUTO_FREE line = NULL;
-    size_t len = 0;
-
-    uint32_t memTotal = 0,
+    uint64_t memTotal = 0,
              shmem = 0,
              memFree = 0,
              buffers = 0,
              cached = 0,
              sReclaimable = 0;
+    
+    char *token = NULL;
+    if((token = strstr(buf, "MemTotal:")) != NULL)
+        memTotal = strtoul(token + strlen("MemTotal:"), NULL, 10);
 
-    while (getline(&line, &len, meminfo) != EOF)
-    {
-        if(!sscanf(line, "MemTotal: %u", &memTotal))
-        if(!sscanf(line, "Shmem: %u", &shmem))
-        if(!sscanf(line, "MemFree: %u", &memFree))
-        if(!sscanf(line, "Buffers: %u", &buffers))
-        if(!sscanf(line, "Cached: %u", &cached))
-            sscanf(line, "SReclaimable: %u", &sReclaimable);
-    }
+    if((token = strstr(buf, "MemFree:")) != NULL)
+        memFree = strtoul(token + strlen("MemFree:"), NULL, 10);
 
-    fclose(meminfo);
+    if((token = strstr(buf, "Buffers:")) != NULL)
+        buffers = strtoul(token + strlen("Buffers:"), NULL, 10);
+    
+    if((token = strstr(buf, "Cached:")) != NULL)
+        cached = strtoul(token + strlen("Cached:"), NULL, 10);
+    
+    if((token = strstr(buf, "Shmem:")) != NULL)
+        shmem = strtoul(token + strlen("Shmem:"), NULL, 10);
+    
+    if((token = strstr(buf, "SReclaimable:")) != NULL)
+        sReclaimable = strtoul(token + strlen("SReclaimable:"), NULL, 10);
 
-    ram->bytesTotal = memTotal * (uint64_t) 1024;
-    if(ram->bytesTotal == 0)
-        return "Failed to read MemTotal";
-    else
-        ram->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * (uint64_t) 1024;
+    ram->bytesTotal = memTotal * 1024lu;
+    ram->bytesUsed = (memTotal + shmem - memFree - buffers - cached - sReclaimable) * 1024lu;
 
     return NULL;
 }

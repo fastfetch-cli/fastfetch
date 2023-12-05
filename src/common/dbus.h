@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_dbus
-#define FF_INCLUDED_common_dbus
-
 #ifdef FF_HAVE_DBUS
 #include <dbus/dbus.h>
 
@@ -54,4 +51,3 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
 void ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
 
 #endif // FF_HAVE_DBUS
-#endif // FF_INCLUDED_common_dbus

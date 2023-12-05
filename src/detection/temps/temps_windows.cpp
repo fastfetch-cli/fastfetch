@@ -7,7 +7,7 @@ extern "C"
 extern "C"
 const char* ffDetectSmbiosTemp(double* current, double* critical)
 {
-    // Requires Administrator priviledges
+    // Requires Administrator privileges
     // https://wutils.com/wmi/root/wmi/msacpi_thermalzonetemperature/#properties
     FFWmiQuery query(L"SELECT CurrentTemperature, CriticalTripPoint FROM MSAcpi_ThermalZoneTemperature WHERE Active = TRUE", nullptr, FFWmiNamespace::WMI);
     if(!query)

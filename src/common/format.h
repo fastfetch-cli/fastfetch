@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_format
-#define FF_INCLUDED_common_format
-
 typedef enum FFformatargtype
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
@@ -27,5 +24,3 @@ typedef struct FFformatarg
 
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg);
 void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t numArgs, const FFformatarg* arguments);
-
-#endif

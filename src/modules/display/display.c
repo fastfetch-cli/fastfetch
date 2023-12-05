@@ -258,6 +258,7 @@ void ffInitDisplayOptions(FFDisplayOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_DISPLAY_MODULE_NAME,
+        "Print resolutions, refresh rates, etc",
         ffParseDisplayCommandOptions,
         ffParseDisplayJsonObject,
         ffPrintDisplay,

@@ -18,7 +18,7 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
     {
         path[sizeof(path) - 2] = i;
 
-        FF_AUTO_CLOSE_FD int blfd = open(path, O_RDONLY);
+        FF_AUTO_CLOSE_FD int blfd = open(path, O_RDONLY | O_CLOEXEC);
         if (blfd < 0)
             continue;
 

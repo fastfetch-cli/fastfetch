@@ -194,7 +194,7 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError)
 
     if(wm->wmPrettyName.length == 0)
     {
-        ffStrbufAppendS(themeOrError, "WM Theme needs sucessfull WM detection");
+        ffStrbufAppendS(themeOrError, "WM Theme needs successful WM detection");
         return false;
     }
 

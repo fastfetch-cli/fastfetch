@@ -136,6 +136,7 @@ void ffInitPublicIpOptions(FFPublicIpOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_PUBLICIP_MODULE_NAME,
+        "Print your public IP address, etc",
         ffParsePublicIpCommandOptions,
         ffParsePublicIpJsonObject,
         ffPrintPublicIp,

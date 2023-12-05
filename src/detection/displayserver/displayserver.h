@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_displayserver
-#define FF_INCLUDED_detection_displayserver
-
 #include "fastfetch.h"
 
 #define FF_DE_PRETTY_PLASMA "KDE Plasma"
@@ -85,5 +82,3 @@ bool ffdsAppendDisplay(
     FFDisplayType type,
     bool primary,
     uint64_t id);
-
-#endif

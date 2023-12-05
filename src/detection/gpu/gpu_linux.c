@@ -192,7 +192,7 @@ FF_MAYBE_UNUSED static void pciDetectType(FFGPUResult* gpu)
     //and their memory sizes are usually smaller than 1GB.
     if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
     {
-        gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 // 1GB
+        gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 // 1GB
             ? FF_GPU_TYPE_DISCRETE
             : FF_GPU_TYPE_INTEGRATED;
     }
@@ -252,7 +252,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         }, "libnvidia-ml.so");
 
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
-            gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+            gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
     }
 
     #ifdef __linux__

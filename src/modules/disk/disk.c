@@ -463,6 +463,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_DISK_MODULE_NAME,
+        "Print partitions, space usage, disk type, etc",
         ffParseDiskCommandOptions,
         ffParseDiskJsonObject,
         ffPrintDisk,

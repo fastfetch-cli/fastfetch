@@ -13,6 +13,16 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
+    // Adélie
+    {
+        .names = {"Adélie", "Adelie"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ADELIE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // AerOS
     {
         .names = {"aerOS"},
@@ -1889,6 +1899,16 @@ static const FFlogo I[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Ironclad
+    {
+        .names = {"Ironclad"},
+        .lines = FASTFETCH_DATATEXT_LOGO_IRONCLAD,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
     // Itc
     {
         .names = {"Itc"},
@@ -2990,7 +3010,8 @@ static const FFlogo P[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_PARCH,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
         },
     },
     // Pardus
@@ -3078,6 +3099,14 @@ static const FFlogo P[] = {
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
+        },
+    },
+    // Peropesis
+    {
+        .names = {"Peropesis", "Peropesis Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PEROPESIS,
+        .colors = {
+            FF_COLOR_FG_WHITE
         },
     },
     // PhyOS
@@ -3791,6 +3820,16 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // TileOS
+    {
+        .names = {"TileOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TILEOS,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
+    },
     // TorizonCore
     {
         .names = {"TorizonCore"},
@@ -4239,6 +4278,16 @@ static const FFlogo X[] = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_CYAN,
         },
+    },
+    //XrayOS
+    {
+        .names = {"XrayOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XRAYOS,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+        }
     },
     // LAST
     {},

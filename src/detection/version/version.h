@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_version_version
-#define FF_INCLUDED_detection_version_version
-
 #include "fastfetch.h"
 
 typedef struct FFVersionResult
@@ -18,5 +15,3 @@ typedef struct FFVersionResult
 } FFVersionResult;
 
 void ffDetectVersion(FFVersionResult* version);
-
-#endif

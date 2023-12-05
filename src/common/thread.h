@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_thread
-#define FF_INCLUDED_common_thread
-
 #include "fastfetch.h"
 
 #ifdef FF_HAVE_THREADS
@@ -82,5 +79,3 @@
     static inline void ffThreadMutexUnlock(FFThreadMutex* mutex) { FF_UNUSED(mutex) }
     #define FF_THREAD_ENTRY_DECL_WRAPPER(fn, paramType)
 #endif //FF_HAVE_THREADS
-
-#endif

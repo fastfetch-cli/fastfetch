@@ -92,6 +92,7 @@ void ffInitProcessesOptions(FFProcessesOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_PROCESSES_MODULE_NAME,
+        "Count running processes",
         ffParseProcessesCommandOptions,
         ffParseProcessesJsonObject,
         ffPrintProcesses,

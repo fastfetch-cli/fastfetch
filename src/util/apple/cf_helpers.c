@@ -1,5 +1,24 @@
 #include "cf_helpers.h"
 
+const char* ffCfNumGetInt64(CFTypeRef cf, int64_t* result)
+{
+    if(CFGetTypeID(cf) == CFNumberGetTypeID())
+    {
+        if(!CFNumberGetValue((CFNumberRef)cf, kCFNumberSInt64Type, result))
+            return "Number type is not SInt64";
+        return NULL;
+    }
+    else if(CFGetTypeID(cf) == CFDataGetTypeID())
+    {
+        if(CFDataGetLength((CFDataRef)cf) != sizeof(int64_t))
+            return "Data length is not sizeof(int64_t)";
+        CFDataGetBytes((CFDataRef)cf, CFRangeMake(0, sizeof(int64_t)), (uint8_t*)result);
+        return NULL;
+    }
+
+    return "TypeID is neither 'CFNumber' nor 'CFData'";
+}
+
 const char* ffCfStrGetString(CFStringRef str, FFstrbuf* result)
 {
     if (!str)
@@ -89,21 +108,7 @@ const char* ffCfDictGetInt64(CFDictionaryRef dict, CFStringRef key, int64_t* res
     if(cf == NULL)
         return "CFDictionaryGetValue() failed";
 
-    if(CFGetTypeID(cf) == CFNumberGetTypeID())
-    {
-        if(!CFNumberGetValue((CFNumberRef)cf, kCFNumberSInt64Type, result))
-            return "Number type is not SInt64";
-        return NULL;
-    }
-    else if(CFGetTypeID(cf) == CFDataGetTypeID())
-    {
-        if(CFDataGetLength((CFDataRef)cf) != sizeof(int64_t))
-            return "Data length is not sizeof(int64_t)";
-        CFDataGetBytes((CFDataRef)cf, CFRangeMake(0, sizeof(int64_t)), (uint8_t*)result);
-        return NULL;
-    }
-
-    return "TypeID is neither 'CFNumber' nor 'CFData'";
+    return ffCfNumGetInt64(cf, result);
 }
 
 const char* ffCfDictGetData(CFDictionaryRef dict, CFStringRef key, uint32_t offset, uint32_t size, uint8_t* result, uint32_t* length)

@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_FFLIST
-#define FF_INCLUDED_FFLIST
-
 #include "FFcheckmacros.h"
 
 #include <stdbool.h>
@@ -109,5 +106,3 @@ static inline void ffListClear(FFlist* list)
         assert((listVar).capacity > (index)); \
         (itemType*)(listVar).data + (index); \
     })
-
-#endif

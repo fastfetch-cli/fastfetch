@@ -155,6 +155,7 @@ void ffInitUptimeOptions(FFUptimeOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_UPTIME_MODULE_NAME,
+        "Print how long system has been running",
         ffParseUptimeCommandOptions,
         ffParseUptimeJsonObject,
         ffPrintUptime,

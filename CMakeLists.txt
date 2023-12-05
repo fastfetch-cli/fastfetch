@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.2.3
+    VERSION 2.3.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -49,6 +49,7 @@ cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF
 cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR BSD" OFF)
+cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR BSD" OFF)
@@ -71,7 +72,7 @@ cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" O
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 
-option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embeded) yyjson library" OFF)
+option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
@@ -204,19 +205,32 @@ endif()
 # Text data #
 #############
 
-function(fastfetch_load_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
+function(fastfetch_encode_c_string STR OUTVAR)
+    string(REGEX REPLACE "\n$" "" TEMP "${STR}") # Remove trailing newline
+    string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
     string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
     string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
-    string(REPLACE "$\\" "" TEMP "${TEMP}")       # Remove $\, so we can unescape some things
-    set("${OUTVAR}" "${TEMP}" PARENT_SCOPE)
+    set(${OUTVAR} "\"${TEMP}\"" PARENT_SCOPE)
+endfunction(fastfetch_encode_c_string)
+
+function(fastfetch_load_text FILENAME OUTVAR)
+    file(READ "${FILENAME}" TEMP)
+    fastfetch_encode_c_string("${TEMP}" TEMP)
+    set(${OUTVAR} "${TEMP}" PARENT_SCOPE)
 endfunction(fastfetch_load_text)
 
+find_package(Python)
+if(Python_FOUND)
+    # Minify JSON string. `io.open(0,encoding='utf-8')` is needed to avoid encoding issues on Windows
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import io,json,sys;json.dump(json.load(io.open(0,encoding='utf-8')),sys.stdout,separators=(',', ':'),ensure_ascii=False)"
+                    INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
+                    OUTPUT_VARIABLE DATATEXT_JSON_HELP)
+else()
+    file(READ "src/data/help.json" TEMP)
+endif()
+
+fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
-fastfetch_load_text(src/data/config_system.txt DATATEXT_CONFIG_SYSTEM)
-fastfetch_load_text(src/data/config_user.txt DATATEXT_CONFIG_USER)
-fastfetch_load_text(src/data/config_user.jsonc DATATEXT_CONFIG_USER_JSONC)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
@@ -228,23 +242,17 @@ if(APPLE)
     configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
 endif()
 
+string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y")
+configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
+
 ####################
 # Ascii image data #
 ####################
 
-function(fastfetch_load_raw_text FILENAME OUTVAR)
-    file(READ "${FILENAME}" TEMP)
-    string(REGEX REPLACE "\n$" "" TEMP "${TEMP}") # Remove trailing newline
-    string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
-    string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
-    string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
-    set(${OUTVAR} "\"${TEMP}\"" PARENT_SCOPE)
-endfunction(fastfetch_load_raw_text)
-
 file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
-set(LOGO_BUILTIN_H "#pragma once\n\n")
+set(LOGO_BUILTIN_H "#pragma once\n#pragma GCC diagnostic ignored \"-Wtrigraphs\"\n\n")
 foreach(file ${LOGO_FILES})
-    fastfetch_load_raw_text("${file}" content)
+    fastfetch_load_text("${file}" content)
     get_filename_component(file "${file}" NAME_WLE)
     string(TOUPPER "${file}" file)
     string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" content "${content}")
@@ -385,6 +393,7 @@ if(LINUX)
         src/detection/disk/disk_linux.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -496,6 +505,7 @@ elseif(BSD)
         src/detection/disk/disk_bsd.c
         src/detection/diskio/diskio_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
@@ -546,7 +556,7 @@ elseif(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
-        src/detection/board/board_nosupport.c
+        src/detection/board/board_apple.c
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
@@ -779,6 +789,10 @@ ff_lib_enable(X11
     "x11"
     "X11"
 )
+ff_lib_enable(DRM
+    "libdrm"
+    "Libdrm"
+)
 ff_lib_enable(GIO
     "gio-2.0"
     "GIO"
@@ -893,26 +907,23 @@ elseif(APPLE)
 elseif(WIN32)
     target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
     target_link_libraries(libfastfetch
-        PRIVATE "bthprops"
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
         PRIVATE "ole32"
         PRIVATE "oleaut32"
-        PRIVATE "opengl32"
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
         PRIVATE "version"
         PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
-        PRIVATE "dxva2"
     )
 elseif(BSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "usbhid"
-        PRIVATE "devstat"
+        PRIVATE "geom"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
@@ -1037,6 +1048,11 @@ install(
 install(
     FILES "${CMAKE_SOURCE_DIR}/LICENSE"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}"
+)
+
+install(
+    FILES "${PROJECT_BINARY_DIR}/fastfetch.1"
+    DESTINATION "${CMAKE_INSTALL_MANDIR}"
 )
 
 ##################

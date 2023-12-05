@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_time
-#define FF_INCLUDED_common_time
-
 #include <stdint.h>
 #ifdef _WIN32
     #include <synchapi.h>
@@ -48,5 +45,3 @@ static inline void ffTimeSleep(uint32_t msec)
         nanosleep(&(struct timespec){ msec / 1000, (msec % 1000) * 1000000 }, NULL);
     #endif
 }
-
-#endif

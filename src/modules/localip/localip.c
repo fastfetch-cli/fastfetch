@@ -359,6 +359,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_LOCALIP_MODULE_NAME,
+        "List local IP addresses (v4 or v6), MAC addresses, etc",
         ffParseLocalIpCommandOptions,
         ffParseLocalIpJsonObject,
         ffPrintLocalIp,

@@ -186,6 +186,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BRIGHTNESS_MODULE_NAME,
+        "Print current brightness level of your monitors",
         ffParseBrightnessCommandOptions,
         ffParseBrightnessJsonObject,
         ffPrintBrightness,

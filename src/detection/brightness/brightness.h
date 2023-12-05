@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_brightness_brightness
-#define FF_INCLUDED_detection_brightness_brightness
-
 #include "fastfetch.h"
 #include "util/FFlist.h"
 
@@ -13,5 +10,3 @@ typedef struct FFBrightnessResult
 } FFBrightnessResult;
 
 const char* ffDetectBrightness(FFBrightnessOptions* options, FFlist* result); // list of FFBrightnessResult
-
-#endif

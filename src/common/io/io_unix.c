@@ -16,18 +16,18 @@ static void createSubfolders(const char* fileName)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
 
-    while(*fileName != '\0')
+    char *token = NULL;
+    while((token = strchr(fileName, '/')) != NULL)
     {
-        ffStrbufAppendC(&path, *fileName);
-        if(*fileName == '/')
-            mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
-        ++fileName;
+        ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);
+        mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
+        fileName = token + 1;
     }
 }
 
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
-    int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC;
+    int openFlagsModes = O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC;
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
     int FF_AUTO_CLOSE_FD fd = open(fileName, openFlagsModes, openFlagsRights);
@@ -44,20 +44,35 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 
 bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
-    ssize_t readed = 0;
+    ssize_t bytesRead = 0;
 
     struct stat fileInfo;
     if(fstat(fd, &fileInfo) != 0)
         return false;
 
-    ffStrbufEnsureFree(buffer, fileInfo.st_size > 0 ? (uint32_t)fileInfo.st_size : 31);
+    if (fileInfo.st_size > 0)
+    {
+        // optimize for files has a fixed length,
+        // file can be very large, only keep necessary memory to save time and resources.
+        ffStrbufEnsureFixedLengthFree(buffer, (uint32_t)fileInfo.st_size);
+    }
+    else
+        ffStrbufEnsureFree(buffer, 31);
     uint32_t free = ffStrbufGetFree(buffer);
+    // procfs file's st_size is always zero
+    // choose a signed int type so that can store a native number
+    ssize_t remain = fileInfo.st_size;
 
     while(
-        (readed = read(fd, buffer->chars + buffer->length, free)) > 0
+        (bytesRead = read(fd, buffer->chars + buffer->length, free)) > 0
     ) {
-        buffer->length += (uint32_t) readed;
-        if((uint32_t) readed == free)
+        buffer->length += (uint32_t) bytesRead;
+        // if remain > 0, it means there is some data left in the file.
+        // if remain == 0, it means reading has completed, no need to grow up the buffer.
+        // if remain < 0, we are reading a file from procfs/sysfs and its st_size is zero,
+        // we cannot detect how many data remains in the file, we only can call ffStrbufEnsureFree and read again.
+        remain -= bytesRead;
+        if((uint32_t) bytesRead == free && remain != 0)
             ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
@@ -72,7 +87,7 @@ bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 {
-    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY | O_CLOEXEC);
     if(fd == -1)
         return -1;
 
@@ -81,7 +96,7 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
 
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
-    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY);
+    int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY | O_CLOEXEC);
     if(fd == -1)
         return false;
 
@@ -94,7 +109,7 @@ bool ffPathExists(const char* path, FFPathType type)
     if(stat(path, &fileStat) != 0)
         return false;
 
-    int mode = fileStat.st_mode & S_IFMT;
+    unsigned int mode = fileStat.st_mode & S_IFMT;
 
     if(type & FF_PATHTYPE_REGULAR && mode == S_IFREG)
         return true;
@@ -153,14 +168,14 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     }
 
     char buffer[512];
-    ssize_t readed = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
+    ssize_t bytesRead = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
 
     tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
 
-    if(readed <= 0)
+    if(bytesRead <= 0)
         return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
 
-    buffer[readed] = '\0';
+    buffer[bytesRead] = '\0';
 
     va_list args;
     va_start(args, format);
@@ -184,7 +199,7 @@ bool ffSuppressIO(bool suppress)
 
         origOut = dup(STDOUT_FILENO);
         origErr = dup(STDERR_FILENO);
-        nullFile = open("/dev/null", O_WRONLY);
+        nullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
         init = true;
     }
 
@@ -199,7 +214,7 @@ bool ffSuppressIO(bool suppress)
     return true;
 }
 
-void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
+void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
 {
     DIR* dir = opendir(folder->chars);
     if(dir == NULL)
@@ -207,8 +222,12 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
     uint32_t folderLength = folder->length;
 
-    if(folderName != NULL)
+    if(pretty && folderName != NULL)
+    {
+        for(uint8_t i = 0; i < indentation - 1; i++)
+            fputs("  | ", stdout);
         printf("%s/\n", folderName);
+    }
 
     struct dirent* entry;
 
@@ -221,13 +240,20 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
 
             ffStrbufAppendS(folder, entry->d_name);
             ffStrbufAppendC(folder, '/');
-            listFilesRecursively(folder, (uint8_t) (indentation + 1), entry->d_name);
+            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), entry->d_name, pretty);
             ffStrbufSubstrBefore(folder, folderLength);
             continue;
         }
 
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
+        if (pretty)
+        {
+            for(uint8_t i = 0; i < indentation; i++)
+                fputs("  | ", stdout);
+        }
+        else
+        {
+            fputs(folder->chars + baseLength, stdout);
+        }
 
         puts(entry->d_name);
     }
@@ -235,9 +261,9 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
     closedir(dir);
 }
 
-void ffListFilesRecursively(const char* path)
+void ffListFilesRecursively(const char* path, bool pretty)
 {
     FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
-    listFilesRecursively(&folder, 0, NULL);
+    listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
 }

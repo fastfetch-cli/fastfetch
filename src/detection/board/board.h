@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_board_board
-#define FF_INCLUDED_detection_board_board
-
 #include "fastfetch.h"
 
 typedef struct FFBoardResult
@@ -12,6 +9,4 @@ typedef struct FFBoardResult
     FFstrbuf version;
 } FFBoardResult;
 
-const char* ffDetectBoard(FFBoardResult* result);
-
-#endif
+const char* ffDetectBoard(FFBoardResult* board);

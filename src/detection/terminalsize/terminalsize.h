@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_terminalsize_terminalsize
-#define FF_INCLUDED_detection_terminalsize_terminalsize
-
 #include "fastfetch.h"
 
 typedef struct FFTerminalSizeResult
@@ -14,5 +11,3 @@ typedef struct FFTerminalSizeResult
 } FFTerminalSizeResult;
 
 bool ffDetectTerminalSize(FFTerminalSizeResult* result);
-
-#endif

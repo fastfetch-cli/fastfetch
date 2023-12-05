@@ -2,7 +2,6 @@
 #include "common/parsing.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
@@ -152,7 +151,7 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     {
         options->hideType = (FFGPUType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "none", FF_GPU_TYPE_UNKNOWN },
-            { "intergrated", FF_GPU_TYPE_INTEGRATED },
+            { "integrated", FF_GPU_TYPE_INTEGRATED },
             { "discrete", FF_GPU_TYPE_DISCRETE },
             {},
         });
@@ -197,7 +196,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
                 { "none", FF_GPU_TYPE_UNKNOWN },
-                { "intergrated", FF_GPU_TYPE_INTEGRATED },
+                { "integrated", FF_GPU_TYPE_INTEGRATED },
                 { "discrete", FF_GPU_TYPE_DISCRETE },
                 {},
             });
@@ -236,7 +235,7 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
                 yyjson_mut_obj_add_str(doc, module, "hideType", "none");
                 break;
             case FF_GPU_TYPE_INTEGRATED:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "intergrated");
+                yyjson_mut_obj_add_str(doc, module, "hideType", "integrated");
                 break;
             case FF_GPU_TYPE_DISCRETE:
                 yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
@@ -336,6 +335,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_GPU_MODULE_NAME,
+        "Print GPU names, graphic memory size, type, etc",
         ffParseGPUCommandOptions,
         ffParseGPUJsonObject,
         ffPrintGPU,

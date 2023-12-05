@@ -1,51 +1,70 @@
 #include "diskio.h"
+#include "util/stringUtils.h"
 
 #include <devstat.h>
 #include <memory.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/disk.h>
+#include <libgeom.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 {
-    if (devstat_checkversion(NULL) < 0)
-        return "devstat_checkversion() failed";
+    struct gmesh geomTree;
+    if (geom_gettree(&geomTree) < 0)
+        return "geom_gettree() failed";
 
-    struct statinfo stats = {
-        .dinfo = (struct devinfo *)calloc(1, sizeof(struct devinfo)),
-    };
-    if (devstat_getdevs(NULL, &stats) < 0)
-        return "devstat_getdevs() failed";
+    if (geom_stats_open() < 0)
+        return "geom_stats_open() failed";
 
-    for (int i = 0; i < stats.dinfo->numdevs; i++)
+    void* snap = geom_stats_snapshot_get();
+    struct devstat* snapIter;
+    while ((snapIter = geom_stats_snapshot_next(snap)) != NULL)
     {
-        struct devstat* current = &stats.dinfo->devices[i];
-        if (current->device_type & DEVSTAT_TYPE_PASS)
+        if (snapIter->device_type & DEVSTAT_TYPE_PASS)
+            continue;
+        struct gident* geomId = geom_lookupid(&geomTree, snapIter->id);
+        if (geomId == NULL)
+            continue;
+        if (geomId->lg_what != ISPROVIDER)
+            continue;
+        struct gprovider* provider = (struct gprovider*) geomId->lg_ptr;
+        if (provider->lg_geom->lg_rank != 1)
             continue;
 
-        char deviceName[128];
-        snprintf(deviceName, sizeof(deviceName), "%s%d", current->device_name, current->unit_number);
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(provider->lg_name);
+        FFDiskIOPhysicalType type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        for (struct gconfig* ptr = provider->lg_config.lh_first; ptr; ptr = ptr->lg_config.le_next)
+        {
+            if (ffStrEquals(ptr->lg_name, "descr"))
+                ffStrbufSetS(&name, ptr->lg_val);
+            else if (ffStrEquals(ptr->lg_name, "rotationrate") && !ffStrEquals(ptr->lg_val, "unknown"))
+                type = ffStrEquals(ptr->lg_val, "0") ? FF_DISKIO_PHYSICAL_TYPE_SSD : FF_DISKIO_PHYSICAL_TYPE_HDD;
+        }
 
-        if (options->namePrefix.length && strncmp(deviceName, options->namePrefix.chars, options->namePrefix.length) != 0)
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
             continue;
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInitS(&device->name, deviceName);
-        ffStrbufInitF(&device->devPath, "/dev/%s", deviceName);
-        device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        ffStrbufInitF(&device->devPath, "/dev/%s", provider->lg_name);
         ffStrbufInit(&device->interconnect);
-        switch (current->device_type & DEVSTAT_TYPE_IF_MASK)
+        switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK)
         {
             case DEVSTAT_TYPE_IF_SCSI: ffStrbufAppendS(&device->interconnect, "SCSI"); break;
             case DEVSTAT_TYPE_IF_IDE: ffStrbufAppendS(&device->interconnect, "IDE"); break;
             case DEVSTAT_TYPE_IF_OTHER: ffStrbufAppendS(&device->interconnect, "OTHER"); break;
         }
-        device->bytesRead = current->bytes[DEVSTAT_READ];
-        device->readCount = current->operations[DEVSTAT_READ];
-        device->bytesWritten = current->bytes[DEVSTAT_WRITE];
-        device->writeCount = current->operations[DEVSTAT_WRITE];
+        device->bytesRead = snapIter->bytes[DEVSTAT_READ];
+        device->readCount = snapIter->operations[DEVSTAT_READ];
+        device->bytesWritten = snapIter->bytes[DEVSTAT_WRITE];
+        device->writeCount = snapIter->operations[DEVSTAT_WRITE];
+        device->size = (uint64_t) provider->lg_mediasize;
+        ffStrbufInitMove(&device->name, &name);
+        device->type = type;
     }
 
-    if (stats.dinfo->mem_ptr)
-        free(stats.dinfo->mem_ptr);
-    free(stats.dinfo);
+    geom_stats_snapshot_free(snap);
+    geom_stats_close();
 
     return NULL;
 }

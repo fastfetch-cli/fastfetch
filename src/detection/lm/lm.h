@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_lm_lm
-#define FF_INCLUDED_detection_lm_lm
-
 #include "fastfetch.h"
 
 typedef struct FFLMResult
@@ -13,5 +10,3 @@ typedef struct FFLMResult
 } FFLMResult;
 
 const char* ffDetectLM(FFLMResult* result);
-
-#endif

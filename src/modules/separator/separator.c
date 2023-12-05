@@ -123,6 +123,7 @@ void ffInitSeparatorOptions(FFSeparatorOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_SEPARATOR_MODULE_NAME,
+        "Print a separator line",
         ffParseSeparatorCommandOptions,
         ffParseSeparatorJsonObject,
         ffPrintSeparator,

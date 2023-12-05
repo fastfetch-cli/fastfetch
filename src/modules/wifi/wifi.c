@@ -173,6 +173,7 @@ void ffInitWifiOptions(FFWifiOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_WIFI_MODULE_NAME,
+        "Print connected Wi-Fi info (SSID, connection and security protocol)",
         ffParseWifiCommandOptions,
         ffParseWifiJsonObject,
         ffPrintWifi,

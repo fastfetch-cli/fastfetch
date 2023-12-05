@@ -144,7 +144,7 @@ static void destroyState(void)
     ffPlatformDestroy(&instance.state.platform);
     yyjson_doc_free(instance.state.configDoc);
     yyjson_mut_doc_free(instance.state.resultDoc);
-    ffStrbufDestroy(&instance.state.migrateConfigPath);
+    ffStrbufDestroy(&instance.state.genConfigPath);
 }
 
 void ffDestroyInstance(void)
@@ -180,6 +180,9 @@ void ffListFeatures(void)
         #endif
         #ifdef FF_HAVE_X11
             "x11\n"
+        #endif
+        #ifdef FF_HAVE_DRM
+            "drm\n"
         #endif
         #ifdef FF_HAVE_GIO
             "gio\n"

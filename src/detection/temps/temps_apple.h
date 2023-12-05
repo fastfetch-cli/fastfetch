@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_temps_apple
-#define FF_INCLUDED_detection_temps_apple
-
 #include "fastfetch.h"
 #include "util/FFlist.h"
 
@@ -31,5 +28,3 @@ enum FFTempType
 };
 
 const char *ffDetectCoreTemps(enum FFTempType type, double* result);
-
-#endif

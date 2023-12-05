@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_opencl_opencl
-#define FF_INCLUDED_detection_opencl_opencl
-
 #include "fastfetch.h"
 
 typedef struct FFOpenCLResult
@@ -13,5 +10,3 @@ typedef struct FFOpenCLResult
 } FFOpenCLResult;
 
 const char* ffDetectOpenCL(FFOpenCLResult* result);
-
-#endif

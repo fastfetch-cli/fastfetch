@@ -57,6 +57,7 @@ void ffInitCustomOptions(FFCustomOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_CUSTOM_MODULE_NAME,
+        "Print a custom string, with or without key",
         ffParseCustomCommandOptions,
         ffParseCustomJsonObject,
         ffPrintCustom,

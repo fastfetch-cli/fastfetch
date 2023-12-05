@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_terminalshell
-#define FF_INCLUDED_detection_terminalshell
-
 #include "fastfetch.h"
 
 typedef struct FFTerminalShellResult
@@ -23,5 +20,3 @@ typedef struct FFTerminalShellResult
 } FFTerminalShellResult;
 
 const FFTerminalShellResult* ffDetectTerminalShell();
-
-#endif

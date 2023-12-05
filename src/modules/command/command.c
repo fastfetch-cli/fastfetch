@@ -151,6 +151,7 @@ void ffInitCommandOptions(FFCommandOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_COMMAND_MODULE_NAME,
+        "Running custom shell scripts",
         ffParseCommandCommandOptions,
         ffParseCommandJsonObject,
         ffPrintCommand,

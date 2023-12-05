@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_io_io
-#define FF_INCLUDED_common_io_io
-
 #include "util/FFstrbuf.h"
 
 #ifdef _WIN32
@@ -14,6 +11,10 @@
     #include <unistd.h>
     #include <dirent.h>
     typedef int FFNativeFD;
+    // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
+    // one safe way to read correct data is reading the whole file in a single read syscall
+    // 8192 comes from procps-ng: https://gitlab.com/procps-ng/procps/-/blob/master/library/meminfo.c?ref_type=heads#L39
+    #define PROC_FILE_BUFFSIZ 8192
 #endif
 
 static inline FFNativeFD FFUnixFD2NativeFD(int unixfd)
@@ -52,11 +53,11 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
     #ifndef _WIN32
         return read(fd, data, dataSize);
     #else
-        DWORD readed;
-        if(!ReadFile(fd, data, (DWORD)dataSize, &readed, NULL))
+        DWORD bytesRead;
+        if(!ReadFile(fd, data, (DWORD)dataSize, &bytesRead, NULL))
             return -1;
 
-        return (ssize_t)readed;
+        return (ssize_t)bytesRead;
     #endif
 }
 
@@ -102,7 +103,7 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 #define FF_SUPPRESS_IO() bool __attribute__((__cleanup__(ffUnsuppressIO), __unused__)) io_suppressed__ = ffSuppressIO(true)
 
-void ffListFilesRecursively(const char* path);
+void ffListFilesRecursively(const char* path, bool pretty);
 
 static inline bool wrapClose(FFNativeFD* pfd)
 {
@@ -153,5 +154,3 @@ static inline bool wrapClosedir(HANDLE* pdir)
 }
 #endif
 #define FF_AUTO_CLOSE_DIR __attribute__((__cleanup__(wrapClosedir)))
-
-#endif // FF_INCLUDED_common_io_io

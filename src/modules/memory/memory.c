@@ -131,6 +131,7 @@ void ffInitMemoryOptions(FFMemoryOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_MEMORY_MODULE_NAME,
+        "Print system memory usage info",
         ffParseMemoryCommandOptions,
         ffParseMemoryJsonObject,
         ffPrintMemory,

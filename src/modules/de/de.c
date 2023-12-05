@@ -127,6 +127,7 @@ void ffInitDEOptions(FFDEOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_DE_MODULE_NAME,
+        "Print desktop environment name",
         ffParseDECommandOptions,
         ffParseDEJsonObject,
         ffPrintDE,

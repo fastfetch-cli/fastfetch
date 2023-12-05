@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_DISKIO_DISPLAY_NAME "Disk IO"
-#define FF_DISKIO_NUM_FORMAT_ARGS 10
+#define FF_DISKIO_NUM_FORMAT_ARGS 11
 
 static int sortDevices(const FFDiskIOResult* left, const FFDiskIOResult* right)
 {
@@ -87,6 +87,8 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
                     physicalType = "Unknown";
                     break;
             }
+            FF_STRBUF_AUTO_DESTROY sizePretty = ffStrbufCreate();
+            ffParseSize(dev->size, &sizePretty);
 
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISKIO_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
@@ -99,6 +101,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->bytesWritten},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->readCount},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->writeCount},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &sizePretty},
             });
         }
         ++index;
@@ -198,6 +201,7 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
         yyjson_mut_obj_add_uint(doc, obj, "bytesWritten", dev->bytesWritten);
         yyjson_mut_obj_add_uint(doc, obj, "readCount", dev->readCount);
         yyjson_mut_obj_add_uint(doc, obj, "writeCount", dev->writeCount);
+        yyjson_mut_obj_add_uint(doc, obj, "size", dev->size);
     }
 
     FF_LIST_FOR_EACH(FFDiskIOResult, dev, result)
@@ -221,6 +225,7 @@ void ffPrintDiskIOHelpFormat(void)
         "Size of data written per second (in bytes)",
         "Number of reads",
         "Number of writes",
+        "Device size (formatted)",
     });
 }
 
@@ -229,6 +234,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_DISKIO_MODULE_NAME,
+        "Print physical disk I/O throughput",
         ffParseDiskIOCommandOptions,
         ffParseDiskIOJsonObject,
         ffPrintDiskIO,

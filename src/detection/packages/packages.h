@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_packages_packages
-#define FF_INCLUDED_detection_packages_packages
-
 #include "fastfetch.h"
 
 typedef struct FFPackagesResult
@@ -24,7 +21,7 @@ typedef struct FFPackagesResult
     uint32_t paludis;
     uint32_t pkg;
     uint32_t pkgtool;
-    uint32_t port;
+    uint32_t macports;
     uint32_t rpm;
     uint32_t scoop;
     uint32_t snap;
@@ -37,5 +34,3 @@ typedef struct FFPackagesResult
 } FFPackagesResult;
 
 const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* options);
-
-#endif

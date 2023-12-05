@@ -470,6 +470,10 @@
                     "type": "string",
                     "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
                 },
+                "drm": {
+                    "type": "string",
+                    "description": "Used for fast resolution and refresh rate detection (Linux)"
+                },
                 "gio": {
                     "type": "string",
                     "description": "Needed for values that are only stored GSettings (Linux, FreeBSD)"
@@ -729,15 +733,15 @@
                                             },
                                             {
                                                 "const": "theme",
-                                                "description": "Print current theme information"
+                                                "description": "Print current theme of desktop environment"
                                             },
                                             {
                                                 "const": "uptime",
-                                                "description": "Print system uptime"
+                                                "description": "Print how long system has been running"
                                             },
                                             {
                                                 "const": "users",
-                                                "description": "List users currently logged in"
+                                                "description": "Print users currently logged in"
                                             },
                                             {
                                                 "const": "version",
@@ -844,7 +848,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "brightness",
-                                        "description": "Print current brightness / luminance of your monitors"
+                                        "description": "Print current brightness level of your monitors"
                                     },
                                     "ddcciSleep": {
                                         "type": "integer",
@@ -1033,7 +1037,7 @@
                                     "preciseRefreshRate": {
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",
                                         "type": "boolean",
-                                        "default": true
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1059,7 +1063,7 @@
                                     },
                                     "folders": {
                                         "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: \"/:/home\" (\"C:\\\\;D:\\\\ ...\" on Windows)"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points"
                                     },
                                     "showExternal": {
                                         "type": "boolean",

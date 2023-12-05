@@ -19,8 +19,6 @@
     #include "util/windows/getline.h"
 #endif
 
-#include "modules/modules.h"
-
 static void printCommandFormatHelp(const char* command)
 {
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateNS((uint32_t) (strlen(command) - strlen("-format")), command);
@@ -40,111 +38,218 @@ static void printCommandFormatHelp(const char* command)
     fprintf(stderr, "Error: Module '%s' is not supported\n", type.chars);
 }
 
+static void printFullHelp()
+{
+    fputs("Fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way\n\n", stdout);
+    if (!instance.config.display.pipe)
+        fputs("\e[1;4mUsage:\e[m \e[1mfastfetch\e[m \e[3m<?options>\e[m\n\n", stdout);
+    else
+        fputs("Usage: fastfetch <?options>\n\n", stdout);
+
+    yyjson_doc* doc = yyjson_read(FASTFETCH_DATATEXT_JSON_HELP, strlen(FASTFETCH_DATATEXT_JSON_HELP), YYJSON_READ_NOFLAG);
+    assert(doc);
+    yyjson_val *groupKey, *flagArr;
+    size_t groupIdx, groupMax;
+    yyjson_obj_foreach(yyjson_doc_get_root(doc), groupIdx, groupMax, groupKey, flagArr)
+    {
+        if (!instance.config.display.pipe)
+            fputs("\e[1;4m", stdout);
+        printf("%s options:", yyjson_get_str(groupKey));
+        if (!instance.config.display.pipe)
+            fputs("\e[m", stdout);
+        putchar('\n');
+
+        yyjson_val* flagObj;
+        size_t flagIdx, flagMax;
+        yyjson_arr_foreach(flagArr, flagIdx, flagMax, flagObj)
+        {
+            yyjson_val* shortKey = yyjson_obj_get(flagObj, "short");
+            if (shortKey)
+            {
+                fputs("  ", stdout);
+                if (!instance.config.display.pipe)
+                    fputs("\e[1m", stdout);
+                printf("-%s", yyjson_get_str(shortKey));
+                if (!instance.config.display.pipe)
+                    fputs("\e[m", stdout);
+                fputs(", ", stdout);
+            }
+            else
+            {
+                fputs("      ", stdout);
+            }
+            yyjson_val* longKey = yyjson_obj_get(flagObj, "long");
+            assert(longKey);
+            if (!instance.config.display.pipe)
+                fputs("\e[1m", stdout);
+            printf("--%s", yyjson_get_str(longKey));
+            if (!instance.config.display.pipe)
+                fputs("\e[m", stdout);
+
+            yyjson_val* argObj = yyjson_obj_get(flagObj, "arg");
+            if (argObj)
+            {
+                yyjson_val* typeKey = yyjson_obj_get(argObj, "type");
+                assert(typeKey);
+                yyjson_val* optionalKey = yyjson_obj_get(argObj, "optional");
+                bool optional = optionalKey && yyjson_get_bool(optionalKey);
+                putchar(' ');
+                if (!instance.config.display.pipe)
+                    fputs("\e[3m", stdout);
+                printf("<%s%s>", optional ? "?" : "", yyjson_get_str(typeKey));
+                if (!instance.config.display.pipe)
+                    fputs("\e[m", stdout);
+            }
+
+            yyjson_val* descKey = yyjson_obj_get(flagObj, "desc");
+            assert(descKey);
+            if (yyjson_is_arr(descKey))
+            {
+                if (instance.config.display.pipe)
+                    putchar(':');
+
+                yyjson_val* descStr;
+                size_t descIdx, descMax;
+                yyjson_arr_foreach(descKey, descIdx, descMax, descStr)
+                {
+                    if (!instance.config.display.pipe)
+                        printf("\e[46G%s\n", yyjson_get_str(descStr));
+                    else
+                        printf(" %s", yyjson_get_str(descStr));
+                }
+                if (instance.config.display.pipe)
+                    putchar('\n');
+            }
+            else
+            {
+                if (!instance.config.display.pipe)
+                    fputs("\e[46G", stdout);
+                else
+                    fputs(": ", stdout);
+                puts(yyjson_get_str(descKey));
+            }
+        }
+
+        putchar('\n');
+    }
+    yyjson_doc_free(doc);
+
+    puts("\n" FASTFETCH_DATATEXT_HELP);
+}
+
+static bool printSpecificCommandHelp(const char* command)
+{
+    yyjson_doc* doc = yyjson_read(FASTFETCH_DATATEXT_JSON_HELP, strlen(FASTFETCH_DATATEXT_JSON_HELP), YYJSON_READ_NOFLAG);
+    assert(doc);
+    yyjson_val *groupKey, *flagArr;
+    size_t groupIdx, groupMax;
+    yyjson_obj_foreach(yyjson_doc_get_root(doc), groupIdx, groupMax, groupKey, flagArr)
+    {
+        yyjson_val* flagObj;
+        size_t flagIdx, flagMax;
+        yyjson_arr_foreach(flagArr, flagIdx, flagMax, flagObj)
+        {
+            yyjson_val* pseudo = yyjson_obj_get(flagObj, "pseudo");
+            if (pseudo && yyjson_get_bool(pseudo))
+                continue;
+
+            yyjson_val* longKey = yyjson_obj_get(flagObj, "long");
+            assert(longKey);
+            if (ffStrEqualsIgnCase(command, yyjson_get_str(longKey)))
+            {
+                puts(yyjson_get_str(yyjson_obj_get(flagObj, "desc")));
+
+                printf("%10s: ", "Usage");
+                yyjson_val* shortKey = yyjson_obj_get(flagObj, "short");
+                if (shortKey)
+                {
+                    if (!instance.config.display.pipe)
+                        fputs("\e[1m", stdout);
+                    printf("-%s", yyjson_get_str(shortKey));
+                    if (!instance.config.display.pipe)
+                        fputs("\e[m", stdout);
+                    fputs(", ", stdout);
+                }
+                if (!instance.config.display.pipe)
+                    fputs("\e[1m", stdout);
+                printf("--%s", yyjson_get_str(longKey));
+                if (!instance.config.display.pipe)
+                    fputs("\e[m", stdout);
+
+                yyjson_val* argObj = yyjson_obj_get(flagObj, "arg");
+                if (argObj)
+                {
+                    yyjson_val* typeKey = yyjson_obj_get(argObj, "type");
+                    assert(typeKey);
+                    yyjson_val* optionalKey = yyjson_obj_get(argObj, "optional");
+                    bool optional = optionalKey && yyjson_get_bool(optionalKey);
+                    putchar(' ');
+                    if (!instance.config.display.pipe)
+                        fputs("\e[3m", stdout);
+                    printf("<%s%s>", optional ? "?" : "", yyjson_get_str(typeKey));
+                    if (!instance.config.display.pipe)
+                        fputs("\e[m", stdout);
+                    putchar('\n');
+
+                    yyjson_val* defaultKey = yyjson_obj_get(argObj, "default");
+                    if (defaultKey)
+                    {
+                        if (ffStrEqualsIgnCase(yyjson_get_str(typeKey), "structure"))
+                            printf("%10s: %s\n", "Default", FASTFETCH_DATATEXT_STRUCTURE);
+                        else if (yyjson_is_bool(defaultKey))
+                            printf("%10s: %s\n", "Default", yyjson_get_bool(defaultKey) ? "true" : "false");
+                        else if (yyjson_is_num(defaultKey))
+                            printf("%10s: %d\n", "Default", yyjson_get_int(defaultKey));
+                        else if (yyjson_is_str(defaultKey))
+                            printf("%10s: %s\n", "Default", yyjson_get_str(defaultKey));
+                        else
+                            printf("%10s: Unknown\n", "Default");
+                    }
+
+                    yyjson_val* enumKey = yyjson_obj_get(argObj, "enum");
+                    if (enumKey)
+                    {
+                        printf("%10s:\n", "Options");
+                        yyjson_val *optKey, *optVal;
+                        size_t optIdx, optMax;
+                        yyjson_obj_foreach(enumKey, optIdx, optMax, optKey, optVal)
+                            printf("%12s: %s\n", yyjson_get_str(optKey), yyjson_get_str(optVal));
+                    }
+                }
+                else
+                    putchar('\n');
+
+                yyjson_val* remarkKey = yyjson_obj_get(flagObj, "remark");
+                if (remarkKey)
+                    printf("%10s: %s\n", "Remark", yyjson_get_str(remarkKey));
+
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 static void printCommandHelp(const char* command)
 {
     if(command == NULL)
-    {
-        static char input[] = FASTFETCH_DATATEXT_HELP;
-        if (!instance.config.display.pipe)
-        {
-            char* token = strtok(input, "\n");
-            puts(token);
-
-            while ((token = strtok(NULL, "\n")))
-            {
-                // handle empty lines
-                char* back = token;
-                while (*--back != '\0');
-                ffPrintCharTimes('\n', (uint32_t) (token - back - 1));
-
-                if (isalpha(*token)) // highlight subjects
-                {
-                    char* colon = strchr(token, ':');
-                    if (colon)
-                    {
-                        fputs("\e[1;4m", stdout); // Bold + Underline
-                        fwrite(token, 1, (uint32_t) (colon - token), stdout);
-                        fputs("\e[m", stdout);
-
-                        if (colon - token == 5 && memcmp(token, "Usage", 5) == 0)
-                        {
-                            char* cmd = strstr(colon, "fastfetch ");
-                            if (cmd)
-                            {
-                                fwrite(colon, 1, (uint32_t) (cmd - colon), stdout);
-                                fputs("\e[1mfastfetch \e[m", stdout);
-                                cmd += strlen("fastfetch ");
-                                if (*cmd == '<')
-                                {
-                                    char* gt = strchr(cmd, '>');
-                                    if (gt)
-                                    {
-                                        fputs("\e[3m", stdout);
-                                        fwrite(cmd, 1, (uint32_t) (gt - cmd + 1), stdout);
-                                        fputs("\e[m", stdout);
-                                        cmd = gt + 1;
-                                    }
-                                }
-                                puts(cmd);
-                                continue;
-                            }
-                        }
-                        puts(colon);
-                        continue;
-                    }
-                }
-                else if (*token == ' ') // highlight options. All options are indented
-                {
-                    char* dash = strchr(token, '-'); // start of an option
-                    if (dash)
-                    {
-                        char* colon = strchr(dash, ':'); // end of an option
-                        if (colon)
-                        {
-                            *colon = '\0';
-                            char* lt = strrchr(dash, '<');
-                            *colon = ':';
-                            fputs("\e[1m", stdout); // Bold
-                            fwrite(token, 1, (uint32_t) ((lt ? lt : colon) - token), stdout);
-                            fputs("\e[m", stdout);
-                            if (lt)
-                            {
-                                fputs("\e[3m", stdout);
-                                fwrite(lt, 1, (uint32_t) (colon - lt), stdout);
-                                fputs("\e[m", stdout);
-                            }
-                            puts(colon);
-                            continue;
-                        }
-                    }
-                }
-
-                puts(token);
-            }
-        }
-        else
-        {
-            puts(input);
-        }
-    }
+        printFullHelp();
     else if(ffStrEqualsIgnCase(command, "color"))
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(ffStrEqualsIgnCase(command, "load-config") || ffStrEqualsIgnCase(command, "config"))
-        puts(FASTFETCH_DATATEXT_HELP_CONFIG);
-    else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // x-format
+    else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
         printCommandFormatHelp(command);
-    else
+    else if(!printSpecificCommandHelp(command))
         fprintf(stderr, "Error: No specific help for command '%s' provided\n", command);
 }
 
-static void listAvailablePresets(void)
+static void listAvailablePresets(bool pretty)
 {
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/presets/");
-        ffListFilesRecursively(path->chars);
+        ffListFilesRecursively(path->chars, pretty);
     }
 }
 
@@ -153,7 +258,7 @@ static void listAvailableLogos(void)
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
         ffStrbufAppendS(path, "fastfetch/logos/");
-        ffListFilesRecursively(path->chars);
+        ffListFilesRecursively(path->chars, true);
     }
 }
 
@@ -162,6 +267,7 @@ static void listConfigPaths(void)
     FF_LIST_FOR_EACH(FFstrbuf, folder, instance.state.platform.configDirs)
     {
         bool exists = false;
+        uint32_t length = folder->length + sizeof("fastfetch");
         ffStrbufAppendS(folder, "fastfetch/config.jsonc");
         exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
         if (!exists)
@@ -170,6 +276,7 @@ static void listConfigPaths(void)
             ffStrbufAppendS(folder, "conf");
             exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
         }
+        ffStrbufSubstrBefore(folder, length);
         printf("%s%s\n", folder->chars, exists ? " (*)" : "");
     }
 }
@@ -183,7 +290,7 @@ static void listDataPaths(void)
     }
 }
 
-static void listModules()
+static void listModules(bool pretty)
 {
     unsigned count = 0;
     for (int i = 0; i <= 'Z' - 'A'; ++i)
@@ -191,7 +298,10 @@ static void listModules()
         for (FFModuleBaseInfo** modules = ffModuleInfos[i]; *modules; ++modules)
         {
             ++count;
-            printf("%d)%s%s\n", count, count > 9 ? " " : "  ", (*modules)->name);
+            if (pretty)
+                printf("%d)%s%-13s: %s\n", count, count > 9 ? " " : "  ", (*modules)->name, (*modules)->description);
+            else
+                printf("%s:%s\n", (*modules)->name, (*modules)->description);
         }
     }
 }
@@ -220,7 +330,7 @@ static bool parseJsoncFile(const char* path)
 
 static bool parseConfigFile(FFdata* data, const char* path)
 {
-    FILE* file = fopen(path, "r");
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(path, "r");
     if(file == NULL)
         return false;
 
@@ -313,63 +423,57 @@ static bool parseConfigFile(FFdata* data, const char* path)
     if(line != NULL)
         free(line);
 
-    fclose(file);
     return true;
 }
 
-static void generateConfigFile(bool force, const char* type)
+static void generateConfigFile(bool force, const char* filePath)
 {
-    if (!type)
+    if (!filePath)
     {
-        fputs("Error: the config type (`jsonc` or `conf`) must be specified\n", stderr);
-        exit(1);
-    }
-
-    FFstrbuf* filename = (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0);
-    // Paths generated in `init.c/initConfigDirs` end with `/`
-    bool isJsonc = ffStrEqualsIgnCase(type, "jsonc");
-    if (!isJsonc)
-    {
-        if (!ffStrEqualsIgnCase(type, "conf"))
-        {
-            fputs("Error: config type can only be `jsonc` or `conf`\n", stderr);
-            exit(1);
-        }
-        else
-            fputs("Warning: support of flag based config type `conf` is deprecated, and may be removed in the future\n", stderr);
-    }
-
-    ffStrbufAppendS(filename, isJsonc ? "fastfetch/config.jsonc" : "fastfetch/config.conf");
-
-    if (!force && ffPathExists(filename->chars, FF_PATHTYPE_FILE))
-    {
-        fprintf(stderr, "Config file exists in `%s`, use `--gen-config-force` to overwrite\n", filename->chars);
-        exit(1);
+        ffStrbufSet(&instance.state.genConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
+        ffStrbufAppendS(&instance.state.genConfigPath, "fastfetch/config.jsonc");
     }
     else
     {
-        ffWriteFileData(
-            filename->chars,
-            isJsonc ? strlen(FASTFETCH_DATATEXT_CONFIG_USER_JSONC) : strlen(FASTFETCH_DATATEXT_CONFIG_USER),
-            isJsonc ? FASTFETCH_DATATEXT_CONFIG_USER_JSONC : FASTFETCH_DATATEXT_CONFIG_USER);
-        printf("A sample config file has been written in `%s`\n", filename->chars);
-        exit(0);
+        if (ffStrEqualsIgnCase(filePath, "conf") || ffStrEqualsIgnCase(filePath, "jsonc"))
+        {
+            fputs("Error: specifying file type is no longer supported\n", stderr);
+            exit(477);
+        }
+        ffStrbufSetS(&instance.state.genConfigPath, filePath);
+    }
+
+    if (!force && ffPathExists(instance.state.genConfigPath.chars, FF_PATHTYPE_ANY))
+    {
+        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config-force` to overwrite\n", instance.state.genConfigPath.chars);
+        exit(477);
     }
 }
 
 static void optionParseConfigFile(FFdata* data, const char* key, const char* value)
 {
+    if (data->configLoaded)
+    {
+        fprintf(stderr, "Error: only one config file can be loaded\n");
+        exit(413);
+    }
+
+    data->configLoaded = true;
+
     if(value == NULL)
     {
-        fprintf(stderr, "Error: usage: %s <file>\n", key);
+        fprintf(stderr, "Error: usage: %s <config>\n", key);
         exit(413);
     }
     uint32_t fileNameLen = (uint32_t) strlen(value);
     if(fileNameLen == 0)
     {
-        fprintf(stderr, "Error: usage: %s <file>\n", key);
+        fprintf(stderr, "Error: usage: %s <config>\n", key);
         exit(413);
     }
+
+    if (ffStrEqualsIgnCase(value, "none"))
+        return;
 
     bool isJsonConfig = fileNameLen > strlen(".jsonc") && strcasecmp(value + fileNameLen - strlen(".jsonc"), ".jsonc") == 0;
 
@@ -428,15 +532,16 @@ static void printVersion()
     printf("%s %s%s%s (%s)\n", result.projectName, result.version, result.versionTweak, result.debugMode ? "-debug" : "", result.architecture);
 }
 
-static void parseOption(FFdata* data, const char* key, const char* value)
+static void parseCommand(FFdata* data, char* key, char* value)
 {
-    ///////////////////////
-    //Informative options//
-    ///////////////////////
-
     if(ffStrEqualsIgnCase(key, "-h") || ffStrEqualsIgnCase(key, "--help"))
     {
         printCommandHelp(value);
+        exit(0);
+    }
+    if(ffStrEqualsIgnCase(key, "--help-raw"))
+    {
+        puts(FASTFETCH_DATATEXT_JSON_HELP);
         exit(0);
     }
     else if(ffStrEqualsIgnCase(key, "-v") || ffStrEqualsIgnCase(key, "--version"))
@@ -452,74 +557,104 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(ffStrStartsWithIgnCase(key, "--print-"))
     {
         const char* subkey = key + strlen("--print-");
-        if(ffStrEqualsIgnCase(subkey, "config-system"))
-        {
-            puts(FASTFETCH_DATATEXT_CONFIG_SYSTEM);
-            exit(0);
-        }
-        else if(ffStrEqualsIgnCase(subkey, "config-user"))
-        {
-            puts(FASTFETCH_DATATEXT_CONFIG_USER);
-            exit(0);
-        }
-        else if(ffStrEqualsIgnCase(subkey, "structure"))
-        {
+        if(ffStrEndsWithIgnCase(subkey, "structure"))
             puts(FASTFETCH_DATATEXT_STRUCTURE);
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "logos"))
-        {
             ffLogoBuiltinPrint();
-            exit(0);
-        }
         else
-            goto error;
+        {
+            fprintf(stderr, "Error: unsupported print option: %s\n", key);
+            exit(415);
+        }
+        exit(0);
     }
     else if(ffStrStartsWithIgnCase(key, "--list-"))
     {
         const char* subkey = key + strlen("--list-");
         if(ffStrEqualsIgnCase(subkey, "modules"))
-        {
-            listModules();
-            exit(0);
-        }
+            listModules(!value || !ffStrEqualsIgnCase(value, "autocompletion"));
         else if(ffStrEqualsIgnCase(subkey, "presets"))
-        {
-            listAvailablePresets();
-            exit(0);
-        }
+            listAvailablePresets(!value || !ffStrEqualsIgnCase(value, "autocompletion"));
         else if(ffStrEqualsIgnCase(subkey, "config-paths"))
-        {
             listConfigPaths();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "data-paths"))
-        {
             listDataPaths();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "features"))
-        {
             ffListFeatures();
-            exit(0);
-        }
         else if(ffStrEqualsIgnCase(subkey, "logos"))
         {
-            puts("Builtin logos:");
-            ffLogoBuiltinList();
-            puts("\nCustom logos:");
-            listAvailableLogos();
-            exit(0);
-        }
-        else if(ffStrEqualsIgnCase(subkey, "logos-autocompletion"))
-        {
-            ffLogoBuiltinListAutocompletion();
-            exit(0);
+            if (value)
+            {
+                if (ffStrEqualsIgnCase(value, "autocompletion"))
+                    ffLogoBuiltinListAutocompletion();
+                else if (ffStrEqualsIgnCase(value, "builtin"))
+                    ffLogoBuiltinList();
+                else if (ffStrEqualsIgnCase(value, "custom"))
+                    listAvailableLogos();
+                else
+                {
+                    fprintf(stderr, "Error: unsupported logo type: %s\n", value);
+                    exit(415);
+                }
+            }
+            else
+            {
+                puts("Builtin logos:");
+                ffLogoBuiltinList();
+                puts("\nCustom logos:");
+                listAvailableLogos();
+            }
         }
         else
-            goto error;
+        {
+            fprintf(stderr, "Error: unsupported list option: %s\n", key);
+            exit(415);
+        }
+
+        exit(0);
     }
-    else if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
+    else if(ffStrEqualsIgnCase(key, "--gen-config"))
+        generateConfigFile(false, value);
+    else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
+        generateConfigFile(true, value);
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+        optionParseConfigFile(data, key, value);
+    else if(ffStrEqualsIgnCase(key, "--format"))
+    {
+        switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "default", 0},
+            { "json", 1 },
+            {},
+        }))
+        {
+            case 0:
+                if (instance.state.resultDoc)
+                {
+                    yyjson_mut_doc_free(instance.state.resultDoc);
+                    instance.state.resultDoc = NULL;
+                }
+                break;
+            case 1:
+                if (!instance.state.resultDoc)
+                {
+                    instance.state.resultDoc = yyjson_mut_doc_new(NULL);
+                    yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
+                }
+                break;
+        }
+    }
+    else
+        return;
+
+    // Don't parse it again in parseOption.
+    // This is necessary because parseOption doesn't understand this option and will result in an unknown option error.
+    key[0] = '\0';
+    if (value) value[0] = '\0';
+}
+
+static void parseOption(FFdata* data, const char* key, const char* value)
+{
+    if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
     {
         FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
         ffOptionParseString(key, value, &customValueStr);
@@ -550,70 +685,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         customValue->printKey = key[5] == '\0';
     }
 
-    ////////////
-    //Switches//
-    ////////////
-
-    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
-        optionParseConfigFile(data, key, value);
-    else if(ffStrEqualsIgnCase(key, "--gen-config"))
-        generateConfigFile(false, value);
-    else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
-        generateConfigFile(true, value);
-    else if (ffStrEqualsIgnCase(key, "--migrate-config"))
-    {
-        if (instance.state.configDoc)
-        {
-            fputs("Error: existing jsonc config detected. Aborting\n", stderr);
-            exit(477);
-        }
-
-        if (!value)
-        {
-            ffStrbufSet(&instance.state.migrateConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
-            ffStrbufAppendS(&instance.state.migrateConfigPath, "fastfetch/config.jsonc");
-        }
-        else
-            ffStrbufSetS(&instance.state.migrateConfigPath, value);
-
-        if (ffPathExists(instance.state.migrateConfigPath.chars, FF_PATHTYPE_ANY))
-        {
-            fprintf(stderr, "Error: file `%s` exists. Aborting\n", instance.state.migrateConfigPath.chars);
-            exit(477);
-        }
-    }
-    else if(ffStrEqualsIgnCase(key, "--load-user-config"))
-        data->loadUserConfig = ffOptionParseBoolean(value);
-    else if(ffStrEqualsIgnCase(key, "--format"))
-    {
-        switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "default", 0},
-            { "json", 1 },
-            {},
-        }))
-        {
-            case 0:
-                if (instance.state.resultDoc)
-                {
-                    yyjson_mut_doc_free(instance.state.resultDoc);
-                    instance.state.resultDoc = NULL;
-                }
-                break;
-            case 1:
-                if (!instance.state.resultDoc)
-                {
-                    instance.state.resultDoc = yyjson_mut_doc_new(NULL);
-                    yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
-                }
-                break;
-        }
-    }
     else if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
         ffOptionParseString(key, value, &data->structure);
-
-    ///////////
-    //Options//
-    ///////////
 
     else if(
         ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
@@ -623,13 +696,8 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffParseModuleOptions(key, value)
     ) {}
 
-    //////////////////
-    //Unknown option//
-    //////////////////
-
     else
     {
-error:
         fprintf(stderr, "Error: unknown option: %s\n", key);
         exit(400);
     }
@@ -637,11 +705,10 @@ error:
 
 static void parseConfigFiles(FFdata* data)
 {
-    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
+    if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
     {
-        for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+        FF_LIST_FOR_EACH(FFstrbuf, dir, instance.state.platform.configDirs)
         {
-            FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
             uint32_t dirLength = dir->length;
 
             ffStrbufAppendS(dir, "fastfetch/config.jsonc");
@@ -650,28 +717,25 @@ static void parseConfigFiles(FFdata* data)
             if (success) return;
         }
     }
-    for (uint32_t i = instance.state.platform.configDirs.length; i > 0; --i)
+    FF_LIST_FOR_EACH(FFstrbuf, dir, instance.state.platform.configDirs)
     {
-        if (!data->loadUserConfig)
-            return;
-
-        FFstrbuf* dir = ffListGet(&instance.state.platform.configDirs, i - 1);
         uint32_t dirLength = dir->length;
 
         ffStrbufAppendS(dir, "fastfetch/config.conf");
-        parseConfigFile(data, dir->chars);
+        bool success = parseConfigFile(data, dir->chars);
         ffStrbufSubstrBefore(dir, dirLength);
+        if (success) return;
     }
 }
 
-static void parseArguments(FFdata* data, int argc, const char** argv)
+static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(FFdata* data, char* key, char* value))
 {
-    if(!data->loadUserConfig)
-        return;
-
     for(int i = 1; i < argc; i++)
     {
         const char* key = argv[i];
+        if(*key == '\0')
+            continue; // has been handled by parseCommand
+
         if(*key != '-')
         {
             fprintf(stderr, "Error: invalid option: %s. An option must start with `-`\n", key);
@@ -683,11 +747,11 @@ static void parseArguments(FFdata* data, int argc, const char** argv)
             argv[i + 1][1] != '\0' && // `-` is used as an alias for `/dev/stdin`
             strcasecmp(argv[i], "--separator-string") != 0 // Separator string can start with a -
         )) {
-            parseOption(data, argv[i], NULL);
+            parser(data, argv[i], NULL);
         }
         else
         {
-            parseOption(data, argv[i], argv[i + 1]);
+            parser(data, argv[i], argv[i + 1]);
             ++i;
         }
     }
@@ -740,7 +804,7 @@ static void run(FFdata* data)
         ffFinish();
 }
 
-static void migrateConfig(FFdata* data, const FFstrbuf* filename)
+static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
 {
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val* root = yyjson_mut_obj(doc);
@@ -758,7 +822,7 @@ static void migrateConfig(FFdata* data, const FFstrbuf* filename)
     else
     {
         if (yyjson_mut_write_file(filename->chars, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL))
-            printf("The migrated config file has been written in `%s`\nYou may remove the old config file if everything works fine\n", filename->chars);
+            printf("The generated config file has been written in `%s`\n", filename->chars);
         else
         {
             printf("Error: failed to write file in `%s`\n", filename->chars);
@@ -769,7 +833,7 @@ static void migrateConfig(FFdata* data, const FFstrbuf* filename)
     yyjson_mut_doc_free(doc);
 }
 
-int main(int argc, const char** argv)
+int main(int argc, char** argv)
 {
     ffInitInstance();
 
@@ -777,17 +841,18 @@ int main(int argc, const char** argv)
     FFdata data = {
         .structure = ffStrbufCreate(),
         .customValues = ffListCreate(sizeof(FFCustomValue)),
-        .loadUserConfig = true,
+        .configLoaded = false,
     };
 
-    if(!getenv("NO_CONFIG"))
+    parseArguments(&data, argc, argv, parseCommand);
+    if(!data.configLoaded && !getenv("NO_CONFIG"))
         parseConfigFiles(&data);
-    parseArguments(&data, argc, argv);
+    parseArguments(&data, argc, argv, (void*) parseOption);
 
-    if (__builtin_expect(instance.state.migrateConfigPath.length == 0, true))
+    if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
         run(&data);
     else
-        migrateConfig(&data, &instance.state.migrateConfigPath);
+        writeConfigFile(&data, &instance.state.genConfigPath);
 
     ffStrbufDestroy(&data.structure);
     FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)

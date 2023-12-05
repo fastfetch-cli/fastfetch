@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_temps_linux
-#define FF_INCLUDED_detection_temps_linux
-
 #include "fastfetch.h"
 
 typedef struct FFTempValue
@@ -13,5 +10,3 @@ typedef struct FFTempValue
 } FFTempValue;
 
 const FFlist* /* List of FFTempValue */ ffDetectTemps();
-
-#endif

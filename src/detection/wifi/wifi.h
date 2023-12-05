@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_wifi_wifi
-#define FF_INCLUDED_detection_wifi_wifi
-
 #include "fastfetch.h"
 
 struct FFWifiInterface
@@ -30,5 +27,3 @@ typedef struct FFWifiResult
 } FFWifiResult;
 
 const char* ffDetectWifi(FFlist* result /*list of FFWifiItem*/);
-
-#endif

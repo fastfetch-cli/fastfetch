@@ -96,13 +96,14 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
 
     if (result.error.length)
     {
-        yyjson_mut_obj_add_str(doc, module, "error", result.error.chars);
-        return;
+        yyjson_mut_obj_add_strbuf(doc, module, "error", &result.error);
     }
-
-    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
-    yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
+    else
+    {
+        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+        yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
+        yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
+    }
 
     ffStrbufDestroy(&result.error);
     ffStrbufDestroy(&result.theme);
@@ -122,6 +123,7 @@ void ffInitCursorOptions(FFCursorOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_CURSOR_MODULE_NAME,
+        "Print cursor style name",
         ffParseCursorCommandOptions,
         ffParseCursorJsonObject,
         ffPrintCursor,

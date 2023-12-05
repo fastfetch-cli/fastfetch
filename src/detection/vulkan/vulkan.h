@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_detection_vulkan
-#define FF_INCLUDED_detection_vulkan
-
 #include "fastfetch.h"
 
 typedef struct FFVulkanResult
@@ -15,5 +12,3 @@ typedef struct FFVulkanResult
 } FFVulkanResult;
 
 FFVulkanResult* ffDetectVulkan();
-
-#endif

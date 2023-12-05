@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_library
-#define FF_INCLUDED_common_library
-
 #include "fastfetch.h"
 #include "util/FFcheckmacros.h"
 
@@ -74,5 +71,3 @@ static inline void ffLibraryUnload(void** handle)
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName)->ff ## symbolName, symbolName, returnValue);
 
 void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
-
-#endif

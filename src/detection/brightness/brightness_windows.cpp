@@ -2,6 +2,7 @@ extern "C"
 {
 #include "brightness.h"
 #include "detection/displayserver/displayserver.h"
+#include "common/library.h"
 }
 #include "util/windows/wmi.hpp"
 #include "util/windows/unicode.hpp"
@@ -36,15 +37,19 @@ static const char* detectWithWmi(FFlist* result)
     return NULL;
 }
 
-static char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist* result)
+static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFlist* result)
 {
+    FF_LIBRARY_LOAD(dxva2, NULL, "dlopen dxva2" FF_LIBRARY_EXTENSION " failed", "dxva2" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, GetPhysicalMonitorsFromHMONITOR)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(dxva2, GetMonitorBrightness)
+
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
         PHYSICAL_MONITOR physicalMonitor;
-        if (GetPhysicalMonitorsFromHMONITOR((HMONITOR)(uintptr_t) display->id, 1, &physicalMonitor))
+        if (ffGetPhysicalMonitorsFromHMONITOR((HMONITOR)(uintptr_t) display->id, 1, &physicalMonitor))
         {
             DWORD min = 0, curr = 0, max = 0;
-            if (GetMonitorBrightness(physicalMonitor.hPhysicalMonitor, &min, &curr, &max))
+            if (ffGetMonitorBrightness(physicalMonitor.hPhysicalMonitor, &min, &curr, &max))
             {
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
 

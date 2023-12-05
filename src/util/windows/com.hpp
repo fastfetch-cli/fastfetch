@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_util_windows_com
-#define FF_INCLUDED_util_windows_com
-
 #ifdef __cplusplus
 
 #include <unknwn.h>
@@ -20,6 +17,4 @@ static inline void ffReleaseComObject(void* ppUnknown)
 #else
     // Win32 COM headers requires C++ compiler
     #error Must be included in C++ source file
-#endif
-
 #endif

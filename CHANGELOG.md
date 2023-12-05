@@ -1,3 +1,46 @@
+# 2.3.0
+
+Config related changes:
+* The deprecated flag `--gen-config conf` is removed
+* Flag `--gen-config` now does the same thing as `--migrate-config`, which can be used as config migration and default config file generation. Flag `--migrate-config` is removed
+* Fastfetch now searches for config files in the order of `fastfetch --list-config-paths`, and won't load other config if one is found.
+* The undocumented flag `--load-user-config` is removed. As an alternative, `--config none` can be used to disable loading config files.
+* `--config` (previously named `--load-config`) is now supported for command line arguments only. If specified, other config files won't be loaded, which works like other programs.
+* Config files will always be loaded before other command line flags being parsed. That is to say, command line flags will always override options defined in config files.
+* the value of GPUType `integrated` contained a typo and was fixed. Existing config files may need to be updated.
+
+We are deprecating flags based config files (will be removed in v3.0.0). We suggest you migrate to json based config files.
+
+Features:
+* Support Oils and elvish shell version detection (Shell)
+* Support Windows Server Core (Windows)
+* Better ddcutil 2.x compatibility (Brightness, Linux)
+* Add completion support for fish (natively) and nushell (via [carapace-bin](https://github.com/rsteube/carapace-bin))
+* Support nix in macOS (Packages, macOS)
+* Print module description for `--list-modules`
+* Support `alacritty.toml` (TerminalFont)
+* Support board detection on macOS. It simplily prints machine model identifier as for now (Board, macOS)
+* Add general method to query product name (Host, macOS)
+* Use `libdrm` as a better fall back for detecting displays, which correctly detects current mode; supports refresh rate detection and maybe also faster than using `/sys/class/drm` (Display, Linux)
+* Support physical disk size detection (DiskIO)
+* Support physical disk name and type detection (DiskIO, FreeBSD)
+
+Bugfixes:
+* End `va_list` before returning (@VoltrexKeyva)
+* Don't use background color when printing blocks (Color)
+* Fix lots of typos
+* Fix compatibility with Linux containers (Linux)
+* Don't report disabled monitors when using DRM (Linux)
+* Fix bad performance in some cases when using X11 (Display, Linux)
+* Fix some memory leaks
+* Fix used swap space detection (Swap, FreeBSD)
+* Don't leak fds to child processes (Linux)
+* Fix possible issues when reading procfs (Linux)
+
+Logos:
+* Add Adelie, Ironclad
+* Update parch
+
 # 2.2.3
 
 Features:
@@ -19,11 +62,11 @@ Features:
 * Improve detection of `Battery`
     * Detect cycle count on supported platforms
     * Detect temperature on Linux when supported
-    * Status detection on macOS has been adjusted to be consistant with other platforms
+    * Status detection on macOS has been adjusted to be consistent with other platforms
 * Linux binaries are built with imagemagick7 support
 
 Bugfixes:
-* Fix unitialized variables (#609)
+* Fix uninitialized variables (#609)
 * Fix spelling of `--preserve-aspect-ratio` (#614)
 
 Logos:
@@ -49,7 +92,7 @@ Changes:
 * Display keys `percent*` and `size*` in JSON config are restructured. e.g. `{ "sizeNdigits": 1 }` is now `{ "size": { "ndigits": 1 } }`
 * With the introduction of `--migrate-config`, the old flag based config file is deprecated, and will be removed in 3.0.0 (next major version)
 * Support of `--gen-config conf` is deprecated accordingly, and will be removed in 2.3.0 (next minor version)
-* The global flag `--allow-slow-operations` is splitted into some explicit flags in differnet modules
+* The global flag `--allow-slow-operations` is split into some explicit flags in different modules
     * `--packages-winget`: control whether `winget` packages count should be detected. Note it's a very slow operation, please enable it with caution.
     * `--chassis-use-wmi`: control whether `WMI` query should be used to detect chassis type, which detects more information, but slower. This flag only affects `--chassis-format` and `--format json`.
     * `--battery-use-setup-api`: control whether `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower.
@@ -122,9 +165,9 @@ This release introduces a new output format: JSON result
 
 Changes:
 * Users module detects and prints user login time by default. Specifying `--users-compact` to disable it
-* Fastfetch now requires yyjson 0.8.0 or later, which is embeded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
+* Fastfetch now requires yyjson 0.8.0 or later, which is embedded in fastfetch source tree. If you build fastfetch with `-DENABLE_SYSTEM_YYJSON` cmake option, you must upgrade your yyjson package
 * Reduced information supported by `--terminal-format`, `--shell-format`
-* Some config presets (`devinfo` and `verbose`) are obseleted and removed. They are barely maintained and can be replaced with `--format json` now.
+* Some config presets (`devinfo` and `verbose`) are obsolete and removed. They are barely maintained and can be replaced with `--format json` now.
 * Custom strings in `--module-key` and `--module-format` are no longer trimmed.
 * `/boot` is hidden by default (FreeBSD, Disk)
 
@@ -204,7 +247,7 @@ Features:
 # 2.0.2
 
 Bugfixes:
-* Workarund [a compiler bug of GCC](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282) (Windows)
+* Workaround [a compiler bug of GCC](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85282) (Windows)
 * Fix presets not detected by file name (#529)
 
 Logo:
@@ -216,7 +259,7 @@ First stable release of Fastfetch V2
 
 Changes:
 * Unescape strings only when parsing `.conf` files
-    * Previously: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\: *`. Note the backslashs are unescaped twice (once by shell and once by fastfetch).
+    * Previously: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\: *`. Note the backslashes are unescaped twice (once by shell and once by fastfetch).
     * Now: `$ NO_CONFIG=1 fastfetch --os-key \\\\ -s os -l none` prints `\\: *`
 * Remove option shortcut `-c` (alias of `--color`), which is more commonly used as alias of `--config`
 * Rename `--recache` to `--logo-recache` (which is used for regenerate image logo cache). Remove option shortcut `-r` (alias of `--recache`).
@@ -272,7 +315,7 @@ Features:
 * Better CPU and Host detection for Android (Android)
 * Support yakuake terminal version & font detection (Terminal, Linux)
 * Add new option `--bright-color` which can be used to disable the default bright color of keys, title and ASCII logo.
-* Add module `Monitor` which prints physical parameters (native resolutions and demensions) of connected monitors
+* Add module `Monitor` which prints physical parameters (native resolutions and dimensions) of connected monitors
 * Support path with environment variables for `--logo-source` and `--load-config`.
 
 Bugfixes:
@@ -360,7 +403,7 @@ Bugfixes:
 * Fix Windows drives detection in WSL (Disk)
 
 Changes:
-* In order to make Icons module consistant between different platforms, `--icons-format` no longer supports individual GTK / QT icon params.
+* In order to make Icons module consistent between different platforms, `--icons-format` no longer supports individual GTK / QT icon params.
 * `--theme-format` no longer supports individual GTK / plasma theme params.
 * `--local-ip-*` and `--public-ip-*` have been changed to `--localip-*` and `--publicip-*`
 * `--localip-compact-type` is no longer supported. Fastfetch now display IPs as `--localip-compat-type multiline` by default, with `--local-compact true` can be set as an alias of `--localip-compact-type oneline`
@@ -383,7 +426,7 @@ Bugfixes:
 * Fix iTerm being detected as iTermServer-* sometimes
 * Fix sound device volume being incorrectly detected as muted sometimes (Sound)
 * Fix memleaks reported by LeakSanitizer (Linux)
-* Fix potential memory curruption bug in unicode.c (Windows)
+* Fix potential memory corruption bug in unicode.c (Windows)
 
 Logo:
 * Update Windows 11 ASCII logo to look more visually consistent (#445)
@@ -419,7 +462,7 @@ Bugfixes:
 * Fix compiling errors (Windows)
 
 Improvements:
-* Improve preformance (WmTheme amd Font, Windows and macOS)
+* Improve performance (WmTheme amd Font, Windows and macOS)
 * Enable nonblocking public-ip / weather detection (Android)
 
 # 1.10.2
@@ -464,7 +507,7 @@ Other:
 
 * Simplified wmtheme output format (Windows)
 * Improved GPU detection performance on Windows 11
-* Lastest Mac model identifier support (macOS)
+* Latest Mac model identifier support (macOS)
 
 # 1.9.1
 
@@ -546,7 +589,7 @@ Bugfixes:
 This release introduces Windows support! Fastfetch now fully support all major desktop OSes (Linux, macOS, Windows and FreeBSD)
 
 Notable Changes:
-* Bios / Board / Chassis modules are splitted against Host module for performance reasons
+* Bios / Board / Chassis modules are split against Host module for performance reasons
 * Caching is removed. Option `--nocache` is removed accordingly
 
 Features:
@@ -555,7 +598,7 @@ Features:
 * Adds a new flag `--stat`, which prints time usage for individual modules
 * Adds Wifi module which supports Windows and macOS
 * Adds data source option for logo printing
-* Detects Homebrew Cellar and Cask seperately
+* Detects Homebrew Cellar and Cask separately
 * Detects WSL version
 * Detects disk based on mount point
 * Exposes more chafa configs

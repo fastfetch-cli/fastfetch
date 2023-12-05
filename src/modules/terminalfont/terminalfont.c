@@ -136,6 +136,7 @@ void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_TERMINALFONT_MODULE_NAME,
+        "Print font name and size used by current terminal",
         ffParseTerminalFontCommandOptions,
         ffParseTerminalFontJsonObject,
         ffPrintTerminalFont,

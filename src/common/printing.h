@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FF_INCLUDED_common_printing
-#define FF_INCLUDED_common_printing
-
 #include "fastfetch.h"
 #include "common/format.h"
 
@@ -26,5 +23,3 @@ void ffPrintColor(const FFstrbuf* colorValue);
 void ffPrintCharTimes(char c, uint32_t times);
 
 void ffPrintModuleFormatHelp(const char* name, const char* def, uint32_t numArgs, const char* args[]);
-
-#endif

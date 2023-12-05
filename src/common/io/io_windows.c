@@ -6,12 +6,12 @@
 static void createSubfolders(const char* fileName)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-    while(*fileName != '\0')
+    char *token = NULL;
+    while((token = strchr(fileName, '/')) != NULL)
     {
-        ffStrbufAppendC(&path, *fileName);
-        if(*fileName == '/')
-            CreateDirectoryA(path.chars, NULL);
-        ++fileName;
+        ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);
+        CreateDirectoryA(path.chars, NULL);
+        fileName = token + 1;
     }
 }
 
@@ -32,22 +32,31 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 
 bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
 {
-    DWORD readed = 0;
+    DWORD bytesRead = 0;
 
     LARGE_INTEGER fileSize;
     if(!GetFileSizeEx(handle, &fileSize))
         fileSize.QuadPart = 0;
-
-    ffStrbufEnsureFree(buffer, fileSize.QuadPart > 0 ? (uint32_t)fileSize.QuadPart : 31);
+    
+    if (fileSize.QuadPart > 0)
+    {
+        // optimize for files has a fixed length,
+        // file can be very large, only keep necessary memory to save time and resources.
+        ffStrbufEnsureFixedLengthFree(buffer, (uint32_t)fileSize.QuadPart);
+    }
+    else
+        ffStrbufEnsureFree(buffer, 31);
     uint32_t free = ffStrbufGetFree(buffer);
+    ssize_t remain = fileSize.QuadPart;
 
     bool success;
     while(
-        (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &readed, NULL)) &&
-        readed > 0
+        (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &bytesRead, NULL)) &&
+        bytesRead > 0
     ) {
-        buffer->length += (uint32_t) readed;
-        if((uint32_t) readed == free)
+        buffer->length += (uint32_t) bytesRead;
+        remain -= (ssize_t)bytesRead;
+        if((uint32_t) bytesRead == free && remain != 0)
             ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
         free = ffStrbufGetFree(buffer);
     }
@@ -114,16 +123,21 @@ bool ffSuppressIO(bool suppress)
     return false;
 }
 
-void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* folderName)
+void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
 {
     uint32_t folderLength = folder->length;
 
-    if(folderName != NULL)
+    if(pretty && folderName != NULL)
+    {
+        for(uint8_t i = 0; i < indentation - 1; i++)
+            fputs("  | ", stdout);
         printf("%s/\n", folderName);
+    }
 
     ffStrbufAppendC(folder, '*');
     WIN32_FIND_DATAA entry;
     HANDLE hFind = FindFirstFileA(folder->chars, &entry);
+    ffStrbufTrimRight(folder, '*');
     if(hFind == INVALID_HANDLE_VALUE)
         return;
 
@@ -137,24 +151,31 @@ void listFilesRecursively(FFstrbuf* folder, uint8_t indentation, const char* fol
             ffStrbufSubstrBefore(folder, folderLength);
             ffStrbufAppendS(folder, entry.cFileName);
             ffStrbufAppendC(folder, '/');
-            listFilesRecursively(folder, (uint8_t) (indentation + 1), entry.cFileName);
+            listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), entry.cFileName, pretty);
             ffStrbufSubstrBefore(folder, folderLength);
             continue;
         }
 
-        for(uint8_t i = 0; i < indentation; i++)
-            fputs("  | ", stdout);
+        if (pretty)
+        {
+            for(uint8_t i = 0; i < indentation; i++)
+                fputs("  | ", stdout);
+        }
+        else
+        {
+            fputs(folder->chars + baseLength, stdout);
+        }
 
         puts(entry.cFileName);
     } while (FindNextFileA(hFind, &entry));
     FindClose(hFind);
 }
 
-void ffListFilesRecursively(const char* path)
+void ffListFilesRecursively(const char* path, bool pretty)
 {
     FF_STRBUF_AUTO_DESTROY folder = ffStrbufCreateS(path);
     ffStrbufEnsureEndsWithC(&folder, '/');
-    listFilesRecursively(&folder, 0, NULL);
+    listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
 }
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)

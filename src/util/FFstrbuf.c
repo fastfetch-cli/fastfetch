@@ -54,6 +54,30 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
     strbuf->allocated = allocate;
 }
 
+void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
+{
+    uint32_t oldFree = ffStrbufGetFree(strbuf);
+    if (oldFree >= free && !(strbuf->allocated == 0 && strbuf->length > 0))
+        return;
+    
+    uint32_t newCap = strbuf->allocated + (free - oldFree);
+    
+    if(strbuf->allocated == 0)
+    {
+        newCap += strbuf->length + 1; // +1 for the NUL
+        char* newbuf = malloc(sizeof(*strbuf->chars) * newCap);
+        if(strbuf->length == 0)
+            *newbuf = '\0';
+        else
+            memcpy(newbuf, strbuf->chars, strbuf->length + 1);
+        strbuf->chars = newbuf;
+    }
+    else
+        strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * newCap);
+    
+    strbuf->allocated = newCap;
+}
+
 void ffStrbufClear(FFstrbuf* strbuf)
 {
     assert(strbuf != NULL);
@@ -167,8 +191,11 @@ void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...)
     va_list arguments;
     va_start(arguments, format);
 
-    if(strbuf->allocated == 0)
-        return ffStrbufInitVF(strbuf, format, arguments);
+    if(strbuf->allocated == 0) {
+        ffStrbufInitVF(strbuf, format, arguments);
+        va_end(arguments);
+        return;
+    }
 
     ffStrbufClear(strbuf);
     ffStrbufAppendVF(strbuf, format, arguments);
@@ -302,7 +329,7 @@ uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t start, char c)
 {
     assert(start <= strbuf->length);
 
-    //We need to loop one higher than the actual index, because uint32_t is guranteed to be >= 0, so this statement would always be true
+    //We need to loop one higher than the actual index, because uint32_t is guaranteed to be >= 0, so this statement would always be true
     for(uint32_t i = start + 1; i > 0; i--)
     {
         if(strbuf->chars[i - 1] == c)

@@ -334,6 +334,65 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
+    //ffStrbufEnsureFixedLengthFree / empty buffer
+    ffStrbufInit(&strbuf);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 10);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 11);
+    ffStrbufDestroy(&strbuf);
+    ffStrbufInitA(&strbuf, 10);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 10);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 11);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufEnsureFixedLengthFree / empty buffer with zero free length
+    ffStrbufInit(&strbuf);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 0);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufEnsureFixedLengthFree / empty buffer but oldFree >= newFree
+    ffStrbufInitA(&strbuf, 11);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 10);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 11);
+    ffStrbufDestroy(&strbuf);
+    ffStrbufInitA(&strbuf, 12);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 10);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 12);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufEnsureFixedLengthFree / non empty buffer
+    ffStrbufAppendF(&strbuf, "%s", "1234567890");
+    VERIFY(strbuf.length == 10);
+    VERIFY(strbuf.allocated == 32);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 0);
+    VERIFY(strbuf.length == 10);
+    VERIFY(strbuf.allocated == 32);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 20); // less than oldFree (=21)
+    VERIFY(strbuf.length == 10);
+    VERIFY(strbuf.allocated == 32);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 21); // equal to oldFree (=21)
+    VERIFY(strbuf.length == 10);
+    VERIFY(strbuf.allocated == 32);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 22); // greater than oldFree (=21)
+    VERIFY(strbuf.length == 10);
+    VERIFY(strbuf.allocated == 33);
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufEnsureFixedLengthFree / static buffer
+    ffStrbufInitStatic(&strbuf, "__TEST__");
+    VERIFY(strbuf.length > 0);
+    VERIFY(strbuf.allocated == 0);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 10);
+    VERIFY(strbuf.length == strlen("__TEST__"));
+    VERIFY(strbuf.allocated == strlen("__TEST__") + 1 + 10);
+    VERIFY(ffStrbufEqualS(&strbuf, "__TEST__"));
+    ffStrbufDestroy(&strbuf);
+
     //Success
     puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }
