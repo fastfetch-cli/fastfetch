@@ -1052,7 +1052,7 @@ install(
 
 install(
     FILES "${PROJECT_BINARY_DIR}/fastfetch.1"
-    DESTINATION "${CMAKE_INSTALL_MANDIR}"
+    DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
 )
 
 ##################

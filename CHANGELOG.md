@@ -1,3 +1,8 @@
+# 2.3.1
+
+Bugfixes:
+* Man page install location
+
 # 2.3.0
 
 Config related changes:
