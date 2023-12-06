@@ -42,25 +42,18 @@ static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, unsigned 
 
 static uint32_t getNumStringsImpl(const char* filename, const char* needle)
 {
-    FILE* file = fopen(filename, "r");
-    if(file == NULL)
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!ffReadFileBuffer(filename, &content))
         return 0;
 
     uint32_t count = 0;
-
-    char* line = NULL;
-    size_t len = 0;
-
-    while(getline(&line, &len, file) != EOF)
+    char *iter = content.chars;
+    size_t needleLength = strlen(needle);
+    while ((iter = memmem(iter, content.length - (size_t)(iter - content.chars), needle, needleLength)) != NULL)
     {
-        if(strstr(line, needle) != NULL)
-            ++count;
+        ++count;
+        iter += needleLength;
     }
-
-    if(line != NULL)
-        free(line);
-
-    fclose(file);
 
     return count;
 }
