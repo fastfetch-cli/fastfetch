@@ -545,7 +545,7 @@
         },
         {
             "long": "bar-char-elapsed",
-            "desc": "Set the character to use in elapsed part",
+            "desc": "Set the character to use in elapsed part of percentage bars",
             "arg": {
                 "type": "str",
                 "default": "■"
@@ -553,7 +553,7 @@
         },
         {
             "long": "bar-char-total",
-            "desc": "Set the character to use in total part",
+            "desc": "Set the character to use in total part of percentage bars",
             "arg": {
                 "type": "str",
                 "default": "-"
@@ -561,7 +561,7 @@
         },
         {
             "long": "bar-width",
-            "desc": "Set the width of the bar, in number of characters",
+            "desc": "Set the width of percentage bars, in number of characters",
             "arg": {
                 "type": "num",
                 "default": 10
@@ -569,7 +569,7 @@
         },
         {
             "long": "bar-border",
-            "desc": "Whether to show a border around the bar",
+            "desc": "Whether to show a border around percentage bars",
             "arg": {
                 "type": "bool",
                 "optional": true,
