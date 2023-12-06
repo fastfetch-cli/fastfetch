@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 
-if not test -x fastfetch
+if not type -q fastfetch
     return
 end
 

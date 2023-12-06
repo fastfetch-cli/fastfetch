@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.3.1
+    VERSION 2.3.2
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1038,6 +1038,12 @@ install(
     FILES "${CMAKE_SOURCE_DIR}/completions/bash"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions"
     RENAME "${CMAKE_PROJECT_NAME}"
+)
+
+install(
+    FILES "${CMAKE_SOURCE_DIR}/completions/fish"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/fish/vendor_completions.d"
+    RENAME "${CMAKE_PROJECT_NAME}.fish"
 )
 
 install(
