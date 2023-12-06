@@ -1041,6 +1041,12 @@ install(
 )
 
 install(
+    FILES "${CMAKE_SOURCE_DIR}/completions/fish"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/fish/vendor_completions.d"
+    RENAME "${CMAKE_PROJECT_NAME}.fish"
+)
+
+install(
     DIRECTORY "${CMAKE_SOURCE_DIR}/presets"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}"
 )
