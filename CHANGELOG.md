@@ -1,7 +1,15 @@
+# 2.3.2
+
+Bugfixes:
+* Fix fish completion script, and install the script correctly
+
+Logo:
+* Fix Xray-OS logo name
+
 # 2.3.1
 
 Bugfixes:
-* Man page install location
+* Fix man page install location
 
 # 2.3.0
 
