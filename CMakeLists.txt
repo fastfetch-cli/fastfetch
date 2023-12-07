@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.3.2
+    VERSION 2.3.3
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -206,7 +206,7 @@ endif()
 #############
 
 function(fastfetch_encode_c_string STR OUTVAR)
-    string(REGEX REPLACE "\n$" "" TEMP "${STR}") # Remove trailing newline
+    string(REGEX REPLACE "\n$" "" TEMP "${STR}")  # Remove trailing newline
     string(REPLACE "\\" "\\\\" TEMP "${TEMP}")    # Escape backslashes
     string(REPLACE "\n" "\\n" TEMP "${TEMP}")     # Replace newlines with \n
     string(REPLACE "\"" "\\\"" TEMP "${TEMP}")    # Replace quotes with \"
@@ -222,7 +222,7 @@ endfunction(fastfetch_load_text)
 find_package(Python)
 if(Python_FOUND)
     # Minify JSON string. `io.open(0,encoding='utf-8')` is needed to avoid encoding issues on Windows
-    execute_process(COMMAND ${Python_EXECUTABLE} -c "import io,json,sys;json.dump(json.load(io.open(0,encoding='utf-8')),sys.stdout,separators=(',', ':'),ensure_ascii=False)"
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import json,sys;json.dump(json.load(sys.stdin),sys.stdout,separators=(',',':'))"
                     INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
                     OUTPUT_VARIABLE DATATEXT_JSON_HELP)
 else()

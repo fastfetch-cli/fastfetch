@@ -548,7 +548,7 @@
             "desc": "Set the character to use in elapsed part of percentage bars",
             "arg": {
                 "type": "str",
-                "default": "■"
+                "default": "\u25a0"
             }
         },
         {
@@ -1290,12 +1290,12 @@
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "block": "███",
-                    "circle": "●",
-                    "diamond": "◆",
-                    "triangle": "▲",
-                    "square": "■",
-                    "star": "★"
+                    "block": "\u2588\u2588\u2588",
+                    "circle": "\u25cf",
+                    "diamond": "\u25c6",
+                    "triangle": "\u25b2",
+                    "square": "\u25a0",
+                    "star": "\u2605"
                 },
                 "default": "block"
             }
