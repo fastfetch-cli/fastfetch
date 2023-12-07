@@ -1,3 +1,12 @@
+# 2.3.4
+
+Bugfixes:
+* Fix `--help` doesn't work when built without python
+
+Features:
+* Use `MemAvailable` if available (Memory, Linux)
+* Improve performance of detecting dpkg package count (Packages, Linux)
+
 # 2.3.3
 
 Bugfixes:
