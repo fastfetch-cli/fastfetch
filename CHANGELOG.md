@@ -1,3 +1,8 @@
+# 2.3.3
+
+Bugfixes:
+* Fix `--help` doesn't work in Windows and some other platforms
+
 # 2.3.2
 
 Bugfixes:
