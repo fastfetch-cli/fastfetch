@@ -221,12 +221,15 @@ endfunction(fastfetch_load_text)
 
 find_package(Python)
 if(Python_FOUND)
-    # Minify JSON string. `io.open(0,encoding='utf-8')` is needed to avoid encoding issues on Windows
     execute_process(COMMAND ${Python_EXECUTABLE} -c "import json,sys;json.dump(json.load(sys.stdin),sys.stdout,separators=(',',':'))"
                     INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
                     OUTPUT_VARIABLE DATATEXT_JSON_HELP)
+    if(DATATEXT_JSON_HELP STREQUAL "")
+        message(ERROR "DATATEXT_JSON_HELP is empty, which should not happen!")
+    endif()
 else()
-    file(READ "src/data/help.json" TEMP)
+    message(STATUS "Python3 is not found, 'help.json' will not be minified")
+    file(READ "src/data/help.json" DATATEXT_JSON_HELP)
 endif()
 
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
