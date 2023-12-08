@@ -2,6 +2,7 @@
 
 Features:
 * Improve performance of detecting rpm and pkg package count (Packages, Linux / FreeBSD)
+* Support Apple M3X temperature detection (CPU / GPU, macOS)
 
 # 2.3.4
 
