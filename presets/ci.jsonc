@@ -35,6 +35,7 @@
     "terminalfont",
     "terminalsize",
     "cpu",
+    "cpuusage",
     "gpu",
     "memory",
     "swap",
