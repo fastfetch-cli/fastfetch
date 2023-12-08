@@ -1,3 +1,8 @@
+# 2.3.5
+
+Features:
+* Improve performance of detecting rpm and pkg package count (Packages, Linux / FreeBSD)
+
 # 2.3.4
 
 Bugfixes:
