@@ -529,7 +529,7 @@ elseif(BSD)
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
-        src/detection/packages/packages_linux.c
+        src/detection/packages/packages_bsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_bsd.c
         src/detection/gtk_qt/qt.c
