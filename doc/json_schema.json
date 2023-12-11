@@ -251,9 +251,24 @@
                     "description": "Set the path to the file containing OS information. Linux only"
                 },
                 "dsForceDrm": {
-                    "type": "boolean",
-                    "description": "Force display detection to use `/sys/class/drm`. Linux only",
-                    "default": false
+                    "description": "Force display detection to use DRM. Linux only",
+                    "oneOf": [
+                        {
+                            "type": "bool",
+                            "const": false,
+                            "description": "Try `libdrm` first, then `sysfs` if libdrm failed"
+                        },
+                        {
+                            "type": "string",
+                            "description": "Use `/sys/class/drm` only.",
+                            "const": "sysfs-only"
+                        },
+                        {
+                            "type": "bool",
+                            "const": true,
+                            "description": "Don't force using DRM"
+                        }
+                    ]
                 },
                 "wmiTimeout": {
                     "type": "integer",

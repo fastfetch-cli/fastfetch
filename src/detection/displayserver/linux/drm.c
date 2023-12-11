@@ -285,8 +285,11 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 void ffdsConnectDrm(FFDisplayServerResult* result)
 {
     #ifdef FF_HAVE_DRM
-    if (drmConnectLibdrm(result) == NULL)
-        return;
+    if (instance.config.general.dsForceDrm != FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY)
+    {
+        if (drmConnectLibdrm(result) == NULL)
+            return;
+    }
     #endif
 
     drmParseSysfs(result);

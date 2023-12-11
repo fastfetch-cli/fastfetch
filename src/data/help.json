@@ -124,9 +124,14 @@
             "desc": "Set if only DRM should be used to detect displays",
             "remark": "Use this option if you encountered problems with other detection method. Linux only",
             "arg": {
-                "type": "bool",
+                "type": "enum",
                 "optional": true,
-                "default": false
+                "default": "false",
+                "enum": {
+                    "true": "Try `libdrm` first, then `sysfs` if libdrm failed",
+                    "sysfs-only": "Use `/sys/class/drm` only",
+                    "false": "Don't force using DRM"
+                }
             }
         }
     ],
