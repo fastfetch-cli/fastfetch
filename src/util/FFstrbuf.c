@@ -59,9 +59,9 @@ void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
     uint32_t oldFree = ffStrbufGetFree(strbuf);
     if (oldFree >= free && !(strbuf->allocated == 0 && strbuf->length > 0))
         return;
-    
+
     uint32_t newCap = strbuf->allocated + (free - oldFree);
-    
+
     if(strbuf->allocated == 0)
     {
         newCap += strbuf->length + 1; // +1 for the NUL
@@ -74,7 +74,7 @@ void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
     }
     else
         strbuf->chars = realloc(strbuf->chars, sizeof(*strbuf->chars) * newCap);
-    
+
     strbuf->allocated = newCap;
 }
 
@@ -99,6 +99,8 @@ void ffStrbufAppendC(FFstrbuf* strbuf, char c)
 
 void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c)
 {
+    if (num == 0) return;
+
     ffStrbufEnsureFree(strbuf, num);
     memset(&strbuf->chars[strbuf->length], c, num);
     strbuf->length += num;

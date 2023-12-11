@@ -5,6 +5,9 @@ Features:
 * Support Apple M3X temperature detection (CPU / GPU, macOS)
 * `--ds-force-drm` support a new option `sysfs-only`
 
+Bugfixes:
+* Fix crashes sometimes when `--logo-padding-top` is not set (Logo)
+
 # 2.3.4
 
 Bugfixes:
