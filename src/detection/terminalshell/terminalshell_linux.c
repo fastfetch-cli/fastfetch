@@ -68,8 +68,6 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
 static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 {
-    const char* error = NULL;
-
     #ifdef __linux__
 
     char statFilePath[64];
@@ -86,20 +84,18 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
         !ffStrSet(name) ||
         *ppid == 0
     )
-        error = "sscanf(stat) failed";
+        return "sscanf(stat) failed";
 
     #elif defined(__APPLE__)
 
     struct proc_bsdshortinfo proc;
     if(proc_pidinfo(pid, PROC_PIDT_SHORTBSDINFO, 0, &proc, PROC_PIDT_SHORTBSDINFO_SIZE) <= 0)
-        error = "proc_pidinfo(pid) failed";
-    else
-    {
-        *ppid = (pid_t)proc.pbsi_ppid;
-        strncpy(name, proc.pbsi_comm, 16); //trancated to 16 chars
-    }
+        return "proc_pidinfo(pid) failed";
 
-    #else
+    *ppid = (pid_t)proc.pbsi_ppid;
+    strncpy(name, proc.pbsi_comm, 16); //trancated to 16 chars
+
+    #elif defined(__FreeBSD__)
 
     struct kinfo_proc proc;
     size_t size = sizeof(proc);
@@ -108,16 +104,18 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
         &proc, &size,
         NULL, 0
     ))
-        error = "sysctl(KERN_PROC_PID) failed";
-    else
-    {
-        *ppid = (pid_t)proc.ki_ppid;
-        strncpy(name, proc.ki_comm, COMMLEN);
-    }
+        return "sysctl(KERN_PROC_PID) failed";
+
+    *ppid = (pid_t)proc.ki_ppid;
+    strncpy(name, proc.ki_comm, COMMLEN);
+
+    #else
+
+    return "Unsupported platform";
 
     #endif
 
-    return error;
+    return NULL;
 }
 
 static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
