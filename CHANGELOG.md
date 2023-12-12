@@ -4,6 +4,8 @@ Features:
 * Improve performance of detecting rpm and pkg package count (Packages, Linux / FreeBSD)
 * Support Apple M3X temperature detection (CPU / GPU, macOS)
 * `--ds-force-drm` support a new option `sysfs-only`
+* Improve xfce4 version detection
+* Improve detection (WM / DE, FreeBSD)
 
 Bugfixes:
 * Fix crashes sometimes when `--logo-padding-top` is not set (Logo)
