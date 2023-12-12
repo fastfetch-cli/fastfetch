@@ -1,14 +1,20 @@
 #include "displayserver_linux.h"
-#include "common/io/io.h"
 #include "common/properties.h"
-#include "common/processing.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <dirent.h>
+
+#ifdef __FreeBSD__
+    #include <sys/sysctl.h>
+    #include <sys/types.h>
+    #include <sys/user.h>
+#else
+    #include "common/io/io.h"
+#endif
 
 static const char* parseEnv(void)
 {
@@ -46,10 +52,12 @@ static const char* parseEnv(void)
     if(getenv("TDE_FULL_SESSION") != NULL)
         return "Trinity";
 
+    #ifdef __linux__
     if(
         getenv("WAYLAND_DISPLAY") != NULL &&
         ffPathExists("/mnt/wslg/", FF_PATHTYPE_DIRECTORY)
     ) return "WSLg";
+    #endif
 
     return NULL;
 }
@@ -244,23 +252,49 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     }
 }
 
-static void getFromProcDir(FFDisplayServerResult* result)
+static const char* getFromProcesses(FFDisplayServerResult* result)
 {
-    DIR* proc = opendir("/proc");
-    if(proc == NULL)
-        return;
+    uint32_t userId = getuid();
+
+#ifdef __FreeBSD__
+    int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId};
+    size_t length = 0;
+
+    if(sysctl(request, sizeof(request) / sizeof(*request), NULL, &length, NULL, 0) != 0)
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, NULL) failed";
+
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    if(sysctl(request, sizeof(request) / sizeof(*request), procs, &length, NULL, 0) != 0)
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
+
+    length /= sizeof(*procs);
+
+    for (struct kinfo_proc* proc = procs; proc < procs + length; ++proc)
+    {
+        if(result->dePrettyName.length == 0)
+            applyPrettyNameIfDE(result, proc->ki_comm);
+
+        if(result->wmPrettyName.length == 0)
+            applyNameIfWM(result, proc->ki_comm);
+
+        if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
+            break;
+    }
+#else
+    FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
+    if(procdir == NULL)
+        return "opendir(\"/proc\") failed";
 
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
     ffStrbufAppendS(&procPath, "/proc/");
 
     uint32_t procPathLength = procPath.length;
 
-    FF_STRBUF_AUTO_DESTROY userID = ffStrbufCreateF("%i", getuid());
     FF_STRBUF_AUTO_DESTROY loginuid = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY processName = ffStrbufCreateA(256); //Some processes have large command lines (looking at you chrome)
 
     struct dirent* dirent;
-    while((dirent = readdir(proc)) != NULL)
+    while((dirent = readdir(procdir)) != NULL)
     {
         //Match only folders starting with a number (the pid folders)
         if(dirent->d_type != DT_DIR || !isdigit(dirent->d_name[0]))
@@ -272,7 +306,7 @@ static void getFromProcDir(FFDisplayServerResult* result)
         //Don't check for processes not owend by the current user.
         ffStrbufAppendS(&procPath, "/loginuid");
         ffReadFileBuffer(procPath.chars, &loginuid);
-        if(ffStrbufComp(&userID, &loginuid) != 0)
+        if(ffStrbufToUInt(&loginuid, (uint64_t) -1) != userId)
         {
             ffStrbufSubstrBefore(&procPath, procPathLength);
             continue;
@@ -297,8 +331,9 @@ static void getFromProcDir(FFDisplayServerResult* result)
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
     }
+#endif
 
-    closedir(proc);
+    return NULL;
 }
 
 void ffdsDetectWMDE(FFDisplayServerResult* result)
@@ -338,7 +373,7 @@ void ffdsDetectWMDE(FFDisplayServerResult* result)
         return;
 
     //Get missing WM / DE from processes.
-    getFromProcDir(result);
+    getFromProcesses(result);
 
     //Return if both wm and de are set, or if env doesn't contain anything
     if(
