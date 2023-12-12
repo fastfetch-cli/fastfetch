@@ -114,6 +114,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HERBSTLUFTWM);
     else if(strcasecmp(name, "icewm") == 0)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
+    else if(strcasecmp(name, "dtwm") == 0)
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DTWM);
 }
 
 static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)
@@ -216,6 +218,13 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     ) {
         ffStrbufSetS(&result->deProcessName, "budgie-desktop");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_BUDGIE);
+    }
+
+    else if(
+        strcasecmp(name, "dtsession") == 0
+    ) {
+        ffStrbufSetS(&result->deProcessName, "dtsession");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CDE);
     }
 }
 
