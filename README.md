@@ -89,3 +89,15 @@ Q: Why do you need a very performant version of neofetch?
 
 Q: It does not display [*] correctly for me, what can I do?
 > This is most likely because your system is not implemented (yet). At the moment I am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration
+
+## Star History
+
+Give it a star to support us!
+
+<a href="https://star-history.com/#fastfetch-cli/fastfetch&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastfetch-cli/fastfetch&type=Date" />
+  </picture>
+</a>
