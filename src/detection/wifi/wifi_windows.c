@@ -18,22 +18,22 @@ static void convertIfStateToString(WLAN_INTERFACE_STATE state, FFstrbuf* result)
         ffStrbufAppendS(result, "Connected");
         break;
     case wlan_interface_state_ad_hoc_network_formed:
-        ffStrbufAppendS(result, "First node in a ad hoc network");
+        ffStrbufAppendS(result, "Ad hoc network formed");
         break;
     case wlan_interface_state_disconnecting:
         ffStrbufAppendS(result, "Disconnecting");
         break;
     case wlan_interface_state_disconnected:
-        ffStrbufAppendS(result, "Not connected");
+        ffStrbufAppendS(result, "Disconnected");
         break;
     case wlan_interface_state_associating:
-        ffStrbufAppendS(result, "Attempting to associate with a network");
+        ffStrbufAppendS(result, "Associating");
         break;
     case wlan_interface_state_discovering:
-        ffStrbufAppendS(result, "Auto configuration is discovering settings for the network");
+        ffStrbufAppendS(result, "Discovering");
         break;
     case wlan_interface_state_authenticating:
-        ffStrbufAppendS(result, "In process of authenticating");
+        ffStrbufAppendS(result, "Authenticating");
         break;
     default:
         ffStrbufAppendS(result, "Unknown");
@@ -133,16 +133,16 @@ const char* ffDetectWifi(FFlist* result)
             case dot11_phy_type_ht:
                 ffStrbufAppendS(&item->conn.protocol, "802.11n (Wi-Fi 4)");
                 break;
-            case 8 /*dot11_phy_type_vht*/:
+            case dot11_phy_type_vht:
                 ffStrbufAppendS(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
                 break;
-            case 9 /*dot11_phy_type_dmg*/:
+            case dot11_phy_type_dmg:
                 ffStrbufAppendS(&item->conn.protocol, "802.11ad (WiGig)");
                 break;
-            case 10 /*dot11_phy_type_he*/:
+            case dot11_phy_type_he:
                 ffStrbufAppendS(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
                 break;
-            case 11 /*dot11_phy_type_eht*/:
+            case dot11_phy_type_eht:
                 ffStrbufAppendS(&item->conn.protocol, "802.11be (Wi-Fi 7)");
                 break;
             default:
@@ -179,10 +179,10 @@ const char* ffDetectWifi(FFlist* result)
                 case DOT11_AUTH_ALGO_RSNA_PSK:
                     ffStrbufAppendS(&item->conn.security, "WPA2-PSK");
                     break;
-                case 8 /* DOT11_AUTH_ALGO_WPA3 */:
+                case DOT11_AUTH_ALGO_WPA3:
                     ffStrbufAppendS(&item->conn.security, "WPA3");
                     break;
-                case 9 /* DOT11_AUTH_ALGO_WPA3_SAE */:
+                case DOT11_AUTH_ALGO_WPA3_SAE:
                     ffStrbufAppendS(&item->conn.security, "WPA3-SAE");
                     break;
                 case 10 /* DOT11_AUTH_ALGO_OWE */:
