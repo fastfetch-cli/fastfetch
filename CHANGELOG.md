@@ -9,6 +9,7 @@ Features:
 
 Bugfixes:
 * Fix crashes sometimes when `--logo-padding-top` is not set (Logo)
+* Fix memory usage counting algorithm (Memory, macOS)
 
 # 2.3.4
 
