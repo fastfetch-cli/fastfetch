@@ -130,7 +130,7 @@
                 "enum": {
                     "true": "Try `libdrm` first, then `sysfs` if libdrm failed",
                     "sysfs-only": "Use `/sys/class/drm` only",
-                    "false": "Don't force using DRM"
+                    "false": "Try `wayland`, then `x11`, then `drm`"
                 }
             }
         }

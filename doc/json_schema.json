@@ -256,7 +256,7 @@
                         {
                             "type": "bool",
                             "const": false,
-                            "description": "Try `libdrm` first, then `sysfs` if libdrm failed"
+                            "description": "Try `wayland`, then `x11`, then `drm`"
                         },
                         {
                             "type": "string",
@@ -266,9 +266,10 @@
                         {
                             "type": "bool",
                             "const": true,
-                            "description": "Don't force using DRM"
+                            "description": "Try `libdrm` first, then `sysfs` if libdrm failed"
                         }
-                    ]
+                    ],
+                    "default": false
                 },
                 "wmiTimeout": {
                     "type": "integer",
