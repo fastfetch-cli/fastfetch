@@ -5,7 +5,6 @@
 #include "common/thread.h"
 #include "util/stringUtils.h"
 
-#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -284,33 +283,7 @@ static void getUserShellFromEnv(FFTerminalShellResult* result)
     }
 }
 
-static void getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
-{
-    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreate();
-    ffStrbufAppendS(&command, "printf \"%s\" \"$");
-    ffStrbufAppendTransformS(&command, exeName, toupper);
-    ffStrbufAppendS(&command, "_VERSION\"");
-
-    ffProcessAppendStdOut(version, (char* const[]) {
-        "env",
-        "-i",
-        exe->chars,
-        "-c",
-        command.chars,
-        NULL
-    });
-    ffStrbufSubstrBeforeFirstC(version, '(');
-    ffStrbufRemoveStrings(version, 2, (const char*[]) { "-release", "release" });
-}
-
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
-
-static void getShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
-{
-    ffStrbufClear(version);
-    if(!fftsGetShellVersion(exe, exeName, version))
-        getShellVersionGeneric(exe, exeName, version);
-}
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
@@ -348,7 +321,8 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     getTerminalFromEnv(&result);
     getUserShellFromEnv(&result);
 
-    getShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
+    ffStrbufClear(&result.shellVersion);
+    fftsGetShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
 
     if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
         ffStrbufInitStatic(&result.shellPrettyName, "PowerShell");
