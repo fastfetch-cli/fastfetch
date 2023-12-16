@@ -152,6 +152,49 @@ static inline const char* drmType2Name(uint32_t connector_type)
     }
 }
 
+static const char* drmGetNameByConnId(uint32_t connId, FFstrbuf* name)
+{
+    const char* drmDirPath = "/sys/class/drm/";
+
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
+    if(dirp == NULL)
+        return "opendir(drmDirPath) failed";
+
+    FF_STRBUF_AUTO_DESTROY drmDir = ffStrbufCreateA(64);
+    ffStrbufAppendS(&drmDir, drmDirPath);
+
+    uint32_t drmDirLength = drmDir.length;
+
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+            continue;
+
+        ffStrbufAppendS(&drmDir, entry->d_name);
+        uint32_t drmDirWithDnameLength = drmDir.length;
+
+        ffStrbufAppendS(&drmDir, "/connector_id");
+        ffReadFileBuffer(drmDir.chars, name);
+        if (ffStrbufToUInt(name, 0) != connId)
+        {
+            ffStrbufSubstrBefore(&drmDir, drmDirLength);
+            continue;
+        }
+
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+        ffStrbufClear(name);
+        ffStrbufAppendS(&drmDir, "/edid");
+        uint8_t edidData[128];
+        if(ffReadFileData(drmDir.chars, sizeof(edidData), edidData) == sizeof(edidData))
+            ffEdidGetName(edidData, name);
+        return NULL;
+    }
+
+    ffStrbufClear(name);
+    return "Failed to match connector ID";
+}
+
 static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 {
     FF_LIBRARY_LOAD(libdrm, &instance.config.library.libdrm, "dlopen(libdrm)" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
@@ -162,6 +205,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetEncoder)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetProperty)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetPropertyBlob)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeResources)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeCrtc)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeEncoder)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeConnector)
@@ -196,18 +240,56 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
             if (!conn)
                 continue;
 
-            if (conn->connection != DRM_MODE_CONNECTED)
-                goto next_conn;
-
-            drmModeEncoder* encoder = ffdrmModeGetEncoder(fd, conn->encoder_id);
-            if (!encoder)
-                goto next_conn;
-
-            drmModeCrtc* crtc = ffdrmModeGetCrtc(fd, encoder->crtc_id);
-            if (!crtc)
-                goto next_encoder;
-
+            if (conn->connection == DRM_MODE_CONNECTED)
             {
+                drmModeEncoder* encoder = ffdrmModeGetEncoder(fd, conn->encoder_id);
+                uint32_t width = 0, height = 0, refreshRate = 0;
+
+                if (encoder)
+                {
+                    drmModeCrtc* crtc = ffdrmModeGetCrtc(fd, encoder->crtc_id);
+                    if (crtc)
+                    {
+                        width = crtc->mode.vdisplay;
+                        height = crtc->mode.hdisplay;
+                        refreshRate = crtc->mode.vrefresh;
+                        if (refreshRate == 0)
+                        {
+                            // There are weird cases that we can't get the refresh rate from the CRTC but from the modes
+                            for (int iMode = 0; iMode < conn->count_modes; ++iMode)
+                            {
+                                drmModeModeInfo* mode = &conn->modes[iMode];
+                                if (mode->clock == crtc->mode.clock && mode->htotal == crtc->mode.htotal)
+                                {
+                                    refreshRate = mode->vrefresh;
+                                    break;
+                                }
+                            }
+                        }
+                        ffdrmModeFreeCrtc(crtc);
+                    }
+
+                    ffdrmModeFreeEncoder(encoder);
+                }
+
+                if (width == 0 || height == 0)
+                {
+                    // NVIDIA DRM driver seems incomplete and conn->encoder_id == 0
+                    // Assume preferred resolution is used as what we do in drmParseSys
+                    for (int iMode = 0; iMode < conn->count_modes; ++iMode)
+                    {
+                        drmModeModeInfo* mode = &conn->modes[iMode];
+
+                        if (mode->type & DRM_MODE_TYPE_PREFERRED)
+                        {
+                            width = mode->hdisplay;
+                            height = mode->vdisplay;
+                            refreshRate = mode->vrefresh;
+                            break;
+                        }
+                    }
+                }
+
                 FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
                 for (int iProp = 0; iProp < conn->count_props; ++iProp)
@@ -219,14 +301,27 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     uint32_t type = prop->flags & (DRM_MODE_PROP_LEGACY_TYPE | DRM_MODE_PROP_EXTENDED_TYPE);
                     if (type == DRM_MODE_PROP_BLOB && ffStrEquals(prop->name, "EDID"))
                     {
-                        // Stangely, prop->count_blobs is 0 and prop->blob_ids is NULL
-                        drmModePropertyBlobPtr blob = ffdrmModeGetPropertyBlob(fd, (uint32_t) conn->prop_values[iProp]);
-                        if (blob->length >= 128)
-                            ffEdidGetName(blob->data, &name);
-                        ffdrmModeFreePropertyBlob(blob);
+                        drmModePropertyBlobPtr blob = NULL;
+
+                        if (prop->count_blobs > 0 && prop->blob_ids != NULL)
+                            blob = ffdrmModeGetPropertyBlob(fd, prop->blob_ids[0]);
+                        else
+                            blob = ffdrmModeGetPropertyBlob(fd, (uint32_t) conn->prop_values[iProp]);
+
+                        if (blob)
+                        {
+                            if (blob->length >= 128)
+                                ffEdidGetName(blob->data, &name);
+                            ffdrmModeFreePropertyBlob(blob);
+                        }
                         break;
                     }
                     ffdrmModeFreeProperty(prop);
+                }
+
+                if (name.length == 0)
+                {
+                    drmGetNameByConnId(conn->connector_id, &name);
                 }
 
                 if (name.length == 0)
@@ -237,42 +332,27 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     ffStrbufSetF(&name, "%s-%d", connectorTypeName, iConn);
                 }
 
-                uint32_t refreshRate = crtc->mode.vrefresh;
-                if (refreshRate == 0)
-                {
-                    // There are weird cases that we can't get the refresh rate from the CRTC but from the modes
-                    for (int iMode = 0; iMode < conn->count_modes; ++iMode)
-                    {
-                        drmModeModeInfo* mode = &conn->modes[iMode];
-                        if (mode->clock == crtc->mode.clock && mode->htotal == crtc->mode.htotal)
-                        {
-                            refreshRate = mode->vrefresh;
-                            break;
-                        }
-                    }
-                }
-
-                ffdsAppendDisplay(
-                    result,
-                    crtc->width, crtc->height,
+                ffdsAppendDisplay(result,
+                    width,
+                    height,
                     refreshRate,
-                    0, 0,
+                    0,
+                    0,
                     0,
                     &name,
-                    FF_DISPLAY_TYPE_UNKNOWN,
+                    conn->connector_type == DRM_MODE_CONNECTOR_eDP
+                        ? FF_DISPLAY_TYPE_BUILTIN
+                        : conn->connector_type == DRM_MODE_CONNECTOR_HDMIA || conn->connector_type == DRM_MODE_CONNECTOR_HDMIB
+                            ? FF_DISPLAY_TYPE_EXTERNAL : FF_DISPLAY_TYPE_UNKNOWN,
                     false,
-                    0
+                    conn->connector_id
                 );
             }
 
-            ffdrmModeFreeCrtc(crtc);
-
-    next_encoder:
-            ffdrmModeFreeEncoder(encoder);
-
-    next_conn:
             ffdrmModeFreeConnector(conn);
         }
+
+        ffdrmModeFreeResources(res);
     }
 
     ffdrmFreeDevices(devices, nDevices);
