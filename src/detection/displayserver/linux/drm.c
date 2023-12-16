@@ -27,10 +27,10 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
         ffStrbufAppendS(&drmDir, entry->d_name);
         uint32_t drmDirWithDnameLength = drmDir.length;
 
-        ffStrbufAppendS(&drmDir, "/enabled");
-        char enabled = 'd'; // disabled
-        ffReadFileData(drmDir.chars, sizeof(enabled), &enabled);
-        if (enabled != 'e') // enabled
+        ffStrbufAppendS(&drmDir, "/status");
+        char status = 'd'; // disconnected
+        ffReadFileData(drmDir.chars, sizeof(status), &status);
+        if (status != 'c') // connected
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             continue;
@@ -329,7 +329,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     const char* connectorTypeName = drmType2Name(conn->connector_type);
                     if (connectorTypeName == NULL)
                         connectorTypeName = "Unknown";
-                    ffStrbufSetF(&name, "%s-%d", connectorTypeName, iConn);
+                    ffStrbufSetF(&name, "%s-%d", connectorTypeName, iConn + 1);
                 }
 
                 ffdsAppendDisplay(result,
