@@ -82,6 +82,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
         }
 
+        ffStrbufInitWS(&device->devPath, szDevice);
         ffStrbufInit(&device->serial);
         if (sdd->SerialNumberOffset != 0)
         {

@@ -114,6 +114,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
         ffStrbufDestroy(&dev->name);
         ffStrbufDestroy(&dev->interconnect);
         ffStrbufDestroy(&dev->devPath);
+        ffStrbufDestroy(&dev->serial);
     }
 }
 
