@@ -18,6 +18,8 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "Undefined") &&
         !ffStrbufIgnCaseEqualS(value, "Not Specified") &&
         !ffStrbufIgnCaseEqualS(value, "Not Applicable") &&
+        !ffStrbufIgnCaseEqualS(value, "Not Defined") &&
+        !ffStrbufIgnCaseEqualS(value, "Not Available") &&
         !ffStrbufIgnCaseEqualS(value, "INVALID") &&
         !ffStrbufIgnCaseEqualS(value, "Type1ProductConfigId") &&
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
