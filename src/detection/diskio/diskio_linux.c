@@ -1,5 +1,6 @@
 #include "diskio.h"
 #include "common/io/io.h"
+#include "common/properties.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>
@@ -64,7 +65,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             else
             {
                 snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
-                ffAppendFileBuffer(pathSysBlock, &device->interconnect);
+                if (!ffAppendFileBuffer(pathSysBlock, &device->interconnect))
+                {
+                    snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/uevent", devName);
+                    if (ffParsePropFile(pathSysBlock, "DEVTYPE=", &device->interconnect))
+                        ffStrbufSubstrBeforeLastC(&device->interconnect, '_');
+                }
             }
         }
 
