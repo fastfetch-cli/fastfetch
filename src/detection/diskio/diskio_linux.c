@@ -24,71 +24,51 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         char pathSysBlock[PATH_MAX];
 
-        char blockId[256] = "";
-        {
-            FF_AUTO_CLOSE_DIR DIR* devDiskDirp = opendir("/dev/disk/by-id");
-            if (devDiskDirp)
-            {
-                struct dirent* devDiskEntry;
-                while ((devDiskEntry = readdir(devDiskDirp)) != NULL)
-                {
-                    if (devDiskEntry->d_name[0] == '.')
-                        continue;
-
-                    char pathDevDisk[PATH_MAX];
-                    snprintf(pathDevDisk, PATH_MAX, "/dev/disk/by-id/%s", devDiskEntry->d_name);
-
-                    char pathDev[PATH_MAX];
-                    ssize_t pathLen = readlink(pathDevDisk, pathDev, sizeof(pathDev) - 1);
-                    if (pathLen > 0)
-                    {
-                        pathDev[pathLen] = '\0';
-                        if (!ffStrEquals(basename(pathDev), devName))
-                            continue;
-
-                        if (ffStrStartsWith(devDiskEntry->d_name, "nvme-eui.")) // NVMe drive identifier
-                            continue;
-
-                        strcpy(blockId, devDiskEntry->d_name);
-                        break;
-                    }
-                }
-            }
-        }
+        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device", devName);
+        if (!ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY))
+            continue;
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        ffStrbufInit(&device->name);
 
-        if (blockId[0])
         {
-            char* slash = strchr(blockId, '-');
-            if (slash)
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/vendor", devName);
+            ffAppendFileBuffer(pathSysBlock, &device->name);
+            if (device->name.length > 0)
+                ffStrbufAppendC(&device->name, ' ');
+
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/model", devName);
+            ffAppendFileBuffer(pathSysBlock, &device->name);
+            ffStrbufTrim(&device->name, ' ');
+
+            if (device->name.length == 0)
+                ffStrbufSetS(&device->name, devName);
+
+            if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
             {
-                char* slash2 = strchr(slash + 1, '-');
-                if (slash2)
-                    ffStrbufInitNS(&device->name, (uint32_t) (slash2 - slash - 1), slash + 1);
-                else
-                    ffStrbufInitS(&device->name, slash + 1);
-                ffStrbufInitNS(&device->interconnect, (uint32_t) (slash - blockId), blockId);
+                ffStrbufDestroy(&device->name);
+                result->length--;
+                continue;
             }
-            else
-            {
-                ffStrbufInitS(&device->name, blockId);
-                ffStrbufInit(&device->interconnect);
-            }
-            ffStrbufReplaceAllC(&device->name, '_', ' ');
         }
-        else
+
         {
-            ffStrbufInitS(&device->name, devName);
             ffStrbufInit(&device->interconnect);
-        }
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s", devName);
+            char pathSysDevices[PATH_MAX];
+            ssize_t resultLength = readlink(pathSysBlock, pathSysDevices, sizeof(pathSysDevices) - 1);
+            if (resultLength > 0)
+            {
+                pathSysDevices[resultLength] = '\0';
+                if (strstr(pathSysDevices, "/usb") != NULL)
+                    ffStrbufSetS(&device->interconnect, "usb");
+            }
 
-        if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
-        {
-            ffStrbufDestroy(&device->name);
-            ffStrbufDestroy(&device->interconnect);
-            result->length--;
-            continue;
+            if (device->interconnect.length == 0)
+            {
+                snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
+                ffAppendFileBuffer(pathSysBlock, &device->interconnect);
+            }
         }
 
         // I/Os merges sectors ticks ...
@@ -113,18 +93,19 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/queue/rotational", devName);
             char isRotationalChar = '1';
             if (ffReadFileData(pathSysBlock, 1, &isRotationalChar))
-                device->type = isRotationalChar = '1' ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
+                device->type = isRotationalChar == '1' ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
             else
                 device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
         }
 
         {
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/size", devName);
-            ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(blockId) - 1, blockId);
+            char blkSize[32];
+            ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(blkSize) - 1, blkSize);
             if (fileSize > 0)
             {
-                blockId[fileSize] = 0;
-                device->size = (uint64_t) strtoul(blockId, NULL, 10) * 512;
+                blkSize[fileSize] = 0;
+                device->size = (uint64_t) strtoul(blkSize, NULL, 10) * 512;
             }
             else
                 device->size = 0;
