@@ -13,6 +13,7 @@ typedef struct FFDiskIOResult
 {
     FFstrbuf name;
     FFstrbuf interconnect;
+    FFstrbuf serial;
     FFDiskIOPhysicalType type;
     uint64_t size;
     FFstrbuf devPath;

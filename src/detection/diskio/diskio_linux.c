@@ -110,6 +110,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             else
                 device->size = 0;
         }
+
+        {
+            ffStrbufInit(&device->serial);
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/serial", devName);
+            ffReadFileBuffer(pathSysBlock, &device->serial);
+        }
     }
 
     return NULL;
