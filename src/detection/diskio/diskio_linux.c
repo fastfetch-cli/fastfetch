@@ -19,10 +19,15 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         if (devName[0] == '.')
             continue;
 
-        if (ffStrStartsWith(devName, "dm-")) // LVM logical partitions
-            continue;
 
         char pathSysBlock[PATH_MAX];
+        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s", devName);
+
+        char pathSysDeviceReal[PATH_MAX] = "";
+        readlink(pathSysBlock, pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
+
+        if (strstr(pathSysDeviceReal, "/virtual/")) // virtual device
+            continue;
 
         snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device", devName);
         if (!ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY))
@@ -54,17 +59,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         {
             ffStrbufInit(&device->interconnect);
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s", devName);
-            char pathSysDevices[PATH_MAX];
-            ssize_t resultLength = readlink(pathSysBlock, pathSysDevices, sizeof(pathSysDevices) - 1);
-            if (resultLength > 0)
-            {
-                pathSysDevices[resultLength] = '\0';
-                if (strstr(pathSysDevices, "/usb") != NULL)
-                    ffStrbufSetS(&device->interconnect, "usb");
-            }
-
-            if (device->interconnect.length == 0)
+            if (strstr(pathSysDeviceReal, "/usb") != NULL)
+                ffStrbufSetS(&device->interconnect, "usb");
+            else
             {
                 snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
                 ffAppendFileBuffer(pathSysBlock, &device->interconnect);
