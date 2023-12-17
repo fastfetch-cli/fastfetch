@@ -43,9 +43,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInit(&device->name);
-
         STORAGE_DEVICE_DESCRIPTOR* sdd = (STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
+
+        ffStrbufInit(&device->name);
         if (sdd->VendorIdOffset != 0)
         {
             ffStrbufSetS(&device->name, (const char*) sddBuffer + sdd->VendorIdOffset);
@@ -60,18 +60,33 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             ffStrbufTrimRight(&device->name, ' ');
         }
 
-        ffStrbufInit(&device->serial);
-        if (sdd->SerialNumberOffset != 0)
-        {
-            ffStrbufSetS(&device->serial, (const char*) sddBuffer + sdd->SerialNumberOffset);
-            ffStrbufTrim(&device->serial, ' ');
-        }
-
         if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
         {
             ffStrbufDestroy(&device->name);
             result->length--;
             continue;
+        }
+
+        DISK_PERFORMANCE dp = {};
+        if (DeviceIoControl(hDevice, IOCTL_DISK_PERFORMANCE, NULL, 0, &dp, sizeof(dp), &retSize, NULL))
+        {
+            device->bytesRead = (uint64_t) dp.BytesRead.QuadPart;
+            device->readCount = (uint64_t) dp.ReadCount;
+            device->bytesWritten = (uint64_t) dp.BytesWritten.QuadPart;
+            device->writeCount = (uint64_t) dp.WriteCount;
+        }
+        else
+        {
+            ffStrbufDestroy(&device->name);
+            result->length--;
+            continue;
+        }
+
+        ffStrbufInit(&device->serial);
+        if (sdd->SerialNumberOffset != 0)
+        {
+            ffStrbufSetS(&device->serial, (const char*) sddBuffer + sdd->SerialNumberOffset);
+            ffStrbufTrim(&device->serial, ' ');
         }
 
         device->removable = !!sdd->RemovableMedia;
@@ -100,15 +115,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             case BusTypeSCM: ffStrbufSetStatic(&device->interconnect, "SCM"); break;
             case BusTypeUfs: ffStrbufSetStatic(&device->interconnect, "Ufs"); break;
             default: ffStrbufSetF(&device->interconnect, "Unknown (%d)", (int) sdd->BusType); break;
-        }
-
-        DISK_PERFORMANCE dp = {};
-        if (DeviceIoControl(hDevice, IOCTL_DISK_PERFORMANCE, NULL, 0, &dp, sizeof(dp), &retSize, NULL))
-        {
-            device->bytesRead = (uint64_t) dp.BytesRead.QuadPart;
-            device->readCount = (uint64_t) dp.ReadCount;
-            device->bytesWritten = (uint64_t) dp.BytesWritten.QuadPart;
-            device->writeCount = (uint64_t) dp.WriteCount;
         }
 
         DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
