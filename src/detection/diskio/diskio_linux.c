@@ -7,80 +7,81 @@
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS("/dev/disk/by-id/");
-    uint32_t baseDirLength = baseDir.length;
+    FF_AUTO_CLOSE_DIR DIR* sysBlockDirp = opendir("/sys/block/");
+    if(sysBlockDirp == NULL)
+        return "opendir(\"/sys/block/\") == NULL";
 
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
-    if(dirp == NULL)
-        return "opendir(batteryDir) == NULL";
-
-    struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
+    struct dirent* sysBlockEntry;
+    while ((sysBlockEntry = readdir(sysBlockDirp)) != NULL)
     {
-        if (entry->d_name[0] == '.')
+        const char* const devName = sysBlockEntry->d_name;
+
+        if (devName[0] == '.')
             continue;
 
-        char* part = strstr(entry->d_name, "-part");
-        if (part && isdigit(part[strlen("-part")]))
+        if (ffStrStartsWith(devName, "dm-")) // LVM logical partitions
             continue;
-
-        if (ffStrStartsWith(entry->d_name, "nvme-eui.")) // NVMe drive identifier
-            continue;
-
-        // Other exceptions?
-
-        ffStrbufAppendS(&baseDir, entry->d_name);
-        char pathDev[PATH_MAX];
-        ssize_t pathLen = readlink(baseDir.chars, pathDev, PATH_MAX);
-        ffStrbufSubstrBefore(&baseDir, baseDirLength);
-
-        if (pathLen < 0) continue;
-        pathDev[pathLen] = '\0'; // ../../nvme0n1
-
-        char pathDev1[PATH_MAX];
-        const char* devName = basename(pathDev);
-        snprintf(pathDev1, PATH_MAX, "/dev/%s", devName);
-
-        // Avoid duplicated disks
-        bool flag = false;
-        FF_LIST_FOR_EACH(FFDiskIOResult, disk, *result)
-        {
-            if (ffStrbufEqualS(&disk->devPath, pathDev1))
-            {
-                flag = true;
-                break;
-            }
-        }
-        if (flag) continue;
 
         char pathSysBlock[PATH_MAX];
-        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/stat", devName);
 
-        FF_AUTO_CLOSE_FILE FILE* sysBlockStat = fopen(pathSysBlock, "r");
-        if (!sysBlockStat) continue;
+        char blockId[256] = "";
+        {
+            FF_AUTO_CLOSE_DIR DIR* devDiskDirp = opendir("/dev/disk/by-id");
+            if (devDiskDirp)
+            {
+                struct dirent* devDiskEntry;
+                while ((devDiskEntry = readdir(devDiskDirp)) != NULL)
+                {
+                    if (devDiskEntry->d_name[0] == '.')
+                        continue;
 
-        // I/Os merges sectors ticks ...
-        uint64_t nRead, sectorRead, nWritten, sectorWritten;
-        if (fscanf(sysBlockStat, "%lu%*u%lu%*u%lu%*u%lu%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) == 0)
-            continue;
+                    char pathDevDisk[PATH_MAX];
+                    snprintf(pathDevDisk, PATH_MAX, "/dev/disk/by-id/%s", devDiskEntry->d_name);
+
+                    char pathDev[PATH_MAX];
+                    ssize_t pathLen = readlink(pathDevDisk, pathDev, sizeof(pathDev) - 1);
+                    if (pathLen > 0)
+                    {
+                        pathDev[pathLen] = '\0';
+                        if (!ffStrEquals(basename(pathDev), devName))
+                            continue;
+
+                        if (ffStrStartsWith(devDiskEntry->d_name, "nvme-eui.")) // NVMe drive identifier
+                            continue;
+
+                        strcpy(blockId, devDiskEntry->d_name);
+                        break;
+                    }
+                }
+            }
+        }
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        char* slash = strchr(entry->d_name, '-');
-        if (slash)
+
+        if (blockId[0])
         {
-            char* slash2 = strchr(slash + 1, '-');
-            if (slash2)
-                ffStrbufInitNS(&device->name, (uint32_t) (slash2 - slash - 1), slash + 1);
+            char* slash = strchr(blockId, '-');
+            if (slash)
+            {
+                char* slash2 = strchr(slash + 1, '-');
+                if (slash2)
+                    ffStrbufInitNS(&device->name, (uint32_t) (slash2 - slash - 1), slash + 1);
+                else
+                    ffStrbufInitS(&device->name, slash + 1);
+                ffStrbufInitNS(&device->interconnect, (uint32_t) (slash - blockId), blockId);
+            }
             else
-                ffStrbufInitS(&device->name, slash + 1);
-            ffStrbufInitNS(&device->interconnect, (uint32_t) (slash - entry->d_name), entry->d_name);
+            {
+                ffStrbufInitS(&device->name, blockId);
+                ffStrbufInit(&device->interconnect);
+            }
+            ffStrbufReplaceAllC(&device->name, '_', ' ');
         }
         else
         {
-            ffStrbufInitS(&device->name, entry->d_name);
+            ffStrbufInitS(&device->name, devName);
             ffStrbufInit(&device->interconnect);
         }
-        ffStrbufReplaceAllC(&device->name, '_', ' ');
 
         if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
         {
@@ -90,24 +91,44 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
         }
 
-        ffStrbufInitS(&device->devPath, pathDev1);
+        // I/Os merges sectors ticks ...
+        uint64_t nRead, sectorRead, nWritten, sectorWritten;
+        {
+            char sysBlockStat[PROC_FILE_BUFFSIZ];
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/stat", devName);
+            ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(sysBlockStat) - 1, sysBlockStat);
+            if (fileSize <= 0) continue;
+            sysBlockStat[fileSize] = '\0';
+            if (sscanf(sysBlockStat, "%lu%*u%lu%*u%lu%*u%lu%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)
+                continue;
+        }
+
+        ffStrbufInitF(&device->devPath, "/dev/%s", devName);
         device->bytesRead = sectorRead * 512;
         device->bytesWritten = sectorWritten * 512;
         device->readCount = nRead;
         device->writeCount = nWritten;
 
-        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/queue/rotational", devName);
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (ffReadFileBuffer(pathSysBlock, &buffer))
-            device->type = ffStrbufEqualS(&buffer, "1") ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
-        else
-            device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        {
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/queue/rotational", devName);
+            char isRotationalChar = '1';
+            if (ffReadFileData(pathSysBlock, 1, &isRotationalChar))
+                device->type = isRotationalChar = '1' ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
+            else
+                device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
+        }
 
-        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/size", devName);
-        if (ffReadFileBuffer(pathSysBlock, &buffer))
-            device->size = ffStrbufToUInt(&buffer, 0);
-        else
-            device->size = 0;
+        {
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/size", devName);
+            ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(blockId) - 1, blockId);
+            if (fileSize > 0)
+            {
+                blockId[fileSize] = 0;
+                device->size = (uint64_t) strtoul(blockId, NULL, 10) * 512;
+            }
+            else
+                device->size = 0;
+        }
     }
 
     return NULL;
