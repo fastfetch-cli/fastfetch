@@ -74,6 +74,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
         }
 
+        device->removable = !!sdd->RemovableMedia;
+
         ffStrbufInit(&device->interconnect);
         switch (sdd->BusType)
         {

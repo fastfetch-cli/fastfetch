@@ -49,6 +49,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         ffStrbufInit(&device->serial);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
+        device->removable = false;
         device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
         device->size = 0;
 

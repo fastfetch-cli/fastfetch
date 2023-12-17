@@ -49,6 +49,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         ffStrbufInitF(&device->devPath, "/dev/%s", provider->lg_name);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->interconnect);
+        device->removable = false;
         switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK)
         {
             case DEVSTAT_TYPE_IF_SCSI: ffStrbufAppendS(&device->interconnect, "SCSI"); break;

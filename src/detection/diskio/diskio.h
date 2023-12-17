@@ -16,6 +16,7 @@ typedef struct FFDiskIOResult
     FFstrbuf serial;
     FFDiskIOPhysicalType type;
     uint64_t size;
+    bool removable;
     FFstrbuf devPath;
     uint64_t bytesRead;
     uint64_t readCount;

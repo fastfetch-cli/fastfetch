@@ -115,6 +115,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         }
 
         {
+            char removableChar = '0';
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/removable", devName);
+            device->removable = removableChar == '1';
+        }
+
+        {
             ffStrbufInit(&device->serial);
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/serial", devName);
             ffReadFileBuffer(pathSysBlock, &device->serial);

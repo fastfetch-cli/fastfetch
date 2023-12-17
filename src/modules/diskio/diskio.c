@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_DISKIO_DISPLAY_NAME "Disk IO"
-#define FF_DISKIO_NUM_FORMAT_ARGS 12
+#define FF_DISKIO_NUM_FORMAT_ARGS 13
 
 static int sortDevices(const FFDiskIOResult* left, const FFDiskIOResult* right)
 {
@@ -103,6 +103,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->writeCount},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &sizePretty},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->serial},
+                {FF_FORMAT_ARG_TYPE_BOOL, &dev->removable},
             });
         }
         ++index;
@@ -204,6 +205,7 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
         yyjson_mut_obj_add_uint(doc, obj, "writeCount", dev->writeCount);
         yyjson_mut_obj_add_uint(doc, obj, "size", dev->size);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &dev->serial);
+        yyjson_mut_obj_add_bool(doc, obj, "removable", dev->removable);
     }
 
     FF_LIST_FOR_EACH(FFDiskIOResult, dev, result)
@@ -229,6 +231,7 @@ void ffPrintDiskIOHelpFormat(void)
         "Number of writes",
         "Device size (formatted)",
         "Serial number",
+        "Removable",
     });
 }
 
