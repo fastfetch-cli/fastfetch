@@ -64,8 +64,29 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             device->bytesWritten = (uint64_t) diskPerformance.BytesWritten.QuadPart;
             device->writeCount = (uint64_t) diskPerformance.WriteCount;
 
-            DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
             DWORD retSize = 0;
+
+            char sddBuffer[4096];
+            if(DeviceIoControl(
+                hDevice,
+                IOCTL_STORAGE_QUERY_PROPERTY,
+                &(STORAGE_PROPERTY_QUERY) {
+                    .PropertyId = StorageDeviceProperty,
+                    .QueryType = PropertyStandardQuery,
+                },
+                sizeof(STORAGE_PROPERTY_QUERY),
+                &sddBuffer,
+                sizeof(sddBuffer),
+                &retSize,
+                NULL
+            ) && retSize > 0)
+            {
+                STORAGE_DEVICE_DESCRIPTOR* sdd = (STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
+                if (sdd->SerialNumberOffset != 0)
+                    ffStrbufSetS(&device->serial, (const char*) sddBuffer + sdd->SerialNumberOffset);
+            }
+
+            DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
             if(DeviceIoControl(
                 hDevice,
                 IOCTL_STORAGE_QUERY_PROPERTY,
