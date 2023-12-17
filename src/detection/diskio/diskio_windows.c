@@ -7,23 +7,15 @@
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Services\\disk\\Enum", &hKey, NULL))
-        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"SYSTEM\\CurrentControlSet\\Services\\disk\\Enum\") failed";
-
-    uint32_t nDevices;
-    if (!ffRegReadUint(hKey, L"Count", &nDevices, NULL))
-        return "ffRegReadUint(hKey, L\"Count\", &nDevices) failed";
-
     wchar_t szDevice[32] = L"\\\\.\\PhysicalDrive";
     wchar_t* pNum = szDevice + strlen("\\\\.\\PhysicalDrive");
-    for (uint32_t idev = 0; idev <= nDevices; ++idev)
+    for (uint32_t idev = 0; ; ++idev)
     {
         _ultow(idev, pNum, 10);
 
         FF_AUTO_CLOSE_FD HANDLE hDevice = CreateFileW(szDevice, FILE_READ_ATTRIBUTES, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
         if (hDevice == INVALID_HANDLE_VALUE)
-            continue;
+            break;
 
         DWORD retSize;
         char sddBuffer[4096];
