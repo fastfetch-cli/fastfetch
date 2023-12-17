@@ -33,6 +33,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
 
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(provider->lg_name);
+        FF_STRBUF_AUTO_DESTROY identifier = ffStrbufCreate();
         FFDiskIOPhysicalType type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
         for (struct gconfig* ptr = provider->lg_config.lh_first; ptr; ptr = ptr->lg_config.le_next)
         {
@@ -40,6 +41,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 ffStrbufSetS(&name, ptr->lg_val);
             else if (ffStrEquals(ptr->lg_name, "rotationrate") && !ffStrEquals(ptr->lg_val, "unknown"))
                 type = ffStrEquals(ptr->lg_val, "0") ? FF_DISKIO_PHYSICAL_TYPE_SSD : FF_DISKIO_PHYSICAL_TYPE_HDD;
+            else if (ffStrEquals(ptr->lg_name, "ident"))
+                ffStrbufSetS(&identifier, ptr->lg_val);
         }
 
         if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
@@ -47,7 +50,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
         ffStrbufInitF(&device->devPath, "/dev/%s", provider->lg_name);
-        ffStrbufInit(&device->serial);
+        ffStrbufInitMove(&device->serial, &identifier);
         ffStrbufInit(&device->interconnect);
         device->removable = false;
         switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK)
