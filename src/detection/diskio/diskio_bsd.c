@@ -47,6 +47,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
         ffStrbufInitF(&device->devPath, "/dev/%s", provider->lg_name);
+        ffStrbufInit(&device->serial);
         ffStrbufInit(&device->interconnect);
         switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK)
         {

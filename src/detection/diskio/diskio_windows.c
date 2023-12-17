@@ -66,6 +66,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
             DWORD retSize = 0;
 
+            ffStrbufInit(&device->serial);
             char sddBuffer[4096];
             if(DeviceIoControl(
                 hDevice,
@@ -83,7 +84,10 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             {
                 STORAGE_DEVICE_DESCRIPTOR* sdd = (STORAGE_DEVICE_DESCRIPTOR*) sddBuffer;
                 if (sdd->SerialNumberOffset != 0)
+                {
                     ffStrbufSetS(&device->serial, (const char*) sddBuffer + sdd->SerialNumberOffset);
+                    ffStrbufTrim(&device->serial, ' ');
+                }
             }
 
             DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};

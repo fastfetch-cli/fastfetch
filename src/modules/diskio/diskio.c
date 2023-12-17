@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_DISKIO_DISPLAY_NAME "Disk IO"
-#define FF_DISKIO_NUM_FORMAT_ARGS 11
+#define FF_DISKIO_NUM_FORMAT_ARGS 12
 
 static int sortDevices(const FFDiskIOResult* left, const FFDiskIOResult* right)
 {
@@ -102,6 +102,7 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->readCount},
                 {FF_FORMAT_ARG_TYPE_UINT64, &dev->writeCount},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &sizePretty},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &dev->serial},
             });
         }
         ++index;
@@ -202,6 +203,7 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
         yyjson_mut_obj_add_uint(doc, obj, "readCount", dev->readCount);
         yyjson_mut_obj_add_uint(doc, obj, "writeCount", dev->writeCount);
         yyjson_mut_obj_add_uint(doc, obj, "size", dev->size);
+        yyjson_mut_obj_add_strbuf(doc, obj, "serial", &dev->serial);
     }
 
     FF_LIST_FOR_EACH(FFDiskIOResult, dev, result)
@@ -226,6 +228,7 @@ void ffPrintDiskIOHelpFormat(void)
         "Number of reads",
         "Number of writes",
         "Device size (formatted)",
+        "Serial number",
     });
 }
 
