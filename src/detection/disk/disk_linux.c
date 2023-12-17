@@ -106,14 +106,6 @@ static void detectName(FFDisk* disk)
 
     FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreate();
 
-    //Detect USB devices. Code is put here to reuse deviceStat
-    //https://stackoverflow.com/a/73302717
-    ffStrbufAppendS(&basePath, "/dev/disk/by-id/");
-    detectNameFromPath(disk, &deviceStat, &basePath);
-    if (ffStrbufStartsWithS(&disk->name, "usb-"))
-        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
-    ffStrbufClear(&disk->name);
-
     //Try label first
     ffStrbufSetS(&basePath, "/dev/disk/by-label/");
     detectNameFromPath(disk, &deviceStat, &basePath);
@@ -197,9 +189,6 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
 
 static bool isRemovable(FFDisk* currentDisk)
 {
-    // https://stackoverflow.com/a/73302025
-    // Note my USB mobile hard disk isn't detected as removable, but my USB flash disk does.
-    // USB devices should be handled in detectName
     FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreateS("/sys/block/");
 
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(basePath.chars);
@@ -218,11 +207,10 @@ static bool isRemovable(FFDisk* currentDisk)
 
         if (!ffStrStartsWith(partitionName, entry->d_name)) continue;
 
-        // /sys/block/sdx/removable
+        // /sys/block/sdx/device/delete
         ffStrbufAppendS(&basePath, entry->d_name);
-        ffStrbufAppendS(&basePath, "/removable");
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        return ffReadFileBuffer(basePath.chars, &buffer) && ffStrbufEqualS(&buffer, "1");
+        ffStrbufAppendS(&basePath, "/device/delete");
+        return ffPathExists(basePath.chars, FF_PATHTYPE_FILE);
     }
 
     return false;
@@ -230,14 +218,12 @@ static bool isRemovable(FFDisk* currentDisk)
 
 static void detectType(const FFlist* disks, FFDisk* currentDisk)
 {
-    if(currentDisk->type != FF_DISK_VOLUME_TYPE_NONE) return;
-
-    if(isRemovable(currentDisk))
+    if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
+        currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+    else if(isRemovable(currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-    else if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
-        currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
