@@ -20,7 +20,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         if (devName[0] == '.')
             continue;
 
-
         char pathSysBlock[PATH_MAX];
         snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s", devName);
 
@@ -58,22 +57,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             }
         }
 
-        {
-            ffStrbufInit(&device->interconnect);
-            if (strstr(pathSysDeviceReal, "/usb") != NULL)
-                ffStrbufSetS(&device->interconnect, "usb");
-            else
-            {
-                snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
-                if (!ffAppendFileBuffer(pathSysBlock, &device->interconnect))
-                {
-                    snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/uevent", devName);
-                    if (ffParsePropFile(pathSysBlock, "DEVTYPE=", &device->interconnect))
-                        ffStrbufSubstrBeforeLastC(&device->interconnect, '_');
-                }
-            }
-        }
-
         // I/Os merges sectors ticks ...
         uint64_t nRead, sectorRead, nWritten, sectorWritten;
         {
@@ -91,40 +74,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         device->bytesWritten = sectorWritten * 512;
         device->readCount = nRead;
         device->writeCount = nWritten;
-
-        {
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/queue/rotational", devName);
-            char isRotationalChar = '1';
-            if (ffReadFileData(pathSysBlock, 1, &isRotationalChar))
-                device->type = isRotationalChar == '1' ? FF_DISKIO_PHYSICAL_TYPE_HDD : FF_DISKIO_PHYSICAL_TYPE_SSD;
-            else
-                device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
-        }
-
-        {
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/size", devName);
-            char blkSize[32];
-            ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(blkSize) - 1, blkSize);
-            if (fileSize > 0)
-            {
-                blkSize[fileSize] = 0;
-                device->size = (uint64_t) strtoul(blkSize, NULL, 10) * 512;
-            }
-            else
-                device->size = 0;
-        }
-
-        {
-            char removableChar = '0';
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/removable", devName);
-            device->removable = removableChar == '1';
-        }
-
-        {
-            ffStrbufInit(&device->serial);
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/serial", devName);
-            ffReadFileBuffer(pathSysBlock, &device->serial);
-        }
     }
 
     return NULL;
