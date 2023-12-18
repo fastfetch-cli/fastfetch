@@ -106,7 +106,13 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 bool ffPathExists(const char* path, FFPathType type)
 {
     struct stat fileStat;
-    if(stat(path, &fileStat) != 0)
+    int statRet = -1;
+    if (type & FF_PATHTYPE_LINK)
+        statRet = lstat(path, &fileStat);
+    else
+        statRet = stat(path, &fileStat);
+
+    if(statRet != 0)
         return false;
 
     unsigned int mode = fileStat.st_mode & S_IFMT;
