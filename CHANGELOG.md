@@ -1,3 +1,29 @@
+# 2.4.0
+
+**We are deprecating flags based config files (will be removed in v3.0.0). We suggest you migrate to json based config files.** One may use `-c /path/to/config.conf --gen-config` to migrate existing flag based config files.
+
+Changes:
+* All flag based presets are removed
+
+Features:
+* Improve performance of detecting rpm and pkg package count (Packages, Linux / FreeBSD)
+* Support Apple M3X temperature detection (CPU / GPU, macOS)
+* `--ds-force-drm` support a new option `sysfs-only`
+* Improve xfce4 version detection
+* Detect WM and DE by enumerating running processes (WM / DE, FreeBSD)
+* Add a new module `Physical Disk`, which detects product name, full size, serial number and so on.
+
+Bugfixes:
+* Fix crashes sometimes when `--logo-padding-top` is not set (Logo)
+* Fix memory usage counting algorithm (Memory, macOS)
+* Fix the behavior of `--no-buffer` in Windows
+* Fix possible segfault in some devices (Display, Linux)
+* Fix segfaults on first use of new images with Sixel flag (Image) 
+
+Logo:
+* Remove unnecessary escaping for Adelie logo
+* Add EshanizedOS
+
 # 2.3.4
 
 Bugfixes:

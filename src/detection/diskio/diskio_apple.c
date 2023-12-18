@@ -48,8 +48,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
-        device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
-        device->size = 0;
 
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey), (int64_t*) &device->bytesRead);
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey), (int64_t*) &device->bytesWritten);
@@ -61,34 +59,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         {
             ffCfStrGetString(bsdName, &device->devPath);
             ffStrbufPrependS(&device->devPath, "/dev/");
-        }
-
-        FF_CFTYPE_AUTO_RELEASE CFNumberRef mediaSize = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOMediaSizeKey), kCFAllocatorDefault, kNilOptions);
-        if (mediaSize)
-            ffCfNumGetInt64(mediaSize, (int64_t*) &device->size);
-        else
-            device->size = 0;
-
-        ffStrbufInit(&device->interconnect);
-        FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryPhysical = 0;
-        if (IORegistryEntryGetParentEntry(entryDriver, kIOServicePlane, &entryPhysical) == KERN_SUCCESS)
-        {
-            FF_CFTYPE_AUTO_RELEASE CFDictionaryRef protocolCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyProtocolCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
-            if (protocolCharacteristics)
-                ffCfDictGetString(protocolCharacteristics, CFSTR("Physical Interconnect"), &device->interconnect);
-
-            FF_CFTYPE_AUTO_RELEASE CFDictionaryRef deviceCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyDeviceCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
-            if (deviceCharacteristics)
-            {
-                CFStringRef mediumType = (CFStringRef) CFDictionaryGetValue(deviceCharacteristics, CFSTR(kIOPropertyMediumTypeKey));
-                if (mediumType)
-                {
-                    if (CFStringCompare(mediumType, CFSTR(kIOPropertyMediumTypeSolidStateKey), 0) == 0)
-                        device->type = FF_DISKIO_PHYSICAL_TYPE_SSD;
-                    else if (CFStringCompare(mediumType, CFSTR(kIOPropertyMediumTypeRotationalKey), 0) == 0)
-                        device->type = FF_DISKIO_PHYSICAL_TYPE_HDD;
-                }
-            }
         }
     }
 

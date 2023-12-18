@@ -251,8 +251,24 @@
                     "description": "Set the path to the file containing OS information. Linux only"
                 },
                 "dsForceDrm": {
-                    "type": "boolean",
-                    "description": "Force display detection to use `/sys/class/drm`. Linux only",
+                    "description": "Force display detection to use DRM. Linux only",
+                    "oneOf": [
+                        {
+                            "type": "bool",
+                            "const": false,
+                            "description": "Try `wayland`, then `x11`, then `drm`"
+                        },
+                        {
+                            "type": "string",
+                            "description": "Use `/sys/class/drm` only.",
+                            "const": "sysfs-only"
+                        },
+                        {
+                            "type": "bool",
+                            "const": true,
+                            "description": "Try `libdrm` first, then `sysfs` if libdrm failed"
+                        }
+                    ],
                     "default": false
                 },
                 "wmiTimeout": {
@@ -584,6 +600,7 @@
                             "opengl",
                             "os",
                             "packages",
+                            "physicaldisk",
                             "player",
                             "poweradapter",
                             "processes",
@@ -1352,6 +1369,32 @@
                                         "$ref": "#/$defs/format"
                                     }
                                 }
+                            },
+                            {
+                                "title": "Physical Disk",
+                                "properties": {
+                                    "type": {
+                                        "description": "Print physical disk information",
+                                        "const": "physicaldisk"
+                                    },
+                                    "namePrefix": {
+                                        "description": "Show disks with given name prefix only",
+                                        "type": "string"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
                             },
                             {
                                 "title": "Public IP",

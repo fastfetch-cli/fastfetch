@@ -16,7 +16,16 @@ const char* ffDetectMemory(FFMemoryResult* ram)
     if(host_statistics64(mach_host_self(), HOST_VM_INFO64, (host_info64_t) (&vmstat), &count) != KERN_SUCCESS)
         return "Failed to read host_statistics64";
 
-    ram->bytesUsed = ((uint64_t) vmstat.active_count + vmstat.wire_count) * instance.state.platform.pageSize;
+    // https://github.com/exelban/stats/blob/master/Modules/RAM/readers.swift#L56
+    ram->bytesUsed = ((uint64_t)
+        + vmstat.active_count
+        + vmstat.inactive_count
+        + vmstat.speculative_count
+        + vmstat.wire_count
+        + vmstat.compressor_page_count
+        - vmstat.purgeable_count
+        - vmstat.external_page_count
+    ) * instance.state.platform.pageSize;
 
     return NULL;
 }

@@ -1,5 +1,0 @@
---structure Title:Separator:OS:Host:Kernel:Uptime:Battery:Break:Packages:Shell:Display:Terminal:Break:CPU:GPU:Memory:Break:Colors
---host-format "{/2}{-}{/}{2}{?3} {3}{?}"
---battery-format "{/4}{-}{/}{4}%{?5} [{5}]{?}"
---display-key "Display"
---gpu-key "GPU"

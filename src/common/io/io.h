@@ -10,6 +10,7 @@
 #else
     #include <unistd.h>
     #include <dirent.h>
+    #include <sys/stat.h>
     typedef int FFNativeFD;
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
     // one safe way to read correct data is reading the whole file in a single read syscall
@@ -75,15 +76,45 @@ static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 //Bit flags, combine with |
 typedef enum FFPathType
 {
-    FF_PATHTYPE_REGULAR = 1,
-    FF_PATHTYPE_LINK = 2,
-    FF_PATHTYPE_DIRECTORY = 4
+    FF_PATHTYPE_FILE = 1 << 0,
+    FF_PATHTYPE_DIRECTORY = 1 << 1,
+    FF_PATHTYPE_ANY = FF_PATHTYPE_FILE | FF_PATHTYPE_DIRECTORY,
 } FFPathType;
 
-#define FF_PATHTYPE_FILE (FF_PATHTYPE_REGULAR | FF_PATHTYPE_LINK)
-#define FF_PATHTYPE_ANY (FF_PATHTYPE_FILE | FF_PATHTYPE_DIRECTORY)
+static inline bool ffPathExists(const char* path, FFPathType pathType)
+{
+    #ifdef _WIN32
 
-bool ffPathExists(const char* path, FFPathType pathType);
+    DWORD attr = GetFileAttributesA(path);
+
+    if(attr == INVALID_FILE_ATTRIBUTES)
+        return false;
+
+    if(pathType & FF_PATHTYPE_FILE && !(attr & FILE_ATTRIBUTE_DIRECTORY))
+        return true;
+
+    if(pathType & FF_PATHTYPE_DIRECTORY && (attr & FILE_ATTRIBUTE_DIRECTORY))
+        return true;
+
+    #else
+
+    struct stat fileStat;
+    if(stat(path, &fileStat) != 0)
+        return false;
+
+    unsigned int mode = fileStat.st_mode & S_IFMT;
+
+    if(pathType & FF_PATHTYPE_FILE && mode == S_IFREG)
+        return true;
+
+    if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
+        return true;
+
+    #endif
+
+    return false;
+}
+
 bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
 #define FF_IO_TERM_RESP_WAIT_MS 100 // #554

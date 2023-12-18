@@ -2,19 +2,9 @@
 
 #include "fastfetch.h"
 
-typedef enum FFDiskIOPhysicalType
-{
-    FF_DISKIO_PHYSICAL_TYPE_UNKNOWN,
-    FF_DISKIO_PHYSICAL_TYPE_HDD,
-    FF_DISKIO_PHYSICAL_TYPE_SSD,
-} FFDiskIOPhysicalType;
-
 typedef struct FFDiskIOResult
 {
     FFstrbuf name;
-    FFstrbuf interconnect;
-    FFDiskIOPhysicalType type;
-    uint64_t size;
     FFstrbuf devPath;
     uint64_t bytesRead;
     uint64_t readCount;

@@ -53,6 +53,7 @@
         "weather",
         "netio",
         "diskio",
+        "physicaldisk",
         "version",
         "break",
         "colors"

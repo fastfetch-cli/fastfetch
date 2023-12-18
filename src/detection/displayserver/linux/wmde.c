@@ -1,14 +1,20 @@
 #include "displayserver_linux.h"
-#include "common/io/io.h"
 #include "common/properties.h"
-#include "common/processing.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <dirent.h>
+
+#ifdef __FreeBSD__
+    #include <sys/sysctl.h>
+    #include <sys/types.h>
+    #include <sys/user.h>
+#else
+    #include "common/io/io.h"
+#endif
 
 static const char* parseEnv(void)
 {
@@ -46,10 +52,12 @@ static const char* parseEnv(void)
     if(getenv("TDE_FULL_SESSION") != NULL)
         return "Trinity";
 
+    #ifdef __linux__
     if(
         getenv("WAYLAND_DISPLAY") != NULL &&
         ffPathExists("/mnt/wslg/", FF_PATHTYPE_DIRECTORY)
     ) return "WSLg";
+    #endif
 
     return NULL;
 }
@@ -60,52 +68,54 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         return;
 
     if(
-        strcasecmp(name, "kwin_wayland") == 0 ||
-        strcasecmp(name, "kwin_wayland_wrapper") == 0 ||
-        strcasecmp(name, "kwin_x11") == 0 ||
-        strcasecmp(name, "kwin_x11_wrapper") == 0 ||
-        strcasecmp(name, "kwin") == 0
+        ffStrEqualsIgnCase(name, "kwin_wayland") ||
+        ffStrEqualsIgnCase(name, "kwin_wayland_wrapper") ||
+        ffStrEqualsIgnCase(name, "kwin_x11") ||
+        ffStrEqualsIgnCase(name, "kwin_x11_wrapper") ||
+        ffStrEqualsIgnCase(name, "kwin")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
     else if(
-        strcasecmp(name, "gnome-shell") == 0 ||
-        strcasecmp(name, "gnome shell") == 0 ||
-        strcasecmp(name, "gnome-session-binary") == 0 ||
-        strcasecmp(name, "Mutter") == 0
+        ffStrEqualsIgnCase(name, "gnome-shell") ||
+        ffStrEqualsIgnCase(name, "gnome shell") ||
+        ffStrEqualsIgnCase(name, "gnome-session-binary") ||
+        ffStrEqualsIgnCase(name, "Mutter")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
-        strcasecmp(name, "cinnamon-session") == 0 ||
-        strcasecmp(name, "Muffin") == 0 ||
-        strcasecmp(name, "Mutter (Muffin)") == 0
+        ffStrEqualsIgnCase(name, "cinnamon-session") ||
+        ffStrEqualsIgnCase(name, "Muffin") ||
+        ffStrEqualsIgnCase(name, "Mutter (Muffin)")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
-    else if(strcasecmp(name, "sway") == 0)
+    else if(ffStrEqualsIgnCase(name, "sway"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_SWAY);
-    else if(strcasecmp(name, "weston") == 0)
+    else if(ffStrEqualsIgnCase(name, "weston"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WESTON);
-    else if(strcasecmp(name, "wayfire") == 0)
+    else if(ffStrEqualsIgnCase(name, "wayfire"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WAYFIRE);
-    else if(strcasecmp(name, "openbox") == 0)
+    else if(ffStrEqualsIgnCase(name, "openbox"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_OPENBOX);
-    else if(strcasecmp(name, "xfwm4") == 0)
+    else if(ffStrEqualsIgnCase(name, "xfwm4"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XFWM4);
-    else if(strcasecmp(name, "Marco") == 0 ||
-        strcasecmp(name, "Metacity (Marco)") == 0)
+    else if(ffStrEqualsIgnCase(name, "Marco") ||
+        ffStrEqualsIgnCase(name, "Metacity (Marco)"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MARCO);
-    else if(strcasecmp(name, "xmonad") == 0)
+    else if(ffStrEqualsIgnCase(name, "xmonad"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_XMONAD);
-    else if(strcasecmp(name, "WSLg") == 0)
+    else if(ffStrEqualsIgnCase(name, "WSLg"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_WSLG);
-    else if(strcasecmp(name, "dwm") == 0)
+    else if(ffStrEqualsIgnCase(name, "dwm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DWM);
-    else if(strcasecmp(name, "bspwm") == 0)
+    else if(ffStrEqualsIgnCase(name, "bspwm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_BSPWM);
-    else if(strcasecmp(name, "tinywm") == 0)
+    else if(ffStrEqualsIgnCase(name, "tinywm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_TINYWM);
-    else if(strcasecmp(name, "qtile") == 0)
+    else if(ffStrEqualsIgnCase(name, "qtile"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_QTILE);
-    else if(strcasecmp(name, "herbstluftwm") == 0)
+    else if(ffStrEqualsIgnCase(name, "herbstluftwm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HERBSTLUFTWM);
-    else if(strcasecmp(name, "icewm") == 0)
+    else if(ffStrEqualsIgnCase(name, "icewm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
+    else if(ffStrEqualsIgnCase(name, "dtwm"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DTWM);
 }
 
 static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)
@@ -136,10 +146,10 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         return;
 
     else if(
-        strcasecmp(name, "KDE") == 0 ||
-        strcasecmp(name, "plasma") == 0 ||
-        strcasecmp(name, "plasmashell") == 0 ||
-        strcasecmp(name, "plasmawayland") == 0
+        ffStrEqualsIgnCase(name, "KDE") ||
+        ffStrEqualsIgnCase(name, "plasma") ||
+        ffStrEqualsIgnCase(name, "plasmashell") ||
+        ffStrEqualsIgnCase(name, "plasmawayland")
     ) {
         ffStrbufSetStatic(&result->deProcessName, "plasmashell");
         ffStrbufSetStatic(&result->dePrettyName, FF_DE_PRETTY_PLASMA);
@@ -147,10 +157,10 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     }
 
     else if(
-        strcasecmp(name, "Gnome") == 0 ||
-        strcasecmp(name, "ubuntu:GNOME") == 0 ||
-        strcasecmp(name, "ubuntu") == 0 ||
-        strcasecmp(name, "gnome-shell") == 0
+        ffStrEqualsIgnCase(name, "Gnome") ||
+        ffStrEqualsIgnCase(name, "ubuntu:GNOME") ||
+        ffStrEqualsIgnCase(name, "ubuntu") ||
+        ffStrEqualsIgnCase(name, "gnome-shell")
     ) {
         ffStrbufSetStatic(&result->deProcessName, "gnome-shell");
         const char* sessionMode = getenv("GNOME_SHELL_SESSION_MODE");
@@ -161,37 +171,37 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     }
 
     else if(
-        strcasecmp(name, "X-Cinnamon") == 0 ||
-        strcasecmp(name, "Cinnamon") == 0
+        ffStrEqualsIgnCase(name, "X-Cinnamon") ||
+        ffStrEqualsIgnCase(name, "Cinnamon")
     ) {
         ffStrbufSetS(&result->deProcessName, "cinnamon");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CINNAMON);
     }
 
     else if(
-        strcasecmp(name, "XFCE") == 0 ||
-        strcasecmp(name, "X-XFCE") == 0 ||
-        strcasecmp(name, "XFCE4") == 0 ||
-        strcasecmp(name, "X-XFCE4") == 0 ||
-        strcasecmp(name, "xfce4-session") == 0
+        ffStrEqualsIgnCase(name, "XFCE") ||
+        ffStrEqualsIgnCase(name, "X-XFCE") ||
+        ffStrEqualsIgnCase(name, "XFCE4") ||
+        ffStrEqualsIgnCase(name, "X-XFCE4") ||
+        ffStrEqualsIgnCase(name, "xfce4-session")
     ) {
         ffStrbufSetS(&result->deProcessName, "xfce4-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_XFCE4);
     }
 
     else if(
-        strcasecmp(name, "MATE") == 0 ||
-        strcasecmp(name, "X-MATE") == 0 ||
-        strcasecmp(name, "mate-session") == 0
+        ffStrEqualsIgnCase(name, "MATE") ||
+        ffStrEqualsIgnCase(name, "X-MATE") ||
+        ffStrEqualsIgnCase(name, "mate-session")
     ) {
         ffStrbufSetS(&result->deProcessName, "mate-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_MATE);
     }
 
     else if(
-        strcasecmp(name, "LXQt") == 0 ||
-        strcasecmp(name, "X-LXQT") == 0 ||
-        strcasecmp(name, "lxqt-session") == 0
+        ffStrEqualsIgnCase(name, "LXQt") ||
+        ffStrEqualsIgnCase(name, "X-LXQT") ||
+        ffStrEqualsIgnCase(name, "lxqt-session")
     ) {
         ffStrbufSetS(&result->deProcessName, "lxqt-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_LXQT);
@@ -201,13 +211,20 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     }
 
     else if(
-        strcasecmp(name, "Budgie") == 0 ||
-        strcasecmp(name, "X-Budgie") == 0 ||
-        strcasecmp(name, "budgie-desktop") == 0 ||
-        strcasecmp(name, "Budgie:GNOME") == 0
+        ffStrEqualsIgnCase(name, "Budgie") ||
+        ffStrEqualsIgnCase(name, "X-Budgie") ||
+        ffStrEqualsIgnCase(name, "budgie-desktop") ||
+        ffStrEqualsIgnCase(name, "Budgie:GNOME")
     ) {
         ffStrbufSetS(&result->deProcessName, "budgie-desktop");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_BUDGIE);
+    }
+
+    else if(
+        ffStrEqualsIgnCase(name, "dtsession")
+    ) {
+        ffStrbufSetS(&result->deProcessName, "dtsession");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CDE);
     }
 }
 
@@ -219,9 +236,9 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     const char* env = getenv("XDG_SESSION_TYPE");
     if(ffStrSet(env))
     {
-        if(strcasecmp(env, "x11") == 0)
+        if(ffStrEqualsIgnCase(env, "x11"))
             ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
-        else if(strcasecmp(env, "tty") == 0)
+        else if(ffStrEqualsIgnCase(env, "tty"))
             ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
         else
             ffStrbufSetS(&result->wmProtocolName, env);
@@ -237,30 +254,56 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
     }
 
     env = getenv("TERM");
-    if(ffStrSet(env) && strcasecmp(env, "linux") == 0)
+    if(ffStrSet(env) && ffStrEqualsIgnCase(env, "linux"))
     {
         ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
         return;
     }
 }
 
-static void getFromProcDir(FFDisplayServerResult* result)
+static const char* getFromProcesses(FFDisplayServerResult* result)
 {
-    DIR* proc = opendir("/proc");
-    if(proc == NULL)
-        return;
+    uint32_t userId = getuid();
+
+#ifdef __FreeBSD__
+    int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId};
+    size_t length = 0;
+
+    if(sysctl(request, sizeof(request) / sizeof(*request), NULL, &length, NULL, 0) != 0)
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, NULL) failed";
+
+    FF_AUTO_FREE struct kinfo_proc* procs = (struct kinfo_proc*) malloc(length);
+    if(sysctl(request, sizeof(request) / sizeof(*request), procs, &length, NULL, 0) != 0)
+        return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_UID}, procs) failed";
+
+    length /= sizeof(*procs);
+
+    for (struct kinfo_proc* proc = procs; proc < procs + length; ++proc)
+    {
+        if(result->dePrettyName.length == 0)
+            applyPrettyNameIfDE(result, proc->ki_comm);
+
+        if(result->wmPrettyName.length == 0)
+            applyNameIfWM(result, proc->ki_comm);
+
+        if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
+            break;
+    }
+#else
+    FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
+    if(procdir == NULL)
+        return "opendir(\"/proc\") failed";
 
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
     ffStrbufAppendS(&procPath, "/proc/");
 
     uint32_t procPathLength = procPath.length;
 
-    FF_STRBUF_AUTO_DESTROY userID = ffStrbufCreateF("%i", getuid());
     FF_STRBUF_AUTO_DESTROY loginuid = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY processName = ffStrbufCreateA(256); //Some processes have large command lines (looking at you chrome)
 
     struct dirent* dirent;
-    while((dirent = readdir(proc)) != NULL)
+    while((dirent = readdir(procdir)) != NULL)
     {
         //Match only folders starting with a number (the pid folders)
         if(dirent->d_type != DT_DIR || !isdigit(dirent->d_name[0]))
@@ -272,7 +315,7 @@ static void getFromProcDir(FFDisplayServerResult* result)
         //Don't check for processes not owend by the current user.
         ffStrbufAppendS(&procPath, "/loginuid");
         ffReadFileBuffer(procPath.chars, &loginuid);
-        if(ffStrbufComp(&userID, &loginuid) != 0)
+        if(ffStrbufToUInt(&loginuid, (uint64_t) -1) != userId)
         {
             ffStrbufSubstrBefore(&procPath, procPathLength);
             continue;
@@ -297,8 +340,9 @@ static void getFromProcDir(FFDisplayServerResult* result)
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
     }
+#endif
 
-    closedir(proc);
+    return NULL;
 }
 
 void ffdsDetectWMDE(FFDisplayServerResult* result)
@@ -338,7 +382,7 @@ void ffdsDetectWMDE(FFDisplayServerResult* result)
         return;
 
     //Get missing WM / DE from processes.
-    getFromProcDir(result);
+    getFromProcesses(result);
 
     //Return if both wm and de are set, or if env doesn't contain anything
     if(

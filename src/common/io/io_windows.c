@@ -18,11 +18,16 @@ static void createSubfolders(const char* fileName)
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
     HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(handle == INVALID_HANDLE_VALUE)
+    if (handle == INVALID_HANDLE_VALUE)
     {
-        createSubfolders(fileName);
-        handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-        if(handle == INVALID_HANDLE_VALUE)
+        if (GetLastError() == ERROR_PATH_NOT_FOUND)
+        {
+            createSubfolders(fileName);
+            handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (handle == INVALID_HANDLE_VALUE)
+                return false;
+        }
+        else
             return false;
     }
 
@@ -37,7 +42,7 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
     LARGE_INTEGER fileSize;
     if(!GetFileSizeEx(handle, &fileSize))
         fileSize.QuadPart = 0;
-    
+
     if (fileSize.QuadPart > 0)
     {
         // optimize for files has a fixed length,
@@ -85,24 +90,6 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
         return false;
 
     return ffAppendFDBuffer(handle, buffer);
-}
-
-bool ffPathExists(const char* path, FFPathType type)
-{
-    DWORD attr = GetFileAttributesA(path);
-    if(attr == INVALID_FILE_ATTRIBUTES)
-        return false;
-
-    if(type & FF_PATHTYPE_REGULAR && !(attr & FILE_ATTRIBUTE_DIRECTORY))
-        return true;
-
-    if(type & FF_PATHTYPE_DIRECTORY && (attr & FILE_ATTRIBUTE_DIRECTORY))
-        return true;
-
-    if(type & FF_PATHTYPE_LINK && (attr & FILE_ATTRIBUTE_REPARSE_POINT))
-        return true;
-
-    return false;
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)

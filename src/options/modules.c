@@ -38,6 +38,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitOpenCLOptions(&options->openCL);
     ffInitOpenGLOptions(&options->openGL);
     ffInitPackagesOptions(&options->packages);
+    ffInitPhysicalDiskOptions(&options->physicalDisk);
     ffInitPlayerOptions(&options->player);
     ffInitPowerAdapterOptions(&options->powerAdapter);
     ffInitProcessesOptions(&options->processes);
@@ -98,6 +99,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyOSOptions(&options->os);
     ffDestroyOpenCLOptions(&options->openCL);
     ffDestroyOpenGLOptions(&options->openGL);
+    ffDestroyPhysicalDiskOptions(&options->physicalDisk);
     ffDestroyPackagesOptions(&options->packages);
     ffDestroyPlayerOptions(&options->player);
     ffDestroyPowerAdapterOptions(&options->powerAdapter);

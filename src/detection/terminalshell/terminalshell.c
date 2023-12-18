@@ -4,6 +4,8 @@
 #include "common/properties.h"
 #include "util/stringUtils.h"
 
+#include <ctype.h>
+
 #ifdef _WIN32
 
 #include "util/mallocHelper.h"
@@ -162,6 +164,28 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
         NULL
     }) == NULL;
 }
+#else
+static bool getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreate();
+    ffStrbufAppendS(&command, "printf \"%s\" \"$");
+    ffStrbufAppendTransformS(&command, exeName, toupper);
+    ffStrbufAppendS(&command, "_VERSION\"");
+
+    if (ffProcessAppendStdOut(version, (char* const[]) {
+        "env",
+        "-i",
+        exe->chars,
+        "-c",
+        command.chars,
+        NULL
+    }) != NULL)
+        return false;
+
+    ffStrbufSubstrBeforeFirstC(version, '(');
+    ffStrbufRemoveStrings(version, 2, (const char*[]) { "-release", "release" });
+    return true;
+}
 #endif
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
@@ -198,7 +222,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 
     return getFileVersion(exe->chars, version);
     #else
-    return false;
+    return getShellVersionGeneric(exe, exeName, version);
     #endif
 }
 

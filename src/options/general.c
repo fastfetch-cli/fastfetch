@@ -30,7 +30,24 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "osFile"))
             ffStrbufSetS(&options->osFile, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
-            options->dsForceDrm = yyjson_get_bool(val);
+        {
+            if (yyjson_is_str(val))
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "sysfs-only", FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY },
+                    { "false", FF_DS_FORCE_DRM_TYPE_FALSE },
+                    { "true", FF_DS_FORCE_DRM_TYPE_TRUE },
+                    {},
+                });
+                if (error)
+                    return "Invalid enum value of `dsForceDrm`";
+                else
+                    options->dsForceDrm = (FFDsForceDrmType) value;
+            }
+            else
+                options->dsForceDrm = yyjson_get_bool(val) ? FF_DS_FORCE_DRM_TYPE_TRUE : FF_DS_FORCE_DRM_TYPE_FALSE;
+        }
         #elif defined(_WIN32)
         else if (ffStrEqualsIgnCase(key, "wmiTimeout"))
             options->wmiTimeout = (int32_t) yyjson_get_int(val);
@@ -65,7 +82,14 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
     else if (ffStrEqualsIgnCase(key, "--os-file"))
         ffOptionParseString(key, value, &options->osFile);
     else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
-        options->dsForceDrm = ffOptionParseBoolean(value);
+    {
+        if (ffOptionParseBoolean(value))
+            options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_TRUE;
+        else if (ffStrEqualsIgnCase(value, "sysfs-only"))
+            options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY;
+        else
+            options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
+    }
     #elif defined(_WIN32)
     else if (ffStrEqualsIgnCase(key, "--wmi-timeout"))
         options->wmiTimeout = ffOptionParseInt32(key, value);
@@ -86,7 +110,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
     options->escapeBedrock = true;
     ffStrbufInit(&options->playerName);
     ffStrbufInit(&options->osFile);
-    options->dsForceDrm = false;
+    options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
     #elif defined(_WIN32)
     options->wmiTimeout = 5000;
     #endif
@@ -125,7 +149,20 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
         yyjson_mut_obj_add_strbuf(doc, obj, "osFile", &options->osFile);
 
     if (options->dsForceDrm != defaultOptions.dsForceDrm)
-        yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", options->dsForceDrm);
+    {
+        switch (options->dsForceDrm)
+        {
+            case FF_DS_FORCE_DRM_TYPE_FALSE:
+                yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", false);
+                break;
+            case FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY:
+                yyjson_mut_obj_add_str(doc, obj, "dsForceDrm", "sysfs-only");
+                break;
+            case FF_DS_FORCE_DRM_TYPE_TRUE:
+                yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
+                break;
+        }
+    }
 
     #elif defined(_WIN32)
 

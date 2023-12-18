@@ -1,6 +1,7 @@
 #include "de.h"
 
 #include "common/io/io.h"
+#include "common/library.h"
 #include "common/parsing.h"
 #include "common/properties.h"
 #include "common/processing.h"
@@ -87,26 +88,18 @@ static void getMate(FFstrbuf* result, FFDEOptions* options)
     }
 }
 
+static const char* getXfce4ByLib(FFstrbuf* result)
+{
+    const char* xfce_version_string(void); // from `xfce4/libxfce4util/xfce-misutils.h
+    FF_LIBRARY_LOAD(xfce4util, NULL, "dlopen libxfce4util" FF_LIBRARY_EXTENSION "failed", "libxfce4util" FF_LIBRARY_EXTENSION, 7);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xfce4util, xfce_version_string);
+    ffStrbufSetS(result, ffxfce_version_string());
+    return NULL;
+}
+
 static void getXFCE4(FFstrbuf* result, FFDEOptions* options)
 {
-    ffParsePropFileData("gtk-doc/html/libxfce4ui/index.html", "<div><p class=\"releaseinfo\">Version", result);
-
-    #ifdef __FreeBSD__
-    if(result->length == 0)
-    {
-        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/usr/local/share/licenses/");
-        if (dirp)
-        {
-            struct dirent* entry;
-            while((entry = readdir(dirp)) != NULL)
-            {
-                if(!ffStrStartsWith(entry->d_name, "xfce-") || !isdigit(entry->d_name[5]))
-                    continue;
-                ffStrbufAppendS(result, &entry->d_name[5]);
-            }
-        }
-    }
-    #endif
+    getXfce4ByLib(result);
 
     if(result->length == 0 && options->slowVersionDetection)
     {
@@ -117,8 +110,8 @@ static void getXFCE4(FFstrbuf* result, FFDEOptions* options)
             NULL
         });
 
-        ffStrbufSubstrBeforeFirstC(result, '(');
-        ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeFirstC(result, ')');
+        ffStrbufSubstrAfterLastC(result, ' ');
         ffStrbufTrim(result, ' ');
     }
 }

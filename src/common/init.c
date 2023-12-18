@@ -94,7 +94,10 @@ void ffStart(void)
     ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe && !instance.state.resultDoc;
 
     #ifdef _WIN32
-    setvbuf(stdout, NULL, _IOFBF, instance.config.display.noBuffer ? 0 : 4096);
+    if (instance.config.display.noBuffer)
+        setvbuf(stdout, NULL, _IONBF, 0);
+    else
+        setvbuf(stdout, NULL, _IOFBF, 4096);
     SetConsoleCtrlHandler(consoleHandler, TRUE);
     HANDLE hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;

@@ -1,4 +1,0 @@
---structure Host:Display:CPU:GPU:Memory:Disk:Battery
---memory-format "{?2}{2}{?}"
---disk-format "{?2}{2}{?}"
---battery-format "{?1}{1} {?}{?2}{2} {?}{?3}({3}){?}"

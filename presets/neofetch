@@ -1,9 +1,0 @@
---structure "Title:Separator:OS:Host:Kernel:Uptime:Packages:Shell:Display:DE:WM:WMTheme:Theme:Icons:Terminal:TerminalFont:CPU:GPU:Memory:Break:Colors"
---host-format "{/2}{-}{/}{2}{?3} {3}{?}"
---os-format "{3} {12}"
---display-key Resolution
---display-compact-type original
---de-format "{2} {3}"
---theme-format "{?1}{1}{?3} {3}{?} [Plasma], {?}{7}"
---terminalfont-format "{/2}{-}{/}{2}{?3} {3}{?}"
---memory-format "{/1}{-}{/}{/2}{-}{/}{} / {}"

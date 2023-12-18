@@ -20,7 +20,7 @@ static void getExePath(FFPlatform* platform)
     FFstrbuf* const exePath = &platform->exePath;
     ffStrbufEnsureFree(exePath, PATH_MAX);
     #ifdef __linux__
-        ssize_t exePathLen = readlink("/proc/self/exe", exePath->chars, exePath->allocated);
+        ssize_t exePathLen = readlink("/proc/self/exe", exePath->chars, exePath->allocated - 1);
     #elif defined(__APPLE__)
         int exePathLen = proc_pidpath((int) getpid(), exePath->chars, exePath->allocated);
     #elif defined(__FreeBSD__)

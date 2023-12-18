@@ -2,6 +2,13 @@
 
 #include "util/FFstrbuf.h"
 
+typedef enum FFDsForceDrmType
+{
+    FF_DS_FORCE_DRM_TYPE_FALSE = 0,   // Disable
+    FF_DS_FORCE_DRM_TYPE_TRUE = 1,    // Try `libdrm`, then `sysfs` if libdrm failed
+    FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY, // Use `/sys/class/drm` only
+} FFDsForceDrmType;
+
 typedef struct FFOptionsGeneral
 {
     bool multithreading;
@@ -12,7 +19,7 @@ typedef struct FFOptionsGeneral
     FFstrbuf playerName;
     FFstrbuf osFile;
     bool escapeBedrock;
-    bool dsForceDrm;
+    FFDsForceDrmType dsForceDrm;
     #elif defined(_WIN32)
     int32_t wmiTimeout;
     #endif
