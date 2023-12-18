@@ -948,6 +948,13 @@
             }
         },
         {
+            "long": "physicaldisk-name-prefix",
+            "desc": "Show disks with given name prefix only",
+            "arg": {
+                "type": "str"
+            }
+        },
+        {
             "long": "bluetooth-show-disconnected",
             "desc": "Set if disconnected bluetooth devices should be printed",
             "arg": {

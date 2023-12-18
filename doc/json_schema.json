@@ -600,6 +600,7 @@
                             "opengl",
                             "os",
                             "packages",
+                            "physicaldisk",
                             "player",
                             "poweradapter",
                             "processes",
@@ -1368,6 +1369,32 @@
                                         "$ref": "#/$defs/format"
                                     }
                                 }
+                            },
+                            {
+                                "title": "Physical Disk",
+                                "properties": {
+                                    "type": {
+                                        "description": "Print physical disk information",
+                                        "const": "physicaldisk"
+                                    },
+                                    "namePrefix": {
+                                        "description": "Show disks with given name prefix only",
+                                        "type": "string"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
                             },
                             {
                                 "title": "Public IP",
