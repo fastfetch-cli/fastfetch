@@ -31,7 +31,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     int openFlagsRights = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
     int FF_AUTO_CLOSE_FD fd = open(fileName, openFlagsModes, openFlagsRights);
-    if(fd == -1)
+    if(fd == -1 && errno == ENOENT)
     {
         createSubfolders(fileName);
         fd = open(fileName, openFlagsModes, openFlagsRights);

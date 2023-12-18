@@ -10,6 +10,7 @@
 #else
     #include <unistd.h>
     #include <dirent.h>
+    #include <errno.h>
     typedef int FFNativeFD;
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
     // one safe way to read correct data is reading the whole file in a single read syscall
