@@ -37,7 +37,7 @@ bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
     LARGE_INTEGER fileSize;
     if(!GetFileSizeEx(handle, &fileSize))
         fileSize.QuadPart = 0;
-    
+
     if (fileSize.QuadPart > 0)
     {
         // optimize for files has a fixed length,
@@ -85,24 +85,6 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
         return false;
 
     return ffAppendFDBuffer(handle, buffer);
-}
-
-bool ffPathExists(const char* path, FFPathType type)
-{
-    DWORD attr = GetFileAttributesA(path);
-    if(attr == INVALID_FILE_ATTRIBUTES)
-        return false;
-
-    if(type & FF_PATHTYPE_REGULAR && !(attr & FILE_ATTRIBUTE_DIRECTORY))
-        return true;
-
-    if(type & FF_PATHTYPE_DIRECTORY && (attr & FILE_ATTRIBUTE_DIRECTORY))
-        return true;
-
-    if(type & FF_PATHTYPE_LINK && (attr & FILE_ATTRIBUTE_REPARSE_POINT))
-        return true;
-
-    return false;
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)

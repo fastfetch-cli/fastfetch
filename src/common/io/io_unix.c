@@ -103,26 +103,6 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
     return ffAppendFDBuffer(fd, buffer);
 }
 
-bool ffPathExists(const char* path, FFPathType type)
-{
-    struct stat fileStat;
-    if(stat(path, &fileStat) != 0)
-        return false;
-
-    unsigned int mode = fileStat.st_mode & S_IFMT;
-
-    if(type & FF_PATHTYPE_REGULAR && mode == S_IFREG)
-        return true;
-
-    if(type & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
-        return true;
-
-    if(type & FF_PATHTYPE_LINK && mode == S_IFLNK)
-        return true;
-
-    return false;
-}
-
 bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* out)
 {
     bool result = false;
