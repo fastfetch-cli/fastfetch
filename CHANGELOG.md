@@ -1,4 +1,9 @@
-# 2.3.5
+# 2.4.0
+
+**We are deprecating flags based config files (will be removed in v3.0.0). We suggest you migrate to json based config files.** One may use `-c /path/to/config.conf --gen-config` to migrate existing flag based config files.
+
+Changes:
+* All flag based presets are removed
 
 Features:
 * Improve performance of detecting rpm and pkg package count (Packages, Linux / FreeBSD)
