@@ -5,11 +5,18 @@ Features:
 * Support Apple M3X temperature detection (CPU / GPU, macOS)
 * `--ds-force-drm` support a new option `sysfs-only`
 * Improve xfce4 version detection
-* Improve detection (WM / DE, FreeBSD)
+* Detect WM and DE by enumerating running processes (WM / DE, FreeBSD)
+* Add a new module `Physical Disk`, which detects product name, full size, serial number and so on.
 
 Bugfixes:
 * Fix crashes sometimes when `--logo-padding-top` is not set (Logo)
 * Fix memory usage counting algorithm (Memory, macOS)
+* Fix the behavior of `--no-buffer` in Windows
+* Fix possible segfault in some devices (Display, Linux)
+
+Logo:
+* Remove unnecessary escaping for Adelie logo
+* Add EshanizedOS
 
 # 2.3.4
 
