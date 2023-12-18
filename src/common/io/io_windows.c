@@ -18,11 +18,16 @@ static void createSubfolders(const char* fileName)
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 {
     HANDLE FF_AUTO_CLOSE_FD handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if(handle == INVALID_HANDLE_VALUE)
+    if (handle == INVALID_HANDLE_VALUE)
     {
-        createSubfolders(fileName);
-        handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-        if(handle == INVALID_HANDLE_VALUE)
+        if (GetLastError() == ERROR_PATH_NOT_FOUND)
+        {
+            createSubfolders(fileName);
+            handle = CreateFileA(fileName, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+            if (handle == INVALID_HANDLE_VALUE)
+                return false;
+        }
+        else
             return false;
     }
 

@@ -3,10 +3,10 @@
 #include "util/unused.h"
 
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <termios.h>
 #include <poll.h>
 #include <dirent.h>
+#include <errno.h>
 
 #if __has_include(<wordexp.h>)
 #include <wordexp.h>
@@ -33,9 +33,14 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     int FF_AUTO_CLOSE_FD fd = open(fileName, openFlagsModes, openFlagsRights);
     if(fd == -1)
     {
-        createSubfolders(fileName);
-        fd = open(fileName, openFlagsModes, openFlagsRights);
-        if(fd == -1)
+        if (errno == ENOENT)
+        {
+            createSubfolders(fileName);
+            fd = open(fileName, openFlagsModes, openFlagsRights);
+            if(fd == -1)
+                return false;
+        }
+        else
             return false;
     }
 
