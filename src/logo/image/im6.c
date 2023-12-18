@@ -17,10 +17,13 @@ FFLogoImageResult ffLogoPrintImageIM6(FFLogoRequestData* requestData)
     FF_LIBRARY_LOAD(imageMagick, &instance.config.library.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR, "libMagickCore-6.Q16HDRI" FF_LIBRARY_EXTENSION, 8, "libMagickCore-6.Q16" FF_LIBRARY_EXTENSION, 8)
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
 
-    return ffLogoPrintImageImpl(requestData, &(FFIMData) {
+    FFLogoImageResult result = ffLogoPrintImageImpl(requestData, &(FFIMData) {
         .resizeFunc = logoResize,
         .library = imageMagick,
     });
+
+    imageMagick = NULL; // leak imageMagick to prevent fastfetch from crashing #552
+    return result;
 }
 
 #endif

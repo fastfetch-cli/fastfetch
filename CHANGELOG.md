@@ -18,6 +18,7 @@ Bugfixes:
 * Fix memory usage counting algorithm (Memory, macOS)
 * Fix the behavior of `--no-buffer` in Windows
 * Fix possible segfault in some devices (Display, Linux)
+* Fix segfaults on first use of new images with Sixel flag (Image) 
 
 Logo:
 * Remove unnecessary escaping for Adelie logo
