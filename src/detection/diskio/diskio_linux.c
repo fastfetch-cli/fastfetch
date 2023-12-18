@@ -24,8 +24,11 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         char pathSysBlock[PATH_MAX];
         snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s", devName);
 
-        char pathSysDeviceReal[PATH_MAX] = "";
-        readlink(pathSysBlock, pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
+        char pathSysDeviceReal[PATH_MAX];
+        ssize_t pathLength = readlink(pathSysBlock, pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
+        if (pathLength < 0)
+            continue;
+        pathSysDeviceReal[pathLength] = '\0';
 
         if (strstr(pathSysDeviceReal, "/virtual/")) // virtual device
             continue;
