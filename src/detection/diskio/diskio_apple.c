@@ -53,6 +53,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         device->type = FF_DISKIO_PHYSICAL_TYPE_UNKNOWN;
         device->size = 0;
 
+        FF_CFTYPE_AUTO_RELEASE CFBooleanRef removable = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOMediaRemovableKey), kCFAllocatorDefault, kNilOptions);
+        device->removable = !!CFBooleanGetValue(removable);
+
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesReadKey), (int64_t*) &device->bytesRead);
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsBytesWrittenKey), (int64_t*) &device->bytesWritten);
         ffCfDictGetInt64(statistics, CFSTR(kIOBlockStorageDriverStatisticsReadsKey), (int64_t*) &device->readCount);
@@ -77,11 +80,13 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         {
             FF_CFTYPE_AUTO_RELEASE CFDictionaryRef protocolCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyProtocolCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
             if (protocolCharacteristics)
-                ffCfDictGetString(protocolCharacteristics, CFSTR("Physical Interconnect"), &device->interconnect);
+                ffCfDictGetString(protocolCharacteristics, CFSTR(kIOPropertyPhysicalInterconnectTypeKey), &device->interconnect);
 
             FF_CFTYPE_AUTO_RELEASE CFDictionaryRef deviceCharacteristics = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyDeviceCharacteristicsKey), kCFAllocatorDefault, kNilOptions);
             if (deviceCharacteristics)
             {
+                ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyProductSerialNumberKey), &device->serial);
+
                 CFStringRef mediumType = (CFStringRef) CFDictionaryGetValue(deviceCharacteristics, CFSTR(kIOPropertyMediumTypeKey));
                 if (mediumType)
                 {
