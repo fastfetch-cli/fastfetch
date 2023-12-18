@@ -1348,6 +1348,15 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // EshanizedOS
+    {
+        .names = {"EshanizedOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ESHANIZEDOS,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // EuroLinux
     {
         .names = {"EuroLinux"},
