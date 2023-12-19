@@ -501,6 +501,11 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         ffStrbufAppendS(&absolutePath, value);
 
         bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+        if (!success)
+        {
+            ffStrbufAppendS(&absolutePath, ".jsonc");
+            success = parseJsoncFile(absolutePath.chars);
+        }
 
         if(success)
             return;
@@ -514,6 +519,11 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         ffStrbufAppendS(&absolutePath, value);
 
         bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+        if (!success)
+        {
+            ffStrbufAppendS(&absolutePath, ".jsonc");
+            success = parseJsoncFile(absolutePath.chars);
+        }
 
         if(success)
             return;
