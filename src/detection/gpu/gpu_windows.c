@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "detection/gpu/gpu_intel.h"
 #include "detection/gpu/gpu_nvidia.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
@@ -100,6 +101,33 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .memory = options->useNvml ? &gpu->dedicated : NULL,
                     .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
                 }, "nvml.dll");
+            }
+        }
+
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL && (options->temp || options->useNvml))
+        {
+            uint32_t vendorId, deviceId, subSystemId, revId;
+            // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
+            // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_8086&DEV_46A6&SUBSYS_13241462&REV_0C"
+            if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4)
+            {
+                ffDetectIntelGpuInfo((FFGpuIntelCondition) {
+                    .pciDeviceId = deviceId,
+                    .pciVendorId = vendorId,
+                    .pciSubSystemId = subSystemId,
+                    .revId = revId,
+                }, (FFGpuIntelResult) {
+                    .temp = options->temp ? &gpu->temperature : NULL,
+                    .memory = options->useNvml ? &gpu->dedicated : NULL,
+                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
+                    .type = options->useNvml ? (uint32_t*) &gpu->type : NULL,
+                },
+                #ifdef _WIN64
+                    "ControlLib.dll"
+                #else
+                    "ControlLib32.dll"
+                #endif
+                );
             }
         }
     }

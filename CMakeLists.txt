@@ -630,6 +630,7 @@ elseif(WIN32)
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/gpu/gpu_nvidia.c
+        src/detection/gpu/gpu_intel.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
