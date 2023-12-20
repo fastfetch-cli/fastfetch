@@ -58,9 +58,9 @@ static const char* detectWithBacklight(FFlist* result)
                     {
                         ffStrbufSubstrBeforeLastC(&brightness->name, '/'); // remove "/edid"
                         ffStrbufSubstrAfterLastC(&brightness->name, '/'); // try getting DRM connector name
-                        if(ffStrbufStartsWithS(&brightness->name, "0000:"))
+                        if(isdigit(brightness->name.chars[0]))
                         {
-                            // PCI address, give up
+                            // PCI address or some unknown path, give up
                             ffStrbufSetS(&brightness->name, entry->d_name);
                         }
                         else
