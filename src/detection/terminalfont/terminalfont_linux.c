@@ -172,10 +172,9 @@ static void detectDeepinTerminal(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreate();
 
-    ffStrbufAppend(&profile, &instance.state.platform.homeDir);
-    ffStrbufAppendS(&profile, ".config/deepin/deepin-terminal/config.conf"); //TODO: Use config dirs
+    FF_STRBUF_AUTO_DESTROY profile = ffStrbufCreateA(64);
+    ffSearchUserConfigFile(&instance.state.platform.configDirs, "deepin/deepin-terminal/config.conf", &profile);
     FILE* file = fopen(profile.chars, "r");
 
     if(file)
