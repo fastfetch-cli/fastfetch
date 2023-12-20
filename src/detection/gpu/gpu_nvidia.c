@@ -1,4 +1,4 @@
-#include "gpu_nvidia.h"
+#include "gpu_driver_specific.h"
 
 #include "3rdparty/nvml/nvml.h"
 #include "common/library.h"
@@ -11,11 +11,12 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperature)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetClockInfo)
 
     bool inited;
 } nvmlData;
 
-const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult result, const char* soName)
+const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName)
 {
     if (!nvmlData.inited)
     {
@@ -30,6 +31,7 @@ const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult r
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperature)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetClockInfo)
 
         if (ffnvmlInit_v2() != NVML_SUCCESS)
         {
@@ -44,13 +46,16 @@ const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult r
         return "loading nvml library failed";
 
     nvmlDevice_t device = NULL;
-    if (cond.pciBusId)
+    if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
     {
-        nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(cond.pciBusId, &device);
+        char pciBusIdStr[32];
+        snprintf(pciBusIdStr, sizeof(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
+
+        nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(pciBusIdStr, &device);
         if (ret != NVML_SUCCESS)
             return "nvmlDeviceGetHandleByPciBusId_v2() failed";
     }
-    else
+    else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID)
     {
         uint32_t count;
         if (nvmlData.ffnvmlDeviceGetCount_v2(&count) != NVML_SUCCESS)
@@ -65,7 +70,8 @@ const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult r
             if (nvmlData.ffnvmlDeviceGetPciInfo_v3(device, &pciInfo) != NVML_SUCCESS)
                 continue;
 
-            if (pciInfo.pciDeviceId != cond.pciDeviceId || pciInfo.pciSubSystemId != cond.pciSubSystemId)
+            if (pciInfo.pciDeviceId != ((cond->pciDeviceId.deviceId << 16u) | cond->pciDeviceId.vendorId) ||
+                pciInfo.pciSubSystemId != cond->pciDeviceId.subSystemId)
                 continue;
 
             break;
@@ -92,6 +98,9 @@ const char* ffDetectNvidiaGpuInfo(FFGpuNvidiaCondition cond, FFGpuNvidiaResult r
 
     if (result.coreCount)
         nvmlData.ffnvmlDeviceGetNumGpuCores(device, result.coreCount);
+
+    if (result.frequency)
+        nvmlData.ffnvmlDeviceGetClockInfo(device, NVML_CLOCK_GRAPHICS, result.frequency);
 
     return NULL;
 }

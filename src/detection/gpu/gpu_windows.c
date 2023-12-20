@@ -1,6 +1,5 @@
 #include "gpu.h"
-#include "detection/gpu/gpu_intel.h"
-#include "detection/gpu/gpu_nvidia.h"
+#include "detection/gpu/gpu_driver_specific.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
 
@@ -44,6 +43,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->deviceId = 0;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         if (deviceKeyLength == 100 && displayDevice.DeviceKey[deviceKeyPrefixLength - 1] == '{')
         {
@@ -76,6 +77,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->dedicated.total = dedicatedVideoMemory + dedicatedSystemMemory;
                     gpu->shared.total = sharedSystemMemory;
                 }
+
+                ffRegReadUint64(hDirectxKey, L"AdapterLuid", &gpu->deviceId, NULL);
             }
             else if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
             {
@@ -86,47 +89,35 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             }
         }
 
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->useNvml))
-        {
-            uint32_t vendorId, deviceId, subSystemId;
-            // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
-            // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
-            if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x", &vendorId, &deviceId, &subSystemId) == 3)
-            {
-                ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) {
-                    .pciDeviceId = (deviceId << 16) | vendorId,
-                    .pciSubSystemId = subSystemId,
-                }, (FFGpuNvidiaResult) {
-                    .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = options->useNvml ? &gpu->dedicated : NULL,
-                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-                }, "nvml.dll");
-            }
-        }
-
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL && (options->temp || options->useNvml))
+        if ((gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA || gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) &&
+            (options->temp || options->useNvml))
         {
             uint32_t vendorId, deviceId, subSystemId, revId;
             // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
-            // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_8086&DEV_46A6&SUBSYS_13241462&REV_0C"
+            // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
             if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4)
             {
-                ffDetectIntelGpuInfo((FFGpuIntelCondition) {
-                    .pciDeviceId = deviceId,
-                    .pciVendorId = vendorId,
-                    .pciSubSystemId = subSystemId,
-                    .revId = revId,
-                }, (FFGpuIntelResult) {
-                    .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = options->useNvml ? &gpu->dedicated : NULL,
-                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-                    .type = options->useNvml ? (uint32_t*) &gpu->type : NULL,
-                },
-                #ifdef _WIN64
-                    "ControlLib.dll"
-                #else
-                    "ControlLib32.dll"
-                #endif
+                (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA ? ffDetectNvidiaGpuInfo : ffDetectIntelGpuInfo)(
+                    &(FFGpuDriverCondition) {
+                        .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID | FF_GPU_DRIVER_CONDITION_TYPE_LUID,
+                        .pciDeviceId = {
+                            .deviceId = deviceId,
+                            .vendorId = vendorId,
+                            .subSystemId = subSystemId,
+                            .revId = revId,
+                        },
+                    }, (FFGpuDriverResult) {
+                        .temp = options->temp ? &gpu->temperature : NULL,
+                        .memory = options->useNvml ? &gpu->dedicated : NULL,
+                        .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
+                        .type = options->useNvml ? (uint32_t*) &gpu->type : NULL,
+                        .frequency = options->useNvml ? &gpu->frequency : NULL,
+                    }, gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA ? "nvml.dll" :
+                        #ifdef _WIN64
+                            "ControlLib.dll"
+                        #else
+                            "ControlLib32.dll"
+                        #endif
                 );
             }
         }

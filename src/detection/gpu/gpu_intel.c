@@ -1,4 +1,4 @@
-#include "gpu_intel.h"
+#include "gpu_driver_specific.h"
 
 #include "3rdparty/igcl/igcl_api.h"
 #include "common/library.h"
@@ -12,6 +12,8 @@ struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlTemperatureGetState)
     FF_LIBRARY_SYMBOL(ctlEnumMemoryModules)
     FF_LIBRARY_SYMBOL(ctlMemoryGetState)
+    FF_LIBRARY_SYMBOL(ctlEnumFrequencyDomains)
+    FF_LIBRARY_SYMBOL(ctlFrequencyGetState)
 
     bool inited;
     ctl_api_handle_t apiHandle;
@@ -26,7 +28,7 @@ static void shutdownIgcl()
     }
 }
 
-const char* ffDetectIntelGpuInfo(FFGpuIntelCondition cond, FFGpuIntelResult result, const char* soName)
+const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName)
 {
     if (!igclData.inited)
     {
@@ -40,6 +42,8 @@ const char* ffDetectIntelGpuInfo(FFGpuIntelCondition cond, FFGpuIntelResult resu
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlTemperatureGetState)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumMemoryModules)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetState)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumFrequencyDomains)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlFrequencyGetState)
 
         if (ffctlInit(&(ctl_init_args_t) {
             .AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION),
@@ -66,7 +70,7 @@ const char* ffDetectIntelGpuInfo(FFGpuIntelCondition cond, FFGpuIntelResult resu
 
     ctl_device_adapter_handle_t device = NULL;
 
-    LUID deviceId;
+    uint64_t /* LUID */ deviceId = 0;
     ctl_device_adapter_properties_t properties = {
         .Size = sizeof(properties),
         .pDeviceID = &deviceId,
@@ -81,14 +85,35 @@ const char* ffDetectIntelGpuInfo(FFGpuIntelCondition cond, FFGpuIntelResult resu
         if (properties.device_type != CTL_DEVICE_TYPE_GRAPHICS)
             continue;
 
-        if (
-            cond.pciDeviceId == properties.pci_device_id &&
-            cond.pciVendorId == properties.pci_vendor_id &&
-            cond.pciSubSystemId == (((uint32_t) properties.pci_subsys_id << 16u) + (uint32_t) properties.pci_subsys_vendor_id) &&
-            cond.revId == properties.rev_id)
+        if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_LUID)
         {
-            device = devices[iDev];
-            break;
+            if (cond->luid == deviceId)
+            {
+                device = devices[iDev];
+                break;
+            }
+        }
+        else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
+        {
+            if (cond->pciBusId.bus == properties.adapter_bdf.bus &&
+                cond->pciBusId.device == properties.adapter_bdf.device &&
+                cond->pciBusId.func == properties.adapter_bdf.function)
+            {
+                device = devices[iDev];
+                break;
+            }
+        }
+        else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID)
+        {
+            if (
+                cond->pciDeviceId.deviceId == properties.pci_device_id &&
+                cond->pciDeviceId.vendorId == properties.pci_vendor_id &&
+                cond->pciDeviceId.subSystemId == (uint32_t) ((properties.pci_subsys_id << 16u) | properties.pci_subsys_vendor_id) &&
+                cond->pciDeviceId.revId == properties.rev_id)
+            {
+                device = devices[iDev];
+                break;
+            }
         }
     }
 
@@ -147,6 +172,9 @@ const char* ffDetectIntelGpuInfo(FFGpuIntelCondition cond, FFGpuIntelResult resu
             *result.temp = sumValue / availableCount;
         }
     }
+
+    if (result.frequency)
+        *result.frequency = properties.Frequency;
 
     return NULL;
 }

@@ -175,13 +175,13 @@ static const char* detectVulkan(FFVulkanResult* result)
         // #456
         FF_LIST_FOR_EACH(FFGPUResult, gpu, result->gpus)
         {
-            if (gpu->vulkanDeviceId == physicalDeviceProperties.properties.deviceID)
+            if (gpu->deviceId == physicalDeviceProperties.properties.deviceID)
                 goto next;
         }
 
         FFGPUResult* gpu = ffListAdd(&result->gpus);
 
-        gpu->vulkanDeviceId = physicalDeviceProperties.properties.deviceID;
+        gpu->deviceId = physicalDeviceProperties.properties.deviceID;
 
         ffStrbufInitS(&gpu->name, physicalDeviceProperties.properties.deviceName);
 
@@ -204,6 +204,7 @@ static const char* detectVulkan(FFVulkanResult* result)
         //No way to detect those using vulkan
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
     next:
         continue;
