@@ -90,7 +90,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         }
 
         if ((gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA || gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) &&
-            (options->temp || options->useNvml))
+            (options->temp || options->driverSpecific))
         {
             uint32_t vendorId, deviceId, subSystemId, revId;
             // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
@@ -108,10 +108,10 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         },
                     }, (FFGpuDriverResult) {
                         .temp = options->temp ? &gpu->temperature : NULL,
-                        .memory = options->useNvml ? &gpu->dedicated : NULL,
-                        .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-                        .type = options->useNvml ? (uint32_t*) &gpu->type : NULL,
-                        .frequency = options->useNvml ? &gpu->frequency : NULL,
+                        .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                        .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                        .type = options->driverSpecific ? &gpu->type : NULL,
+                        .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                     }, gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA ? "nvml.dll" :
                         #ifdef _WIN64
                             "ControlLib.dll"

@@ -14,6 +14,8 @@ extern "C" {
 #include <utility>
 #include <cinttypes>
 
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+
 template <typename Fn>
 struct on_scope_exit {
     on_scope_exit(Fn &&fn): _fn(std::move(fn)) {}
@@ -96,9 +98,9 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
             const char* vendorStr = ffGetGPUVendorString((unsigned) hardwareId.vendorID);
             ffStrbufSetStatic(&gpu->vendor, vendorStr);
 
-            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && options->useNvml)
+            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && options->driverSpecific)
             {
-                ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
+                FFGpuDriverCondition cond = {
                     .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID,
                     .pciDeviceId = {
                         .deviceId = hardwareId.deviceID,
@@ -106,12 +108,13 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
                         .subSystemId = hardwareId.subSysID,
                         .revId = hardwareId.revision,
                     },
-                }, (FFGpuNvidiaResult) {
+                };
+                ffDetectNvidiaGpuInfo(&cond, (FFGpuDriverResult) {
                     .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = options->useNvml ? &gpu->dedicated : NULL,
-                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-                    .type = options->useNvml ? (uint32_t*) &gpu->type : NULL,
-                    .frequency = options->useNvml ? &gpu->frequency : NULL,
+                    .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                    .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                    .type = options->driverSpecific ? &gpu->type : NULL,
+                    .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 }, "/usr/lib/wsl/lib/libnvidia-ml.so");
             }
         }

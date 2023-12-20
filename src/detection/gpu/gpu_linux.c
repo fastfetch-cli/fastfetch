@@ -241,22 +241,22 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->useNvml))
+    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
     {
         ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
             .type = FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID,
-            .pciDeviceId = {
-                .domain = device->domain,
+            .pciBusId = {
+                .domain = (uint32_t) device->domain,
                 .bus = device->bus,
                 .device = device->dev,
                 .func = device->func,
             },
-        }, (FFGpuNvidiaResult) {
+        }, (FFGpuDriverResult) {
             .temp = options->temp ? &gpu->temperature : NULL,
-            .memory = options->useNvml ? &gpu->dedicated : NULL,
-            .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
-            .type = options->useNvml ? (uint32_t*) &gpu->type : NULL,
-            .frequency = options->useNvml ? &gpu->frequency : NULL,
+            .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+            .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+            .type = options->driverSpecific ? &gpu->type : NULL,
+            .frequency = options->driverSpecific ? &gpu->frequency : NULL,
         }, "libnvidia-ml.so");
 
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)

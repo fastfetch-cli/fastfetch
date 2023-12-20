@@ -1082,9 +1082,9 @@
             }
         },
         {
-            "long": "gpu-use-nvml",
-            "desc": "Use nvml (NVIDIA Management Library) to detect more detailed GPU information",
-            "remark": "Detects memory usage, CUDA core count, etc. Requires NVIDIA proprietary driver installed",
+            "long": "gpu-driver-specific",
+            "desc": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
+            "remark": "Correctly NVML (NVIDIA) and IGCL (Intel, Windows only) are supported. Both require the latest proprietary driver to be installed",
             "arg": {
                 "type": "bool",
                 "optional": true,

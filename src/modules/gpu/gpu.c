@@ -133,9 +133,9 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(subKey, "use-nvml"))
+    if (ffStrEqualsIgnCase(subKey, "driver-specific"))
     {
-        options->useNvml = ffOptionParseBoolean(value);
+        options->driverSpecific = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -183,9 +183,9 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "useNvml"))
+        if (ffStrEqualsIgnCase(key, "driverSpecific"))
         {
-            options->useNvml = yyjson_get_bool(val);
+            options->driverSpecific = yyjson_get_bool(val);
             continue;
         }
 
@@ -222,8 +222,8 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
-    if (options->useNvml != defaultOptions.useNvml)
-        yyjson_mut_obj_add_bool(doc, module, "useNvml", options->useNvml);
+    if (options->driverSpecific != defaultOptions.driverSpecific)
+        yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
 
     if (options->forceVulkan != defaultOptions.forceVulkan)
         yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
@@ -354,7 +354,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    options->useNvml = false;
+    options->driverSpecific = false;
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
