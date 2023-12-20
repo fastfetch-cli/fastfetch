@@ -176,7 +176,25 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     }
 
     if (result.frequency)
-        *result.frequency = properties.Frequency / 1000.;
+    {
+        ctl_freq_handle_t freqs[16];
+        uint32_t freqCount = sizeof(freqs) / sizeof(freqs[0]);
+        if (igclData.ffctlEnumFrequencyDomains(device, &freqCount, freqs) == CTL_RESULT_SUCCESS && freqCount > 0)
+        {
+            double sumValue = 0;
+            uint32_t availableCount = 0;
+            for (uint32_t iFreq = 0; iFreq < freqCount; iFreq++)
+            {
+                ctl_freq_state_t state = { .Size = sizeof(state), .Version = 0 };
+                if (igclData.ffctlFrequencyGetState(freqs[iFreq], &state) == CTL_RESULT_SUCCESS)
+                {
+                    sumValue += state.actual;
+                    availableCount++;
+                }
+            }
+            *result.frequency = (sumValue / availableCount) / 1000.;
+        }
+    }
 
     return NULL;
 }
