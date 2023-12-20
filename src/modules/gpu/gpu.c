@@ -38,8 +38,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if(gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
             ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
 
-        if(gpu->frequency != FF_GPU_FREQUENCY_UNSET)
-            ffStrbufAppendF(&output, " @ %.2f MHz", gpu->frequency / 1e6);
+        if(gpu->frequency == gpu->frequency && gpu->frequency > 0 /* Inactive? */)
+            ffStrbufAppendF(&output, " @ %.2f GHz", gpu->frequency);
 
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
         {
@@ -83,7 +83,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.used},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.total},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used},
-            {FF_FORMAT_ARG_TYPE_UINT, &gpu->frequency},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency},
         });
     }
 }
@@ -312,7 +312,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
             yyjson_mut_obj_add_null(doc, obj, "frequency");
         else
-            yyjson_mut_obj_add_uint(doc, obj, "frequency", gpu->frequency);
+            yyjson_mut_obj_add_real(doc, obj, "frequency", gpu->frequency);
     }
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)

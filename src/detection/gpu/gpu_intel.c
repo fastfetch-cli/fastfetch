@@ -2,6 +2,7 @@
 
 #include "3rdparty/igcl/igcl_api.h"
 #include "common/library.h"
+#include "util/mallocHelper.h"
 
 struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlClose)
@@ -62,9 +63,10 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     uint32_t deviceCount = 0;
     if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, NULL))
         return "ctlEnumerateDevices(NULL) failed";
-    ctl_device_adapter_handle_t devices[16] = {};
-    if (deviceCount == 0 || deviceCount > sizeof(devices) / sizeof(devices[0]))
-        return "Invalid device count";
+    if (deviceCount == 0)
+        return "No Intel graphics adapter found";
+
+    FF_AUTO_FREE ctl_device_adapter_handle_t* devices = malloc(deviceCount * sizeof(*devices));
     if (igclData.ffctlEnumerateDevices(igclData.apiHandle, &deviceCount, devices))
         return "ctlEnumerateDevices(devices) failed";
 
@@ -127,7 +129,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     {
         ctl_mem_handle_t memoryModules[16];
         uint32_t memoryCount = sizeof(memoryModules) / sizeof(memoryModules[0]);
-        if (igclData.ffctlEnumMemoryModules(device, &memoryCount, memoryModules) == CTL_RESULT_SUCCESS)
+        if (igclData.ffctlEnumMemoryModules(device, &memoryCount, memoryModules) == CTL_RESULT_SUCCESS && memoryCount > 0)
         {
             result.memory->used = 0;
             result.memory->total = 0;
@@ -156,7 +158,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     {
         ctl_temp_handle_t sensors[16];
         uint32_t sensorCount = sizeof(sensors) / sizeof(sensors[0]);
-        if (igclData.ffctlEnumTemperatureSensors(device, &sensorCount, sensors) == CTL_RESULT_SUCCESS)
+        if (igclData.ffctlEnumTemperatureSensors(device, &sensorCount, sensors) == CTL_RESULT_SUCCESS && sensorCount > 0)
         {
             double sumValue = 0;
             uint32_t availableCount = 0;
@@ -174,7 +176,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     }
 
     if (result.frequency)
-        *result.frequency = properties.Frequency;
+        *result.frequency = properties.Frequency / 1000.;
 
     return NULL;
 }

@@ -113,8 +113,8 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
                     .temp = options->temp ? &gpu->temperature : NULL,
                     .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-                    .type = options->driverSpecific ? &gpu->type : NULL,
-                    .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                    .type = &gpu->type,
+                    .frequency = &gpu->frequency,
                 }, "/usr/lib/wsl/lib/libnvidia-ml.so");
             }
         }

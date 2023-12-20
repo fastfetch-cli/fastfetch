@@ -255,8 +255,8 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             .temp = options->temp ? &gpu->temperature : NULL,
             .memory = options->driverSpecific ? &gpu->dedicated : NULL,
             .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-            .type = options->driverSpecific ? &gpu->type : NULL,
-            .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+            .type = &gpu->type,
+            .frequency = &gpu->frequency,
         }, "libnvidia-ml.so");
 
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)

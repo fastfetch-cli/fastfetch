@@ -5,7 +5,7 @@
 #define FF_GPU_TEMP_UNSET (0/0.0)
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
-#define FF_GPU_FREQUENCY_UNSET -1u
+#define FF_GPU_FREQUENCY_UNSET (0/0.0)
 
 extern const char* FF_GPU_VENDOR_NAME_APPLE;
 extern const char* FF_GPU_VENDOR_NAME_AMD;
@@ -31,7 +31,7 @@ typedef struct FFGPUResult
     FFstrbuf driver;
     double temperature;
     int32_t coreCount;
-    uint32_t frequency;
+    double frequency; // Real time clock frequency in GHz
     FFGPUMemory dedicated;
     FFGPUMemory shared;
     uint64_t deviceId; // Used internally, may be uninitialized

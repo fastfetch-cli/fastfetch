@@ -106,12 +106,13 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             .subSystemId = subSystemId,
                             .revId = revId,
                         },
+                        .luid = gpu->deviceId,
                     }, (FFGpuDriverResult) {
                         .temp = options->temp ? &gpu->temperature : NULL,
                         .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                         .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-                        .type = options->driverSpecific ? &gpu->type : NULL,
-                        .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                        .type = &gpu->type,
+                        .frequency = &gpu->frequency,
                     }, gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA ? "nvml.dll" :
                         #ifdef _WIN64
                             "ControlLib.dll"
