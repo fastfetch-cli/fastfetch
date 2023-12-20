@@ -133,15 +133,17 @@ static bool detectXFWM4(FFstrbuf* themeOrError)
 static bool detectOpenbox(const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
 {
     FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(64);
-    ffStrbufAppend(&absolutePath, &instance.state.platform.homeDir);
+    const char *configFileSubpath = "openbox/rc.xml"; 
+    if (ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
+        configFileSubpath = "openbox/lxqt-rc.xml";
+    else if (ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
+        configFileSubpath = "openbox/lxde-rc.xml";
 
-    //TODO: use config dirs
-    if(ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
-        ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
-    else if(ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
-        ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
-    else
-        ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
+    if (!ffSearchUserConfigFile(&instance.state.platform.configDirs, configFileSubpath, &absolutePath))
+    {
+        ffStrbufAppendF(themeOrError, "Couldn't find config file \"%s\"", configFileSubpath);
+        return false;
+    }
 
     FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     if (!ffReadFileBuffer(absolutePath.chars, &content))
