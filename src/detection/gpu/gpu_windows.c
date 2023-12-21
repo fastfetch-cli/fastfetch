@@ -10,6 +10,41 @@ static int isGpuNameEqual(const FFGPUResult* gpu, const FFstrbuf* name)
     return ffStrbufEqual(&gpu->name, name);
 }
 
+static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName)
+{
+    if (vendor == FF_GPU_VENDOR_NAME_NVIDIA)
+    {
+        *pDetectFn = ffDetectNvidiaGpuInfo;
+        *pDllName = "nvml.dll";
+    }
+    else if (vendor == FF_GPU_VENDOR_NAME_INTEL)
+    {
+        *pDetectFn = ffDetectIntelGpuInfo;
+        #ifdef _WIN64
+            *pDllName = "ControlLib.dll";
+        #else
+            *pDllName = "ControlLib32.dll";
+        #endif
+    }
+    else if (vendor == FF_GPU_VENDOR_NAME_AMD)
+    {
+        *pDetectFn = ffDetectAmdGpuInfo;
+        #ifdef _WIN64
+            *pDllName = "amd_ags_x64.dll";
+        #else
+            *pDllName = "amd_ags_x86.dll";
+        #endif
+    }
+    else
+    {
+        *pDetectFn = NULL;
+        *pDllName = NULL;
+        return false;
+    }
+
+    return true;
+}
+
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(displayDevice) };
@@ -55,12 +90,12 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             ffRegReadStrbuf(hKey, L"DriverVersion", &gpu->driver, NULL);
             ffRegReadStrbuf(hKey, L"ProviderName", &gpu->vendor, NULL);
 
-            if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
-                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-            else if(ffStrbufContainS(&gpu->vendor, "Intel"))
+            if (ffStrbufContainS(&gpu->vendor, "Intel"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-            else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
+            else if (ffStrbufContainS(&gpu->vendor, "NVIDIA"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+            else if (ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
 
             wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, strlen("00000000-0000-0000-0000-000000000000}"));
             FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
@@ -89,15 +124,17 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             }
         }
 
-        if ((gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA || gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL) &&
-            (options->temp || options->driverSpecific))
+        __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
+        const char* dllName;
+
+        if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName) && (options->temp || options->driverSpecific))
         {
             uint32_t vendorId, deviceId, subSystemId, revId;
             // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
             // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
             if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4)
             {
-                (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA ? ffDetectNvidiaGpuInfo : ffDetectIntelGpuInfo)(
+                detectFn(
                     &(FFGpuDriverCondition) {
                         .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID | FF_GPU_DRIVER_CONDITION_TYPE_LUID,
                         .pciDeviceId = {
@@ -107,18 +144,15 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             .revId = revId,
                         },
                         .luid = gpu->deviceId,
-                    }, (FFGpuDriverResult) {
+                    },
+                    (FFGpuDriverResult) {
                         .temp = options->temp ? &gpu->temperature : NULL,
                         .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                         .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                         .type = &gpu->type,
                         .frequency = &gpu->frequency,
-                    }, gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA ? "nvml.dll" :
-                        #ifdef _WIN64
-                            "ControlLib.dll"
-                        #else
-                            "ControlLib32.dll"
-                        #endif
+                    },
+                    dllName
                 );
             }
         }
