@@ -2,5 +2,6 @@
     "home": "https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK",
     "license": "MIT (embeded in source)",
     "version": "AGS v6.2.0",
-    "author": "Advanced Micro Devices, Inc"
+    "author": "Advanced Micro Devices, Inc",
+    "modified": "CarterLi"
 }
