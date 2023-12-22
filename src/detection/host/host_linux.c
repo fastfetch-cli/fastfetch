@@ -5,22 +5,9 @@
 
 #include <stdlib.h>
 
-static void getSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
-{
-    ffReadFileBuffer(devicesPath, buffer);
-    if(ffIsSmbiosValueSet(buffer))
-        return;
-
-    ffReadFileBuffer(classPath, buffer);
-    if(ffIsSmbiosValueSet(buffer))
-        return;
-
-    ffStrbufClear(buffer);
-}
-
 static void getHostProductName(FFstrbuf* name)
 {
-    getSmbiosValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", name);
+    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", name);
     if(name->length > 0)
         return;
 
@@ -42,11 +29,11 @@ static void getHostProductName(FFstrbuf* name)
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    getSmbiosValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->productFamily);
+    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->productFamily);
     getHostProductName(&host->productName);
-    getSmbiosValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &host->productVersion);
-    getSmbiosValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->productSku);
-    getSmbiosValue("/sys/devices/virtual/dmi/id/sys_vendor", "/sys/class/dmi/id/sys_vendor", &host->sysVendor);
+    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &host->productVersion);
+    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->productSku);
+    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/sys_vendor", "/sys/class/dmi/id/sys_vendor", &host->sysVendor);
 
     //KVM/Qemu virtual machine
     if(ffStrbufStartsWithS(&host->productName, "Standard PC"))

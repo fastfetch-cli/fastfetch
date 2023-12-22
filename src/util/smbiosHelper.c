@@ -1,4 +1,5 @@
 #include "smbiosHelper.h"
+#include "common/io/io.h"
 
 bool ffIsSmbiosValueSet(FFstrbuf* value)
 {
@@ -26,3 +27,24 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "N/A")
     ;
 }
+
+#ifdef __linux__
+void ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
+{
+    if (ffReadFileBuffer(devicesPath, buffer))
+    {
+        ffStrbufTrimRightSpace(buffer);
+        if(ffIsSmbiosValueSet(buffer))
+            return;
+    }
+
+    if (ffReadFileBuffer(classPath, buffer))
+    {
+        ffStrbufTrimRightSpace(buffer);
+        if(ffIsSmbiosValueSet(buffer))
+            return;
+    }
+
+    ffStrbufClear(buffer);
+}
+#endif

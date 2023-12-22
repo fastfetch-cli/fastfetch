@@ -281,6 +281,24 @@ void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
     strbuf->chars[strbuf->length] = '\0';
 }
 
+void ffStrbufTrimRightSpace(FFstrbuf* strbuf)
+{
+    if(strbuf->length == 0)
+        return;
+
+    while(ffStrbufEndsWithFn(strbuf, isspace))
+        --strbuf->length;
+
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
+        return;
+    }
+
+    strbuf->chars[strbuf->length] = '\0';
+}
+
 void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex)
 {
     if(startIndex > strbuf->length || startIndex >= endIndex)

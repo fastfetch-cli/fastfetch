@@ -133,7 +133,7 @@ static void pciDetectDriverName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     ffStrbufAppendC(&gpu->driver, ' ');
     ffStrbufAppendS(&path, "/module/version");
     ffAppendFileBuffer(path.chars, &gpu->driver);
-    ffStrbufTrimRight(&gpu->driver, ' ');
+    ffStrbufTrimRightSpace(&gpu->driver);
 }
 
 FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, struct pci_dev* device)

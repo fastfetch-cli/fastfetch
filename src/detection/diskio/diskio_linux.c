@@ -41,13 +41,16 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         {
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/vendor", devName);
-            ffAppendFileBuffer(pathSysBlock, &device->name);
-            if (device->name.length > 0)
-                ffStrbufAppendC(&device->name, ' ');
+            if (ffAppendFileBuffer(pathSysBlock, &device->name))
+            {
+                ffStrbufTrimRightSpace(&device->name);
+                if (device->name.length > 0)
+                    ffStrbufAppendC(&device->name, ' ');
+            }
 
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/model", devName);
             ffAppendFileBuffer(pathSysBlock, &device->name);
-            ffStrbufTrim(&device->name, ' ');
+            ffStrbufTrimRightSpace(&device->name);
 
             if (device->name.length == 0)
                 ffStrbufSetS(&device->name, devName);

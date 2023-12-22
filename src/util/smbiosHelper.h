@@ -12,4 +12,8 @@ static inline void ffCleanUpSmbiosValue(FFstrbuf* value)
         ffStrbufClear(value);
 }
 
+#ifdef __linux__
+void ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
+#endif
+
 #endif
