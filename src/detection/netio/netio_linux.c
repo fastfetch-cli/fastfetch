@@ -9,7 +9,7 @@
 static void getData(FFstrbuf* buffer, const char* ifName, bool isDefaultRoute, FFstrbuf* path, FFlist* result)
 {
     ffStrbufSetF(path, "/sys/class/net/%s/operstate", ifName);
-    if(!ffReadFileBuffer(path->chars, buffer) || !ffStrbufEqualS(buffer, "up"))
+    if(!ffReadFileBuffer(path->chars, buffer) || !ffStrbufEqualS(buffer, "up\n"))
         return;
 
     FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);

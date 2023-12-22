@@ -126,6 +126,7 @@ static void getDebianVersion(FFOSResult* result)
 {
     FF_STRBUF_AUTO_DESTROY debianVersion = ffStrbufCreate();
     ffAppendFileBuffer("/etc/debian_version", &debianVersion);
+    ffStrbufTrimRightSpace(&debianVersion);
     if (!debianVersion.length) return;
     ffStrbufSet(&result->version, &debianVersion);
     ffStrbufSet(&result->versionID, &debianVersion);
