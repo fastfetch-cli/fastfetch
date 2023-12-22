@@ -82,7 +82,7 @@
             }
         }
     ],
-    "pseudo": [
+    "General": [
         {
             "long": "thread",
             "desc": "Use separate threads to send HTTP requests",
