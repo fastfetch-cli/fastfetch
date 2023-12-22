@@ -26,6 +26,7 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
 
     ffStrbufAppendS(dir, "name");
     ffReadFileBuffer(dir->chars, &value->name);
+    ffStrbufTrimRightSpace(&value->name);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufAppendS(dir, "device/class");
@@ -35,6 +36,7 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
         ffStrbufAppendS(dir, "device/device/class");
         ffReadFileBuffer(dir->chars, &valueBuffer);
     }
+    ffStrbufTrimRightSpace(&valueBuffer);
     if(valueBuffer.length)
         value->deviceClass = (uint32_t) strtoul(valueBuffer.chars, NULL, 16);
 

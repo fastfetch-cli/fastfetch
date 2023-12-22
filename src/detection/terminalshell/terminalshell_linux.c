@@ -37,6 +37,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
     if(ffAppendFileBuffer(cmdlineFilePath, exe))
     {
+        ffStrbufTrimRightSpace(exe);
         ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
         ffStrbufTrimLeft(exe, '-'); //Happens in TTY
     }

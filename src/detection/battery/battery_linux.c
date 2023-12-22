@@ -14,6 +14,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     //type must exist and be "Battery"
     ffStrbufAppendS(dir, "/type");
     ffReadFileBuffer(dir->chars, &testBatteryBuffer);
+    ffStrbufTrimRightSpace(&testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Battery") != 0)
@@ -22,6 +23,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     //scope may not exist or must not be "Device"
     ffStrbufAppendS(dir, "/scope");
     ffReadFileBuffer(dir->chars, &testBatteryBuffer);
+    ffStrbufTrimRightSpace(&testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseCompS(&testBatteryBuffer, "Device") == 0)
@@ -48,25 +50,30 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     ffStrbufInit(&result->manufacturer);
     ffStrbufAppendS(dir, "/manufacturer");
     ffReadFileBuffer(dir->chars, &result->manufacturer);
+    ffStrbufTrimRightSpace(&result->manufacturer);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->modelName);
     ffStrbufAppendS(dir, "/model_name");
     ffReadFileBuffer(dir->chars, &result->modelName);
+    ffStrbufTrimRightSpace(&result->modelName);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->technology);
     ffStrbufAppendS(dir, "/technology");
     ffReadFileBuffer(dir->chars, &result->technology);
+    ffStrbufTrimRightSpace(&result->technology);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->status);
     ffStrbufAppendS(dir, "/status");
     ffReadFileBuffer(dir->chars, &result->status);
+    ffStrbufTrimRightSpace(&result->status);
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufAppendS(dir, "/cycle_count");
     ffReadFileBuffer(dir->chars, &testBatteryBuffer);
+    ffStrbufTrimRightSpace(&testBatteryBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
     if(dir->length)
         result->cycleCount = (uint32_t) ffStrbufToUInt(&testBatteryBuffer, 0);

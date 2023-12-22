@@ -326,6 +326,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
         //We check the cmdline for the process name, because it is not trimmed.
         ffStrbufAppendS(&procPath, "/cmdline");
         ffReadFileBuffer(procPath.chars, &processName);
+        ffStrbufTrimRightSpace(&processName);
         ffStrbufSubstrBeforeFirstC(&processName, '\0'); //Trim the arguments
         ffStrbufSubstrAfterLastC(&processName, '/');
 
