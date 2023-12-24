@@ -75,7 +75,8 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             else
             {
                 snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
-                ffAppendFileBuffer(pathSysBlock, &device->interconnect);
+                if (ffAppendFileBuffer(pathSysBlock, &device->interconnect))
+                    ffStrbufTrimRightSpace(&device->interconnect);
             }
         }
 
@@ -109,7 +110,8 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         {
             ffStrbufInit(&device->serial);
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/serial", devName);
-            ffReadFileBuffer(pathSysBlock, &device->serial);
+            if (ffReadFileBuffer(pathSysBlock, &device->serial))
+                ffStrbufTrimRightSpace(&device->serial);
         }
     }
 
