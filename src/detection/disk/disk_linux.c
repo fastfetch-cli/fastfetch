@@ -210,10 +210,11 @@ static bool isRemovable(FFDisk* currentDisk)
 
         if (!ffStrStartsWith(partitionName, entry->d_name)) continue;
 
-        // /sys/block/sdx/device/delete
+        // /sys/block/sdx/removable
         ffStrbufAppendS(&basePath, entry->d_name);
-        ffStrbufAppendS(&basePath, "/device/delete");
-        return ffPathExists(basePath.chars, FF_PATHTYPE_FILE);
+        ffStrbufAppendS(&basePath, "/removable");
+        char removableChar = '0';
+        return ffReadFileData(basePath.chars, 1, &removableChar) > 0 && removableChar == '1';
     }
 
     return false;
