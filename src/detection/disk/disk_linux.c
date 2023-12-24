@@ -223,10 +223,10 @@ static void detectType(const FFlist* disks, FFDisk* currentDisk)
 {
     if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-    else if(isRemovable(currentDisk))
-        currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
+    else if(isRemovable(currentDisk))
+        currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
