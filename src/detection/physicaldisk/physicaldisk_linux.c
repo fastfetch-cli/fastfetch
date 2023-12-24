@@ -70,15 +70,12 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             ffStrbufInit(&device->interconnect);
             if (strstr(pathSysDeviceReal, "/usb") != NULL)
                 ffStrbufSetS(&device->interconnect, "usb");
+            if (strstr(pathSysDeviceReal, "/ata") != NULL)
+                ffStrbufSetS(&device->interconnect, "ata");
             else
             {
                 snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
-                if (!ffAppendFileBuffer(pathSysBlock, &device->interconnect))
-                {
-                    snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/uevent", devName);
-                    if (ffParsePropFile(pathSysBlock, "DEVTYPE=", &device->interconnect))
-                        ffStrbufSubstrBeforeLastC(&device->interconnect, '_');
-                }
+                ffAppendFileBuffer(pathSysBlock, &device->interconnect);
             }
         }
 
