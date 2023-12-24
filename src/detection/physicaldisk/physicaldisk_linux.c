@@ -110,6 +110,13 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
 
         {
+            char roChar = '0';
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/ro", devName);
+            if (ffReadFileData(pathSysBlock, 1, &roChar) > 0)
+                device->type |= roChar == '1' ? FF_PHYSICALDISK_TYPE_READONLY : 0;
+        }
+
+        {
             ffStrbufInit(&device->serial);
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/serial", devName);
             if (ffReadFileBuffer(pathSysBlock, &device->serial))

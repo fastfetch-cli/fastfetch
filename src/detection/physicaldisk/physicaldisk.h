@@ -10,6 +10,8 @@ typedef enum FFPhysicalDiskType
 
     FF_PHYSICALDISK_TYPE_FIXED = 1 << 2,
     FF_PHYSICALDISK_TYPE_REMOVABLE = 1 << 3,
+
+    FF_PHYSICALDISK_TYPE_READONLY = 1 << 2,
 } FFPhysicalDiskType;
 
 typedef struct FFPhysicalDiskResult
