@@ -98,7 +98,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
             const char* vendorStr = ffGetGPUVendorString((unsigned) hardwareId.vendorID);
             ffStrbufSetStatic(&gpu->vendor, vendorStr);
 
-            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && options->driverSpecific)
+            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && (options->driverSpecific || options->temp))
             {
                 FFGpuDriverCondition cond = {
                     .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID,
