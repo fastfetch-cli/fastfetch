@@ -70,8 +70,10 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             ffStrbufInit(&device->interconnect);
             if (strstr(pathSysDeviceReal, "/usb") != NULL)
                 ffStrbufSetS(&device->interconnect, "usb");
-            if (strstr(pathSysDeviceReal, "/ata") != NULL)
+            else if (strstr(pathSysDeviceReal, "/ata") != NULL)
                 ffStrbufSetS(&device->interconnect, "ata");
+            else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
+                ffStrbufSetS(&device->interconnect, "nvme");
             else
             {
                 snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
