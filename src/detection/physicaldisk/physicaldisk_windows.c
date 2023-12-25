@@ -65,6 +65,12 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         ffStrbufTrim(&device->serial, ' ');
     }
 
+    if (sdd->ProductRevisionOffset != 0)
+    {
+        ffStrbufSetS(&device->revision, (const char*) sddBuffer + sdd->ProductRevisionOffset);
+        ffStrbufTrim(&device->revision, ' ');
+    }
+
     device->type |= sdd->RemovableMedia ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
 
     ffStrbufInit(&device->interconnect);
