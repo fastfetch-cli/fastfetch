@@ -56,6 +56,15 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             if (device->name.length == 0)
                 ffStrbufSetS(&device->name, devName);
 
+            char diskseq[8] = "";
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/diskseq", devName);
+            ffReadFileData(pathSysBlock, sizeof(diskseq) - 1, diskseq);
+            char* lineEnding = strchr(diskseq, '\n');
+            if (lineEnding)
+                *lineEnding = '\0';
+            if (!ffStrEquals(diskseq, "1"))
+                ffStrbufAppendF(&device->name, "-%s", diskseq);
+
             if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
             {
                 ffStrbufDestroy(&device->name);
@@ -121,6 +130,13 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/serial", devName);
             if (ffReadFileBuffer(pathSysBlock, &device->serial))
                 ffStrbufTrimRightSpace(&device->serial);
+        }
+
+        {
+            ffStrbufInit(&device->firmwareRev);
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/firmware_rev", devName);
+            if (ffReadFileBuffer(pathSysBlock, &device->firmwareRev))
+                ffStrbufTrimRightSpace(&device->firmwareRev);
         }
     }
 
