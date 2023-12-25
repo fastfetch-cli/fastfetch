@@ -28,7 +28,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         ffagsDeInitialize(apiHandle);
     }
 
-    if (!gpuInfo.numDevices == 0)
+    if (gpuInfo.numDevices == 0)
         return "loading ags library failed or no AMD gpus found";
 
     AGSDeviceInfo* device = NULL;
