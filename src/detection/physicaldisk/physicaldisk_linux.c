@@ -124,10 +124,10 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
 
         {
-            ffStrbufInit(&device->firmwareRev);
+            ffStrbufInit(&device->revision);
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/firmware_rev", devName);
-            if (ffReadFileBuffer(pathSysBlock, &device->firmwareRev))
-                ffStrbufTrimRightSpace(&device->firmwareRev);
+            if (ffReadFileBuffer(pathSysBlock, &device->revision))
+                ffStrbufTrimRightSpace(&device->revision);
         }
     }
 

@@ -21,7 +21,7 @@ typedef struct FFPhysicalDiskResult
     FFstrbuf interconnect;
     FFstrbuf serial;
     FFstrbuf devPath;
-    FFstrbuf firmwareRev;
+    FFstrbuf revision;
     FFPhysicalDiskType type;
     uint64_t size;
 } FFPhysicalDiskResult;
