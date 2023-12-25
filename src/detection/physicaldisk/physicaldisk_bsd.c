@@ -60,6 +60,11 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
         device->size = (uint64_t) provider->lg_mediasize;
         ffStrbufInitMove(&device->name, &name);
+
+        int acr = 1, acw = 1; // TODO: find some documents to verify the usage
+        if (sscanf(provider->lg_mode, "r%dw%de%*d", &acr, &acw) == 2 && acr)
+            type |= acw ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE;
+
         device->type = type;
     }
 
