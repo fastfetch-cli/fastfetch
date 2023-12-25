@@ -43,6 +43,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
         FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
         ffStrbufInit(&device->serial);
+        ffStrbufInit(&device->firmwareRev);
         ffStrbufInitS(&device->name, deviceName);
         ffStrbufInit(&device->devPath);
         ffStrbufInit(&device->interconnect);
@@ -79,6 +80,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             if (deviceCharacteristics)
             {
                 ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyProductSerialNumberKey), &device->serial);
+                ffCfDictGetString(deviceCharacteristics, CFSTR(kIOPropertyProductRevisionLevelKey), &device->firmwareRev);
 
                 CFStringRef mediumType = (CFStringRef) CFDictionaryGetValue(deviceCharacteristics, CFSTR(kIOPropertyMediumTypeKey));
                 if (mediumType)
