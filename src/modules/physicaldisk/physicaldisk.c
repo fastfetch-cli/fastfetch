@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_PHYSICALDISK_DISPLAY_NAME "Physical Disk"
-#define FF_PHYSICALDISK_NUM_FORMAT_ARGS 7
+#define FF_PHYSICALDISK_NUM_FORMAT_ARGS 9
 
 static int sortDevices(const FFPhysicalDiskResult* left, const FFPhysicalDiskResult* right)
 {
@@ -94,6 +94,8 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
         }
         else
         {
+            if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
+                readOnlyType = "Read-write";
             ffParseSize(dev->size, &buffer);
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_PHYSICALDISK_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
@@ -103,6 +105,8 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->devPath},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->serial},
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
+                {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
             });
         }
         ++index;
@@ -209,6 +213,8 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
             yyjson_mut_obj_add_bool(doc, obj, "readOnly", false);
         else
             yyjson_mut_obj_add_null(doc, obj, "readOnly");
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "revision", &dev->revision);
     }
 
     FF_LIST_FOR_EACH(FFPhysicalDiskResult, dev, result)
@@ -229,6 +235,8 @@ void ffPrintPhysicalDiskHelpFormat(void)
         "Serial number",
         "Device kind (SSD or HDD)",
         "Device kind (Removable or Fixed)",
+        "Device kind (Read-only or Read-write)",
+        "Product revision",
     });
 }
 
