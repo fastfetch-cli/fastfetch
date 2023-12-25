@@ -56,15 +56,6 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             if (device->name.length == 0)
                 ffStrbufSetS(&device->name, devName);
 
-            char diskseq[8] = "";
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/diskseq", devName);
-            ffReadFileData(pathSysBlock, sizeof(diskseq) - 1, diskseq);
-            char* lineEnding = strchr(diskseq, '\n');
-            if (lineEnding)
-                *lineEnding = '\0';
-            if (!ffStrEquals(diskseq, "1"))
-                ffStrbufAppendF(&device->name, "-%s", diskseq);
-
             if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
             {
                 ffStrbufDestroy(&device->name);
