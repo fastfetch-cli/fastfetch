@@ -150,7 +150,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
-        battery->temperature = 0.0/0.0;
+        battery->temperature = FF_BATTERY_TEMP_UNSET;
         battery->cycleCount = 0;
 
         battery->capacity = info.RemainingCapacity * 100.0 / info.MaxCapacity;
