@@ -65,6 +65,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         ffStrbufTrim(&device->serial, ' ');
     }
 
+    ffStrbufInit(&device->revision);
     if (sdd->ProductRevisionOffset != 0)
     {
         ffStrbufSetS(&device->revision, (const char*) sddBuffer + sdd->ProductRevisionOffset);
