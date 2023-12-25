@@ -138,6 +138,8 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         __typeof__(gmt.MediaInfo[0].DeviceSpecific.DiskInfo)* diskInfo = &gmt.MediaInfo[0].DeviceSpecific.DiskInfo;
         if (diskInfo->MediaCharacteristics & MEDIA_READ_ONLY)
             device->type |= FF_PHYSICALDISK_TYPE_READONLY;
+        else if (diskInfo->MediaCharacteristics & MEDIA_READ_WRITE)
+            device->type |= FF_PHYSICALDISK_TYPE_READWRITE;
         if (device->size == 0)
             device->size = (uint64_t) diskInfo->NumberMediaSides * diskInfo->TracksPerCylinder * diskInfo->SectorsPerTrack * diskInfo->BytesPerSector;
     }

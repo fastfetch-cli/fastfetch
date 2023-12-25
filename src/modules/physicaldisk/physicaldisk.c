@@ -63,21 +63,30 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
             : dev->type & FF_PHYSICALDISK_TYPE_FIXED
                 ? "Fixed"
                 : "";
+        const char* readOnlyType = dev->type & FF_PHYSICALDISK_TYPE_READONLY
+            ? "Read-only"
+            : "";
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-            if (physicalType[0] || removableType[0])
+            if (physicalType[0] || removableType[0] || readOnlyType[0])
             {
                 ffStrbufAppendS(&buffer, " [");
                 if (physicalType[0])
                     ffStrbufAppendS(&buffer, physicalType);
                 if (removableType[0])
                 {
-                    if (physicalType[0])
+                    if (buffer.chars[buffer.length - 1] != '[')
                         ffStrbufAppendS(&buffer, ", ");
                     ffStrbufAppendS(&buffer, removableType);
+                }
+                if (readOnlyType[0])
+                {
+                    if (buffer.chars[buffer.length - 1] != '[')
+                        ffStrbufAppendS(&buffer, ", ");
+                    ffStrbufAppendS(&buffer, readOnlyType);
                 }
                 ffStrbufAppendC(&buffer, ']');
             }
@@ -193,6 +202,13 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
             yyjson_mut_obj_add_bool(doc, obj, "removable", false);
         else
             yyjson_mut_obj_add_null(doc, obj, "removable");
+
+        if (dev->type & FF_PHYSICALDISK_TYPE_READONLY)
+            yyjson_mut_obj_add_bool(doc, obj, "readOnly", true);
+        else if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
+            yyjson_mut_obj_add_bool(doc, obj, "readOnly", false);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "readOnly");
     }
 
     FF_LIST_FOR_EACH(FFPhysicalDiskResult, dev, result)
