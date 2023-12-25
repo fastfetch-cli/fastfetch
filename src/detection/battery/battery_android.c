@@ -71,6 +71,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
 
     FFBatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
+    battery->cycleCount = 0;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);

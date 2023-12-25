@@ -56,7 +56,9 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
                 ffStrbufAppendS(&battery->modelName, "Built-in");
         }
 
-        ffCfDictGetInt(properties, CFSTR("CycleCount"), (int32_t*) &battery->cycleCount);
+        int32_t cycleCount = 0;
+        ffCfDictGetInt(properties, CFSTR("CycleCount"), &cycleCount);
+        battery->cycleCount = cycleCount < 0 ? 0 : (uint32_t) cycleCount;
 
         if (!ffCfDictGetBool(properties, CFSTR("ExternalConnected"), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "AC connected, ");
