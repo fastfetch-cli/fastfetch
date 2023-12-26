@@ -192,32 +192,19 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
 
 static bool isRemovable(FFDisk* currentDisk)
 {
-    FF_STRBUF_AUTO_DESTROY basePath = ffStrbufCreateS("/sys/block/");
-
-    FF_AUTO_CLOSE_DIR DIR* dir = opendir(basePath.chars);
-    if(dir == NULL)
+    if (!ffStrbufStartsWithS(&currentDisk->mountFrom, "/dev/"))
         return false;
 
-    uint32_t index = ffStrbufLastIndexC(&currentDisk->mountFrom, '/');
-    const char* partitionName = index == currentDisk->mountFrom.length ? NULL : currentDisk->mountFrom.chars + index + 1;
-    if (!partitionName || !*partitionName) return false;
+    char sysBlockPartition[64];
+    snprintf(sysBlockPartition, sizeof(sysBlockPartition), "/sys/class/block/%s", currentDisk->mountFrom.chars + strlen("/dev/"));
 
-    struct dirent* entry;
-    while((entry = readdir(dir)) != NULL)
-    {
-        if(entry->d_name[0] == '.')
-            continue;
+    char sysBlockVolume[PATH_MAX]; // /sys/devices/pci0000:00/0000:00:14.0/usb4/4-3/4-3:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
+    if (realpath(sysBlockPartition, sysBlockVolume) == NULL)
+        return false;
+    strcpy(strrchr(sysBlockVolume, '/') + 1, "removable");
 
-        if (!ffStrStartsWith(partitionName, entry->d_name)) continue;
-
-        // /sys/block/sdx/removable
-        ffStrbufAppendS(&basePath, entry->d_name);
-        ffStrbufAppendS(&basePath, "/removable");
-        char removableChar = '0';
-        return ffReadFileData(basePath.chars, 1, &removableChar) > 0 && removableChar == '1';
-    }
-
-    return false;
+    char removableChar = '0';
+    return ffReadFileData(sysBlockVolume, 1, &removableChar) > 0 && removableChar == '1';
 }
 
 static void detectType(const FFlist* disks, FFDisk* currentDisk)
