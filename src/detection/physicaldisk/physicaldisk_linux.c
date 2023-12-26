@@ -1,6 +1,7 @@
 #include "physicaldisk.h"
 #include "common/io/io.h"
 #include "common/properties.h"
+#include "detection/temps/temps_linux.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>
@@ -128,6 +129,21 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/firmware_rev", devName);
             if (ffReadFileBuffer(pathSysBlock, &device->revision))
                 ffStrbufTrimRightSpace(&device->revision);
+        }
+
+        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+        if (options->temp)
+        {
+            const FFlist* tempsResult = ffDetectTemps();
+
+            FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
+            {
+                if (ffStrStartsWith(devName, value->deviceName.chars)) // nvme0 - nvme0n1
+                {
+                    device->temperature = value->value;
+                    break;
+                }
+            }
         }
     }
 

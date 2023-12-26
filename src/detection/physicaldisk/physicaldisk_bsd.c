@@ -67,6 +67,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             type |= acw ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE;
 
         device->type = type;
+        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
     }
 
     geom_stats_snapshot_free(snap);

@@ -151,6 +151,26 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
             device->size = (uint64_t) diskInfo->NumberMediaSides * diskInfo->TracksPerCylinder * diskInfo->SectorsPerTrack * diskInfo->BytesPerSector;
     }
 
+    device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+    if (options->temp)
+    {
+        STORAGE_TEMPERATURE_DATA_DESCRIPTOR stdd = {};
+        if(DeviceIoControl(
+            hDevice,
+            IOCTL_STORAGE_QUERY_PROPERTY,
+            &(STORAGE_PROPERTY_QUERY) {
+                .PropertyId = StorageDeviceTemperatureProperty,
+                .QueryType = PropertyStandardQuery,
+            },
+            sizeof(STORAGE_PROPERTY_QUERY),
+            &stdd,
+            sizeof(stdd),
+            &retSize,
+            NULL
+        ) && retSize == sizeof(stdd))
+            device->temperature = stdd.TemperatureInfo[0].Temperature;
+    }
+
     return true;
 }
 

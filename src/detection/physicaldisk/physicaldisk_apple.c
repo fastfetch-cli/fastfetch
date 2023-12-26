@@ -92,6 +92,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
                 }
             }
         }
+        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
     }
 
     return NULL;

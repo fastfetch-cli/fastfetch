@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 
+#define FF_PHYSICALDISK_TEMP_UNSET (0/0.0)
+
 typedef enum FFPhysicalDiskType
 {
     FF_PHYSICALDISK_TYPE_NONE = 0,
@@ -24,6 +26,7 @@ typedef struct FFPhysicalDiskResult
     FFstrbuf revision;
     FFPhysicalDiskType type;
     uint64_t size;
+    double temperature;
 } FFPhysicalDiskResult;
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options);

@@ -90,6 +90,14 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 }
                 ffStrbufAppendC(&buffer, ']');
             }
+
+            if (dev->temperature == dev->temperature) //FF_PHYSICALDISK_TEMP_UNSET
+            {
+                if(buffer.length > 0)
+                    ffStrbufAppendS(&buffer, " - ");
+
+                ffParseTemperature(dev->temperature, &buffer);
+            }
             ffStrbufPutTo(&buffer, stdout);
         }
         else
@@ -107,6 +115,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
                 {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &dev->temperature},
             });
         }
         ++index;
@@ -134,6 +143,12 @@ bool ffParsePhysicalDiskCommandOptions(FFPhysicalDiskOptions* options, const cha
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "temp"))
+    {
+        options->temp = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
@@ -156,6 +171,12 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "temp"))
+        {
+            options->temp = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -169,6 +190,9 @@ void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut
 
     if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
         yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+
+    if (options->temp != defaultOptions.temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
 }
 
 void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -215,6 +239,8 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
             yyjson_mut_obj_add_null(doc, obj, "readOnly");
 
         yyjson_mut_obj_add_strbuf(doc, obj, "revision", &dev->revision);
+
+        yyjson_mut_obj_add_real(doc, obj, "temperature", dev->temperature);
     }
 
     FF_LIST_FOR_EACH(FFPhysicalDiskResult, dev, result)
@@ -237,6 +263,7 @@ void ffPrintPhysicalDiskHelpFormat(void)
         "Device kind (Removable or Fixed)",
         "Device kind (Read-only or Read-write)",
         "Product revision",
+        "Device temperature",
     });
 }
 
@@ -256,6 +283,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
+    options->temp = false;
 }
 
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options)
