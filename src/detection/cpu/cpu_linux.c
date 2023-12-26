@@ -133,10 +133,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
     if (error) return error;
 
-    cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, 1);
-
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
+    cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
 
     #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
     if(ffPathExists(BP, FF_PATHTYPE_DIRECTORY))
