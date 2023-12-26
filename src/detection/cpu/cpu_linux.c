@@ -168,38 +168,16 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     detectAndroid(cpu);
     #endif
 
-    #ifdef __linux__
     if (cpu->name.length == 0)
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
         {
             char* pstart = buffer.chars;
-            while ((pstart = strstr(pstart, "Model name:")))
-            {
-                pstart += strlen("Model name:");
-                while (isspace(*pstart)) ++pstart;
-                if (*pstart == '\0')
-                    break;
-
-                if (cpu->name.length > 0)
-                    ffStrbufAppendS(&cpu->name, " + ");
-
-                char* pend = strchr(pstart, '\n');
-                if (pend != NULL)
-                    ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
-                else
-                {
-                    ffStrbufAppendS(&cpu->name, pstart);
-                    break;
-                }
-
-                pstart = pend + 1;
-            }
 
             if (cpu->vendor.length == 0)
             {
-                pstart = strstr(buffer.chars, "Vendor ID:");
+                pstart = strstr(pstart, "Vendor ID:");
                 if (pstart)
                 {
                     pstart += strlen("Vendor ID:");
@@ -213,12 +191,41 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                         {
                             ffStrbufAppendS(&cpu->vendor, pstart);
                         }
+                        pstart = pend + 1;
                     }
                 }
             }
+
+            while ((pstart = strstr(pstart, "Model name:")))
+            {
+                pstart += strlen("Model name:");
+                while (isspace(*pstart)) ++pstart;
+                if (*pstart == '\0')
+                    break;
+
+                if (cpu->name.length > 0)
+                    ffStrbufAppendS(&cpu->name, " + ");
+
+                if (*pstart == '-')
+                {
+                    ffStrbufAppendS(&cpu->name, "Unknown");
+                    ++pstart;
+                    continue;
+                }
+
+                char* pend = strchr(pstart, '\n');
+                if (pend != NULL)
+                    ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
+                else
+                {
+                    ffStrbufAppendS(&cpu->name, pstart);
+                    break;
+                }
+
+                pstart = pend + 1;
+            }
         }
     }
-    #endif
 
     return NULL;
 }
