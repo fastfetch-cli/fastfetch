@@ -1,3 +1,21 @@
+# 2.4.1
+
+Changes:
+* `--gpu-use-nvml` has been renamed to `--gpu-driver-specific` due to using of `IGCL` and `AGS`
+* We now detect external partitions more conservatively in Linux. USB partitions will not be detected as external always ( eg. The Linux kernel itself is installed in a USB drive )
+
+Features:
+* Support more authentication type detection for macOS Sonoma (Wifi, macOS)
+* Default preset names to `.jsonc`. For example, `fastfetch -c all` will load `presets/all.jsonc` (#666)
+* Use Intel Graphics Control Library (IGCL) to detect more GPU information. Windows only (GPU, Windows)
+* Improve support of Asahi Linux (Brightness / CPU / GPU, Linux)
+* Support more properties of physical disks (PhysicalDisk)
+
+Bugfixes:
+* Fix Windows partition detection for WSL2 (Linux, Disk)
+* Fix Btrfs subvolumes being detected as external partitions some times (Linux, Disk)
+* Fix battery cycle counts in some places (Battery)
+
 # 2.4.0
 
 **We are deprecating flags based config files (will be removed in v3.0.0). We suggest you migrate to json based config files.** One may use `-c /path/to/config.conf --gen-config` to migrate existing flag based config files.
