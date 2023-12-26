@@ -37,8 +37,23 @@ static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
         ffReadFileBuffer(dir->chars, &valueBuffer);
     }
     ffStrbufTrimRightSpace(&valueBuffer);
+    ffStrbufSubstrBefore(dir, dirLength);
     if(valueBuffer.length)
         value->deviceClass = (uint32_t) strtoul(valueBuffer.chars, NULL, 16);
+
+    ffStrbufClear(&valueBuffer);
+    ffStrbufEnsureFree(&valueBuffer, 64);
+    ffStrbufAppendS(dir, "device");
+    ssize_t linkLen = readlink(dir->chars, valueBuffer.chars, valueBuffer.allocated - 1);
+    if (linkLen > 0)
+    {
+        valueBuffer.length = (uint32_t) linkLen;
+        valueBuffer.chars[linkLen] = 0;
+        ffStrbufSubstrAfterLastC(&valueBuffer, '/');
+        ffStrbufInitMove(&value->deviceName, &valueBuffer);
+    }
+    else
+        ffStrbufInit(&value->deviceName);
 
     return value->name.length > 0 || value->deviceClass > 0;
 }

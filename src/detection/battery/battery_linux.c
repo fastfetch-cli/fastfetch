@@ -89,7 +89,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
 
         FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
         {
-            if (ffStrbufEqualS(&value->name, id))
+            if (ffStrbufEqualS(&value->deviceName, id))
             {
                 result->temperature = value->value;
                 break;
