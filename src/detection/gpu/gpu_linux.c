@@ -46,12 +46,14 @@ static void pciDetectVendorName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* 
     pci->ffpci_lookup_name(pci->access, gpu->vendor.chars, (int) gpu->vendor.allocated, PCI_LOOKUP_VENDOR, device->vendor_id);
     ffStrbufRecalculateLength(&gpu->vendor);
 
-    if(ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
+    if(ffStrbufContainIgnCaseS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
         ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-    else if(ffStrbufContainS(&gpu->vendor, "Intel"))
+    else if(ffStrbufContainIgnCaseS(&gpu->vendor, "Intel"))
         ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-    else if(ffStrbufContainS(&gpu->vendor, "NVIDIA"))
+    else if(ffStrbufContainIgnCaseS(&gpu->vendor, "NVIDIA"))
         ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+    else if(ffStrbufContainIgnCaseS(&gpu->vendor, "Apple"))
+        ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
 }
 
 static void drmDetectDeviceName(FFGPUResult* gpu, PCIData* pci, struct pci_dev* device)
