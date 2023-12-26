@@ -8,6 +8,7 @@
 #include <sys/sysinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #ifdef __ANDROID__
 #include "common/settings.h"
@@ -171,10 +172,50 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (cpu->name.length == 0)
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (!ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }))
+        if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
         {
-            ffParsePropLines(buffer.chars, "Model name:", &cpu->name);
-            if (ffStrbufEqualS(&cpu->name, "-")) ffStrbufClear(&cpu->name);
+            char* pstart = buffer.chars;
+            while ((pstart = strstr(pstart, "Model name:")))
+            {
+                pstart += strlen("Model name:");
+                while (isspace(*pstart)) ++pstart;
+                if (*pstart == '\0')
+                    break;
+
+                if (cpu->name.length > 0)
+                    ffStrbufAppendS(&cpu->name, " + ");
+
+                char* pend = strchr(pstart, '\n');
+                if (pend != NULL)
+                    ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
+                else
+                {
+                    ffStrbufAppendS(&cpu->name, pstart);
+                    break;
+                }
+
+                pstart = pend + 1;
+            }
+
+            if (cpu->vendor.length == 0)
+            {
+                pstart = strstr(buffer.chars, "Vendor ID:");
+                if (pstart)
+                {
+                    pstart += strlen("Vendor ID:");
+                    while (isspace(*pstart)) ++pstart;
+                    if (*pstart)
+                    {
+                        char* pend = strchr(pstart, '\n');
+                        if (pend != NULL)
+                            ffStrbufAppendNS(&cpu->vendor, (uint32_t) (pend - pstart), pstart);
+                        else
+                        {
+                            ffStrbufAppendS(&cpu->vendor, pstart);
+                        }
+                    }
+                }
+            }
         }
     }
     #endif
