@@ -101,16 +101,8 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-
-    if(options->dir.length > 0)
-    {
-        ffStrbufAppend(&baseDir, &options->dir);
-        ffStrbufEnsureEndsWithC(&baseDir, '/');
-    }
-    else
-    {
-        ffStrbufAppendS(&baseDir, "/sys/class/power_supply/");
-    }
+    ffStrbufAppend(&baseDir, &options->dir);
+    ffStrbufEnsureEndsWithC(&baseDir, '/');
 
     uint32_t baseDirLength = baseDir.length;
 

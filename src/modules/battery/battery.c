@@ -258,7 +258,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     options->temp = false;
 
     #ifdef __linux__
-        ffStrbufInit(&options->dir);
+        ffStrbufInitStatic(&options->dir, "/sys/class/power_supply/");
     #elif defined(_WIN32)
         options->useSetupApi = false;
     #endif
