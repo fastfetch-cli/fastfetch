@@ -11,14 +11,14 @@ static double detectCpuTemp(const FFstrbuf* cpuName)
     {
         switch (strtol(cpuName->chars + strlen("Apple M"), NULL, 10))
         {
-            case 1: error = ffDetectCoreTemps(FF_TEMP_CPU_M1X, &result); break;
-            case 2: error = ffDetectCoreTemps(FF_TEMP_CPU_M2X, &result); break;
-            case 3: error = ffDetectCoreTemps(FF_TEMP_CPU_M3X, &result); break;
+            case 1: error = ffDetectSmcTemps(FF_TEMP_CPU_M1X, &result); break;
+            case 2: error = ffDetectSmcTemps(FF_TEMP_CPU_M2X, &result); break;
+            case 3: error = ffDetectSmcTemps(FF_TEMP_CPU_M3X, &result); break;
             default: error = "Unsupported Apple Silicon CPU";
         }
     }
     else // PPC?
-        error = ffDetectCoreTemps(FF_TEMP_CPU_X64, &result);
+        error = ffDetectSmcTemps(FF_TEMP_CPU_X64, &result);
 
     if(error)
         return FF_CPU_TEMP_UNSET;

@@ -287,7 +287,7 @@ static bool detectTemp(io_connect_t conn, const char *sensor, double* sum)
     return true;
 }
 
-const char *ffDetectCoreTemps(enum FFTempType type, double *result)
+const char *ffDetectSmcTemps(enum FFTempType type, double *result)
 {
     static io_connect_t conn;
     static dispatch_once_t once_control;

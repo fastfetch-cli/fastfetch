@@ -77,7 +77,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
             if (!ffCfDictGetInt64(properties, CFSTR("Temperature"), &temp))
                 battery->temperature = (double) temp / 10 - 273.15;
             else
-                ffDetectCoreTemps(FF_TEMP_BATTERY, &battery->temperature);
+                ffDetectSmcTemps(FF_TEMP_BATTERY, &battery->temperature);
         }
 
         IOObjectRelease(registryEntry);
