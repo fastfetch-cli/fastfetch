@@ -43,6 +43,13 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
                 type |= ffStrEquals(ptr->lg_val, "0") ? FF_PHYSICALDISK_TYPE_SSD : FF_PHYSICALDISK_TYPE_HDD;
             else if (ffStrEquals(ptr->lg_name, "ident"))
                 ffStrbufSetS(&identifier, ptr->lg_val);
+            else if (ffStrEquals(ptr->lg_name, "access"))
+            {
+                if (ffStrEquals(ptr->lg_val, "read-only"))
+                    type |= FF_PHYSICALDISK_TYPE_READONLY;
+                else if (ffStrEquals(ptr->lg_val, "read-write"))
+                    type |= FF_PHYSICALDISK_TYPE_READWRITE;
+            }
         }
 
         if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
@@ -62,9 +69,12 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         device->size = (uint64_t) provider->lg_mediasize;
         ffStrbufInitMove(&device->name, &name);
 
-        int acr = 1, acw = 1; // TODO: find some documents to verify the usage
-        if (sscanf(provider->lg_mode, "r%dw%de%*d", &acr, &acw) == 2 && acr)
-            type |= acw ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE;
+        if (!(device->type & FF_PHYSICALDISK_TYPE_READONLY) && !(device->type & FF_PHYSICALDISK_TYPE_READWRITE))
+        {
+            int acr = 1, acw = 1; // Number of partitions mounted for reading or writing
+            if (sscanf(provider->lg_mode, "r%dw%de%*d", &acr, &acw) == 2 && acr)
+                type |= acw ? FF_PHYSICALDISK_TYPE_READWRITE : FF_PHYSICALDISK_TYPE_READONLY;
+        }
 
         device->type = type;
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
