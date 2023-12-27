@@ -32,6 +32,10 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         if (provider->lg_geom->lg_rank != 1)
             continue;
 
+        // Should memory disk (MD) be considered as physical disk?
+        //if (!ffStrEquals(provider->lg_geom->lg_class->lg_name, "DISK"))
+        //    continue;
+
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(provider->lg_name);
         FF_STRBUF_AUTO_DESTROY identifier = ffStrbufCreate();
         FFPhysicalDiskType type = FF_PHYSICALDISK_TYPE_NONE;
