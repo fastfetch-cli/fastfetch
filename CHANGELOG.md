@@ -10,6 +10,7 @@ Features:
 * Use Intel Graphics Control Library (IGCL) to detect more GPU information. Windows only (GPU, Windows)
 * Improve support of Asahi Linux (Brightness / CPU / GPU, Linux)
 * Support more properties of physical disks (PhysicalDisk)
+* Support SSD temperature detection with `--physicaldisk-temp` (PhysicalDisk)
 
 Bugfixes:
 * Fix Windows partition detection for WSL2 (Linux, Disk)

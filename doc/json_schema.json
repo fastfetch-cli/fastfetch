@@ -1381,6 +1381,11 @@
                                         "description": "Show disks with given name prefix only",
                                         "type": "string"
                                     },
+                                    "temp": {
+                                        "description": "Detect and display SSD temperature if supported",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

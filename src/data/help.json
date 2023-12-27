@@ -955,6 +955,15 @@
             }
         },
         {
+            "long": "physicaldisk-temp",
+            "desc": "Detect and display SSD temperature if supported",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "bluetooth-show-disconnected",
             "desc": "Set if disconnected bluetooth devices should be printed",
             "arg": {
