@@ -26,10 +26,10 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 #include <sys/attr.h>
 #include <unistd.h>
 
-struct VolAttrBuf {
+struct CmnAttrBuf {
     uint32_t       length;
-    attrreference_t volNameRef;
-    char            volNameSpace[MAXPATHLEN];
+    attrreference_t nameRef;
+    char            nameSpace[NAME_MAX * 3 + 1];
 } __attribute__((aligned(4), packed));
 
 void detectFsInfo(struct statfs* fs, FFDisk* disk)
@@ -41,12 +41,12 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 
-    struct VolAttrBuf attrBuf;
+    struct CmnAttrBuf attrBuf;
     if (getattrlist(disk->mountpoint.chars, &(struct attrlist) {
         .bitmapcount = ATTR_BIT_MAP_COUNT,
-        .volattr = ATTR_VOL_INFO | ATTR_VOL_NAME,
+        .commonattr = ATTR_CMN_NAME,
     }, &attrBuf, sizeof(attrBuf), 0) == 0)
-        ffStrbufInitNS(&disk->name, attrBuf.volNameRef.attr_length - 1 /* excluding '\0' */, attrBuf.volNameSpace);
+        ffStrbufInitNS(&disk->name, attrBuf.nameRef.attr_length - 1 /* excluding '\0' */, attrBuf.nameSpace);
 }
 #endif
 
