@@ -5,6 +5,43 @@
 #include <sys/mount.h>
 
 #ifdef __FreeBSD__
+#include <libgeom.h>
+
+static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
+{
+    if (!ffStrStartsWith(fs->f_mntfromname, "/dev/"))
+        return "Only block devices are supported";
+
+    // Detect volume label in geom tree
+    static struct gmesh geomTree;
+    static struct gclass* cLabels;
+    if (!cLabels)
+    {
+        if (geomTree.lg_ident)
+            return "Previous geom_gettree() failed";
+
+        if (geom_gettree(&geomTree) < 0)
+        {
+            geomTree.lg_ident = (void*)(intptr_t)-1;
+            return "geom_gettree() failed";
+        }
+
+        for (cLabels = geomTree.lg_class.lh_first; !ffStrEquals(cLabels->lg_name, "LABEL"); cLabels = cLabels->lg_class.le_next);
+        if (!cLabels)
+            return "Class LABEL is not found";
+    }
+
+    for (struct ggeom* label = cLabels->lg_geom.lh_first; label; label = label->lg_geom.le_next)
+    {
+        struct gprovider* provider = label->lg_provider.lh_first;
+        if (!provider || !ffStrEquals(label->lg_name, fs->f_mntfromname + strlen("/dev/"))) continue;
+        const char* str = strchr(provider->lg_name, '/');
+        ffStrbufSetS(&disk->name, str ? str + 1 : provider->lg_name);
+    }
+
+    return NULL;
+}
+
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
     if(ffStrbufEqualS(&disk->filesystem, "zfs"))
@@ -19,6 +56,8 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+
+    detectFsLabel(fs, disk);
 }
 #elif __APPLE__
 #include "util/apple/cf_helpers.h"
