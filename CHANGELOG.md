@@ -8,9 +8,10 @@ Features:
 * Support more authentication type detection for macOS Sonoma (Wifi, macOS)
 * Default preset names to `.jsonc`. For example, `fastfetch -c all` will load `presets/all.jsonc` (#666)
 * Use Intel Graphics Control Library (IGCL) to detect more GPU information. Windows only (GPU, Windows)
-* Improve support of Asahi Linux (Brightness / CPU / GPU, Linux)
+* Improve support of Asahi Linux (Brightness / CPU / GPU / Disk, Linux)
 * Support more properties of physical disks (PhysicalDisk)
 * Support SSD temperature detection with `--physicaldisk-temp` (PhysicalDisk)
+* Support partition label detection (Disk, FreeBSD)
 
 Bugfixes:
 * Fix Windows partition detection for WSL2 (Linux, Disk)
