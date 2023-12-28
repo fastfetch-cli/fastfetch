@@ -71,7 +71,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             case DEVSTAT_TYPE_IF_OTHER: ffStrbufAppendS(&device->interconnect, "OTHER"); break;
 
             // https://github.com/freebsd/freebsd-src/commit/d282baddb0b029ca8466d23ac51e95c918442535
-            case 0x040 /*DEVSTAT_TYPE_IF_NVME*/: ffStrbufAppendS(&device->interconnect, "NVME"); break;
+            case 0x040 /*DEVSTAT_TYPE_IF_NVME*/: ffStrbufAppendS(&device->interconnect, "NVMe"); break;
         }
         device->size = (uint64_t) provider->lg_mediasize;
         ffStrbufInitMove(&device->name, &name);

@@ -78,25 +78,25 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
     switch (sdd->BusType)
     {
         case BusTypeUnknown: ffStrbufSetStatic(&device->interconnect, "Unknown"); break;
-        case BusTypeScsi: ffStrbufSetStatic(&device->interconnect, "Scsi"); break;
-        case BusTypeAtapi: ffStrbufSetStatic(&device->interconnect, "Atapi"); break;
-        case BusTypeAta: ffStrbufSetStatic(&device->interconnect, "Ata"); break;
+        case BusTypeScsi: ffStrbufSetStatic(&device->interconnect, "SCSI"); break;
+        case BusTypeAtapi: ffStrbufSetStatic(&device->interconnect, "ATAPI"); break;
+        case BusTypeAta: ffStrbufSetStatic(&device->interconnect, "ATA"); break;
         case BusType1394: ffStrbufSetStatic(&device->interconnect, "1394"); break;
-        case BusTypeSsa: ffStrbufSetStatic(&device->interconnect, "Ssa"); break;
-        case BusTypeFibre: ffStrbufSetStatic(&device->interconnect, "Fibra"); break;
-        case BusTypeUsb: ffStrbufSetStatic(&device->interconnect, "Usb"); break;
+        case BusTypeSsa: ffStrbufSetStatic(&device->interconnect, "SSA"); break;
+        case BusTypeFibre: ffStrbufSetStatic(&device->interconnect, "Fibre"); break;
+        case BusTypeUsb: ffStrbufSetStatic(&device->interconnect, "USB"); break;
         case BusTypeRAID: ffStrbufSetStatic(&device->interconnect, "RAID"); break;
-        case BusTypeiScsi: ffStrbufSetStatic(&device->interconnect, "iScsi"); break;
-        case BusTypeSas: ffStrbufSetStatic(&device->interconnect, "Sas"); break;
-        case BusTypeSata: ffStrbufSetStatic(&device->interconnect, "Sata"); break;
-        case BusTypeSd: ffStrbufSetStatic(&device->interconnect, "Sd"); break;
-        case BusTypeMmc: ffStrbufSetStatic(&device->interconnect, "Mmc"); break;
+        case BusTypeiScsi: ffStrbufSetStatic(&device->interconnect, "iSCSI"); break;
+        case BusTypeSas: ffStrbufSetStatic(&device->interconnect, "SAS"); break;
+        case BusTypeSata: ffStrbufSetStatic(&device->interconnect, "SATA"); break;
+        case BusTypeSd: ffStrbufSetStatic(&device->interconnect, "SD"); break;
+        case BusTypeMmc: ffStrbufSetStatic(&device->interconnect, "MMC"); break;
         case BusTypeVirtual: ffStrbufSetStatic(&device->interconnect, "Virtual"); break;
-        case BusTypeFileBackedVirtual: ffStrbufSetStatic(&device->interconnect, "FileBackedVirtual"); break;
+        case BusTypeFileBackedVirtual: ffStrbufSetStatic(&device->interconnect, "File Backed Virtual"); break;
         case BusTypeSpaces: ffStrbufSetStatic(&device->interconnect, "Spaces"); break;
-        case BusTypeNvme: ffStrbufSetStatic(&device->interconnect, "Nvme"); break;
+        case BusTypeNvme: ffStrbufSetStatic(&device->interconnect, "NVMe"); break;
         case BusTypeSCM: ffStrbufSetStatic(&device->interconnect, "SCM"); break;
-        case BusTypeUfs: ffStrbufSetStatic(&device->interconnect, "Ufs"); break;
+        case BusTypeUfs: ffStrbufSetStatic(&device->interconnect, "UFS"); break;
         default: ffStrbufSetF(&device->interconnect, "Unknown (%d)", (int) sdd->BusType); break;
     }
 
