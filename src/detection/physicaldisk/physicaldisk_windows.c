@@ -100,55 +100,74 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFPhysic
         default: ffStrbufSetF(&device->interconnect, "Unknown (%d)", (int) sdd->BusType); break;
     }
 
-    DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
-    if(DeviceIoControl(
-        hDevice,
-        IOCTL_STORAGE_QUERY_PROPERTY,
-        &(STORAGE_PROPERTY_QUERY) {
-            .PropertyId = StorageDeviceSeekPenaltyProperty,
-            .QueryType = PropertyStandardQuery,
-        },
-        sizeof(STORAGE_PROPERTY_QUERY),
-        &dspd,
-        sizeof(dspd),
-        &retSize,
-        NULL
-    ) && retSize == sizeof(dspd))
-        device->type |= dspd.IncursSeekPenalty ? FF_PHYSICALDISK_TYPE_HDD : FF_PHYSICALDISK_TYPE_SSD;
-
-    DISK_GEOMETRY_EX dge = {};
-    if(DeviceIoControl(
-        hDevice,
-        IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
-        NULL,
-        0,
-        &dge,
-        sizeof(dge),
-        &retSize,
-        NULL))
-        device->size = (uint64_t) dge.DiskSize.QuadPart;
-    else
-        device->size = 0;
-
-    GET_MEDIA_TYPES gmt = {};
-    if(DeviceIoControl(
-        hDevice,
-        IOCTL_STORAGE_GET_MEDIA_TYPES_EX,
-        NULL,
-        0,
-        &gmt,
-        sizeof(gmt),
-        &retSize,
-        NULL) && gmt.MediaInfoCount > 0
-    )
     {
-        __typeof__(gmt.MediaInfo[0].DeviceSpecific.DiskInfo)* diskInfo = &gmt.MediaInfo[0].DeviceSpecific.DiskInfo;
-        if (diskInfo->MediaCharacteristics & MEDIA_READ_ONLY)
-            device->type |= FF_PHYSICALDISK_TYPE_READONLY;
-        else if (diskInfo->MediaCharacteristics & MEDIA_READ_WRITE)
-            device->type |= FF_PHYSICALDISK_TYPE_READWRITE;
-        if (device->size == 0)
-            device->size = (uint64_t) diskInfo->NumberMediaSides * diskInfo->TracksPerCylinder * diskInfo->SectorsPerTrack * diskInfo->BytesPerSector;
+        DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {};
+        if(DeviceIoControl(
+            hDevice,
+            IOCTL_STORAGE_QUERY_PROPERTY,
+            &(STORAGE_PROPERTY_QUERY) {
+                .PropertyId = StorageDeviceSeekPenaltyProperty,
+                .QueryType = PropertyStandardQuery,
+            },
+            sizeof(STORAGE_PROPERTY_QUERY),
+            &dspd,
+            sizeof(dspd),
+            &retSize,
+            NULL
+        ) && retSize == sizeof(dspd))
+            device->type |= dspd.IncursSeekPenalty ? FF_PHYSICALDISK_TYPE_HDD : FF_PHYSICALDISK_TYPE_SSD;
+    }
+
+    {
+        DISK_GEOMETRY_EX dge = {};
+        if(DeviceIoControl(
+            hDevice,
+            IOCTL_DISK_GET_DRIVE_GEOMETRY_EX,
+            NULL,
+            0,
+            &dge,
+            sizeof(dge),
+            &retSize,
+            NULL))
+            device->size = (uint64_t) dge.DiskSize.QuadPart;
+        else
+            device->size = 0;
+    }
+
+    {
+        uint8_t buffer[sizeof(GET_MEDIA_TYPES) + sizeof(DEVICE_MEDIA_INFO) * 7] = "";
+        GET_MEDIA_TYPES* gmt = (GET_MEDIA_TYPES*) buffer;
+        if(DeviceIoControl(
+            hDevice,
+            IOCTL_STORAGE_GET_MEDIA_TYPES_EX,
+            NULL,
+            0,
+            gmt,
+            sizeof(buffer),
+            &retSize,
+            NULL) && gmt->MediaInfoCount > 0
+        )
+        {
+            // DiskInfo and RemovableDiskInfo have the same structures. TapeInfo doesn't.
+            if (gmt->DeviceType != FILE_DEVICE_TAPE)
+            {
+                __typeof__(gmt->MediaInfo[0].DeviceSpecific.DiskInfo)* diskInfo = &gmt->MediaInfo[0].DeviceSpecific.DiskInfo;
+                if (diskInfo->MediaCharacteristics & MEDIA_READ_ONLY)
+                    device->type |= FF_PHYSICALDISK_TYPE_READONLY;
+                else if (diskInfo->MediaCharacteristics & MEDIA_READ_WRITE)
+                    device->type |= FF_PHYSICALDISK_TYPE_READWRITE;
+                if (device->size == 0)
+                    device->size = (uint64_t) diskInfo->NumberMediaSides * diskInfo->TracksPerCylinder * diskInfo->SectorsPerTrack * diskInfo->BytesPerSector;
+            }
+            else
+            {
+                __typeof__(gmt->MediaInfo[0].DeviceSpecific.TapeInfo)* tapeInfo = &gmt->MediaInfo[0].DeviceSpecific.TapeInfo;
+                if (tapeInfo->MediaCharacteristics & MEDIA_READ_ONLY)
+                    device->type |= FF_PHYSICALDISK_TYPE_READONLY;
+                else if (tapeInfo->MediaCharacteristics & MEDIA_READ_WRITE)
+                    device->type |= FF_PHYSICALDISK_TYPE_READWRITE;
+            }
+        }
     }
 
     device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
