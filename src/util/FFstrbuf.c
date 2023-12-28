@@ -119,22 +119,6 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude)
-{
-    if(value == NULL || length == 0)
-        return;
-
-    ffStrbufEnsureFree(strbuf, length);
-
-    for(uint32_t i = 0; i < length; i++)
-    {
-        if(value[i] != exclude)
-        strbuf->chars[strbuf->length++] = value[i];
-    }
-
-    strbuf->chars[strbuf->length] = '\0';
-}
-
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int))
 {
     if(value == NULL)
