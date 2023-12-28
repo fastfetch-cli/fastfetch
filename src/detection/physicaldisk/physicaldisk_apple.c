@@ -126,7 +126,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             if (options->temp)
             {
                 FF_CFTYPE_AUTO_RELEASE CFBooleanRef nvmeSMARTCapable = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyNVMeSMARTCapableKey), kCFAllocatorDefault, kNilOptions);
-                if (CFBooleanGetValue(nvmeSMARTCapable))
+                if (nvmeSMARTCapable && CFBooleanGetValue(nvmeSMARTCapable))
                     detectSsdTemp(entryPhysical, &device->temperature);
             }
         }
