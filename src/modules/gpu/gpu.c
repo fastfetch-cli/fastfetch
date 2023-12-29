@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-#define FF_GPU_NUM_FORMAT_ARGS 11
+#define FF_GPU_NUM_FORMAT_ARGS 12
 
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
 {
@@ -83,6 +83,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.used},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.total},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency},
         });
     }
@@ -309,6 +310,8 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &gpu->vendor);
 
+        yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &gpu->platformApi);
+
         if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
             yyjson_mut_obj_add_null(doc, obj, "frequency");
         else
@@ -336,6 +339,8 @@ void ffPrintGPUHelpFormat(void)
         "GPU used dedicated memory",
         "GPU total shared memory",
         "GPU used shared memory",
+        "The platform API that GPU supports",
+        "Current frequency in GHz",
     });
 }
 

@@ -29,6 +29,7 @@ typedef struct FFGPUResult
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
+    FFstrbuf platformApi;
     double temperature;
     int32_t coreCount;
     double frequency; // Real time clock frequency in GHz

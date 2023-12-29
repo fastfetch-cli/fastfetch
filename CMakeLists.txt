@@ -575,6 +575,7 @@ elseif(APPLE)
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
+        src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
@@ -905,6 +906,7 @@ elseif(APPLE)
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
+        PRIVATE "-framework Metal"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework SystemConfiguration"

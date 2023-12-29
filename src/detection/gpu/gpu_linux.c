@@ -221,6 +221,8 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     FFGPUResult* gpu = ffListAdd(results);
 
+    ffStrbufInit(&gpu->platformApi);
+
     ffStrbufInit(&gpu->vendor);
     pciDetectVendorName(gpu, pci, device);
 

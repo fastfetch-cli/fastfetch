@@ -181,6 +181,7 @@ static const char* detectVulkan(FFVulkanResult* result)
 
         FFGPUResult* gpu = ffListAdd(&result->gpus);
 
+        ffStrbufInitF(&gpu->platformApi, "Vulkan %u.%u.%u", deviceAPIVersion.major, deviceAPIVersion.minor, deviceAPIVersion.patch);
         gpu->deviceId = physicalDeviceProperties.properties.deviceID;
 
         ffStrbufInitS(&gpu->name, physicalDeviceProperties.properties.deviceName);

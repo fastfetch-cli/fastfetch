@@ -74,6 +74,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->vendor);
         ffStrbufInitWS(&gpu->name, displayDevice.DeviceString);
         ffStrbufInit(&gpu->driver);
+        ffStrbufInitStatic(&gpu->platformApi, "Direct3D");
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
@@ -114,6 +115,12 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 }
 
                 ffRegReadUint64(hDirectxKey, L"AdapterLuid", &gpu->deviceId, NULL);
+
+                uint32_t featureLevel = 0;
+                if(ffRegReadUint(hDirectxKey, L"MaxD3D12FeatureLevel", &featureLevel, NULL) && featureLevel)
+                    ffStrbufSetF(&gpu->platformApi, "Direct3D 12.%u", (featureLevel & 0x0F00) >> 8);
+                else if(ffRegReadUint(hDirectxKey, L"MaxD3D11FeatureLevel", &featureLevel, NULL) && featureLevel)
+                    ffStrbufSetF(&gpu->platformApi, "Direct3D 11.%u", (featureLevel & 0x0F00) >> 8);
             }
             else if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
             {
