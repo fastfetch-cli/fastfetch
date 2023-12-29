@@ -12,6 +12,7 @@ Features:
 * Support more properties of physical disks (PhysicalDisk)
 * Support SSD temperature detection with `--physicaldisk-temp` (PhysicalDisk)
 * Support partition label detection (Disk, FreeBSD)
+* Support platform specific graphic API version detection (GPU, macOS / Windows)
 
 Bugfixes:
 * Fix Windows partition detection for WSL2 (Linux, Disk)
