@@ -70,8 +70,13 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             if (ffListContains(gpus, &gpuName, (void*) isGpuNameEqual)) continue;
         }
 
+        // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
+        // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
+        uint32_t vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
+        swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInit(&gpu->vendor);
+        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
         ffStrbufInitWS(&gpu->name, displayDevice.DeviceString);
         ffStrbufInit(&gpu->driver);
         ffStrbufInitStatic(&gpu->platformApi, "Direct3D");
@@ -89,14 +94,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regControlVideoKey, &hKey, NULL)) continue;
 
             ffRegReadStrbuf(hKey, L"DriverVersion", &gpu->driver, NULL);
-            ffRegReadStrbuf(hKey, L"ProviderName", &gpu->vendor, NULL);
-
-            if (ffStrbufContainS(&gpu->vendor, "Intel"))
-                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-            else if (ffStrbufContainS(&gpu->vendor, "NVIDIA"))
-                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
-            else if (ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
-                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
 
             wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, displayDevice.DeviceKey + deviceKeyPrefixLength, strlen("00000000-0000-0000-0000-000000000000}"));
             FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
@@ -129,6 +126,17 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->dedicated.total = vmem;
                 gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
             }
+
+            if (gpu->vendor.length == 0)
+            {
+                ffRegReadStrbuf(hKey, L"ProviderName", &gpu->vendor, NULL);
+                if (ffStrbufContainS(&gpu->vendor, "Intel"))
+                    ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+                else if (ffStrbufContainS(&gpu->vendor, "NVIDIA"))
+                    ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+                else if (ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
+                    ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+            }
         }
 
         __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
@@ -136,10 +144,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName) && (options->temp || options->driverSpecific))
         {
-            uint32_t vendorId, deviceId, subSystemId, revId;
-            // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
-            // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
-            if (swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId) == 4)
+            if (vendorId && deviceId && subSystemId && revId)
             {
                 detectFn(
                     &(FFGpuDriverCondition) {
