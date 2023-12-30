@@ -21,7 +21,7 @@ namespace
     };
 }
 
-static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lpContext)
+static const char* doInitService(const wchar_t* networkResource, IWbemServices** result)
 {
     HRESULT hres;
 
@@ -35,10 +35,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
         (LPVOID*) &pLoc);
 
     if (FAILED(hres))
-    {
-        *((const char**)lpContext) = "Failed to create IWbemLocator object";
-        return FALSE;
-    }
+        return "Failed to create IWbemLocator object";
 
     // Connect to WMI through the IWbemLocator::ConnectServer method
     IWbemServices* pSvc = nullptr;
@@ -47,7 +44,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
     // the current user and obtain pointer pSvc
     // to make IWbemServices calls.
     hres = pLoc->ConnectServer(
-        bstr_t((const wchar_t*) lpParameter), // Object path of WMI namespace
+        bstr_t(networkResource),              // Object path of WMI namespace
         nullptr,                              // User name. nullptr = current user
         nullptr,                              // User password. nullptr = current
         0,                                    // Locale. nullptr indicates current
@@ -60,10 +57,7 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
     pLoc = nullptr;
 
     if (FAILED(hres))
-    {
-        *((const char**)lpContext) = "Could not connect WMI server";
-        return FALSE;
-    }
+        return "Could not connect WMI server";
 
     // Set security levels on the proxy -------------------------
     hres = CoSetProxyBlanket(
@@ -80,39 +74,40 @@ static BOOL CALLBACK InitHandleFunction(PINIT_ONCE, PVOID lpParameter, PVOID* lp
     if (FAILED(hres))
     {
         pSvc->Release();
-        *((const char**)lpContext) = "Could not set proxy blanket";
-        return FALSE;
+        return "Could not set proxy blanket";
     }
 
-    *((IWbemServices**)lpContext) = pSvc;
-    return TRUE;
+    *result = pSvc;
+    return NULL;
 }
 
 FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace wmiNs)
     : pEnumerator(nullptr)
 {
-    const char* context = ffInitCom();
-    if (context)
+    const char* errStr;
+    if ((errStr = ffInitCom()))
     {
         if (error)
-            ffStrbufAppendS(error, context);
+            ffStrbufSetS(error, errStr);
         return;
     }
 
-    static INIT_ONCE s_InitOnce[(int) FFWmiNamespace::LAST] = {};
-    if (InitOnceExecuteOnce(
-        &s_InitOnce[(int)wmiNs],
-        &InitHandleFunction,
-        (PVOID) (wmiNs == FFWmiNamespace::CIMV2 ? L"ROOT\\CIMV2" : L"ROOT\\WMI"),
-        (void**)&context) == FALSE
-    ) {
-        if(error)
-            ffStrbufAppendS(error, context);
-        return;
+    static IWbemServices* contexts[(int) FFWmiNamespace::LAST];
+
+    IWbemServices* context = contexts[(int)wmiNs];
+    if (!contexts[(int)wmiNs])
+    {
+        if ((errStr = doInitService(wmiNs == FFWmiNamespace::CIMV2 ? L"ROOT\\CIMV2" : L"ROOT\\WMI", &context)))
+        {
+            if (error)
+                ffStrbufSetS(error, errStr);
+            return;
+        }
+        contexts[(int)wmiNs] = context;
     }
 
     // Use the IWbemServices pointer to make requests of WMI
-    HRESULT hres = ((IWbemServices*)context)->ExecQuery(
+    HRESULT hres = context->ExecQuery(
         bstr_t(L"WQL"),
         bstr_t(queryStr),
         WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,

@@ -7,22 +7,18 @@
 
 static LPFN_CONNECTEX ConnectEx;
 
-static BOOL WINAPI initWsaData(PINIT_ONCE once, PVOID param, PVOID* context)
+static const char* initWsaData(WSADATA* wsaData)
 {
-    (void)once;
-    (void)param;
-    static WSADATA wsaData;
-    *context = &wsaData;
-    if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
-        return FALSE;
+    if(WSAStartup(MAKEWORD(2, 2), wsaData) != 0)
+        return "WSAStartup() failed";
 
-    if(LOBYTE(wsaData.wVersion) != 2 || HIBYTE(wsaData.wVersion) != 2)
-        return FALSE;
+    if(LOBYTE(wsaData->wVersion) != 2 || HIBYTE(wsaData->wVersion) != 2)
+        return "Invalid wsaData version found";
 
     //Dummy socket needed for WSAIoctl
     SOCKET sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sockfd == INVALID_SOCKET)
-        return FALSE;
+        return "socket(AF_INET, SOCK_STREAM) failed";
 
     DWORD dwBytes;
     GUID guid = WSAID_CONNECTEX;
@@ -30,28 +26,35 @@ static BOOL WINAPI initWsaData(PINIT_ONCE once, PVOID param, PVOID* context)
                     &guid, sizeof(guid),
                     &ConnectEx, sizeof(ConnectEx),
                     &dwBytes, NULL, NULL) != 0)
-        return FALSE;
+        return "WSAIoctl(sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER) failed";
 
-    return closesocket(sockfd) == 0;
+    closesocket(sockfd);
+
+    return NULL;
 }
 
 bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
 {
-    static INIT_ONCE once = INIT_ONCE_STATIC_INIT;
-    WSADATA* pData;
-    if(!InitOnceExecuteOnce(&once, initWsaData, NULL, (LPVOID*) &pData))
+    static WSADATA wsaData;
+    if (wsaData.wVersion == 0)
+    {
+        if (initWsaData(&wsaData) != NULL)
+        {
+            wsaData.wVersion = (WORD) -1;
+            return false;
+        }
+    }
+    else if (wsaData.wVersion == (WORD) -1)
         return false;
 
     memset(state, 0, sizeof(*state));
 
-    struct addrinfo hints = {
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_STREAM,
-    };
-
     struct addrinfo* addr;
 
-    if(getaddrinfo(host, "80", &hints, &addr) != 0)
+    if(getaddrinfo(host, "80", &(struct addrinfo) {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+    }, &addr) != 0)
         return false;
 
     state->sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
