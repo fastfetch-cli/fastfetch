@@ -79,7 +79,6 @@ static const char* getMedia(FFMediaResult* result)
 
 void ffDetectMediaImpl(FFMediaResult* media)
 {
-    FF_UNUSED(instance)
     const char* error = getMedia(media);
     ffStrbufAppendS(&media->error, error);
 }
