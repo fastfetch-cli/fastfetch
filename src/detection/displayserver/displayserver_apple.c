@@ -73,20 +73,11 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         FF_CFTYPE_AUTO_RELEASE CFMachPortRef port = CGWindowServerCreateServerPort();
         if (port)
         {
-            ffStrbufInitStatic(&ds->wmProcessName, "WindowServer");
-            ffStrbufInitStatic(&ds->wmPrettyName, "Quartz Compositor");
-        }
-        else
-        {
-            ffStrbufInit(&ds->wmProcessName);
-            ffStrbufInit(&ds->wmPrettyName);
+            ffStrbufSetStatic(&ds->wmProcessName, "WindowServer");
+            ffStrbufSetStatic(&ds->wmPrettyName, "Quartz Compositor");
         }
     }
-    ffStrbufInit(&ds->wmProtocolName);
+    ffStrbufSetStatic(&ds->dePrettyName, "Aqua");
 
-    ffStrbufInit(&ds->deProcessName);
-    ffStrbufInitStatic(&ds->dePrettyName, "Aqua");
-
-    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
     detectDisplays(ds);
 }

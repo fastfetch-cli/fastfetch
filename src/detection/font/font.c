@@ -1,5 +1,4 @@
 #include "font.h"
-#include "detection/internal.h"
 
 const char* ffDetectFontImpl(FFFontResult* font);
 

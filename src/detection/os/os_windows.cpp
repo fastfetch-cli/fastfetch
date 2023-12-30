@@ -42,17 +42,6 @@ static const char* getOsNameByWinbrand(FFstrbuf* osName)
 extern "C"
 void ffDetectOSImpl(FFOSResult* os)
 {
-    ffStrbufInit(&os->name);
-    ffStrbufInit(&os->prettyName);
-    ffStrbufInit(&os->id);
-    ffStrbufInit(&os->idLike);
-    ffStrbufInit(&os->variant);
-    ffStrbufInit(&os->variantID);
-    ffStrbufInit(&os->version);
-    ffStrbufInit(&os->versionID);
-    ffStrbufInit(&os->codename);
-    ffStrbufInit(&os->buildID);
-
     if(getOsNameByWinbrand(&os->variant) && getOsNameByWmi(&os->variant))
         return;
 

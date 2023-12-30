@@ -1,5 +1,4 @@
 #include "gpu.h"
-#include "detection/internal.h"
 #include "detection/vulkan/vulkan.h"
 #include "detection/opengl/opengl.h"
 
