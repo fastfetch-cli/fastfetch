@@ -141,9 +141,13 @@ static const char* detectVulkan(FFVulkanResult* result)
         else
             ffvkGetPhysicalDeviceProperties(physicalDevices[i], &physicalDeviceProperties.properties);
 
+
+        //We don't want software rasterizers to show up as physical gpu
+        if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
+            continue;
+
         //If the device api version is higher than the current highest device api version, overwrite it
         //In this case, also use the current device driver name as the shown driver name
-
 
         FFVersion deviceAPIVersion = FF_VERSION_INIT;
         applyVulkanVersion(physicalDeviceProperties.properties.apiVersion, &deviceAPIVersion);
@@ -167,10 +171,6 @@ static const char* detectVulkan(FFVulkanResult* result)
         }
 
         //Add the device to the list of devices shown by the GPU module
-
-        //We don't want software rasterizers to show up as physical gpu
-        if(physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
-            continue;
 
         // #456
         FF_LIST_FOR_EACH(FFGPUResult, gpu, result->gpus)
@@ -230,22 +230,20 @@ static const char* detectVulkan(FFVulkanResult* result)
 FFVulkanResult* ffDetectVulkan(void)
 {
     static FFVulkanResult result;
-    static bool init = false;
 
-    if(init)
-        return &result;
-    init = true;
+    if (result.gpus.elementSize == 0)
+    {
+        ffStrbufInit(&result.driver);
+        ffStrbufInit(&result.apiVersion);
+        ffStrbufInit(&result.conformanceVersion);
+        ffListInit(&result.gpus, sizeof(FFGPUResult));
 
-    ffStrbufInit(&result.driver);
-    ffStrbufInit(&result.apiVersion);
-    ffStrbufInit(&result.conformanceVersion);
-    ffListInit(&result.gpus, sizeof(FFGPUResult));
-
-    #ifdef FF_HAVE_VULKAN
-        result.error = detectVulkan(&result);
-    #else
-        result.error = "fastfetch was compiled without vulkan support";
-    #endif
+        #ifdef FF_HAVE_VULKAN
+            result.error = detectVulkan(&result);
+        #else
+            result.error = "fastfetch was compiled without vulkan support";
+        #endif
+    }
 
     return &result;
 }
