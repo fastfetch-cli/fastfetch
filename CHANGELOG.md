@@ -1,4 +1,4 @@
-# 2.4.1
+# 2.5.0
 
 Changes:
 * `--gpu-use-nvml` has been renamed to `--gpu-driver-specific` due to using of `IGCL` and `AGS`
