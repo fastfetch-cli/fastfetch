@@ -18,6 +18,7 @@ Bugfixes:
 * Fix Windows partition detection for WSL2 (Linux, Disk)
 * Fix Btrfs subvolumes being detected as external partitions some times (Linux, Disk)
 * Fix battery cycle counts in some places (Battery)
+* Fix CodeWhisperer compatibility (#676, Terminal, macOS)
 
 # 2.4.0
 
