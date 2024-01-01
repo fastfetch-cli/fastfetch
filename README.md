@@ -31,7 +31,6 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 * Arch Linux: `sudo pacman -S fastfetch`
 * Fedora: `sudo dnf install fastfetch`
 * Gentoo: `sudo emerge --ask app-misc/fastfetch`
-* Alpine: `sudo pkg install fastfetch`
 * NixOS: `sudo nix-shell -p fastfetch`
 * openSUSE: `sudo zypper install fastfetch`
 
