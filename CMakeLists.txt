@@ -76,6 +76,7 @@ option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
+option(ENABLE_NVIDIA_GPU "Enable Nvidia NVML" ON)
 
 ####################
 # Compiler options #
@@ -405,7 +406,6 @@ if(LINUX)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/gpu/gpu_nvidia.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
@@ -519,7 +519,6 @@ elseif(BSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
-        src/detection/gpu/gpu_nvidia.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
@@ -630,7 +629,6 @@ elseif(WIN32)
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
-        src/detection/gpu/gpu_nvidia.c
         src/detection/gpu/gpu_intel.c
         src/detection/gpu/gpu_amd.c
         src/detection/host/host_windows.c
@@ -676,6 +674,11 @@ if(ENABLE_DIRECTX_HEADERS)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
 endif()
 
+if(ENABLE_NVIDIA_GPU AND (LINUX OR BSD OR WIN32))
+    message(STATUS "Enabling Nvidia NVML")
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
+endif()
+
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
@@ -698,6 +701,10 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
+
+if(ENABLE_NVIDIA_GPU AND (LINUX OR BSD OR WIN32))
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_NVIDIA_GPU=1)
+endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)

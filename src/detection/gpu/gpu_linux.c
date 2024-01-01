@@ -245,6 +245,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
+    #ifdef FF_HAVE_NVIDIA_GPU
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
     {
         ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
@@ -266,6 +267,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
             gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
     }
+    #endif
 
     #ifdef __linux__
     if(options->temp && gpu->temperature != gpu->temperature)
