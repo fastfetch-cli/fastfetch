@@ -37,6 +37,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
     if(ffAppendFileBuffer(cmdlineFilePath, exe))
     {
+        ffStrbufTrimRightSpace(exe);
         ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
         ffStrbufTrimLeft(exe, '-'); //Happens in TTY
     }
@@ -180,7 +181,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
 
     #ifdef __APPLE__
     // https://github.com/fastfetch-cli/fastfetch/discussions/501
-    if (ffStrEndsWith(name, " (figterm)"))
+    if (ffStrEndsWith(name, " (figterm)") || ffStrEndsWith(name, " (cwterm)"))
         getProcessNameAndPpid(ppid, name, &ppid);
     #endif
 

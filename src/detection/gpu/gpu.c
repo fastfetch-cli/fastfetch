@@ -1,6 +1,6 @@
 #include "gpu.h"
-#include "detection/internal.h"
 #include "detection/vulkan/vulkan.h"
+#include "detection/opengl/opengl.h"
 
 const char* FF_GPU_VENDOR_NAME_APPLE = "Apple";
 const char* FF_GPU_VENDOR_NAME_AMD = "AMD";
@@ -46,17 +46,67 @@ const char* ffGetGPUVendorString(unsigned vendorId)
     return NULL;
 }
 
+const char* detectByOpenGL(FFlist* gpus)
+{
+    FFOpenGLResult result;
+    ffStrbufInit(&result.version);
+    ffStrbufInit(&result.renderer);
+    ffStrbufInit(&result.vendor);
+    ffStrbufInit(&result.slv);
+    const char* error = ffDetectOpenGL(&instance.config.modules.openGL, &result);
+    if (!error)
+    {
+        FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+        ffStrbufInitMove(&gpu->vendor, &result.vendor);
+        ffStrbufInitMove(&gpu->name, &result.renderer);
+        ffStrbufInit(&gpu->driver);
+        ffStrbufInitF(&gpu->platformApi, "OpenGL %s", result.version.chars);
+        gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->dedicated = gpu->shared = (FFGPUMemory){0, 0};
+        gpu->deviceId = 0;
+
+        if (ffStrbufIgnCaseEqualS(&gpu->vendor, "Mesa"))
+            ffStrbufClear(&gpu->vendor);
+
+        if (!gpu->vendor.length)
+        {
+            if (ffStrbufContainS(&result.renderer, "Apple"))
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
+            else if (ffStrbufContainS(&result.renderer, "Intel"))
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
+            else if (ffStrbufContainS(&result.renderer, "AMD") || ffStrbufContainS(&result.renderer, "ATI"))
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
+            else if (ffStrbufContainS(&result.renderer, "NVIDIA"))
+                ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+        }
+    }
+
+    ffStrbufDestroy(&result.version);
+    ffStrbufDestroy(&result.renderer);
+    ffStrbufDestroy(&result.vendor);
+    ffStrbufDestroy(&result.slv);
+    return error;
+}
+
 const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
 {
     if (!options->forceVulkan)
     {
         const char* error = ffDetectGPUImpl(options, result);
-        if (!error) return NULL;
+        if (!error && result->length > 0) return NULL;
     }
     FFVulkanResult* vulkan = ffDetectVulkan();
-    if (vulkan->error) return "GPU detection failed";
-    ffListDestroy(result);
-    ffListInitMove(result, &vulkan->gpus);
+    if (!vulkan->error && vulkan->gpus.length > 0)
+    {
+        ffListDestroy(result);
+        ffListInitMove(result, &vulkan->gpus);
+        return NULL;
+    }
+    if (detectByOpenGL(result) == NULL)
+        return NULL;
 
-    return NULL;
+    return "GPU detection failed";
 }

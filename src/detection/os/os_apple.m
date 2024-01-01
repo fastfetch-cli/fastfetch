@@ -98,18 +98,6 @@ static void parseOSXSoftwareLicense(FFOSResult* os)
 
 void ffDetectOSImpl(FFOSResult* os)
 {
-    ffStrbufInit(&os->name);
-    ffStrbufInit(&os->version);
-    ffStrbufInit(&os->buildID);
-    ffStrbufInit(&os->id);
-    ffStrbufInit(&os->prettyName);
-    ffStrbufInit(&os->versionID);
-
-    ffStrbufInit(&os->codename);
-    ffStrbufInit(&os->idLike);
-    ffStrbufInit(&os->variant);
-    ffStrbufInit(&os->variantID);
-
     parseSystemVersion(os);
 
     if(ffStrbufStartsWithIgnCaseS(&os->name, "MacOS"))

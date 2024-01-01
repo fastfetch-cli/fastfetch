@@ -1,4 +1,5 @@
 #include "wmtheme.h"
+#include "common/io/io.h"
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/settings.h"
@@ -132,60 +133,57 @@ static bool detectXFWM4(FFstrbuf* themeOrError)
 static bool detectOpenbox(const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
 {
     FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(64);
-    ffStrbufAppend(&absolutePath, &instance.state.platform.homeDir);
+    const char *configFileSubpath = "openbox/rc.xml"; 
+    if (ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
+        configFileSubpath = "openbox/lxqt-rc.xml";
+    else if (ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
+        configFileSubpath = "openbox/lxde-rc.xml";
 
-    //TODO: use config dirs
-    if(ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
-        ffStrbufAppendS(&absolutePath, ".config/openbox/lxqt-rc.xml");
-    else if(ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
-        ffStrbufAppendS(&absolutePath, ".config/openbox/lxde-rc.xml");
-    else
-        ffStrbufAppendS(&absolutePath, ".config/openbox/rc.xml");
-
-    char* line = NULL;
-    size_t len = 0;
-
-    FILE* file = fopen(absolutePath.chars, "r");
-    if(file == NULL)
+    if (!ffSearchUserConfigFile(&instance.state.platform.configDirs, configFileSubpath, &absolutePath))
     {
-        ffStrbufAppendF(themeOrError, "Couldn't open \"%s\"", absolutePath.chars);
-
+        ffStrbufAppendF(themeOrError, "Couldn't find config file \"%s\"", configFileSubpath);
         return false;
     }
 
-    while(getline(&line, &len, file) != -1)
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!ffReadFileBuffer(absolutePath.chars, &content))
     {
-        if(strstr(line, "<theme>") != 0)
-            break;
+        ffStrbufAppendF(themeOrError, "Couldn't read \"%s\"", absolutePath.chars);
+        return false;
     }
 
-    while(getline(&line, &len, file) != -1)
-    {
-        if(strstr(line, "<name>") != 0)
-        {
-            ffStrbufAppendS(themeOrError, line);
-            ffStrbufRemoveStrings(themeOrError, 2, (const char*[]) { "<name>", "</name>" });
-            ffStrbufTrimRight(themeOrError, '\n');
-            ffStrbufTrim(themeOrError, ' ');
-            break;
-        }
+    const char *themeStart = strstr(content.chars, "<theme>");
+    if (themeStart == NULL)
+        goto theme_not_found;
 
-        if(strstr(line, "</theme>") != 0) // sanity check
-            break;
-    }
+    const char *themeEnd = strstr(themeStart, "</theme>");
+    if (__builtin_expect(themeEnd == NULL, false)) // very rare case
+        goto theme_not_found;
 
-    if(line != NULL)
-        free(line);
+    const char *nameStart = strstr(themeStart, "<name>");
+    if (nameStart == NULL)
+        goto name_not_found;
 
-    fclose(file);
+    const char *nameEnd = strstr(nameStart, "</name>");
+    if (nameEnd == NULL || nameEnd > themeEnd) // (nameEnd > themeEnd) means name is not a theme's child
+        goto name_not_found;
+
+    nameStart += strlen("<name>");
+    ffStrbufAppendNS(themeOrError, (uint32_t)(nameEnd - nameStart), nameStart);
+    ffStrbufTrim(themeOrError, ' ');
 
     if(themeOrError->length == 0)
-    {
-        ffStrbufAppendF(themeOrError, "Couldn't find theme name in \"%s\"", absolutePath.chars);
-        return false;
-    }
+        goto name_not_found;
 
     return true;
+
+theme_not_found:
+    ffStrbufAppendF(themeOrError, "Couldn't find theme node in \"%s\"", absolutePath.chars);
+    return false;
+
+name_not_found:
+    ffStrbufAppendF(themeOrError, "Couldn't find theme name in \"%s\"", absolutePath.chars);
+    return false;
 }
 
 bool ffDetectWmTheme(FFstrbuf* themeOrError)

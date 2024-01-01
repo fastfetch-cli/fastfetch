@@ -287,7 +287,7 @@ static bool detectTemp(io_connect_t conn, const char *sensor, double* sum)
     return true;
 }
 
-const char *ffDetectCoreTemps(enum FFTempType type, double *result)
+const char *ffDetectSmcTemps(enum FFTempType type, double *result)
 {
     static io_connect_t conn;
     static dispatch_once_t once_control;
@@ -323,14 +323,19 @@ const char *ffDetectCoreTemps(enum FFTempType type, double *result)
         break;
 
     case FF_TEMP_CPU_M2X:
-        count += detectTemp(conn, "Tp0A", result); // CPU core 1
-        count += detectTemp(conn, "Tp0D", result); // CPU core 2
-        count += detectTemp(conn, "Tp0E", result); // CPU core 3
-        count += detectTemp(conn, "Tp01", result); // CPU core 4
-        count += detectTemp(conn, "Tp02", result); // CPU core 5
-        count += detectTemp(conn, "Tp05", result); // CPU core 6
-        count += detectTemp(conn, "Tp06", result); // CPU core 7
-        count += detectTemp(conn, "Tp09", result); // CPU core 8
+        count += detectTemp(conn, "Tp1h", result); // CPU efficiency core 1
+        count += detectTemp(conn, "Tp1t", result); // CPU efficiency core 2
+        count += detectTemp(conn, "Tp1p", result); // CPU efficiency core 3
+        count += detectTemp(conn, "Tp1l", result); // CPU efficiency core 4
+
+        count += detectTemp(conn, "Tp01", result); // CPU performance core 1
+        count += detectTemp(conn, "Tp05", result); // CPU performance core 2
+        count += detectTemp(conn, "Tp09", result); // CPU performance core 3
+        count += detectTemp(conn, "Tp0D", result); // CPU performance core 4
+        count += detectTemp(conn, "Tp0X", result); // CPU performance core 5
+        count += detectTemp(conn, "Tp0b", result); // CPU performance core 6
+        count += detectTemp(conn, "Tp0f", result); // CPU performance core 7
+        count += detectTemp(conn, "Tp0j", result); // CPU performance core 8
         break;
 
     case FF_TEMP_CPU_M3X:

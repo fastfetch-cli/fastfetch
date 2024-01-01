@@ -14,7 +14,11 @@ typedef struct FFfont
 void ffFontInit(FFfont* font);
 void ffFontInitQt(FFfont* font, const char* data);
 void ffFontInitPango(FFfont* font, const char* data);
-void ffFontInitCopy(FFfont* font, const char* name);
 void ffFontInitValues(FFfont* font, const char* name, const char* size);
 void ffFontInitWithSpace(FFfont* font, const char* rawName);
 void ffFontDestroy(FFfont* font);
+
+static inline void ffFontInitCopy(FFfont* font, const char* name)
+{
+    ffFontInitValues(font, name, NULL);
+}

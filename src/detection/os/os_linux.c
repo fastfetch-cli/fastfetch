@@ -126,6 +126,7 @@ static void getDebianVersion(FFOSResult* result)
 {
     FF_STRBUF_AUTO_DESTROY debianVersion = ffStrbufCreate();
     ffAppendFileBuffer("/etc/debian_version", &debianVersion);
+    ffStrbufTrimRightSpace(&debianVersion);
     if (!debianVersion.length) return;
     ffStrbufSet(&result->version, &debianVersion);
     ffStrbufSet(&result->versionID, &debianVersion);
@@ -166,17 +167,6 @@ static void detectOS(FFOSResult* os)
 
 void ffDetectOSImpl(FFOSResult* os)
 {
-    ffStrbufInit(&os->name);
-    ffStrbufInit(&os->prettyName);
-    ffStrbufInit(&os->id);
-    ffStrbufInit(&os->idLike);
-    ffStrbufInit(&os->variant);
-    ffStrbufInit(&os->variantID);
-    ffStrbufInit(&os->version);
-    ffStrbufInit(&os->versionID);
-    ffStrbufInit(&os->codename);
-    ffStrbufInit(&os->buildID);
-
     detectOS(os);
 
     if(ffStrbufIgnCaseEqualS(&os->id, "ubuntu"))

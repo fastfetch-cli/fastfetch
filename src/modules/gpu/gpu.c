@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 
-#define FF_GPU_NUM_FORMAT_ARGS 10
+#define FF_GPU_NUM_FORMAT_ARGS 12
 
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
 {
@@ -37,6 +37,9 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 
         if(gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
             ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
+
+        if(gpu->frequency == gpu->frequency && gpu->frequency > 0 /* Inactive? */)
+            ffStrbufAppendF(&output, " @ %.2f GHz", gpu->frequency);
 
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
         {
@@ -80,6 +83,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.used},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.total},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency},
         });
     }
 }
@@ -129,9 +134,9 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(subKey, "use-nvml"))
+    if (ffStrEqualsIgnCase(subKey, "driver-specific"))
     {
-        options->useNvml = ffOptionParseBoolean(value);
+        options->driverSpecific = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -179,9 +184,9 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "useNvml"))
+        if (ffStrEqualsIgnCase(key, "driverSpecific"))
         {
-            options->useNvml = yyjson_get_bool(val);
+            options->driverSpecific = yyjson_get_bool(val);
             continue;
         }
 
@@ -218,8 +223,8 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
-    if (options->useNvml != defaultOptions.useNvml)
-        yyjson_mut_obj_add_bool(doc, module, "useNvml", options->useNvml);
+    if (options->driverSpecific != defaultOptions.driverSpecific)
+        yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
 
     if (options->forceVulkan != defaultOptions.forceVulkan)
         yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
@@ -304,6 +309,13 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_str(doc, obj, "type", type);
 
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &gpu->vendor);
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &gpu->platformApi);
+
+        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
+            yyjson_mut_obj_add_null(doc, obj, "frequency");
+        else
+            yyjson_mut_obj_add_real(doc, obj, "frequency", gpu->frequency);
     }
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
@@ -327,6 +339,8 @@ void ffPrintGPUHelpFormat(void)
         "GPU used dedicated memory",
         "GPU total shared memory",
         "GPU used shared memory",
+        "The platform API that GPU supports",
+        "Current frequency in GHz",
     });
 }
 
@@ -345,7 +359,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    options->useNvml = false;
+    options->driverSpecific = false;
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;

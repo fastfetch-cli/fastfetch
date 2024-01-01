@@ -102,12 +102,8 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufInitStatic(&ds->wmProcessName, "WindowManager");
-    ffStrbufInitStatic(&ds->wmPrettyName, "Window Manager");
-    ffStrbufInit(&ds->wmProtocolName);
-    ffStrbufInit(&ds->deProcessName);
-    ffStrbufInit(&ds->dePrettyName);
-    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 0);
+    ffStrbufSetStatic(&ds->wmProcessName, "WindowManager");
+    ffStrbufSetStatic(&ds->wmPrettyName, "Window Manager");
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);

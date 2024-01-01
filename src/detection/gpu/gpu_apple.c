@@ -6,6 +6,8 @@
 
 #include <IOKit/graphics/IOGraphicsLib.h>
 
+const char* ffGpuDetectMetal(FFlist* gpus);
+
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
     double result = 0;
@@ -15,18 +17,18 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
     {
         switch (strtol(gpuName->chars + strlen("Apple M"), NULL, 10))
         {
-            case 1: error = ffDetectCoreTemps(FF_TEMP_GPU_M1X, &result); break;
-            case 2: error = ffDetectCoreTemps(FF_TEMP_GPU_M2X, &result); break;
-            case 3: error = ffDetectCoreTemps(FF_TEMP_GPU_M3X, &result); break;
+            case 1: error = ffDetectSmcTemps(FF_TEMP_GPU_M1X, &result); break;
+            case 2: error = ffDetectSmcTemps(FF_TEMP_GPU_M2X, &result); break;
+            case 3: error = ffDetectSmcTemps(FF_TEMP_GPU_M3X, &result); break;
             default: error = "Unsupported Apple Silicon GPU";
         }
     }
     else if (ffStrbufStartsWithS(gpuName, "Intel"))
-        error = ffDetectCoreTemps(FF_TEMP_GPU_INTEL, &result);
+        error = ffDetectSmcTemps(FF_TEMP_GPU_INTEL, &result);
     else if (ffStrbufStartsWithS(gpuName, "Radeon") || ffStrbufStartsWithS(gpuName, "AMD"))
-        error = ffDetectCoreTemps(FF_TEMP_GPU_AMD, &result);
+        error = ffDetectSmcTemps(FF_TEMP_GPU_AMD, &result);
     else
-        error = ffDetectCoreTemps(FF_TEMP_GPU_UNKNOWN, &result);
+        error = ffDetectSmcTemps(FF_TEMP_GPU_UNKNOWN, &result);
 
     if (error)
         return FF_GPU_TEMP_UNSET;
@@ -54,6 +56,9 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        IORegistryEntryGetRegistryEntryID(registryEntry, &gpu->deviceId);
+        ffStrbufInitStatic(&gpu->platformApi, "Metal");
 
         ffStrbufInit(&gpu->driver); // Ok for both Apple and Intel
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);
@@ -102,5 +107,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
     }
 
     IOObjectRelease(iterator);
+
+    ffGpuDetectMetal(gpus);
     return NULL;
 }

@@ -1,6 +1,7 @@
 #include "physicaldisk.h"
 #include "common/io/io.h"
 #include "common/properties.h"
+#include "detection/temps/temps_linux.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>
@@ -42,16 +43,37 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 
         {
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/vendor", devName);
-            ffAppendFileBuffer(pathSysBlock, &device->name);
-            if (device->name.length > 0)
-                ffStrbufAppendC(&device->name, ' ');
+            if (ffAppendFileBuffer(pathSysBlock, &device->name))
+            {
+                ffStrbufTrimRightSpace(&device->name);
+                if (device->name.length > 0)
+                    ffStrbufAppendC(&device->name, ' ');
+            }
 
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/model", devName);
             ffAppendFileBuffer(pathSysBlock, &device->name);
-            ffStrbufTrim(&device->name, ' ');
+            ffStrbufTrimRightSpace(&device->name);
 
             if (device->name.length == 0)
                 ffStrbufSetS(&device->name, devName);
+            else if (ffStrStartsWith(devName, "nvme"))
+            {
+                int devid, nsid;
+                if (sscanf(devName, "nvme%dn%d", &devid, &nsid) == 2)
+                {
+                    bool multiNs = nsid > 1;
+                    if (!multiNs)
+                    {
+                        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/nvme%dn2", devName, devid);
+                        multiNs = ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY);
+                    }
+                    if (multiNs)
+                    {
+                        // In Asahi Linux, there are multiple namespaces for the same NVMe drive.
+                        ffStrbufAppendF(&device->name, " - %d", nsid);
+                    }
+                }
+            }
 
             if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
             {
@@ -66,16 +88,18 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         {
             ffStrbufInit(&device->interconnect);
             if (strstr(pathSysDeviceReal, "/usb") != NULL)
-                ffStrbufSetS(&device->interconnect, "usb");
+                ffStrbufSetS(&device->interconnect, "USB");
+            else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
+                ffStrbufSetS(&device->interconnect, "NVMe");
+            else if (strstr(pathSysDeviceReal, "/ata") != NULL)
+                ffStrbufSetS(&device->interconnect, "ATA");
+            else if (strstr(pathSysDeviceReal, "/scsi") != NULL)
+                ffStrbufSetS(&device->interconnect, "SCSI");
             else
             {
                 snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/transport", devName);
-                if (!ffAppendFileBuffer(pathSysBlock, &device->interconnect))
-                {
-                    snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/uevent", devName);
-                    if (ffParsePropFile(pathSysBlock, "DEVTYPE=", &device->interconnect))
-                        ffStrbufSubstrBeforeLastC(&device->interconnect, '_');
-                }
+                if (ffAppendFileBuffer(pathSysBlock, &device->interconnect))
+                    ffStrbufTrimRightSpace(&device->interconnect);
             }
         }
 
@@ -107,9 +131,39 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         }
 
         {
+            char roChar = '0';
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/ro", devName);
+            if (ffReadFileData(pathSysBlock, 1, &roChar) > 0)
+                device->type |= roChar == '1' ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE;
+        }
+
+        {
             ffStrbufInit(&device->serial);
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/serial", devName);
-            ffReadFileBuffer(pathSysBlock, &device->serial);
+            if (ffReadFileBuffer(pathSysBlock, &device->serial))
+                ffStrbufTrimRightSpace(&device->serial);
+        }
+
+        {
+            ffStrbufInit(&device->revision);
+            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/firmware_rev", devName);
+            if (ffReadFileBuffer(pathSysBlock, &device->revision))
+                ffStrbufTrimRightSpace(&device->revision);
+        }
+
+        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
+        if (options->temp)
+        {
+            const FFlist* tempsResult = ffDetectTemps();
+
+            FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
+            {
+                if (ffStrStartsWith(devName, value->deviceName.chars)) // nvme0 - nvme0n1
+                {
+                    device->temperature = value->value;
+                    break;
+                }
+            }
         }
     }
 

@@ -1,5 +1,4 @@
 #include "displayserver.h"
-#include "detection/internal.h"
 
 bool ffdsAppendDisplay(
     FFDisplayServerResult* result,
@@ -36,7 +35,16 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
 const FFDisplayServerResult* ffConnectDisplayServer()
 {
-    FF_DETECTION_INTERNAL_GUARD(FFDisplayServerResult,
+    static FFDisplayServerResult result;
+    if (result.displays.elementSize == 0)
+    {
+        ffStrbufInit(&result.wmProcessName);
+        ffStrbufInit(&result.wmPrettyName);
+        ffStrbufInit(&result.wmProtocolName);
+        ffStrbufInit(&result.deProcessName);
+        ffStrbufInit(&result.dePrettyName);
+        ffListInit(&result.displays, sizeof(FFDisplayResult));
         ffConnectDisplayServerImpl(&result);
-    );
+    }
+    return &result;
 }

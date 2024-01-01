@@ -132,7 +132,7 @@ jobs:
         run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fastfetch-linux
           path: ./fastfetch-*.*
@@ -188,7 +188,7 @@ jobs:
         run: ctest
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fastfetch-macos
           path: ./fastfetch-*.*
@@ -204,7 +204,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: run VM
-        uses: cross-platform-actions/action@v0.21.1
+        uses: cross-platform-actions/action@master
         with:
           operating_system: freebsd
           version: '13.2'
@@ -222,7 +222,7 @@ jobs:
             ctest
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fastfetch-freebsd
           path: ./fastfetch-*.*
@@ -284,7 +284,7 @@ jobs:
         run: 7z a -t7z -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-Win64.7z *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fastfetch-win64
           path: ./fastfetch-*-Win64.*
@@ -351,7 +351,7 @@ jobs:
         run: 7z a -t7z -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-Win32.7z *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: fastfetch-win32
           path: ./fastfetch-*-Win32.*
@@ -369,14 +369,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: download artifacts
-        uses: actions/download-artifact@v3
-
       - name: get latest release version
         id: get_version_release
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ${{ github.repository }}
+
+      - name: download artifacts
+        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        uses: actions/download-artifact@v4
 
       - name: create release
         if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
@@ -385,4 +386,28 @@ jobs:
           tag: ${{ needs.linux.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
-          artifacts: fastfetch-linux/*,fastfetch-macos/*,fastfetch-freebsd/*,fastfetch-win64/*,fastfetch-win32/*
+          artifacts: fastfetch-*/fastfetch-*
+          body: "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux.outputs.ffversion }}/CHANGELOG.md) for details."
+
+      - name: download source tarballs
+        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        run: |
+          for i in 1 2 3 4 5; do curl -L --remote-name-all --output-dir fastfetch-source --create-dirs https://github.com/${{ github.repository }}/archive/refs/tags/${{ needs.linux.outputs.ffversion }}.{tar.gz,zip} && break || sleep 5; done
+          ls fastfetch-*/*
+
+      - name: generate release notes
+        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        run: |
+          echo "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux.outputs.ffversion }}/CHANGELOG.md) for details." > fastfetch-release-notes.md
+          echo -e "\n---\n\n<details><summary>SHA256SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
+          sha256sum fastfetch-*/* >> fastfetch-release-notes.md
+          echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
+
+      - name: update release body
+        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ needs.linux.outputs.ffversion }}
+          commit: ${{ github.sha }}
+          bodyFile: fastfetch-release-notes.md
+          allowUpdates: true

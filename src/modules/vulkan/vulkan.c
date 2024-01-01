@@ -130,7 +130,7 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
                 yyjson_mut_obj_add_null(doc, sharedMemory, "used");
         }
 
-        yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", vulkanGpu->vulkanDeviceId);
+        yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", vulkanGpu->deviceId);
     }
 }
 

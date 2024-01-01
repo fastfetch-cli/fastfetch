@@ -47,45 +47,45 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     return write(fd, data, dataSize) > 0;
 }
 
+static inline void readWithLength(int fd, FFstrbuf* buffer, uint32_t length)
+{
+    ffStrbufEnsureFixedLengthFree(buffer, length);
+    ssize_t bytesRead = 0;
+    while(
+        length > 0 && (bytesRead = read(fd, buffer->chars + buffer->length, length)) > 0
+    ) {
+        buffer->length += (uint32_t) bytesRead;
+        length -= (uint32_t) bytesRead;
+    }
+}
+
+static inline void readUntilEOF(int fd, FFstrbuf* buffer)
+{
+    ffStrbufEnsureFree(buffer, 31);
+    uint32_t available = ffStrbufGetFree(buffer);
+    ssize_t bytesRead = 0;
+    while(
+        (bytesRead = read(fd, buffer->chars + buffer->length, available)) > 0
+    ) {
+        buffer->length += (uint32_t) bytesRead;
+        if((uint32_t) bytesRead == available)
+            ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
+        available = ffStrbufGetFree(buffer);
+    }
+}
+
 bool ffAppendFDBuffer(int fd, FFstrbuf* buffer)
 {
-    ssize_t bytesRead = 0;
-
     struct stat fileInfo;
     if(fstat(fd, &fileInfo) != 0)
         return false;
 
     if (fileInfo.st_size > 0)
-    {
-        // optimize for files has a fixed length,
-        // file can be very large, only keep necessary memory to save time and resources.
-        ffStrbufEnsureFixedLengthFree(buffer, (uint32_t)fileInfo.st_size);
-    }
+        readWithLength(fd, buffer, (uint32_t)fileInfo.st_size);
     else
-        ffStrbufEnsureFree(buffer, 31);
-    uint32_t free = ffStrbufGetFree(buffer);
-    // procfs file's st_size is always zero
-    // choose a signed int type so that can store a native number
-    ssize_t remain = fileInfo.st_size;
-
-    while(
-        (bytesRead = read(fd, buffer->chars + buffer->length, free)) > 0
-    ) {
-        buffer->length += (uint32_t) bytesRead;
-        // if remain > 0, it means there is some data left in the file.
-        // if remain == 0, it means reading has completed, no need to grow up the buffer.
-        // if remain < 0, we are reading a file from procfs/sysfs and its st_size is zero,
-        // we cannot detect how many data remains in the file, we only can call ffStrbufEnsureFree and read again.
-        remain -= bytesRead;
-        if((uint32_t) bytesRead == free && remain != 0)
-            ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
-        free = ffStrbufGetFree(buffer);
-    }
+        readUntilEOF(fd, buffer);
 
     buffer->chars[buffer->length] = '\0';
-
-    ffStrbufTrimRight(buffer, '\n');
-    ffStrbufTrimRight(buffer, ' ');
 
     return buffer->length > 0;
 }

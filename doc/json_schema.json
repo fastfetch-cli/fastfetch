@@ -1191,8 +1191,8 @@
                                         "type": "boolean",
                                         "default": false
                                     },
-                                    "useNvml": {
-                                        "description": "Use nvml (NVIDIA Management Library) to detect more detailed GPU information (memory usage, CUDA core count, etc)",
+                                    "driverSpecific": {
+                                        "description": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -1380,6 +1380,11 @@
                                     "namePrefix": {
                                         "description": "Show disks with given name prefix only",
                                         "type": "string"
+                                    },
+                                    "temp": {
+                                        "description": "Detect and display SSD temperature if supported",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

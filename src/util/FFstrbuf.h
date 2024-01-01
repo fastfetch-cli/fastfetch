@@ -41,7 +41,6 @@ static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* _
 void ffStrbufAppendC(FFstrbuf* strbuf, char c);
 void ffStrbufAppendNC(FFstrbuf* strbuf, uint32_t num, char c);
 void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
-void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
@@ -55,6 +54,7 @@ FF_C_PRINTF(2, 3) void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
+void ffStrbufTrimRightSpace(FFstrbuf* strbuf);
 
 void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
 void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str);
@@ -452,6 +452,12 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithNS(const FFstrbuf* strbuf, uin
 static inline FF_C_NODISCARD bool ffStrbufEndsWithS(const FFstrbuf* strbuf, const char* end)
 {
     return ffStrbufEndsWithNS(strbuf, (uint32_t) strlen(end), end);
+}
+
+static inline FF_C_NODISCARD bool ffStrbufEndsWithFn(const FFstrbuf* strbuf, int (*fn)(int))
+{
+    return strbuf->length == 0 ? false :
+        fn(strbuf->chars[strbuf->length - 1]);
 }
 
 static inline FF_C_NODISCARD bool ffStrbufEndsWith(const FFstrbuf* strbuf, const FFstrbuf* end)

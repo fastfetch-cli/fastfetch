@@ -54,6 +54,7 @@ void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)
     strbuf->allocated = allocate;
 }
 
+// for an empty buffer, free + 1 length memory will be allocated(+1 for the NUL)
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
 {
     uint32_t oldFree = ffStrbufGetFree(strbuf);
@@ -64,7 +65,7 @@ void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free)
 
     if(strbuf->allocated == 0)
     {
-        newCap += strbuf->length + 1; // +1 for the NUL
+        newCap += strbuf->length + 1;
         char* newbuf = malloc(sizeof(*strbuf->chars) * newCap);
         if(strbuf->length == 0)
             *newbuf = '\0';
@@ -115,22 +116,6 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     ffStrbufEnsureFree(strbuf, length);
     memcpy(&strbuf->chars[strbuf->length], value, length);
     strbuf->length += length;
-    strbuf->chars[strbuf->length] = '\0';
-}
-
-void ffStrbufAppendNSExludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude)
-{
-    if(value == NULL || length == 0)
-        return;
-
-    ffStrbufEnsureFree(strbuf, length);
-
-    for(uint32_t i = 0; i < length; i++)
-    {
-        if(value[i] != exclude)
-        strbuf->chars[strbuf->length++] = value[i];
-    }
-
     strbuf->chars[strbuf->length] = '\0';
 }
 
@@ -268,6 +253,24 @@ void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
         return;
 
     while(ffStrbufEndsWithC(strbuf, c))
+        --strbuf->length;
+
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
+        return;
+    }
+
+    strbuf->chars[strbuf->length] = '\0';
+}
+
+void ffStrbufTrimRightSpace(FFstrbuf* strbuf)
+{
+    if(strbuf->length == 0)
+        return;
+
+    while(ffStrbufEndsWithFn(strbuf, isspace))
         --strbuf->length;
 
     if(strbuf->allocated == 0)

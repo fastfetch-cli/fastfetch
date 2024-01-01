@@ -8,6 +8,7 @@
 #include <sys/sysinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #ifdef __ANDROID__
 #include "common/settings.h"
@@ -132,10 +133,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
     if (error) return error;
 
-    cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, 1);
-
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
+    cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
 
     #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
     if(ffPathExists(BP, FF_PATHTYPE_DIRECTORY))
@@ -167,17 +167,64 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     detectAndroid(cpu);
     #endif
 
-    #ifdef __linux__
     if (cpu->name.length == 0)
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (!ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }))
+        if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
         {
-            ffParsePropLines(buffer.chars, "Model name:", &cpu->name);
-            if (ffStrbufEqualS(&cpu->name, "-")) ffStrbufClear(&cpu->name);
+            char* pstart = buffer.chars;
+
+            if (cpu->vendor.length == 0)
+            {
+                pstart = strstr(pstart, "Vendor ID:");
+                if (pstart)
+                {
+                    pstart += strlen("Vendor ID:");
+                    while (isspace(*pstart)) ++pstart;
+                    if (*pstart)
+                    {
+                        char* pend = strchr(pstart, '\n');
+                        if (pend != NULL)
+                            ffStrbufAppendNS(&cpu->vendor, (uint32_t) (pend - pstart), pstart);
+                        else
+                        {
+                            ffStrbufAppendS(&cpu->vendor, pstart);
+                        }
+                        pstart = pend + 1;
+                    }
+                }
+            }
+
+            while ((pstart = strstr(pstart, "Model name:")))
+            {
+                pstart += strlen("Model name:");
+                while (isspace(*pstart)) ++pstart;
+                if (*pstart == '\0')
+                    break;
+
+                if (cpu->name.length > 0)
+                    ffStrbufAppendS(&cpu->name, " + ");
+
+                if (*pstart == '-')
+                {
+                    ffStrbufAppendS(&cpu->name, "Unknown");
+                    ++pstart;
+                    continue;
+                }
+
+                char* pend = strchr(pstart, '\n');
+                if (pend != NULL)
+                    ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
+                else
+                {
+                    ffStrbufAppendS(&cpu->name, pstart);
+                    break;
+                }
+
+                pstart = pend + 1;
+            }
         }
     }
-    #endif
 
     return NULL;
 }

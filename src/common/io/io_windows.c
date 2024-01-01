@@ -35,43 +35,50 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
     return !!WriteFile(handle, data, (DWORD)dataSize, &written, NULL);
 }
 
+static inline void readWithLength(HANDLE handle, FFstrbuf* buffer, uint32_t length)
+{
+    ffStrbufEnsureFixedLengthFree(buffer, length);
+    DWORD bytesRead = 0;
+    while(
+        length > 0 &&
+        ReadFile(handle, buffer->chars + buffer->length, length, &bytesRead, NULL) != FALSE &&
+        bytesRead > 0
+    ) {
+        buffer->length += (uint32_t) bytesRead;
+        length -= (uint32_t) bytesRead;
+    }
+}
+
+static inline void readUntilEOF(HANDLE handle, FFstrbuf* buffer)
+{
+    ffStrbufEnsureFree(buffer, 31);
+    uint32_t available = ffStrbufGetFree(buffer);
+    DWORD bytesRead = 0;
+    while(
+        ReadFile(handle, buffer->chars + buffer->length, available, &bytesRead, NULL) != FALSE &&
+        bytesRead > 0
+    ) {
+        buffer->length += (uint32_t) bytesRead;
+        if((uint32_t) bytesRead == available)
+            ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
+        available = ffStrbufGetFree(buffer);
+    }
+}
+
 bool ffAppendFDBuffer(HANDLE handle, FFstrbuf* buffer)
 {
-    DWORD bytesRead = 0;
-
     LARGE_INTEGER fileSize;
     if(!GetFileSizeEx(handle, &fileSize))
         fileSize.QuadPart = 0;
 
     if (fileSize.QuadPart > 0)
-    {
-        // optimize for files has a fixed length,
-        // file can be very large, only keep necessary memory to save time and resources.
-        ffStrbufEnsureFixedLengthFree(buffer, (uint32_t)fileSize.QuadPart);
-    }
+        readWithLength(handle, buffer, (uint32_t)fileSize.QuadPart);
     else
-        ffStrbufEnsureFree(buffer, 31);
-    uint32_t free = ffStrbufGetFree(buffer);
-    ssize_t remain = fileSize.QuadPart;
-
-    bool success;
-    while(
-        (success = !!ReadFile(handle, buffer->chars + buffer->length, free, &bytesRead, NULL)) &&
-        bytesRead > 0
-    ) {
-        buffer->length += (uint32_t) bytesRead;
-        remain -= (ssize_t)bytesRead;
-        if((uint32_t) bytesRead == free && remain != 0)
-            ffStrbufEnsureFree(buffer, buffer->allocated - 1); // Doubles capacity every round. -1 for the null byte.
-        free = ffStrbufGetFree(buffer);
-    }
+        readUntilEOF(handle, buffer);
 
     buffer->chars[buffer->length] = '\0';
 
-    ffStrbufTrimRight(buffer, '\n');
-    ffStrbufTrimRight(buffer, ' ');
-
-    return success;
+    return buffer->length > 0;
 }
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)

@@ -1,5 +1,4 @@
 #include "cpu.h"
-#include "detection/internal.h"
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu);
 

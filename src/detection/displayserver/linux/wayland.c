@@ -50,6 +50,7 @@ static void waylandDetectWM(int fd, FFDisplayServerResult* result)
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreate();
     ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
     ffReadFileBuffer(procPath.chars, &result->wmProcessName);
+    ffStrbufTrimRightSpace(&result->wmProcessName);
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
 }

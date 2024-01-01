@@ -4,7 +4,7 @@
 extern "C" {
 #include "common/library.h"
 #include "detection/gpu/gpu.h"
-#include "detection/gpu/gpu_nvidia.h"
+#include "detection/gpu/gpu_driver_specific.h"
 }
 
 #include <wsl/winadapter.h>
@@ -13,6 +13,8 @@ extern "C" {
 #include <dxguids/dxguids.h>
 #include <utility>
 #include <cinttypes>
+
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
 template <typename Fn>
 struct on_scope_exit {
@@ -65,6 +67,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         ffStrbufInitS(&gpu->name, desc);
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         ffStrbufInit(&gpu->driver);
         uint64_t value = 0;
@@ -95,16 +98,23 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
             const char* vendorStr = ffGetGPUVendorString((unsigned) hardwareId.vendorID);
             ffStrbufSetStatic(&gpu->vendor, vendorStr);
 
-            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && options->useNvml)
+            if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && (options->driverSpecific || options->temp))
             {
-                ffDetectNvidiaGpuInfo((FFGpuNvidiaCondition) {
-                    .pciBusId = nullptr,
-                    .pciDeviceId = (hardwareId.deviceID << 16) | hardwareId.vendorID,
-                    .pciSubSystemId = hardwareId.subSysID
-                }, (FFGpuNvidiaResult) {
+                FFGpuDriverCondition cond = {
+                    .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID,
+                    .pciDeviceId = {
+                        .deviceId = hardwareId.deviceID,
+                        .vendorId = hardwareId.vendorID,
+                        .subSystemId = hardwareId.subSysID,
+                        .revId = hardwareId.revision,
+                    },
+                };
+                ffDetectNvidiaGpuInfo(&cond, (FFGpuDriverResult) {
                     .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = options->useNvml ? &gpu->dedicated : NULL,
-                    .coreCount = options->useNvml ? (uint32_t*) &gpu->coreCount : NULL,
+                    .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                    .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                    .type = &gpu->type,
+                    .frequency = &gpu->frequency,
                 }, "/usr/lib/wsl/lib/libnvidia-ml.so");
             }
         }

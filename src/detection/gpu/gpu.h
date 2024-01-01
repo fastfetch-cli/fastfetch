@@ -5,6 +5,7 @@
 #define FF_GPU_TEMP_UNSET (0/0.0)
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
+#define FF_GPU_FREQUENCY_UNSET (0/0.0)
 
 extern const char* FF_GPU_VENDOR_NAME_APPLE;
 extern const char* FF_GPU_VENDOR_NAME_AMD;
@@ -28,11 +29,13 @@ typedef struct FFGPUResult
     FFstrbuf vendor;
     FFstrbuf name;
     FFstrbuf driver;
+    FFstrbuf platformApi;
     double temperature;
-    int coreCount;
+    int32_t coreCount;
+    double frequency; // Real time clock frequency in GHz
     FFGPUMemory dedicated;
     FFGPUMemory shared;
-    uint32_t vulkanDeviceId; // Only used for vulkan
+    uint64_t deviceId; // Used internally, may be uninitialized
 } FFGPUResult;
 
 const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result);

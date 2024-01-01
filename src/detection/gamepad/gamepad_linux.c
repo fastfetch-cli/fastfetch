@@ -30,7 +30,8 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
             ffStrbufInitS(&device->identifier, entry->d_name);
             ffStrbufInit(&device->name);
-            ffAppendFileBuffer(path.chars, &device->name);
+            if (ffAppendFileBuffer(path.chars, &device->name))
+                ffStrbufTrimRightSpace(&device->name);
         }
 
         ffStrbufSubstrBefore(&path, baseLen);

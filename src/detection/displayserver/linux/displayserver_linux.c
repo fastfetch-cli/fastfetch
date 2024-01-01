@@ -3,13 +3,6 @@
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufInit(&ds->wmProcessName);
-    ffStrbufInit(&ds->wmPrettyName);
-    ffStrbufInit(&ds->wmProtocolName);
-    ffStrbufInit(&ds->deProcessName);
-    ffStrbufInit(&ds->dePrettyName);
-    ffListInitA(&ds->displays, sizeof(FFDisplayResult), 4);
-
     if (instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE)
     {
         //We try wayland as our preferred display server, as it supports the most features.

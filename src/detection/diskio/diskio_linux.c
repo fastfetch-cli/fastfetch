@@ -41,16 +41,37 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
         {
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/vendor", devName);
-            ffAppendFileBuffer(pathSysBlock, &device->name);
-            if (device->name.length > 0)
-                ffStrbufAppendC(&device->name, ' ');
+            if (ffAppendFileBuffer(pathSysBlock, &device->name))
+            {
+                ffStrbufTrimRightSpace(&device->name);
+                if (device->name.length > 0)
+                    ffStrbufAppendC(&device->name, ' ');
+            }
 
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/model", devName);
             ffAppendFileBuffer(pathSysBlock, &device->name);
-            ffStrbufTrim(&device->name, ' ');
+            ffStrbufTrimRightSpace(&device->name);
 
             if (device->name.length == 0)
                 ffStrbufSetS(&device->name, devName);
+            else if (ffStrStartsWith(devName, "nvme"))
+            {
+                int devid, nsid;
+                if (sscanf(devName, "nvme%dn%d", &devid, &nsid) == 2)
+                {
+                    bool multiNs = nsid > 1;
+                    if (!multiNs)
+                    {
+                        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/nvme%dn2", devName, devid);
+                        multiNs = ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY);
+                    }
+                    if (multiNs)
+                    {
+                        // In Asahi Linux, there are multiple namespaces for the same NVMe drive.
+                        ffStrbufAppendF(&device->name, " - %d", nsid);
+                    }
+                }
+            }
 
             if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
             {

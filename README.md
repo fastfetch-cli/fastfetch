@@ -27,10 +27,14 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ### Linux
 
-* Debian / Ubuntu: Download `fastfetch-<version>-Linux.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and `sudo apt install fastfetch-<version>-Linux.deb`
+* Debian / Ubuntu: Download `fastfetch-<version>-Linux.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and `dpkg -i fastfetch-<version>-Linux.deb`
 * Arch Linux: `sudo pacman -S fastfetch`
 * Fedora: `sudo dnf install fastfetch`
 * Gentoo: `sudo emerge --ask app-misc/fastfetch`
+* NixOS: `sudo nix-shell -p fastfetch`
+* openSUSE: `sudo zypper install fastfetch`
+
+Replace sudo with doas depending on what you use.
 
 [See also if fastfetch has been packaged for your favorite Linux distro](#Packaging)
 

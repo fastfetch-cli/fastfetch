@@ -157,7 +157,7 @@ const char* ffDetectWifi(FFlist* result)
                     NSDictionary* authType = [apple valueForKey:@"AUTH_TYPE"];
                     if (authType)
                     {
-                        if ([[authType valueForKey:@"AUTH_LOWER"] intValue] != 1) break; // APPLE80211_AUTH_TYPE_UNICAST?
+                        // AUTH_LOWER seems useless. `airport` verifies if its value is between 1 and 3, and prints `unknown` if not
 
                         NSNumber* authUpper = [authType valueForKey:@"AUTH_UPPER"];
                         if (!authUpper)
@@ -167,14 +167,38 @@ const char* ffDetectWifi(FFlist* result)
                             int authUpperValue = [authUpper intValue];
                             switch (authUpperValue)
                             {
-                                case 4096:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA3-SAE");
+                                case 1:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA");
+                                    break;
+                                case 2:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA-PSK");
+                                    break;
+                                case 4:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA2");
                                     break;
                                 case 8:
                                     ffStrbufSetStatic(&item->conn.security, "WPA2-PSK");
                                     break;
-                                case 4:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA2");
+                                case 16:
+                                    ffStrbufSetStatic(&item->conn.security, "FT-WPA2-PSK");
+                                    break;
+                                case 32:
+                                    ffStrbufSetStatic(&item->conn.security, "LEAP");
+                                    break;
+                                case 64:
+                                    ffStrbufSetStatic(&item->conn.security, "802.1X");
+                                    break;
+                                case 128:
+                                    ffStrbufSetStatic(&item->conn.security, "FT-WPA2");
+                                    break;
+                                case 256:
+                                    ffStrbufSetStatic(&item->conn.security, "WPS");
+                                    break;
+                                case 4096:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA3-SAE");
+                                    break;
+                                case 8192:
+                                    ffStrbufSetStatic(&item->conn.security, "WPA3-FT-SAE");
                                     break;
                                 default: // TODO: support more auth types
                                     ffStrbufAppendF(&item->conn.security, "To be supported (%d)", authUpperValue);

@@ -1,7 +1,6 @@
 #include "terminalfont.h"
 #include "common/properties.h"
 #include "common/processing.h"
-#include "detection/internal.h"
 #include "detection/terminalshell/terminalshell.h"
 
 static void detectAlacritty(FFTerminalFontResult* terminalFont)

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.4.0
+    VERSION 2.5.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -575,6 +575,7 @@ elseif(APPLE)
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
+        src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
@@ -630,6 +631,8 @@ elseif(WIN32)
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/gpu/gpu_nvidia.c
+        src/detection/gpu/gpu_intel.c
+        src/detection/gpu/gpu_amd.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
@@ -903,6 +906,7 @@ elseif(APPLE)
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-framework IOBluetooth"
         PRIVATE "-framework IOKit"
+        PRIVATE "-framework Metal"
         PRIVATE "-framework OpenGL"
         PRIVATE "-framework OpenCL"
         PRIVATE "-framework SystemConfiguration"

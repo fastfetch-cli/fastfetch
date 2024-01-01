@@ -12,6 +12,22 @@ void ffFontInit(FFfont* font)
     ffListInit(&font->styles, sizeof(FFstrbuf));
 }
 
+static void strbufAppendNSExcludingC(FFstrbuf* strbuf, uint32_t length, const char* value, char exclude)
+{
+    if(value == NULL || length == 0)
+        return;
+
+    ffStrbufEnsureFree(strbuf, length);
+
+    for(uint32_t i = 0; i < length; i++)
+    {
+        if(value[i] != exclude)
+        strbuf->chars[strbuf->length++] = value[i];
+    }
+
+    strbuf->chars[strbuf->length] = '\0';
+}
+
 static void fontInitPretty(FFfont* font)
 {
     ffStrbufAppend(&font->pretty, &font->name);
@@ -155,7 +171,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
             ffStrbufInit(alternativeBuffer);
         }
 
-        ffStrbufAppendNSExludingC(alternativeBuffer, wordLength, wordStart, '-');
+        strbufAppendNSExcludingC(alternativeBuffer, wordLength, wordStart, '-');
 
         if(
             strncasecmp(wordStart, "Ultra ", 6) == 0 ||
@@ -171,7 +187,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
 
     if(alternativeBuffer != NULL)
     {
-        ffStrbufAppendNSExludingC(alternativeBuffer, wordLength, wordStart, '-');
+        strbufAppendNSExcludingC(alternativeBuffer, wordLength, wordStart, '-');
         return;
     }
 
@@ -198,11 +214,6 @@ void ffFontInitValues(FFfont* font, const char* name, const char* size)
     ffStrbufAppendS(&font->size, size);
 
     fontInitPretty(font);
-}
-
-void ffFontInitCopy(FFfont* font, const char* name)
-{
-    ffFontInitValues(font, name, NULL);
 }
 
 void ffFontInitWithSpace(FFfont* font, const char* rawName)

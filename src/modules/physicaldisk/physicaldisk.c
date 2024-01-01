@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_PHYSICALDISK_DISPLAY_NAME "Physical Disk"
-#define FF_PHYSICALDISK_NUM_FORMAT_ARGS 7
+#define FF_PHYSICALDISK_NUM_FORMAT_ARGS 9
 
 static int sortDevices(const FFPhysicalDiskResult* left, const FFPhysicalDiskResult* right)
 {
@@ -63,28 +63,47 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
             : dev->type & FF_PHYSICALDISK_TYPE_FIXED
                 ? "Fixed"
                 : "";
+        const char* readOnlyType = dev->type & FF_PHYSICALDISK_TYPE_READONLY
+            ? "Read-only"
+            : "";
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-            if (physicalType[0] || removableType[0])
+            if (physicalType[0] || removableType[0] || readOnlyType[0])
             {
                 ffStrbufAppendS(&buffer, " [");
                 if (physicalType[0])
                     ffStrbufAppendS(&buffer, physicalType);
                 if (removableType[0])
                 {
-                    if (physicalType[0])
+                    if (buffer.chars[buffer.length - 1] != '[')
                         ffStrbufAppendS(&buffer, ", ");
                     ffStrbufAppendS(&buffer, removableType);
                 }
+                if (readOnlyType[0])
+                {
+                    if (buffer.chars[buffer.length - 1] != '[')
+                        ffStrbufAppendS(&buffer, ", ");
+                    ffStrbufAppendS(&buffer, readOnlyType);
+                }
                 ffStrbufAppendC(&buffer, ']');
+            }
+
+            if (dev->temperature == dev->temperature) //FF_PHYSICALDISK_TEMP_UNSET
+            {
+                if(buffer.length > 0)
+                    ffStrbufAppendS(&buffer, " - ");
+
+                ffParseTemperature(dev->temperature, &buffer);
             }
             ffStrbufPutTo(&buffer, stdout);
         }
         else
         {
+            if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
+                readOnlyType = "Read-write";
             ffParseSize(dev->size, &buffer);
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_PHYSICALDISK_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
@@ -94,6 +113,9 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->devPath},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->serial},
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
+                {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &dev->temperature},
             });
         }
         ++index;
@@ -121,6 +143,12 @@ bool ffParsePhysicalDiskCommandOptions(FFPhysicalDiskOptions* options, const cha
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "temp"))
+    {
+        options->temp = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
@@ -143,6 +171,12 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "temp"))
+        {
+            options->temp = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -156,6 +190,9 @@ void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut
 
     if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
         yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+
+    if (options->temp != defaultOptions.temp)
+        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
 }
 
 void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -193,6 +230,17 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
             yyjson_mut_obj_add_bool(doc, obj, "removable", false);
         else
             yyjson_mut_obj_add_null(doc, obj, "removable");
+
+        if (dev->type & FF_PHYSICALDISK_TYPE_READONLY)
+            yyjson_mut_obj_add_bool(doc, obj, "readOnly", true);
+        else if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
+            yyjson_mut_obj_add_bool(doc, obj, "readOnly", false);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "readOnly");
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "revision", &dev->revision);
+
+        yyjson_mut_obj_add_real(doc, obj, "temperature", dev->temperature);
     }
 
     FF_LIST_FOR_EACH(FFPhysicalDiskResult, dev, result)
@@ -213,6 +261,9 @@ void ffPrintPhysicalDiskHelpFormat(void)
         "Serial number",
         "Device kind (SSD or HDD)",
         "Device kind (Removable or Fixed)",
+        "Device kind (Read-only or Read-write)",
+        "Product revision",
+        "Device temperature",
     });
 }
 
@@ -232,6 +283,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
+    options->temp = false;
 }
 
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options)
