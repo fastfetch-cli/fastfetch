@@ -74,9 +74,9 @@ cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with 
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
+option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVML, IGCL and AGS)" ON)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
-option(ENABLE_NVIDIA_GPU "Enable Nvidia NVML" ON)
 
 ####################
 # Compiler options #
@@ -629,8 +629,6 @@ elseif(WIN32)
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
-        src/detection/gpu/gpu_intel.c
-        src/detection/gpu/gpu_amd.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
@@ -674,9 +672,15 @@ if(ENABLE_DIRECTX_HEADERS)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
 endif()
 
-if(ENABLE_NVIDIA_GPU AND (LINUX OR BSD OR WIN32))
-    message(STATUS "Enabling Nvidia NVML")
-    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
+if(ENABLE_PROPRIETARY_GPU_DRIVER_API AND (LINUX OR BSD OR WIN32))
+    message(STATUS "Enabling proprietary GPU driver API")
+    if(LINUX OR BSD OR WIN32)
+        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
+    endif()
+    if(WIN32)
+        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_intel.c)
+        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_amd.c)
+    endif()
 endif()
 
 include(CheckFunctionExists)
@@ -702,8 +706,8 @@ add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
 
-if(ENABLE_NVIDIA_GPU AND (LINUX OR BSD OR WIN32))
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_NVIDIA_GPU=1)
+if(ENABLE_PROPRIETARY_GPU_DRIVER_API AND (LINUX OR BSD OR WIN32))
+    target_compile_definitions(libfastfetch PRIVATE FF_USE_PROPRIETARY_GPU_DRIVER_API)
 endif()
 
 if(yyjson_FOUND)
