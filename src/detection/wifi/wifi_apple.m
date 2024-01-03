@@ -17,7 +17,7 @@ static NSDictionary* getWifiInfoByApple80211(NSString* ifName)
 
     struct Apple80211* handle = NULL;
     if (Apple80211Open(&handle) < 0) return NULL;
-    if (Apple80211BindToInterface(handle, (CFStringRef)ifName) < 0) return NULL;
+    if (Apple80211BindToInterface(handle, (__bridge CFStringRef)ifName) < 0) return NULL;
     CFDictionaryRef result;
     if (Apple80211GetInfoCopy(handle, &result) < 0) return NULL;
     Apple80211Close(handle);
