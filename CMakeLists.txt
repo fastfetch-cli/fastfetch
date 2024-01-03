@@ -601,7 +601,7 @@ elseif(APPLE)
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
-        src/detection/wallpaper/wallpaper_apple.c
+        src/detection/wallpaper/wallpaper_apple.m
         src/detection/wifi/wifi_apple.m
         src/detection/wm/wm_apple.c
         src/detection/de/de_nosupport.c
