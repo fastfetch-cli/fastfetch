@@ -1,3 +1,12 @@
+# 2.5.1
+
+Features:
+* Add `ENABLE_PROPRIETARY_GPU_DRIVER_API` cmake option to disable using of proprietary GPU driver APIs (GPU)
+
+Bugfixes:
+* Fix support of macOS Sonoma (Wallpaper, macOS)
+* Fix overall memory leaks (macOS)
+
 # 2.5.0
 
 Changes:
