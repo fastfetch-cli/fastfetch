@@ -470,6 +470,13 @@ uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue)
     return str_end == strbuf->chars ? defaultValue : (uint64_t)result;
 }
 
+int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue)
+{
+    char* str_end;
+    long long result = strtoll(strbuf->chars, &str_end, 10);
+    return str_end == strbuf->chars ? defaultValue : (int64_t)result;
+}
+
 void ffStrbufUpperCase(FFstrbuf* strbuf)
 {
     for (uint32_t i = 0; i < strbuf->length; ++i)
