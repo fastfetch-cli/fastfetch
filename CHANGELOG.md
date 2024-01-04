@@ -1,7 +1,12 @@
 # 2.5.1
 
+Changes:
+* Remove support of option `--battery-dir`. We detect a lot of things in `/sys/class/*` and only module `Battery` supports specifying a custom directory for some reason, which is weird.
+
 Features:
 * Add `ENABLE_PROPRIETARY_GPU_DRIVER_API` cmake option to disable using of proprietary GPU driver APIs (GPU)
+* Add power adapter detection support for Asahi Linux (PowerAdapter, Linux)
+* Add battery serial number detection (Battery)
 
 Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
