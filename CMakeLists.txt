@@ -422,7 +422,7 @@ if(LINUX)
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
-        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/poweradapter/poweradapter_linux.c
         src/detection/processes/processes_linux.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c

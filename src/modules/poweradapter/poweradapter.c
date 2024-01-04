@@ -11,7 +11,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
 
-    const char* error = ffDetectPowerAdapterImpl(&results);
+    const char* error = ffDetectPowerAdapter(&results);
 
     if (error)
     {
@@ -99,7 +99,7 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFPowerAdapterResult));
 
-    const char* error = ffDetectPowerAdapterImpl(&results);
+    const char* error = ffDetectPowerAdapter(&results);
 
     if (error)
     {

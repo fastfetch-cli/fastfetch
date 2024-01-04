@@ -4,7 +4,7 @@
 
 #include <IOKit/IOKitLib.h>
 
-const char* ffDetectPowerAdapterImpl(FFlist* results)
+const char* ffDetectPowerAdapter(FFlist* results)
 {
     io_iterator_t iterator;
     if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSmartBattery"), &iterator) != kIOReturnSuccess)

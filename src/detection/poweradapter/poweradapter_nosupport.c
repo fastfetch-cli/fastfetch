@@ -1,7 +1,6 @@
-#include "fastfetch.h"
+#include "poweradapter.h"
 
-const char* ffDetectPowerAdapterImpl(FFlist* results)
+const char* ffDetectPowerAdapter(FF_MAYBE_UNUSED FFlist* results)
 {
-    FF_UNUSED(results);
     return "Not supported on this platform";
 }
