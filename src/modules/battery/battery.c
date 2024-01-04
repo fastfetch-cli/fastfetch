@@ -6,7 +6,7 @@
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
 
-#define FF_BATTERY_NUM_FORMAT_ARGS 7
+#define FF_BATTERY_NUM_FORMAT_ARGS 8
 
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
@@ -71,6 +71,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
             {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
         });
     }
 }
@@ -194,6 +195,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &battery->modelName);
         yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
         yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
+        yyjson_mut_obj_add_strbuf(doc, obj, "serial", &battery->serial);
         yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
         yyjson_mut_obj_add_uint(doc, obj, "cycleCount", battery->cycleCount);
     }
@@ -204,6 +206,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         ffStrbufDestroy(&battery->modelName);
         ffStrbufDestroy(&battery->technology);
         ffStrbufDestroy(&battery->status);
+        ffStrbufDestroy(&battery->serial);
     }
 }
 
@@ -217,6 +220,7 @@ void ffPrintBatteryHelpFormat(void)
         "Battery status",
         "Battery temperature",
         "Battery cycle count",
+        "Battery serial number",
     });
 }
 
