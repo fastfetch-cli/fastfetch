@@ -1027,15 +1027,6 @@
             }
         },
         {
-            "long": "battery-dir",
-            "desc": "The directory where the battery folders are",
-            "remark": "Linux only",
-            "arg": {
-                "type": "path",
-                "default": "/sys/class/power_supply/"
-            }
-        },
-        {
             "long": "battery-use-setup-api",
             "desc": "Set if \"SetupAPI\" should be used on Windows to detect battery info",
             "remark": "SetupAPI supports multi batteries, but slower. Windows only",

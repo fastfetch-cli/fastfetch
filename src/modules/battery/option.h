@@ -11,9 +11,7 @@ typedef struct FFBatteryOptions
 
     bool temp;
 
-    #ifdef __linux__
-        FFstrbuf dir;
-    #elif defined(_WIN32)
+    #ifdef _WIN32
         bool useSetupApi;
     #endif
 } FFBatteryOptions;

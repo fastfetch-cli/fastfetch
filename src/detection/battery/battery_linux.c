@@ -101,14 +101,13 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-    ffStrbufAppend(&baseDir, &options->dir);
-    ffStrbufEnsureEndsWithC(&baseDir, '/');
+    ffStrbufAppend(&baseDir, "/sys/class/power_supply/");
 
     uint32_t baseDirLength = baseDir.length;
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
-        return "opendir(batteryDir) == NULL";
+        return "opendir(\"/sys/class/power_supply/\") == NULL";
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
@@ -122,7 +121,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
     }
 
     if(results->length == 0)
-        return "batteryDir doesn't contain any battery folder";
+        return "\"/sys/class/power_supply/\" doesn't contain any battery folder";
 
     return NULL;
 }
