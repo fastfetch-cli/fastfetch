@@ -105,6 +105,14 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
                 ffStrbufSetWS(&battery->manufacturer, name);
         }
 
+        {
+            ffStrbufInit(&battery->serial);
+            bqi.InformationLevel = BatterySerialNumber;
+            wchar_t name[64];
+            if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), name, sizeof(name), &dwOut, NULL))
+                ffStrbufSetWS(&battery->serial, name);
+        }
+
         battery->cycleCount = bi.CycleCount;
 
         battery->temperature = 0.0/0.0;
@@ -150,6 +158,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
+        ffStrbufInit(&battery->serial);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
         battery->cycleCount = 0;
 
