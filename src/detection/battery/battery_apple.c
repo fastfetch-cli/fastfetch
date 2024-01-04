@@ -28,6 +28,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         battery->temperature = FF_BATTERY_TEMP_UNSET;
         ffStrbufInit(&battery->manufacturer);
         ffStrbufInit(&battery->modelName);
+        ffStrbufInit(&battery->serial);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
         battery->capacity = 0.0/0.0;
@@ -47,6 +48,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         battery->capacity = currentCapacity * 100.0 / maxCapacity;
 
         ffCfDictGetString(properties, CFSTR("DeviceName"), &battery->modelName);
+        ffCfDictGetString(properties, CFSTR("Serial"), &battery->serial);
 
         if (!ffCfDictGetBool(properties, CFSTR("built-in"), &boolValue) && boolValue)
         {
