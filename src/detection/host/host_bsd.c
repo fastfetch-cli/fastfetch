@@ -12,6 +12,10 @@ const char* ffDetectHost(FFHostResult* host)
     ffCleanUpSmbiosValue(&host->productVersion);
     ffSettingsGetFreeBSDKenv("smbios.system.sku", &host->productSku);
     ffCleanUpSmbiosValue(&host->productSku);
+    ffSettingsGetFreeBSDKenv("smbios.system.serial", &host->productSerial);
+    ffCleanUpSmbiosValue(&host->productSerial);
+    ffSettingsGetFreeBSDKenv("smbios.system.uuid", &host->productUuid);
+    ffCleanUpSmbiosValue(&host->productUuid);
     ffSettingsGetFreeBSDKenv("smbios.system.maker", &host->sysVendor);
     ffCleanUpSmbiosValue(&host->sysVendor);
 
