@@ -8,6 +8,8 @@ typedef struct FFHostResult
     FFstrbuf productName;
     FFstrbuf productVersion;
     FFstrbuf productSku;
+    FFstrbuf productSerial;
+    FFstrbuf productUuid;
     FFstrbuf sysVendor;
 } FFHostResult;
 

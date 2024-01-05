@@ -180,10 +180,29 @@ const char* getProductNameWithIokit(FFstrbuf* result)
     return ffCfStrGetString(productName, result);
 }
 
+const char* getOthersByIokit(FFHostResult* host)
+{
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t registryEntry = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("IOPlatformExpertDevice"));
+    if (!registryEntry)
+        return "IOServiceGetMatchingService() failed";
+
+    FF_CFTYPE_AUTO_RELEASE CFStringRef serialNumber = IORegistryEntryCreateCFProperty(registryEntry, CFSTR(kIOPlatformSerialNumberKey), kCFAllocatorDefault, kNilOptions);
+    if (serialNumber)
+        ffCfStrGetString(serialNumber, &host->productSerial);
+
+    FF_CFTYPE_AUTO_RELEASE CFStringRef uuid = IORegistryEntryCreateCFProperty(registryEntry, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, kNilOptions);
+    if (uuid)
+        ffCfStrGetString(uuid, &host->productUuid);
+
+    FF_CFTYPE_AUTO_RELEASE CFStringRef manufacturer = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("manufacturer"), kCFAllocatorDefault, kNilOptions);
+    if (manufacturer)
+        ffCfStrGetString(manufacturer, &host->sysVendor);
+
+    return NULL;
+}
+
 const char* ffDetectHost(FFHostResult* host)
 {
-    ffStrbufSetStatic(&host->sysVendor, "Apple");
-
     const char* error = ffSysctlGetString("hw.model", &host->productFamily);
     if (error) return error;
 
@@ -192,6 +211,6 @@ const char* ffDetectHost(FFHostResult* host)
         getProductNameWithIokit(&host->productName);
     if (host->productName.length == 0)
         ffStrbufSet(&host->productName, &host->productFamily);
-
+    getOthersByIokit(host);
     return NULL;
 }

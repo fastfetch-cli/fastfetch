@@ -4,7 +4,7 @@
 #include "modules/host/host.h"
 #include "util/stringUtils.h"
 
-#define FF_HOST_NUM_FORMAT_ARGS 5
+#define FF_HOST_NUM_FORMAT_ARGS 7
 
 void ffPrintHost(FFHostOptions* options)
 {
@@ -13,6 +13,8 @@ void ffPrintHost(FFHostOptions* options)
     ffStrbufInit(&host.productName);
     ffStrbufInit(&host.productVersion);
     ffStrbufInit(&host.productSku);
+    ffStrbufInit(&host.productSerial);
+    ffStrbufInit(&host.productUuid);
     ffStrbufInit(&host.sysVendor);
     const char* error = ffDetectHost(&host);
 
@@ -51,7 +53,9 @@ void ffPrintHost(FFHostOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.productName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.productVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.productSku},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sysVendor}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sysVendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productSerial},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productUuid},
         });
     }
 
@@ -60,6 +64,8 @@ exit:
     ffStrbufDestroy(&host.productName);
     ffStrbufDestroy(&host.productVersion);
     ffStrbufDestroy(&host.productSku);
+    ffStrbufDestroy(&host.productSerial);
+    ffStrbufDestroy(&host.productUuid);
     ffStrbufDestroy(&host.sysVendor);
 }
 
@@ -105,6 +111,8 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     ffStrbufInit(&host.productName);
     ffStrbufInit(&host.productVersion);
     ffStrbufInit(&host.productSku);
+    ffStrbufInit(&host.productSerial);
+    ffStrbufInit(&host.productUuid);
     ffStrbufInit(&host.sysVendor);
     const char* error = ffDetectHost(&host);
 
@@ -125,6 +133,8 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &host.productName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &host.productVersion);
     yyjson_mut_obj_add_strbuf(doc, obj, "sku", &host.productSku);
+    yyjson_mut_obj_add_strbuf(doc, obj, "serial", &host.productSerial);
+    yyjson_mut_obj_add_strbuf(doc, obj, "uuid", &host.productUuid);
     yyjson_mut_obj_add_strbuf(doc, obj, "sysVender", &host.sysVendor);
 
 exit:
@@ -132,6 +142,8 @@ exit:
     ffStrbufDestroy(&host.productName);
     ffStrbufDestroy(&host.productVersion);
     ffStrbufDestroy(&host.productSku);
+    ffStrbufDestroy(&host.productSerial);
+    ffStrbufDestroy(&host.productUuid);
     ffStrbufDestroy(&host.sysVendor);
 }
 
@@ -142,6 +154,8 @@ void ffPrintHostHelpFormat(void)
         "product name",
         "product version",
         "product sku",
+        "product serial number",
+        "product uuid",
         "sys vendor"
     });
 }
