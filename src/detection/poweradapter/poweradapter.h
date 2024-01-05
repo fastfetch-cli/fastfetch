@@ -8,10 +8,10 @@ typedef struct FFPowerAdapterResult
     FFstrbuf name;
     FFstrbuf modelName;
     FFstrbuf manufacturer;
+    FFstrbuf serial;
     int watts;
 } FFPowerAdapterResult;
 
 const char* ffDetectPowerAdapter(FFlist* results);
 
-#define FF_POWERADAPTER_UNSET -2
 #define FF_POWERADAPTER_NOT_CONNECTED -1

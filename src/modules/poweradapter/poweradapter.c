@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
-#define FF_POWERADAPTER_NUM_FORMAT_ARGS 5
+#define FF_POWERADAPTER_NUM_FORMAT_ARGS 6
 
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
@@ -27,35 +27,34 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
         {
             FFPowerAdapterResult* result = ffListGet(&results, i);
 
-            if(result->watts != FF_POWERADAPTER_UNSET)
+            if(options->moduleArgs.outputFormat.length == 0)
             {
-                if(options->moduleArgs.outputFormat.length == 0)
-                {
-                    ffPrintLogoAndKey(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+                ffPrintLogoAndKey(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-                    if(result->name.length > 0)
-                        puts(result->name.chars);
-                    else if(result->watts == FF_POWERADAPTER_NOT_CONNECTED)
-                        puts("not connected");
-                    else
-                        printf("%dW\n", result->watts);
-                }
+                if(result->name.length > 0)
+                    puts(result->name.chars);
+                else if(result->watts == FF_POWERADAPTER_NOT_CONNECTED)
+                    puts("not connected");
                 else
-                {
-                    ffPrintFormat(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_POWERADAPTER_NUM_FORMAT_ARGS, (FFformatarg[]){
-                        {FF_FORMAT_ARG_TYPE_INT, &result->watts},
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &result->description},
-                    });
-                }
+                    printf("%dW\n", result->watts);
+            }
+            else
+            {
+                ffPrintFormat(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_POWERADAPTER_NUM_FORMAT_ARGS, (FFformatarg[]){
+                    {FF_FORMAT_ARG_TYPE_INT, &result->watts},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->description},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
+                });
             }
 
             ffStrbufDestroy(&result->manufacturer);
             ffStrbufDestroy(&result->description);
             ffStrbufDestroy(&result->modelName);
             ffStrbufDestroy(&result->name);
+            ffStrbufDestroy(&result->serial);
         }
     }
 }
@@ -119,6 +118,7 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
             yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &item->manufacturer);
             yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &item->modelName);
             yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+            yyjson_mut_obj_add_strbuf(doc, obj, "serial", &item->serial);
             yyjson_mut_obj_add_int(doc, obj, "watts", item->watts);
         }
     }
@@ -132,6 +132,7 @@ void ffPrintPowerAdapterHelpFormat(void)
         "PowerAdapter manufacturer",
         "PowerAdapter model",
         "PowerAdapter description"
+        "PowerAdapter serial number"
     });
 }
 

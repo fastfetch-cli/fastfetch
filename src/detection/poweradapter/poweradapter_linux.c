@@ -65,6 +65,12 @@ static void parsePowerAdapter(FFstrbuf* dir, FF_MAYBE_UNUSED const char* id, FFl
     if (ffReadFileBuffer(dir->chars, &result->modelName))
         ffStrbufTrimRightSpace(&result->modelName);
     ffStrbufSubstrBefore(dir, dirLength);
+
+    ffStrbufInit(&result->serial);
+    ffStrbufAppendS(dir, "/serial_number");
+    if (ffReadFileBuffer(dir->chars, &result->serial))
+        ffStrbufTrimRightSpace(&result->serial);
+    ffStrbufSubstrBefore(dir, dirLength);
 }
 
 const char* ffDetectPowerAdapter(FFlist* results)
