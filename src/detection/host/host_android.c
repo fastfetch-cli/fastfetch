@@ -2,7 +2,7 @@
 #include "common/settings.h"
 #include <ctype.h>
 
-const char* ffDetectHost(FFHostResult* host)
+const char* ffDetectHost(FFHostResult* host, FF_MAYBE_UNUSED FFHostOptions* options)
 {
     // http://newandroidbook.com/ddb/
     ffSettingsGetAndroidProperty("ro.product.device", &host->family);

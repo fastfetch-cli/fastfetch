@@ -16,8 +16,8 @@ void ffPrintHost(FFHostOptions* options)
     ffStrbufInit(&host.serial);
     ffStrbufInit(&host.uuid);
     ffStrbufInit(&host.vendor);
-    const char* error = ffDetectHost(&host);
 
+    const char* error = ffDetectHost(&host, options);
     if(error)
     {
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
@@ -76,6 +76,14 @@ bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const ch
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    #ifdef _WIN32
+    if (ffStrEqualsIgnCase(subKey, "use-wmi"))
+    {
+        options->useWmi = ffOptionParseBoolean(value);
+        return true;
+    }
+    #endif
+
     return false;
 }
 
@@ -92,6 +100,14 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        #ifdef _WIN32
+        if (ffStrEqualsIgnCase(key, "useWmi"))
+        {
+            options->useWmi = yyjson_get_bool(val);
+            continue;
+        }
+        #endif
+
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -102,6 +118,11 @@ void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjso
     ffInitHostOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    #ifdef _WIN32
+    if (options->useWmi != defaultOptions.useWmi)
+        yyjson_mut_obj_add_bool(doc, module, "useWmi", options->useWmi);
+    #endif
 }
 
 void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -114,8 +135,8 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     ffStrbufInit(&host.serial);
     ffStrbufInit(&host.uuid);
     ffStrbufInit(&host.vendor);
-    const char* error = ffDetectHost(&host);
 
+    const char* error = ffDetectHost(&host, options);
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
@@ -133,9 +154,9 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &host.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &host.version);
     yyjson_mut_obj_add_strbuf(doc, obj, "sku", &host.sku);
+    yyjson_mut_obj_add_strbuf(doc, obj, "vender", &host.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "serial", &host.serial);
     yyjson_mut_obj_add_strbuf(doc, obj, "uuid", &host.uuid);
-    yyjson_mut_obj_add_strbuf(doc, obj, "sysVender", &host.vendor);
 
 exit:
     ffStrbufDestroy(&host.family);
@@ -154,9 +175,9 @@ void ffPrintHostHelpFormat(void)
         "product name",
         "product version",
         "product sku",
+        "product vendor",
         "product serial number",
         "product uuid",
-        "sys vendor"
     });
 }
 
@@ -174,6 +195,10 @@ void ffInitHostOptions(FFHostOptions* options)
         ffGenerateHostJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    #ifdef _WIN32
+    options->useWmi = false;
+    #endif
 }
 
 void ffDestroyHostOptions(FFHostOptions* options)

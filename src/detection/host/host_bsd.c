@@ -2,7 +2,7 @@
 #include "common/settings.h"
 #include "util/smbiosHelper.h"
 
-const char* ffDetectHost(FFHostResult* host)
+const char* ffDetectHost(FFHostResult* host, FF_MAYBE_UNUSED FFHostOptions* options)
 {
     ffSettingsGetFreeBSDKenv("smbios.system.product", &host->name);
     ffCleanUpSmbiosValue(&host->name);

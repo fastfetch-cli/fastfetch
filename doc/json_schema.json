@@ -677,10 +677,6 @@
                                                 "description": "List connected gamepads"
                                             },
                                             {
-                                                "const": "host",
-                                                "description": "Print product name of your computer"
-                                            },
-                                            {
                                                 "const": "icons",
                                                 "description": "Print icon style name"
                                             },
@@ -1205,6 +1201,33 @@
                                             "none"
                                         ],
                                         "default": "none"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Host",
+                                "properties": {
+                                    "type": {
+                                        "const": "host",
+                                        "description": "Print product name of your computer",
+                                    },
+                                    "useWmi": {
+                                        "description": "Set if WMI query should be used on Windows, which detects more information but slower",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

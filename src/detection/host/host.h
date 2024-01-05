@@ -13,4 +13,4 @@ typedef struct FFHostResult
     FFstrbuf vendor;
 } FFHostResult;
 
-const char* ffDetectHost(FFHostResult* host);
+const char* ffDetectHost(FFHostResult* host, FFHostOptions* options);
