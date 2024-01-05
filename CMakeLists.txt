@@ -621,7 +621,7 @@ elseif(WIN32)
         src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
         src/detection/brightness/brightness_windows.cpp
-        src/detection/chassis/chassis_windows.cpp
+        src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
@@ -631,7 +631,7 @@ elseif(WIN32)
         src/detection/displayserver/displayserver_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
-        src/detection/host/host_windows.cpp
+        src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c

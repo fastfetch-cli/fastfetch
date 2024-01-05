@@ -47,4 +47,22 @@ void ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
 
     ffStrbufClear(buffer);
 }
+#elif defined(_WIN32)
+#include <windows.h>
+
+#pragma GCC diagnostic ignored "-Wmultichar"
+
+const FFRawSmbiosData* ffGetSmbiosData()
+{
+    static FFRawSmbiosData* buffer;
+    if (!buffer)
+    {
+        const DWORD signature = 'RSMB';
+        uint32_t bufSize = GetSystemFirmwareTable(signature, 0, NULL, 0);
+        assert(bufSize > sizeof(FFRawSmbiosData));
+        buffer = (FFRawSmbiosData*) malloc(bufSize);
+        GetSystemFirmwareTable(signature, 0, buffer, bufSize);
+    }
+    return buffer;
+}
 #endif
