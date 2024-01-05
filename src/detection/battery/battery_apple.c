@@ -8,22 +8,19 @@
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSmartBattery"), &iterator) != kIOReturnSuccess)
+    FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSmartBattery"), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;
-    while((registryEntry = IOIteratorNext(iterator)) != 0)
+    while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
+        FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryBattery = registryEntry;
         FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
-        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
-        {
-            IOObjectRelease(registryEntry);
+        if (IORegistryEntryCreateCFProperties(entryBattery, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
             continue;
-        }
 
         bool boolValue;
-        const char* error;
 
         FFBatteryResult* battery = ffListAdd(results);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
@@ -36,15 +33,11 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 
         int currentCapacity, maxCapacity;
 
-        if ((error = ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity)))
-            return error;
-        if (maxCapacity <= 0)
-            return "Querying MaxCapacity failed";
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity) != NULL || maxCapacity <= 0)
+            continue;
 
-        if ((error = ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity)))
-            return error;
-        if(currentCapacity <= 0)
-            return "Querying CurrentCapacity failed";
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity) != NULL || currentCapacity <= 0)
+            continue;
 
         battery->capacity = currentCapacity * 100.0 / maxCapacity;
 
@@ -82,11 +75,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
             else
                 ffDetectSmcTemps(FF_TEMP_BATTERY, &battery->temperature);
         }
-
-        IOObjectRelease(registryEntry);
     }
-
-    IOObjectRelease(iterator);
 
     return NULL;
 }

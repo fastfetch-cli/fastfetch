@@ -85,12 +85,9 @@ static void smcUltostr(char *str, uint32_t val)
 
 static const char *smcCall(io_connect_t conn, uint32_t selector, SmcKeyData_t *inputStructure, SmcKeyData_t *outputStructure)
 {
-    size_t structureInputSize;
-    size_t structureOutputSize;
-    structureInputSize = sizeof(SmcKeyData_t);
-    structureOutputSize = sizeof(SmcKeyData_t);
+    size_t size = sizeof(SmcKeyData_t);
 
-    if (IOConnectCallStructMethod(conn, selector, inputStructure, structureInputSize, outputStructure, &structureOutputSize) != kIOReturnSuccess)
+    if (IOConnectCallStructMethod(conn, selector, inputStructure, size, outputStructure, &size) != kIOReturnSuccess)
         return "IOConnectCallStructMethod(conn) failed";
     return NULL;
 }
@@ -140,17 +137,13 @@ static const char *smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
 
 static const char *smcOpen(io_connect_t *conn)
 {
-    io_iterator_t iterator;
-    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleSMC"), &iterator) != kIOReturnSuccess)
-        return "IOServiceGetMatchingServices() failed";
-
-    io_object_t device = IOIteratorNext(iterator);
-    IOObjectRelease(iterator);
-    if (device == 0)
+    io_object_t device = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMC"));
+    if (!device)
         return "No SMC device found";
 
     kern_return_t result = IOServiceOpen(device, mach_task_self(), 0, conn);
     IOObjectRelease(device);
+
     if (result != kIOReturnSuccess)
         return "IOServiceOpen() failed";
 
@@ -290,10 +283,13 @@ static bool detectTemp(io_connect_t conn, const char *sensor, double* sum)
 const char *ffDetectSmcTemps(enum FFTempType type, double *result)
 {
     static io_connect_t conn;
-    static dispatch_once_t once_control;
-    dispatch_once_f(&once_control, &conn, (dispatch_function_t) smcOpen);
-    if(!conn)
-        return "smcOpen() failed";
+    if (!conn)
+    {
+        if (smcOpen(&conn) != NULL)
+            conn = (io_connect_t) -1;
+    }
+    else if (conn == (io_connect_t) -1)
+        return "Could not open SMC connection";
 
     uint32_t count = 0;
     *result = 0;

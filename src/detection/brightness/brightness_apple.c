@@ -57,37 +57,34 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
     if (!IOAVServiceCreate || !IOAVServiceReadI2C)
         return "IOAVService is not available";
 
-    io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("DCPAVServiceProxy"), &iterator) != kIOReturnSuccess)
+    FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("DCPAVServiceProxy"), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;
-    while((registryEntry = IOIteratorNext(iterator)) != 0)
+    while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
+        FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = NULL;
         {
-            FF_CFTYPE_AUTO_RELEASE CFBooleanRef IOAVServiceUserInterfaceSupported = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("IOAVServiceUserInterfaceSupported"), kCFAllocatorDefault, kNilOptions);
+            FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryAv = registryEntry;
+
+            FF_CFTYPE_AUTO_RELEASE CFBooleanRef IOAVServiceUserInterfaceSupported = IORegistryEntryCreateCFProperty(entryAv, CFSTR("IOAVServiceUserInterfaceSupported"), kCFAllocatorDefault, kNilOptions);
             if (IOAVServiceUserInterfaceSupported && !CFBooleanGetValue(IOAVServiceUserInterfaceSupported))
             {
                 // IOAVServiceCreateWithService won't work
-                IOObjectRelease(registryEntry);
                 continue;
             }
-        }
 
-        {
-            FF_CFTYPE_AUTO_RELEASE CFStringRef location = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("Location"), kCFAllocatorDefault, kNilOptions);
+            FF_CFTYPE_AUTO_RELEASE CFStringRef location = IORegistryEntryCreateCFProperty(entryAv, CFSTR("Location"), kCFAllocatorDefault, kNilOptions);
             if (location && CFStringCompare(location, CFSTR("Embedded"), 0) == 0)
             {
                 // Builtin display should be handled by DisplayServices
-                IOObjectRelease(registryEntry);
                 continue;
             }
+
+            service = IOAVServiceCreateWithService(kCFAllocatorDefault, (io_service_t) registryEntry);
+            if (!service) continue;
         }
-
-        FF_CFTYPE_AUTO_RELEASE IOAVServiceRef service = IOAVServiceCreateWithService(kCFAllocatorDefault, (io_service_t) registryEntry);
-        IOObjectRelease(registryEntry);
-
-        if (!service) continue;
 
         {
             uint8_t i2cIn[4] = { 0x82, 0x01, 0x10 /* luminance */ };

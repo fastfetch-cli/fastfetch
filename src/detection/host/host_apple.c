@@ -169,26 +169,15 @@ static const char* getProductNameWithHwModel(const FFstrbuf* hwModel)
 
 const char* getProductNameWithIokit(FFstrbuf* result)
 {
-    io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceNameMatching("product"), &iterator) != kIOReturnSuccess)
-        return "IOServiceGetMatchingServices() failed";
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t registryEntry = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("product"));
+    if (!registryEntry)
+        return "IOServiceGetMatchingService() failed";
 
-    io_registry_entry_t registryEntry;
-    while((registryEntry = IOIteratorNext(iterator)) != 0)
-    {
-        FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
-        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
-        {
-            IOObjectRelease(registryEntry);
-            continue;
-        }
+    FF_CFTYPE_AUTO_RELEASE CFStringRef productName = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("product-name"), kCFAllocatorDefault, kNilOptions);
+    if (!productName)
+        return "IORegistryEntryCreateCFProperty() failed";
 
-        if (ffCfDictGetString(properties, CFSTR("product-name"), result))
-            break;
-    }
-
-    IOObjectRelease(registryEntry);
-    return NULL;
+    return ffCfStrGetString(productName, result);
 }
 
 const char* ffDetectHost(FFHostResult* host)
