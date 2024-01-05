@@ -86,16 +86,10 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp)
     {
-        const FFlist* tempsResult = ffDetectTemps();
-
-        FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
-        {
-            if (ffStrbufEqualS(&value->deviceName, id))
-            {
-                result->temperature = value->value;
-                break;
-            }
-        }
+        ffStrbufAppendS(dir, "/temp");
+        if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+            options->temp = ffStrbufToDouble(&tmpBuffer) / 10;
+        ffStrbufSubstrBefore(dir, dirLength);
     }
 }
 
