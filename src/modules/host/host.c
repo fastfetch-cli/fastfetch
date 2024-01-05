@@ -9,13 +9,13 @@
 void ffPrintHost(FFHostOptions* options)
 {
     FFHostResult host;
-    ffStrbufInit(&host.productFamily);
-    ffStrbufInit(&host.productName);
-    ffStrbufInit(&host.productVersion);
-    ffStrbufInit(&host.productSku);
-    ffStrbufInit(&host.productSerial);
-    ffStrbufInit(&host.productUuid);
-    ffStrbufInit(&host.sysVendor);
+    ffStrbufInit(&host.family);
+    ffStrbufInit(&host.name);
+    ffStrbufInit(&host.version);
+    ffStrbufInit(&host.sku);
+    ffStrbufInit(&host.serial);
+    ffStrbufInit(&host.uuid);
+    ffStrbufInit(&host.vendor);
     const char* error = ffDetectHost(&host);
 
     if(error)
@@ -24,7 +24,7 @@ void ffPrintHost(FFHostOptions* options)
         goto exit;
     }
 
-    if(host.productFamily.length == 0 && host.productName.length == 0)
+    if(host.family.length == 0 && host.name.length == 0)
     {
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "neither product_family nor product_name is set by O.E.M.");
         goto exit;
@@ -36,37 +36,37 @@ void ffPrintHost(FFHostOptions* options)
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
-        if(host.productName.length > 0)
-            ffStrbufAppend(&output, &host.productName);
+        if(host.name.length > 0)
+            ffStrbufAppend(&output, &host.name);
         else
-            ffStrbufAppend(&output, &host.productFamily);
+            ffStrbufAppend(&output, &host.family);
 
-        if(host.productVersion.length > 0)
-            ffStrbufAppendF(&output, " (%s)", host.productVersion.chars);
+        if(host.version.length > 0)
+            ffStrbufAppendF(&output, " (%s)", host.version.chars);
 
         ffStrbufPutTo(&output, stdout);
     }
     else
     {
         ffPrintFormat(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productFamily},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productSku},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sysVendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productSerial},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.productUuid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.family},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.name},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sku},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.vendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.serial},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.uuid},
         });
     }
 
 exit:
-    ffStrbufDestroy(&host.productFamily);
-    ffStrbufDestroy(&host.productName);
-    ffStrbufDestroy(&host.productVersion);
-    ffStrbufDestroy(&host.productSku);
-    ffStrbufDestroy(&host.productSerial);
-    ffStrbufDestroy(&host.productUuid);
-    ffStrbufDestroy(&host.sysVendor);
+    ffStrbufDestroy(&host.family);
+    ffStrbufDestroy(&host.name);
+    ffStrbufDestroy(&host.version);
+    ffStrbufDestroy(&host.sku);
+    ffStrbufDestroy(&host.serial);
+    ffStrbufDestroy(&host.uuid);
+    ffStrbufDestroy(&host.vendor);
 }
 
 bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value)
@@ -107,13 +107,13 @@ void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjso
 void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFHostResult host;
-    ffStrbufInit(&host.productFamily);
-    ffStrbufInit(&host.productName);
-    ffStrbufInit(&host.productVersion);
-    ffStrbufInit(&host.productSku);
-    ffStrbufInit(&host.productSerial);
-    ffStrbufInit(&host.productUuid);
-    ffStrbufInit(&host.sysVendor);
+    ffStrbufInit(&host.family);
+    ffStrbufInit(&host.name);
+    ffStrbufInit(&host.version);
+    ffStrbufInit(&host.sku);
+    ffStrbufInit(&host.serial);
+    ffStrbufInit(&host.uuid);
+    ffStrbufInit(&host.vendor);
     const char* error = ffDetectHost(&host);
 
     if (error)
@@ -122,29 +122,29 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
         goto exit;
     }
 
-    if (host.productFamily.length == 0 && host.productName.length == 0)
+    if (host.family.length == 0 && host.name.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "neither product_family nor product_name is set by O.E.M.");
         goto exit;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "family", &host.productFamily);
-    yyjson_mut_obj_add_strbuf(doc, obj, "name", &host.productName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "version", &host.productVersion);
-    yyjson_mut_obj_add_strbuf(doc, obj, "sku", &host.productSku);
-    yyjson_mut_obj_add_strbuf(doc, obj, "serial", &host.productSerial);
-    yyjson_mut_obj_add_strbuf(doc, obj, "uuid", &host.productUuid);
-    yyjson_mut_obj_add_strbuf(doc, obj, "sysVender", &host.sysVendor);
+    yyjson_mut_obj_add_strbuf(doc, obj, "family", &host.family);
+    yyjson_mut_obj_add_strbuf(doc, obj, "name", &host.name);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &host.version);
+    yyjson_mut_obj_add_strbuf(doc, obj, "sku", &host.sku);
+    yyjson_mut_obj_add_strbuf(doc, obj, "serial", &host.serial);
+    yyjson_mut_obj_add_strbuf(doc, obj, "uuid", &host.uuid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "sysVender", &host.vendor);
 
 exit:
-    ffStrbufDestroy(&host.productFamily);
-    ffStrbufDestroy(&host.productName);
-    ffStrbufDestroy(&host.productVersion);
-    ffStrbufDestroy(&host.productSku);
-    ffStrbufDestroy(&host.productSerial);
-    ffStrbufDestroy(&host.productUuid);
-    ffStrbufDestroy(&host.sysVendor);
+    ffStrbufDestroy(&host.family);
+    ffStrbufDestroy(&host.name);
+    ffStrbufDestroy(&host.version);
+    ffStrbufDestroy(&host.sku);
+    ffStrbufDestroy(&host.serial);
+    ffStrbufDestroy(&host.uuid);
+    ffStrbufDestroy(&host.vendor);
 }
 
 void ffPrintHostHelpFormat(void)

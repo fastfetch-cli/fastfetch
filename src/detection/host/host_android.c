@@ -5,32 +5,32 @@
 const char* ffDetectHost(FFHostResult* host)
 {
     // http://newandroidbook.com/ddb/
-    ffSettingsGetAndroidProperty("ro.product.device", &host->productFamily);
+    ffSettingsGetAndroidProperty("ro.product.device", &host->family);
 
-    ffSettingsGetAndroidProperty("ro.product.marketname", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.vendor.product.display", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.config.devicename", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.config.marketing_name", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.product.vendor.model", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.product.oppo_model", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.oppo.market.name", &host->productName)
-        || ffSettingsGetAndroidProperty("ro.product.brand", &host->productName);
+    ffSettingsGetAndroidProperty("ro.product.marketname", &host->name)
+        || ffSettingsGetAndroidProperty("ro.vendor.product.display", &host->name)
+        || ffSettingsGetAndroidProperty("ro.config.devicename", &host->name)
+        || ffSettingsGetAndroidProperty("ro.config.marketing_name", &host->name)
+        || ffSettingsGetAndroidProperty("ro.product.vendor.model", &host->name)
+        || ffSettingsGetAndroidProperty("ro.product.oppo_model", &host->name)
+        || ffSettingsGetAndroidProperty("ro.oppo.market.name", &host->name)
+        || ffSettingsGetAndroidProperty("ro.product.brand", &host->name);
 
-    if (ffSettingsGetAndroidProperty("ro.product.model", &host->productVersion))
+    if (ffSettingsGetAndroidProperty("ro.product.model", &host->version))
     {
-        if (ffStrbufStartsWithIgnCase(&host->productVersion, &host->productName))
+        if (ffStrbufStartsWithIgnCase(&host->version, &host->name))
         {
-            ffStrbufSubstrAfter(&host->productVersion, host->productName.length);
-            ffStrbufTrimLeft(&host->productVersion, ' ');
+            ffStrbufSubstrAfter(&host->version, host->name.length);
+            ffStrbufTrimLeft(&host->version, ' ');
         }
     }
 
-    ffSettingsGetAndroidProperty("ro.product.manufacturer", &host->sysVendor);
+    ffSettingsGetAndroidProperty("ro.product.manufacturer", &host->vendor);
 
-    if(host->sysVendor.length && !ffStrbufStartsWithIgnCase(&host->productName, &host->sysVendor))
+    if(host->vendor.length && !ffStrbufStartsWithIgnCase(&host->name, &host->vendor))
     {
-        ffStrbufPrependS(&host->productName, " ");
-        ffStrbufPrepend(&host->productName, &host->sysVendor);
+        ffStrbufPrependS(&host->name, " ");
+        ffStrbufPrepend(&host->name, &host->vendor);
     }
 
     return NULL;

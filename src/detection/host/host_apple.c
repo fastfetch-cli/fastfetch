@@ -177,7 +177,7 @@ const char* getProductNameWithIokit(FFstrbuf* result)
     if (!productName)
         return "IORegistryEntryCreateCFProperty() failed";
 
-    return ffCfStrGetString(productName, result);
+    return ffCfStrGetString(name, result);
 }
 
 const char* getOthersByIokit(FFHostResult* host)
@@ -188,29 +188,29 @@ const char* getOthersByIokit(FFHostResult* host)
 
     FF_CFTYPE_AUTO_RELEASE CFStringRef serialNumber = IORegistryEntryCreateCFProperty(registryEntry, CFSTR(kIOPlatformSerialNumberKey), kCFAllocatorDefault, kNilOptions);
     if (serialNumber)
-        ffCfStrGetString(serialNumber, &host->productSerial);
+        ffCfStrGetString(serialNumber, &host->serial);
 
     FF_CFTYPE_AUTO_RELEASE CFStringRef uuid = IORegistryEntryCreateCFProperty(registryEntry, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, kNilOptions);
     if (uuid)
-        ffCfStrGetString(uuid, &host->productUuid);
+        ffCfStrGetString(uuid, &host->uuid);
 
     FF_CFTYPE_AUTO_RELEASE CFStringRef manufacturer = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("manufacturer"), kCFAllocatorDefault, kNilOptions);
     if (manufacturer)
-        ffCfStrGetString(manufacturer, &host->sysVendor);
+        ffCfStrGetString(manufacturer, &host->vendor);
 
     return NULL;
 }
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    const char* error = ffSysctlGetString("hw.model", &host->productFamily);
+    const char* error = ffSysctlGetString("hw.model", &host->family);
     if (error) return error;
 
-    ffStrbufSetStatic(&host->productName, getProductNameWithHwModel(&host->productFamily));
-    if (host->productName.length == 0)
-        getProductNameWithIokit(&host->productName);
-    if (host->productName.length == 0)
-        ffStrbufSet(&host->productName, &host->productFamily);
+    ffStrbufSetStatic(&host->name, getProductNameWithHwModel(&host->family));
+    if (host->name.length == 0)
+        getProductNameWithIokit(&host->name);
+    if (host->name.length == 0)
+        ffStrbufSet(&host->name, &host->family);
     getOthersByIokit(host);
     return NULL;
 }
