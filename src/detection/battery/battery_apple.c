@@ -4,6 +4,7 @@
 #include "detection/temps/temps_apple.h"
 
 #include <IOKit/IOKitLib.h>
+#include <IOKit/pwr_mgt/IOPM.h>
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
@@ -35,20 +36,20 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 
         int currentCapacity, maxCapacity;
 
-        if ((error = ffCfDictGetInt(properties, CFSTR("MaxCapacity"), &maxCapacity)))
+        if ((error = ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity)))
             return error;
         if (maxCapacity <= 0)
             return "Querying MaxCapacity failed";
 
-        if ((error = ffCfDictGetInt(properties, CFSTR("CurrentCapacity"), &currentCapacity)))
+        if ((error = ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity)))
             return error;
         if(currentCapacity <= 0)
             return "Querying CurrentCapacity failed";
 
         battery->capacity = currentCapacity * 100.0 / maxCapacity;
 
-        ffCfDictGetString(properties, CFSTR("DeviceName"), &battery->modelName);
-        ffCfDictGetString(properties, CFSTR("Serial"), &battery->serial);
+        ffCfDictGetString(properties, CFSTR(kIOPMDeviceNameKey), &battery->modelName);
+        ffCfDictGetString(properties, CFSTR(kIOPMPSSerialKey), &battery->serial);
 
         if (!ffCfDictGetBool(properties, CFSTR("built-in"), &boolValue) && boolValue)
         {
@@ -59,16 +60,16 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         }
 
         int32_t cycleCount = 0;
-        ffCfDictGetInt(properties, CFSTR("CycleCount"), &cycleCount);
+        ffCfDictGetInt(properties, CFSTR(kIOPMPSCycleCountKey), &cycleCount);
         battery->cycleCount = cycleCount < 0 ? 0 : (uint32_t) cycleCount;
 
-        if (!ffCfDictGetBool(properties, CFSTR("ExternalConnected"), &boolValue) && boolValue)
+        if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "AC connected, ");
         else
             ffStrbufAppendS(&battery->status, "Discharging, ");
-        if (!ffCfDictGetBool(properties, CFSTR("IsCharging"), &boolValue) && boolValue)
+        if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "Charging, ");
-        if (!ffCfDictGetBool(properties, CFSTR("AtCriticalLevel"), &boolValue) && boolValue)
+        if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "Critical, ");
         ffStrbufTrimRight(&battery->status, ' ');
         ffStrbufTrimRight(&battery->status, ',');
@@ -76,7 +77,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         if (options->temp)
         {
             int64_t temp;
-            if (!ffCfDictGetInt64(properties, CFSTR("Temperature"), &temp))
+            if (!ffCfDictGetInt64(properties, CFSTR(kIOPMPSBatteryTemperatureKey), &temp))
                 battery->temperature = (double) temp / 10 - 273.15;
             else
                 ffDetectSmcTemps(FF_TEMP_BATTERY, &battery->temperature);
