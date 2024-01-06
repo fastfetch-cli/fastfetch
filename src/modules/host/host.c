@@ -133,7 +133,7 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &host.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &host.version);
     yyjson_mut_obj_add_strbuf(doc, obj, "sku", &host.sku);
-    yyjson_mut_obj_add_strbuf(doc, obj, "vender", &host.vendor);
+    yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &host.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "serial", &host.serial);
     yyjson_mut_obj_add_strbuf(doc, obj, "uuid", &host.uuid);
 

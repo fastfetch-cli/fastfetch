@@ -79,8 +79,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         assert(bufSize > sizeof(FFRawSmbiosData));
         buffer = (FFRawSmbiosData*) malloc(bufSize);
         assert(buffer);
-        uint32_t resSize = GetSystemFirmwareTable(signature, 0, buffer, bufSize);
-        assert(resSize == bufSize);
+        uint32_t resultSize = GetSystemFirmwareTable(signature, 0, buffer, bufSize);
+        assert(resultSize == bufSize);
 
         for (
             const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer->SMBIOSTableData;

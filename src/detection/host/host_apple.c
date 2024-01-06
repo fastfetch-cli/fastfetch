@@ -177,7 +177,7 @@ const char* getProductNameWithIokit(FFstrbuf* result)
     if (!productName)
         return "IORegistryEntryCreateCFProperty() failed";
 
-    return ffCfStrGetString(name, result);
+    return ffCfStrGetString(productName, result);
 }
 
 const char* getOthersByIokit(FFHostResult* host)
