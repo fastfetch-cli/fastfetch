@@ -82,24 +82,31 @@ static const char* detectBySmbios(FFCPUResult* cpu)
     {
         DWORD length = 0;
         GetLogicalProcessorInformationEx(RelationGroup, NULL, &length);
-        if (length == 0)
-            return "GetLogicalProcessorInformationEx(RelationGroup, NULL, &length) failed";
-
-        SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
-            pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
-
-        if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationGroup, pProcessorInfo, &length))
+        if (length > 0)
         {
-            for(
-                SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
-                (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
-                ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
-            )
+            SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
+                pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
+
+            if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationGroup, pProcessorInfo, &length))
             {
-                assert(ptr->Relationship == RelationGroup);
-                cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
-                cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
+                for(
+                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
+                    (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
+                    ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
+                )
+                {
+                    assert(ptr->Relationship == RelationGroup);
+                    cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
+                    cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
+                }
             }
+        }
+        if (cpu->coresOnline == 0 || cpu->coresLogical == 0)
+        {
+            if (data->Header.Length > offsetof(FFSmbiosProcessorInfo, ThreadCount2))
+                cpu->coresOnline = cpu->coresLogical = data->ThreadCount2;
+            else
+                cpu->coresOnline = cpu->coresLogical = data->ThreadCount;
         }
     }
 
