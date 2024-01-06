@@ -1,21 +1,36 @@
 #include "board.h"
-#include "util/windows/registry.h"
 #include "util/smbiosHelper.h"
+
+typedef struct FFSmbiosBaseboard
+{
+    FFSmbiosHeader Header;
+
+    uint8_t Manufacturer; // string
+    uint8_t Product; // string
+    uint8_t Version; // string
+    uint8_t SerialNumber; // string
+    uint8_t AssetTag; // string
+    uint8_t FeatureFlags; // bit field
+    uint8_t LocationInChassis; // string
+    uint16_t ChassisHandle; // varies
+    uint8_t BoardType; // enum
+    uint8_t NumberOfContainedObjectHandle; // varies
+    uint16_t ContainedObjectHandle[]; // varies
+} FFSmbiosBaseboard;
 
 const char* ffDetectBoard(FFBoardResult* board)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    const FFSmbiosBaseboard* data = (const FFSmbiosBaseboard*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_BASEBOARD_INFO];
+    if (!data)
+        return "Baseboard information section is not found in SMBIOS data";
 
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL))
-        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\BIOS\") failed";
+    const char* strings = (const char*) data + data->Header.Length;
 
-    if(!ffRegReadStrbuf(hKey, L"BaseBoardProduct", &board->name, NULL))
-        return "ffRegReadStrbuf(hKey, L\"BaseBoardProduct\") failed";
-
+    ffStrbufSetStatic(&board->name, ffSmbiosLocateString(strings, data->Product));
     ffCleanUpSmbiosValue(&board->name);
-    ffRegReadStrbuf(hKey, L"BaseBoardManufacturer", &board->vendor, NULL);
+    ffStrbufSetStatic(&board->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
     ffCleanUpSmbiosValue(&board->vendor);
-    ffRegReadStrbuf(hKey, L"BaseBoardVersion", &board->version, NULL);
+    ffStrbufSetStatic(&board->version, ffSmbiosLocateString(strings, data->Version));
     ffCleanUpSmbiosValue(&board->version);
 
     return NULL;
