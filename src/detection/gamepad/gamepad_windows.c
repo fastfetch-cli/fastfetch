@@ -3,6 +3,7 @@
 #include "util/mallocHelper.h"
 #include "util/windows/unicode.h"
 
+#include <winternl.h>
 #include <windows.h>
 #include <hidsdi.h>
 
@@ -98,7 +99,8 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
     if ((nDevices = GetRawInputDeviceList(pRawInputDeviceList, &nDevices, sizeof(RAWINPUTDEVICELIST))) == (UINT) -1)
         return "GetRawInputDeviceList(pRawInputDeviceList) failed";
 
-    for (UINT i = 0; i < nDevices; ++i) {
+    for (UINT i = 0; i < nDevices; ++i)
+    {
         if (pRawInputDeviceList[i].dwType != 2) continue;
 
         HANDLE hDevice = pRawInputDeviceList[i].hDevice;
@@ -117,21 +119,79 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             continue;
 
         FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
-        ffStrbufInitWS(&device->identifier, devName);
+        ffStrbufInit(&device->identifier);
         ffStrbufInit(&device->name);
         device->battery = 0;
 
         const char* knownGamepad = detectKnownGamepad(rdi.hid.dwVendorId, rdi.hid.dwProductId);
         if (knownGamepad)
             ffStrbufSetS(&device->name, knownGamepad);
-        else
+        HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+        if (!hHidFile)
+        {
+            if (!knownGamepad)
+                ffStrbufSetF(&device->name, "Unknown gamepad %04X-%04X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
+            continue;
+        }
+
+        if (!knownGamepad)
         {
             wchar_t displayName[126];
-            HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-            if (hHidFile && HidD_GetProductString(hHidFile, displayName, sizeof(wchar_t) * 126))
-                ffStrbufSetWS(&device->name, displayName);
-            else
-                ffStrbufSetF(&device->name, "Unknown gamepad %4X-%4X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
+            if (HidD_GetProductString(hHidFile, displayName, sizeof(displayName)))
+            {
+                wchar_t manufacturer[126];
+                if (HidD_GetManufacturerString(hHidFile, manufacturer, sizeof(manufacturer)))
+                {
+                    ffStrbufSetWS(&device->name, manufacturer);
+                    FF_STRBUF_AUTO_DESTROY displayNameStr = ffStrbufCreateWS(displayName);
+                    ffStrbufAppendC(&device->name, ' ');
+                    ffStrbufAppend(&device->name, &displayNameStr);
+                }
+                else
+                {
+                    ffStrbufSetWS(&device->name, displayName);
+                }
+            }
+        }
+
+        PHIDP_PREPARSED_DATA preparsedData = NULL;
+        if (HidD_GetPreparsedData(hHidFile, &preparsedData))
+        {
+            HIDP_CAPS caps;
+            NTSTATUS capsResult = HidP_GetCaps(preparsedData, &caps);
+            HidD_FreePreparsedData(preparsedData);
+            if (!NT_SUCCESS(capsResult))
+                continue;
+
+            wchar_t serialNumber[127] = L"";
+            if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
+                ffStrbufSetWS(&device->identifier, serialNumber);
+            else if (caps.FeatureReportByteLength >= 6)
+            {
+                uint8_t* featureBuffer = malloc(caps.FeatureReportByteLength);
+                featureBuffer[0] = 18;
+                if (HidD_GetFeature(hHidFile, featureBuffer, caps.FeatureReportByteLength))
+                    ffStrbufSetF(&device->identifier, "%02X:%02X:%02X:%02X:%02X:%02X", featureBuffer[0], featureBuffer[1], featureBuffer[2], featureBuffer[3], featureBuffer[4], featureBuffer[5]);
+            }
+
+
+            if (caps.InputReportByteLength < 31)
+                continue;
+
+            if (
+                (rdi.hid.dwVendorId == 0x054C && rdi.hid.dwProductId == 0x05C4) || // PS4 G1
+                (rdi.hid.dwVendorId == 0x054C && rdi.hid.dwProductId == 0x09CC) // PS4 G2
+            )
+            {
+                FF_AUTO_FREE uint8_t* reportBuffer = malloc(caps.InputReportByteLength);
+                ssize_t nBytes = ffReadFDData(hHidFile, caps.InputReportByteLength, reportBuffer);
+                if (nBytes > 31)
+                {
+                    uint8_t batteryInfo = reportBuffer[caps.InputReportByteLength == 64 /*USB?*/ ? 30 : 32];
+                    device->battery = (uint8_t) ((batteryInfo & 0x0f) * 100 / (batteryInfo & 0x10 /*charging?*/ ? 11 /*BATTERY_MAX_USB*/ : 8 /*BATTERY_MAX*/));
+                    if (device->battery > 100) device->battery = 100;
+                }
+            }
         }
     }
 
