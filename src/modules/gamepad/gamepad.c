@@ -1,3 +1,4 @@
+#include "common/bar.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/gamepad/gamepad.h"
@@ -10,14 +11,21 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
         ffPrintLogoAndKey(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&device->name, stdout);
+        if (device->battery > 0 && device->battery <= 100)
+        {
+            ffStrbufAppendC(&buffer, ' ');
+            ffAppendPercentNum(&buffer, device->battery, 51, 21, true);
+        }
+        ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
         ffPrintFormat(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier},
+            {FF_FORMAT_ARG_TYPE_UINT8, &device->battery},
         });
     }
 }
@@ -121,7 +129,8 @@ void ffPrintGamepadHelpFormat(void)
 {
     ffPrintModuleFormatHelp(FF_GAMEPAD_MODULE_NAME, "{1}", FF_GAMEPAD_NUM_FORMAT_ARGS, (const char* []) {
         "Name",
-        "Identifier"
+        "Identifier",
+        "Battery",
     });
 }
 

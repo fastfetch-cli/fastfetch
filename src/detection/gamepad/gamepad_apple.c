@@ -13,6 +13,7 @@ static void enumSet(const void* value, void *context)
     ffCfStrGetString(serialNumber, &device->identifier);
     ffStrbufInit(&device->name);
     ffCfStrGetString(product, &device->name);
+    device->battery = 0;
 }
 
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
