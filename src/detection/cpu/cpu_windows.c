@@ -66,7 +66,10 @@ static const char* detectBySmbios(FFCPUResult* cpu)
 
     const char* strings = (const char*) data + data->Header.Length;
 
-    cpu->frequencyMax = (data->MaxSpeed > 0 ? data->MaxSpeed : data->CurrentSpeed) / 1000.0;
+    if (data->MaxSpeed > 0 && data->MaxSpeed < 30000) // VMware reports weird values
+        cpu->frequencyMax = data->MaxSpeed / 1000.0;
+    else
+        cpu->frequencyMax = data->CurrentSpeed / 1000.0;
     cpu->frequencyMin = data->ExternalClock / 1000.0;
     ffStrbufSetStatic(&cpu->name, ffSmbiosLocateString(strings, data->ProcessorVersion));
     ffStrbufSetStatic(&cpu->vendor, ffSmbiosLocateString(strings, data->ProcessorManufacturer));
