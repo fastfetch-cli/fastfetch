@@ -52,17 +52,52 @@ void ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
 
 #pragma GCC diagnostic ignored "-Wmultichar"
 
-const FFRawSmbiosData* ffGetSmbiosData()
+const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
+{
+    const char* p = ((const char*) header) + header->Length;
+    if (*p)
+    {
+        do
+            p += strlen(p) + 1;
+        while (*p);
+    }
+    else // The terminator is always double 0 even if there is no string
+        p ++;
+
+    return (const FFSmbiosHeader*) (p + 1);
+}
+
+const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
     static FFRawSmbiosData* buffer;
+    static FFSmbiosHeaderTable table;
+
     if (!buffer)
     {
         const DWORD signature = 'RSMB';
         uint32_t bufSize = GetSystemFirmwareTable(signature, 0, NULL, 0);
         assert(bufSize > sizeof(FFRawSmbiosData));
         buffer = (FFRawSmbiosData*) malloc(bufSize);
-        GetSystemFirmwareTable(signature, 0, buffer, bufSize);
+        assert(buffer);
+        uint32_t resSize = GetSystemFirmwareTable(signature, 0, buffer, bufSize);
+        assert(resSize == bufSize);
+
+        for (
+            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer->SMBIOSTableData;
+            (const uint8_t*) header < buffer->SMBIOSTableData + buffer->Length;
+            header = ffSmbiosNextEntry(header)
+        )
+        {
+            if (header->Type < FF_SMBIOS_TYPE_END_OF_TABLE)
+            {
+                if (!table[header->Type])
+                    table[header->Type] = header;
+            }
+            else if (header->Type == FF_SMBIOS_TYPE_END_OF_TABLE)
+                break;
+        }
     }
-    return buffer;
+
+    return &table;
 }
 #endif

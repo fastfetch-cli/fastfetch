@@ -52,65 +52,58 @@ typedef struct FFSmbiosProcessorInfo
 
 static const char* detectBySmbios(FFCPUResult* cpu)
 {
-    const FFRawSmbiosData* data = ffGetSmbiosData();
+    const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_PROCESSOR_INFO];
 
-    for (
-        const FFSmbiosHeader* header = (const FFSmbiosHeader*) data->SMBIOSTableData;
-        (const uint8_t*) header < data->SMBIOSTableData + data->Length && header->Type != FF_SMBIOS_TYPE_END_OF_TABLE;
-        header = ffSmbiosSkipLastStr(header)
-    )
+    if (!data)
+        return "Processor information is not found in SMBIOS data";
+
+    while (data->ProcessorType != 0x03 /*Central Processor*/ || (data->Status & 0b00000111) != 1 /*Enabled*/)
     {
-        if (header->Type != FF_SMBIOS_TYPE_PROCESSOR_INFO)
-            continue;
-
-        const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) header;
-
-        if (data->ProcessorType != 0x03 /*Central Processor*/ || (data->Status & 0b00000111) != 1 /*Enabled*/)
-            continue;
-
-        const char* strings = (const char*) header + header->Length;
-
-        cpu->frequencyMax = (data->MaxSpeed > 0 ? data->MaxSpeed : data->CurrentSpeed) / 1000.0;
-        cpu->frequencyMin = data->ExternalClock / 1000.0;
-        ffStrbufSetStatic(&cpu->name, ffSmbiosLocateString(strings, data->ProcessorVersion));
-        ffStrbufSetStatic(&cpu->vendor, ffSmbiosLocateString(strings, data->ProcessorManufacturer));
-
-        if (header->Length > offsetof(FFSmbiosProcessorInfo, CoreEnabled2))
-            cpu->coresPhysical = data->CoreEnabled2;
-        else
-            cpu->coresPhysical = data->CoreEnabled;
-
-        if (header->Length > offsetof(FFSmbiosProcessorInfo, ThreadEnabled))
-            cpu->coresLogical = cpu->coresOnline = data->ThreadEnabled;
-        else
-        {
-            DWORD length = 0;
-            GetLogicalProcessorInformationEx(RelationGroup, NULL, &length);
-            if (length == 0)
-                return "GetLogicalProcessorInformationEx(RelationGroup, NULL, &length) failed";
-
-            SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
-                pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
-
-            if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationGroup, pProcessorInfo, &length))
-            {
-                for(
-                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
-                    (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
-                    ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
-                )
-                {
-                    assert(ptr->Relationship == RelationGroup);
-                    cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
-                    cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
-                }
-            }
-        }
-
-        return NULL;
+        data = (const FFSmbiosProcessorInfo*) ffSmbiosNextEntry(&data->Header);
+        if (data->Header.Type != FF_SMBIOS_TYPE_PROCESSOR_INFO)
+            return "No active CPU is not found in SMBIOS data";
     }
 
-    return "System enclosure is not found in SMBIOS data";
+    const char* strings = (const char*) data + data->Header.Length;
+
+    cpu->frequencyMax = (data->MaxSpeed > 0 ? data->MaxSpeed : data->CurrentSpeed) / 1000.0;
+    cpu->frequencyMin = data->ExternalClock / 1000.0;
+    ffStrbufSetStatic(&cpu->name, ffSmbiosLocateString(strings, data->ProcessorVersion));
+    ffStrbufSetStatic(&cpu->vendor, ffSmbiosLocateString(strings, data->ProcessorManufacturer));
+
+    if (data->Header.Length > offsetof(FFSmbiosProcessorInfo, CoreEnabled2))
+        cpu->coresPhysical = data->CoreEnabled2;
+    else
+        cpu->coresPhysical = data->CoreEnabled;
+
+    if (data->Header.Length > offsetof(FFSmbiosProcessorInfo, ThreadEnabled))
+        cpu->coresLogical = cpu->coresOnline = data->ThreadEnabled;
+    else
+    {
+        DWORD length = 0;
+        GetLogicalProcessorInformationEx(RelationGroup, NULL, &length);
+        if (length == 0)
+            return "GetLogicalProcessorInformationEx(RelationGroup, NULL, &length) failed";
+
+        SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
+            pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
+
+        if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationGroup, pProcessorInfo, &length))
+        {
+            for(
+                SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
+                (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
+                ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
+            )
+            {
+                assert(ptr->Relationship == RelationGroup);
+                cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
+                cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
+            }
+        }
+    }
+
+    return NULL;
 }
 
 static const char* detectByOS(FFCPUResult* cpu)

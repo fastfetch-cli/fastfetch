@@ -100,22 +100,10 @@ static inline const char* ffSmbiosLocateString(const char* start, uint8_t index 
     return start;
 }
 
-static inline const FFSmbiosHeader* ffSmbiosSkipLastStr(const FFSmbiosHeader* header)
-{
-    const char* p = ((const char*) header) + header->Length;
-    if (*p)
-    {
-        do
-            p += strlen(p) + 1;
-        while (*p);
-    }
-    else // The terminator is always double 0 even if there is no string
-        p ++;
+typedef const FFSmbiosHeader* FFSmbiosHeaderTable[FF_SMBIOS_TYPE_END_OF_TABLE];
 
-    return (const FFSmbiosHeader*) (p + 1);
-}
-
-const FFRawSmbiosData* ffGetSmbiosData();
+const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header);
+const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable();
 #endif
 
 #endif

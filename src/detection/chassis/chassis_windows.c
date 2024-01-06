@@ -29,28 +29,17 @@ typedef struct FFSmbiosSystemEnclosure
 
 const char* ffDetectChassis(FFChassisResult* result)
 {
-    const FFRawSmbiosData* data = ffGetSmbiosData();
+    const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE];
+    if (!data)
+        return "System enclosure is not found in SMBIOS data";
 
-    for (
-        const FFSmbiosHeader* header = (const FFSmbiosHeader*) data->SMBIOSTableData;
-        (const uint8_t*) header < data->SMBIOSTableData + data->Length && header->Type != FF_SMBIOS_TYPE_END_OF_TABLE;
-        header = ffSmbiosSkipLastStr(header)
-    )
-    {
-        if (header->Type != FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE)
-            continue;
+    const char* strings = (const char*) data + data->Header.Length;
 
-        const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) header;
-        const char* strings = (const char*) header + header->Length;
+    ffStrbufSetStatic(&result->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
+    ffCleanUpSmbiosValue(&result->vendor);
+    ffStrbufSetStatic(&result->version, ffSmbiosLocateString(strings, data->Version));
+    ffCleanUpSmbiosValue(&result->version);
+    ffStrbufSetStatic(&result->type, ffChassisTypeToString(data->Type));
 
-        ffStrbufSetStatic(&result->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
-        ffCleanUpSmbiosValue(&result->vendor);
-        ffStrbufSetStatic(&result->version, ffSmbiosLocateString(strings, data->Version));
-        ffCleanUpSmbiosValue(&result->version);
-        ffStrbufSetStatic(&result->type, ffChassisTypeToString(data->Type));
-
-        return NULL;
-    }
-
-    return "System enclosure is not found in SMBIOS data";
+    return NULL;
 }
