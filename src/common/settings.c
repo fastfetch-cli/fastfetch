@@ -411,9 +411,8 @@ bool ffSettingsGetFreeBSDKenv(const char* propName, FFstrbuf* result)
     //https://wiki.ghostbsd.org/index.php/Kenv
     ffStrbufEnsureFree(result, KENV_MVALLEN);
     int len = kenv(KENV_GET, propName, result->chars + result->length, KENV_MVALLEN);
-    if (len <= 0) return false;
-    result->length += (uint32_t) len;
-    result->chars[result->length] = '\0';
+    if (len <= 1) return false; // number of bytes copied, including NUL terminator
+    result->length += (uint32_t) len - 1;
     return true;
 }
 #endif

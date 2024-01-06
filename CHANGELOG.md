@@ -13,6 +13,7 @@ Features:
 Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
 * Fix overall memory leaks (macOS)
+* Remove trailing `\0` in JSON results (FreeBSD)
 
 # 2.5.0
 
