@@ -50,7 +50,7 @@ typedef struct FFSmbiosProcessorInfo
     uint16_t ThreadEnabled; // varies
 } FFSmbiosProcessorInfo;
 
-static const char* detectBySmbios(FFCPUResult* cpu)
+static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
 {
     const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_PROCESSOR_INFO];
 
@@ -61,57 +61,17 @@ static const char* detectBySmbios(FFCPUResult* cpu)
     {
         data = (const FFSmbiosProcessorInfo*) ffSmbiosNextEntry(&data->Header);
         if (data->Header.Type != FF_SMBIOS_TYPE_PROCESSOR_INFO)
-            return "No active CPU is not found in SMBIOS data";
+            return "No active CPU is found in SMBIOS data";
     }
 
-    const char* strings = (const char*) data + data->Header.Length;
-
+    double speed;
     if (data->MaxSpeed > 0 && data->MaxSpeed < 30000) // VMware reports weird values
-        cpu->frequencyMax = data->MaxSpeed / 1000.0;
+        speed = data->MaxSpeed / 1000.0;
     else
-        cpu->frequencyMax = data->CurrentSpeed / 1000.0;
-    cpu->frequencyMin = data->ExternalClock / 1000.0;
-    ffStrbufSetStatic(&cpu->name, ffSmbiosLocateString(strings, data->ProcessorVersion));
-    ffStrbufSetStatic(&cpu->vendor, ffSmbiosLocateString(strings, data->ProcessorManufacturer));
+        speed = data->CurrentSpeed / 1000.0;
 
-    if (data->Header.Length > offsetof(FFSmbiosProcessorInfo, CoreEnabled2))
-        cpu->coresPhysical = data->CoreEnabled2;
-    else
-        cpu->coresPhysical = data->CoreEnabled;
-
-    if (data->Header.Length > offsetof(FFSmbiosProcessorInfo, ThreadEnabled))
-        cpu->coresLogical = cpu->coresOnline = data->ThreadEnabled;
-    else
-    {
-        DWORD length = 0;
-        GetLogicalProcessorInformationEx(RelationGroup, NULL, &length);
-        if (length > 0)
-        {
-            SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
-                pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
-
-            if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationGroup, pProcessorInfo, &length))
-            {
-                for(
-                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
-                    (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
-                    ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
-                )
-                {
-                    assert(ptr->Relationship == RelationGroup);
-                    cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
-                    cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
-                }
-            }
-        }
-        if (cpu->coresOnline == 0 || cpu->coresLogical == 0)
-        {
-            if (data->Header.Length > offsetof(FFSmbiosProcessorInfo, ThreadCount2))
-                cpu->coresOnline = cpu->coresLogical = data->ThreadCount2;
-            else
-                cpu->coresOnline = cpu->coresLogical = data->ThreadCount;
-        }
-    }
+    if (cpu->frequencyMax < speed)
+        cpu->frequencyMax = speed;
 
     return NULL;
 }
@@ -155,7 +115,7 @@ static const char* detectByOS(FFCPUResult* cpu)
     {
         uint32_t mhz;
         if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-            cpu->frequencyMax = mhz / 1000.0;
+            cpu->frequencyMin = cpu->frequencyMax = mhz / 1000.0;
     }
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
@@ -166,10 +126,13 @@ static const char* detectByOS(FFCPUResult* cpu)
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
+    const char* error = detectByOS(cpu);
+    if (error)
+        return error;
+
     if(options->temp)
         ffDetectSmbiosTemp(&cpu->temperature, NULL);
 
-    if (detectBySmbios(cpu) == NULL)
-        return NULL;
-    return detectByOS(cpu);
+    detectMaxSpeedBySmbios(cpu);
+    return NULL;
 }
