@@ -9,6 +9,8 @@ const char* ffDetectChassis(FFChassisResult* result)
     ffCleanUpSmbiosValue(&result->type);
     ffSettingsGetFreeBSDKenv("smbios.chassis.maker", &result->vendor);
     ffCleanUpSmbiosValue(&result->vendor);
+    ffSettingsGetFreeBSDKenv("smbios.chassis.serial", &result->serial);
+    ffCleanUpSmbiosValue(&result->serial);
     ffSettingsGetFreeBSDKenv("smbios.chassis.version", &result->version);
     ffCleanUpSmbiosValue(&result->version);
     return NULL;

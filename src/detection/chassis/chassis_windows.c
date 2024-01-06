@@ -37,6 +37,8 @@ const char* ffDetectChassis(FFChassisResult* result)
 
     ffStrbufSetStatic(&result->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
     ffCleanUpSmbiosValue(&result->vendor);
+    ffStrbufSetStatic(&result->serial, ffSmbiosLocateString(strings, data->SerialNumber));
+    ffCleanUpSmbiosValue(&result->serial);
     ffStrbufSetStatic(&result->version, ffSmbiosLocateString(strings, data->Version));
     ffCleanUpSmbiosValue(&result->version);
     ffStrbufSetStatic(&result->type, ffChassisTypeToString(data->Type));

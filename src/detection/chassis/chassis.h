@@ -5,6 +5,7 @@
 typedef struct FFChassisResult
 {
     FFstrbuf type;
+    FFstrbuf serial;
     FFstrbuf vendor;
     FFstrbuf version;
 } FFChassisResult;

@@ -12,6 +12,7 @@ void ffPrintChassis(FFChassisOptions* options)
     ffStrbufInit(&result.type);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
+    ffStrbufInit(&result.serial);
 
     const char* error = ffDetectChassis(&result);
 
@@ -41,6 +42,7 @@ void ffPrintChassis(FFChassisOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial},
         });
     }
 
@@ -48,6 +50,7 @@ exit:
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
+    ffStrbufDestroy(&result.serial);
 }
 
 bool ffParseChassisCommandOptions(FFChassisOptions* options, const char* key, const char* value)
@@ -91,6 +94,7 @@ void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjs
     ffStrbufInit(&result.type);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
+    ffStrbufInit(&result.serial);
 
     const char* error = ffDetectChassis(&result);
 
@@ -110,11 +114,13 @@ void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
+    yyjson_mut_obj_add_strbuf(doc, obj, "serial", &result.serial);
 
 exit:
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
+    ffStrbufDestroy(&result.serial);
 }
 
 void ffPrintChassisHelpFormat(void)
@@ -122,7 +128,8 @@ void ffPrintChassisHelpFormat(void)
     ffPrintModuleFormatHelp(FF_CHASSIS_MODULE_NAME, "{1}", FF_CHASSIS_NUM_FORMAT_ARGS, (const char* []) {
         "chassis type",
         "chassis vendor",
-        "chassis version"
+        "chassis version",
+        "chassis serial number",
     });
 }
 
