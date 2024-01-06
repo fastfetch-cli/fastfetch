@@ -14,6 +14,7 @@ Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
 * Fix overall memory leaks (macOS)
 * Remove trailing `\0` in JSON results (FreeBSD)
+* Fix physical monitor detection with Nvidia drivers (Monitor, Linux)
 
 # 2.5.0
 

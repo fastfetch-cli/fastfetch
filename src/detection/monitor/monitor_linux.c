@@ -29,10 +29,10 @@ const char* ffDetectMonitor(FFlist* results)
         ffStrbufAppendS(&drmDir, entry->d_name);
         uint32_t drmDirWithDnameLength = drmDir.length;
 
-        ffStrbufAppendS(&drmDir, "/enabled");
-        char enabled = 'd'; // disabled
-        ffReadFileData(drmDir.chars, sizeof(enabled), &enabled);
-        if (enabled != 'e') // enabled
+        ffStrbufAppendS(&drmDir, "/status");
+        char status = 'd'; // disconnected
+        ffReadFileData(drmDir.chars, sizeof(status), &status);
+        if (status != 'c') // connected
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             continue;
