@@ -875,11 +875,6 @@
                                         "const": "chassis",
                                         "description": "Print chassis type (desktop, laptop, etc)"
                                     },
-                                    "useWmi": {
-                                        "description": "Set if WMI query should be used on Windows, which detects more information but slower",
-                                        "type": "boolean",
-                                        "default": false
-                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -1223,11 +1218,6 @@
                                     "type": {
                                         "const": "host",
                                         "description": "Print product name of your computer",
-                                    },
-                                    "useWmi": {
-                                        "description": "Set if WMI query should be used on Windows, which detects more information but slower",
-                                        "type": "boolean",
-                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

@@ -27,7 +27,7 @@ static void getHostProductName(FFstrbuf* name)
     ffStrbufClear(name);
 }
 
-const char* ffDetectHost(FFHostResult* host, FF_MAYBE_UNUSED FFHostOptions* options)
+const char* ffDetectHost(FFHostResult* host)
 {
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->family);
     getHostProductName(&host->name);

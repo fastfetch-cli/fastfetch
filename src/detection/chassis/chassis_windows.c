@@ -18,7 +18,7 @@ typedef struct FFSmbiosSystemEnclosure
     uint8_t NumberOfPowerCords;
 } FFSmbiosSystemEnclosure;
 
-const char* ffDetectChassis(FFChassisResult* result, FFChassisOptions* options)
+const char* ffDetectChassis(FFChassisResult* result)
 {
     const FFRawSmbiosData* data = ffGetSmbiosData();
 

@@ -17,7 +17,7 @@ void ffPrintHost(FFHostOptions* options)
     ffStrbufInit(&host.uuid);
     ffStrbufInit(&host.vendor);
 
-    const char* error = ffDetectHost(&host, options);
+    const char* error = ffDetectHost(&host);
     if(error)
     {
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
@@ -76,14 +76,6 @@ bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const ch
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    #ifdef _WIN32
-    if (ffStrEqualsIgnCase(subKey, "use-wmi"))
-    {
-        options->useWmi = ffOptionParseBoolean(value);
-        return true;
-    }
-    #endif
-
     return false;
 }
 
@@ -100,14 +92,6 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        #ifdef _WIN32
-        if (ffStrEqualsIgnCase(key, "useWmi"))
-        {
-            options->useWmi = yyjson_get_bool(val);
-            continue;
-        }
-        #endif
-
         ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -118,11 +102,6 @@ void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjso
     ffInitHostOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    #ifdef _WIN32
-    if (options->useWmi != defaultOptions.useWmi)
-        yyjson_mut_obj_add_bool(doc, module, "useWmi", options->useWmi);
-    #endif
 }
 
 void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -136,7 +115,7 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     ffStrbufInit(&host.uuid);
     ffStrbufInit(&host.vendor);
 
-    const char* error = ffDetectHost(&host, options);
+    const char* error = ffDetectHost(&host);
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
@@ -195,10 +174,6 @@ void ffInitHostOptions(FFHostOptions* options)
         ffGenerateHostJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
-
-    #ifdef _WIN32
-    options->useWmi = false;
-    #endif
 }
 
 void ffDestroyHostOptions(FFHostOptions* options)

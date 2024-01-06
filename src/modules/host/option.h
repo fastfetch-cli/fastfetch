@@ -8,8 +8,4 @@ typedef struct FFHostOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
-
-    #ifdef _WIN32
-    bool useWmi;
-    #endif
 } FFHostOptions;

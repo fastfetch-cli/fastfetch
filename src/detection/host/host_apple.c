@@ -201,7 +201,7 @@ const char* getOthersByIokit(FFHostResult* host)
     return NULL;
 }
 
-const char* ffDetectHost(FFHostResult* host, FF_MAYBE_UNUSED FFHostOptions* options)
+const char* ffDetectHost(FFHostResult* host)
 {
     const char* error = ffSysctlGetString("hw.model", &host->family);
     if (error) return error;

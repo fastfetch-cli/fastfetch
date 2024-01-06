@@ -843,26 +843,6 @@
             }
         },
         {
-            "long": "host-use-wmi",
-            "desc": "Set if WMI query should be used on Windows when detecting host",
-            "remark": "WMI query detects more information (UUID and serial number) but is slower. Windows only",
-            "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
-            }
-        },
-        {
-            "long": "chassis-use-wmi",
-            "desc": "Set if WMI query should be used on Windows when detecting chassis",
-            "remark": "WMI query detects more information (vendor and version) but is slower. Windows only",
-            "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
-            }
-        },
-        {
             "long": "separator-string",
             "desc": "Set the string printed by the separator module",
             "arg": {

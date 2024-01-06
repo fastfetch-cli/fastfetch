@@ -20,7 +20,7 @@ typedef struct FFSmbiosSystemInfo
     uint8_t Family;
 } FFSmbiosSystemInfo;
 
-const char* ffDetectHost(FFHostResult* host, FFHostOptions* options)
+const char* ffDetectHost(FFHostResult* host)
 {
     const FFRawSmbiosData* fullData = ffGetSmbiosData();
 

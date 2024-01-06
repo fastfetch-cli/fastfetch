@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-const char* ffDetectChassis(FFChassisResult* result, FF_MAYBE_UNUSED FFChassisOptions* options)
+const char* ffDetectChassis(FFChassisResult* result)
 {
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/chassis_type", "/sys/class/dmi/id/chassis_type", &result->type);
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/chassis_vendor", "/sys/class/dmi/id/chassis_vendor", &result->vendor);
