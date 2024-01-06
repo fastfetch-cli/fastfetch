@@ -2,8 +2,118 @@
 #include "detection/temps/temps_windows.h"
 #include "util/windows/registry.h"
 #include "util/mallocHelper.h"
+#include "util/smbiosHelper.h"
 
-const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
+// 7.5
+typedef struct FFSmbiosProcessorInfo
+{
+    FFSmbiosHeader Header;
+
+    uint8_t SocketDesignation; // string
+    uint8_t ProcessorType; // enum
+    uint8_t ProcessorFamily; // enum
+    uint8_t ProcessorManufacturer; // string
+    uint64_t ProcessorID; // varies
+    uint8_t ProcessorVersion; // string
+    uint8_t Voltage; // varies
+    uint16_t ExternalClock; // varies
+    uint16_t MaxSpeed; // varies
+    uint16_t CurrentSpeed; // varies
+    uint8_t Status; // varies
+    uint8_t ProcessorUpgrade; // enum
+
+    // 2.1+
+    uint16_t L1CacheHandle; // varies
+    uint16_t L2CacheHandle; // varies
+    uint16_t L3CacheHandle; // varies
+
+    // 2.3+
+    uint8_t SerialNumber; // string
+    uint8_t AssertTag; // string
+    uint8_t PartNumber; // string
+
+    // 2.5+
+    uint8_t CoreCount; // varies
+    uint8_t CoreEnabled; // varies
+    uint8_t ThreadCount; // varies
+    uint16_t ProcessorCharacteristics; // bit field
+
+    // 2.6+
+    uint16_t ProcessorFamily2; // enum
+
+    // 3.0+
+    uint16_t CoreCount2; // varies
+    uint16_t CoreEnabled2; // varies
+    uint16_t ThreadCount2; // varies
+
+    // 3.6+
+    uint16_t ThreadEnabled; // varies
+} FFSmbiosProcessorInfo;
+
+static const char* detectBySmbios(FFCPUResult* cpu)
+{
+    const FFRawSmbiosData* data = ffGetSmbiosData();
+
+    for (
+        const FFSmbiosHeader* header = (const FFSmbiosHeader*) data->SMBIOSTableData;
+        (const uint8_t*) header < data->SMBIOSTableData + data->Length && header->Type != FF_SMBIOS_TYPE_END_OF_TABLE;
+        header = ffSmbiosSkipLastStr(header)
+    )
+    {
+        if (header->Type != FF_SMBIOS_TYPE_PROCESSOR_INFO)
+            continue;
+
+        const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) header;
+
+        if (data->ProcessorType != 0x03 /*Central Processor*/ || (data->Status & 0b00000111) != 1 /*Enabled*/)
+            continue;
+
+        const char* strings = (const char*) header + header->Length;
+
+        cpu->frequencyMax = (data->MaxSpeed > 0 ? data->MaxSpeed : data->CurrentSpeed) / 1000.0;
+        cpu->frequencyMin = data->ExternalClock / 1000.0;
+        ffStrbufSetStatic(&cpu->name, ffSmbiosLocateString(strings, data->ProcessorVersion));
+        ffStrbufSetStatic(&cpu->vendor, ffSmbiosLocateString(strings, data->ProcessorManufacturer));
+
+        if (header->Length > offsetof(FFSmbiosProcessorInfo, CoreEnabled2))
+            cpu->coresPhysical = data->CoreEnabled2;
+        else
+            cpu->coresPhysical = data->CoreEnabled;
+
+        if (header->Length > offsetof(FFSmbiosProcessorInfo, ThreadEnabled))
+            cpu->coresLogical = cpu->coresOnline = data->ThreadEnabled;
+        else
+        {
+            DWORD length = 0;
+            GetLogicalProcessorInformationEx(RelationGroup, NULL, &length);
+            if (length == 0)
+                return "GetLogicalProcessorInformationEx(RelationGroup, NULL, &length) failed";
+
+            SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
+                pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
+
+            if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationGroup, pProcessorInfo, &length))
+            {
+                for(
+                    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
+                    (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
+                    ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
+                )
+                {
+                    assert(ptr->Relationship == RelationGroup);
+                    cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
+                    cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
+                }
+            }
+        }
+
+        return NULL;
+    }
+
+    return "System enclosure is not found in SMBIOS data";
+}
+
+static const char* detectByOS(FFCPUResult* cpu)
 {
     {
         DWORD length = 0;
@@ -48,8 +158,15 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
     ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
 
+    return NULL;
+}
+
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
+{
     if(options->temp)
         ffDetectSmbiosTemp(&cpu->temperature, NULL);
 
-    return NULL;
+    if (detectBySmbios(cpu) == NULL)
+        return NULL;
+    return detectByOS(cpu);
 }
