@@ -23,6 +23,7 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "Not Available") &&
         !ffStrbufIgnCaseEqualS(value, "INVALID") &&
         !ffStrbufIgnCaseEqualS(value, "Type1ProductConfigId") &&
+        !ffStrbufIgnCaseEqualS(value, "No Enclosure") &&
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
         !ffStrbufIgnCaseEqualS(value, "N/A")
     ;

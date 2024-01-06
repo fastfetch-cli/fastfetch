@@ -28,6 +28,8 @@ const char* ffDetectBoard(FFBoardResult* board)
 
     ffStrbufSetStatic(&board->name, ffSmbiosLocateString(strings, data->Product));
     ffCleanUpSmbiosValue(&board->name);
+    ffStrbufSetStatic(&board->serial, ffSmbiosLocateString(strings, data->SerialNumber));
+    ffCleanUpSmbiosValue(&board->serial);
     ffStrbufSetStatic(&board->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
     ffCleanUpSmbiosValue(&board->vendor);
     ffStrbufSetStatic(&board->version, ffSmbiosLocateString(strings, data->Version));

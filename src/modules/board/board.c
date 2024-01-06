@@ -12,8 +12,9 @@ void ffPrintBoard(FFBoardOptions* options)
     ffStrbufInit(&result.name);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.version);
-    const char* error = ffDetectBoard(&result);
+    ffStrbufInit(&result.serial);
 
+    const char* error = ffDetectBoard(&result);
     if(error)
     {
         ffPrintError(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
@@ -40,6 +41,7 @@ void ffPrintBoard(FFBoardOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial},
         });
     }
 
@@ -47,6 +49,7 @@ exit:
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
+    ffStrbufDestroy(&result.serial);
 }
 
 bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const char* value)
@@ -90,6 +93,7 @@ void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_m
     ffStrbufInit(&board.name);
     ffStrbufInit(&board.vendor);
     ffStrbufInit(&board.version);
+    ffStrbufInit(&board.serial);
 
     const char* error = ffDetectBoard(&board);
 
@@ -109,11 +113,13 @@ void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &board.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &board.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &board.version);
+    yyjson_mut_obj_add_strbuf(doc, obj, "serial", &board.serial);
 
 exit:
     ffStrbufDestroy(&board.name);
     ffStrbufDestroy(&board.vendor);
     ffStrbufDestroy(&board.version);
+    ffStrbufDestroy(&board.serial);
 }
 
 void ffPrintBoardHelpFormat(void)
@@ -121,7 +127,8 @@ void ffPrintBoardHelpFormat(void)
     ffPrintModuleFormatHelp(FF_BOARD_MODULE_NAME, "{1} ({3})", FF_BOARD_NUM_FORMAT_ARGS, (const char* []) {
         "board name",
         "board vendor",
-        "board version"
+        "board version",
+        "board serial number",
     });
 }
 
