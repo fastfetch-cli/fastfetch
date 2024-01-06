@@ -3,6 +3,7 @@
 
 bool ffIsSmbiosValueSet(FFstrbuf* value)
 {
+    ffStrbufTrimRightSpace(value);
     return
         value->length > 0 &&
         !ffStrbufStartsWithIgnCaseS(value, "To be filled") &&

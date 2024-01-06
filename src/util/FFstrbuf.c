@@ -249,13 +249,17 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
 {
-    if(strbuf->length == 0)
+    if (strbuf->length == 0)
         return;
 
-    while(ffStrbufEndsWithC(strbuf, c))
-        --strbuf->length;
+    if (!ffStrbufEndsWithC(strbuf, c))
+        return;
 
-    if(strbuf->allocated == 0)
+    do
+        --strbuf->length;
+    while (ffStrbufEndsWithC(strbuf, c));
+
+    if (strbuf->allocated == 0)
     {
         //static string
         ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
@@ -267,13 +271,17 @@ void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
 
 void ffStrbufTrimRightSpace(FFstrbuf* strbuf)
 {
-    if(strbuf->length == 0)
+    if (strbuf->length == 0)
         return;
 
-    while(ffStrbufEndsWithFn(strbuf, isspace))
-        --strbuf->length;
+    if (!ffStrbufEndsWithFn(strbuf, isspace))
+        return;
 
-    if(strbuf->allocated == 0)
+    do
+        --strbuf->length;
+    while (ffStrbufEndsWithFn(strbuf, isspace));
+
+    if (strbuf->allocated == 0)
     {
         //static string
         ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);

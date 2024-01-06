@@ -181,6 +181,12 @@ int main(void)
     ffStrbufEnsureEndsWithC(&strbuf, '$');
     VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG$"));
 
+    //trimRight
+    ffStrbufTrimRight(&strbuf, '$');
+    VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG"));
+    ffStrbufTrimRight(&strbuf, '$');
+    VERIFY(ffStrbufEqualS(&strbuf, "AbCdEfG"));
+
     //clear
     ffStrbufClear(&strbuf);
     VERIFY(strbuf.allocated > 0);
@@ -296,6 +302,9 @@ int main(void)
 
     //ffStrbufCreateStatic / TrimR
     ffStrbufInitStatic(&strbuf, "_TEST_");
+    ffStrbufTrimRight(&strbuf, ' ');
+    VERIFY(strbuf.allocated == 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "_TEST_"));
     ffStrbufTrimRight(&strbuf, '_');
     VERIFY(ffStrbufEqualS(&strbuf, "_TEST"));
     VERIFY(strbuf.length == 5);
