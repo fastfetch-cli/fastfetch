@@ -3,10 +3,14 @@
 
 typedef struct FFSmbiosSystemInfo
 {
-    uint8_t Manufacturer;
-    uint8_t ProductName;
-    uint8_t Version;
-    uint8_t SerialNumber;
+    FFSmbiosHeader Header;
+
+    uint8_t Manufacturer; // string
+    uint8_t ProductName; // string
+    uint8_t Version; // string
+    uint8_t SerialNumber; // string
+
+    // 2.1+
     struct {
         uint32_t TimeLow;
         uint16_t TimeMid;
@@ -14,10 +18,12 @@ typedef struct FFSmbiosSystemInfo
         uint8_t ClockSeqHiAndReserved;
         uint8_t ClockSeqLow;
         uint8_t Node[6];
-    } UUID;
-    uint8_t WakeUpType;
-    uint8_t SKUNumber;
-    uint8_t Family;
+    } UUID; // varies
+    uint8_t WakeUpType; // enum
+
+    // 2.4+
+    uint8_t SKUNumber; // string
+    uint8_t Family; // string
 } FFSmbiosSystemInfo;
 
 const char* ffDetectHost(FFHostResult* host)
@@ -26,14 +32,14 @@ const char* ffDetectHost(FFHostResult* host)
 
     for (
         const FFSmbiosHeader* header = (const FFSmbiosHeader*) fullData->SMBIOSTableData;
-        (const uint8_t*) header < fullData->SMBIOSTableData + fullData->Length && header->Type < FF_SMBIOS_TYPE_LAST;
+        (const uint8_t*) header < fullData->SMBIOSTableData + fullData->Length && header->Type != FF_SMBIOS_TYPE_END_OF_TABLE;
         header = ffSmbiosSkipLastStr(header)
     )
     {
         if (header->Type != FF_SMBIOS_TYPE_SYSTEM_INFO)
             continue;
 
-        const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) header->Data;
+        const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) header;
         const char* strings = (const char*) header + header->Length;
 
         ffStrbufSetStatic(&host->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
@@ -45,15 +51,17 @@ const char* ffDetectHost(FFHostResult* host)
         ffStrbufSetStatic(&host->serial, ffSmbiosLocateString(strings, data->SerialNumber));
         ffCleanUpSmbiosValue(&host->serial);
 
-        if (header->Length > 0x08)
+        static_assert(offsetof(FFSmbiosSystemInfo, UUID) == 0x08, "FFSmbiosSystemInfo.UUID offset is wrong");
+        if (header->Length > offsetof(FFSmbiosSystemInfo, UUID))
         {
-            // Order?
             ffStrbufSetF(&host->uuid, "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
                 data->UUID.TimeLow, data->UUID.TimeMid, data->UUID.TimeHighAndVersion,
                 data->UUID.ClockSeqHiAndReserved, data->UUID.ClockSeqLow,
                 data->UUID.Node[0], data->UUID.Node[1], data->UUID.Node[2], data->UUID.Node[3], data->UUID.Node[4], data->UUID.Node[5]);
         }
-        if (header->Length > 0x19)
+
+        static_assert(offsetof(FFSmbiosSystemInfo, SKUNumber) == 0x19, "FFSmbiosSystemInfo.SKUNumber offset is wrong");
+        if (header->Length > offsetof(FFSmbiosSystemInfo, SKUNumber))
         {
             ffStrbufSetStatic(&host->family, ffSmbiosLocateString(strings, data->Family));
             ffCleanUpSmbiosValue(&host->family);
