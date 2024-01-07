@@ -174,22 +174,36 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
                     ffStrbufSetF(&device->identifier, "%02X:%02X:%02X:%02X:%02X:%02X", featureBuffer[0], featureBuffer[1], featureBuffer[2], featureBuffer[3], featureBuffer[4], featureBuffer[5]);
             }
 
-
-            if (caps.InputReportByteLength < 31)
-                continue;
-
             if (
-                (rdi.hid.dwVendorId == 0x054C && rdi.hid.dwProductId == 0x05C4) || // PS4 G1
-                (rdi.hid.dwVendorId == 0x054C && rdi.hid.dwProductId == 0x09CC) // PS4 G2
+                (rdi.hid.dwVendorId == 0x054C && (
+                    rdi.hid.dwProductId == 0x05C4 || // PS4 Gen1
+                    rdi.hid.dwProductId == 0x09CC // PS4 Gen2
+                )) ||
+                (rdi.hid.dwVendorId == 0x057E && (
+                    rdi.hid.dwProductId == 0x2009 // NS Pro
+                ))
             )
             {
                 FF_AUTO_FREE uint8_t* reportBuffer = malloc(caps.InputReportByteLength);
                 ssize_t nBytes = ffReadFDData(hHidFile, caps.InputReportByteLength, reportBuffer);
-                if (nBytes > 31)
+                if (rdi.hid.dwVendorId == 0x054C)
                 {
-                    uint8_t batteryInfo = reportBuffer[caps.InputReportByteLength == 64 /*USB?*/ ? 30 : 32];
-                    device->battery = (uint8_t) ((batteryInfo & 0x0f) * 100 / (batteryInfo & 0x10 /*charging?*/ ? 11 /*BATTERY_MAX_USB*/ : 8 /*BATTERY_MAX*/));
-                    if (device->battery > 100) device->battery = 100;
+                    if (nBytes > 31)
+                    {
+                        uint8_t batteryInfo = reportBuffer[caps.InputReportByteLength == 64 /*USB?*/ ? 30 : 32];
+                        device->battery = (uint8_t) ((batteryInfo & 0x0f) * 100 / (batteryInfo & 0x10 /*charging?*/ ? 11 /*BATTERY_MAX_USB*/ : 8 /*BATTERY_MAX*/));
+                        if (device->battery > 100) device->battery = 100;
+                    }
+                }
+                else
+                {
+                    if (nBytes > 3 && reportBuffer[0] == 0x30) // Controller must be connected by other programs
+                    {
+                        uint8_t batteryInfo = reportBuffer[2];
+                        device->battery = (uint8_t) (((batteryInfo & 0xE0) >> 4) * 100 / 8);
+                        if (device->battery == 0) device->battery = 1;
+                        else if (device->battery > 100) device->battery = 100;
+                    }
                 }
             }
         }
