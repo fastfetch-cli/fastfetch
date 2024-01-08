@@ -87,43 +87,43 @@ static const char* detectWifiWithLibnm(FFlist* result)
         switch(state)
         {
             case NM_DEVICE_STATE_UNKNOWN:
-                ffStrbufAppendS(&item->inf.status, "Unknown");
+                ffStrbufSetStatic(&item->inf.status, "Unknown");
                 break;
             case NM_DEVICE_STATE_UNMANAGED:
-                ffStrbufAppendS(&item->inf.status, "Unmanaged");
+                ffStrbufSetStatic(&item->inf.status, "Unmanaged");
                 break;
             case NM_DEVICE_STATE_UNAVAILABLE:
-                ffStrbufAppendS(&item->inf.status, "Unavailable");
+                ffStrbufSetStatic(&item->inf.status, "Unavailable");
                 break;
             case NM_DEVICE_STATE_DISCONNECTED:
-                ffStrbufAppendS(&item->inf.status, "Disconnected");
+                ffStrbufSetStatic(&item->inf.status, "Disconnected");
                 break;
             case NM_DEVICE_STATE_PREPARE:
-                ffStrbufAppendS(&item->inf.status, "Prepare");
+                ffStrbufSetStatic(&item->inf.status, "Prepare");
                 break;
             case NM_DEVICE_STATE_CONFIG:
-                ffStrbufAppendS(&item->inf.status, "Config");
+                ffStrbufSetStatic(&item->inf.status, "Config");
                 break;
             case NM_DEVICE_STATE_NEED_AUTH:
-                ffStrbufAppendS(&item->inf.status, "Need auth");
+                ffStrbufSetStatic(&item->inf.status, "Need auth");
                 break;
             case NM_DEVICE_STATE_IP_CONFIG:
-                ffStrbufAppendS(&item->inf.status, "IP config");
+                ffStrbufSetStatic(&item->inf.status, "IP config");
                 break;
             case NM_DEVICE_STATE_IP_CHECK:
-                ffStrbufAppendS(&item->inf.status, "IP check");
+                ffStrbufSetStatic(&item->inf.status, "IP check");
                 break;
             case NM_DEVICE_STATE_SECONDARIES:
-                ffStrbufAppendS(&item->inf.status, "Secondaries");
+                ffStrbufSetStatic(&item->inf.status, "Secondaries");
                 break;
             case NM_DEVICE_STATE_ACTIVATED:
-                ffStrbufAppendS(&item->inf.status, "Activated");
+                ffStrbufSetStatic(&item->inf.status, "Activated");
                 break;
             case NM_DEVICE_STATE_DEACTIVATING:
-                ffStrbufAppendS(&item->inf.status, "Deactivating");
+                ffStrbufSetStatic(&item->inf.status, "Deactivating");
                 break;
             case NM_DEVICE_STATE_FAILED:
-                ffStrbufAppendS(&item->inf.status, "Failed");
+                ffStrbufSetStatic(&item->inf.status, "Failed");
                 break;
         }
         if(state != NM_DEVICE_STATE_ACTIVATED)
@@ -132,6 +132,8 @@ static const char* detectWifiWithLibnm(FFlist* result)
         NMAccessPoint* ap = ffnm_device_wifi_get_active_access_point((NMDeviceWifi *) device);
         if (!ap)
             continue;
+
+        ffStrbufSetStatic(&item->conn.status, "Connected");
 
         GBytes* activeSsid = ffnm_access_point_get_ssid(ap);
         if (activeSsid)
@@ -161,13 +163,13 @@ static const char* detectWifiWithLibnm(FFlist* result)
             if(ffParsePropLines(output.chars, "tx bitrate: ", &item->conn.protocol))
             {
                 if(ffStrbufContainS(&item->conn.protocol, " HE-MCS "))
-                    ffStrbufSetS(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
                 else if(ffStrbufContainS(&item->conn.protocol, " VHT-MCS "))
-                    ffStrbufSetS(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
                 else if(ffStrbufContainS(&item->conn.protocol, " MCS "))
-                    ffStrbufSetS(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
                 else
-                    ffStrbufSetS(&item->conn.protocol, "802.11a/b/g");
+                    ffStrbufClear(&item->conn.protocol);
 
                 sscanf(item->conn.protocol.chars, "%lf", &item->conn.txRate);
             }
