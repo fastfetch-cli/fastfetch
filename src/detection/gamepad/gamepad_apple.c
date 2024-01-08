@@ -4,16 +4,18 @@
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDLib.h>
 
-static void enumSet(const void* value, void *context)
+static void enumSet(IOHIDDeviceRef value, FFlist* results)
 {
-    CFStringRef product = IOHIDDeviceGetProperty((IOHIDDeviceRef) value, CFSTR(kIOHIDProductKey));
-    CFStringRef serialNumber = IOHIDDeviceGetProperty((IOHIDDeviceRef) value, CFSTR(kIOHIDSerialNumberKey));
-    FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd((FFlist*) context);
+    FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(results);
     ffStrbufInit(&device->identifier);
-    ffCfStrGetString(serialNumber, &device->identifier);
     ffStrbufInit(&device->name);
-    ffCfStrGetString(product, &device->name);
     device->battery = 0;
+
+    CFStringRef serialNumber = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDSerialNumberKey));
+    ffCfStrGetString(serialNumber, &device->identifier);
+
+    CFStringRef product = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDProductKey));
+    ffCfStrGetString(product, &device->name);
 }
 
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
@@ -35,7 +37,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 
     CFSetRef FF_CFTYPE_AUTO_RELEASE set = IOHIDManagerCopyDevices(manager);
     if (set)
-        CFSetApplyFunction(set, &enumSet, devices);
+        CFSetApplyFunction(set, (CFSetApplierFunction) &enumSet, devices);
     IOHIDManagerClose(manager, 0);
 
     return NULL;

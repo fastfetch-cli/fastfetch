@@ -7,7 +7,7 @@
 #include <windows.h>
 #include <hidsdi.h>
 
-static const char* detectKnownGamepad(uint32_t vendorId, uint32_t productId)
+static const char* detectKnownDeviceName(uint32_t vendorId, uint32_t productId)
 {
     switch (vendorId)
     {
@@ -31,38 +31,14 @@ static const char* detectKnownGamepad(uint32_t vendorId, uint32_t productId)
         {
             switch (productId)
             {
-                case 0x0268: return "Sony Playstation 3 Controller";
+                case 0x0268: return "Sony DualShock 3 / Six Axis";
 
                 case 0x05C4: return "Sony DualShock 4 Gen1";
                 case 0x09CC: return "Sony DualShock 4 Gen2";
-                case 0x0BA0: return "Sony PS4 Controller USB receiver";
+                case 0x0BA0: return "Sony DualShock 4 USB receiver";
 
                 case 0x0CE6: return "Sony DualSense";
-
-                default: return NULL;
-            }
-        }
-
-        // Microsoft
-        case 0x045E:
-        {
-            switch (productId)
-            {
-                case 0x02E0: return "Microsoft X-Box One S pad (Wireless)";
-                case 0x02FD: return "Microsoft X-Box One S pad (Wireless, 2016 FW)";
-                case 0x0B05: return "Microsoft X-Box One Elite Series 2 pad (Wireless)";
-                case 0x0B13: return "Microsoft X-Box Series X (Wireless)";
-
-                case 0x028E: return "Microsoft XBox 360";
-                case 0x028F: return "Microsoft XBox 360 v2";
-                case 0x02A1: return "Microsoft XBox 360";
-                case 0x0291: return "Microsoft XBox 360 USB receiver";
-                case 0x02A0: return "Microsoft XBox 360 Big Button IR";
-                case 0x02DD: return "Microsoft XBox One";
-                case 0xB326: return "Microsoft XBox One Firmware 2015";
-                case 0x02E3: return "Microsoft XBox One Elite";
-                case 0x02FF: return "Microsoft XBox One Elite";
-                case 0x02EA: return "Microsoft XBox One S";
+                case 0x0DF2: return "Sony DualSense Edge";
 
                 default: return NULL;
             }
@@ -84,6 +60,7 @@ static const char* detectKnownGamepad(uint32_t vendorId, uint32_t productId)
             }
         }
 
+        case 0x045E: // Microsoft Xbox compatible controllers should be handled by Windows without problems
         default: return NULL;
     }
 }
@@ -123,7 +100,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         ffStrbufInit(&device->name);
         device->battery = 0;
 
-        const char* knownGamepad = detectKnownGamepad(rdi.hid.dwVendorId, rdi.hid.dwProductId);
+        const char* knownGamepad = detectKnownDeviceName(rdi.hid.dwVendorId, rdi.hid.dwProductId);
         if (knownGamepad)
             ffStrbufSetS(&device->name, knownGamepad);
         HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
