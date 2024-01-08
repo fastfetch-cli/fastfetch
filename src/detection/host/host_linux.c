@@ -7,35 +7,61 @@
 
 static void getHostProductName(FFstrbuf* name)
 {
-    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", name);
-    if(name->length > 0)
-        return;
+    if (ffReadFileBuffer("/sys/firmware/devicetree/base/model", name))
+    {
+        ffStrbufTrimRightSpace(name);
+        ffStrbufTrimRight(name, '\0');
+        if(ffIsSmbiosValueSet(name))
+            return;
+    }
 
-    ffReadFileBuffer("/sys/firmware/devicetree/base/model", name);
-    if(ffIsSmbiosValueSet(name))
-        return;
+    if (ffReadFileBuffer("/sys/firmware/devicetree/base/banner-name", name))
+    {
+        ffStrbufTrimRightSpace(name);
+        ffStrbufTrimRight(name, '\0');
+        if(ffIsSmbiosValueSet(name))
+            return;
+    }
 
-    ffReadFileBuffer("/sys/firmware/devicetree/base/banner-name", name);
-    if(ffIsSmbiosValueSet(name))
-        return;
-
-    //does a clear before the read
-    ffReadFileBuffer("/tmp/sysinfo/model", name);
-    if(ffIsSmbiosValueSet(name))
-        return;
+    if (ffReadFileBuffer("/tmp/sysinfo/model", name))
+    {
+        ffStrbufTrimRightSpace(name);
+        ffStrbufTrimRight(name, '\0');
+        if(ffIsSmbiosValueSet(name))
+            return;
+    }
 
     ffStrbufClear(name);
+}
+
+static void getHostSerialNumber(FFstrbuf* serial)
+{
+    if (ffReadFileBuffer("/sys/firmware/devicetree/base/serial-number", serial))
+    {
+        ffStrbufTrimRightSpace(serial);
+        ffStrbufTrimRight(serial, '\0');
+        if(ffIsSmbiosValueSet(serial))
+            return;
+    }
+
+    ffStrbufClear(serial);
 }
 
 const char* ffDetectHost(FFHostResult* host)
 {
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_family", "/sys/class/dmi/id/product_family", &host->family);
-    getHostProductName(&host->name);
+    if (!ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_name", "/sys/class/dmi/id/product_name", &host->name))
+        getHostProductName(&host->name);
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_version", "/sys/class/dmi/id/product_version", &host->version);
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_sku", "/sys/class/dmi/id/product_sku", &host->sku);
-    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_serial", "/sys/class/dmi/id/product_serial", &host->serial);
+    if (!ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_serial", "/sys/class/dmi/id/product_serial", &host->serial))
+        getHostSerialNumber(&host->serial);
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/product_uuid", "/sys/class/dmi/id/product_uuid", &host->uuid);
-    ffGetSmbiosValue("/sys/devices/virtual/dmi/id/sys_vendor", "/sys/class/dmi/id/sys_vendor", &host->vendor);
+    if (!ffGetSmbiosValue("/sys/devices/virtual/dmi/id/sys_vendor", "/sys/class/dmi/id/sys_vendor", &host->vendor))
+    {
+        if (ffStrbufStartsWithS(&host->name, "Apple "))
+            ffStrbufSetStatic(&host->vendor, "Apple Inc.");
+    }
 
     //KVM/Qemu virtual machine
     if(ffStrbufStartsWithS(&host->name, "Standard PC"))

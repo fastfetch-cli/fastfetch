@@ -31,23 +31,24 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
 }
 
 #ifdef __linux__
-void ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
+bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
     if (ffReadFileBuffer(devicesPath, buffer))
     {
         ffStrbufTrimRightSpace(buffer);
         if(ffIsSmbiosValueSet(buffer))
-            return;
+            return true;
     }
 
     if (ffReadFileBuffer(classPath, buffer))
     {
         ffStrbufTrimRightSpace(buffer);
         if(ffIsSmbiosValueSet(buffer))
-            return;
+            return true;
     }
 
     ffStrbufClear(buffer);
+    return false;
 }
 #elif defined(_WIN32)
 #include <windows.h>

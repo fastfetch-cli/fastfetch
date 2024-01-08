@@ -13,7 +13,7 @@ static inline void ffCleanUpSmbiosValue(FFstrbuf* value)
 }
 
 #ifdef __linux__
-void ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
+bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
 #elif defined(_WIN32)
 // https://github.com/KunYi/DumpSMBIOS
 // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.7.0.pdf
