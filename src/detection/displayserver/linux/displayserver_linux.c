@@ -1,5 +1,8 @@
 #include "displayserver_linux.h"
-#include "common/io/io.h"
+
+#ifdef __FreeBSD__
+    #include "common/settings.h"
+#endif
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
@@ -30,6 +33,26 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     //Use it if all connections failed
     if(ds->displays.length == 0)
         ffdsConnectDrm(ds);
+
+    #ifdef __FreeBSD__
+    if(ds->displays.length == 0)
+    {
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        if (ffSettingsGetFreeBSDKenv("screen.width", &buf))
+        {
+            uint32_t width = (uint32_t) ffStrbufToUInt(&buf, 0);
+            if (width)
+            {
+                ffStrbufClear(&buf);
+                if (ffSettingsGetFreeBSDKenv("screen.height", &buf))
+                {
+                    uint32_t height = (uint32_t) ffStrbufToUInt(&buf, 0);
+                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, NULL, FF_DISPLAY_TYPE_UNKNOWN, false, 0);
+                }
+            }
+        }
+    }
+    #endif
 
     //This fills in missing information about WM / DE by using env vars and iterating processes
     ffdsDetectWMDE(ds);
