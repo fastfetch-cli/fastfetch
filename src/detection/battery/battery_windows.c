@@ -1,6 +1,7 @@
 #include "battery.h"
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"
+#include "util/smbiosHelper.h"
 
 #undef WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -75,19 +76,19 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
         FFBatteryResult* battery = (FFBatteryResult*)ffListAdd(results);
 
         if(memcmp(bi.Chemistry, "PbAc", 4) == 0)
-            ffStrbufInitS(&battery->technology, "Lead Acid");
+            ffStrbufInitStatic(&battery->technology, "Lead Acid");
         else if(memcmp(bi.Chemistry, "LION", 4) == 0 || memcmp(bi.Chemistry, "Li-I", 4) == 0)
-            ffStrbufInitS(&battery->technology, "Lithium Ion");
+            ffStrbufInitStatic(&battery->technology, "Lithium Ion");
         else if(memcmp(bi.Chemistry, "NiCd", 4) == 0)
-            ffStrbufInitS(&battery->technology, "Nickel Cadmium");
+            ffStrbufInitStatic(&battery->technology, "Nickel Cadmium");
         else if(memcmp(bi.Chemistry, "NiMH", 4) == 0)
-            ffStrbufInitS(&battery->technology, "Nickel Metal Hydride");
+            ffStrbufInitStatic(&battery->technology, "Nickel Metal Hydride");
         else if(memcmp(bi.Chemistry, "NiZn", 4) == 0)
-            ffStrbufInitS(&battery->technology, "Nickel Zinc");
+            ffStrbufInitStatic(&battery->technology, "Nickel Zinc");
         else if(memcmp(bi.Chemistry, "RAM\0", 4) == 0)
-            ffStrbufInitS(&battery->technology, "Rechargeable Alkaline-Manganese");
+            ffStrbufInitStatic(&battery->technology, "Rechargeable Alkaline-Manganese");
         else
-            ffStrbufInitS(&battery->technology, "Unknown");
+            ffStrbufInitStatic(&battery->technology, "Unknown");
 
         {
             ffStrbufInit(&battery->modelName);
@@ -106,6 +107,14 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
         }
 
         {
+            ffStrbufInit(&battery->manufacturerDate);
+            bqi.InformationLevel = BatteryManufactureDate;
+            BATTERY_MANUFACTURE_DATE date;
+            if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), &date, sizeof(date), &dwOut, NULL))
+                ffStrbufSetF(&battery->manufacturerDate, "%.4d-%.2d-%.2d", date.Year + 1900, date.Month, date.Day);
+        }
+
+        {
             ffStrbufInit(&battery->serial);
             bqi.InformationLevel = BatterySerialNumber;
             wchar_t name[64];
@@ -121,7 +130,7 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
             bqi.InformationLevel = BatteryTemperature;
             ULONG temp;
             if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), &temp, sizeof(temp), &dwOut, NULL))
-                battery->temperature = temp;
+                battery->temperature = temp / 10.0 - 273.15;
         }
 
         {
@@ -148,6 +157,83 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
     return NULL;
 }
 
+
+
+typedef struct FFSmbiosPortableBattery
+{
+    FFSmbiosHeader Header;
+
+    // 2.1+
+    uint8_t Location; // string
+    uint8_t Manufacturer; // string
+    uint8_t ManufactureDate; // string
+    uint8_t SerialNumber; // string
+    uint8_t DeviceName; // string
+    uint8_t DeviceChemistry; // enum
+    uint16_t DesignCapacity; // varies
+    uint16_t DesignVoltage; // varies
+    uint8_t SbdsVersionNumber; // string
+    uint8_t MaximumErrorInBatteryData; // varies
+
+    // 2.2+
+    uint16_t SbdsSerialNumber; // varies
+    uint16_t SbdsManufactureDate; // varies
+    uint8_t SbdsDeviceChemistry; // string
+    uint8_t DesignCapacityMultiplier; // varies
+    uint16_t OEMSpecific; // varies
+} FFSmbiosPortableBattery;
+
+const char* detectBySmbios(FFBatteryResult* battery)
+{
+    const FFSmbiosPortableBattery* data = (const FFSmbiosPortableBattery*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_PORTABLE_BATTERY];
+    if (!data)
+        return "Portable battery section is not found in SMBIOS data";
+
+    const char* strings = (const char*) data + data->Header.Length;
+
+    ffStrbufSetStatic(&battery->modelName, ffSmbiosLocateString(strings, data->DeviceName));
+    ffCleanUpSmbiosValue(&battery->modelName);
+    ffStrbufSetStatic(&battery->manufacturer, ffSmbiosLocateString(strings, data->Manufacturer));
+    ffCleanUpSmbiosValue(&battery->manufacturer);
+
+    if (data->ManufactureDate)
+    {
+        ffStrbufSetStatic(&battery->manufacturerDate, ffSmbiosLocateString(strings, data->ManufactureDate));
+        ffCleanUpSmbiosValue(&battery->manufacturerDate);
+    }
+    else if (data->Header.Length > offsetof(FFSmbiosPortableBattery, SbdsManufactureDate))
+    {
+        uint16_t day = data->SbdsManufactureDate & 0b11111;
+        uint16_t month = (data->SbdsManufactureDate >> 5) & 0b1111;
+        uint16_t year = (data->SbdsManufactureDate >> 9) + 1800;
+        ffStrbufSetF(&battery->manufacturerDate, "%.4d-%.2d-%.2d", year, month, day);
+    }
+
+    switch (data->DeviceChemistry)
+    {
+    case 0x01: ffStrbufSetStatic(&battery->technology, "Other"); break;
+    case 0x02: ffStrbufSetStatic(&battery->technology, "Unknown"); break;
+    case 0x03: ffStrbufSetStatic(&battery->technology, "Lead Acid"); break;
+    case 0x04: ffStrbufSetStatic(&battery->technology, "Nickel Cadmium"); break;
+    case 0x05: ffStrbufSetStatic(&battery->technology, "Nickel metal hydride"); break;
+    case 0x06: ffStrbufSetStatic(&battery->technology, "Lithium-ion"); break;
+    case 0x07: ffStrbufSetStatic(&battery->technology, "Zinc air"); break;
+    case 0x08: ffStrbufSetStatic(&battery->technology, "Lithium Polymer"); break;
+    }
+
+    if (data->SerialNumber)
+    {
+        ffStrbufSetStatic(&battery->serial, ffSmbiosLocateString(strings, data->SerialNumber));
+        ffCleanUpSmbiosValue(&battery->serial);
+    }
+    else if (data->Header.Length > offsetof(FFSmbiosPortableBattery, SbdsSerialNumber))
+    {
+        ffStrbufSetF(&battery->serial, "%4X", data->SbdsSerialNumber);
+    }
+
+    return NULL;
+}
+
 static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
 {
     SYSTEM_BATTERY_STATE info;
@@ -156,6 +242,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         FFBatteryResult* battery = (FFBatteryResult*)ffListAdd(results);
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->manufacturer);
+        ffStrbufInit(&battery->manufacturerDate);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
         ffStrbufInit(&battery->serial);
@@ -171,6 +258,9 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         }
         else if(info.Discharging)
             ffStrbufAppendS(&battery->status, "Discharging");
+
+        detectBySmbios(battery);
+
         return NULL;
     }
     return "NtPowerInformation(SystemBatteryState) failed";
@@ -178,7 +268,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    return true
+    return options->useSetupApi
         ? detectWithSetupApi(options, results)
         : detectWithNtApi(options, results);
 }

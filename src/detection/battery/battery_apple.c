@@ -29,6 +29,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffStrbufInit(&battery->serial);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
+        ffStrbufInit(&battery->manufacturerDate);
         battery->capacity = 0.0/0.0;
 
         int currentCapacity, maxCapacity;

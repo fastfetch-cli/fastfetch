@@ -83,6 +83,8 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
         result->cycleCount = cycleCount < 0 || cycleCount > UINT32_MAX ? 0 : (uint32_t) cycleCount;
     }
 
+    ffStrbufInit(&result->manufacturerDate);
+
     result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp)
     {
