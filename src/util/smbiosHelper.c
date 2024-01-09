@@ -1,5 +1,6 @@
 #include "smbiosHelper.h"
 #include "common/io/io.h"
+#include "util/unused.h"
 
 bool ffIsSmbiosValueSet(FFstrbuf* value)
 {
@@ -82,7 +83,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         assert(bufSize > sizeof(FFRawSmbiosData));
         buffer = (FFRawSmbiosData*) malloc(bufSize);
         assert(buffer);
-        uint32_t resultSize = GetSystemFirmwareTable(signature, 0, buffer, bufSize);
+        FF_MAYBE_UNUSED uint32_t resultSize = GetSystemFirmwareTable(signature, 0, buffer, bufSize);
         assert(resultSize == bufSize);
 
         for (
