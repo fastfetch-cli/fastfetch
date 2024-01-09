@@ -88,7 +88,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     {
         ffStrbufAppendS(dir, "/temp");
         if (ffReadFileBuffer(dir->chars, &tmpBuffer))
-            options->temp = ffStrbufToDouble(&tmpBuffer) / 10;
+            result->temperature = ffStrbufToDouble(&tmpBuffer) / 10;
         ffStrbufSubstrBefore(dir, dirLength);
     }
 }
