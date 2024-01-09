@@ -84,6 +84,37 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     }
 
     ffStrbufInit(&result->manufacturerDate);
+    ffStrbufAppendS(dir, "/manufacture_year");
+    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
+    ffStrbufSubstrBefore(dir, dirLength);
+    if (available)
+    {
+        int year = (int) ffStrbufToSInt(&tmpBuffer, 0);
+        if (year > 0)
+        {
+            ffStrbufAppendS(dir, "/manufacture_month");
+            available = ffReadFileBuffer(dir->chars, &tmpBuffer);
+            ffStrbufSubstrBefore(dir, dirLength);
+            if (available)
+            {
+                int month = (int) ffStrbufToSInt(&tmpBuffer, 0);
+                if (month > 0)
+                {
+                    ffStrbufAppendS(dir, "/manufacture_day");
+                    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
+                    ffStrbufSubstrBefore(dir, dirLength);
+                    if (available)
+                    {
+                        int day = (int) ffStrbufToSInt(&tmpBuffer, 0);
+                        if (day > 0)
+                        {
+                            ffStrbufSetF(&result->manufacturerDate, "%.4d-%.2d-%.2d", year, month, day);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp)
