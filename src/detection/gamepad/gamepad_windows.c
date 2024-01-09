@@ -96,7 +96,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             continue;
 
         FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
-        ffStrbufInit(&device->identifier);
+        ffStrbufInit(&device->serial);
         ffStrbufInit(&device->name);
         device->battery = 0;
 
@@ -142,14 +142,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 
             wchar_t serialNumber[127] = L"";
             if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
-                ffStrbufSetWS(&device->identifier, serialNumber);
-            else if (caps.FeatureReportByteLength >= 6)
-            {
-                uint8_t* featureBuffer = malloc(caps.FeatureReportByteLength);
-                featureBuffer[0] = 18;
-                if (HidD_GetFeature(hHidFile, featureBuffer, caps.FeatureReportByteLength))
-                    ffStrbufSetF(&device->identifier, "%02X:%02X:%02X:%02X:%02X:%02X", featureBuffer[0], featureBuffer[1], featureBuffer[2], featureBuffer[3], featureBuffer[4], featureBuffer[5]);
-            }
+                ffStrbufSetWS(&device->serial, serialNumber);
 
             if (
                 (rdi.hid.dwVendorId == 0x054C && (

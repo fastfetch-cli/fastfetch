@@ -24,7 +24,7 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
     {
         ffPrintFormat(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &device->serial},
             {FF_FORMAT_ARG_TYPE_UINT8, &device->battery},
         });
     }
@@ -52,7 +52,7 @@ void ffPrintGamepad(FFGamepadOptions* options)
     FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
     {
         printDevice(options, device, result.length > 1 ? ++index : 0);
-        ffStrbufDestroy(&device->identifier);
+        ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->name);
     }
 }
@@ -114,13 +114,13 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
     FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &device->identifier);
+        yyjson_mut_obj_add_strbuf(doc, obj, "serial", &device->serial);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &device->name);
     }
 
     FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
     {
-        ffStrbufDestroy(&device->identifier);
+        ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->name);
     }
 }
@@ -129,7 +129,7 @@ void ffPrintGamepadHelpFormat(void)
 {
     ffPrintModuleFormatHelp(FF_GAMEPAD_MODULE_NAME, "{1}", FF_GAMEPAD_NUM_FORMAT_ARGS, (const char* []) {
         "Name",
-        "Identifier",
+        "Serial number",
         "Battery",
     });
 }

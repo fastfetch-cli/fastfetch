@@ -8,7 +8,7 @@
 static void enumSet(IOHIDDeviceRef value, FFlist* results)
 {
     FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(results);
-    ffStrbufInit(&device->identifier);
+    ffStrbufInit(&device->serial);
     ffStrbufInit(&device->name);
     device->battery = 0;
 
@@ -18,9 +18,9 @@ static void enumSet(IOHIDDeviceRef value, FFlist* results)
     CFStringRef product = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDProductKey));
     if (device->name.length)
     {
-        ffCfStrGetString(product, &device->identifier);
+        ffCfStrGetString(product, &device->serial);
         ffStrbufAppendC(&device->name, ' ');
-        ffStrbufAppend(&device->name, &device->identifier);
+        ffStrbufAppend(&device->name, &device->serial);
     }
     else
     {
@@ -28,7 +28,7 @@ static void enumSet(IOHIDDeviceRef value, FFlist* results)
     }
 
     CFStringRef serialNumber = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDSerialNumberKey));
-    ffCfStrGetString(serialNumber, &device->identifier);
+    ffCfStrGetString(serialNumber, &device->serial);
 }
 
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)

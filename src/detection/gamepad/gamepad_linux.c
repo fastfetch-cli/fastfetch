@@ -9,13 +9,13 @@ static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path)
 {
     uint32_t baseLen = path->length;
     FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
-    ffStrbufInit(&device->identifier);
+    ffStrbufInit(&device->serial);
     ffStrbufInitMove(&device->name, name);
     device->battery = 0;
 
     ffStrbufAppendS(path, "uniq");
-    if (ffAppendFileBuffer(path->chars, &device->identifier))
-        ffStrbufTrimRightSpace(&device->identifier);
+    if (ffAppendFileBuffer(path->chars, &device->serial))
+        ffStrbufTrimRightSpace(&device->serial);
 
     ffStrbufSubstrBefore(path, baseLen);
     ffStrbufAppendS(path, "device/power_supply/"); // /sys/class/input/jsX/device/device/power_supply
