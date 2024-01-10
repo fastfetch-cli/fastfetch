@@ -72,7 +72,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
             {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturerDate},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate},
         });
     }
 }
@@ -99,7 +99,7 @@ void ffPrintBattery(FFBatteryOptions* options)
             ffStrbufDestroy(&result->technology);
             ffStrbufDestroy(&result->status);
             ffStrbufDestroy(&result->serial);
-            ffStrbufDestroy(&result->manufacturerDate);
+            ffStrbufDestroy(&result->manufactureDate);
         }
         if(results.length == 0)
             ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
@@ -195,7 +195,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_real(doc, obj, "capacity", battery->capacity);
         yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &battery->manufacturer);
-        yyjson_mut_obj_add_strbuf(doc, obj, "manufacturerDate", &battery->manufacturerDate);
+        yyjson_mut_obj_add_strbuf(doc, obj, "manufactureDate", &battery->manufactureDate);
         yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &battery->modelName);
         yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
         yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
@@ -207,7 +207,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
     FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
     {
         ffStrbufDestroy(&battery->manufacturer);
-        ffStrbufDestroy(&battery->manufacturerDate);
+        ffStrbufDestroy(&battery->manufactureDate);
         ffStrbufDestroy(&battery->modelName);
         ffStrbufDestroy(&battery->technology);
         ffStrbufDestroy(&battery->status);

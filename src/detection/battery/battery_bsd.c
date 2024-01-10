@@ -40,7 +40,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         ffStrbufInit(&battery->status);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->serial);
-        ffStrbufInit(&battery->manufacturerDate);
+        ffStrbufInit(&battery->manufactureDate);
 
         battery->capacity = battio.battinfo.cap;
         if(battio.battinfo.state == ACPI_BATT_STAT_INVALID)

@@ -83,7 +83,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
         result->cycleCount = cycleCount < 0 || cycleCount > UINT32_MAX ? 0 : (uint32_t) cycleCount;
     }
 
-    ffStrbufInit(&result->manufacturerDate);
+    ffStrbufInit(&result->manufactureDate);
     ffStrbufAppendS(dir, "/manufacture_year");
     available = ffReadFileBuffer(dir->chars, &tmpBuffer);
     ffStrbufSubstrBefore(dir, dirLength);
@@ -108,7 +108,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
                         int day = (int) ffStrbufToSInt(&tmpBuffer, 0);
                         if (day > 0)
                         {
-                            ffStrbufSetF(&result->manufacturerDate, "%.4d-%.2d-%.2d", year, month, day);
+                            ffStrbufSetF(&result->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
                         }
                     }
                 }

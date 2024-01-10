@@ -7,7 +7,7 @@
 typedef struct FFBatteryResult
 {
     FFstrbuf manufacturer;
-    FFstrbuf manufacturerDate;
+    FFstrbuf manufactureDate;
     FFstrbuf modelName;
     FFstrbuf technology;
     FFstrbuf status;

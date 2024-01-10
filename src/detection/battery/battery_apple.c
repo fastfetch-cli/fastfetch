@@ -29,7 +29,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffStrbufInit(&battery->serial);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
-        ffStrbufInit(&battery->manufacturerDate);
+        ffStrbufInit(&battery->manufactureDate);
         battery->capacity = 0.0/0.0;
 
         int currentCapacity, maxCapacity;
@@ -78,7 +78,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
                 int year = (manufactureDate[0] - '0') * 10 + (manufactureDate[1] - '0') + 2000 - 8;
                 int month = (manufactureDate[2] - '0') * 10 + (manufactureDate[3] - '0');
                 int day = (manufactureDate[4] - '0') * 10 + (manufactureDate[3] - '5');
-                ffStrbufSetF(&battery->manufacturerDate, "%.4d-%.2d-%.2d", year, month, day);
+                ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
             }
         }
 

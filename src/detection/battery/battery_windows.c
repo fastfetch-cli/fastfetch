@@ -107,11 +107,11 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
         }
 
         {
-            ffStrbufInit(&battery->manufacturerDate);
+            ffStrbufInit(&battery->manufactureDate);
             bqi.InformationLevel = BatteryManufactureDate;
             BATTERY_MANUFACTURE_DATE date;
             if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), &date, sizeof(date), &dwOut, NULL))
-                ffStrbufSetF(&battery->manufacturerDate, "%.4d-%.2d-%.2d", date.Year + 1900, date.Month, date.Day);
+                ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", date.Year + 1900, date.Month, date.Day);
         }
 
         {
@@ -198,15 +198,15 @@ const char* detectBySmbios(FFBatteryResult* battery)
 
     if (data->ManufactureDate)
     {
-        ffStrbufSetStatic(&battery->manufacturerDate, ffSmbiosLocateString(strings, data->ManufactureDate));
-        ffCleanUpSmbiosValue(&battery->manufacturerDate);
+        ffStrbufSetStatic(&battery->manufactureDate, ffSmbiosLocateString(strings, data->ManufactureDate));
+        ffCleanUpSmbiosValue(&battery->manufactureDate);
     }
     else if (data->Header.Length > offsetof(FFSmbiosPortableBattery, SbdsManufactureDate))
     {
         uint16_t day = data->SbdsManufactureDate & 0b11111;
         uint16_t month = (data->SbdsManufactureDate >> 5) & 0b1111;
         uint16_t year = (data->SbdsManufactureDate >> 9) + 1800;
-        ffStrbufSetF(&battery->manufacturerDate, "%.4d-%.2d-%.2d", year, month, day);
+        ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
     }
 
     switch (data->DeviceChemistry)
@@ -242,7 +242,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         FFBatteryResult* battery = (FFBatteryResult*)ffListAdd(results);
         ffStrbufInit(&battery->modelName);
         ffStrbufInit(&battery->manufacturer);
-        ffStrbufInit(&battery->manufacturerDate);
+        ffStrbufInit(&battery->manufactureDate);
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
         ffStrbufInit(&battery->serial);
