@@ -44,6 +44,7 @@ const char* ffDetectMonitor(FFlist* results)
         FFMonitorResult* display = (FFMonitorResult*) ffListAdd(results);
         display->width = width;
         display->height = height;
+        ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
         display->hdrCompatible = ffEdidGetHdrCompatible(edidData, edidLength); // Doesn't work. edidLength is always 128
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
