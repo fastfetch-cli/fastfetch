@@ -26,6 +26,7 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "INVALID") &&
         !ffStrbufIgnCaseEqualS(value, "Type1ProductConfigId") &&
         !ffStrbufIgnCaseEqualS(value, "No Enclosure") &&
+        !ffStrbufIgnCaseEqualS(value, "Chassis Version") &&
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
         !ffStrbufIgnCaseEqualS(value, "N/A")
     ;
