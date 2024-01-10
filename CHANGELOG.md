@@ -6,9 +6,11 @@ Changes:
 
 Features:
 * Add `ENABLE_PROPRIETARY_GPU_DRIVER_API` cmake option to disable using of proprietary GPU driver APIs (GPU)
-* Add power adapter detection support for Asahi Linux (PowerAdapter, Linux)
-* Add battery serial number detection (Battery)
-* Add host serial number and UUID detection (Host)
+* Support power adapter detection for Asahi Linux (PowerAdapter, Linux)
+* Support battery serial number and manufacturer date detection (Battery)
+* Support host serial number and UUID detection (Host)
+* Support battery level detection for gamepads where possible (Gamepad)
+* Support maximum CPU clock detection. Previously base clock was printed (CPU, Windows)
 
 Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
