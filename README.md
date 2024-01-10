@@ -50,7 +50,8 @@ You may also download it directly from [GitHub releases page](https://github.com
 
 ### FreeBSD
 
-`pkg install fastfetch`
+- Full (including deps): `pkg install fastfetch`
+- Lite: `pkg install fastfetch-lite`
 
 ### Android (Termux)
 
