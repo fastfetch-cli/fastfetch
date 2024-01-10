@@ -68,6 +68,20 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffStrbufTrimRight(&battery->status, ' ');
         ffStrbufTrimRight(&battery->status, ',');
 
+        CFDictionaryRef batteryData;
+        if (ffCfDictGetDict(properties, CFSTR("BatteryData"), &batteryData) == NULL)
+        {
+            char manufactureDate[sizeof(uint64_t)];
+            if (ffCfDictGetInt64(batteryData, CFSTR(kIOPMPSManufactureDateKey), (int64_t*) manufactureDate) == NULL)
+            {
+                // https://github.com/AsahiLinux/linux/blob/b5c05cbffb0488c7618106926d522cc3b43d93d5/drivers/power/supply/macsmc_power.c#L410-L419
+                int year = (manufactureDate[0] - '0') * 10 + (manufactureDate[1] - '0') + 2000 - 8;
+                int month = (manufactureDate[2] - '0') * 10 + (manufactureDate[3] - '0');
+                int day = (manufactureDate[4] - '0') * 10 + (manufactureDate[3] - '5');
+                ffStrbufSetF(&battery->manufacturerDate, "%.4d-%.2d-%.2d", year, month, day);
+            }
+        }
+
         if (options->temp)
         {
             int64_t temp;
