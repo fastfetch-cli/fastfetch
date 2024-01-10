@@ -36,6 +36,8 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
         struct backlight_info info;
         if(ioctl(blfd, BACKLIGHTGETINFO, &info) < 0)
             ffStrbufAppendS(&brightness->name, info.name);
+        else
+            ffStrbufAppendS(&brightness->name, path + strlen("/dev/backlight/"));
     }
     return NULL;
 }
