@@ -11,6 +11,7 @@ Features:
 * Support host serial number and UUID detection (Host)
 * Support battery level detection for gamepads where possible (Gamepad)
 * Support maximum CPU clock detection. Previously base clock was printed (CPU, Windows)
+* Support manufacture date and serial number detection for physical monitors (Monitor)
 
 Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
