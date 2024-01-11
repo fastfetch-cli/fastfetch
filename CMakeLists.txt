@@ -377,7 +377,6 @@ set(LIBFASTFETCH_SRC
     src/util/FFlist.c
     src/util/FFstrbuf.c
     src/util/platform/FFPlatform.c
-    src/util/stringUtils.c
     src/util/smbiosHelper.c
 )
 

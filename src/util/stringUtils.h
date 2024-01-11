@@ -3,9 +3,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
-bool ffStrSet(const char* str);
-bool ffStrHasNChars(const char* str, char c, uint32_t n);
+static inline bool ffStrSet(const char* str)
+{
+    if(str == NULL)
+        return false;
+
+    while(isspace(*str))
+        str++;
+
+    return *str != '\0';
+}
+
 
 static inline bool ffStrStartsWithIgnCase(const char* str, const char* compareTo)
 {
