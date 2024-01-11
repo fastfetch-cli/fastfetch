@@ -15,7 +15,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             FFGPUResult* gpu = NULL;
             FF_LIST_FOR_EACH(FFGPUResult, x, *gpus)
             {
-                if (x->deviceId == device.registryID || ffStrbufEqualS(&x->name, device.name.UTF8String))
+                if (x->deviceId == device.registryID)
                 {
                     gpu = x;
                     break;
@@ -34,7 +34,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
 
             gpu->type = device.hasUnifiedMemory ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
         }
+        return NULL;
     }
-
-    return NULL;
+    return "Metal API is not supported by this macOS version";
 }
