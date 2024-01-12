@@ -118,7 +118,7 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
     return NULL;
 }
 
-static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
+static pid_t getShellInfo(FFTerminalShellResult* result, pid_t pid)
 {
     char name[256];
     name[0] = '\0';
@@ -126,7 +126,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
     pid_t ppid = 0;
 
     if(getProcessNameAndPpid(pid, name, &ppid))
-        return;
+        return 0;
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
@@ -137,6 +137,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "sshd")                 == 0 ||
         strcasecmp(name, "gdb")                  == 0 ||
         strcasecmp(name, "lldb")                 == 0 ||
+        strcasecmp(name, "lldb-mi")              == 0 ||
         strcasecmp(name, "login")                == 0 ||
         strcasecmp(name, "ltrace")               == 0 ||
         strcasecmp(name, "perf")                 == 0 ||
@@ -144,10 +145,24 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasestr(name, "debug")             != NULL ||
         strcasestr(name, "command-not-found") != NULL ||
         ffStrEndsWith(name, ".sh")
-    ) {
-        getTerminalShell(result, ppid);
-        return;
-    }
+    )
+        return getShellInfo(result, ppid);
+
+    result->shellPid = (uint32_t) pid;
+    ffStrbufSetS(&result->shellProcessName, name);
+    getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
+    return ppid;
+}
+
+static pid_t getTerminalInfo(FFTerminalShellResult* result, pid_t pid)
+{
+    char name[256];
+    name[0] = '\0';
+
+    pid_t ppid = 0;
+
+    if(getProcessNameAndPpid(pid, name, &ppid))
+        return 0;
 
     //Known shells
     if (
@@ -167,17 +182,8 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
         strcasecmp(name, "elvish")    == 0 ||
         strcasecmp(name, "oil.ovm")   == 0 ||
         (strcasecmp(name, "python") == 0 && getenv("XONSH_VERSION"))
-    ) {
-        if (result->shellProcessName.length == 0)
-        {
-            result->shellPid = (uint32_t) pid;
-            ffStrbufSetS(&result->shellProcessName, name);
-            getProcessInformation(pid, &result->shellProcessName, &result->shellExe, &result->shellExeName);
-        }
-
-        getTerminalShell(result, ppid);
-        return;
-    }
+    )
+        return getTerminalInfo(result, ppid);
 
     #ifdef __APPLE__
     // https://github.com/fastfetch-cli/fastfetch/discussions/501
@@ -188,6 +194,7 @@ static void getTerminalShell(FFTerminalShellResult* result, pid_t pid)
     result->terminalPid = (uint32_t) pid;
     ffStrbufSetS(&result->terminalProcessName, name);
     getProcessInformation(pid, &result->terminalProcessName, &result->terminalExe, &result->terminalExeName);
+    return ppid;
 }
 
 static void getTerminalFromEnv(FFTerminalShellResult* result)
@@ -288,6 +295,80 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
+static void setShellInfoDetails(FFTerminalShellResult* result)
+{
+    ffStrbufClear(&result->shellVersion);
+    fftsGetShellVersion(&result->shellExe, result->shellExeName, &result->shellVersion);
+
+    if(ffStrbufEqualS(&result->shellProcessName, "pwsh"))
+        ffStrbufInitStatic(&result->shellPrettyName, "PowerShell");
+    else if(ffStrbufEqualS(&result->shellProcessName, "nu"))
+        ffStrbufInitStatic(&result->shellPrettyName, "nushell");
+    else if(ffStrbufIgnCaseEqualS(&result->shellProcessName, "python") && getenv("XONSH_VERSION"))
+        ffStrbufInitStatic(&result->shellPrettyName, "xonsh");
+    else if(ffStrbufIgnCaseEqualS(&result->shellProcessName, "oil.ovm"))
+        ffStrbufInitStatic(&result->shellPrettyName, "Oils");
+    else
+    {
+        // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
+        ffStrbufInitS(&result->shellPrettyName, result->shellExeName);
+    }
+}
+
+static void setTerminalInfoDetails(FFTerminalShellResult* result)
+{
+    if(result->terminalExeName[0] == '.' && ffStrEndsWith(result->terminalExeName, "-wrapped"))
+    {
+        // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
+        // We use terminalProcessName when detecting version and font, overriding it for simplification
+        ffStrbufSetNS(
+            &result->terminalProcessName,
+            (uint32_t) (strlen(result->terminalExeName) - strlen(".-wrapped")),
+            result->terminalExeName + 1);
+    }
+
+    if(ffStrbufEqualS(&result->terminalProcessName, "wezterm-gui"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "WezTerm");
+    if(ffStrbufStartsWithS(&result->terminalProcessName, "tmux:"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "tmux");
+
+    #if defined(__ANDROID__)
+
+    else if(ffStrbufEqualS(&result->terminalProcessName, "com.termux"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "Termux");
+
+    #elif defined(__linux__) || defined(__FreeBSD__)
+
+    else if(ffStrbufStartsWithS(&result->terminalProcessName, "gnome-terminal-"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "GNOME Terminal");
+    else if(ffStrbufStartsWithS(&result->terminalProcessName, "kgx"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "GNOME Console");
+    else if(ffStrbufEqualS(&result->terminalProcessName, "urxvt") ||
+        ffStrbufEqualS(&result->terminalProcessName, "urxvtd") ||
+        ffStrbufEqualS(&result->terminalProcessName, "rxvt")
+    )
+        ffStrbufInitStatic(&result->terminalPrettyName, "rxvt-unicode");
+
+    #elif defined(__APPLE__)
+
+    else if(ffStrbufEqualS(&result->terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result->terminalProcessName, "iTermServer-"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "iTerm");
+    else if(ffStrbufEqualS(&result->terminalProcessName, "Apple_Terminal"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "Apple Terminal");
+    else if(ffStrbufEqualS(&result->terminalProcessName, "WarpTerminal"))
+        ffStrbufInitStatic(&result->terminalPrettyName, "Warp");
+
+    #endif
+
+    else if(strncmp(result->terminalExeName, result->terminalProcessName.chars, result->terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
+        ffStrbufInitS(&result->terminalPrettyName, result->terminalExeName);
+    else
+        ffStrbufInitCopy(&result->terminalPrettyName, &result->terminalProcessName);
+
+    ffStrbufInit(&result->terminalVersion);
+    fftsGetTerminalVersion(&result->terminalProcessName, &result->terminalExe, &result->terminalVersion);
+}
+
 const FFTerminalShellResult* ffDetectTerminalShell()
 {
     static FFTerminalShellResult result;
@@ -317,78 +398,15 @@ const FFTerminalShellResult* ffDetectTerminalShell()
     result.terminalExeName = result.terminalExe.chars;
     result.terminalPid = 0;
 
-    getTerminalShell(&result, getppid());
-
-    getTerminalFromEnv(&result);
+    pid_t ppid = getppid();
+    ppid = getShellInfo(&result, ppid);
     getUserShellFromEnv(&result);
+    setShellInfoDetails(&result);
 
-    ffStrbufClear(&result.shellVersion);
-    fftsGetShellVersion(&result.shellExe, result.shellExeName, &result.shellVersion);
-
-    if(ffStrbufEqualS(&result.shellProcessName, "pwsh"))
-        ffStrbufInitStatic(&result.shellPrettyName, "PowerShell");
-    else if(ffStrbufEqualS(&result.shellProcessName, "nu"))
-        ffStrbufInitStatic(&result.shellPrettyName, "nushell");
-    else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "python") && getenv("XONSH_VERSION"))
-        ffStrbufInitStatic(&result.shellPrettyName, "xonsh");
-    else if(ffStrbufIgnCaseEqualS(&result.shellProcessName, "oil.ovm"))
-        ffStrbufInitStatic(&result.shellPrettyName, "Oils");
-    else
-    {
-        // https://github.com/fastfetch-cli/fastfetch/discussions/280#discussioncomment-3831734
-        ffStrbufInitS(&result.shellPrettyName, result.shellExeName);
-    }
-
-    if(result.terminalExeName[0] == '.' && ffStrEndsWith(result.terminalExeName, "-wrapped"))
-    {
-        // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
-        // We use terminalProcessName when detecting version and font, overriding it for simplification
-        ffStrbufSetNS(
-            &result.terminalProcessName,
-            (uint32_t) (strlen(result.terminalExeName) - strlen(".-wrapped")),
-            result.terminalExeName + 1);
-    }
-
-    if(ffStrbufEqualS(&result.terminalProcessName, "wezterm-gui"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "WezTerm");
-    if(ffStrbufStartsWithS(&result.terminalProcessName, "tmux:"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "tmux");
-
-    #if defined(__ANDROID__)
-
-    else if(ffStrbufEqualS(&result.terminalProcessName, "com.termux"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "Termux");
-
-    #elif defined(__linux__) || defined(__FreeBSD__)
-
-    else if(ffStrbufStartsWithS(&result.terminalProcessName, "gnome-terminal-"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Terminal");
-    else if(ffStrbufStartsWithS(&result.terminalProcessName, "kgx"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "GNOME Console");
-    else if(ffStrbufEqualS(&result.terminalProcessName, "urxvt") ||
-        ffStrbufEqualS(&result.terminalProcessName, "urxvtd") ||
-        ffStrbufEqualS(&result.terminalProcessName, "rxvt")
-    )
-        ffStrbufInitStatic(&result.terminalPrettyName, "rxvt-unicode");
-
-    #elif defined(__APPLE__)
-
-    else if(ffStrbufEqualS(&result.terminalProcessName, "iTerm.app") || ffStrbufStartsWithS(&result.terminalProcessName, "iTermServer-"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "iTerm");
-    else if(ffStrbufEqualS(&result.terminalProcessName, "Apple_Terminal"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "Apple Terminal");
-    else if(ffStrbufEqualS(&result.terminalProcessName, "WarpTerminal"))
-        ffStrbufInitStatic(&result.terminalPrettyName, "Warp");
-
-    #endif
-
-    else if(strncmp(result.terminalExeName, result.terminalProcessName.chars, result.terminalProcessName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName
-        ffStrbufInitS(&result.terminalPrettyName, result.terminalExeName);
-    else
-        ffStrbufInitCopy(&result.terminalPrettyName, &result.terminalProcessName);
-
-    ffStrbufInit(&result.terminalVersion);
-    fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
+    if (ppid)
+        ppid = getTerminalInfo(&result, ppid);
+    getTerminalFromEnv(&result);
+    setTerminalInfoDetails(&result);
 
     return &result;
 }

@@ -120,6 +120,19 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     fftsGetShellVersion(&result->shellExe, result->shellPrettyName.chars, &result->shellVersion);
 
     result->shellPid = pid;
+
+    if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "explorer"))
+    {
+        ffStrbufSetS(&result->shellPrettyName, "Windows Explorer"); // Started without shell
+        // In this case, terminal process will be created by fastfetch itself.
+        ppid = 0;
+    }
+
+    return ppid;
+}
+
+static void setShellInfoDetails(FFTerminalShellResult* result)
+{
     if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "pwsh"))
         ffStrbufSetS(&result->shellPrettyName, "PowerShell");
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "powershell"))
@@ -131,7 +144,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufClear(&result->shellPrettyName);
 
         FF_AUTO_CLOSE_FD HANDLE snapshot = NULL;
-        while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
+        while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, result->shellPid)) && GetLastError() == ERROR_BAD_LENGTH) {}
 
         if(snapshot)
         {
@@ -154,13 +167,7 @@ static uint32_t getShellInfo(FFTerminalShellResult* result, uint32_t pid)
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "nu"))
         ffStrbufSetS(&result->shellPrettyName, "nushell");
     else if(ffStrbufIgnCaseEqualS(&result->shellPrettyName, "explorer"))
-    {
-        ffStrbufSetS(&result->shellPrettyName, "Windows Explorer"); // Started without shell
-        // In this case, terminal process will be created by fastfetch itself.
-        return 0;
-    }
-
-    return ppid;
+        ffStrbufSetS(&result->shellPrettyName, "Windows Explorer");
 }
 
 static bool getTerminalFromEnv(FFTerminalShellResult* result)
@@ -198,7 +205,7 @@ static bool getTerminalFromEnv(FFTerminalShellResult* result)
     if(!term && (
         getenv("WT_SESSION") != NULL ||
         getenv("WT_PROFILE_ID") != NULL
-    )) term = "Windows Terminal";
+    )) term = "WindowsTerminal";
 
     //Alacritty
     if(!term && (
@@ -334,6 +341,11 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
     else
         result->terminalPid = pid;
 
+    return ppid;
+}
+
+static void setTerminalInfoDetails(FFTerminalShellResult* result)
+{
     if(ffStrbufIgnCaseEqualS(&result->terminalPrettyName, "WindowsTerminal"))
         ffStrbufSetStatic(&result->terminalPrettyName, ffStrbufContainIgnCaseS(&result->terminalExe, ".WindowsTerminalPreview_")
             ? "Windows Terminal Preview"
@@ -347,8 +359,6 @@ static uint32_t getTerminalInfo(FFTerminalShellResult* result, uint32_t pid)
         ffStrbufSetStatic(&result->terminalPrettyName, "Windows Explorer");
     else if(ffStrbufEqualS(&result->terminalPrettyName, "wezterm-gui"))
         ffStrbufSetStatic(&result->terminalPrettyName, "WezTerm");
-
-    return ppid;
 }
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
@@ -379,11 +389,15 @@ const FFTerminalShellResult* ffDetectTerminalShell(void)
         return &result;
 
     ppid = getShellInfo(&result, ppid);
+    setShellInfoDetails(&result);
+
     if(ppid)
         getTerminalInfo(&result, ppid);
 
     if(result.terminalProcessName.length == 0)
         getTerminalFromEnv(&result);
+
+    setTerminalInfoDetails(&result);
 
     ffStrbufInit(&result.terminalVersion);
     fftsGetTerminalVersion(&result.terminalProcessName, &result.terminalExe, &result.terminalVersion);
