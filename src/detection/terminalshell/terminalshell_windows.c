@@ -87,48 +87,50 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName))
-        return 0;
-
-    ffStrbufSet(&result->prettyName, &result->processName);
-    if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
-        ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
-
-    //Common programs that are between terminal and own process, but are not the shell
-    if(
-        ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "doas")          ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "strace")        ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "sshd")          ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "guake-wrapped") ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || //scoop warps the real binaries with a "shim" exe
-        ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
-        ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
-        ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
-    ) {
-        ffStrbufClear(&result->processName);
-        ffStrbufClear(&result->prettyName);
-        ffStrbufClear(&result->exe);
-        result->exeName = NULL;
-        return getShellInfo(result, ppid);
-    }
-
-    ffStrbufClear(&result->version);
-    fftsGetShellVersion(&result->exe, result->prettyName.chars, &result->version);
-
-    result->pid = pid;
-    result->ppid = ppid;
-
-    if(ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName))
     {
-        ffStrbufSetS(&result->prettyName, "Windows Explorer"); // Started without shell
-        // In this case, terminal process will be created by fastfetch itself.
-        ppid = 0;
-    }
+        ffStrbufSet(&result->prettyName, &result->processName);
+        if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+            ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
 
+        //Common programs that are between terminal and own process, but are not the shell
+        if(
+            ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "doas")          ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "strace")        ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "sshd")          ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "guake-wrapped") ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || //scoop warps the real binaries with a "shim" exe
+            ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
+            ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
+            ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
+        ) {
+            ffStrbufClear(&result->processName);
+            ffStrbufClear(&result->prettyName);
+            ffStrbufClear(&result->exe);
+            result->exeName = NULL;
+            pid = ppid;
+            continue;
+        }
+
+        ffStrbufClear(&result->version);
+        fftsGetShellVersion(&result->exe, result->prettyName.chars, &result->version);
+
+        result->pid = pid;
+        result->ppid = ppid;
+
+        if(ffStrbufIgnCaseEqualS(&result->prettyName, "explorer"))
+        {
+            ffStrbufSetS(&result->prettyName, "Windows Explorer"); // Started without shell
+            // In this case, terminal process will be created by fastfetch itself.
+            ppid = 0;
+        }
+
+        break;
+    }
     return ppid;
 }
 
@@ -296,55 +298,57 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    if(pid == 0 || !getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName))
-        return 0;
+    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName))
+    {
+        ffStrbufSet(&result->prettyName, &result->processName);
+        if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+            ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
 
-    ffStrbufSet(&result->prettyName, &result->processName);
-    if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
-        ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
-
-    if(
-        ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh")           ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "cmd")            ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "bash")           ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "zsh")            ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "fish")           ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "nu")             ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "powershell")     ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "powershell_ise") ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "wsl")            || // running inside wsl
-        ffStrbufIgnCaseEqualS(&result->prettyName, "servercoreshell")   || // ServerCore Shell Launcher
-        ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmuC") // wrapper process of ConEmu
-    ) {
-        //We are nested shell
-        ffStrbufClear(&result->processName);
-        ffStrbufClear(&result->prettyName);
-        ffStrbufClear(&result->exe);
-        result->exeName = "";
-        return getTerminalInfo(result, ppid);
-    }
-
-    if(ffStrbufIgnCaseEqualS(&result->prettyName, "sihost")           ||
-        ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")
-    ) {
-        // A CUI program created by Windows Explorer will spawn a conhost as its child.
-        // However the conhost process is just a placeholder;
-        // The true terminal can be Windows Terminal or others.
-        if (!getTerminalFromEnv(result) && !detectDefaultTerminal(result))
-        {
+        if(
+            ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh")            ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "cmd")             ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "bash")            ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "zsh")             ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "fish")            ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "nu")              ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "powershell")      ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "powershell_ise")  ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "wsl")             || // running inside wsl
+            ffStrbufIgnCaseEqualS(&result->prettyName, "servercoreshell") || // ServerCore Shell Launcher
+            ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmuC") // wrapper process of ConEmu
+        ) {
+            //We are nested shell
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
             ffStrbufClear(&result->exe);
             result->exeName = "";
-            return 0;
+            pid = ppid;
+            continue;
         }
-    }
-    else
-    {
-        result->pid = pid;
-        result->ppid = ppid;
-    }
 
+        if(ffStrbufIgnCaseEqualS(&result->prettyName, "sihost")           ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")
+        ) {
+            // A CUI program created by Windows Explorer will spawn a conhost as its child.
+            // However the conhost process is just a placeholder;
+            // The true terminal can be Windows Terminal or others.
+            if (!getTerminalFromEnv(result) && !detectDefaultTerminal(result))
+            {
+                ffStrbufClear(&result->processName);
+                ffStrbufClear(&result->prettyName);
+                ffStrbufClear(&result->exe);
+                result->exeName = "";
+                return 0;
+            }
+        }
+        else
+        {
+            result->pid = pid;
+            result->ppid = ppid;
+        }
+
+        break;
+    }
     return ppid;
 }
 
