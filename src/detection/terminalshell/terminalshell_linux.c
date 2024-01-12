@@ -125,33 +125,37 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
     pid_t ppid = 0;
 
-    if(getProcessNameAndPpid(pid, name, &ppid))
-        return 0;
+    while (getProcessNameAndPpid(pid, name, &ppid) == NULL)
+    {
+        //Common programs that are between terminal and own process, but are not the shell
+        if(
+            ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
+            ffStrEquals(name, "sudo")                ||
+            ffStrEquals(name, "su")                  ||
+            ffStrEquals(name, "strace")              ||
+            ffStrEquals(name, "sshd")                ||
+            ffStrEquals(name, "gdb")                 ||
+            ffStrEquals(name, "lldb")                ||
+            ffStrEquals(name, "lldb-mi")             ||
+            ffStrEquals(name, "login")               ||
+            ffStrEquals(name, "ltrace")              ||
+            ffStrEquals(name, "perf")                ||
+            ffStrEquals(name, "guake-wrapped")       ||
+            ffStrContainsIgnCase(name, "debug")      ||
+            ffStrContainsIgnCase(name, "not-found")  ||
+            ffStrEndsWith(name, ".sh")
+        )
+        {
+            pid = ppid;
+            continue;
+        }
 
-    //Common programs that are between terminal and own process, but are not the shell
-    if(
-        ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
-        ffStrEquals(name, "sudo")                ||
-        ffStrEquals(name, "su")                  ||
-        ffStrEquals(name, "strace")              ||
-        ffStrEquals(name, "sshd")                ||
-        ffStrEquals(name, "gdb")                 ||
-        ffStrEquals(name, "lldb")                ||
-        ffStrEquals(name, "lldb-mi")             ||
-        ffStrEquals(name, "login")               ||
-        ffStrEquals(name, "ltrace")              ||
-        ffStrEquals(name, "perf")                ||
-        ffStrEquals(name, "guake-wrapped")       ||
-        ffStrContainsIgnCase(name, "debug")      ||
-        ffStrContainsIgnCase(name, "not-found")  ||
-        ffStrEndsWith(name, ".sh")
-    )
-        return getShellInfo(result, ppid);
-
-    result->pid = (uint32_t) pid;
-    result->ppid = (uint32_t) ppid;
-    ffStrbufSetS(&result->processName, name);
-    getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        result->pid = (uint32_t) pid;
+        result->ppid = (uint32_t) ppid;
+        ffStrbufSetS(&result->processName, name);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        break;
+    }
     return ppid;
 }
 
@@ -162,39 +166,46 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
     pid_t ppid = 0;
 
-    if(getProcessNameAndPpid(pid, name, &ppid))
-        return 0;
+    while (getProcessNameAndPpid(pid, name, &ppid) == NULL)
+    {
+        //Known shells
+        if (
+            ffStrEquals(name, "ash")        ||
+            ffStrEquals(name, "bash")       ||
+            ffStrEquals(name, "zsh")        ||
+            ffStrEquals(name, "ksh")        ||
+            ffStrEquals(name, "mksh")       ||
+            ffStrEquals(name, "oksh")       ||
+            ffStrEquals(name, "csh")        ||
+            ffStrEquals(name, "tcsh")       ||
+            ffStrEquals(name, "fish")       ||
+            ffStrEquals(name, "dash")       ||
+            ffStrEquals(name, "pwsh")       ||
+            ffStrEquals(name, "nu")         ||
+            ffStrEquals(name, "git-shell")  ||
+            ffStrEquals(name, "elvish")     ||
+            ffStrEquals(name, "oil.ovm")    ||
+            (ffStrEquals(name, "python") && getenv("XONSH_VERSION"))
+        )
+        {
+            pid = ppid;
+            continue;
+        }
 
-    //Known shells
-    if (
-        ffStrEquals(name, "ash")        ||
-        ffStrEquals(name, "bash")       ||
-        ffStrEquals(name, "zsh")        ||
-        ffStrEquals(name, "ksh")        ||
-        ffStrEquals(name, "mksh")       ||
-        ffStrEquals(name, "oksh")       ||
-        ffStrEquals(name, "csh")        ||
-        ffStrEquals(name, "tcsh")       ||
-        ffStrEquals(name, "fish")       ||
-        ffStrEquals(name, "dash")       ||
-        ffStrEquals(name, "pwsh")       ||
-        ffStrEquals(name, "nu")         ||
-        ffStrEquals(name, "git-shell")  ||
-        ffStrEquals(name, "elvish")     ||
-        ffStrEquals(name, "oil.ovm")    ||
-        (ffStrEquals(name, "python") && getenv("XONSH_VERSION"))
-    )
-        return getTerminalInfo(result, ppid);
+        #ifdef __APPLE__
+        // https://github.com/fastfetch-cli/fastfetch/discussions/501
+        if (ffStrEndsWith(name, " (figterm)") || ffStrEndsWith(name, " (cwterm)"))
+        {
+            if (__builtin_expect(getProcessNameAndPpid(ppid, name, &ppid) != NULL, false))
+                return 0;
+        }
+        #endif
 
-    #ifdef __APPLE__
-    // https://github.com/fastfetch-cli/fastfetch/discussions/501
-    if (ffStrEndsWith(name, " (figterm)") || ffStrEndsWith(name, " (cwterm)"))
-        getProcessNameAndPpid(ppid, name, &ppid);
-    #endif
-
-    result->pid = (uint32_t) pid;
-    ffStrbufSetS(&result->processName, name);
-    getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        result->pid = (uint32_t) pid;
+        ffStrbufSetS(&result->processName, name);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        break;
+    }
     return ppid;
 }
 
