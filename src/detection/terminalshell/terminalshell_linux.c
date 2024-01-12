@@ -75,7 +75,7 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
     char buf[PROC_FILE_BUFFSIZ];
     ssize_t nRead = ffReadFileData(statFilePath, sizeof(buf) - 1, buf);
     if(nRead < 0)
-        return "ffReadFileData(statFilePath, sizeof(buf)-1, buf)";
+        return "ffReadFileData(statFilePath, sizeof(buf)-1, buf) failed";
     buf[nRead] = '\0';
 
     *ppid = 0;
@@ -130,20 +130,20 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
     //Common programs that are between terminal and own process, but are not the shell
     if(
-        strcasecmp(name, "sh")                   == 0 || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
-        strcasecmp(name, "sudo")                 == 0 ||
-        strcasecmp(name, "su")                   == 0 ||
-        strcasecmp(name, "strace")               == 0 ||
-        strcasecmp(name, "sshd")                 == 0 ||
-        strcasecmp(name, "gdb")                  == 0 ||
-        strcasecmp(name, "lldb")                 == 0 ||
-        strcasecmp(name, "lldb-mi")              == 0 ||
-        strcasecmp(name, "login")                == 0 ||
-        strcasecmp(name, "ltrace")               == 0 ||
-        strcasecmp(name, "perf")                 == 0 ||
-        strcasecmp(name, "guake-wrapped")        == 0 ||
-        strcasestr(name, "debug")             != NULL ||
-        strcasestr(name, "command-not-found") != NULL ||
+        ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
+        ffStrEquals(name, "sudo")                ||
+        ffStrEquals(name, "su")                  ||
+        ffStrEquals(name, "strace")              ||
+        ffStrEquals(name, "sshd")                ||
+        ffStrEquals(name, "gdb")                 ||
+        ffStrEquals(name, "lldb")                ||
+        ffStrEquals(name, "lldb-mi")             ||
+        ffStrEquals(name, "login")               ||
+        ffStrEquals(name, "ltrace")              ||
+        ffStrEquals(name, "perf")                ||
+        ffStrEquals(name, "guake-wrapped")       ||
+        ffStrContainsIgnCase(name, "debug")      ||
+        ffStrContainsIgnCase(name, "not-found")  ||
         ffStrEndsWith(name, ".sh")
     )
         return getShellInfo(result, ppid);
@@ -167,22 +167,22 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
     //Known shells
     if (
-        strcasecmp(name, "ash")       == 0 ||
-        strcasecmp(name, "bash")      == 0 ||
-        strcasecmp(name, "zsh")       == 0 ||
-        strcasecmp(name, "ksh")       == 0 ||
-        strcasecmp(name, "mksh")      == 0 ||
-        strcasecmp(name, "oksh")      == 0 ||
-        strcasecmp(name, "csh")       == 0 ||
-        strcasecmp(name, "tcsh")      == 0 ||
-        strcasecmp(name, "fish")      == 0 ||
-        strcasecmp(name, "dash")      == 0 ||
-        strcasecmp(name, "pwsh")      == 0 ||
-        strcasecmp(name, "nu")        == 0 ||
-        strcasecmp(name, "git-shell") == 0 ||
-        strcasecmp(name, "elvish")    == 0 ||
-        strcasecmp(name, "oil.ovm")   == 0 ||
-        (strcasecmp(name, "python") == 0 && getenv("XONSH_VERSION"))
+        ffStrEquals(name, "ash")        ||
+        ffStrEquals(name, "bash")       ||
+        ffStrEquals(name, "zsh")        ||
+        ffStrEquals(name, "ksh")        ||
+        ffStrEquals(name, "mksh")       ||
+        ffStrEquals(name, "oksh")       ||
+        ffStrEquals(name, "csh")        ||
+        ffStrEquals(name, "tcsh")       ||
+        ffStrEquals(name, "fish")       ||
+        ffStrEquals(name, "dash")       ||
+        ffStrEquals(name, "pwsh")       ||
+        ffStrEquals(name, "nu")         ||
+        ffStrEquals(name, "git-shell")  ||
+        ffStrEquals(name, "elvish")     ||
+        ffStrEquals(name, "oil.ovm")    ||
+        (ffStrEquals(name, "python") && getenv("XONSH_VERSION"))
     )
         return getTerminalInfo(result, ppid);
 
@@ -202,19 +202,19 @@ static void getTerminalFromEnv(FFTerminalResult* result)
 {
     if(
         result->processName.length > 0 &&
-        !ffStrbufStartsWithIgnCaseS(&result->processName, "login") &&
-        !ffStrbufIgnCaseEqualS(&result->processName, "(login)") &&
+        !ffStrbufStartsWithS(&result->processName, "login") &&
+        !ffStrbufEqualS(&result->processName, "(login)") &&
 
         #ifdef __APPLE__
-        !ffStrbufIgnCaseEqualS(&result->processName, "launchd") &&
-        !ffStrbufIgnCaseEqualS(&result->processName, "stable") && //for WarpTerminal
+        !ffStrbufEqualS(&result->processName, "launchd") &&
+        !ffStrbufEqualS(&result->processName, "stable") && //for WarpTerminal
         #else
-        !ffStrbufIgnCaseEqualS(&result->processName, "systemd") &&
-        !ffStrbufIgnCaseEqualS(&result->processName, "init") &&
-        !ffStrbufIgnCaseEqualS(&result->processName, "(init)") &&
+        !ffStrbufEqualS(&result->processName, "systemd") &&
+        !ffStrbufEqualS(&result->processName, "init") &&
+        !ffStrbufEqualS(&result->processName, "(init)") &&
         #endif
 
-        ffStrbufIgnCaseCompS(&result->processName, "0") != 0
+        ffStrbufEqualS(&result->processName, "0")
     ) return;
 
     const char* term = NULL;
@@ -270,7 +270,7 @@ static void getTerminalFromEnv(FFTerminalResult* result)
         term = getenv("TERM");
 
     //TTY
-    if(!ffStrSet(term) || strcasecmp(term, "linux") == 0)
+    if(!ffStrSet(term) || ffStrEquals(term, "linux"))
         term = ttyname(STDIN_FILENO);
 
     if(ffStrSet(term))
@@ -305,9 +305,9 @@ static void setShellInfoDetails(FFShellResult* result)
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
     else if(ffStrbufEqualS(&result->processName, "nu"))
         ffStrbufInitStatic(&result->prettyName, "nushell");
-    else if(ffStrbufIgnCaseEqualS(&result->processName, "python") && getenv("XONSH_VERSION"))
+    else if(ffStrbufEqualS(&result->processName, "python") && getenv("XONSH_VERSION"))
         ffStrbufInitStatic(&result->prettyName, "xonsh");
-    else if(ffStrbufIgnCaseEqualS(&result->processName, "oil.ovm"))
+    else if(ffStrbufEqualS(&result->processName, "oil.ovm"))
         ffStrbufInitStatic(&result->prettyName, "Oils");
     else
     {

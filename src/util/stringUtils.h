@@ -54,3 +54,13 @@ static inline bool ffStrEquals(const char* str, const char* compareTo)
 {
     return strcmp(str, compareTo) == 0;
 }
+
+static inline bool ffStrContains(const char* str, const char* compareTo)
+{
+    return strstr(str, compareTo) != NULL;
+}
+
+static inline bool ffStrContainsIgnCase(const char* str, const char* compareTo)
+{
+    return strcasestr(str, compareTo) != NULL;
+}
