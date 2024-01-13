@@ -103,7 +103,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         const char* knownGamepad = detectKnownDeviceName(rdi.hid.dwVendorId, rdi.hid.dwProductId);
         if (knownGamepad)
             ffStrbufSetS(&device->name, knownGamepad);
-        HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+        HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
         if (!hHidFile)
         {
             if (!knownGamepad)
@@ -154,27 +154,35 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
                 ))
             )
             {
+                // Controller must be connected by other programs
                 FF_AUTO_FREE uint8_t* reportBuffer = malloc(caps.InputReportByteLength);
-                ssize_t nBytes = ffReadFDData(hHidFile, caps.InputReportByteLength, reportBuffer);
-                if (rdi.hid.dwVendorId == 0x054C)
+                OVERLAPPED overlapped = { };
+                DWORD nBytes;
+                if (ReadFile(hHidFile, reportBuffer, caps.InputReportByteLength, &nBytes, &overlapped) ||
+                    (WaitForSingleObject(hHidFile, FF_IO_TERM_RESP_WAIT_MS) == WAIT_OBJECT_0 && GetOverlappedResult(hHidFile, &overlapped, &nBytes, FALSE)))
                 {
-                    if (nBytes > 31)
+                    if (rdi.hid.dwVendorId == 0x054C)
                     {
-                        uint8_t batteryInfo = reportBuffer[caps.InputReportByteLength == 64 /*USB?*/ ? 30 : 32];
-                        device->battery = (uint8_t) ((batteryInfo & 0x0f) * 100 / (batteryInfo & 0x10 /*charging?*/ ? 11 /*BATTERY_MAX_USB*/ : 8 /*BATTERY_MAX*/));
-                        if (device->battery > 100) device->battery = 100;
+                        if (nBytes > 31)
+                        {
+                            uint8_t batteryInfo = reportBuffer[caps.InputReportByteLength == 64 /*USB?*/ ? 30 : 32];
+                            device->battery = (uint8_t) ((batteryInfo & 0x0f) * 100 / (batteryInfo & 0x10 /*charging?*/ ? 11 /*BATTERY_MAX_USB*/ : 8 /*BATTERY_MAX*/));
+                            if (device->battery > 100) device->battery = 100;
+                        }
+                    }
+                    else
+                    {
+                        if (nBytes > 3 && reportBuffer[0] == 0x30)
+                        {
+                            uint8_t batteryInfo = reportBuffer[2];
+                            device->battery = (uint8_t) (((batteryInfo & 0xE0) >> 4) * 100 / 8);
+                            if (device->battery == 0) device->battery = 1;
+                            else if (device->battery > 100) device->battery = 100;
+                        }
                     }
                 }
                 else
-                {
-                    if (nBytes > 3 && reportBuffer[0] == 0x30) // Controller must be connected by other programs
-                    {
-                        uint8_t batteryInfo = reportBuffer[2];
-                        device->battery = (uint8_t) (((batteryInfo & 0xE0) >> 4) * 100 / 8);
-                        if (device->battery == 0) device->battery = 1;
-                        else if (device->battery > 100) device->battery = 100;
-                    }
-                }
+                    CancelIo(hHidFile);
             }
         }
     }
