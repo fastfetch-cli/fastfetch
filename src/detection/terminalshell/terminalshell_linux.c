@@ -225,7 +225,7 @@ static void getTerminalFromEnv(FFTerminalResult* result)
         !ffStrbufEqualS(&result->processName, "(init)") &&
         #endif
 
-        ffStrbufEqualS(&result->processName, "0")
+        !ffStrbufEqualS(&result->processName, "0")
     ) return;
 
     const char* term = NULL;
