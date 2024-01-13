@@ -152,6 +152,22 @@ static bool getShellVersionNushell(FFstrbuf* exe, FFstrbuf* version)
     return getExeVersionRaw(exe, version); //0.73.0
 }
 
+static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--help",
+        NULL
+    }) != NULL)
+        return false;
+
+    // BusyBox v1.36.1 (2023-11-07 18:53:09 UTC) multi-call binary...
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    ffStrbufTrimLeft(version, 'v');
+    return true;
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -210,6 +226,8 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getShellVersionOils(exe, version);
     if(strcasecmp(exeName, "elvish") == 0)
         return getExeVersionRaw(exe, version);
+    if(strcasecmp(exeName, "ash") == 0)
+        return getShellVersionAsh(exe, version);
     if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
     {
         ffStrbufSetS(version, getenv("XONSH_VERSION"));
