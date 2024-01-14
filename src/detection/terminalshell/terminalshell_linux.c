@@ -341,7 +341,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 
     if(ffStrbufEqualS(&result->processName, "wezterm-gui"))
         ffStrbufInitStatic(&result->prettyName, "WezTerm");
-    if(ffStrbufStartsWithS(&result->processName, "tmux:"))
+    else if(ffStrbufStartsWithS(&result->processName, "tmux:"))
         ffStrbufInitStatic(&result->prettyName, "tmux");
 
     #if defined(__ANDROID__)
