@@ -20,7 +20,7 @@ Bugfixes:
 * Remove trailing `\0` in JSON results (FreeBSD)
 * Fix physical monitor detection with Nvidia drivers (Monitor, Linux)
 * Don't print llvmpipe in vulkan module (Vulkan)
-* Fix system yyjson usage in `fastfetch.c`. Previously embeded `3rdparty/yyjson/yyjson.h` was used in `fastfetch.c` even if `ENABLE_SYSTEM_YYJSON` was set (CMake)
+* Fix system yyjson usage in `fastfetch.c`. Previously embedded `3rdparty/yyjson/yyjson.h` was used in `fastfetch.c` even if `ENABLE_SYSTEM_YYJSON` was set (CMake)
 
 # 2.5.0
 
