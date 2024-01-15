@@ -1,4 +1,4 @@
-# 2.5.1
+# 2.6.0
 
 Changes:
 * Remove support of option `--battery-dir`. We detect a lot of things in `/sys/class/*` and only module `Battery` supports specifying a custom directory for some reason, which is weird.
@@ -21,6 +21,7 @@ Bugfixes:
 * Fix physical monitor detection with Nvidia drivers (Monitor, Linux)
 * Don't print llvmpipe in vulkan module (Vulkan)
 * Fix system yyjson usage in `fastfetch.c`. Previously embedded `3rdparty/yyjson/yyjson.h` was used in `fastfetch.c` even if `ENABLE_SYSTEM_YYJSON` was set (CMake)
+* Fix locale module printing unexpected results in specific environments (Locale)
 
 # 2.5.0
 
