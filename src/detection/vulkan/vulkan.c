@@ -1,5 +1,4 @@
 #include "fastfetch.h"
-#include "common/thread.h"
 #include "detection/gpu/gpu.h"
 #include "detection/vulkan/vulkan.h"
 
@@ -8,7 +7,7 @@
 #include "common/io/io.h"
 #include "common/parsing.h"
 #include "util/stringUtils.h"
-#include "util/mallocHelper.h"
+
 #include <stdlib.h>
 #include <vulkan/vulkan.h>
 
@@ -211,14 +210,8 @@ static const char* detectVulkan(FFVulkanResult* result)
         continue;
     }
 
-    //If the highest device version is lower than the instance version, use it as our vulkan version
-    //otherwise the instance version is the vulkan version
-    if(ffVersionCompare(&instanceVersion, &maxDeviceApiVersion) > 0)
-        ffVersionToPretty(&maxDeviceApiVersion, &result->apiVersion);
-    else
-        ffVersionToPretty(&instanceVersion, &result->apiVersion);
-
-    //Use the highest device conformace version as our conformance version
+    ffVersionToPretty(&instanceVersion, &result->instanceVersion);
+    ffVersionToPretty(&maxDeviceApiVersion, &result->apiVersion);
     ffVersionToPretty(&maxDeviceConformanceVersion, &result->conformanceVersion);
 
     ffvkDestroyInstance(vkInstance, NULL);
@@ -236,6 +229,7 @@ FFVulkanResult* ffDetectVulkan(void)
         ffStrbufInit(&result.driver);
         ffStrbufInit(&result.apiVersion);
         ffStrbufInit(&result.conformanceVersion);
+        ffStrbufInit(&result.instanceVersion);
         ffListInit(&result.gpus, sizeof(FFGPUResult));
 
         #ifdef FF_HAVE_VULKAN

@@ -17,15 +17,16 @@ void ffPrintVulkan(FFVulkanOptions* options)
         return;
     }
 
-    if (vulkan->apiVersion.length == 0 && vulkan->driver.length == 0)
-    {
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "No Vulkan drivers found");
-        return;
-    }
-
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+
+        if (vulkan->apiVersion.length == 0 && vulkan->driver.length == 0)
+        {
+            ffStrbufWriteTo(&vulkan->instanceVersion, stdout);
+            puts(" [Software only]");
+            return;
+        }
 
         if(vulkan->apiVersion.length > 0)
         {
@@ -145,7 +146,8 @@ void ffPrintVulkanHelpFormat(void)
     ffPrintModuleFormatHelp(FF_VULKAN_MODULE_NAME, "{2} - {1}", FF_VULKAN_NUM_FORMAT_ARGS, (const char* []) {
         "Driver name",
         "API version",
-        "Conformance version"
+        "Conformance version",
+        "Instance version",
     });
 }
 
