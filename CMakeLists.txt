@@ -114,12 +114,6 @@ elseif(APPLE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fobjc-arc")
 endif()
 
-# Used for dlopen finding dylibs installed by homebrew
-# `/opt/homebrew/lib` is not on in dlopen search path by default
-if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
-endif()
-
 set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
 if(ENABLE_ASAN)
     message(STATUS "Address sanitizer enabled (DEBUG only)")
@@ -713,7 +707,14 @@ endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
-    target_link_libraries(libfastfetch PRIVATE yyjson)
+    target_link_libraries(libfastfetch PRIVATE yyjson::yyjson)
+    # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
+else()
+    # Used for dlopen finding dylibs installed by homebrew
+    # `/opt/homebrew/lib` is not on in dlopen search path by default
+    if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
+    endif()
 endif()
 
 if(LINUX AND EXISTS "/lib/ld-musl-${CMAKE_HOST_SYSTEM_PROCESSOR}.so.1")
@@ -1007,7 +1008,9 @@ set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(yyjson_FOUND)
     target_compile_definitions(fastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
+    target_link_libraries(fastfetch PRIVATE yyjson::yyjson)
     target_compile_definitions(flashfetch PRIVATE FF_USE_SYSTEM_YYJSON)
+    target_link_libraries(flashfetch PRIVATE yyjson::yyjson)
 endif()
 
 if(WIN32)
