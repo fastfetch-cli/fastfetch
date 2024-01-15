@@ -17,6 +17,12 @@ void ffPrintVulkan(FFVulkanOptions* options)
         return;
     }
 
+    if (vulkan->apiVersion.length == 0 && vulkan->driver.length == 0)
+    {
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "No Vulkan drivers found");
+        return;
+    }
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
