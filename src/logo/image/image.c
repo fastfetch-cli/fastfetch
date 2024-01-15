@@ -265,11 +265,7 @@ static bool compressBlob(void** blob, size_t* length)
 #endif // FF_HAVE_ZLIB
 
 //We use only the defines from here, that are exactly the same in both versions
-#ifdef FF_HAVE_IMAGEMAGICK7
-    #include <MagickCore/MagickCore.h>
-#else
-    #include <magick/MagickCore.h>
-#endif
+#include "magickcore_wrapper.h"
 
 typedef struct ImageData
 {
