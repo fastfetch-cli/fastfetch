@@ -108,6 +108,7 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "vendor", &vulkanGpu->vendor);
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "name", &vulkanGpu->name);
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "driver", &vulkanGpu->driver);
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "platformApi", &vulkanGpu->platformApi);
 
         yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");
 
