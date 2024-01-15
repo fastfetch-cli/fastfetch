@@ -1005,6 +1005,11 @@ set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
+if(yyjson_FOUND)
+    target_compile_definitions(fastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
+    target_compile_definitions(flashfetch PRIVATE FF_USE_SYSTEM_YYJSON)
+endif()
+
 if(WIN32)
     set(TARGET_NAME fastfetch)
     target_sources(fastfetch
