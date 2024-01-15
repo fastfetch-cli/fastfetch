@@ -21,14 +21,14 @@ static void getLocaleFromEnv(FFstrbuf* locale)
 
 static void getLocaleFromStdFn(FFstrbuf* locale)
 {
-    ffStrbufAppendS(locale, setlocale(LC_ALL, NULL));
-
     #ifdef LC_MESSAGES
+    ffStrbufAppendS(locale, setlocale(LC_MESSAGES, NULL));
+
     if(locale->length > 0)
         return;
-
-    ffStrbufAppendS(locale, setlocale(LC_MESSAGES, NULL));
     #endif
+
+    ffStrbufAppendS(locale, setlocale(LC_ALL, NULL));
 }
 
 void ffDetectLocale(FFstrbuf* result)
