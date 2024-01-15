@@ -11,7 +11,7 @@ void ffDetectLocale(FFstrbuf* result)
     if (size > 1) // including '\0'
     {
         ffStrbufSetNWS(result, (uint32_t)size - 1, name);
-        ffStrbufAppendS(result, ".UTF-8"); // set explictly in `ffInitInstance`
+        ffStrbufAppendS(result, ".UTF-8"); // set explicitly in `ffInitInstance`
     }
     else
         ffStrbufSetS(result, setlocale(LC_ALL, NULL));
