@@ -12,12 +12,15 @@ Features:
 * Support battery level detection for gamepads where possible (Gamepad)
 * Support maximum CPU clock detection. Previously base clock was printed (CPU, Windows)
 * Support manufacture date and serial number detection for physical monitors (Monitor)
+* Support ash shell version detection (Shell, Linux)
 
 Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
 * Fix overall memory leaks (macOS)
 * Remove trailing `\0` in JSON results (FreeBSD)
 * Fix physical monitor detection with Nvidia drivers (Monitor, Linux)
+* Don't print llvmpipe in vulkan module (Vulkan)
+* Fix system yyjson usage in `fastfetch.c`. Previously embeded `3rdparty/yyjson/yyjson.h` was used in `fastfetch.c` even if `ENABLE_SYSTEM_YYJSON` was set (CMake)
 
 # 2.5.0
 
