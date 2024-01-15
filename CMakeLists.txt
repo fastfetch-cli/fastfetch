@@ -287,7 +287,6 @@ set(LIBFASTFETCH_SRC
     src/detection/displayserver/displayserver.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
-    src/detection/locale/locale.c
     src/detection/media/media.c
     src/detection/netio/netio.c
     src/detection/opencl/opencl.c
@@ -406,6 +405,7 @@ if(LINUX)
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
+        src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
@@ -459,6 +459,7 @@ elseif(ANDROID)
         src/detection/icons/icons_nosupport.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
+        src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
@@ -519,6 +520,7 @@ elseif(BSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_bsd.c
+        src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
@@ -574,6 +576,7 @@ elseif(APPLE)
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
         src/detection/libc/libc_apple.c
+        src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
@@ -628,6 +631,7 @@ elseif(WIN32)
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
+        src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
