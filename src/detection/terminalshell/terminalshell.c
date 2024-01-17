@@ -228,7 +228,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getExeVersionRaw(exe, version);
     if(strcasecmp(exeName, "ash") == 0)
         return getShellVersionAsh(exe, version);
-    if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
+    if((strcasecmp(exeName, "xonsh") == 0 || strcasecmp(exeName, "python") == 0) && getenv("XONSH_VERSION"))
     {
         ffStrbufSetS(version, getenv("XONSH_VERSION"));
         return true;

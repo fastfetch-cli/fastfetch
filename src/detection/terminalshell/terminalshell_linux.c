@@ -186,7 +186,8 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "git-shell")  ||
             ffStrEquals(name, "elvish")     ||
             ffStrEquals(name, "oil.ovm")    ||
-            (ffStrEquals(name, "python") && getenv("XONSH_VERSION"))
+            ffStrEquals(name, "xonsh")      ||
+            ffStrEndsWith(name, ".sh")
         )
         {
             pid = ppid;
