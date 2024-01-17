@@ -226,7 +226,7 @@ void ffPrintBatteryHelpFormat(void)
         "Battery temperature",
         "Battery cycle count",
         "Battery serial number",
-        "Battery manufactorDate",
+        "Battery manufactor date",
     });
 }
 

@@ -93,11 +93,11 @@ static void detectWarpTerminal(FFTerminalFontResult* terminalFont)
 
 void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
-    if(ffStrbufIgnCaseCompS(&terminal->processName, "iterm.app") == 0 ||
+    if(ffStrbufIgnCaseEqualS(&terminal->processName, "iterm.app") ||
         ffStrbufStartsWithIgnCaseS(&terminal->processName, "iTermServer-"))
         detectIterm2(terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminal->processName, "Apple_Terminal") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "Apple_Terminal"))
         detectAppleTerminal(terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminal->processName, "WarpTerminal") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal"))
         detectWarpTerminal(terminalFont);
 }

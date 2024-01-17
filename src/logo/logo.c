@@ -502,10 +502,10 @@ void ffLogoPrint(void)
 
     //Terminal emulators that support kitty graphics protocol.
     bool supportsKitty =
-        ffStrbufIgnCaseCompS(&terminal->processName, "kitty") == 0 ||
-        ffStrbufIgnCaseCompS(&terminal->processName, "konsole") == 0 ||
-        ffStrbufIgnCaseCompS(&terminal->processName, "wezterm") == 0 ||
-        ffStrbufIgnCaseCompS(&terminal->processName, "wayst") == 0;
+        ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
+        ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
+        ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
+        ffStrbufIgnCaseEqualS(&terminal->processName, "wayst");
 
     //Try to load the logo as an image. If it succeeds, print it and return.
     if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))

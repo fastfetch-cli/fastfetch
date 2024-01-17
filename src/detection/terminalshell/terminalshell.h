@@ -15,7 +15,6 @@ typedef struct FFShellResult
 
 typedef struct FFTerminalResult
 {
-
     FFstrbuf processName;
     FFstrbuf exe;
     FFstrbuf prettyName;

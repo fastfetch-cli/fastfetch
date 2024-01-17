@@ -16,10 +16,7 @@
         "separator",
         "memory",
         "swap",
-        {
-            "type": "disk",
-            "folders": "/"
-        },
+        "disk",
         "battery",
         {
             "type": "colors",

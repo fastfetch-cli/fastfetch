@@ -87,9 +87,9 @@ static void detectConEmu(FFTerminalFontResult* terminalFont)
 
 void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
-    if(ffStrbufIgnCaseCompS(&terminal->processName, "mintty") == 0)
+    if(ffStrbufIgnCaseEqualS(&terminal->processName, "mintty"))
         detectMintty(terminalFont);
-    else if(ffStrbufIgnCaseCompS(&terminal->processName, "conhost.exe") == 0)
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "conhost.exe"))
         detectConhost(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ConEmu"))
         detectConEmu(terminalFont);
