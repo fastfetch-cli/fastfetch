@@ -13,6 +13,8 @@ Features:
 * Support maximum CPU clock detection. Previously base clock was printed (CPU, Windows)
 * Support manufacture date and serial number detection for physical monitors (Monitor)
 * Support ash shell version detection (Shell, Linux)
+* Sound module in FreeBSD now uses native `ioctl`s. Pulseaudio dependency is no longer used.
+* Locale module in Windows now prints the same format as in Linux and other posix systems.
 
 Bugfixes:
 * Fix support of macOS Sonoma (Wallpaper, macOS)
