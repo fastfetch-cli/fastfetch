@@ -1,6 +1,5 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
-#include "common/thread.h"
 #include "util/stringUtils.h"
 
 #include <string.h>
@@ -11,7 +10,6 @@
 #ifdef FF_HAVE_DBUS
 #include "common/dbus.h"
 #include "common/library.h"
-#include "common/parsing.h"
 
 static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResult* result)
 {

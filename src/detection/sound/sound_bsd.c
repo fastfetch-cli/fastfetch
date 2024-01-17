@@ -19,7 +19,7 @@ const char* ffDetectSound(FFlist* devices)
         uint32_t devmask = 0;
         if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devmask) < 0)
             continue;
-        if (!((1 << SOUND_MIXER_VOLUME) & devmask))
+        if (!(devmask & SOUND_MASK_VOLUME))
             continue;
 
         uint32_t mutemask = 0;
@@ -31,13 +31,13 @@ const char* ffDetectSound(FFlist* devices)
             continue;
 
         uint32_t volume;
-        if (ioctl(fd, MIXER_READ(SOUND_MIXER_VOLUME), &volume) < 0)
+        if (ioctl(fd, SOUND_MIXER_READ_VOLUME, &volume) < 0)
             continue;
 
         FFSoundDevice* device = ffListAdd(devices);
         ffStrbufInitS(&device->identifier, path);
         ffStrbufInitF(&device->name, "%s %s", ci.longname, ci.hw_info);
-        device->volume = (1 << SOUND_MIXER_VOLUME) & mutemask
+        device->volume = mutemask & SOUND_MASK_VOLUME
             ? 0
             : ((uint8_t) volume /*left*/ + (uint8_t) (volume >> 8) /*right*/) / 2;
         device->active = true;
