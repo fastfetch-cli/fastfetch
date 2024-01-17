@@ -1217,7 +1217,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "host",
-                                        "description": "Print product name of your computer",
+                                        "description": "Print product name of your computer"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
