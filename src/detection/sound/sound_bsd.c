@@ -1,37 +1,47 @@
 #include "sound.h"
+#include "common/io/io.h"
+#include "common/sysctl.h"
 
-#include <mixer.h>
+#include <fcntl.h>
+#include <sys/soundcard.h>
 
 const char* ffDetectSound(FFlist* devices)
 {
-    int nmixers = mixer_get_nmixers();
-    if (nmixers == 0) return "No mixers found";
-
-    if (__builtin_expect(nmixers > 9, false)) nmixers = 9;
-
     char path[] = "/dev/mixer0";
+    int defaultDev = ffSysctlGetInt("hw.snd.default_unit", -1);
 
-    for (int idev = 0; idev < nmixers; ++idev)
+    for (int idev = 0; idev <= 9; ++idev)
     {
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
-        struct mixer* m = mixer_open(path);
-        if (!m) continue;
+        FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR);
+        if (fd < 0) break;
 
-        if (m->mode & MIX_MODE_PLAY)
-        {
-            struct mix_dev* dev = mixer_get_dev_byname(m, "vol");
-            if (dev)
-            {
-                FFSoundDevice* device = ffListAdd(devices);
-                ffStrbufInitS(&device->identifier, path);
-                ffStrbufInitF(&device->name, "%s %s", m->ci.longname, m->ci.hw_info);
-                device->volume = MIX_ISMUTE(m, dev->devno) ? 0 : (uint8_t) MIX_VOLDENORM((dev->vol.left + dev->vol.right) / 2);
-                device->active = true;
-                device->main = !!m->f_default;
-            }
-        }
+        uint32_t devmask = 0;
+        if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devmask) < 0)
+            continue;
+        if (!((1 << SOUND_MIXER_VOLUME) & devmask))
+            continue;
 
-        mixer_close(m);
+        uint32_t mutemask = 0;
+        if (ioctl(fd, SOUND_MIXER_READ_MUTE, &mutemask) < 0)
+            continue;
+
+        struct oss_card_info ci = { .card = idev };
+        if (ioctl(fd, SNDCTL_CARDINFO, &ci) < 0)
+            continue;
+
+        uint32_t volume;
+        if (ioctl(fd, MIXER_READ(SOUND_MIXER_VOLUME), &volume) < 0)
+            continue;
+
+        FFSoundDevice* device = ffListAdd(devices);
+        ffStrbufInitS(&device->identifier, path);
+        ffStrbufInitF(&device->name, "%s %s", ci.longname, ci.hw_info);
+        device->volume = (1 << SOUND_MIXER_VOLUME) & mutemask
+            ? 0
+            : ((uint8_t) volume /*left*/ + (uint8_t) (volume >> 8) /*right*/) / 2;
+        device->active = true;
+        device->main = defaultDev == idev;
     }
 
     return NULL;
