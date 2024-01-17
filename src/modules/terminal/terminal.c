@@ -10,9 +10,9 @@
 
 void ffPrintTerminal(FFTerminalOptions* options)
 {
-    const FFTerminalShellResult* result = ffDetectTerminalShell();
+    const FFTerminalResult* result = ffDetectTerminal();
 
-    if(result->terminalProcessName.length == 0)
+    if(result->processName.length == 0)
     {
         ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect terminal");
         return;
@@ -22,20 +22,20 @@ void ffPrintTerminal(FFTerminalOptions* options)
     {
         ffPrintLogoAndKey(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        if(result->terminalVersion.length)
-            printf("%s %s\n", result->terminalPrettyName.chars, result->terminalVersion.chars);
+        if(result->version.length)
+            printf("%s %s\n", result->prettyName.chars, result->version.chars);
         else
-            ffStrbufPutTo(&result->terminalPrettyName, stdout);
+            ffStrbufPutTo(&result->prettyName, stdout);
     }
     else
     {
         ffPrintFormat(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalProcessName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->terminalExeName},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->terminalPid},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalPrettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->terminalVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe},
+            {FF_FORMAT_ARG_TYPE_STRING, result->exeName},
+            {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
         });
     }
 }
@@ -77,21 +77,22 @@ void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* do
 
 void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    const FFTerminalShellResult* result = ffDetectTerminalShell();
+    const FFTerminalResult* result = ffDetectTerminal();
 
-    if(result->terminalProcessName.length == 0)
+    if(result->processName.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect terminal");
         return;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->terminalProcessName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->terminalExe);
-    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->terminalExeName);
-    yyjson_mut_obj_add_uint(doc, obj, "pid", result->terminalPid);
-    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->terminalPrettyName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->terminalVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->exe);
+    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->exeName);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", result->pid);
+    yyjson_mut_obj_add_uint(doc, obj, "ppid", result->ppid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
 }
 
 void ffPrintTerminalHelpFormat(void)

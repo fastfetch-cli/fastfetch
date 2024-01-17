@@ -25,7 +25,7 @@ private:
 extern "C"
 const char* ffDetectWMPlugin(FFstrbuf* pluginName)
 {
-    DWORD pid = ffDetectTerminalShell()->terminalPid; // Whatever GUI program
+    DWORD pid = ffDetectTerminal()->pid; // Whatever GUI program
     if (pid == 0) return "Unable to find a GUI program";
 
     FF_AUTO_CLOSE_FD HANDLE snapshot = NULL;

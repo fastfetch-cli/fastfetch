@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "common/sysctl.h"
 #include "detection/temps/temps_apple.h"
+#include "util/stringUtils.h"
 
 static double detectCpuTemp(const FFstrbuf* cpuName)
 {
@@ -35,44 +36,33 @@ static const char* detectFrequency(FFCPUResult* cpu)
 {
     // https://github.com/giampaolo/psutil/pull/2222/files
 
-    io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching("AppleARMIODevice"), &iterator) != kIOReturnSuccess)
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("pmgr"));
+    if (!entryDevice)
         return "IOServiceGetMatchingServices() failed";
 
-    io_registry_entry_t registryEntry;
-    while((registryEntry = IOIteratorNext(iterator)) != 0)
+    if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice"))
+        return "\"pmgr\" should conform to \"AppleARMIODevice\"";
+
+    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
+    if (IORegistryEntryCreateCFProperties(entryDevice, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+        return "IORegistryEntryCreateCFProperties() failed";
+
+    uint32_t pMin, eMin, aMax, pCoreLength;
+    if (ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), 0, 4, (uint8_t*) &pMin, &pCoreLength) != NULL) // pCore
+        return "\"voltage-states5-sram\" in \"pmgr\" is not found";
+    if (ffCfDictGetData(properties, CFSTR("voltage-states1-sram"), 0, 4, (uint8_t*) &eMin, NULL) != NULL) // eCore
+        return "\"voltage-states1-sram\" in \"pmgr\" is not found";
+
+    cpu->frequencyMin = (pMin < eMin ? pMin : eMin) / (1000.0 * 1000 * 1000);
+
+    if (pCoreLength >= 8)
     {
-        CFMutableDictionaryRef properties;
-        if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
-        {
-            IOObjectRelease(registryEntry);
-            continue;
-        }
-
-        io_name_t name;
-        if (IORegistryEntryGetName(registryEntry, name) != KERN_SUCCESS)
-            continue;
-        if (strcmp(name, "pmgr") != 0)
-            continue;
-
-        uint32_t pMin, eMin, aMax, pCoreLength;
-        ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), 0, 4, (uint8_t*) &pMin, &pCoreLength); // pCore
-        ffCfDictGetData(properties, CFSTR("voltage-states1-sram"), 0, 4, (uint8_t*) &eMin, NULL); // eCore
-        cpu->frequencyMin = (pMin < eMin ? pMin : eMin) / (1000.0 * 1000 * 1000);
-
-        if (pCoreLength >= 8)
-        {
-            ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), pCoreLength - 8, 4, (uint8_t*) &aMax, NULL);
-            cpu->frequencyMax = aMax / (1000.0 * 1000 * 1000);
-        }
-        else
-            cpu->frequencyMax = 0.0;
-
-        CFRelease(properties);
-        IOObjectRelease(registryEntry);
+        ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), pCoreLength - 8, 4, (uint8_t*) &aMax, NULL);
+        cpu->frequencyMax = aMax / (1000.0 * 1000 * 1000);
     }
+    else
+        cpu->frequencyMax = 0.0;
 
-    IOObjectRelease(iterator);
     return NULL;
 }
 #else

@@ -8,8 +8,4 @@ typedef struct FFChassisOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
-
-    #ifdef _WIN32
-    bool useWmi;
-    #endif
 } FFChassisOptions;

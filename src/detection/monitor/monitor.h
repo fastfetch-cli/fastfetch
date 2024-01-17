@@ -8,6 +8,9 @@ typedef struct FFMonitorResult
     uint32_t physicalWidth; // in mm
     uint32_t physicalHeight; // in mm
     bool hdrCompatible;
+    uint16_t manufactureYear;
+    uint16_t manufactureWeek;
+    uint32_t serial;
 } FFMonitorResult;
 
 const char* ffDetectMonitor(FFlist* results);

@@ -384,7 +384,6 @@ __fastfetch_completion()
         "--lib-pulse"
         "--lib-ddcutil"
         "--lib-nm"
-        "--battery-dir"
     )
 
     local FF_OPTIONS_LOGO=(

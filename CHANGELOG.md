@@ -1,3 +1,32 @@
+# 2.6.0
+
+Changes:
+* Remove support of option `--battery-dir`. We detect a lot of things in `/sys/class/*` and only module `Battery` supports specifying a custom directory for some reason, which is weird.
+* Remove `--chassis-use-wmi` which is no longer used.
+
+Features:
+* Add `ENABLE_PROPRIETARY_GPU_DRIVER_API` cmake option to disable using of proprietary GPU driver APIs (GPU)
+* Support wallpaper detection for macOS Sonoma (Wallpaper, macOS)
+* Support power adapter detection for Asahi Linux (PowerAdapter, Linux)
+* Support battery serial number and manufacturer date detection (Battery)
+* Support host serial number and UUID detection (Host)
+* Support battery level detection for gamepads where possible (Gamepad)
+* Support maximum CPU clock detection. Previously base clock was printed (CPU, Windows)
+* Support manufacture date and serial number detection for physical monitors (Monitor)
+* Support ash (default shell of BusyBox) version detection (Shell, Linux)
+* Sound module in FreeBSD now uses native `ioctl`s. Pulseaudio dependency is no longer used.
+* Locale module in Windows now prints the same format as in Linux and other posix systems.
+
+Bugfixes:
+* Fix overall memory leaks (macOS)
+* Remove trailing `\0` in JSON results (FreeBSD)
+* Fix physical monitor detection with Nvidia drivers (Monitor, Linux)
+* Don't print llvmpipe in vulkan module (Vulkan)
+* Fix system yyjson usage in `fastfetch.c`. Previously embedded `3rdparty/yyjson/yyjson.h` was used in `fastfetch.c` even if `ENABLE_SYSTEM_YYJSON` was set (CMake)
+* Fix locale module printing unexpected results in specific environments (Locale)
+* Fix battery temperature detection in Windows. Note only smart batteries report temperatures but few laptops uses smart battery (Battery, Windows)
+* Print device name if no backlight name is available, so we don't print empty parentheses (Brightness, FreeBSD)
+
 # 2.5.0
 
 Changes:

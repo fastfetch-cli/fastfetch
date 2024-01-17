@@ -83,6 +83,7 @@ void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
 FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
+FF_C_NODISCARD int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue);
 FF_C_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue);
 
 void ffStrbufUpperCase(FFstrbuf* strbuf);
@@ -222,6 +223,8 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreate()
 static inline void ffStrbufInitStatic(FFstrbuf* strbuf, const char* str)
 {
     ffStrbufInit(strbuf);
+    if (!str) return;
+
     strbuf->allocated = 0;
     strbuf->length = (uint32_t) strlen(str);
     strbuf->chars = (char*) str;

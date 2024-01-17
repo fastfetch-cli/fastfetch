@@ -9,14 +9,6 @@
 #include <IOKit/storage/IOStorageProtocolCharacteristics.h>
 #include <IOKit/storage/nvme/NVMeSMARTLibExternal.h>
 
-static inline void wrapIoObjectRelease(io_service_t* service)
-{
-    assert(service);
-    if (*service)
-        IOObjectRelease(*service);
-}
-#define FF_IOOBJECT_AUTO_RELEASE __attribute__((__cleanup__(wrapIoObjectRelease)))
-
 static inline void wrapIoDestroyPlugInInterface(IOCFPlugInInterface*** pluginInf)
 {
     assert(pluginInf);
@@ -49,11 +41,11 @@ static const char* detectSsdTemp(io_service_t entryPhysical, double* temp)
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 {
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = 0;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOMediaClass), &iterator) != KERN_SUCCESS)
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOMediaClass), &iterator) != KERN_SUCCESS)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;
-    while((registryEntry = IOIteratorNext(iterator)) != 0)
+    while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
         FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryPartition = registryEntry;
 

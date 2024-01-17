@@ -73,15 +73,17 @@ const char* detectByOpenGL(FFlist* gpus)
 
         if (!gpu->vendor.length)
         {
-            if (ffStrbufContainS(&result.renderer, "Apple"))
+            if (ffStrbufContainS(&gpu->name, "Apple"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
-            else if (ffStrbufContainS(&result.renderer, "Intel"))
+            else if (ffStrbufContainS(&gpu->name, "Intel"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
-            else if (ffStrbufContainS(&result.renderer, "AMD") || ffStrbufContainS(&result.renderer, "ATI"))
+            else if (ffStrbufContainS(&gpu->name, "AMD") || ffStrbufContainS(&gpu->name, "ATI"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
-            else if (ffStrbufContainS(&result.renderer, "NVIDIA"))
+            else if (ffStrbufContainS(&gpu->name, "NVIDIA"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
         }
+        if (ffStrbufEqualS(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE))
+            gpu->type = FF_GPU_TYPE_INTEGRATED;
     }
 
     ffStrbufDestroy(&result.version);

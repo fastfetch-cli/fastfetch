@@ -15,7 +15,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             FFGPUResult* gpu = NULL;
             FF_LIST_FOR_EACH(FFGPUResult, x, *gpus)
             {
-                if (x->deviceId == device.registryID || ffStrbufEqualS(&x->name, device.name.UTF8String))
+                if (x->deviceId == device.registryID)
                 {
                     gpu = x;
                     break;
@@ -32,9 +32,20 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             else if ([device supportsFamily:MTLGPUFamilyCommon1])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
 
-            gpu->type = device.hasUnifiedMemory ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            if (gpu->type == device.hasUnifiedMemory)
+            {
+                gpu->type = FF_GPU_TYPE_INTEGRATED;
+                gpu->shared.total = device.recommendedMaxWorkingSetSize;
+                gpu->shared.used = device.currentAllocatedSize;
+            }
+            else
+            {
+                gpu->type = FF_GPU_TYPE_DISCRETE;
+                gpu->dedicated.total = device.recommendedMaxWorkingSetSize;
+                gpu->dedicated.used = device.currentAllocatedSize;
+            }
         }
+        return NULL;
     }
-
-    return NULL;
+    return "Metal API is not supported by this macOS version";
 }

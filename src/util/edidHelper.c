@@ -50,6 +50,20 @@ void ffEdidGetPhysicalSize(const uint8_t edid[128], uint32_t* width, uint32_t* h
     *height = (((uint32_t) edid[68] & 0x0F) << 8) + edid[67];
 }
 
+void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial, uint16_t* year, uint16_t* week)
+{
+    if (edid[17] > 0 && edid[17] < 0xFF)
+    {
+        *year = edid[17] + 1990;
+        *week = edid[16];
+        if (*week == 0xFF) *week = 0;
+    }
+    else
+        *year = *week = 0;
+
+    *serial = *(uint32_t*) &edid[12];
+}
+
 bool ffEdidGetHdrCompatible(const uint8_t* edid, uint32_t length)
 {
     if (length <= 128) return false;

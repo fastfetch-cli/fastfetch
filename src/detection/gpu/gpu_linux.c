@@ -1,6 +1,9 @@
 #include "detection/gpu/gpu.h"
-#include "detection/gpu/gpu_driver_specific.h"
 #include "detection/vulkan/vulkan.h"
+
+#ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
+    #include "detection/gpu/gpu_driver_specific.h"
+#endif
 
 #ifdef FF_HAVE_LIBPCI
 #include "common/io/io.h"
@@ -245,6 +248,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
+    #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
     {
         ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
@@ -266,6 +270,7 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
             gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
     }
+    #endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
 
     #ifdef __linux__
     if(options->temp && gpu->temperature != gpu->temperature)

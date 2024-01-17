@@ -40,6 +40,7 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results)
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);
     ffStrbufInit(&battery->technology);
+    ffStrbufInit(&battery->manufactureDate);
 
     battery->capacity = yyjson_get_num(yyjson_obj_get(root, "percentage"));
     ffStrbufAppendS(&battery->status, yyjson_get_str(yyjson_obj_get(root, "status")));

@@ -59,6 +59,15 @@ void ffPrintMonitor(FFMonitorOptions* options)
         }
         else
         {
+            char buf[32];
+            if (display->serial)
+            {
+                const uint8_t* nums = (uint8_t*) &display->serial;
+                snprintf(buf, sizeof(buf), "%2X-%2X-%2X-%2X", nums[0], nums[1], nums[2], nums[3]);
+            }
+            else
+                buf[0] = '\0';
+
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_MONITOR_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->width},
@@ -67,6 +76,9 @@ void ffPrintMonitor(FFMonitorOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT, &display->physicalHeight},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &inch},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &ppi},
+                {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureYear},
+                {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureWeek},
+                {FF_FORMAT_ARG_TYPE_STRING, buf},
             });
         }
 
@@ -131,11 +143,31 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
         {
             yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
             yyjson_mut_obj_add_bool(doc, obj, "hdrCompatible", item->hdrCompatible);
-            yyjson_mut_obj_add_uint(doc, obj, "width", item->width);
-            yyjson_mut_obj_add_uint(doc, obj, "height", item->height);
             yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
-            yyjson_mut_obj_add_uint(doc, obj, "physicalHeight", item->physicalHeight);
-            yyjson_mut_obj_add_uint(doc, obj, "physicalWidth", item->physicalWidth);
+
+            yyjson_mut_val* resolution = yyjson_mut_obj_add_obj(doc, obj, "resolution");
+            yyjson_mut_obj_add_uint(doc, resolution, "width", item->width);
+            yyjson_mut_obj_add_uint(doc, resolution, "height", item->height);
+
+            yyjson_mut_val* physical = yyjson_mut_obj_add_obj(doc, obj, "physical");
+            yyjson_mut_obj_add_uint(doc, physical, "height", item->physicalHeight);
+            yyjson_mut_obj_add_uint(doc, physical, "width", item->physicalWidth);
+
+            if (item->manufactureYear)
+            {
+                yyjson_mut_val* manufactureDate = yyjson_mut_obj_add_obj(doc, obj, "manufactureDate");
+                yyjson_mut_obj_add_uint(doc, manufactureDate, "year", item->manufactureYear);
+                yyjson_mut_obj_add_uint(doc, manufactureDate, "week", item->manufactureWeek);
+            }
+            else
+            {
+                yyjson_mut_obj_add_null(doc, obj, "manufactureDate");
+            }
+
+            if (item->serial)
+                yyjson_mut_obj_add_uint(doc, obj, "serial", item->serial);
+            else
+                yyjson_mut_obj_add_null(doc, obj, "serial");
         }
     }
 
@@ -154,7 +186,9 @@ void ffPrintMonitorHelpFormat(void)
         "Display physical width in millimeters",
         "Display physical height in millimeters",
         "Display physical diagonal length in inches",
-        "Display physical pixels per inch (PPI)"
+        "Year of manufacturing",
+        "Nth week of manufacturing in the year",
+        "Serial number",
     });
 }
 

@@ -7,10 +7,12 @@
 typedef struct FFBatteryResult
 {
     FFstrbuf manufacturer;
+    FFstrbuf manufactureDate;
     FFstrbuf modelName;
     FFstrbuf technology;
-    double capacity;
     FFstrbuf status;
+    FFstrbuf serial;
+    double capacity;
     double temperature;
     uint32_t cycleCount;
 } FFBatteryResult;

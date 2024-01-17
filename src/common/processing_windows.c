@@ -83,8 +83,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     char str[FF_PIPE_BUFSIZ];
     DWORD nRead = 0;
-    FF_AUTO_CLOSE_FD HANDLE hEvent = CreateEventW(NULL, FALSE, FALSE, NULL);
-    OVERLAPPED overlapped = { .hEvent = hEvent };
+    OVERLAPPED overlapped = { };
     // ReadFile always completes synchronously if the pipe is not created with FILE_FLAG_OVERLAPPED
     do
     {
@@ -93,11 +92,11 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             switch (GetLastError())
             {
             case ERROR_IO_PENDING:
-                if (!timeout || WaitForSingleObject(hEvent, (DWORD) timeout) != WAIT_OBJECT_0)
+                if (!timeout || WaitForSingleObject(hChildPipeRead, (DWORD) timeout) != WAIT_OBJECT_0)
                 {
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
-                    return "WaitForSingleObject(hEvent) failed or timeout";
+                    return "WaitForSingleObject(hChildPipeRead) failed or timeout";
                 }
 
                 if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, FALSE))

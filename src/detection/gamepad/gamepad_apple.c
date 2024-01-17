@@ -1,18 +1,34 @@
 #include "gamepad.h"
 #include "util/apple/cf_helpers.h"
+#include "util/mallocHelper.h"
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDLib.h>
 
-static void enumSet(const void* value, void *context)
+static void enumSet(IOHIDDeviceRef value, FFlist* results)
 {
-    CFStringRef product = IOHIDDeviceGetProperty((IOHIDDeviceRef) value, CFSTR(kIOHIDProductKey));
-    CFStringRef serialNumber = IOHIDDeviceGetProperty((IOHIDDeviceRef) value, CFSTR(kIOHIDSerialNumberKey));
-    FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd((FFlist*) context);
-    ffStrbufInit(&device->identifier);
-    ffCfStrGetString(serialNumber, &device->identifier);
+    FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(results);
+    ffStrbufInit(&device->serial);
     ffStrbufInit(&device->name);
-    ffCfStrGetString(product, &device->name);
+    device->battery = 0;
+
+    CFStringRef manufacturer = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDManufacturerKey));
+    ffCfStrGetString(manufacturer, &device->name);
+
+    CFStringRef product = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDProductKey));
+    if (device->name.length)
+    {
+        ffCfStrGetString(product, &device->serial);
+        ffStrbufAppendC(&device->name, ' ');
+        ffStrbufAppend(&device->name, &device->serial);
+    }
+    else
+    {
+        ffCfStrGetString(product, &device->name);
+    }
+
+    CFStringRef serialNumber = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDSerialNumberKey));
+    ffCfStrGetString(serialNumber, &device->serial);
 }
 
 const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
@@ -21,21 +37,29 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
     if (IOHIDManagerOpen(manager, kIOHIDOptionsTypeNone) != kIOReturnSuccess)
         return "IOHIDManagerOpen() failed";
 
-    CFNumberRef FF_CFTYPE_AUTO_RELEASE genericDesktop = ffCfCreateInt(kHIDPage_GenericDesktop);
-    CFNumberRef FF_CFTYPE_AUTO_RELEASE gamePad = ffCfCreateInt(kHIDUsage_GD_GamePad);
-    CFDictionaryRef FF_CFTYPE_AUTO_RELEASE matching = CFDictionaryCreate(kCFAllocatorDefault, (const void **)(CFStringRef[]){
+    CFDictionaryRef FF_CFTYPE_AUTO_RELEASE matching1 = CFDictionaryCreate(kCFAllocatorDefault, (const void **)(CFStringRef[]){
         CFSTR(kIOHIDDeviceUsagePageKey),
         CFSTR(kIOHIDDeviceUsageKey)
     }, (const void **)(CFNumberRef[]){
-        genericDesktop,
-        gamePad
+        ffCfCreateInt(kHIDPage_GenericDesktop),
+        ffCfCreateInt(kHIDUsage_GD_Joystick)
     }, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    IOHIDManagerSetDeviceMatching(manager, matching);
+    CFDictionaryRef FF_CFTYPE_AUTO_RELEASE matching2 = CFDictionaryCreate(kCFAllocatorDefault, (const void **)(CFStringRef[]){
+        CFSTR(kIOHIDDeviceUsagePageKey),
+        CFSTR(kIOHIDDeviceUsageKey)
+    }, (const void **)(CFNumberRef[]){
+        ffCfCreateInt(kHIDPage_GenericDesktop),
+        ffCfCreateInt(kHIDUsage_GD_GamePad)
+    }, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFArrayRef FF_CFTYPE_AUTO_RELEASE matchings = CFArrayCreate(kCFAllocatorDefault, (const void **)(CFTypeRef[]){
+        matching1, matching2
+    }, 2, &kCFTypeArrayCallBacks);
+    IOHIDManagerSetDeviceMatchingMultiple(manager, matchings);
 
     CFSetRef FF_CFTYPE_AUTO_RELEASE set = IOHIDManagerCopyDevices(manager);
     if (set)
-        CFSetApplyFunction(set, &enumSet, devices);
-    IOHIDManagerClose(manager, 0);
+        CFSetApplyFunction(set, (CFSetApplierFunction) &enumSet, devices);
+    IOHIDManagerClose(manager, kIOHIDOptionsTypeNone);
 
     return NULL;
 }

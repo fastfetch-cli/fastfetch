@@ -804,10 +804,6 @@
                                         "const": "battery",
                                         "description": "Print battery capacity, status, etc"
                                     },
-                                    "dir": {
-                                        "description": "The directory where the battery folders are. Standard: `/sys/class/power_supply/`. Linux only",
-                                        "type": "string"
-                                    },
                                     "useSetupApi": {
                                         "description": "Set if `SetupAPI` should be used on Windows to detect battery info, which supports multi batteries, but slower. Windows only",
                                         "type": "boolean",
@@ -882,11 +878,6 @@
                                     "type": {
                                         "const": "chassis",
                                         "description": "Print chassis type (desktop, laptop, etc)"
-                                    },
-                                    "useWmi": {
-                                        "description": "Set if WMI query should be used on Windows, which detects more information but slower",
-                                        "type": "boolean",
-                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

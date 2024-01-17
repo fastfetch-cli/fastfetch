@@ -843,16 +843,6 @@
             }
         },
         {
-            "long": "chassis-use-wmi",
-            "desc": "Set if WMI query should be used on Windows",
-            "remark": "WMI query detects more information but is slower. Windows only",
-            "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
-            }
-        },
-        {
             "long": "separator-string",
             "desc": "Set the string printed by the separator module",
             "arg": {
@@ -1024,15 +1014,6 @@
                     "all": "Print all sound devices"
                 },
                 "default": "main"
-            }
-        },
-        {
-            "long": "battery-dir",
-            "desc": "The directory where the battery folders are",
-            "remark": "Linux only",
-            "arg": {
-                "type": "path",
-                "default": "/sys/class/power_supply/"
             }
         },
         {

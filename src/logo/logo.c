@@ -498,14 +498,14 @@ void ffLogoPrint(void)
     //Make sure the logo path is set correctly.
     updateLogoPath();
 
-    const FFTerminalShellResult* terminalShell = ffDetectTerminalShell();
+    const FFTerminalResult* terminal = ffDetectTerminal();
 
     //Terminal emulators that support kitty graphics protocol.
     bool supportsKitty =
-        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "kitty") == 0 ||
-        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "konsole") == 0 ||
-        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wezterm") == 0 ||
-        ffStrbufIgnCaseCompS(&terminalShell->terminalProcessName, "wayst") == 0;
+        ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
+        ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
+        ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
+        ffStrbufIgnCaseEqualS(&terminal->processName, "wayst");
 
     //Try to load the logo as an image. If it succeeds, print it and return.
     if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))

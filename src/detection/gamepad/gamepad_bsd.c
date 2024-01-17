@@ -42,8 +42,9 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
                 if (ioctl(fd, USB_GET_DEVICEINFO, &di) != -1)
                 {
                     FFGamepadDevice* device = (FFGamepadDevice*) ffListAdd(devices);
-                    ffStrbufInitS(&device->identifier, di.udi_serial);
+                    ffStrbufInitS(&device->serial, di.udi_serial);
                     ffStrbufInitF(&device->name, "%s %s", di.udi_vendor, di.udi_product);
+                    device->battery = 0;
                 }
             }
         }

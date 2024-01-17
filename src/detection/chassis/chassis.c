@@ -2,9 +2,9 @@
 
 const char* ffChassisTypeToString(uint32_t type)
 {
-    // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.2.0.pdf
+    // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.7.0.pdf
     // 7.4.1 System Enclosure or Chassis Types
-    switch (type)
+    switch (type & 0b01111111)
     {
         case 0x01: return "Other";
         case 0x02: return "Unknown";

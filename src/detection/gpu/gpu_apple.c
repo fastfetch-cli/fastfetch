@@ -38,12 +38,12 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
-    io_iterator_t iterator;
-    if(IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOAcceleratorClassName), &iterator) != kIOReturnSuccess)
+    FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOAcceleratorClassName), &iterator) != kIOReturnSuccess)
         return "IOServiceGetMatchingServices() failed";
 
     io_registry_entry_t registryEntry;
-    while((registryEntry = IOIteratorNext(iterator)) != 0)
+    while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
     {
         CFMutableDictionaryRef properties;
         if(IORegistryEntryCreateCFProperties(registryEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
@@ -105,8 +105,6 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         CFRelease(properties);
         IOObjectRelease(registryEntry);
     }
-
-    IOObjectRelease(iterator);
 
     ffGpuDetectMetal(gpus);
     return NULL;

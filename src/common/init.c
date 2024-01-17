@@ -244,6 +244,15 @@ void ffListFeatures(void)
         #ifdef FF_HAVE_DIRECTX_HEADERS
             "Directx Headers\n"
         #endif
+        #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
+            "Proprietary GPU driver API\n"
+        #endif
+        #ifdef FF_USE_SYSTEM_YYJSON
+            "System yyjson\n"
+        #endif
+        #ifdef FF_USE_PCI_MEMORY
+            "PCI memory\n"
+        #endif
         ""
     , stdout);
 }

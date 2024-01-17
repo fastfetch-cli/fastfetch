@@ -4,11 +4,13 @@
 
 typedef struct FFHostResult
 {
-    FFstrbuf productFamily;
-    FFstrbuf productName;
-    FFstrbuf productVersion;
-    FFstrbuf productSku;
-    FFstrbuf sysVendor;
+    FFstrbuf family;
+    FFstrbuf name;
+    FFstrbuf version;
+    FFstrbuf sku;
+    FFstrbuf serial;
+    FFstrbuf uuid;
+    FFstrbuf vendor;
 } FFHostResult;
 
 const char* ffDetectHost(FFHostResult* host);

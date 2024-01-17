@@ -40,9 +40,13 @@ const char* ffDetectMonitor(FFlist* results)
         CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary((CGDirectDisplayID) display->id);
         if(!displayInfo) continue;
 
+        bool isVirtual = false;
+        if (ffCfDictGetBool(displayInfo, CFSTR("kCGDisplayIsVirtualDevice"), &isVirtual) == NULL && isVirtual)
+            continue;
+
         uint8_t edidData[128] = {};
         uint32_t edidLength = 0;
-        if (false || !ffCfDictGetData(displayInfo, CFSTR("IODisplayEDID"), 0, sizeof(edidData), edidData, &edidLength))
+        if (ffCfDictGetData(displayInfo, CFSTR("IODisplayEDID"), 0, sizeof(edidData), edidData, &edidLength) == NULL)
         {
             uint32_t width, height;
             ffEdidGetPhysicalResolution(edidData, &width, &height);
@@ -75,6 +79,14 @@ const char* ffDetectMonitor(FFlist* results)
         monitor->physicalHeight = (uint32_t) (size.height + 0.5);
         monitor->hdrCompatible = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance")) ||
             detectHdrSupportWithNSScreen(display);
+
+        int64_t serial, year, week;
+        if (ffCfDictGetInt64(displayInfo, CFSTR("DisplaySerialNumber"), &serial) == NULL)
+            monitor->serial = (uint32_t) (uint64_t) serial;
+        if (ffCfDictGetInt64(displayInfo, CFSTR("DisplayYearManufacture"), &year) == NULL)
+            monitor->manufactureYear = (uint16_t) year;
+        if (ffCfDictGetInt64(displayInfo, CFSTR("DisplayWeekManufacture"), &week) == NULL)
+            monitor->manufactureWeek = (uint16_t) week;
     }
 
     return NULL;

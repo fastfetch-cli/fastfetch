@@ -6,7 +6,7 @@
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
 
-#define FF_BATTERY_NUM_FORMAT_ARGS 7
+#define FF_BATTERY_NUM_FORMAT_ARGS 8
 
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
@@ -71,6 +71,8 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
             {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate},
         });
     }
 }
@@ -96,6 +98,8 @@ void ffPrintBattery(FFBatteryOptions* options)
             ffStrbufDestroy(&result->modelName);
             ffStrbufDestroy(&result->technology);
             ffStrbufDestroy(&result->status);
+            ffStrbufDestroy(&result->serial);
+            ffStrbufDestroy(&result->manufactureDate);
         }
         if(results.length == 0)
             ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
@@ -114,14 +118,6 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
         options->temp = ffOptionParseBoolean(value);
         return true;
     }
-
-    #ifdef __linux__
-        if (ffStrEqualsIgnCase(subKey, "dir"))
-        {
-            ffOptionParseString(key, value, &options->dir);
-            return true;
-        }
-    #endif
 
     #ifdef _WIN32
         if (ffStrEqualsIgnCase(subKey, "use-setup-api"))
@@ -147,14 +143,6 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        #ifdef __linux__
-        if (ffStrEqualsIgnCase(key, "dir"))
-        {
-            ffStrbufSetS(&options->dir, yyjson_get_str(val));
-            continue;
-        }
-        #endif
-
         #ifdef _WIN32
         if (ffStrEqualsIgnCase(key, "useSetupApi"))
         {
@@ -179,11 +167,6 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
     ffInitBatteryOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    #ifdef __linux__
-    if (!ffStrbufEqual(&defaultOptions.dir, &options->dir))
-        yyjson_mut_obj_add_strbuf(doc, module, "dir", &options->dir);
-    #endif
 
     #ifdef _WIN32
     if (defaultOptions.useSetupApi != options->useSetupApi)
@@ -212,9 +195,11 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_real(doc, obj, "capacity", battery->capacity);
         yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &battery->manufacturer);
+        yyjson_mut_obj_add_strbuf(doc, obj, "manufactureDate", &battery->manufactureDate);
         yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &battery->modelName);
         yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
         yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
+        yyjson_mut_obj_add_strbuf(doc, obj, "serial", &battery->serial);
         yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
         yyjson_mut_obj_add_uint(doc, obj, "cycleCount", battery->cycleCount);
     }
@@ -222,9 +207,11 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
     FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
     {
         ffStrbufDestroy(&battery->manufacturer);
+        ffStrbufDestroy(&battery->manufactureDate);
         ffStrbufDestroy(&battery->modelName);
         ffStrbufDestroy(&battery->technology);
         ffStrbufDestroy(&battery->status);
+        ffStrbufDestroy(&battery->serial);
     }
 }
 
@@ -238,6 +225,8 @@ void ffPrintBatteryHelpFormat(void)
         "Battery status",
         "Battery temperature",
         "Battery cycle count",
+        "Battery serial number",
+        "Battery manufactor date",
     });
 }
 
@@ -257,9 +246,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
 
-    #ifdef __linux__
-        ffStrbufInitStatic(&options->dir, "/sys/class/power_supply/");
-    #elif defined(_WIN32)
+    #ifdef _WIN32
         options->useSetupApi = false;
     #endif
 }
@@ -267,8 +254,4 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
 void ffDestroyBatteryOptions(FFBatteryOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    #ifdef __linux__
-        ffStrbufDestroy(&options->dir);
-    #endif
 }

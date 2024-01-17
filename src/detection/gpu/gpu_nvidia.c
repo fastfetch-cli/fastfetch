@@ -12,6 +12,7 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetClockInfo)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetBrand)
 
     bool inited;
 } nvmlData;
@@ -32,6 +33,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetClockInfo)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetBrand)
 
         if (ffnvmlInit_v2() != NVML_SUCCESS)
         {
@@ -77,6 +79,24 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
             break;
         }
         if (!device) return "Device not found";
+    }
+
+    nvmlBrandType_t brand;
+    if (nvmlData.ffnvmlDeviceGetBrand(device, &brand) == NVML_SUCCESS)
+    {
+        switch (brand)
+        {
+            case NVML_BRAND_NVIDIA_RTX:
+            case NVML_BRAND_QUADRO_RTX:
+            case NVML_BRAND_GEFORCE:
+            case NVML_BRAND_TITAN:
+            case NVML_BRAND_TESLA:
+            case NVML_BRAND_QUADRO:
+                *result.type = FF_GPU_TYPE_DISCRETE;
+                break;
+            default:
+                break;
+        }
     }
 
     if (result.temp)

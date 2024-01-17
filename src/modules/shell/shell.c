@@ -8,9 +8,9 @@
 
 void ffPrintShell(FFShellOptions* options)
 {
-    const FFTerminalShellResult* result = ffDetectTerminalShell();
+    const FFShellResult* result = ffDetectShell();
 
-    if(result->shellProcessName.length == 0)
+    if(result->processName.length == 0)
     {
         ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect shell");
         return;
@@ -19,12 +19,12 @@ void ffPrintShell(FFShellOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result->shellPrettyName, stdout);
+        ffStrbufWriteTo(&result->prettyName, stdout);
 
-        if(result->shellVersion.length > 0)
+        if(result->version.length > 0)
         {
             putchar(' ');
-            ffStrbufWriteTo(&result->shellVersion, stdout);
+            ffStrbufWriteTo(&result->version, stdout);
         }
 
         putchar('\n');
@@ -32,12 +32,12 @@ void ffPrintShell(FFShellOptions* options)
     else
     {
         ffPrintFormat(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellProcessName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellExe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->shellExeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellVersion},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->shellPid},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->shellPrettyName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe},
+            {FF_FORMAT_ARG_TYPE_STRING, result->exeName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
+            {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
         });
     }
 }
@@ -79,20 +79,21 @@ void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyj
 
 void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    const FFTerminalShellResult* result = ffDetectTerminalShell();
+    const FFShellResult* result = ffDetectShell();
 
-    if(result->shellProcessName.length == 0)
+    if(result->processName.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect shell");
         return;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->shellExe);
-    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->shellExeName);
-    yyjson_mut_obj_add_uint(doc, obj, "pid", result->shellPid);
-    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->shellProcessName);
-    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->shellVersion);
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->exe);
+    yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->exeName);
+    yyjson_mut_obj_add_uint(doc, obj, "pid", result->pid);
+    yyjson_mut_obj_add_uint(doc, obj, "ppid", result->ppid);
+    yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
 }
 
 void ffPrintShellHelpFormat(void)

@@ -5,9 +5,11 @@
 
 #include "fastfetch.h"
 #include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
 
 //Return error info if failed, NULL otherwise
-const char* ffCfStrGetString(CFStringRef str, FFstrbuf* result);
+const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result);
+const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result);
 const char* ffCfNumGetInt64(CFTypeRef cf, int64_t* result);
 const char* ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result);
 const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result);
@@ -28,5 +30,13 @@ static inline void cfReleaseWrapper(void* type)
 }
 
 #define FF_CFTYPE_AUTO_RELEASE __attribute__((__cleanup__(cfReleaseWrapper)))
+
+static inline void wrapIoObjectRelease(io_service_t* service)
+{
+    assert(service);
+    if (*service)
+        IOObjectRelease(*service);
+}
+#define FF_IOOBJECT_AUTO_RELEASE __attribute__((__cleanup__(wrapIoObjectRelease)))
 
 #endif

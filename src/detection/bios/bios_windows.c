@@ -1,5 +1,4 @@
 #include "bios.h"
-#include "util/windows/registry.h"
 #include "util/smbiosHelper.h"
 
 #include <ntstatus.h>
@@ -26,27 +25,46 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
     };
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
 
+
+typedef struct FFSmbiosBios
+{
+    FFSmbiosHeader Header;
+
+    uint8_t Vendor; // string
+    uint8_t BiosVersion; // string
+    uint16_t BiosStartingAddressSegment; // varies
+    uint8_t BiosReleaseDate; // string
+    uint8_t BiosRomSize; // string
+    uint32_t BiosCharacteristics; // bit field
+
+    // 2.4+
+    uint8_t BiosCharacteristicsExtensionBytes[2]; // bit field
+    uint8_t SystemBiosMajorRelease; // varies
+    uint8_t SystemBiosMinorRelease; // varies
+    uint8_t EmbeddedControllerFirmwareMajorRelease; // varies
+    uint8_t EmbeddedControllerFirmwareMinorRelease; // varies
+
+    // 3.1+
+    uint16_t ExtendedBiosRomSize; // bit field
+} FFSmbiosBios;
+
 const char* ffDetectBios(FFBiosResult* bios)
 {
-    FF_HKEY_AUTO_DESTROY hKey = NULL;
-    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\BIOS", &hKey, NULL))
-        return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\BIOS\", &hKey, NULL) failed";
+    const FFSmbiosBios* data = (const FFSmbiosBios*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_BIOS];
+    if (!data)
+        return "BIOS section is not found in SMBIOS data";
 
-    if(!ffRegReadStrbuf(hKey, L"BIOSVersion", &bios->version, NULL))
-        return "\"HKEY_LOCAL_MACHINE\\HARDWARE\\DESCRIPTION\\System\\BIOS\\BIOSVersion\" doesn't exist";
+    const char* strings = (const char*) data + data->Header.Length;
 
+    ffStrbufSetStatic(&bios->version, ffSmbiosLocateString(strings, data->BiosVersion));
     ffCleanUpSmbiosValue(&bios->version);
-    ffRegReadStrbuf(hKey, L"BIOSVendor", &bios->vendor, NULL);
+    ffStrbufSetStatic(&bios->vendor, ffSmbiosLocateString(strings, data->Vendor));
     ffCleanUpSmbiosValue(&bios->vendor);
-    ffRegReadStrbuf(hKey, L"BIOSReleaseDate", &bios->date, NULL);
+    ffStrbufSetStatic(&bios->date, ffSmbiosLocateString(strings, data->BiosReleaseDate));
     ffCleanUpSmbiosValue(&bios->date);
 
-    uint32_t major, minor;
-    if(
-        ffRegReadUint(hKey, L"BiosMajorRelease", &major, NULL) &&
-        ffRegReadUint(hKey, L"BiosMinorRelease", &minor, NULL)
-    )
-        ffStrbufAppendF(&bios->release, "%u.%u", (unsigned)major, (unsigned)minor);
+    if (data->Header.Length > offsetof(FFSmbiosBios, SystemBiosMajorRelease))
+        ffStrbufSetF(&bios->release, "%u.%u", data->SystemBiosMajorRelease, data->SystemBiosMinorRelease);
 
     // Same as GetFirmwareType, but support (?) Windows 7
     // https://ntdoc.m417z.com/system_information_class
