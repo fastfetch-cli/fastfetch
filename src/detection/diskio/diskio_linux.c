@@ -5,6 +5,7 @@
 
 #include <ctype.h>
 #include <limits.h>
+#include <inttypes.h>
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 {
@@ -89,7 +90,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(sysBlockStat) - 1, sysBlockStat);
             if (fileSize <= 0) continue;
             sysBlockStat[fileSize] = '\0';
-            if (sscanf(sysBlockStat, "%lu%*u%lu%*u%lu%*u%lu%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)
+            if (sscanf(sysBlockStat, "%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)
                 continue;
         }
 

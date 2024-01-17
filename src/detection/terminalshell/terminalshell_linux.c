@@ -79,6 +79,7 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
     buf[nRead] = '\0';
 
     *ppid = 0;
+    static_assert(sizeof(*ppid) == sizeof(int), "");
     if(
         sscanf(buf, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
         !ffStrSet(name) ||

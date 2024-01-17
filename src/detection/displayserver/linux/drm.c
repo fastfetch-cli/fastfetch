@@ -46,7 +46,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             continue;
         }
 
-        uint32_t width = 0, height = 0;
+        unsigned width = 0, height = 0;
 
         int scanned = sscanf(modes, "%ux%u", &width, &height);
         if(scanned == 2 && width > 0 && height > 0)

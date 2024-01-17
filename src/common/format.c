@@ -57,7 +57,7 @@ static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
     uint32_t result = UINT32_MAX;
 
     if(placeholderValue->chars[0] != '-')
-        sscanf(placeholderValue->chars, "%u", &result);
+        sscanf(placeholderValue->chars, "%" PRIu32, &result);
 
     return result == 0 ? UINT32_MAX : result;
 }
