@@ -93,6 +93,7 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->pid);
     yyjson_mut_obj_add_uint(doc, obj, "ppid", result->ppid);
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
 }
 

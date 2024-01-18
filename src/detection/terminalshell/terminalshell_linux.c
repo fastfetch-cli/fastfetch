@@ -4,14 +4,13 @@
 #include "common/processing.h"
 #include "common/thread.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef __APPLE__
-    #include <libproc.h>
-#elif defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__APPLE__)
     #include <sys/types.h>
     #include <sys/user.h>
     #include <sys/sysctl.h>
@@ -38,15 +37,31 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     if(ffAppendFileBuffer(cmdlineFilePath, exe))
     {
         ffStrbufTrimRightSpace(exe);
-        ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
-        ffStrbufTrimLeft(exe, '-'); //Happens in TTY
+        ffStrbufRecalculateLength(exe); //Trim the arguments
+        ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
     }
 
     #elif defined(__APPLE__)
 
-    int length = proc_pidpath((int)pid, exe->chars, exe->allocated);
-    if(length > 0)
-        exe->length = (uint32_t)length;
+    size_t len = 0;
+    int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
+    if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), NULL, &len, NULL, 0) == 0)
+    {
+        FF_AUTO_FREE char* const procArgs2 = malloc(len);
+        if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), procArgs2, &len, NULL, 0) == 0)
+        {
+            // https://gist.github.com/nonowarn/770696#file-getargv-c-L46
+            uint32_t argc = *(uint32_t*) procArgs2;
+            const char* realExePath = procArgs2 + sizeof(argc);
+
+            const char* arg0 = memchr(realExePath, '\0', len - (size_t) (realExePath - procArgs2));
+            while (*arg0 == '\0') arg0++;
+            assert(arg0 < procArgs2 + len);
+            if (*arg0 == '-') arg0++; // Login shells
+
+            ffStrbufSetS(exe, arg0);
+        }
+    }
 
     #elif defined(__FreeBSD__)
 
@@ -89,12 +104,17 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 
     #elif defined(__APPLE__)
 
-    struct proc_bsdshortinfo proc;
-    if(proc_pidinfo(pid, PROC_PIDT_SHORTBSDINFO, 0, &proc, PROC_PIDT_SHORTBSDINFO_SIZE) <= 0)
-        return "proc_pidinfo(pid) failed";
+    struct kinfo_proc proc;
+    size_t size = sizeof(proc);
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PID, pid}, 4,
+        &proc, &size,
+        NULL, 0
+    ))
+        return "sysctl(KERN_PROC_PID) failed";
 
-    *ppid = (pid_t)proc.pbsi_ppid;
-    strncpy(name, proc.pbsi_comm, 16); //trancated to 16 chars
+    *ppid = (pid_t)proc.kp_eproc.e_ppid;
+    strncpy(name, proc.kp_proc.p_comm, MAXCOMLEN); //trancated to 16 chars
 
     #elif defined(__FreeBSD__)
 
@@ -186,7 +206,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "git-shell")  ||
             ffStrEquals(name, "elvish")     ||
             ffStrEquals(name, "oil.ovm")    ||
-            ffStrEquals(name, "xonsh")      ||
+            ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrEndsWith(name, ".sh")
         )
         {
@@ -318,8 +338,6 @@ static void setShellInfoDetails(FFShellResult* result)
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
     else if(ffStrbufEqualS(&result->processName, "nu"))
         ffStrbufInitStatic(&result->prettyName, "nushell");
-    else if(ffStrbufEqualS(&result->processName, "python") && getenv("XONSH_VERSION"))
-        ffStrbufInitStatic(&result->prettyName, "xonsh");
     else if(ffStrbufEqualS(&result->processName, "oil.ovm"))
         ffStrbufInitStatic(&result->prettyName, "Oils");
     else
@@ -383,9 +401,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
 }
 
-#ifdef __APPLE__
-#define FF_EXE_PATH_LEN PROC_PIDPATHINFO_MAXSIZE
-#elif defined(MAXPATH)
+#if defined(MAXPATH)
 #define FF_EXE_PATH_LEN MAXPATH
 #elif defined(PATH_MAX)
 #define FF_EXE_PATH_LEN PATH_MAX

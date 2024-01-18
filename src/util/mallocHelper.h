@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-static inline void ffWrapFree(void* pPtr)
+static inline void ffWrapFree(const void* pPtr)
 {
     assert(pPtr);
     if(*(void**)pPtr)
