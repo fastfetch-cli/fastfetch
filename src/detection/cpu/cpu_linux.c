@@ -191,6 +191,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                             ffStrbufAppendS(&cpu->vendor, pstart);
                         }
                         pstart = pend + 1;
+                        if (pstart >= buffer.chars + buffer.length)
+                            return NULL;
                     }
                 }
             }
@@ -222,6 +224,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                 }
 
                 pstart = pend + 1;
+                if (pstart >= buffer.chars + buffer.length)
+                    return NULL;
             }
         }
     }
