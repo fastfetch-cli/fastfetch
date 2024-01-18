@@ -1,3 +1,10 @@
+# 2.6.1
+
+Bugfixes:
+* Fix segfault in CPU module when running in aarch64 machine without `lscpu` installed (CPU, Linux)
+* Improve xonsh shell detection (Shell, Linux)
+* Silence warnings when building in 32bit machines.
+
 # 2.6.0
 
 Changes:
