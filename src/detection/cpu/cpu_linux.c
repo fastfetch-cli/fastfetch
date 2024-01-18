@@ -209,7 +209,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
                 if (*pstart == '-')
                 {
-                    ffStrbufAppendS(&cpu->name, "Unknown");
+                    if (cpu->vendor.length > 0)
+                        ffStrbufAppend(&cpu->name, &cpu->vendor);
+                    else
+                        ffStrbufAppendS(&cpu->name, "Unknown");
                     ++pstart;
                     continue;
                 }
