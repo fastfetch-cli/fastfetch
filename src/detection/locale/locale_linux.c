@@ -33,6 +33,14 @@ static void getLocaleFromStdFn(FFstrbuf* locale)
 
 void ffDetectLocale(FFstrbuf* result)
 {
+    #ifndef _WIN32
+
+        getLocaleFromEnv(result);
+        if(result->length > 0)
+            return;
+
+    #endif
+
     #if !(defined(__APPLE__) || defined(_WIN32))
 
         //Ubuntu (and deriviates) use a non standard locale file.
@@ -44,14 +52,6 @@ void ffDetectLocale(FFstrbuf* result)
             return;
 
         ffParsePropFile(FASTFETCH_TARGET_DIR_ETC"/locale.conf", "LANG =", result);
-        if(result->length > 0)
-            return;
-
-    #endif
-
-    #ifndef _WIN32
-
-        getLocaleFromEnv(result);
         if(result->length > 0)
             return;
 
