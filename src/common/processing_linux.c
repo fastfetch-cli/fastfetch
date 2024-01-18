@@ -13,13 +13,6 @@
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
-static inline void waitpid_wrapper(const pid_t* pid)
-{
-    // remove zombie processes
-    if (*pid > 0)
-        waitpid(*pid, NULL, 0);
-}
-
 static inline int ffPipe2(int *fds, int flags)
 {
     #ifdef __APPLE__
@@ -41,7 +34,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if(ffPipe2(pipes, O_CLOEXEC) == -1)
         return "pipe() failed";
 
-    __attribute__((__cleanup__(waitpid_wrapper))) pid_t childPid = fork();
+    pid_t childPid = fork();
     if(childPid == -1)
     {
         close(pipes[0]);
@@ -74,11 +67,13 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             if (poll(&pollfd, 1, timeout) == 0)
             {
                 kill(childPid, SIGTERM);
+                waitpid(childPid, NULL, 0);
                 return "poll(&pollfd, 1, timeout) timeout";
             }
             else if (pollfd.revents & POLLERR)
             {
                 kill(childPid, SIGTERM);
+                waitpid(childPid, NULL, 0);
                 return "poll(&pollfd, 1, timeout) error";
             }
         }
@@ -87,7 +82,19 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         if (nRead > 0)
             ffStrbufAppendNS(buffer, (uint32_t) nRead, str);
         else if (nRead == 0)
-            return NULL;
+        {
+            int stat_loc = 0;
+            if (waitpid(childPid, &stat_loc, 0) == childPid)
+            {
+                if (!WIFEXITED(stat_loc))
+                    return "child process exited abnormally";
+                if (WEXITSTATUS(stat_loc) == 127)
+                    return "command was not found";
+                // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
+                return NULL;
+            }
+            return "waitpid() failed";
+        }
         else if (nRead < 0)
             break;
     };
