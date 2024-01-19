@@ -65,13 +65,31 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
     #elif defined(__FreeBSD__)
 
-    size_t size = exe->allocated;
-    if(!sysctl(
-        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
-        exe->chars, &size,
+    size_t size = ARG_MAX;
+    FF_AUTO_FREE char* args = malloc(size);
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_ARGS, pid}, 4,
+        args, &size,
         NULL, 0
-    ))
-        exe->length = (uint32_t)size - 1;
+    ) == 0)
+    {
+        char* arg0 = args;
+        size_t arg0Len = strlen(args);
+        if (size > arg0Len + 1)
+        {
+            char* p = (char*) memrchr(args, '/', arg0Len);
+            if (p)
+            {
+                p++;
+                if (ffStrStartsWith(p, "python")) // /usr/local/bin/python3.9 /home/carter/.local/bin/xonsh
+                {
+                    arg0 += arg0Len + 1;
+                }
+            }
+        }
+        if (arg0[0] == '-') arg0++;
+        ffStrbufSetS(exe, arg0);
+    }
 
     #endif
 
