@@ -31,14 +31,23 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
     #ifdef __linux__
 
-    char cmdlineFilePath[64];
-    snprintf(cmdlineFilePath, sizeof(cmdlineFilePath), "/proc/%d/cmdline", (int)pid);
+    char filePath[64];
+    snprintf(filePath, sizeof(filePath), "/proc/%d/cmdline", (int)pid);
 
-    if(ffAppendFileBuffer(cmdlineFilePath, exe))
+    if(ffAppendFileBuffer(filePath, exe))
     {
         ffStrbufTrimRightSpace(exe);
         ffStrbufRecalculateLength(exe); //Trim the arguments
         ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
+    }
+
+    snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
+    ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
+    ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+    if (length > 0) // doesn't contain trailing NUL
+    {
+        exePath->chars[length + 1] = '\0';
+        exePath->length = (uint32_t) length;
     }
 
     #elif defined(__APPLE__)
