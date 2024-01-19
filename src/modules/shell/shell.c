@@ -39,6 +39,7 @@ void ffPrintShell(FFShellOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
+            {FF_FORMAT_ARG_TYPE_INT, &result->tty},
         });
     }
 }
@@ -97,6 +98,10 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
+    if (result->tty >= 0)
+        yyjson_mut_obj_add_int(doc, obj, "tty", result->tty);
+    else
+        yyjson_mut_obj_add_null(doc, obj, "tty");
 }
 
 void ffPrintShellHelpFormat(void)

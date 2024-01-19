@@ -379,6 +379,7 @@ const FFShellResult* ffDetectShell(void)
     ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
+    result.tty = -1;
 
     uint32_t ppid;
     if(!getProcessInfo(0, &ppid, NULL, NULL, NULL, NULL, NULL))

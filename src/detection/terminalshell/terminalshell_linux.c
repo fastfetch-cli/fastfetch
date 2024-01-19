@@ -121,7 +121,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     setExeName(exe, exeName);
 }
 
-static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
+static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int32_t* tty)
 {
     #ifdef __linux__
 
@@ -135,12 +135,17 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
 
     *ppid = 0;
     static_assert(sizeof(*ppid) == sizeof(int), "");
+
+    int tty_;
     if(
-        sscanf(buf, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
+        sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
         !ffStrSet(name) ||
         *ppid == 0
     )
         return "sscanf(stat) failed";
+
+    if (tty && (tty_ >> 8) == 0x88)
+        *tty = tty_ & 0xFF;
 
     #elif defined(__APPLE__)
 
@@ -154,7 +159,13 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
         return "sysctl(KERN_PROC_PID) failed";
 
     *ppid = (pid_t)proc.kp_eproc.e_ppid;
-    strncpy(name, proc.kp_proc.p_comm, MAXCOMLEN); //trancated to 16 chars
+    strcpy(name, proc.kp_proc.p_comm); //trancated to 16 chars
+    if (tty)
+    {
+        *tty = ((proc.kp_eproc.e_tdev >> 24) & 0xFF) == 0x10
+            ? proc.kp_eproc.e_tdev & 0xFFFFFF
+            : -1;
+    }
 
     #elif defined(__FreeBSD__)
 
@@ -168,7 +179,20 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
         return "sysctl(KERN_PROC_PID) failed";
 
     *ppid = (pid_t)proc.ki_ppid;
-    strncpy(name, proc.ki_comm, COMMLEN);
+    strcpy(name, proc.ki_comm);
+    if (tty)
+    {
+        if (proc.ki_tdev != NODEV && proc.ki_flag & P_CONTROLT)
+        {
+            const char* ttyName = devname(proc.ki_tdev, S_IFCHR);
+            if (ffStrStartsWith(ttyName, "pts/"))
+                *tty = (int32_t) strtol(ttyName + strlen("pts/"), NULL, 10);
+            else
+                *tty = -1;
+        }
+        else
+            *tty = -1;
+    }
 
     #else
 
@@ -186,7 +210,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
     pid_t ppid = 0;
 
-    while (getProcessNameAndPpid(pid, name, &ppid) == NULL)
+    while (getProcessNameAndPpid(pid, name, &ppid, &result->tty) == NULL)
     {
         //Common programs that are between terminal and own process, but are not the shell
         if(
@@ -227,7 +251,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
     pid_t ppid = 0;
 
-    while (getProcessNameAndPpid(pid, name, &ppid) == NULL)
+    while (getProcessNameAndPpid(pid, name, &ppid, NULL) == NULL)
     {
         //Known shells
         if (
@@ -259,7 +283,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         // https://github.com/fastfetch-cli/fastfetch/discussions/501
         if (ffStrEndsWith(name, " (figterm)") || ffStrEndsWith(name, " (cwterm)"))
         {
-            if (__builtin_expect(getProcessNameAndPpid(ppid, name, &ppid) != NULL, false))
+            if (__builtin_expect(getProcessNameAndPpid(ppid, name, &ppid, NULL) != NULL, false))
                 return 0;
         }
         #endif
@@ -465,6 +489,7 @@ const FFShellResult* ffDetectShell()
     ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
+    result.tty = -1;
 
     pid_t ppid = getppid();
     ppid = getShellInfo(&result, ppid);
