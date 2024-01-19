@@ -39,15 +39,15 @@ static bool getProductVersion(const wchar_t* filePath, FFstrbuf* version)
     return false;
 }
 
-static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName)
+static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath)
 {
-    HANDLE hProcess = pid == 0
+    FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
         ? GetCurrentProcess()
         : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, TRUE, pid);
 
     if(ppid)
     {
-        PROCESS_BASIC_INFORMATION info;
+        PROCESS_BASIC_INFORMATION info = {};
         ULONG size;
         if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
         {
@@ -55,21 +55,20 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
             *ppid = (uint32_t)info.InheritedFromUniqueProcessId;
         }
         else
-        {
-            CloseHandle(hProcess);
             return false;
-        }
     }
     if(exe)
     {
         DWORD bufSize = exe->allocated;
         if(QueryFullProcessImageNameA(hProcess, 0, exe->chars, &bufSize))
-            exe->length = bufSize;
-        else
         {
-            CloseHandle(hProcess);
-            return false;
+            // We use full path here
+            // Querying command line of remote processes in Windows requires either WMI or ReadProcessMemory
+            exe->length = bufSize;
+            if (exePath) ffStrbufSet(exePath, exe);
         }
+        else
+            return false;
     }
     if(pname && exeName)
     {
@@ -77,7 +76,6 @@ static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrb
         ffStrbufSetS(pname, *exeName);
     }
 
-    CloseHandle(hProcess);
     return true;
 }
 
@@ -87,7 +85,7 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName))
+    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath))
     {
         ffStrbufSet(&result->prettyName, &result->processName);
         if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
@@ -188,7 +186,7 @@ static bool getTerminalFromEnv(FFTerminalResult* result)
         //ConEmu
         uint32_t pid = (uint32_t) strtoul(term, NULL, 10);
         result->pid = pid;
-        if(getProcessInfo(pid, NULL, &result->processName, &result->exe, &result->exeName))
+        if(getProcessInfo(pid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath))
         {
             ffStrbufSet(&result->prettyName, &result->processName);
             if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
@@ -299,7 +297,7 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName))
+    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath))
     {
         ffStrbufSet(&result->prettyName, &result->processName);
         if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
@@ -381,15 +379,16 @@ const FFShellResult* ffDetectShell(void)
     init = true;
 
     ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, 128);
+    ffStrbufInitA(&result.exe, MAX_PATH);
     result.exeName = "";
+    ffStrbufInit(&result.exePath);
     ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
 
     uint32_t ppid;
-    if(!getProcessInfo(0, &ppid, NULL, NULL, NULL))
+    if(!getProcessInfo(0, &ppid, NULL, NULL, NULL, NULL))
         return &result;
 
     ppid = getShellInfo(&result, ppid);
@@ -407,8 +406,9 @@ const FFTerminalResult* ffDetectTerminal(void)
     init = true;
 
     ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, 128);
+    ffStrbufInitA(&result.exe, MAX_PATH);
     result.exeName = "";
+    ffStrbufInit(&result.exePath);
     ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
     result.pid = 0;
