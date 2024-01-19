@@ -78,6 +78,17 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
     size_t size = ARG_MAX;
     FF_AUTO_FREE char* args = malloc(size);
+
+    static_assert(ARG_MAX > PATH_MAX, "");
+
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
+        args, &size,
+        NULL, 0
+    ) == 0)
+        ffStrbufSetS(exePath, args);
+
+    size = ARG_MAX;
     if(sysctl(
         (int[]){CTL_KERN, KERN_PROC, KERN_PROC_ARGS, pid}, 4,
         args, &size,
