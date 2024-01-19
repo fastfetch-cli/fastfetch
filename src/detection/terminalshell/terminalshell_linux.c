@@ -225,6 +225,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "elvish")     ||
             ffStrEquals(name, "oil.ovm")    ||
             ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
+            ffStrEquals(name, "login")      ||
             ffStrEndsWith(name, ".sh")
         )
         {
@@ -242,6 +243,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         #endif
 
         result->pid = (uint32_t) pid;
+        result->ppid = (uint32_t) ppid;
         ffStrbufSetS(&result->processName, name);
         getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
         break;

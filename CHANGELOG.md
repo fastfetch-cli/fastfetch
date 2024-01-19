@@ -1,8 +1,11 @@
 # 2.6.1
 
+Features:
+* Improve xonsh shell detection (Shell)
+
 Bugfixes:
 * Fix segfault in CPU module when running in aarch64 machine without `lscpu` installed (CPU, Linux)
-* Improve xonsh shell detection (Shell, Linux)
+* Don't use `login` as terminal process (Terminal, Linux)
 * Silence warnings when building in 32bit machines.
 
 # 2.6.0
