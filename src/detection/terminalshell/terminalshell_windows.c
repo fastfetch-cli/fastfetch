@@ -39,11 +39,14 @@ static bool getProductVersion(const wchar_t* filePath, FFstrbuf* version)
     return false;
 }
 
-static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath)
+static bool getProcessInfo(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
 {
     FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
         ? GetCurrentProcess()
         : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, TRUE, pid);
+
+    if (gui)
+        *gui = GetGuiResources(hProcess, GR_GDIOBJECTS) > 0;
 
     if(ppid)
     {
@@ -85,7 +88,7 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
     uint32_t ppid;
 
-    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath))
+    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
     {
         ffStrbufSet(&result->prettyName, &result->processName);
         if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
@@ -186,7 +189,7 @@ static bool getTerminalFromEnv(FFTerminalResult* result)
         //ConEmu
         uint32_t pid = (uint32_t) strtoul(term, NULL, 10);
         result->pid = pid;
-        if(getProcessInfo(pid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath))
+        if(getProcessInfo(pid, NULL, &result->processName, &result->exe, &result->exeName, &result->exePath, NULL))
         {
             ffStrbufSet(&result->prettyName, &result->processName);
             if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
@@ -296,26 +299,12 @@ conhost:
 static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 {
     uint32_t ppid;
+    bool hasGui;
 
-    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath))
+    while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &hasGui))
     {
-        ffStrbufSet(&result->prettyName, &result->processName);
-        if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
-            ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
-
-        if(
-            ffStrbufIgnCaseEqualS(&result->prettyName, "pwsh")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "cmd")             ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "bash")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "zsh")             ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "fish")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "nu")              ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "powershell")      ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "powershell_ise")  ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "wsl")             || // running inside wsl
-            ffStrbufIgnCaseEqualS(&result->prettyName, "servercoreshell") || // ServerCore Shell Launcher
-            ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmuC") // wrapper process of ConEmu
-        ) {
+        if(!hasGui)
+        {
             //We are nested shell
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
@@ -324,6 +313,10 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
             pid = ppid;
             continue;
         }
+
+        ffStrbufSet(&result->prettyName, &result->processName);
+        if(ffStrbufEndsWithIgnCaseS(&result->prettyName, ".exe"))
+            ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
 
         if(ffStrbufIgnCaseEqualS(&result->prettyName, "sihost")           ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")
@@ -388,7 +381,7 @@ const FFShellResult* ffDetectShell(void)
     result.ppid = 0;
 
     uint32_t ppid;
-    if(!getProcessInfo(0, &ppid, NULL, NULL, NULL, NULL))
+    if(!getProcessInfo(0, &ppid, NULL, NULL, NULL, NULL, NULL))
         return &result;
 
     ppid = getShellInfo(&result, ppid);
