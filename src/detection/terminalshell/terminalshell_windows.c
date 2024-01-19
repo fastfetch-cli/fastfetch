@@ -245,12 +245,8 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
     DWORD bufSize = 80;
     if (RegGetValueW(HKEY_CURRENT_USER, L"Console\\%%Startup", L"DelegationTerminal", RRF_RT_REG_SZ, NULL, uuid, &bufSize) == ERROR_SUCCESS)
     {
-        if(wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0)
-        {
-            // Let Windows decide
-            return false;
-        }
-        if(wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0)
+        if(wcscmp(uuid, L"{00000000-0000-0000-0000-000000000000}") == 0 || // Let Windows decide
+            wcscmp(uuid, L"{B23D10C0-E52E-411E-9D5B-C09FDF709C7D}") == 0) // Conhost
         {
             goto conhost;
         }
