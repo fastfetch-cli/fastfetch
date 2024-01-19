@@ -24,7 +24,7 @@ static void setExeName(FFstrbuf* exe, const char** exeName)
         *exeName = exe->chars + lastSlashIndex + 1;
 }
 
-static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName)
+static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath)
 {
     assert(processName->length > 0);
     ffStrbufClear(exe);
@@ -55,7 +55,9 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
             const char* realExePath = procArgs2 + sizeof(argc);
 
             const char* arg0 = memchr(realExePath, '\0', len - (size_t) (realExePath - procArgs2));
-            while (*arg0 == '\0') arg0++;
+            ffStrbufSetNS(exePath, (uint32_t) (arg0 - realExePath), realExePath);
+
+            do arg0++; while (*arg0 == '\0');
             assert(arg0 < procArgs2 + len);
             if (*arg0 == '-') arg0++; // Login shells
 
@@ -192,7 +194,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
         ffStrbufSetS(&result->processName, name);
-        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
     return ppid;
@@ -245,7 +247,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
         ffStrbufSetS(&result->processName, name);
-        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
     return ppid;
@@ -417,7 +419,6 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
-    ffStrbufInit(&result->version);
     fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
 }
 
@@ -440,6 +441,7 @@ const FFShellResult* ffDetectShell()
     ffStrbufInit(&result.processName);
     ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
     result.exeName = result.exe.chars;
+    ffStrbufInit(&result.exePath);
     ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
@@ -463,6 +465,8 @@ const FFTerminalResult* ffDetectTerminal()
     ffStrbufInit(&result.processName);
     ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
     result.exeName = result.exe.chars;
+    ffStrbufInit(&result.exePath);
+    ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
 

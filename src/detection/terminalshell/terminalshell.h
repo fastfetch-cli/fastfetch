@@ -5,8 +5,9 @@
 typedef struct FFShellResult
 {
     FFstrbuf processName;
-    FFstrbuf exe;
+    FFstrbuf exe; //Actually arg0
     const char* exeName; //pointer to a char in exe
+    FFstrbuf exePath; //Full real path to executable file
     FFstrbuf prettyName;
     FFstrbuf version;
     uint32_t pid;
@@ -19,6 +20,7 @@ typedef struct FFTerminalResult
     FFstrbuf exe;
     FFstrbuf prettyName;
     const char* exeName; //pointer to a char in exe
+    FFstrbuf exePath; //Full real path to executable file
     FFstrbuf version;
     uint32_t pid;
     uint32_t ppid;
