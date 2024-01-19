@@ -118,9 +118,6 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
             continue;
         }
 
-        ffStrbufClear(&result->version);
-        fftsGetShellVersion(&result->exe, result->prettyName.chars, &result->version);
-
         result->pid = pid;
         result->ppid = ppid;
 
@@ -320,14 +317,11 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
             // A CUI program created by Windows Explorer will spawn a conhost as its child.
             // However the conhost process is just a placeholder;
             // The true terminal can be Windows Terminal or others.
-            if (!getTerminalFromEnv(result) && !detectDefaultTerminal(result))
-            {
-                ffStrbufClear(&result->processName);
-                ffStrbufClear(&result->prettyName);
-                ffStrbufClear(&result->exe);
-                result->exeName = "";
-                return 0;
-            }
+            ffStrbufClear(&result->processName);
+            ffStrbufClear(&result->prettyName);
+            ffStrbufClear(&result->exe);
+            result->exeName = "";
+            return 0;
         }
         else
         {
@@ -382,7 +376,16 @@ const FFShellResult* ffDetectShell(void)
         return &result;
 
     ppid = getShellInfo(&result, ppid);
-    setShellInfoDetails(&result);
+
+    if (result.processName.length > 0)
+    {
+        setShellInfoDetails(&result);
+        char tmp[MAX_PATH];
+        strcpy(tmp, result.exeName);
+        char* ext = strrchr(tmp, '.');
+        if (ext) *ext = '\0';
+        fftsGetShellVersion(&result.exe, tmp, &result.version);
+    }
 
     return &result;
 }
@@ -410,10 +413,14 @@ const FFTerminalResult* ffDetectTerminal(void)
 
     if(result.processName.length == 0)
         getTerminalFromEnv(&result);
+    if(result.processName.length == 0)
+        detectDefaultTerminal(&result);
 
-    setTerminalInfoDetails(&result);
-
-    fftsGetTerminalVersion(&result.processName, &result.exe, &result.version);
+    if(result.processName.length > 0)
+    {
+        setTerminalInfoDetails(&result);
+        fftsGetTerminalVersion(&result.processName, &result.exe, &result.version);
+    }
 
     return &result;
 }
