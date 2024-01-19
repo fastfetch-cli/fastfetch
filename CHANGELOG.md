@@ -8,6 +8,7 @@ Bugfixes:
 * Don't use `login` as terminal process (Terminal, Linux)
 * Silence warnings when building in 32bit machines.
 * Create sub folders when writing config file (#690)
+* Improve user specific locale detection; fix locale detection in Windows 7 (Locale)
 
 # 2.6.0
 
