@@ -7,6 +7,7 @@ Bugfixes:
 * Fix segfault in CPU module when running in aarch64 machine without `lscpu` installed (CPU, Linux)
 * Don't use `login` as terminal process (Terminal, Linux)
 * Silence warnings when building in 32bit machines.
+* Create sub folders when writing config file (#690)
 
 # 2.6.0
 
