@@ -20,5 +20,5 @@ enum
 // [yellow, green): print yellow
 // [0, yellow): print red
 
-void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow);
-void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses);
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow);
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses);

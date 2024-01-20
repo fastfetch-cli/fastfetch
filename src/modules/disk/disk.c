@@ -59,7 +59,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, bytesPercentage, 50, 80);
+                ffPercentAppendBar(&str, bytesPercentage, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -68,7 +68,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffAppendPercentNum(&str, bytesPercentage, 50, 80, str.length > 0);
+                ffPercentAppendNum(&str, bytesPercentage, 50, 80, str.length > 0);
                 ffStrbufAppendC(&str, ' ');
             }
         }
@@ -104,10 +104,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     else
     {
         FF_STRBUF_AUTO_DESTROY bytesPercentageStr = ffStrbufCreate();
-        ffAppendPercentNum(&bytesPercentageStr, bytesPercentage, 50, 80, false);
+        ffPercentAppendNum(&bytesPercentageStr, bytesPercentage, 50, 80, false);
         FF_STRBUF_AUTO_DESTROY filesPercentageStr = ffStrbufCreate();
         double filesPercentage = disk->filesTotal > 0 ? ((double) disk->filesUsed / (double) disk->filesTotal) * 100.0 : 0;
-        ffAppendPercentNum(&filesPercentageStr, filesPercentage, 50, 80, false);
+        ffPercentAppendNum(&filesPercentageStr, filesPercentage, 50, 80, false);
 
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);

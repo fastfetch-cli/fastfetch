@@ -24,7 +24,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, result->capacity, 50, 20);
+                ffPercentAppendBar(&str, result->capacity, 50, 20);
             }
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -32,7 +32,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, result->capacity, 50, 20, str.length > 0);
+                ffPercentAppendNum(&str, result->capacity, 50, 20, str.length > 0);
             }
         }
 
@@ -57,7 +57,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     else
     {
         FF_STRBUF_AUTO_DESTROY capacityStr = ffStrbufCreate();
-        ffAppendPercentNum(&capacityStr, result->capacity, 51, 21, false);
+        ffPercentAppendNum(&capacityStr, result->capacity, 51, 21, false);
         ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},

@@ -52,12 +52,12 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         if (!options->separate)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
-                ffAppendPercentBar(&str, avgValue, 50, 80);
+                ffPercentAppendBar(&str, avgValue, 50, 80);
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffAppendPercentNum(&str, avgValue, 50, 80, str.length > 0);
+                ffPercentAppendNum(&str, avgValue, 50, 80, str.length > 0);
             }
         }
         else
@@ -66,7 +66,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffAppendPercentNum(&str, *percent, 50, 80, false);
+                ffPercentAppendNum(&str, *percent, 50, 80, false);
             }
         }
         ffStrbufPutTo(&str, stdout);
@@ -74,11 +74,11 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY avgStr = ffStrbufCreate();
-        ffAppendPercentNum(&avgStr, avgValue, 50, 80, false);
+        ffPercentAppendNum(&avgStr, avgValue, 50, 80, false);
         FF_STRBUF_AUTO_DESTROY minStr = ffStrbufCreate();
-        ffAppendPercentNum(&minStr, minValue, 50, 80, false);
+        ffPercentAppendNum(&minStr, minValue, 50, 80, false);
         FF_STRBUF_AUTO_DESTROY maxStr = ffStrbufCreate();
-        ffAppendPercentNum(&maxStr, maxValue, 50, 80, false);
+        ffPercentAppendNum(&maxStr, maxValue, 50, 80, false);
         ffPrintFormat(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_CPUUSAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &avgStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &maxStr},

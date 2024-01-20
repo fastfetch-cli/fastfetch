@@ -19,14 +19,14 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
         {
             if (buffer.length)
                 ffStrbufAppendC(&buffer, ' ');
-            ffAppendPercentNum(&buffer, device->battery, 50, 20, buffer.length > 0);
+            ffPercentAppendNum(&buffer, device->battery, 50, 20, buffer.length > 0);
         }
         ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffAppendPercentNum(&percentageStr, device->battery, 50, 20, false);
+        ffPercentAppendNum(&percentageStr, device->battery, 50, 20, false);
 
         ffPrintFormat(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
