@@ -7,7 +7,6 @@
 
 const char* ffDetectPowerAdapter(FFlist* results)
 {
-    FF_CFTYPE_AUTO_RELEASE CFDictionaryRef details = IOPSCopyExternalPowerAdapterDetails();
     FFPowerAdapterResult* adapter = ffListAdd(results);
 
     ffStrbufInit(&adapter->name);
@@ -17,13 +16,24 @@ const char* ffDetectPowerAdapter(FFlist* results)
     ffStrbufInit(&adapter->serial);
     adapter->watts = FF_POWERADAPTER_NOT_CONNECTED;
 
+    FF_CFTYPE_AUTO_RELEASE CFDictionaryRef details = IOPSCopyExternalPowerAdapterDetails();
     if (details)
     {
         ffCfDictGetString(details, CFSTR(kIOPSNameKey), &adapter->name);
-        ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName);
+        if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != NULL)
+        {
+            int adapterId;
+            if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterIDKey), &adapterId) == 0)
+                ffStrbufSetF(&adapter->modelName, "%d", adapterId);
+        }
         ffCfDictGetString(details, CFSTR("Manufacturer"), &adapter->manufacturer);
         ffCfDictGetString(details, CFSTR("Description"), &adapter->description);
-        ffCfDictGetString(details, CFSTR("SerialString"), &adapter->serial);
+        if (ffCfDictGetString(details, CFSTR("SerialString"), &adapter->serial) != NULL)
+        {
+            int serialNumber;
+            if (ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterSerialNumberKey), &serialNumber) == 0)
+                ffStrbufSetF(&adapter->serial, "%X", serialNumber);
+        }
         ffCfDictGetInt(details, CFSTR(kIOPSPowerAdapterWattsKey), &adapter->watts);
     }
 
