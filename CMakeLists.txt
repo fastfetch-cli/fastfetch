@@ -265,7 +265,7 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/common/bar.c
+    src/common/percent.c
     src/common/commandoption.c
     src/common/font.c
     src/common/format.c

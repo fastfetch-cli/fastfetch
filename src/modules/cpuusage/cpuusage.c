@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/bar.h"
+#include "common/percent.h"
 #include "detection/cpuusage/cpuusage.h"
 #include "modules/cpuusage/cpuusage.h"
 #include "util/stringUtils.h"

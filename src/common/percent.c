@@ -1,5 +1,5 @@
-#include "common/bar.h"
 #include "common/color.h"
+#include "common/percent.h"
 #include "util/textModifier.h"
 
 void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, uint8_t red)

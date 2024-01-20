@@ -1,4 +1,4 @@
-#include "common/bar.h"
+#include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/brightness/brightness.h"

@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
-#include "common/bar.h"
+#include "common/percent.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
 #include "util/stringUtils.h"
