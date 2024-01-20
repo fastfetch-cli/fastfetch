@@ -203,9 +203,9 @@ const char* detectBySmbios(FFBatteryResult* battery)
     }
     else if (data->Header.Length > offsetof(FFSmbiosPortableBattery, SbdsManufactureDate))
     {
-        uint16_t day = data->SbdsManufactureDate & 0b11111;
-        uint16_t month = (data->SbdsManufactureDate >> 5) & 0b1111;
-        uint16_t year = (data->SbdsManufactureDate >> 9) + 1800;
+        int day = data->SbdsManufactureDate & 0b11111;
+        int month = (data->SbdsManufactureDate >> 5) & 0b1111;
+        int year = (data->SbdsManufactureDate >> 9) + 1800;
         ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
     }
 

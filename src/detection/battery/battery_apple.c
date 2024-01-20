@@ -44,10 +44,12 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 
         ffCfDictGetString(properties, CFSTR(kIOPMDeviceNameKey), &battery->modelName);
         ffCfDictGetString(properties, CFSTR(kIOPMPSSerialKey), &battery->serial);
+        ffCfDictGetString(properties, CFSTR(kIOPMPSManufacturerKey), &battery->manufacturer);
 
         if (!ffCfDictGetBool(properties, CFSTR("built-in"), &boolValue) && boolValue)
         {
-            ffStrbufAppendS(&battery->manufacturer, "Apple Inc.");
+            if (!battery->manufacturer.length)
+                ffStrbufAppendS(&battery->manufacturer, "Apple Inc.");
             ffStrbufAppendS(&battery->technology, "Lithium");
             if (!battery->modelName.length)
                 ffStrbufAppendS(&battery->modelName, "Built-in");
@@ -68,17 +70,28 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffStrbufTrimRight(&battery->status, ' ');
         ffStrbufTrimRight(&battery->status, ',');
 
-        CFDictionaryRef batteryData;
-        if (ffCfDictGetDict(properties, CFSTR("BatteryData"), &batteryData) == NULL)
+        int sbdsManufactureDate = 0;
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSManufactureDateKey), &sbdsManufactureDate) == NULL)
         {
-            char manufactureDate[sizeof(uint64_t)];
-            if (ffCfDictGetInt64(batteryData, CFSTR(kIOPMPSManufactureDateKey), (int64_t*) manufactureDate) == NULL)
+            int day = sbdsManufactureDate & 0b11111;
+            int month = (sbdsManufactureDate >> 5) & 0b1111;
+            int year = (sbdsManufactureDate >> 9) + 1800;
+            ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
+        }
+        else
+        {
+            CFDictionaryRef batteryData;
+            if (ffCfDictGetDict(properties, CFSTR("BatteryData"), &batteryData) == NULL)
             {
-                // https://github.com/AsahiLinux/linux/blob/b5c05cbffb0488c7618106926d522cc3b43d93d5/drivers/power/supply/macsmc_power.c#L410-L419
-                int year = (manufactureDate[0] - '0') * 10 + (manufactureDate[1] - '0') + 2000 - 8;
-                int month = (manufactureDate[2] - '0') * 10 + (manufactureDate[3] - '0');
-                int day = (manufactureDate[4] - '0') * 10 + (manufactureDate[3] - '5');
-                ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
+                char manufactureDate[sizeof(uint64_t)];
+                if (ffCfDictGetInt64(batteryData, CFSTR(kIOPMPSManufactureDateKey), (int64_t*) manufactureDate) == NULL)
+                {
+                    // https://github.com/AsahiLinux/linux/blob/b5c05cbffb0488c7618106926d522cc3b43d93d5/drivers/power/supply/macsmc_power.c#L410-L419
+                    int year = (manufactureDate[0] - '0') * 10 + (manufactureDate[1] - '0') + 2000 - 8;
+                    int month = (manufactureDate[2] - '0') * 10 + (manufactureDate[3] - '0');
+                    int day = (manufactureDate[4] - '0') * 10 + (manufactureDate[3] - '5');
+                    ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
+                }
             }
         }
 
