@@ -10,5 +10,15 @@ enum
     FF_PERCENTAGE_TYPE_NUM_COLOR_BIT = 1 << 3,
 };
 
-void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, uint8_t red);
+// if (green <= yellow)
+// [0, green]: print green
+// (green, yellow]: print yellow
+// (yellow, 100]: print red
+//
+// if (green > yellow)
+// [green, 100]: print green
+// [yellow, green): print yellow
+// [0, yellow): print red
+
+void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow);
 void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses);

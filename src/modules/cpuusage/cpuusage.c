@@ -52,7 +52,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         if (!options->separate)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
-                ffAppendPercentBar(&str, avgValue, 0, 50, 80);
+                ffAppendPercentBar(&str, avgValue, 50, 80);
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)

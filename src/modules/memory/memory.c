@@ -40,7 +40,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, percentage, 0, 50, 80);
+                ffAppendPercentBar(&str, percentage, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 

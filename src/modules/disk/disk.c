@@ -59,7 +59,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, bytesPercentage, 0, 50, 80);
+                ffAppendPercentBar(&str, bytesPercentage, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 

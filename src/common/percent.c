@@ -1,17 +1,15 @@
-#include "common/color.h"
+#include "fastfetch.h"
 #include "common/percent.h"
+#include "common/color.h"
 #include "util/textModifier.h"
 
-void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, uint8_t red)
+void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow)
 {
-    assert(green <= 100 && yellow <= 100 && red <= 100);
+    assert(green <= 100 && yellow <= 100);
 
     const FFOptionsDisplay* options = &instance.config.display;
 
     uint32_t blocksPercent = (uint32_t) (percent / 100.0 * options->barWidth + 0.5);
-    uint32_t blocksGreen = (uint32_t) (green / 100.0 * options->barWidth + 0.5);
-    uint32_t blocksYellow = (uint32_t) (yellow / 100.0 * options->barWidth + 0.5);
-    uint32_t blocksRed = (uint32_t) (red / 100.0 * options->barWidth + 0.5);
     assert(blocksPercent <= options->barWidth);
 
     if(options->barBorder)
@@ -26,12 +24,14 @@ void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
     {
         if(!options->pipe)
         {
-            if (i == blocksGreen)
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
-            else if (i == blocksYellow)
+            uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+            uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+            if (i == section2Begin)
+                ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? FF_COLOR_FG_LIGHT_GREEN : FF_COLOR_FG_LIGHT_RED));
+            else if (i == section1Begin)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_YELLOW "m");
-            else if (i == blocksRed)
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
+            else if (i == 0)
+                ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? FF_COLOR_FG_GREEN : FF_COLOR_FG_LIGHT_RED));
         }
         ffStrbufAppend(buffer, &options->barCharElapsed);
     }
@@ -56,15 +56,6 @@ void ffAppendPercentBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-// if (green < yellow)
-// [0, green]: print green
-// (green, yellow]: print yellow
-// (yellow, 100]: print red
-//
-// if (green > yellow)
-// [green, 100]: print green
-// [yellow, green): print yellow
-// [0, yellow): PRINT RED
 void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses)
 {
     assert(green <= 100 && yellow <= 100);
@@ -80,23 +71,24 @@ void ffAppendPercentNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
     {
         if(percent != percent)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
-        else if(green < yellow)
+        else if(green <= yellow)
         {
-            if (percent <= green)
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
-            else if (percent <= yellow)
+            if (percent > yellow)
+                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
+            else if (percent > green)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_YELLOW "m");
             else
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
+                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
+
         }
         else
         {
-            if (percent >= green)
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
-            else if (percent >= yellow)
+            if (percent < yellow)
+                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
+            else if (percent < green)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_YELLOW "m");
             else
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_RED "m");
+                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_GREEN "m");
         }
     }
     ffStrbufAppendF(buffer, "%.*f%%", options->percentNdigits, percent);

@@ -37,7 +37,7 @@ void ffPrintSwap(FFSwapOptions* options)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, 0, 0, 50, 80);
+                ffAppendPercentBar(&str, 0, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
             if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
@@ -47,7 +47,7 @@ void ffPrintSwap(FFSwapOptions* options)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, percentage, 0, 50, 80);
+                ffAppendPercentBar(&str, percentage, 50, 80);
                 ffStrbufAppendC(&str, ' ');
             }
 
