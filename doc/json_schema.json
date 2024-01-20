@@ -457,6 +457,24 @@
                             "minimum": 0,
                             "maximum": 9,
                             "default": 0
+                        },
+                        "color": {
+                            "type": "object",
+                            "description": "Set color used in different states of percentage bars and numbers",
+                            "properties": {
+                                "green": {
+                                    "description": "Color used in green state",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "yellow": {
+                                    "description": "Color used in yellow state",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "red": {
+                                    "description": "Color used in red state",
+                                    "$ref": "#/$defs/colors"
+                                }
+                            }
                         }
                     }
                 },

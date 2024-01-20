@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/color.h"
 #include "common/jsonconfig.h"
 #include "util/stringUtils.h"
 #include "options/display.h"
@@ -118,6 +119,22 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
+
+            yyjson_val* color = yyjson_obj_get(val, "color");
+            if (color)
+            {
+                if (!yyjson_is_obj(color))
+                    return "display.percent.color must be an object";
+
+                yyjson_val* green = yyjson_obj_get(color, "green");
+                if (green) ffOptionParseColor(yyjson_get_str(green), &options->percentColorGreen);
+
+                yyjson_val* yellow = yyjson_obj_get(color, "yellow");
+                if (yellow) ffOptionParseColor(yyjson_get_str(yellow), &options->percentColorYellow);
+
+                yyjson_val* red = yyjson_obj_get(color, "red");
+                if (red) ffOptionParseColor(yyjson_get_str(red), &options->percentColorRed);
+            }
         }
         else if (ffStrEqualsIgnCase(key, "bar"))
         {
@@ -248,10 +265,22 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             {},
         });
     }
-    else if(ffStrEqualsIgnCase(key, "--percent-type"))
-        options->percentType = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--percent-ndigits"))
-        options->percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+    else if(ffStrStartsWithIgnCase(key, "--percent-"))
+    {
+        const char* subkey = key + strlen("--percent-");
+        if(ffStrEqualsIgnCase(subkey, "type"))
+            options->percentType = (uint8_t) ffOptionParseUInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "ndigits"))
+            options->percentNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "color-green"))
+            ffOptionParseColor(value, &options->percentColorGreen);
+        else if(ffStrEqualsIgnCase(subkey, "color-yellow"))
+            ffOptionParseColor(value, &options->percentColorYellow);
+        else if(ffStrEqualsIgnCase(subkey, "color-red"))
+            ffOptionParseColor(value, &options->percentColorRed);
+        else
+            return false;
+    }
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         options->noBuffer = ffOptionParseBoolean(value);
     else if(ffStrStartsWithIgnCase(key, "--bar-"))
@@ -305,6 +334,9 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->barBorder = true;
     options->percentType = 9;
     options->percentNdigits = 0;
+    ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
+    ffStrbufInitStatic(&options->percentColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->percentColorRed, FF_COLOR_FG_LIGHT_RED);
 }
 
 void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
