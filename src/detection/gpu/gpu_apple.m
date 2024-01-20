@@ -32,7 +32,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             else if ([device supportsFamily:MTLGPUFamilyCommon1])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
 
-            if (gpu->type == device.hasUnifiedMemory)
+            if (device.hasUnifiedMemory)
             {
                 gpu->type = FF_GPU_TYPE_INTEGRATED;
                 gpu->shared.total = device.recommendedMaxWorkingSetSize;
