@@ -42,6 +42,8 @@ void ffPrintSwap(FFSwapOptions* options)
             }
             if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendS(&str, "Disabled");
+            else
+                ffAppendPercentNum(&str, 0, 50, 80, str.length > 0);
         }
         else
         {

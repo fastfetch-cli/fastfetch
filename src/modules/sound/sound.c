@@ -1,3 +1,4 @@
+#include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/sound/sound.h"
@@ -11,27 +12,47 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&device->name, stdout);
+
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+        if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            ffStrbufAppend(&str, &device->name);
 
         if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
         {
-            if(device->volume > 0)
-                printf(" (%d%%)", device->volume);
-            else
-                fputs(" (muted)", stdout);
+            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                if (str.length)
+                    ffStrbufAppendC(&str, ' ');
+
+                ffAppendPercentBar(&str, device->volume, 80, 90);
+            }
+
+            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            {
+                if (str.length)
+                    ffStrbufAppendC(&str, ' ');
+
+                ffAppendPercentNum(&str, device->volume, 80, 90, str.length > 0);
+            }
         }
 
-        if(device->main && index > 0)
-            fputs(" (*)", stdout);
+        if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        {
+            if (device->main && index > 0)
+                ffStrbufAppendS(&str, " (*)");
+        }
 
-        putchar('\n');
+        ffStrbufPutTo(&str, stdout);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffAppendPercentNum(&percentageStr, device->volume, 80, 90, false);
+
         ffPrintFormat(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_SOUND_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
-            {FF_FORMAT_ARG_TYPE_UINT8, &device->volume},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier}
         });
     }

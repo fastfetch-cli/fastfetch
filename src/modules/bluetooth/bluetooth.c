@@ -1,3 +1,4 @@
+#include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/bluetooth/bluetooth.h"
@@ -11,23 +12,29 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&device->name, stdout);
 
-        if(device->battery > 0)
-            printf(" (%d%%)", device->battery);
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
 
-        if(!device->connected)
-            puts(" [disconnected]");
-        else
-            putchar('\n');
+        if (device->battery > 0 && device->battery <= 100)
+        {
+            if (buffer.length)
+                ffStrbufAppendC(&buffer, ' ');
+            ffAppendPercentNum(&buffer, device->battery, 50, 20, buffer.length > 0);
+        }
+
+        if (!device->connected)
+            ffStrbufAppendS(&buffer, " [disconnected]");
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffAppendPercentNum(&percentageStr, device->battery, 50, 20, false);
+
         ffPrintFormat(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_BLUETOOTH_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->address},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->type},
-            {FF_FORMAT_ARG_TYPE_UINT8, &device->battery}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr}
         });
     }
 }

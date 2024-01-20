@@ -11,21 +11,27 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
         ffPrintLogoAndKey(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
+
         if (device->battery > 0 && device->battery <= 100)
         {
-            ffStrbufAppendC(&buffer, ' ');
-            ffAppendPercentNum(&buffer, device->battery, 51, 21, true);
+            if (buffer.length)
+                ffStrbufAppendC(&buffer, ' ');
+            ffAppendPercentNum(&buffer, device->battery, 50, 20, buffer.length > 0);
         }
         ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffAppendPercentNum(&percentageStr, device->battery, 50, 20, false);
+
         ffPrintFormat(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->serial},
-            {FF_FORMAT_ARG_TYPE_UINT8, &device->battery},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
         });
     }
 }
@@ -130,7 +136,7 @@ void ffPrintGamepadHelpFormat(void)
     ffPrintModuleFormatHelp(FF_GAMEPAD_MODULE_NAME, "{1}", FF_GAMEPAD_NUM_FORMAT_ARGS, (const char* []) {
         "Name",
         "Serial number",
-        "Battery",
+        "Battery percentage",
     });
 }
 
