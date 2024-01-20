@@ -41,6 +41,9 @@ typedef struct FFOptionsDisplay
     bool barBorder;
     uint8_t percentType;
     uint8_t percentNdigits;
+    FFstrbuf percentColorGreen;
+    FFstrbuf percentColorYellow;
+    FFstrbuf percentColorRed;
     bool noBuffer;
     uint32_t keyWidth;
 } FFOptionsDisplay;

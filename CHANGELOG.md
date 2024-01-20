@@ -1,3 +1,22 @@
+# 2.6.1
+
+Features:
+* Improve xonsh shell detection (Shell)
+* Support colored percentage values (Bluetooth / Gamepad / Sound)
+* Add `--<module>-percent-[green|yellow]` options to specify threshold of percentage colors
+    * eg. `--disk-percent-green 20 --disk-percent-yellow 50` will show green if disk usage is less than 20%, yellow if disk usage is less then 50%, and red otherwise.
+* Add `--percent-color-[green|yellow|red]` options to specify color of different percent value states.
+    * eg. `--percent-color-green blue` will show blue color if percent value falls in green state.
+* Improve Intel macbook support (macOS)
+
+Bugfixes:
+* Fix segfault in CPU module when running in aarch64 machine without `lscpu` installed (CPU, Linux)
+* Don't use `login` as terminal process (Terminal, Linux)
+* Silence warnings when building in 32bit machines.
+* Create sub folders when writing config file (#690)
+* Improve user specific locale detection; fix locale detection in Windows 7 (Locale)
+* Fix GPU type detection (GPU, macOS)
+
 # 2.6.0
 
 Changes:

@@ -1,3 +1,4 @@
+#include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/sound/sound.h"
@@ -11,27 +12,47 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&device->name, stdout);
+
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+        if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            ffStrbufAppend(&str, &device->name);
 
         if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
         {
-            if(device->volume > 0)
-                printf(" (%d%%)", device->volume);
-            else
-                fputs(" (muted)", stdout);
+            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            {
+                if (str.length)
+                    ffStrbufAppendC(&str, ' ');
+
+                ffPercentAppendBar(&str, device->volume, options->percent);
+            }
+
+            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            {
+                if (str.length)
+                    ffStrbufAppendC(&str, ' ');
+
+                ffPercentAppendNum(&str, device->volume, options->percent, str.length > 0);
+            }
         }
 
-        if(device->main && index > 0)
-            fputs(" (*)", stdout);
+        if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        {
+            if (device->main && index > 0)
+                ffStrbufAppendS(&str, " (*)");
+        }
 
-        putchar('\n');
+        ffStrbufPutTo(&str, stdout);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffPercentAppendNum(&percentageStr, device->volume, options->percent, false);
+
         ffPrintFormat(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_SOUND_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
-            {FF_FORMAT_ARG_TYPE_UINT8, &device->volume},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier}
         });
     }
@@ -100,6 +121,9 @@ bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const 
         return true;
     }
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -132,6 +156,9 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -158,6 +185,8 @@ void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyj
                 break;
         }
     }
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -226,6 +255,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
+    options->percent = (FFPercentConfig) { 80, 90 };
 }
 
 void ffDestroySoundOptions(FFSoundOptions* options)

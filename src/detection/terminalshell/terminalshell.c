@@ -168,6 +168,23 @@ static bool getShellVersionAsh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool getShellVersionXonsh(FFstrbuf* exe, FFstrbuf* version)
+{
+    ffStrbufSetS(version, getenv("XONSH_VERSION"));
+    if (version->length) return true;
+
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    // xonsh/0.14.1
+    ffStrbufSubstrAfterFirstC(version, '/');
+    return true;
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -228,11 +245,8 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getExeVersionRaw(exe, version);
     if(strcasecmp(exeName, "ash") == 0)
         return getShellVersionAsh(exe, version);
-    if(strcasecmp(exeName, "python") == 0 && getenv("XONSH_VERSION"))
-    {
-        ffStrbufSetS(version, getenv("XONSH_VERSION"));
-        return true;
-    }
+    if(strcasecmp(exeName, "xonsh") == 0)
+        return getShellVersionXonsh(exe, version);
 
     #ifdef _WIN32
     if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)

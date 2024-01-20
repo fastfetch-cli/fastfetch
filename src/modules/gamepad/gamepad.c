@@ -1,4 +1,4 @@
-#include "common/bar.h"
+#include "common/percent.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "detection/gamepad/gamepad.h"
@@ -11,21 +11,27 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
 {
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
         ffPrintLogoAndKey(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
+
         if (device->battery > 0 && device->battery <= 100)
         {
-            ffStrbufAppendC(&buffer, ' ');
-            ffAppendPercentNum(&buffer, device->battery, 51, 21, true);
+            if (buffer.length)
+                ffStrbufAppendC(&buffer, ' ');
+            ffPercentAppendNum(&buffer, device->battery, options->percent, buffer.length > 0);
         }
         ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
+        ffPercentAppendNum(&percentageStr, device->battery, options->percent, false);
+
         ffPrintFormat(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_GAMEPAD_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->serial},
-            {FF_FORMAT_ARG_TYPE_UINT8, &device->battery},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
         });
     }
 }
@@ -64,6 +70,9 @@ bool ffParseGamepadCommandOptions(FFGamepadOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -80,6 +89,9 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -90,6 +102,8 @@ void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc,
     ffInitGamepadOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -127,10 +141,10 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
 
 void ffPrintGamepadHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_GAMEPAD_MODULE_NAME, "{1}", FF_GAMEPAD_NUM_FORMAT_ARGS, (const char* []) {
+    ffPrintModuleFormatHelp(FF_GAMEPAD_MODULE_NAME, "{1} ({3})", FF_GAMEPAD_NUM_FORMAT_ARGS, (const char* []) {
         "Name",
         "Serial number",
-        "Battery",
+        "Battery percentage",
     });
 }
 
@@ -148,6 +162,7 @@ void ffInitGamepadOptions(FFGamepadOptions* options)
         ffGenerateGamepadJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+    options->percent = (FFPercentConfig) { 50, 20 };
 }
 
 void ffDestroyGamepadOptions(FFGamepadOptions* options)

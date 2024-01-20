@@ -7,6 +7,7 @@
 #include "common/jsonconfig.h"
 #include "detection/version/version.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 #include "logo/logo.h"
 #include "fastfetch_datatext.h"
 
@@ -831,7 +832,14 @@ static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
         yyjson_mut_write_fp(stdout, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
     else
     {
-        if (yyjson_mut_write_file(filename->chars, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL))
+        size_t len;
+        FF_AUTO_FREE const char* str = yyjson_mut_write(doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, &len);
+        if (!str)
+        {
+            printf("Error: failed to generate config file\n");
+            exit(1);
+        }
+        if (ffWriteFileData(filename->chars, len, str))
             printf("The generated config file has been written in `%s`\n", filename->chars);
         else
         {

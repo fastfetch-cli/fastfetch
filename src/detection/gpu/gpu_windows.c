@@ -77,7 +77,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         // See: https://download.nvidia.com/XFree86/Linux-x86_64/545.23.06/README/supportedchips.html
         // displayDevice.DeviceID = MatchingDeviceId "PCI\\VEN_10DE&DEV_2782&SUBSYS_513417AA&REV_A1"
-        uint32_t vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
+        unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
         swscanf(displayDevice.DeviceID, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);

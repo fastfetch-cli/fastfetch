@@ -38,6 +38,8 @@ void ffPrintShell(FFShellOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
             {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
+            {FF_FORMAT_ARG_TYPE_INT, &result->tty},
         });
     }
 }
@@ -90,21 +92,28 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->exe);
     yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->exeName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &result->exePath);
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->pid);
     yyjson_mut_obj_add_uint(doc, obj, "ppid", result->ppid);
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
+    if (result->tty >= 0)
+        yyjson_mut_obj_add_int(doc, obj, "tty", result->tty);
+    else
+        yyjson_mut_obj_add_null(doc, obj, "tty");
 }
 
 void ffPrintShellHelpFormat(void)
 {
     ffPrintModuleFormatHelp(FF_SHELL_MODULE_NAME, "{3} {4}", FF_SHELL_NUM_FORMAT_ARGS, (const char* []) {
         "Shell process name",
-        "Shell path with exe name",
-        "Shell exe name",
+        "The first argument of the command line when running the shell",
+        "Shell base name of arg0",
         "Shell version",
         "Shell pid",
-        "Shell pretty name"
+        "Shell pretty name",
+        "Shell full exe path",
     });
 }
 

@@ -143,7 +143,7 @@ void ffOptionParseColor(const char* value, FFstrbuf* buffer)
     while(*value != '\0')
     {
         #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
-            if(strncasecmp(value, #prefix, strlen(#prefix)) == 0) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
+            if(ffStrStartsWithIgnCase(value, #prefix)) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); }
 
         FF_APPEND_COLOR_CODE_COND(reset_, FF_COLOR_MODE_RESET)
         else FF_APPEND_COLOR_CODE_COND(bright_, FF_COLOR_MODE_BOLD)

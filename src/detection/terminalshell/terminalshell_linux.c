@@ -4,14 +4,13 @@
 #include "common/processing.h"
 #include "common/thread.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef __APPLE__
-    #include <libproc.h>
-#elif defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__APPLE__)
     #include <sys/types.h>
     #include <sys/user.h>
     #include <sys/sysctl.h>
@@ -25,38 +24,94 @@ static void setExeName(FFstrbuf* exe, const char** exeName)
         *exeName = exe->chars + lastSlashIndex + 1;
 }
 
-static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName)
+static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath)
 {
     assert(processName->length > 0);
     ffStrbufClear(exe);
 
     #ifdef __linux__
 
-    char cmdlineFilePath[64];
-    snprintf(cmdlineFilePath, sizeof(cmdlineFilePath), "/proc/%d/cmdline", (int)pid);
+    char filePath[64];
+    snprintf(filePath, sizeof(filePath), "/proc/%d/cmdline", (int)pid);
 
-    if(ffAppendFileBuffer(cmdlineFilePath, exe))
+    if(ffAppendFileBuffer(filePath, exe))
     {
         ffStrbufTrimRightSpace(exe);
-        ffStrbufSubstrBeforeFirstC(exe, '\0'); //Trim the arguments
-        ffStrbufTrimLeft(exe, '-'); //Happens in TTY
+        ffStrbufRecalculateLength(exe); //Trim the arguments
+        ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
+    }
+
+    snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
+    ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
+    ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+    if (length > 0) // doesn't contain trailing NUL
+    {
+        exePath->chars[length + 1] = '\0';
+        exePath->length = (uint32_t) length;
     }
 
     #elif defined(__APPLE__)
 
-    int length = proc_pidpath((int)pid, exe->chars, exe->allocated);
-    if(length > 0)
-        exe->length = (uint32_t)length;
+    size_t len = 0;
+    int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
+    if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), NULL, &len, NULL, 0) == 0)
+    {
+        FF_AUTO_FREE char* const procArgs2 = malloc(len);
+        if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), procArgs2, &len, NULL, 0) == 0)
+        {
+            // https://gist.github.com/nonowarn/770696#file-getargv-c-L46
+            uint32_t argc = *(uint32_t*) procArgs2;
+            const char* realExePath = procArgs2 + sizeof(argc);
+
+            const char* arg0 = memchr(realExePath, '\0', len - (size_t) (realExePath - procArgs2));
+            ffStrbufSetNS(exePath, (uint32_t) (arg0 - realExePath), realExePath);
+
+            do arg0++; while (*arg0 == '\0');
+            assert(arg0 < procArgs2 + len);
+            if (*arg0 == '-') arg0++; // Login shells
+
+            ffStrbufSetS(exe, arg0);
+        }
+    }
 
     #elif defined(__FreeBSD__)
 
-    size_t size = exe->allocated;
-    if(!sysctl(
+    size_t size = ARG_MAX;
+    FF_AUTO_FREE char* args = malloc(size);
+
+    static_assert(ARG_MAX > PATH_MAX, "");
+
+    if(sysctl(
         (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
-        exe->chars, &size,
+        args, &size,
         NULL, 0
-    ))
-        exe->length = (uint32_t)size - 1;
+    ) == 0)
+        ffStrbufSetS(exePath, args);
+
+    size = ARG_MAX;
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_ARGS, pid}, 4,
+        args, &size,
+        NULL, 0
+    ) == 0)
+    {
+        char* arg0 = args;
+        size_t arg0Len = strlen(args);
+        if (size > arg0Len + 1)
+        {
+            char* p = (char*) memrchr(args, '/', arg0Len);
+            if (p)
+            {
+                p++;
+                if (ffStrStartsWith(p, "python")) // /usr/local/bin/python3.9 /home/carter/.local/bin/xonsh
+                {
+                    arg0 += arg0Len + 1;
+                }
+            }
+        }
+        if (arg0[0] == '-') arg0++;
+        ffStrbufSetS(exe, arg0);
+    }
 
     #endif
 
@@ -66,7 +121,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     setExeName(exe, exeName);
 }
 
-static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
+static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int32_t* tty)
 {
     #ifdef __linux__
 
@@ -79,21 +134,38 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
     buf[nRead] = '\0';
 
     *ppid = 0;
+    static_assert(sizeof(*ppid) == sizeof(int), "");
+
+    int tty_;
     if(
-        sscanf(buf, "%*s (%255[^)]) %*c %d", name, ppid) != 2 || //stat (comm) state ppid
+        sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
         !ffStrSet(name) ||
         *ppid == 0
     )
         return "sscanf(stat) failed";
 
+    if (tty && (tty_ >> 8) == 0x88)
+        *tty = tty_ & 0xFF;
+
     #elif defined(__APPLE__)
 
-    struct proc_bsdshortinfo proc;
-    if(proc_pidinfo(pid, PROC_PIDT_SHORTBSDINFO, 0, &proc, PROC_PIDT_SHORTBSDINFO_SIZE) <= 0)
-        return "proc_pidinfo(pid) failed";
+    struct kinfo_proc proc;
+    size_t size = sizeof(proc);
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PID, pid}, 4,
+        &proc, &size,
+        NULL, 0
+    ))
+        return "sysctl(KERN_PROC_PID) failed";
 
-    *ppid = (pid_t)proc.pbsi_ppid;
-    strncpy(name, proc.pbsi_comm, 16); //trancated to 16 chars
+    *ppid = (pid_t)proc.kp_eproc.e_ppid;
+    strcpy(name, proc.kp_proc.p_comm); //trancated to 16 chars
+    if (tty)
+    {
+        *tty = ((proc.kp_eproc.e_tdev >> 24) & 0xFF) == 0x10
+            ? proc.kp_eproc.e_tdev & 0xFFFFFF
+            : -1;
+    }
 
     #elif defined(__FreeBSD__)
 
@@ -107,7 +179,20 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid)
         return "sysctl(KERN_PROC_PID) failed";
 
     *ppid = (pid_t)proc.ki_ppid;
-    strncpy(name, proc.ki_comm, COMMLEN);
+    strcpy(name, proc.ki_comm);
+    if (tty)
+    {
+        if (proc.ki_tdev != NODEV && proc.ki_flag & P_CONTROLT)
+        {
+            const char* ttyName = devname(proc.ki_tdev, S_IFCHR);
+            if (ffStrStartsWith(ttyName, "pts/"))
+                *tty = (int32_t) strtol(ttyName + strlen("pts/"), NULL, 10);
+            else
+                *tty = -1;
+        }
+        else
+            *tty = -1;
+    }
 
     #else
 
@@ -125,7 +210,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
     pid_t ppid = 0;
 
-    while (getProcessNameAndPpid(pid, name, &ppid) == NULL)
+    while (getProcessNameAndPpid(pid, name, &ppid, &result->tty) == NULL)
     {
         //Common programs that are between terminal and own process, but are not the shell
         if(
@@ -153,7 +238,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
         ffStrbufSetS(&result->processName, name);
-        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
     return ppid;
@@ -166,7 +251,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
     pid_t ppid = 0;
 
-    while (getProcessNameAndPpid(pid, name, &ppid) == NULL)
+    while (getProcessNameAndPpid(pid, name, &ppid, NULL) == NULL)
     {
         //Known shells
         if (
@@ -185,7 +270,9 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "git-shell")  ||
             ffStrEquals(name, "elvish")     ||
             ffStrEquals(name, "oil.ovm")    ||
-            (ffStrEquals(name, "python") && getenv("XONSH_VERSION"))
+            ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
+            ffStrEquals(name, "login")      ||
+            ffStrEndsWith(name, ".sh")
         )
         {
             pid = ppid;
@@ -196,14 +283,15 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         // https://github.com/fastfetch-cli/fastfetch/discussions/501
         if (ffStrEndsWith(name, " (figterm)") || ffStrEndsWith(name, " (cwterm)"))
         {
-            if (__builtin_expect(getProcessNameAndPpid(ppid, name, &ppid) != NULL, false))
+            if (__builtin_expect(getProcessNameAndPpid(ppid, name, &ppid, NULL) != NULL, false))
                 return 0;
         }
         #endif
 
         result->pid = (uint32_t) pid;
+        result->ppid = (uint32_t) ppid;
         ffStrbufSetS(&result->processName, name);
-        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
     return ppid;
@@ -316,8 +404,6 @@ static void setShellInfoDetails(FFShellResult* result)
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
     else if(ffStrbufEqualS(&result->processName, "nu"))
         ffStrbufInitStatic(&result->prettyName, "nushell");
-    else if(ffStrbufEqualS(&result->processName, "python") && getenv("XONSH_VERSION"))
-        ffStrbufInitStatic(&result->prettyName, "xonsh");
     else if(ffStrbufEqualS(&result->processName, "oil.ovm"))
         ffStrbufInitStatic(&result->prettyName, "Oils");
     else
@@ -377,13 +463,10 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
-    ffStrbufInit(&result->version);
     fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
 }
 
-#ifdef __APPLE__
-#define FF_EXE_PATH_LEN PROC_PIDPATHINFO_MAXSIZE
-#elif defined(MAXPATH)
+#if defined(MAXPATH)
 #define FF_EXE_PATH_LEN MAXPATH
 #elif defined(PATH_MAX)
 #define FF_EXE_PATH_LEN PATH_MAX
@@ -402,9 +485,11 @@ const FFShellResult* ffDetectShell()
     ffStrbufInit(&result.processName);
     ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
     result.exeName = result.exe.chars;
+    ffStrbufInit(&result.exePath);
     ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
+    result.tty = -1;
 
     pid_t ppid = getppid();
     ppid = getShellInfo(&result, ppid);
@@ -425,6 +510,8 @@ const FFTerminalResult* ffDetectTerminal()
     ffStrbufInit(&result.processName);
     ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
     result.exeName = result.exe.chars;
+    ffStrbufInit(&result.exePath);
+    ffStrbufInit(&result.version);
     result.pid = 0;
     result.ppid = 0;
 

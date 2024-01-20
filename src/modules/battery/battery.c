@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/bar.h"
+#include "common/percent.h"
 #include "common/parsing.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
@@ -24,12 +24,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                if(result->capacity <= 20)
-                    ffAppendPercentBar(&str, result->capacity, 100, 100, 0);
-                else if(result->capacity <= 50)
-                    ffAppendPercentBar(&str, result->capacity, 100, 0, 100);
-                else
-                    ffAppendPercentBar(&str, result->capacity, 0, 100, 100);
+                ffPercentAppendBar(&str, result->capacity, options->percent);
             }
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -37,7 +32,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffAppendPercentNum(&str, result->capacity, 51, 21, str.length > 0);
+                ffPercentAppendNum(&str, result->capacity, options->percent, str.length > 0);
             }
         }
 
@@ -62,7 +57,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     else
     {
         FF_STRBUF_AUTO_DESTROY capacityStr = ffStrbufCreate();
-        ffAppendPercentNum(&capacityStr, result->capacity, 51, 21, false);
+        ffPercentAppendNum(&capacityStr, result->capacity, options->percent, false);
         ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
@@ -127,6 +122,9 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
         }
     #endif
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -157,6 +155,9 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -175,6 +176,8 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
 
     if (options->temp != defaultOptions.temp)
         yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -245,6 +248,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
+    options->percent = (FFPercentConfig) { 50, 20 };
 
     #ifdef _WIN32
         options->useSetupApi = false;

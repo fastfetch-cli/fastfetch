@@ -42,6 +42,6 @@ static inline void ffTimeSleep(uint32_t msec)
     #ifdef _WIN32
         SleepEx(msec, TRUE);
     #else
-        nanosleep(&(struct timespec){ msec / 1000, (msec % 1000) * 1000000 }, NULL);
+        nanosleep(&(struct timespec){ msec / 1000, (long) (msec % 1000) * 1000000 }, NULL);
     #endif
 }

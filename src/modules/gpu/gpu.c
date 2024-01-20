@@ -1,4 +1,4 @@
-#include "common/bar.h"
+#include "common/percent.h"
 #include "common/parsing.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
@@ -60,7 +60,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffAppendPercentNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, 50, 80, false);
+                ffPercentAppendNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, options->percent, false);
             }
             ffStrbufAppendC(&output, ')');
         }
@@ -162,6 +162,9 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
         });
     }
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -212,6 +215,9 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -247,6 +253,8 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
                 break;
         }
     }
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -363,6 +371,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
+    options->percent = (FFPercentConfig) { 50, 80 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options)

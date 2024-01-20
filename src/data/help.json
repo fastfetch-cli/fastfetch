@@ -198,6 +198,7 @@
         {
             "long": "logo-color-[1-9]",
             "desc": "Overwrite a color in the logo",
+            "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
             },
@@ -432,6 +433,7 @@
         {
             "long": "color-keys",
             "desc": "Set the color of the keys",
+            "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
             }
@@ -439,6 +441,7 @@
         {
             "long": "color-title",
             "desc": "Set the color of the title",
+            "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
             }
@@ -546,6 +549,33 @@
             "arg": {
                 "type": "num",
                 "default": 0
+            }
+        },
+        {
+            "long": "percent-color-green",
+            "desc": "Set color used in green state of percentage bars and numbers",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "green"
+            }
+        },
+        {
+            "long": "percent-color-yellow",
+            "desc": "Set color used in yellow state of percentage bars and numbers",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "light_yellow"
+            }
+        },
+        {
+            "long": "percent-color-red",
+            "desc": "Set color used in red state of percentage bars and numbers",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "light_red"
             }
         },
         {
@@ -821,6 +851,7 @@
         {
             "long": "title-color-user",
             "desc": "Set color of the user name (left part)",
+            "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
                 "default": "Use color of \"--color-title\""
@@ -829,6 +860,7 @@
         {
             "long": "title-color-at",
             "desc": "Set color of the @ symbol (middle part)",
+            "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
                 "default": "Use color of \"--color-title\""
@@ -837,6 +869,7 @@
         {
             "long": "title-color-host",
             "desc": "Set color of the host name (right part)",
+            "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
                 "default": "default"
@@ -1347,6 +1380,29 @@
         {
             "long": "<module>-key-width",
             "desc": "Override the global \"--key-width\" option for each specific module",
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-percent-green",
+            "desc": [
+                "Threshold of percentage colors",
+                "Value less then percent-green will be shown in green"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-percent-yellow",
+            "desc": [
+                "Threshold of percentage colors",
+                "Value greater than percent-green and less then yellow will be shown in yellow",
+                "Value greater than percent-yellow will be shown in red"
+            ],
             "arg": {
                 "type": "num"
             },

@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#define FF_TERMINAL_NUM_FORMAT_ARGS 6
+#define FF_TERMINAL_NUM_FORMAT_ARGS 7
 
 void ffPrintTerminal(FFTerminalOptions* options)
 {
@@ -36,6 +36,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
         });
     }
 }
@@ -89,6 +90,7 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->processName);
     yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result->exe);
     yyjson_mut_obj_add_strcpy(doc, obj, "exeName", result->exeName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &result->exePath);
     yyjson_mut_obj_add_uint(doc, obj, "pid", result->pid);
     yyjson_mut_obj_add_uint(doc, obj, "ppid", result->ppid);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
@@ -99,11 +101,12 @@ void ffPrintTerminalHelpFormat(void)
 {
     ffPrintModuleFormatHelp(FF_TERMINAL_MODULE_NAME, "{5} {6}", FF_TERMINAL_NUM_FORMAT_ARGS, (const char* []) {
         "Terminal process name",
-        "Terminal path with exe name",
-        "Terminal exe name",
+        "The first argument of the command line when running the terminal",
+        "Terminal base name of arg0",
         "Terminal pid",
         "Terminal pretty name",
-        "Terminal version"
+        "Terminal version",
+        "Terminal full exe path",
     });
 }
 

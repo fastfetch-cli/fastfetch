@@ -191,6 +191,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                             ffStrbufAppendS(&cpu->vendor, pstart);
                         }
                         pstart = pend + 1;
+                        if (pstart >= buffer.chars + buffer.length)
+                            return NULL;
                     }
                 }
             }
@@ -207,7 +209,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
                 if (*pstart == '-')
                 {
-                    ffStrbufAppendS(&cpu->name, "Unknown");
+                    if (cpu->vendor.length > 0)
+                        ffStrbufAppend(&cpu->name, &cpu->vendor);
+                    else
+                        ffStrbufAppendS(&cpu->name, "Unknown");
                     ++pstart;
                     continue;
                 }
@@ -222,6 +227,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                 }
 
                 pstart = pend + 1;
+                if (pstart >= buffer.chars + buffer.length)
+                    return NULL;
             }
         }
     }

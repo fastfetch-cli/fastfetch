@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
-#include "common/bar.h"
+#include "common/percent.h"
 #include "detection/memory/memory.h"
 #include "modules/memory/memory.h"
 #include "util/stringUtils.h"
@@ -40,7 +40,7 @@ void ffPrintMemory(FFMemoryOptions* options)
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffAppendPercentBar(&str, percentage, 0, 50, 80);
+                ffPercentAppendBar(&str, percentage, options->percent);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -48,7 +48,7 @@ void ffPrintMemory(FFMemoryOptions* options)
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-                ffAppendPercentNum(&str, percentage, 50, 80, str.length > 0);
+                ffPercentAppendNum(&str, percentage, options->percent, str.length > 0);
 
             ffStrbufTrimRight(&str, ' ');
             ffStrbufPutTo(&str, stdout);
@@ -57,7 +57,7 @@ void ffPrintMemory(FFMemoryOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffAppendPercentNum(&percentageStr, percentage, 50, 80, false);
+        ffPercentAppendNum(&percentageStr, percentage, options->percent, false);
         ffPrintFormat(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_MEMORY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
@@ -71,6 +71,9 @@ bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, cons
     const char* subKey = ffOptionTestPrefix(key, FF_MEMORY_MODULE_NAME);
     if (!subKey) return false;
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
+        return true;
+
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
         return true;
 
     return false;
@@ -89,6 +92,9 @@ void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -99,6 +105,8 @@ void ffGenerateMemoryJsonConfig(FFMemoryOptions* options, yyjson_mut_doc* doc, y
     ffInitMemoryOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -140,6 +148,7 @@ void ffInitMemoryOptions(FFMemoryOptions* options)
         ffGenerateMemoryJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+    options->percent = (FFPercentConfig) { 50, 80 };
 }
 
 void ffDestroyMemoryOptions(FFMemoryOptions* options)
