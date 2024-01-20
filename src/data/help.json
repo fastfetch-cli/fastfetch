@@ -1351,6 +1351,29 @@
                 "type": "num"
             },
             "pseudo": true
+        },
+        {
+            "long": "<module>-percent-green",
+            "desc": [
+                "Threshold of percentage colors",
+                "Value less then percent-green will be shown in green"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-percent-yellow",
+            "desc": [
+                "Threshold of percentage colors",
+                "Value greater than percent-green and less then yellow will be shown in yellow",
+                "Value greater than percent-yellow will be shown in red"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
         }
     ]
 }

@@ -93,6 +93,9 @@ bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key
         return true;
     }
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -115,6 +118,9 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -128,6 +134,8 @@ void ffGenerateBluetoothJsonConfig(FFBluetoothOptions* options, yyjson_mut_doc* 
 
     if (options->showDisconnected != defaultOptions.showDisconnected)
         yyjson_mut_obj_add_bool(doc, module, "showDisconnected", options->showDisconnected);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateBluetoothJsonResult(FF_MAYBE_UNUSED FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

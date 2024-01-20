@@ -28,3 +28,10 @@ typedef struct FFPercentConfig
 
 void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentConfig config);
 void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config, bool parentheses);
+
+typedef struct yyjson_val yyjson_val;
+typedef struct yyjson_mut_doc yyjson_mut_doc;
+typedef struct yyjson_mut_val yyjson_mut_val;
+bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentConfig* config);
+bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentConfig* config);
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentConfig defaultConfig, FFPercentConfig config);

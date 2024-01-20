@@ -121,6 +121,9 @@ bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const 
         return true;
     }
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -153,6 +156,9 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -179,6 +185,8 @@ void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyj
                 break;
         }
     }
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

@@ -122,6 +122,9 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
         }
     #endif
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -152,6 +155,9 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -170,6 +176,8 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
 
     if (options->temp != defaultOptions.temp)
         yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

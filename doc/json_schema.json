@@ -26,6 +26,24 @@
         "format": {
             "description": "Output format of the module",
             "type": "string"
+        },
+        "percent": {
+            "description": "Threshold of percentage colors",
+            "type": "object",
+            "properties": {
+                "green": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Value less then green will be shown in green"
+                },
+                "yellow": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Value greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
+                }
+            }
         }
     },
     "type": "object",
@@ -673,10 +691,6 @@
                                                 "description": "Print system font name"
                                             },
                                             {
-                                                "const": "gamepad",
-                                                "description": "List connected gamepads"
-                                            },
-                                            {
                                                 "const": "host",
                                                 "description": "Print product name of your computer"
                                             },
@@ -699,10 +713,6 @@
                                             {
                                                 "const": "media",
                                                 "description": "Print playing song name"
-                                            },
-                                            {
-                                                "const": "memory",
-                                                "description": "Print system memory usage info"
                                             },
                                             {
                                                 "const": "monitor",
@@ -731,10 +741,6 @@
                                             {
                                                 "const": "shell",
                                                 "description": "Print current shell name and version"
-                                            },
-                                            {
-                                                "const": "swap",
-                                                "description": "Print swap (paging file) space usage"
                                             },
                                             {
                                                 "const": "terminal",
@@ -814,6 +820,9 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -841,6 +850,9 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -862,6 +874,9 @@
                                     "type": {
                                         "const": "brightness",
                                         "description": "Print current brightness level of your monitors"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "ddcciSleep": {
                                         "type": "integer",
@@ -933,6 +948,9 @@
                                     "type": {
                                         "const": "cpuusage",
                                         "description": "Print CPU usage. Costs some time to collect data"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "separate": {
                                         "type": "boolean",
@@ -1103,6 +1121,9 @@
                                         "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
                                         "default": false
                                     },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -1169,6 +1190,31 @@
                                         "$ref": "#/$defs/format"
                                     }
                                 }
+                            },
+                            {
+                                "title": "Gamepad",
+                                "properties": {
+                                    "type": {
+                                        "const": "gamepad",
+                                        "description": "List connected gamepads"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
                             },
                             {
                                 "title": "GPU",
@@ -1256,6 +1302,31 @@
                                         "description": "Show ips that are used for default routing only",
                                         "type": "boolean",
                                         "default": true
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Memory",
+                                "properties": {
+                                    "type": {
+                                        "const": "memory",
+                                        "description": "Print system memory usage info"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1457,6 +1528,34 @@
                                             "all"
                                         ],
                                         "default": "main"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                },
+                                "additionalProperties": false
+                            },
+                            {
+                                "title": "Swap",
+                                "properties": {
+                                    "type": {
+                                        "const": "swap",
+                                        "description": "Print swap (paging file) space usage"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

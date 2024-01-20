@@ -82,6 +82,9 @@ bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const ch
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -98,6 +101,9 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -106,6 +112,8 @@ void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjso
 {
     __attribute__((__cleanup__(ffDestroySwapOptions))) FFSwapOptions defaultOptions;
     ffInitSwapOptions(&defaultOptions);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 }
