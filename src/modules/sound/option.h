@@ -3,6 +3,7 @@
 // This file will be included in "fastfetch.h", do NOT put unnecessary things here
 
 #include "common/option.h"
+#include "common/percent.h"
 
 typedef enum FFSoundType
 {
@@ -17,4 +18,5 @@ typedef struct FFSoundOptions
     FFModuleArgs moduleArgs;
 
     FFSoundType soundType;
+    FFPercentConfig percent;
 } FFSoundOptions;

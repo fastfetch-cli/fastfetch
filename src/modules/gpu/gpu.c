@@ -60,7 +60,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffPercentAppendNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, 50, 80, false);
+                ffPercentAppendNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, options->percent, false);
             }
             ffStrbufAppendC(&output, ')');
         }
@@ -363,6 +363,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
+    options->percent = (FFPercentConfig) { 50, 80 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options)

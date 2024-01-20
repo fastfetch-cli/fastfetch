@@ -24,7 +24,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
                 if (str.length)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendBar(&str, device->volume, 80, 90);
+                ffPercentAppendBar(&str, device->volume, options->percent);
             }
 
             if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -32,7 +32,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
                 if (str.length)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendNum(&str, device->volume, 80, 90, str.length > 0);
+                ffPercentAppendNum(&str, device->volume, options->percent, str.length > 0);
             }
         }
 
@@ -47,7 +47,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&percentageStr, device->volume, 80, 90, false);
+        ffPercentAppendNum(&percentageStr, device->volume, options->percent, false);
 
         ffPrintFormat(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_SOUND_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},
@@ -247,6 +247,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->soundType = FF_SOUND_TYPE_MAIN;
+    options->percent = (FFPercentConfig) { 80, 90 };
 }
 
 void ffDestroySoundOptions(FFSoundOptions* options)

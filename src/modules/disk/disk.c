@@ -59,7 +59,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffPercentAppendBar(&str, bytesPercentage, 50, 80);
+                ffPercentAppendBar(&str, bytesPercentage, options->percent);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -68,7 +68,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffPercentAppendNum(&str, bytesPercentage, 50, 80, str.length > 0);
+                ffPercentAppendNum(&str, bytesPercentage, options->percent, str.length > 0);
                 ffStrbufAppendC(&str, ' ');
             }
         }
@@ -104,10 +104,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     else
     {
         FF_STRBUF_AUTO_DESTROY bytesPercentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&bytesPercentageStr, bytesPercentage, 50, 80, false);
+        ffPercentAppendNum(&bytesPercentageStr, bytesPercentage, options->percent, false);
         FF_STRBUF_AUTO_DESTROY filesPercentageStr = ffStrbufCreate();
         double filesPercentage = disk->filesTotal > 0 ? ((double) disk->filesUsed / (double) disk->filesTotal) * 100.0 : 0;
-        ffPercentAppendNum(&filesPercentageStr, filesPercentage, 50, 80, false);
+        ffPercentAppendNum(&filesPercentageStr, filesPercentage, options->percent, false);
 
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
@@ -476,6 +476,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     ffStrbufInit(&options->folders);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
+    options->percent = (FFPercentConfig) { 50, 80 };
 }
 
 void ffDestroyDiskOptions(FFDiskOptions* options)

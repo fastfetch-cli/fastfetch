@@ -52,12 +52,12 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         if (!options->separate)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
-                ffPercentAppendBar(&str, avgValue, 50, 80);
+                ffPercentAppendBar(&str, avgValue, options->percent);
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffPercentAppendNum(&str, avgValue, 50, 80, str.length > 0);
+                ffPercentAppendNum(&str, avgValue, options->percent, str.length > 0);
             }
         }
         else
@@ -66,7 +66,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffPercentAppendNum(&str, *percent, 50, 80, false);
+                ffPercentAppendNum(&str, *percent, options->percent, false);
             }
         }
         ffStrbufPutTo(&str, stdout);
@@ -74,11 +74,11 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY avgStr = ffStrbufCreate();
-        ffPercentAppendNum(&avgStr, avgValue, 50, 80, false);
+        ffPercentAppendNum(&avgStr, avgValue, options->percent, false);
         FF_STRBUF_AUTO_DESTROY minStr = ffStrbufCreate();
-        ffPercentAppendNum(&minStr, minValue, 50, 80, false);
+        ffPercentAppendNum(&minStr, minValue, options->percent, false);
         FF_STRBUF_AUTO_DESTROY maxStr = ffStrbufCreate();
-        ffPercentAppendNum(&maxStr, maxValue, 50, 80, false);
+        ffPercentAppendNum(&maxStr, maxValue, options->percent, false);
         ffPrintFormat(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_CPUUSAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &avgStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &maxStr},
@@ -182,6 +182,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->separate = false;
+    options->percent = (FFPercentConfig) { 50, 80 };
 }
 
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)

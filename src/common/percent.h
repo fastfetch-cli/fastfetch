@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
 
 enum
 {
@@ -9,6 +9,12 @@ enum
     FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT = 1 << 2,
     FF_PERCENTAGE_TYPE_NUM_COLOR_BIT = 1 << 3,
 };
+
+typedef struct FFPercentConfig
+{
+    uint8_t green;
+    uint8_t yellow;
+} FFPercentConfig;
 
 // if (green <= yellow)
 // [0, green]: print green
@@ -20,5 +26,5 @@ enum
 // [yellow, green): print yellow
 // [0, yellow): print red
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow);
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses);
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentConfig config);
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config, bool parentheses);

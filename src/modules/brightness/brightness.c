@@ -52,7 +52,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
             if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffPercentAppendBar(&str, percent, 100, 100);
+                ffPercentAppendBar(&str, percent, options->percent);
             }
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -60,7 +60,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendNum(&str, percent, 100, 100, str.length > 0);
+                ffPercentAppendNum(&str, percent, options->percent, str.length > 0);
             }
 
             ffStrbufPutTo(&str, stdout);
@@ -68,7 +68,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
-            ffPercentAppendNum(&valueStr, percent, 10, 10, false);
+            ffPercentAppendNum(&valueStr, percent, options->percent, false);
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
@@ -197,6 +197,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->ddcciSleep = 10;
+    options->percent = (FFPercentConfig) { 100, 100 };
 }
 
 void ffDestroyBrightnessOptions(FFBrightnessOptions* options)

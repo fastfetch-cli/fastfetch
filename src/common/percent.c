@@ -3,8 +3,9 @@
 #include "common/color.h"
 #include "util/textModifier.h"
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow)
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentConfig config)
 {
+    uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
 
     const FFOptionsDisplay* options = &instance.config.display;
@@ -56,8 +57,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, uint8_t green, uint8_t
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, uint8_t green, uint8_t yellow, bool parentheses)
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config, bool parentheses)
 {
+    uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
 
     const FFOptionsDisplay* options = &instance.config.display;
