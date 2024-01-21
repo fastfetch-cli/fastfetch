@@ -1,3 +1,8 @@
+# 2.6.2
+
+Bugfixes:
+* Fix building for GCC in Windows (Windows)
+
 # 2.6.1
 
 Features:
