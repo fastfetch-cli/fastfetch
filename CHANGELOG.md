@@ -1,3 +1,8 @@
+# 2.6.3
+
+Bugfixes:
+* Fix module not working (Bluetooth)
+
 # 2.6.2
 
 Bugfixes:
