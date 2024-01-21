@@ -291,7 +291,7 @@ conhost:
 
 static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 {
-    uint32_t ppid;
+    uint32_t ppid = 0;
     bool hasGui;
 
     while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &hasGui))
