@@ -24,6 +24,8 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
 
         if (!device->connected)
             ffStrbufAppendS(&buffer, " [disconnected]");
+
+        ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
