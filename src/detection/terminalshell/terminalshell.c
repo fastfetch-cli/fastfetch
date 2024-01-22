@@ -281,7 +281,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
 FF_MAYBE_UNUSED static bool getTerminalVersionKgx(FFstrbuf* version)
 {
     if(ffProcessAppendStdOut(version, (char* const[]){
-        "gnome-terminal",
+        "kgx",
         "--version",
         NULL
     })) return false;
