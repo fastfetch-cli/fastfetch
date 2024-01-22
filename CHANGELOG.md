@@ -3,6 +3,9 @@
 Features:
 * Add new module `TerminalTheme`
 
+Bugfixes:
+* Fix text formatting (Wifi, Linux)
+
 # 2.6.3
 
 Bugfixes:
