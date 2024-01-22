@@ -297,6 +297,21 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
     return ppid;
 }
 
+static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv)
+{
+    pid_t pid = (pid_t) strtol(getenv(pidEnv), NULL, 10);
+    result->pid = (uint32_t) pid;
+    char name[256];
+    if (getProcessNameAndPpid(pid, name, (pid_t*) &result->ppid, NULL) == NULL)
+    {
+        ffStrbufSetS(&result->processName, name);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
+        return true;
+    }
+
+    return false;
+}
+
 static void getTerminalFromEnv(FFTerminalResult* result)
 {
     if(
@@ -319,58 +334,80 @@ static void getTerminalFromEnv(FFTerminalResult* result)
     const char* term = NULL;
 
     //SSH
-    if(getenv("SSH_CONNECTION") != NULL)
+    if(
+        getenv("SSH_TTY") != NULL
+    )
         term = getenv("SSH_TTY");
+    else if(
+        getenv("KITTY_PID") != NULL ||
+        getenv("KITTY_INSTALLATION_DIR") != NULL
+    )
+    {
+        if (getTerminalInfoByPidEnv(result, "KITTY_PID"))
+            return;
+        term = "kitty";
+    }
 
-    #ifdef __linux__
+    #ifdef __linux__ // WSL
     //Windows Terminal
-    if(!ffStrSet(term) && (
+    else if(
         getenv("WT_SESSION") != NULL ||
         getenv("WT_PROFILE_ID") != NULL
-    )) term = "Windows Terminal";
+    ) term = "Windows Terminal";
 
     //ConEmu
-    if(!ffStrSet(term) && (
+    else if(
         getenv("ConEmuPID") != NULL
-    )) term = "ConEmu";
+    ) term = "ConEmu";
     #endif
 
     //Alacritty
-    if(!ffStrSet(term) && (
+    else if(
         getenv("ALACRITTY_SOCKET") != NULL ||
         getenv("ALACRITTY_LOG") != NULL ||
         getenv("ALACRITTY_WINDOW_ID") != NULL
-    )) term = "Alacritty";
+    ) term = "Alacritty";
 
     #ifdef __ANDROID__
     //Termux
-    if(!ffStrSet(term) && (
+    else if(
         getenv("TERMUX_VERSION") != NULL ||
         getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL
-    )) term = "com.termux";
+    )
+    {
+        if (getTerminalInfoByPidEnv(result, "TERMUX_APP__PID"))
+            return;
+        term = "com.termux";
+    }
     #endif
 
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__FreeBSD__)
     //Konsole
-    if(!ffStrSet(term) && (
+    else if(
         getenv("KONSOLE_VERSION") != NULL
-    )) term = "konsole";
+    ) term = "konsole";
+
+    else if(
+        getenv("GNOME_TERMINAL_SCREEN") != NULL ||
+        getenv("GNOME_TERMINAL_SERVICE") != NULL
+    ) term = "gnome-terminal";
     #endif
 
     //MacOS, mintty
-    if(!ffStrSet(term))
+    else if(getenv("TERM_PROGRAM") != NULL)
         term = getenv("TERM_PROGRAM");
 
-    if(!ffStrSet(term))
+    else if(getenv("LC_TERMINAL") != NULL)
         term = getenv("LC_TERMINAL");
 
     //Normal Terminal
-    if(!ffStrSet(term))
+    else
+    {
         term = getenv("TERM");
-
-    //TTY
-    if(!ffStrSet(term) || ffStrEquals(term, "linux"))
-        term = ttyname(STDIN_FILENO);
+        //TTY
+        if(!ffStrSet(term) || ffStrEquals(term, "linux"))
+            term = ttyname(STDIN_FILENO);
+    }
 
     if(ffStrSet(term))
     {
@@ -437,7 +474,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 
     #elif defined(__linux__) || defined(__FreeBSD__)
 
-    else if(ffStrbufStartsWithS(&result->processName, "gnome-terminal-"))
+    else if(ffStrbufStartsWithS(&result->processName, "gnome-terminal"))
         ffStrbufInitStatic(&result->prettyName, "GNOME Terminal");
     else if(ffStrbufStartsWithS(&result->processName, "kgx"))
         ffStrbufInitStatic(&result->prettyName, "GNOME Console");
