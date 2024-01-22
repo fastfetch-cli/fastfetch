@@ -400,6 +400,15 @@ static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+static bool getTerminalVersionScreen(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version)) return false;
+    // Screen version 4.09.01 (GNU) 20-Aug-23
+    ffStrbufSubstrAfter(version, strlen("Screen version ") - 1);
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -510,6 +519,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "contour"))
         return getTerminalVersionContour(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "screen"))
+        return getTerminalVersionScreen(exe, version);
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)
