@@ -34,6 +34,7 @@
     "terminal",
     "terminalfont",
     "terminalsize",
+    "terminaltheme",
     "cpu",
     "cpuusage",
     "gpu",

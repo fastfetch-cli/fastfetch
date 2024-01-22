@@ -1,3 +1,8 @@
+# 2.6.4
+
+Features:
+* Add new module `TerminalTheme`
+
 # 2.6.3
 
 Bugfixes:

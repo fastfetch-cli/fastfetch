@@ -648,6 +648,7 @@
                             "terminal",
                             "terminalfont",
                             "terminalsize",
+                            "terminaltheme",
                             "title",
                             "theme",
                             "uptime",
@@ -771,6 +772,10 @@
                                             {
                                                 "const": "terminalsize",
                                                 "description": "Print current terminal size"
+                                            },
+                                            {
+                                                "const": "terminaltheme",
+                                                "description": "Print current terminal theme (foreground and background colors)"
                                             },
                                             {
                                                 "const": "theme",
