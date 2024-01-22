@@ -14,7 +14,7 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result)
         }
         else
         {
-            ffGetTerminalResponse("\033[18t", "\033[8;%hu;%hut", &result->rows, &result->columns);
+            ffGetTerminalResponse("\e[18t", "\e[8;%hu;%hut", &result->rows, &result->columns);
         }
     }
 
