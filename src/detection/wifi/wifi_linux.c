@@ -250,7 +250,11 @@ static const char* detectWifiWithIoctls(FFlist* result)
         item->conn.txRate = 0.0/0.0;
 
         ffStrbufSetF(&path, "/sys/class/net/%s/operstate", i->if_name);
-        if (!ffAppendFileBuffer(path.chars, &item->inf.status) || !ffStrbufEqualS(&item->inf.status, "up\n"))
+        if (!ffAppendFileBuffer(path.chars, &item->inf.status))
+            continue;
+
+        ffStrbufTrimRightSpace(&item->inf.status);
+        if (!ffStrbufEqualS(&item->inf.status, "up"))
             continue;
 
         FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
