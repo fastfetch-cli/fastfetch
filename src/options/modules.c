@@ -47,9 +47,10 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitShellOptions(&options->shell);
     ffInitSoundOptions(&options->sound);
     ffInitSwapOptions(&options->swap);
-    ffInitTerminalFontOptions(&options->terminalFont);
     ffInitTerminalOptions(&options->terminal);
+    ffInitTerminalFontOptions(&options->terminalFont);
     ffInitTerminalSizeOptions(&options->terminalSize);
+    ffInitTerminalThemeOptions(&options->terminalTheme);
     ffInitThemeOptions(&options->theme);
     ffInitTitleOptions(&options->title);
     ffInitUptimeOptions(&options->uptime);
@@ -109,9 +110,10 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyShellOptions(&options->shell);
     ffDestroySoundOptions(&options->sound);
     ffDestroySwapOptions(&options->swap);
-    ffDestroyTerminalFontOptions(&options->terminalFont);
     ffDestroyTerminalOptions(&options->terminal);
+    ffDestroyTerminalFontOptions(&options->terminalFont);
     ffDestroyTerminalSizeOptions(&options->terminalSize);
+    ffDestroyTerminalThemeOptions(&options->terminalTheme);
     ffDestroyThemeOptions(&options->theme);
     ffDestroyTitleOptions(&options->title);
     ffDestroyUptimeOptions(&options->uptime);

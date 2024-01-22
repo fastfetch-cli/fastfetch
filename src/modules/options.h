@@ -49,6 +49,7 @@
 #include "modules/terminal/option.h"
 #include "modules/terminalfont/option.h"
 #include "modules/terminalsize/option.h"
+#include "modules/terminaltheme/option.h"
 #include "modules/theme/option.h"
 #include "modules/title/option.h"
 #include "modules/uptime/option.h"

@@ -293,6 +293,7 @@ set(LIBFASTFETCH_SRC
     src/detection/os/os.c
     src/detection/packages/packages.c
     src/detection/publicip/publicip.c
+    src/detection/terminaltheme/terminaltheme.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
@@ -348,6 +349,7 @@ set(LIBFASTFETCH_SRC
     src/modules/swap/swap.c
     src/modules/media/media.c
     src/modules/terminal/terminal.c
+    src/modules/terminaltheme/terminaltheme.c
     src/modules/terminalfont/terminalfont.c
     src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
