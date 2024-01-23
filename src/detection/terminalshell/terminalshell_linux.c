@@ -123,6 +123,9 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
 static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int32_t* tty)
 {
+    if (pid <= 0)
+        return "Invalid pid";
+
     #ifdef __linux__
 
     char statFilePath[64];
@@ -146,6 +149,8 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int
 
     if (tty && (tty_ >> 8) == 0x88)
         *tty = tty_ & 0xFF;
+    else
+        *tty = -1;
 
     #elif defined(__APPLE__)
 
@@ -209,11 +214,13 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
     name[0] = '\0';
 
     pid_t ppid = 0;
+    int32_t tty = -1;
 
-    while (getProcessNameAndPpid(pid, name, &ppid, &result->tty) == NULL)
+    while (getProcessNameAndPpid(pid, name, &ppid, &tty) == NULL)
     {
         //Common programs that are between terminal and own process, but are not the shell
         if(
+            // tty < 0                                  || //A shell should connect to a tty
             ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
             ffStrEquals(name, "sudo")                ||
             ffStrEquals(name, "su")                  ||
@@ -237,6 +244,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
+        result->tty = tty;
         ffStrbufSetS(&result->processName, name);
         getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
@@ -255,6 +263,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
     {
         //Known shells
         if (
+            ffStrEquals(name, "sh")         ||
             ffStrEquals(name, "ash")        ||
             ffStrEquals(name, "bash")       ||
             ffStrEquals(name, "zsh")        ||
