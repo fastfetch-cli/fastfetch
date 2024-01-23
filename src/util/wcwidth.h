@@ -2,14 +2,15 @@
 
 #include <wchar.h>
 
-#ifndef FF_HAVE_WCWIDTH
-#include "3rdparty/wcwidch/wcwidth.h"
-
-static inline int wcswidth(const wchar_t *pwcs, size_t n)
-{
-    int res = 0;
-    while (n-- > 0)
-        res += wcwidth(*pwcs++);
-    return res;
+#ifdef FF_HAVE_WCWIDTH
+static inline int mk_wcwidth(wchar_t ucs) {
+    return wcwidth(ucs);
 }
+static inline int mk_wcswidth(const wchar_t *pwcs, size_t n) {
+    return wcswidth(pwcs, n);
+}
+#else
+// https://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c
+int mk_wcwidth(wchar_t ucs);
+int mk_wcswidth(const wchar_t *pwcs, size_t n);
 #endif
