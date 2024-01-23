@@ -14,7 +14,7 @@ static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate
 {
     const char* str = mbstr->chars;
     uint32_t wstrLength = (uint32_t) mbsrtowcs(wstr, &str, mbstr->length, state);
-    int result = mk_wcswidth(wstr, wstrLength);
+    int result = wcswidth(wstr, wstrLength);
     return result > 0 ? (uint32_t) result : mbstr->length;
 }
 
@@ -61,7 +61,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
                     #else
                     putwchar(wstr[i]);
                     #endif
-                    int width = mk_wcwidth(wstr[i]);
+                    int width = wcwidth(wstr[i]);
                     remaining -= width < 0 ? 0 : width;
                 }
             }
