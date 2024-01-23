@@ -483,10 +483,8 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
     if(isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, value))
         return;
 
-    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
-    if (ffPathExpandEnv(value, &absolutePath))
     {
-        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+        bool success = isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, value);
 
         if(success)
             return;
@@ -494,6 +492,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     //Try to load as a relative path
 
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
         //We need to copy it, because if a config file loads a config file, the value of path must be unchanged
