@@ -86,7 +86,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
         args, &size,
         NULL, 0
     ) == 0)
-        ffStrbufSetS(exePath, args);
+        ffStrbufSetNS(exePath, (uint32_t) (size - 1), args);
 
     size = ARG_MAX;
     if(sysctl(

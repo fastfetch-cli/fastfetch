@@ -33,7 +33,7 @@ static void getExePath(FFPlatform* platform)
             exePathLen = 0;
     #endif
     if (exePathLen > 0)
-        exePath->length = (uint32_t) exePathLen;
+        exePath->length = (uint32_t) (exePathLen - 1);
 }
 
 static void platformPathAddEnv(FFlist* dirs, const char* env)
