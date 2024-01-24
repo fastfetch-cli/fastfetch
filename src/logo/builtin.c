@@ -974,7 +974,7 @@ static const FFlogo C[] = {
     // ContainerLinux
     {
         .names = {"ContainerLinux", "Container Linux", "Container Linux by CoreOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_CONTAINER_LINUX,
+        .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
@@ -1467,6 +1467,68 @@ static const FFlogo F[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // FedoraSilverblue
+    {
+        .names = {"Fedora_silverblue", "fedora-silverblue", "fedora-linux-silverblue", "fedora-linux_silverblue"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_SILVERBLUE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // FedoraKinoite
+    {
+        .names = {"Fedora_kinoite", "fedora-kinoite", "fedora-linux-kinoite", "fedora-linux_kinoite"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_KINOITE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // FedoraSericea
+    {
+        .names = {"Fedora_sericea", "fedora-sericea", "fedora-linux-sericea", "fedora-linux_sericea"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_SERICEA,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // FedoraOnyx placeholder - Currently does not have a logo
+    //{
+        //.names = {"Fedora_onyx", "fedora-onyx", "fedora-linux-onyx", "fedora-linux_onyx"},
+        //.type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        //.lines = FASTFETCH_DATATEXT_LOGO_FEDORA_ONYX,
+        //.colors = {
+            //FF_COLOR_FG_BLUE,
+            //FF_COLOR_FG_WHITE,
+        //},
+        //.colorKeys = FF_COLOR_FG_BLUE,
+        //.colorTitle = FF_COLOR_FG_BLUE,
+    //},
+    // FedoraCoreOS
+    {
+        .names = {"Fedora_coreos", "fedora-coreos", "fedora-linux-coreos", "fedora-linux_coreos"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_WHITE,
     },
     // FemboyOS
     {
