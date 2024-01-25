@@ -516,7 +516,7 @@ elseif(BSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_bsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
@@ -956,6 +956,7 @@ elseif(BSD)
         PRIVATE "m"
         PRIVATE "usbhid"
         PRIVATE "geom"
+        PRIVATE "devinfo"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
