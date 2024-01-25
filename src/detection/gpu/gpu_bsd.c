@@ -50,7 +50,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 
     for (uint32_t i = 0; i < pcio.num_matches; ++i)
     {
-        const struct pci_conf* pc = &confs[i];
+        struct pci_conf* pc = &confs[i];
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(pc->pc_vendor));
@@ -102,7 +102,17 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                     end = memchr(start, '\n', (uint32_t) (end - start));
                     if (!end)
                         end = pciids.chars + pciids.length;
-                    ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
+
+                    char* openingBracket = memchr(start, '[', (uint32_t) (end - start));
+                    if (openingBracket)
+                    {
+                        openingBracket++;
+                        char* closingBracket = memchr(openingBracket, ']', (uint32_t) (end - openingBracket));
+                        if (closingBracket)
+                            ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
+                    }
+                    if (!gpu->name.length)
+                        ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
                 }
             }
         }
