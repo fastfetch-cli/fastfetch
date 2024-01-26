@@ -29,11 +29,13 @@ static void getExePath(FFPlatform* platform)
             (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()}, 4,
             exePath->chars, &exePathLen,
             NULL, 0
-        ))
+        ) < 0)
             exePathLen = 0;
+        else
+            exePathLen--; // remove terminating NUL
     #endif
     if (exePathLen > 0)
-        exePath->length = (uint32_t) (exePathLen - 1);
+        exePath->length = (uint32_t) exePathLen;
 }
 
 static void platformPathAddEnv(FFlist* dirs, const char* env)
