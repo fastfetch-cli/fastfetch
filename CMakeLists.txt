@@ -956,7 +956,6 @@ elseif(BSD)
         PRIVATE "m"
         PRIVATE "usbhid"
         PRIVATE "geom"
-        PRIVATE "devinfo"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
