@@ -284,6 +284,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "oil.ovm")    ||
             ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrEquals(name, "login")      ||
+            ffStrEquals(name, "sshd")       ||
             ffStrEndsWith(name, ".sh")
         )
         {
