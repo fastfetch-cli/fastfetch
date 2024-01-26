@@ -1,4 +1,4 @@
-# 2.6.4
+# 2.7.0
 
 Features:
 * Add new module `TerminalTheme`, which prints the foreground and background color of the current terminal window. Currently doesn't work on Windows.
