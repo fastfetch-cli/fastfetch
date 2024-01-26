@@ -402,6 +402,9 @@ jobs:
           echo -e "\n---\n\n<details><summary>SHA256SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
           sha256sum fastfetch-*/* >> fastfetch-release-notes.md
           echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
+          echo -e "\n<details><summary>SHA512SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
+          sha512sum fastfetch-*/* >> fastfetch-release-notes.md
+          echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
 
       - name: update release body
         if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
