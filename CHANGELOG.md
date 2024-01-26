@@ -1,10 +1,19 @@
 # 2.6.4
 
 Features:
-* Add new module `TerminalTheme`
+* Add new module `TerminalTheme`, which prints the foreground and background color of the current terminal window. Currently doesn't work on Windows.
+* Allow command substitution when expanding paths. For example, now it's possible to use `"source": "$(ls ~/path/to/images/*.png | shuf -n 1)"` in JSONC config file to randomly choose an image to display. (#698)
+* Use native methods instead of pciutils to detect GPUs in FreeBSD. (GPU, FreeBSD)
 
 Bugfixes:
 * Fix text formatting (Wifi, Linux)
+* Fix terminal detection in some cases (Terminal)
+* Remove trailing `\0` in JSON results (FreeBSD)
+* Fix uninitialized variables (GPU, Linux)
+* Fix a possible segfault (OpenCL)
+
+Logo:
+* Add ASCII logos for fedora immutable variants (#700)
 
 # 2.6.3
 
