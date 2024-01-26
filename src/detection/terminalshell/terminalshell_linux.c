@@ -86,7 +86,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
         args, &size,
         NULL, 0
     ) == 0)
-        ffStrbufSetS(exePath, args);
+        ffStrbufSetNS(exePath, (uint32_t) (size - 1), args);
 
     size = ARG_MAX;
     if(sysctl(
@@ -123,6 +123,9 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
 
 static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int32_t* tty)
 {
+    if (pid <= 0)
+        return "Invalid pid";
+
     #ifdef __linux__
 
     char statFilePath[64];
@@ -144,8 +147,13 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int
     )
         return "sscanf(stat) failed";
 
-    if (tty && (tty_ >> 8) == 0x88)
-        *tty = tty_ & 0xFF;
+    if (tty)
+    {
+        if ((tty_ >> 8) == 0x88)
+            *tty = tty_ & 0xFF;
+        else
+            *tty = -1;
+    }
 
     #elif defined(__APPLE__)
 
@@ -209,11 +217,13 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
     name[0] = '\0';
 
     pid_t ppid = 0;
+    int32_t tty = -1;
 
-    while (getProcessNameAndPpid(pid, name, &ppid, &result->tty) == NULL)
+    while (getProcessNameAndPpid(pid, name, &ppid, &tty) == NULL)
     {
         //Common programs that are between terminal and own process, but are not the shell
         if(
+            // tty < 0                                  || //A shell should connect to a tty
             ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
             ffStrEquals(name, "sudo")                ||
             ffStrEquals(name, "su")                  ||
@@ -237,6 +247,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
+        result->tty = tty;
         ffStrbufSetS(&result->processName, name);
         getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
@@ -255,6 +266,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
     {
         //Known shells
         if (
+            ffStrEquals(name, "sh")         ||
             ffStrEquals(name, "ash")        ||
             ffStrEquals(name, "bash")       ||
             ffStrEquals(name, "zsh")        ||
@@ -272,6 +284,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "oil.ovm")    ||
             ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrEquals(name, "login")      ||
+            ffStrEquals(name, "sshd")       ||
             ffStrEndsWith(name, ".sh")
         )
         {
@@ -297,6 +310,21 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
     return ppid;
 }
 
+static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv)
+{
+    pid_t pid = (pid_t) strtol(getenv(pidEnv), NULL, 10);
+    result->pid = (uint32_t) pid;
+    char name[256];
+    if (getProcessNameAndPpid(pid, name, (pid_t*) &result->ppid, NULL) == NULL)
+    {
+        ffStrbufSetS(&result->processName, name);
+        getProcessInformation(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
+        return true;
+    }
+
+    return false;
+}
+
 static void getTerminalFromEnv(FFTerminalResult* result)
 {
     if(
@@ -319,58 +347,80 @@ static void getTerminalFromEnv(FFTerminalResult* result)
     const char* term = NULL;
 
     //SSH
-    if(getenv("SSH_CONNECTION") != NULL)
+    if(
+        getenv("SSH_TTY") != NULL
+    )
         term = getenv("SSH_TTY");
+    else if(
+        getenv("KITTY_PID") != NULL ||
+        getenv("KITTY_INSTALLATION_DIR") != NULL
+    )
+    {
+        if (getTerminalInfoByPidEnv(result, "KITTY_PID"))
+            return;
+        term = "kitty";
+    }
 
-    #ifdef __linux__
+    #ifdef __linux__ // WSL
     //Windows Terminal
-    if(!ffStrSet(term) && (
+    else if(
         getenv("WT_SESSION") != NULL ||
         getenv("WT_PROFILE_ID") != NULL
-    )) term = "Windows Terminal";
+    ) term = "Windows Terminal";
 
     //ConEmu
-    if(!ffStrSet(term) && (
+    else if(
         getenv("ConEmuPID") != NULL
-    )) term = "ConEmu";
+    ) term = "ConEmu";
     #endif
 
     //Alacritty
-    if(!ffStrSet(term) && (
+    else if(
         getenv("ALACRITTY_SOCKET") != NULL ||
         getenv("ALACRITTY_LOG") != NULL ||
         getenv("ALACRITTY_WINDOW_ID") != NULL
-    )) term = "Alacritty";
+    ) term = "Alacritty";
 
     #ifdef __ANDROID__
     //Termux
-    if(!ffStrSet(term) && (
+    else if(
         getenv("TERMUX_VERSION") != NULL ||
         getenv("TERMUX_MAIN_PACKAGE_FORMAT") != NULL
-    )) term = "com.termux";
+    )
+    {
+        if (getTerminalInfoByPidEnv(result, "TERMUX_APP__PID"))
+            return;
+        term = "com.termux";
+    }
     #endif
 
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__FreeBSD__)
     //Konsole
-    if(!ffStrSet(term) && (
+    else if(
         getenv("KONSOLE_VERSION") != NULL
-    )) term = "konsole";
+    ) term = "konsole";
+
+    else if(
+        getenv("GNOME_TERMINAL_SCREEN") != NULL ||
+        getenv("GNOME_TERMINAL_SERVICE") != NULL
+    ) term = "gnome-terminal";
     #endif
 
     //MacOS, mintty
-    if(!ffStrSet(term))
+    else if(getenv("TERM_PROGRAM") != NULL)
         term = getenv("TERM_PROGRAM");
 
-    if(!ffStrSet(term))
+    else if(getenv("LC_TERMINAL") != NULL)
         term = getenv("LC_TERMINAL");
 
     //Normal Terminal
-    if(!ffStrSet(term))
+    else
+    {
         term = getenv("TERM");
-
-    //TTY
-    if(!ffStrSet(term) || ffStrEquals(term, "linux"))
-        term = ttyname(STDIN_FILENO);
+        //TTY
+        if(!ffStrSet(term) || ffStrEquals(term, "linux"))
+            term = ttyname(STDIN_FILENO);
+    }
 
     if(ffStrSet(term))
     {
@@ -429,6 +479,8 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufInitStatic(&result->prettyName, "WezTerm");
     else if(ffStrbufStartsWithS(&result->processName, "tmux:"))
         ffStrbufInitStatic(&result->prettyName, "tmux");
+    else if(ffStrbufStartsWithS(&result->processName, "screen-"))
+        ffStrbufInitStatic(&result->prettyName, "screen");
 
     #if defined(__ANDROID__)
 
@@ -437,7 +489,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 
     #elif defined(__linux__) || defined(__FreeBSD__)
 
-    else if(ffStrbufStartsWithS(&result->processName, "gnome-terminal-"))
+    else if(ffStrbufStartsWithS(&result->processName, "gnome-terminal"))
         ffStrbufInitStatic(&result->prettyName, "GNOME Terminal");
     else if(ffStrbufStartsWithS(&result->processName, "kgx"))
         ffStrbufInitStatic(&result->prettyName, "GNOME Console");

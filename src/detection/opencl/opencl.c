@@ -23,15 +23,15 @@ typedef struct OpenCLData
 
 static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
 {
-    cl_platform_id platformID;
-    cl_uint numPlatforms;
+    cl_platform_id platformID = NULL;
+    cl_uint numPlatforms = 0;
     data->ffclGetPlatformIDs(1, &platformID, &numPlatforms);
 
     if(numPlatforms == 0)
         return "clGetPlatformIDs returned 0 platforms";
 
-    cl_device_id deviceID;
-    cl_uint numDevices;
+    cl_device_id deviceID = NULL;
+    cl_uint numDevices = 0;
     data->ffclGetDeviceIDs(platformID, CL_DEVICE_TYPE_GPU, 1, &deviceID, &numDevices);
 
     if(numDevices == 0)
@@ -40,7 +40,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
     if(numDevices == 0)
         return "clGetDeviceIDs returned 0 devices";
 
-    char version[64];
+    char version[64] = "";
     data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(version), version, NULL);
     if(!ffStrSet(version))
         return "clGetDeviceInfo returned NULL or empty string";

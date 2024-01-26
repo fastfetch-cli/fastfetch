@@ -68,6 +68,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        ffStrbufInitStatic(&gpu->platformApi, "DXCore");
 
         ffStrbufInit(&gpu->driver);
         uint64_t value = 0;

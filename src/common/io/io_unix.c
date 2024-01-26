@@ -115,7 +115,7 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
     #if __has_include(<wordexp.h>) // https://github.com/termux/termux-packages/pull/7056
 
     wordexp_t exp;
-    if(wordexp(in, &exp, WRDE_NOCMD) != 0)
+    if(wordexp(in, &exp, 0) != 0)
         return false;
 
     if (exp.we_wordc == 1)

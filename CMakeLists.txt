@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.6.3
+    VERSION 2.7.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -293,6 +293,7 @@ set(LIBFASTFETCH_SRC
     src/detection/os/os.c
     src/detection/packages/packages.c
     src/detection/publicip/publicip.c
+    src/detection/terminaltheme/terminaltheme.c
     src/detection/terminalfont/terminalfont.c
     src/detection/terminalshell/terminalshell.c
     src/detection/version/version.c
@@ -348,6 +349,7 @@ set(LIBFASTFETCH_SRC
     src/modules/swap/swap.c
     src/modules/media/media.c
     src/modules/terminal/terminal.c
+    src/modules/terminaltheme/terminaltheme.c
     src/modules/terminalfont/terminalfont.c
     src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
@@ -514,7 +516,7 @@ elseif(BSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_bsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c

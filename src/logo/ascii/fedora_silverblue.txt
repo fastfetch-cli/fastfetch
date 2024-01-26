@@ -1,0 +1,17 @@
+    .;ooooooooooooooooooooooooooo.
+  ,dddddddddddddddddddddddddddddd'$3;
+$1 lddddddddddddddddddddddddddddd'$3;;;
+$1ddddd$2,XXX.$1ddddd$2,XXX.$1dddd'$2,XXX.$3;;;;;
+$1ddddd$2XX$1x$2XX$1ddddd$2XX$1x$2XX$1ddd'$2,XX$3x$2XX$3;;;;;
+$1ddddd$2'XXX'$1ddddd$2'XXX'$1dd'$2XXXXXX'$3;;;;;
+$1dddddd$2;X;$1ddddddd$2;X:$1d'$2XXX$3;;;;;;;;;;;
+$1dddddd$2;X;$1ddddddd$2;X:$2XXX$3;;;;;;;;;;;;;
+$1dddddd$2;X;$1dddddd'$2;XXX,,,,,,XXX.$3;;;;;
+$1dddddd$2;X;$1dddd'$2XXXX$2XXXXXXXXX$3x$2XX$3;;;;;
+$1dddddd$2;X;$1dd'$2XXX$3;;;;;;;;;;;$2XXX$3;;;;;;
+$1dddddd$2;X;$1'$2XXX$3;;;;;;;;;;;;;;;;;;;;;;
+$1dddddd$2;XXXXX,,,,,,,,,,,,,;XXX:$3;;;;;
+$1dddddd$2:XXXXXXXXXXXXXXXXXXXX$3x$2XX$3;;;;;
+$1ddddd'$3;;;;;;;;;;;;;;;;;;;$2'XXX'$3;;;;'
+$1ddd'$3;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+$1o'$3;;;;;;;;;;;;;;;;;;;;;;;;;;;;'

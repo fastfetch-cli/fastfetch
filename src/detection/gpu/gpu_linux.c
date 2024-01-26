@@ -209,16 +209,8 @@ static void pciHandleDevice(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 {
     pci->ffpci_fill_info(device, PCI_FILL_CLASS);
 
-    char class[1024];
-    pci->ffpci_lookup_name(pci->access, class, sizeof(class) - 1, PCI_LOOKUP_CLASS, device->device_class);
-
-    if(
-        //https://pci-ids.ucw.cz/read/PD/03
-        strcasecmp("VGA compatible controller", class) != 0 &&
-        strcasecmp("XGA compatible controller", class) != 0 &&
-        strcasecmp("3D controller", class)             != 0 &&
-        strcasecmp("Display controller", class)        != 0
-    ) return;
+    if (device->device_class >> 8 != PCI_BASE_CLASS_DISPLAY)
+        return;
 
     pci->ffpci_fill_info(device, PCI_FILL_IDENT);
 

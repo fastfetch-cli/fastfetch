@@ -124,6 +124,7 @@ static FFModuleBaseInfo* T[] = {
     (void*) &instance.config.modules.terminal,
     (void*) &instance.config.modules.terminalFont,
     (void*) &instance.config.modules.terminalSize,
+    (void*) &instance.config.modules.terminalTheme,
     (void*) &instance.config.modules.title,
     (void*) &instance.config.modules.theme,
     NULL,

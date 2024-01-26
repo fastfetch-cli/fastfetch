@@ -48,9 +48,10 @@ typedef struct FFOptionsModules
     FFShellOptions shell;
     FFSoundOptions sound;
     FFSwapOptions swap;
-    FFTerminalFontOptions terminalFont;
     FFTerminalOptions terminal;
+    FFTerminalFontOptions terminalFont;
     FFTerminalSizeOptions terminalSize;
+    FFTerminalThemeOptions terminalTheme;
     FFThemeOptions theme;
     FFTitleOptions title;
     FFUptimeOptions uptime;

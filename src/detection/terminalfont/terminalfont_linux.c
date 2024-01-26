@@ -315,7 +315,7 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectFromConfigFile("lxterminal/lxterminal.conf", "fontname =", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "tilix"))
         detectFromGSettings("/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", "default", terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "gnome-terminal-"))
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "gnome-terminal"))
         detectFromGSettings("/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", "default", terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "kgx"))
         detectKgx(terminalFont);

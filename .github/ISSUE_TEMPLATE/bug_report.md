@@ -19,7 +19,10 @@ assignees: ''
 
 # Often helpful information:
 
-The content of the configuration file you use (if any)
+Screenshot:
+<!-- Paste the screenshot here -->
+
+The content of the configuration file you use (if any):
 ```
 //paste here
 ```
