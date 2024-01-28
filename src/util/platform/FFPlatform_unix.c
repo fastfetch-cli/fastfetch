@@ -17,17 +17,17 @@
 
 static void getExePath(FFPlatform* platform)
 {
-    FFstrbuf* const exePath = &platform->exePath;
-    ffStrbufEnsureFree(exePath, PATH_MAX);
+    char exePath[PATH_MAX + 1];
     #ifdef __linux__
-        ssize_t exePathLen = readlink("/proc/self/exe", exePath->chars, exePath->allocated - 1);
+        ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+        exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
-        int exePathLen = proc_pidpath((int) getpid(), exePath->chars, exePath->allocated);
+        int exePathLen = proc_pidpath((int) getpid(), exePath, sizeof(exePath));
     #elif defined(__FreeBSD__)
-        size_t exePathLen = exePath->allocated;
+        size_t exePathLen = sizeof(exePath);
         if(sysctl(
             (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()}, 4,
-            exePath->chars, &exePathLen,
+            exePath, &exePathLen,
             NULL, 0
         ) < 0)
             exePathLen = 0;
@@ -35,7 +35,13 @@ static void getExePath(FFPlatform* platform)
             exePathLen--; // remove terminating NUL
     #endif
     if (exePathLen > 0)
-        exePath->length = (uint32_t) exePathLen;
+    {
+        ffStrbufEnsureFree(&platform->exePath, PATH_MAX);
+        if (realpath(platform->exePath.chars, exePath))
+            ffStrbufRecalculateLength(&platform->exePath);
+        else
+            ffStrbufSetNS(&platform->exePath, (uint32_t) exePathLen, exePath);
+    }
 }
 
 static void platformPathAddEnv(FFlist* dirs, const char* env)
