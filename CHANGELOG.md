@@ -1,3 +1,11 @@
+# 2.7.1
+
+Features:
+* Config presets in app folder now work with symlinks
+
+Bugfixes:
+* Fix a possible segfault when detecting terminal (Terminal, Linux)
+
 # 2.7.0
 
 Features:
