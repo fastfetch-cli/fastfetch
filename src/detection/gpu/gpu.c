@@ -6,6 +6,8 @@ const char* FF_GPU_VENDOR_NAME_APPLE = "Apple";
 const char* FF_GPU_VENDOR_NAME_AMD = "AMD";
 const char* FF_GPU_VENDOR_NAME_INTEL = "Intel";
 const char* FF_GPU_VENDOR_NAME_NVIDIA = "NVIDIA";
+const char* FF_GPU_VENDOR_NAME_QUALCOMM = "Qualcomm";
+const char* FF_GPU_VENDOR_NAME_MTK = "MTK";
 const char* FF_GPU_VENDOR_NAME_VMWARE = "VMware";
 const char* FF_GPU_VENDOR_NAME_PARALLEL = "Parallel";
 const char* FF_GPU_VENDOR_NAME_MICROSOFT = "Microsoft";
@@ -33,6 +35,10 @@ const char* ffGetGPUVendorString(unsigned vendorId)
         return FF_GPU_VENDOR_NAME_INTEL;
     else if(arrayContains((const unsigned[]) {0x0955, 0x10de, 0x12d2}, vendorId, 3))
         return FF_GPU_VENDOR_NAME_NVIDIA;
+    else if(arrayContains((const unsigned[]) {0x5143}, vendorId, 1))
+        return FF_GPU_VENDOR_NAME_QUALCOMM;
+    else if(arrayContains((const unsigned[]) {0x14c3}, vendorId, 1))
+        return FF_GPU_VENDOR_NAME_MTK;
     else if(arrayContains((const unsigned[]) {0x15ad}, vendorId, 1))
         return FF_GPU_VENDOR_NAME_VMWARE;
     else if(arrayContains((const unsigned[]) {0x1af4}, vendorId, 1))

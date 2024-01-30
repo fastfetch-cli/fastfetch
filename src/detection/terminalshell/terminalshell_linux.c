@@ -312,7 +312,11 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
 static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv)
 {
-    pid_t pid = (pid_t) strtol(getenv(pidEnv), NULL, 10);
+    const char* envStr = getenv(pidEnv);
+    if (envStr == NULL)
+        return false;
+
+    pid_t pid = (pid_t) strtol(envStr, NULL, 10);
     result->pid = (uint32_t) pid;
     char name[256];
     if (getProcessNameAndPpid(pid, name, (pid_t*) &result->ppid, NULL) == NULL)
