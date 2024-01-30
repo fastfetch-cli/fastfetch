@@ -197,6 +197,87 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                 }
             }
 
+            #ifdef __aarch64__
+            // In Asahi Linux, reading /proc/device-tree/compatible gives
+            // information on the device model. It consists of 3 NUL terminated
+            // strings, the second of which gives the actual SoC model. But it
+            // is not the marketing name, i.e. for M2 there is "apple,t8112" in
+            // the compatible string.
+            //
+            // A full list of the SoC model names can be found here:
+            // https://github.com/AsahiLinux/docs/wiki/Codenames
+            #define DT_COMPAT_PATH "/proc/device-tree/compatible"
+            if (ffStrbufEqualS(&cpu->vendor, "Apple"))
+            {
+                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+                char* cpu_compat = NULL;
+                char* cpu_model_name = NULL;
+
+                ffStrbufAppend(&cpu->name, &cpu->vendor);
+                ffStrbufAppendC(&cpu->name, ' ');
+
+                if (ffAppendFileBuffer(DT_COMPAT_PATH, &content))
+                {
+                    // get the second NUL terminated string
+                    cpu_compat = content.chars + strlen(content.chars) + 1;
+                    // "apple,t8112" -> "t8112"
+                    cpu_compat = strchr(cpu_compat, ',') + 1;
+                    if (strcmp(cpu_compat, "t8103") == 0)
+                    {
+                        cpu_model_name = "M1";
+                    }
+                    else if (strcmp(cpu_compat, "t6000") == 0)
+                    {
+                        cpu_model_name = "M1 Pro";
+                    }
+                    else if (strcmp(cpu_compat, "t6001") == 0)
+                    {
+                        cpu_model_name = "M1 Max";
+                    }
+                    else if (strcmp(cpu_compat, "t6002") == 0)
+                    {
+                        cpu_model_name = "M1 Ultra";
+                    }
+                    else if (strcmp(cpu_compat, "t8112") == 0)
+                    {
+                        cpu_model_name = "M2";
+                    }
+                    else if (strcmp(cpu_compat, "t6020") == 0)
+                    {
+                        cpu_model_name = "M2 Pro";
+                    }
+                    else if (strcmp(cpu_compat, "t6021") == 0)
+                    {
+                        cpu_model_name = "M2 Max";
+                    }
+                    else if (strcmp(cpu_compat, "t6022") == 0)
+                    {
+                        cpu_model_name = "M2 Ultra";
+                    }
+                    else if (strcmp(cpu_compat, "t8122") == 0)
+                    {
+                        cpu_model_name = "M3";
+                    }
+                    else if (strcmp(cpu_compat, "t6030") == 0)
+                    {
+                        cpu_model_name = "M3 Pro";
+                    }
+                    else if (strcmp(cpu_compat, "t6031") == 0
+                                    || strcmp(cpu_compat, "t6034") == 0)
+                    {
+                        cpu_model_name = "M3 Max";
+                    }
+                    else
+                    {
+                        cpu_model_name = "CPU";
+                    }
+                }
+
+                ffStrbufAppendS(&cpu->name, cpu_model_name);
+                return NULL;
+            }
+            #endif
+
             while ((pstart = strstr(pstart, "Model name:")))
             {
                 pstart += strlen("Model name:");
