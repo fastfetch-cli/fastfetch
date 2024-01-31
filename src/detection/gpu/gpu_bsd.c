@@ -61,75 +61,10 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = ((uint64_t) pc->pc_vendor << 16) + pc->pc_device;
+        gpu->deviceId = ((uint64_t) pc->pc_sel.pc_domain << 6) | ((uint64_t) pc->pc_sel.pc_bus << 4) | ((uint64_t) pc->pc_sel.pc_dev << 2) | pc->pc_sel.pc_func;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        if (pciids.length)
-        {
-            char buffer[32];
-            uint32_t len = (uint32_t) snprintf(buffer, sizeof(buffer), "\n%04x  ", pc->pc_vendor);
-            char* start = (char*) memmem(pciids.chars, pciids.length, buffer, len);
-            char* end = pciids.chars + pciids.length;
-            if (start)
-            {
-                start += len;
-                end = memchr(start, '\n', (uint32_t) (end - start));
-                if (!end)
-                    end = pciids.chars + pciids.length;
-                if (!gpu->vendor.length)
-                    ffStrbufSetNS(&gpu->vendor, (uint32_t) (end - start), start);
-
-                start = end; // point to '\n' of vendor
-                end = start + 1; // point to start of devices
-                // find the start of next vendor
-                while (end[0] == '\t' || end[0] == '#')
-                {
-                    end = strchr(end, '\n');
-                    if (!end)
-                    {
-                        end = pciids.chars + pciids.length;
-                        break;
-                    }
-                    else
-                        end++;
-                }
-
-                len = (uint32_t) snprintf(buffer, sizeof(buffer), "\n\t%04x  ", pc->pc_device);
-                start = memmem(start, (size_t) (end - start), buffer, len);
-                if (start)
-                {
-                    start += len;
-                    end = memchr(start, '\n', (uint32_t) (end - start));
-                    if (!end)
-                        end = pciids.chars + pciids.length;
-
-                    char* openingBracket = memchr(start, '[', (uint32_t) (end - start));
-                    if (openingBracket)
-                    {
-                        openingBracket++;
-                        char* closingBracket = memchr(openingBracket, ']', (uint32_t) (end - openingBracket));
-                        if (closingBracket)
-                            ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
-                    }
-                    if (!gpu->name.length)
-                        ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);
-                }
-            }
-        }
-
-        if (!gpu->name.length)
-        {
-            const char* subclass;
-            switch (pc->pc_subclass)
-            {
-            case PCIS_DISPLAY_VGA: subclass = " (VGA compatible)"; break;
-            case PCIS_DISPLAY_XGA: subclass = " (XGA compatible)"; break;
-            case PCIS_DISPLAY_3D: subclass = " (3D)"; break;
-            default: subclass = ""; break;
-            }
-
-            ffStrbufSetF(&gpu->name, "%s Device %04X%s", gpu->vendor.length ? gpu->vendor.chars : "Unknown", pc->pc_device, subclass);
-        }
+        ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
 
         #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
