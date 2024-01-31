@@ -88,16 +88,14 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         if(entry->d_name[0] == '.')
             continue;
 
+        ffStrbufSubstrBefore(&pciDir, pciBaseDirLength);
         ffStrbufAppendS(&pciDir, entry->d_name);
 
         const uint32_t pciDevDirLength = pciDir.length;
 
         ffStrbufAppendS(&pciDir, "/modalias");
         if (!ffReadFileBuffer(pciDir.chars, &buffer))
-        {
-            ffStrbufSubstrBefore(&pciDir, pciBaseDirLength);
             continue;
-        }
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
 
         uint32_t vendorId, deviceId;
