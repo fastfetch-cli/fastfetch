@@ -4,6 +4,7 @@
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -156,76 +157,34 @@ void detectAsahi(FFCPUResult* cpu)
     // strings, the second of which gives the actual SoC model. But it
     // is not the marketing name, i.e. for M2 there is "apple,t8112" in
     // the compatible string.
-    //
-    // A full list of the SoC model names can be found here:
-    // https://github.com/AsahiLinux/docs/wiki/Codenames
     if (cpu->name.length == 0 && ffStrbufEqualS(&cpu->vendor, "Apple"))
     {
-        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-        char* cpu_compat = NULL;
-        char* cpu_model_name = NULL;
+        char content[32];
+        ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
+        if (length <= 0) return;
 
-        ffStrbufAppend(&cpu->name, &cpu->vendor);
-        ffStrbufAppendC(&cpu->name, ' ');
-
-        if (ffAppendFileBuffer("/proc/device-tree/compatible", &content))
+        // get the second NUL terminated string
+        char* modelName = memchr(content, '\0', (size_t) length) + 1;
+        if (modelName - content < length && ffStrStartsWith(modelName, "apple,t"))
         {
-            // get the second NUL terminated string
-            cpu_compat = content.chars + strlen(content.chars) + 1;
-            // "apple,t8112" -> "t8112"
-            cpu_compat = strchr(cpu_compat, ',') + 1;
-            if (strcmp(cpu_compat, "t8103") == 0)
+            // https://github.com/AsahiLinux/docs/wiki/Codenames
+            switch (strtoul(modelName + strlen("apple,t"), NULL, 10))
             {
-                cpu_model_name = "M1";
-            }
-            else if (strcmp(cpu_compat, "t6000") == 0)
-            {
-                cpu_model_name = "M1 Pro";
-            }
-            else if (strcmp(cpu_compat, "t6001") == 0)
-            {
-                cpu_model_name = "M1 Max";
-            }
-            else if (strcmp(cpu_compat, "t6002") == 0)
-            {
-                cpu_model_name = "M1 Ultra";
-            }
-            else if (strcmp(cpu_compat, "t8112") == 0)
-            {
-                cpu_model_name = "M2";
-            }
-            else if (strcmp(cpu_compat, "t6020") == 0)
-            {
-                cpu_model_name = "M2 Pro";
-            }
-            else if (strcmp(cpu_compat, "t6021") == 0)
-            {
-                cpu_model_name = "M2 Max";
-            }
-            else if (strcmp(cpu_compat, "t6022") == 0)
-            {
-                cpu_model_name = "M2 Ultra";
-            }
-            else if (strcmp(cpu_compat, "t8122") == 0)
-            {
-                cpu_model_name = "M3";
-            }
-            else if (strcmp(cpu_compat, "t6030") == 0)
-            {
-                cpu_model_name = "M3 Pro";
-            }
-            else if (strcmp(cpu_compat, "t6031") == 0
-                            || strcmp(cpu_compat, "t6034") == 0)
-            {
-                cpu_model_name = "M3 Max";
-            }
-            else
-            {
-                cpu_model_name = "CPU";
+                case 8103: ffStrbufSetStatic(&cpu->name, "Apple M1"); break;
+                case 6000: ffStrbufSetStatic(&cpu->name, "Apple M1 Pro"); break;
+                case 6001: ffStrbufSetStatic(&cpu->name, "Apple M1 Max"); break;
+                case 6002: ffStrbufSetStatic(&cpu->name, "Apple M1 Ultra"); break;
+                case 8112: ffStrbufSetStatic(&cpu->name, "Apple M2"); break;
+                case 6020: ffStrbufSetStatic(&cpu->name, "Apple M2 Pro"); break;
+                case 6021: ffStrbufSetStatic(&cpu->name, "Apple M2 Max"); break;
+                case 6022: ffStrbufSetStatic(&cpu->name, "Apple M2 Ultra"); break;
+                case 8122: ffStrbufSetStatic(&cpu->name, "Apple M3"); break;
+                case 6030: ffStrbufSetStatic(&cpu->name, "Apple M3 Pro"); break;
+                case 6031:
+                case 6034: ffStrbufSetStatic(&cpu->name, "Apple M3 Max"); break;
+                default: ffStrbufSetStatic(&cpu->name, "Apple Silicon"); break;
             }
         }
-
-        ffStrbufAppendS(&cpu->name, cpu_model_name);
     }
 }
 
