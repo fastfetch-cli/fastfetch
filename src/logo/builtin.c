@@ -468,6 +468,23 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // Asahi2
+    {
+        .names = {"asahi2", "asahi-linux2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ASAHI2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_LIGHT_YELLOW,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_LIGHT_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // Aster
     {
         .names = {"aster"},
@@ -1444,6 +1461,22 @@ static const FFlogo F[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // FedoraAsahiRemix
+    {
+        .names = {"fedora-asahi-remix"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ASAHI,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_RED,
+            "38", //cyan
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
     },
     // FedoraSmall
     {
