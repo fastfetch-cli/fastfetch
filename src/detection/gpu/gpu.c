@@ -119,6 +119,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
     return "GPU detection failed";
 }
 
+#ifndef _WIN32
 void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu)
 {
     if (content->length)
@@ -188,3 +189,4 @@ void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint
         ffStrbufSetF(&gpu->name, "%s Device %04X%s", gpu->vendor.length ? gpu->vendor.chars : "Unknown", device, subclassStr);
     }
 }
+#endif

@@ -42,4 +42,7 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result);
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus);
 
 const char* ffGetGPUVendorString(unsigned vendorId);
+
+#ifndef _WIN32
 void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
+#endif
