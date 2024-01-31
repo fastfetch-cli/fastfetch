@@ -34,6 +34,10 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
     FF_AUTO_FREE char* line = NULL;
     size_t len = 0;
 
+    #ifdef __aarch64__
+    FF_STRBUF_AUTO_DESTROY implementer = ffStrbufCreate();
+    #endif
+
     while(getline(&line, &len, cpuinfo) != -1)
     {
         //Stop after the first CPU
@@ -47,11 +51,35 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
             ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
+
+            #ifdef __aarch64__
+            (cpu->vendor.length == 0 && ffParsePropLine(line, "CPU implementer :", &implementer)) ||
+            #endif
+
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) || //For POWER
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu model               :", &cpu->name)) //For MIPS
         );
     }
+
+    #ifdef __aarch64__
+    // https://github.com/util-linux/util-linux/blob/2cd89de14549d2b2c079a4f8b73f75500d229fee/sys-utils/lscpu-arm.c#L286
+    if (cpu->vendor.length == 0 && implementer.length > 2 /* 0xX */)
+    {
+        uint32_t implId = (uint32_t) strtoul(implementer.chars, NULL, 16);
+        switch (implId)
+        {
+        case 0x41: ffStrbufSetStatic(&cpu->vendor, "ARM"); break;
+        case 0x42: ffStrbufSetStatic(&cpu->vendor, "Broadcom"); break;
+        case 0x48: ffStrbufSetStatic(&cpu->vendor, "HiSilicon"); break;
+        case 0x4e: ffStrbufSetStatic(&cpu->vendor, "Nvidia"); break;
+        case 0x51: ffStrbufSetStatic(&cpu->vendor, "Qualcomm"); break;
+        case 0x53: ffStrbufSetStatic(&cpu->vendor, "Samsung"); break;
+        case 0x61: ffStrbufSetStatic(&cpu->vendor, "Apple"); break;
+        case 0x69: ffStrbufSetStatic(&cpu->vendor, "Intel"); break;
+        }
+    }
+    #endif
 
     return NULL;
 }
@@ -121,6 +149,86 @@ static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
+void detectAsahi(FFCPUResult* cpu)
+{
+    // In Asahi Linux, reading /proc/device-tree/compatible gives
+    // information on the device model. It consists of 3 NUL terminated
+    // strings, the second of which gives the actual SoC model. But it
+    // is not the marketing name, i.e. for M2 there is "apple,t8112" in
+    // the compatible string.
+    //
+    // A full list of the SoC model names can be found here:
+    // https://github.com/AsahiLinux/docs/wiki/Codenames
+    if (cpu->name.length == 0 && ffStrbufEqualS(&cpu->vendor, "Apple"))
+    {
+        FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+        char* cpu_compat = NULL;
+        char* cpu_model_name = NULL;
+
+        ffStrbufAppend(&cpu->name, &cpu->vendor);
+        ffStrbufAppendC(&cpu->name, ' ');
+
+        if (ffAppendFileBuffer("/proc/device-tree/compatible", &content))
+        {
+            // get the second NUL terminated string
+            cpu_compat = content.chars + strlen(content.chars) + 1;
+            // "apple,t8112" -> "t8112"
+            cpu_compat = strchr(cpu_compat, ',') + 1;
+            if (strcmp(cpu_compat, "t8103") == 0)
+            {
+                cpu_model_name = "M1";
+            }
+            else if (strcmp(cpu_compat, "t6000") == 0)
+            {
+                cpu_model_name = "M1 Pro";
+            }
+            else if (strcmp(cpu_compat, "t6001") == 0)
+            {
+                cpu_model_name = "M1 Max";
+            }
+            else if (strcmp(cpu_compat, "t6002") == 0)
+            {
+                cpu_model_name = "M1 Ultra";
+            }
+            else if (strcmp(cpu_compat, "t8112") == 0)
+            {
+                cpu_model_name = "M2";
+            }
+            else if (strcmp(cpu_compat, "t6020") == 0)
+            {
+                cpu_model_name = "M2 Pro";
+            }
+            else if (strcmp(cpu_compat, "t6021") == 0)
+            {
+                cpu_model_name = "M2 Max";
+            }
+            else if (strcmp(cpu_compat, "t6022") == 0)
+            {
+                cpu_model_name = "M2 Ultra";
+            }
+            else if (strcmp(cpu_compat, "t8122") == 0)
+            {
+                cpu_model_name = "M3";
+            }
+            else if (strcmp(cpu_compat, "t6030") == 0)
+            {
+                cpu_model_name = "M3 Pro";
+            }
+            else if (strcmp(cpu_compat, "t6031") == 0
+                            || strcmp(cpu_compat, "t6034") == 0)
+            {
+                cpu_model_name = "M3 Max";
+            }
+            else
+            {
+                cpu_model_name = "CPU";
+            }
+        }
+
+        ffStrbufAppendS(&cpu->name, cpu_model_name);
+    }
+}
+
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
@@ -167,6 +275,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     detectAndroid(cpu);
     #endif
 
+    #if defined(__linux__) && defined(__aarch64__)
+    detectAsahi(cpu);
+    #endif
+
     if (cpu->name.length == 0)
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -196,87 +308,6 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                     }
                 }
             }
-
-            #ifdef __aarch64__
-            // In Asahi Linux, reading /proc/device-tree/compatible gives
-            // information on the device model. It consists of 3 NUL terminated
-            // strings, the second of which gives the actual SoC model. But it
-            // is not the marketing name, i.e. for M2 there is "apple,t8112" in
-            // the compatible string.
-            //
-            // A full list of the SoC model names can be found here:
-            // https://github.com/AsahiLinux/docs/wiki/Codenames
-            #define DT_COMPAT_PATH "/proc/device-tree/compatible"
-            if (ffStrbufEqualS(&cpu->vendor, "Apple"))
-            {
-                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-                char* cpu_compat = NULL;
-                char* cpu_model_name = NULL;
-
-                ffStrbufAppend(&cpu->name, &cpu->vendor);
-                ffStrbufAppendC(&cpu->name, ' ');
-
-                if (ffAppendFileBuffer(DT_COMPAT_PATH, &content))
-                {
-                    // get the second NUL terminated string
-                    cpu_compat = content.chars + strlen(content.chars) + 1;
-                    // "apple,t8112" -> "t8112"
-                    cpu_compat = strchr(cpu_compat, ',') + 1;
-                    if (strcmp(cpu_compat, "t8103") == 0)
-                    {
-                        cpu_model_name = "M1";
-                    }
-                    else if (strcmp(cpu_compat, "t6000") == 0)
-                    {
-                        cpu_model_name = "M1 Pro";
-                    }
-                    else if (strcmp(cpu_compat, "t6001") == 0)
-                    {
-                        cpu_model_name = "M1 Max";
-                    }
-                    else if (strcmp(cpu_compat, "t6002") == 0)
-                    {
-                        cpu_model_name = "M1 Ultra";
-                    }
-                    else if (strcmp(cpu_compat, "t8112") == 0)
-                    {
-                        cpu_model_name = "M2";
-                    }
-                    else if (strcmp(cpu_compat, "t6020") == 0)
-                    {
-                        cpu_model_name = "M2 Pro";
-                    }
-                    else if (strcmp(cpu_compat, "t6021") == 0)
-                    {
-                        cpu_model_name = "M2 Max";
-                    }
-                    else if (strcmp(cpu_compat, "t6022") == 0)
-                    {
-                        cpu_model_name = "M2 Ultra";
-                    }
-                    else if (strcmp(cpu_compat, "t8122") == 0)
-                    {
-                        cpu_model_name = "M3";
-                    }
-                    else if (strcmp(cpu_compat, "t6030") == 0)
-                    {
-                        cpu_model_name = "M3 Pro";
-                    }
-                    else if (strcmp(cpu_compat, "t6031") == 0
-                                    || strcmp(cpu_compat, "t6034") == 0)
-                    {
-                        cpu_model_name = "M3 Max";
-                    }
-                    else
-                    {
-                        cpu_model_name = "CPU";
-                    }
-                }
-
-                ffStrbufAppendS(&cpu->name, cpu_model_name);
-                return NULL;
-            }
-            #endif
 
             while ((pstart = strstr(pstart, "Model name:")))
             {
