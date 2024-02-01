@@ -72,8 +72,8 @@ jobs:
       - name: run flashfetch
         run: time ./flashfetch
 
-  linux:
-    name: Linux
+  linux-amd64:
+    name: Linux-amd64
     runs-on: ubuntu-20.04 # 22.04 ships a newer version of glibc than debian stable, allow those people to use the debian package
     permissions:
       security-events: write
@@ -172,8 +172,8 @@ jobs:
           name: fastfetch-linux-aarch64
           path: ./fastfetch-*.*
 
-  macos:
-    name: MacOS
+  macos-universal:
+    name: macOS-universal
     runs-on: macos-latest
     permissions:
       security-events: write
@@ -228,8 +228,8 @@ jobs:
           name: fastfetch-macos
           path: ./fastfetch-*.*
 
-  freebsd:
-    name: FreeBSD
+  freebsd-amd64:
+    name: FreeBSD-amd64
     runs-on: macos-12
     permissions:
       security-events: write
@@ -262,8 +262,8 @@ jobs:
           name: fastfetch-freebsd
           path: ./fastfetch-*.*
 
-  win64:
-    name: Win64
+  windows-amd64:
+    name: Windows-amd64
     runs-on: windows-latest
     permissions:
       security-events: write
@@ -324,8 +324,8 @@ jobs:
           name: fastfetch-win64
           path: ./fastfetch-*-Win64.*
 
-  win32:
-    name: Win32
+  windows-i686:
+    name: Windows-i686
     runs-on: windows-latest
     permissions:
       security-events: write
@@ -396,12 +396,12 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     needs:
-      - linux
+      - linux-amd64
       - linux-aarch64
-      - macos
-      - freebsd
-      - win64
-      - win32
+      - macos-universal
+      - freebsd-amd64
+      - windows-amd64
+      - windows-i686
     permissions:
       contents: write
     steps:
@@ -412,29 +412,29 @@ jobs:
           repository: ${{ github.repository }}
 
       - name: download artifacts
-        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         uses: actions/download-artifact@v4
 
       - name: create release
-        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ needs.linux.outputs.ffversion }}
+          tag: ${{ needs.linux-amd64.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
           artifacts: fastfetch-*/fastfetch-*
-          body: "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux.outputs.ffversion }}/CHANGELOG.md) for details."
+          body: "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux-amd64.outputs.ffversion }}/CHANGELOG.md) for details."
 
       - name: download source tarballs
-        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         run: |
-          for i in 1 2 3 4 5; do curl -L --remote-name-all --output-dir fastfetch-source --create-dirs https://github.com/${{ github.repository }}/archive/refs/tags/${{ needs.linux.outputs.ffversion }}.{tar.gz,zip} && break || sleep 5; done
+          for i in 1 2 3 4 5; do curl -L --remote-name-all --output-dir fastfetch-source --create-dirs https://github.com/${{ github.repository }}/archive/refs/tags/${{ needs.linux-amd64.outputs.ffversion }}.{tar.gz,zip} && break || sleep 5; done
           ls fastfetch-*/*
 
       - name: generate release notes
-        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         run: |
-          echo "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux.outputs.ffversion }}/CHANGELOG.md) for details." > fastfetch-release-notes.md
+          echo "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux-amd64.outputs.ffversion }}/CHANGELOG.md) for details." > fastfetch-release-notes.md
           echo -e "\n---\n\n<details><summary>SHA256SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
           sha256sum fastfetch-*/* >> fastfetch-release-notes.md
           echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
@@ -443,10 +443,10 @@ jobs:
           echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
 
       - name: update release body
-        if: needs.linux.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ needs.linux.outputs.ffversion }}
+          tag: ${{ needs.linux-amd64.outputs.ffversion }}
           commit: ${{ github.sha }}
           bodyFile: fastfetch-release-notes.md
           allowUpdates: true
