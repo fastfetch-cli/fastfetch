@@ -356,6 +356,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* ver
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionBlackbox(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        exe->chars,
+        "--version",
+        NULL
+    })) return false;
+
+    //BlackBox version 0.14.0 (flatpak)
+    ffStrbufSubstrBeforeLastC(version, ' ');
+    ffStrbufSubstrAfterLastC(version, ' ');
+    return version->length > 0;
+}
+
 FF_MAYBE_UNUSED static bool getTerminalVersionUrxvt(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     if(ffProcessAppendStdErr(version, (char* const[]){
@@ -481,6 +495,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "xterm"))
         return getTerminalVersionXterm(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "blackbox"))
+        return getTerminalVersionBlackbox(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "st"))
         return getTerminalVersionSt(exe, version);
