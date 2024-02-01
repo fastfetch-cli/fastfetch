@@ -96,7 +96,7 @@ jobs:
           /home/linuxbrew/.linuxbrew/bin/brew install imagemagick ddcutil chafa --ignore-dependencies
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: c
 
@@ -191,7 +191,7 @@ jobs:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install vulkan-loader vulkan-headers molten-vk imagemagick chafa
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: c
 
@@ -348,7 +348,7 @@ jobs:
         run: uname -a
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: c, cpp
 
