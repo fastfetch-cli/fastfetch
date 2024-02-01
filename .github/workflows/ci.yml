@@ -55,7 +55,7 @@ jobs:
         run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_VULKAN=${{ matrix.enableFeatures }} -DENABLE_WAYLAND=${{ matrix.enableFeatures }} -DENABLE_XCB_RANDR=${{ matrix.enableFeatures }} -DENABLE_XCB=${{ matrix.enableFeatures }} -DENABLE_XRANDR=${{ matrix.enableFeatures }} -DENABLE_X11=${{ matrix.enableFeatures }} -DENABLE_GIO=${{ matrix.enableFeatures }} -DENABLE_DCONF=${{ matrix.enableFeatures }} -DENABLE_DBUS=${{ matrix.enableFeatures }} -DENABLE_XFCONF=${{ matrix.enableFeatures }} -DENABLE_SQLITE3=${{ matrix.enableFeatures }} -DENABLE_RPM=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK7=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK6=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} -DENABLE_ZLIB=${{ matrix.enableFeatures }} -DENABLE_EGL=${{ matrix.enableFeatures }} -DENABLE_GLX=${{ matrix.enableFeatures }} -DENABLE_OSMESA=${{ matrix.enableFeatures }} -DENABLE_OPENCL=${{ matrix.enableFeatures }} -DENABLE_LIBNM=${{ matrix.enableFeatures }} -DENABLE_PULSE=${{ matrix.enableFeatures }} -DENABLE_DIRECTX_HEADERS=${{ matrix.enableFeatures }} -DENABLE_DRM=${{ matrix.enableFeatures }} .
 
       - name: build project
-        run: cmake --build .
+        run: cmake --build . --verbose -j4
 
       - name: run tests
         run: ctest
@@ -104,7 +104,7 @@ jobs:
         run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
-        run: cmake --build . --target package --verbose
+        run: cmake --build . --target package --verbose -j4
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
@@ -158,7 +158,7 @@ jobs:
             uname -a
             apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev libddcutil-dev libchafa-dev rpm
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
-            cmake --build . --target package --verbose
+            cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc
             time ./fastfetch -c presets/ci.jsonc --format json
@@ -199,7 +199,7 @@ jobs:
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' .
 
       - name: build project
-        run: cmake --build . --target package --verbose
+        run: cmake --build . --target package --verbose -j4
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
@@ -248,7 +248,7 @@ jobs:
             sudo pkg update
             sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-            cmake --build . --target package --verbose
+            cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch
             time ./fastfetch --format json
@@ -289,7 +289,7 @@ jobs:
         run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build . --verbose
+        run: cmake --build . --verbose -j4
 
       - name: copy necessary dlls
         run: cp /clang64/bin/{OpenCL,vulkan-1}.dll .
@@ -356,7 +356,7 @@ jobs:
         run: env PKG_CONFIG_PATH=/clang32/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
-        run: cmake --build . --verbose
+        run: cmake --build . --verbose -j4
 
       - name: perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
