@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install codespell
         shell: bash
@@ -107,7 +107,7 @@ jobs:
         run: cmake --build . --target package --verbose
 
       - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
       - name: list features
         run: ./fastfetch --list-features
@@ -202,7 +202,7 @@ jobs:
         run: cmake --build . --target package --verbose
 
       - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
       - name: list features
         run: ./fastfetch --list-features
@@ -359,7 +359,7 @@ jobs:
         run: cmake --build . --verbose
 
       - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
       - name: copy necessary dlls
         run: cp /clang32/bin/{OpenCL,vulkan-1}.dll .
