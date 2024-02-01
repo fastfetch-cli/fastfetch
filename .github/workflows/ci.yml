@@ -93,7 +93,7 @@ jobs:
       - name: install linuxbrew packages
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick ddcutil --ignore-dependencies
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick ddcutil chafa --ignore-dependencies
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -135,6 +135,41 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-linux
+          path: ./fastfetch-*.*
+
+  linux-aarch64:
+    name: Linux-aarch64
+    runs-on: ubuntu-22.04
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: uraimo/run-on-arch-action@v2
+        id: runcmd
+        with:
+          arch: aarch64
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          run: |
+            uname -a
+            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev libddcutil-dev libchafa-dev rpm
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+            cmake --build . --target package --verbose
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-linux-aarch64
           path: ./fastfetch-*.*
 
   macos:
@@ -362,6 +397,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - linux
+      - linux-aarch64
       - macos
       - freebsd
       - win64
