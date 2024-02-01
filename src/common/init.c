@@ -163,9 +163,6 @@ void ffListFeatures(void)
         #ifdef FF_HAVE_THREADS
             "threads\n"
         #endif
-        #ifdef FF_HAVE_LIBPCI
-            "libpci\n"
-        #endif
         #ifdef FF_HAVE_VULKAN
             "vulkan\n"
         #endif

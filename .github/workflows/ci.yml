@@ -46,13 +46,13 @@ jobs:
         run: uname -a
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev directx-headers-dev libdrm-dev
+        run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev directx-headers-dev libdrm-dev
 
       - name: configure project
         env:
           CC: ${{ matrix.compiler.cc }}
           CXX: ${{ matrix.compiler.cxx }}
-        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_LIBPCI=${{ matrix.enableFeatures }} -DENABLE_VULKAN=${{ matrix.enableFeatures }} -DENABLE_WAYLAND=${{ matrix.enableFeatures }} -DENABLE_XCB_RANDR=${{ matrix.enableFeatures }} -DENABLE_XCB=${{ matrix.enableFeatures }} -DENABLE_XRANDR=${{ matrix.enableFeatures }} -DENABLE_X11=${{ matrix.enableFeatures }} -DENABLE_GIO=${{ matrix.enableFeatures }} -DENABLE_DCONF=${{ matrix.enableFeatures }} -DENABLE_DBUS=${{ matrix.enableFeatures }} -DENABLE_XFCONF=${{ matrix.enableFeatures }} -DENABLE_SQLITE3=${{ matrix.enableFeatures }} -DENABLE_RPM=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK7=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK6=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} -DENABLE_ZLIB=${{ matrix.enableFeatures }} -DENABLE_EGL=${{ matrix.enableFeatures }} -DENABLE_GLX=${{ matrix.enableFeatures }} -DENABLE_OSMESA=${{ matrix.enableFeatures }} -DENABLE_OPENCL=${{ matrix.enableFeatures }} -DENABLE_LIBNM=${{ matrix.enableFeatures }} -DENABLE_PULSE=${{ matrix.enableFeatures }} -DENABLE_DIRECTX_HEADERS=${{ matrix.enableFeatures }} -DENABLE_DRM=${{ matrix.enableFeatures }} .
+        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_VULKAN=${{ matrix.enableFeatures }} -DENABLE_WAYLAND=${{ matrix.enableFeatures }} -DENABLE_XCB_RANDR=${{ matrix.enableFeatures }} -DENABLE_XCB=${{ matrix.enableFeatures }} -DENABLE_XRANDR=${{ matrix.enableFeatures }} -DENABLE_X11=${{ matrix.enableFeatures }} -DENABLE_GIO=${{ matrix.enableFeatures }} -DENABLE_DCONF=${{ matrix.enableFeatures }} -DENABLE_DBUS=${{ matrix.enableFeatures }} -DENABLE_XFCONF=${{ matrix.enableFeatures }} -DENABLE_SQLITE3=${{ matrix.enableFeatures }} -DENABLE_RPM=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK7=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK6=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} -DENABLE_ZLIB=${{ matrix.enableFeatures }} -DENABLE_EGL=${{ matrix.enableFeatures }} -DENABLE_GLX=${{ matrix.enableFeatures }} -DENABLE_OSMESA=${{ matrix.enableFeatures }} -DENABLE_OPENCL=${{ matrix.enableFeatures }} -DENABLE_LIBNM=${{ matrix.enableFeatures }} -DENABLE_PULSE=${{ matrix.enableFeatures }} -DENABLE_DIRECTX_HEADERS=${{ matrix.enableFeatures }} -DENABLE_DRM=${{ matrix.enableFeatures }} .
 
       - name: build project
         run: cmake --build .
@@ -88,7 +88,7 @@ jobs:
         run: uname -a
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libpci-dev libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev directx-headers-dev
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev directx-headers-dev
 
       - name: install linuxbrew packages
         run: |
@@ -211,7 +211,7 @@ jobs:
           run: |
             uname -a
             sudo pkg update
-            sudo pkg install -y cmake git pkgconf binutils pciutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose
             ./fastfetch --list-features
