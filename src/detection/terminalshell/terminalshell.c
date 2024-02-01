@@ -365,8 +365,8 @@ FF_MAYBE_UNUSED static bool getTerminalVersionBlackbox(FFstrbuf* exe, FFstrbuf* 
     })) return false;
 
     //BlackBox version 0.14.0 (flatpak)
-    ffStrbufSubstrBeforeLastC(version, ' ');
-    ffStrbufSubstrAfterLastC(version, ' ');
+    ffStrbufSubstrAfterFirstS(version, "version ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
     return version->length > 0;
 }
 
