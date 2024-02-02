@@ -487,7 +487,7 @@ elseif(ANDROID)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
-        src/detection/camera/camera_nosupport.c
+        src/detection/camera/camera_android.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(BSD)
