@@ -662,7 +662,7 @@ elseif(WIN32)
         src/detection/wm/wm_windows.cpp
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
-        src/detection/camera/camera_windows.c
+        src/detection/camera/camera_windows.cpp
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -944,6 +944,8 @@ elseif(WIN32)
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
+        PRIVATE "mf"
+        PRIVATE "mfplat"
         PRIVATE "ole32"
         PRIVATE "oleaut32"
         PRIVATE "ws2_32"
