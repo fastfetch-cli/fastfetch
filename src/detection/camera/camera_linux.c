@@ -33,8 +33,6 @@ const char* ffDetectCamera(FFlist* result)
         ffStrbufInitS(&camera->name, (const char*) cap.card);
         ffStrbufInit(&camera->vendor);
         ffStrbufInitS(&camera->id, (const char*) cap.bus_info);
-        camera->width = camera->height = 0;
-
         camera->width = fmt.fmt.pix.width;
         camera->height = fmt.fmt.pix.height;
     }
