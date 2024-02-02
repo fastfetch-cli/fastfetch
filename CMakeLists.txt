@@ -308,6 +308,7 @@ set(LIBFASTFETCH_SRC
     src/modules/board/board.c
     src/modules/brightness/brightness.c
     src/modules/break/break.c
+    src/modules/camera/camera.c
     src/modules/chassis/chassis.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
@@ -432,6 +433,7 @@ if(LINUX)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_nosupport.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(ANDROID)
@@ -485,6 +487,7 @@ elseif(ANDROID)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/camera/camera_nosupport.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(BSD)
@@ -547,6 +550,7 @@ elseif(BSD)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_nosupport.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(APPLE)
@@ -602,6 +606,7 @@ elseif(APPLE)
         src/detection/wm/wm_apple.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
+        src/detection/camera/camera_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/platform/FFPlatform_unix.c
@@ -657,6 +662,7 @@ elseif(WIN32)
         src/detection/wm/wm_windows.cpp
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
+        src/detection/camera/camera_windows.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -912,9 +918,11 @@ if(LINUX)
     )
 elseif(APPLE)
     target_link_libraries(libfastfetch
+        PRIVATE "-framework AVFoundation"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
         PRIVATE "-framework CoreAudio"
+        PRIVATE "-framework CoreMedia"
         PRIVATE "-framework CoreVideo"
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-framework IOBluetooth"

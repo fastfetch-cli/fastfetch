@@ -15,6 +15,7 @@ static FFModuleBaseInfo* B[] = {
 };
 
 static FFModuleBaseInfo* C[] = {
+    (void*) &instance.config.modules.camera,
     (void*) &instance.config.modules.chassis,
     (void*) &instance.config.modules.command,
     (void*) &instance.config.modules.colors,
