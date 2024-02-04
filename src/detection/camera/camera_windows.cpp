@@ -54,6 +54,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
 
         FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
         ffStrbufInitNWS(&camera->name, length, buffer);
+        ffStrbufInit(&camera->colorspace);
         ffStrbufInit(&camera->vendor);
         ffStrbufInit(&camera->id);
         camera->width = 0;
@@ -81,12 +82,42 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
         if (FAILED(sd->GetMediaTypeHandler(&handler)))
             continue;
 
-        // Assume first type is the maximum resolution
-        IMFMediaType* FF_AUTO_RELEASE_COM_OBJECT type = NULL;
-        if (FAILED(handler->GetMediaTypeByIndex(0, &type)))
+        DWORD mediaTypeCount;
+        if (FAILED(handler->GetMediaTypeCount(&mediaTypeCount)))
             continue;
 
-        MFGetAttributeSize(type, MF_MT_FRAME_SIZE, &camera->width, &camera->height);
+        // Assume first type is the maximum resolution
+        IMFMediaType* FF_AUTO_RELEASE_COM_OBJECT type = NULL;
+        for (DWORD idx = 0; SUCCEEDED(handler->GetMediaTypeByIndex(idx, &type)); ++idx)
+        {
+            GUID majorType;
+            if (FAILED(type->GetMajorType(&majorType)) || majorType != MFMediaType_Video)
+                continue;
+
+            MFVideoPrimaries primaries;
+            static_assert(sizeof(primaries) == sizeof(uint32_t), "");
+            if (SUCCEEDED(type->GetUINT32(MF_MT_VIDEO_PRIMARIES, (uint32_t*) &primaries)))
+            {
+                switch (primaries)
+                {
+                case MFVideoPrimaries_BT709: ffStrbufSetStatic(&camera->colorspace, "sRGB"); break;
+                case MFVideoPrimaries_BT470_2_SysM:
+                case MFVideoPrimaries_BT470_2_SysBG: ffStrbufSetStatic(&camera->colorspace, "NTSC"); break;
+                case MFVideoPrimaries_SMPTE170M: ffStrbufSetStatic(&camera->colorspace, "SMPTE 170M"); break;
+                case MFVideoPrimaries_SMPTE240M: ffStrbufSetStatic(&camera->colorspace, "SMPTE 240M"); break;
+                case MFVideoPrimaries_EBU3213: ffStrbufSetStatic(&camera->colorspace, "EBU 3213"); break;
+                case MFVideoPrimaries_SMPTE_C: ffStrbufSetStatic(&camera->colorspace, "SMPTE C"); break;
+                case MFVideoPrimaries_BT2020: ffStrbufSetStatic(&camera->colorspace, "BT.2020"); break;
+                case MFVideoPrimaries_XYZ: ffStrbufSetStatic(&camera->colorspace, "XYZ"); break;
+                case MFVideoPrimaries_DCI_P3: ffStrbufSetStatic(&camera->colorspace, "DCI-P3"); break;
+                case MFVideoPrimaries_ACES: ffStrbufSetStatic(&camera->colorspace, "ACES"); break;
+                default: break;
+                }
+            }
+
+            MFGetAttributeSize(type, MF_MT_FRAME_SIZE, &camera->width, &camera->height);
+            break;
+        }
     }
 
     CoTaskMemFree(devices);
