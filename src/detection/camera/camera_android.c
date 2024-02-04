@@ -37,17 +37,24 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
     yyjson_arr_foreach(root, idx, max, device)
     {
         FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
-        ffStrbufInitF(&camera->name, "Camera-%s", yyjson_get_str(yyjson_obj_get(device, "facing")));
+        {
+            const char* facing = yyjson_get_str(yyjson_obj_get(device, "facing"));
+            if (facing)
+                ffStrbufInitF(&camera->name, "builtin-%s", facing);
+            else
+                ffStrbufInitStatic(&camera->name, "Unknown");
+        }
         ffStrbufInit(&camera->vendor);
         ffStrbufInitS(&camera->id, yyjson_get_str(yyjson_obj_get(device, "id")));
-        yyjson_val* format = yyjson_arr_get_first(yyjson_obj_get(device, "jpeg_output_sizes"));
-        if (yyjson_is_obj(format))
+        yyjson_val* sizes = yyjson_arr_get_first(yyjson_obj_get(device, "jpeg_output_sizes"));
+        if (yyjson_is_obj(sizes))
         {
-            camera->width = (uint32_t) yyjson_get_uint(yyjson_obj_get(format, "width"));
-            camera->height = (uint32_t) yyjson_get_uint(yyjson_obj_get(format, "height"));
+            camera->width = (uint32_t) yyjson_get_uint(yyjson_obj_get(sizes, "width"));
+            camera->height = (uint32_t) yyjson_get_uint(yyjson_obj_get(sizes, "height"));
         }
         else
             camera->width = camera->height = 0;
+        ffStrbufInit(&camera->colorspace);
     }
 
     return NULL;
