@@ -21,7 +21,7 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
         }
 
         if (device->width > 0 && device->height > 0)
-            printf(" (%upx x %upx)\n", (unsigned) device->width, (unsigned) device->height);
+            printf(" (%ux%u px)\n", (unsigned) device->width, (unsigned) device->height);
         else
             putchar('\n');
     }
