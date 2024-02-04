@@ -7,6 +7,7 @@ typedef struct FFCameraResult
     FFstrbuf name;
     FFstrbuf vendor;
     FFstrbuf id;
+    FFstrbuf colorspace;
     uint32_t width;
     uint32_t height;
 } FFCameraResult;

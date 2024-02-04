@@ -13,19 +13,27 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
     {
         ffPrintLogoAndKey(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
+        ffStrbufWriteTo(&device->name, stdout);
+        if (device->colorspace.length > 0)
+        {
+            fputs(" - ", stdout);
+            ffStrbufWriteTo(&device->colorspace, stdout);
+        }
+
         if (device->width > 0 && device->height > 0)
-            printf("%s (%upx x %upx)\n", device->name.chars, (unsigned) device->width, (unsigned) device->height);
+            printf(" (%upx x %upx)\n", (unsigned) device->width, (unsigned) device->height);
         else
-            ffStrbufPutTo(&device->name, stdout);
+            putchar('\n');
     }
     else
     {
         ffPrintFormat(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_CAMERA_NUM_FORMAT_ARGS, (FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->vendor},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &device->colorspace},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->id},
             {FF_FORMAT_ARG_TYPE_UINT, &device->width},
-            {FF_FORMAT_ARG_TYPE_UINT, &device->height}
+            {FF_FORMAT_ARG_TYPE_UINT, &device->height},
         });
     }
 }
@@ -57,6 +65,7 @@ void ffPrintCamera(FFCameraOptions* options)
     {
         ffStrbufDestroy(&dev->name);
         ffStrbufDestroy(&dev->id);
+        ffStrbufDestroy(&dev->colorspace);
     }
 }
 
@@ -113,6 +122,7 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &dev->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &dev->vendor);
+        yyjson_mut_obj_add_strbuf(doc, obj, "colorSpace", &dev->colorspace);
         yyjson_mut_obj_add_strbuf(doc, obj, "id", &dev->id);
         yyjson_mut_obj_add_uint(doc, obj, "width", dev->width);
         yyjson_mut_obj_add_uint(doc, obj, "height", dev->height);
@@ -122,6 +132,7 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     {
         ffStrbufDestroy(&dev->name);
         ffStrbufDestroy(&dev->id);
+        ffStrbufDestroy(&dev->colorspace);
     }
 }
 
@@ -130,6 +141,7 @@ void ffPrintCameraHelpFormat(void)
     ffPrintModuleFormatHelp(FF_CAMERA_MODULE_NAME, "{1} ({4}px x {5}px)", FF_CAMERA_NUM_FORMAT_ARGS, (const char* []) {
         "Device name",
         "Vendor",
+        "Color space",
         "Identifier",
         "Width (in px)",
         "Height (in px)",
