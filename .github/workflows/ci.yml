@@ -246,7 +246,7 @@ jobs:
           run: |
             uname -a
             sudo pkg update
-            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd pulseaudio v4l_compat
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd v4l_compat
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
