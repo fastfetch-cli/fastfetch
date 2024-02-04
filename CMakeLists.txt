@@ -550,7 +550,7 @@ elseif(BSD)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
-        src/detection/camera/camera_nosupport.c
+        src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(APPLE)
