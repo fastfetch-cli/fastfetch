@@ -40,8 +40,14 @@ static void getHomeDir(FFPlatform* platform)
         ffStrbufSetWS(&platform->homeDir, pPath);
         ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
+        CoTaskMemFree(pPath);
     }
-    CoTaskMemFree(pPath);
+    else
+    {
+        ffStrbufSetS(&platform->homeDir, getenv("USERPROFILE"));
+        ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
+        ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
+    }
 }
 
 static void getCacheDir(FFPlatform* platform)
@@ -52,13 +58,13 @@ static void getCacheDir(FFPlatform* platform)
         ffStrbufSetWS(&platform->cacheDir, pPath);
         ffStrbufReplaceAllC(&platform->cacheDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
+        CoTaskMemFree(pPath);
     }
     else
     {
         ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
         ffStrbufAppendS(&platform->cacheDir, "AppData/Local/");
     }
-    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
@@ -71,8 +77,8 @@ static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
         ffStrbufEnsureEndsWithC(&buffer, '/');
         if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
             ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
+        CoTaskMemFree(pPath);
     }
-    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)
@@ -130,10 +136,16 @@ static void getDataDirs(FFPlatform* platform)
 
 static void getUserName(FFPlatform* platform)
 {
-    wchar_t buffer[128];
-    DWORD len = sizeof(buffer) / sizeof(*buffer);
-    if(GetUserNameW(buffer, &len))
-        ffStrbufSetWS(&platform->userName, buffer);
+    const char* userName = getenv("USERNAME");
+    if (ffStrSet(userName))
+        ffStrbufSetS(&platform->userName, userName);
+    else
+    {
+        wchar_t buffer[128];
+        DWORD len = sizeof(buffer) / sizeof(*buffer);
+        if(GetUserNameW(buffer, &len))
+            ffStrbufSetWS(&platform->userName, buffer);
+    }
 }
 
 static void getHostName(FFPlatform* platform)
