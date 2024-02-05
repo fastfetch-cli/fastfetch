@@ -71,6 +71,65 @@ jobs:
       - name: run flashfetch
         run: time ./flashfetch
 
+  Linux-old-amd64:
+    name: Linux-old-amd64
+    runs-on: ubuntu-20.04
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: uname -a
+        run: uname -a
+
+      - name: install required packages
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev directx-headers-dev
+
+      - name: install linuxbrew packages
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa ddcutil --ignore-dependencies
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: c
+
+      - name: configure project
+        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-linux-old-amd64
+          path: ./fastfetch-*.*
+
   linux-amd64:
     name: Linux-amd64
     runs-on: ubuntu-22.04 # Ubuntu 22.04 uses Glibc 2.35. Should be fine with Debian 12, which uses Glibc 2.36 (https://packages.debian.org/source/bookworm/glibc)
