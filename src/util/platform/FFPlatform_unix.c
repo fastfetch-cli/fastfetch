@@ -150,7 +150,10 @@ static void getUserName(FFPlatform* platform, const struct passwd* pwd)
 
 static void getHostName(FFPlatform* platform, const struct utsname* uts)
 {
-    ffStrbufAppendS(&platform->hostName, uts->nodename);
+    const char* hostname = getenv("HOSTNAME");
+    if(!ffStrSet(hostname) && uts)
+        hostname = uts->nodename;
+    ffStrbufAppendS(&platform->hostName, hostname);
 }
 
 static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
