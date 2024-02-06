@@ -13,7 +13,7 @@ Bugfixes:
 
 Logo:
 * Print Asahi logo in asahi linux (Logo, Linux)
-* Add Asahi2
+* Add Asahi2, z/OS, Tatra, PikaOS
 
 # 2.7.1
 
