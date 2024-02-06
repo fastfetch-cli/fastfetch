@@ -3222,6 +3222,14 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // PikaOS
+    {
+        .names = {"PikaOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PIKAOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+    },
     // Pisi
     {
         .names = {"Pisi"},
