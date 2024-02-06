@@ -1,0 +1,11 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: fastfetch
+Source: https://github.com/fastfetch-cli/fastfetch
+
+Files: *
+Copyright: 2024 fastfetch-cli
+License: Expat
+
+Files: src/3rdparty/yyjson/*
+Copyright: 2020 YaoYuan
+License: Expat

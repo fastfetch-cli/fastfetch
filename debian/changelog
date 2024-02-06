@@ -1,0 +1,18 @@
+fastfetch (2.7.1ubuntu2) jammy; urgency=medium
+
+  * Ignore .git
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 07 Feb 2024 14:23:23 +0800
+
+fastfetch (2.7.1ubuntu1) jammy; urgency=medium
+
+  * Update build scripts
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 07 Feb 2024 13:53:37 +0800
+
+fastfetch (2.7.1) jammy; urgency=medium
+
+  * Initial release.
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 06 Feb 2024 15:01:11 +0800
+
