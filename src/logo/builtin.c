@@ -4422,6 +4422,14 @@ static const FFlogo Z[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // Z/OS
+    {
+        .names = {"z/OS", "zos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ZOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // LAST
     {},
 };
