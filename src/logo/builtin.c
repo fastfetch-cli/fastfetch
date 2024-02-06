@@ -3915,6 +3915,15 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Tatra
+    {
+        .names = {"Tatra"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TATRA,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
+    },
     // TeArch
     {
         .names = {"TeArch"},
