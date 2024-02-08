@@ -20,6 +20,14 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         if (IORegistryEntryCreateCFProperties(entryBattery, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
             continue;
 
+        int currentCapacity, maxCapacity;
+
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity) != NULL || maxCapacity <= 0)
+            continue;
+
+        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity) != NULL || currentCapacity <= 0)
+            continue;
+
         bool boolValue;
 
         FFBatteryResult* battery = ffListAdd(results);
@@ -30,16 +38,6 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->status);
         ffStrbufInit(&battery->manufactureDate);
-        battery->capacity = 0.0/0.0;
-
-        int currentCapacity, maxCapacity;
-
-        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSMaxCapacityKey), &maxCapacity) != NULL || maxCapacity <= 0)
-            continue;
-
-        if (ffCfDictGetInt(properties, CFSTR(kIOPMPSCurrentCapacityKey), &currentCapacity) != NULL || currentCapacity <= 0)
-            continue;
-
         battery->capacity = currentCapacity * 100.0 / maxCapacity;
 
         ffCfDictGetString(properties, CFSTR(kIOPMDeviceNameKey), &battery->modelName);
