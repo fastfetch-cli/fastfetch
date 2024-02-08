@@ -10,6 +10,9 @@ Features:
 
 Bugfixes:
 * Fix compatibility with packages installed by flatpak (Terminal, Linux)
+* Don't show an empty battery if no battery is detected (macOS, Battery)
+* Don't show `not connected` if no power adapter is found (macOS / Linux, PowerAdapter)
+* Make format of battery status be consistent with other platforms (Linux, Battery)
 
 Logo:
 * Print Asahi logo in asahi linux (Logo, Linux)
