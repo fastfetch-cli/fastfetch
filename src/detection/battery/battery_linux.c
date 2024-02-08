@@ -5,6 +5,8 @@
 
 #include <dirent.h>
 
+// https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-power
+
 static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* options, FFlist* results)
 {
     uint32_t dirLength = dir->length;
@@ -66,6 +68,26 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     ffStrbufAppendS(dir, "/status");
     if (ffReadFileBuffer(dir->chars, &result->status))
         ffStrbufTrimRightSpace(&result->status);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    // Unknown, Charging, Discharging, Not charging, Full
+    if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full"))
+        ffStrbufSetStatic(&result->status, "AC Connected");
+    else if (ffStrbufEqualS(&result->status, "Unknown"))
+        ffStrbufClear(&result->status);
+
+    ffStrbufAppendS(dir, "/capacity_level");
+    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+    {
+        ffStrbufTrimRightSpace(&result->manufacturer);
+        if (ffStrbufEqualS(&tmpBuffer, "Critical"))
+        {
+            if (result->status.length)
+                ffStrbufAppendS(&result->status, ", Critical");
+            else
+                ffStrbufSetStatic(&result->status, "Critical");
+        }
+    }
     ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->serial);
