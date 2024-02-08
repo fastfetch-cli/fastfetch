@@ -21,14 +21,17 @@ private:
 extern "C"
 const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
 {
-    // TODO: check if supported by Windows Server Core
+    FF_LIBRARY_LOAD(mfplat, NULL, "dlopen mfplat" FF_LIBRARY_EXTENSION " failed", "mfplat" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFCreateAttributes)
+    FF_LIBRARY_LOAD(mf, NULL, "dlopen mf" FF_LIBRARY_EXTENSION " failed", "mf" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mf, MFEnumDeviceSources)
 
     const char* error = ffInitCom();
     if (error)
         return error;
 
     IMFAttributes* FF_AUTO_RELEASE_COM_OBJECT attrs = nullptr;
-    if (FAILED(MFCreateAttributes(&attrs, 1)))
+    if (FAILED(ffMFCreateAttributes(&attrs, 1)))
         return "MFCreateAttributes() failed";
 
     if (FAILED(attrs->SetGUID(
@@ -40,7 +43,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
     IMFActivate** devices = NULL;
     uint32_t count;
 
-    if (FAILED(MFEnumDeviceSources(attrs, &devices, &count)))
+    if (FAILED(ffMFEnumDeviceSources(attrs, &devices, &count)))
         return "MFEnumDeviceSources() failed";
 
     for (uint32_t i = 0; i < count; i++)

@@ -944,8 +944,6 @@ elseif(WIN32)
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
         PRIVATE "iphlpapi"
-        PRIVATE "mf"
-        PRIVATE "mfplat"
         PRIVATE "ole32"
         PRIVATE "oleaut32"
         PRIVATE "ws2_32"
