@@ -298,10 +298,11 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
     {
         if(!hasGui)
         {
-            //We are nested shell
+            //We are in nested shell
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
             ffStrbufClear(&result->exe);
+            ffStrbufClear(&result->exePath);
             result->exeName = "";
             pid = ppid;
             continue;
@@ -320,6 +321,7 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
             ffStrbufClear(&result->processName);
             ffStrbufClear(&result->prettyName);
             ffStrbufClear(&result->exe);
+            ffStrbufClear(&result->exePath);
             result->exeName = "";
             return 0;
         }
