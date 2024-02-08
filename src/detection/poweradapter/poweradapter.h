@@ -13,5 +13,3 @@ typedef struct FFPowerAdapterResult
 } FFPowerAdapterResult;
 
 const char* ffDetectPowerAdapter(FFlist* results);
-
-#define FF_POWERADAPTER_NOT_CONNECTED -1

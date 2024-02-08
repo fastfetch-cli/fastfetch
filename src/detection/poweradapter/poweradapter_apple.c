@@ -17,7 +17,7 @@ const char* ffDetectPowerAdapter(FFlist* results)
         ffStrbufInit(&adapter->manufacturer);
         ffStrbufInit(&adapter->modelName);
         ffStrbufInit(&adapter->serial);
-        adapter->watts = FF_POWERADAPTER_NOT_CONNECTED;
+        adapter->watts = 0;
 
         ffCfDictGetString(details, CFSTR(kIOPSNameKey), &adapter->name);
         if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != NULL)

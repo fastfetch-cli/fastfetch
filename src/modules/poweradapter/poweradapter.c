@@ -33,8 +33,6 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 
                 if(result->name.length > 0)
                     puts(result->name.chars);
-                else if(result->watts == FF_POWERADAPTER_NOT_CONNECTED)
-                    puts("not connected");
                 else
                     printf("%dW\n", result->watts);
             }

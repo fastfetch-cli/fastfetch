@@ -28,6 +28,14 @@ static void parsePowerAdapter(FFstrbuf* dir, FF_MAYBE_UNUSED const char* id, FFl
     if(ffStrbufIgnCaseEqualS(&tmpBuffer, "Device"))
         return;
 
+    ffStrbufAppendS(dir, "/online");
+    char online = '1';
+    ffReadFileData(dir->chars, sizeof(online), &online);
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    if (online == '0')
+        return;
+
     //input_power_limit must exist and be not empty
     ffStrbufAppendS(dir, "/input_power_limit");
     bool available = ffReadFileBuffer(dir->chars, &tmpBuffer);
@@ -35,24 +43,14 @@ static void parsePowerAdapter(FFstrbuf* dir, FF_MAYBE_UNUSED const char* id, FFl
 
     if (!available)
         return;
-
     FFPowerAdapterResult* result = ffListAdd(results);
     ffStrbufInit(&result->name);
     ffStrbufInit(&result->description);
-
-    ffStrbufAppendS(dir, "/online");
-    char online = '1';
-    ffReadFileData(dir->chars, sizeof(online), &online);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if (online == '0')
-        result->watts = FF_POWERADAPTER_NOT_CONNECTED;
-    else
-        result->watts = (int) (ffStrbufToDouble(&tmpBuffer) / 1e6 + 0.5);
-
-    //At this point, we have a battery. Try to get as much values as possible.
-
+    result->watts = (int) (ffStrbufToDouble(&tmpBuffer) / 1e6 + 0.5);
     ffStrbufInit(&result->manufacturer);
+    ffStrbufInit(&result->modelName);
+    ffStrbufInit(&result->serial);
+
     ffStrbufAppendS(dir, "/manufacturer");
     if (ffReadFileBuffer(dir->chars, &result->manufacturer))
         ffStrbufTrimRightSpace(&result->manufacturer);
@@ -60,13 +58,11 @@ static void parsePowerAdapter(FFstrbuf* dir, FF_MAYBE_UNUSED const char* id, FFl
         ffStrbufSetStatic(&result->manufacturer, "Apple Inc.");
     ffStrbufSubstrBefore(dir, dirLength);
 
-    ffStrbufInit(&result->modelName);
     ffStrbufAppendS(dir, "/model_name");
     if (ffReadFileBuffer(dir->chars, &result->modelName))
         ffStrbufTrimRightSpace(&result->modelName);
     ffStrbufSubstrBefore(dir, dirLength);
 
-    ffStrbufInit(&result->serial);
     ffStrbufAppendS(dir, "/serial_number");
     if (ffReadFileBuffer(dir->chars, &result->serial))
         ffStrbufTrimRightSpace(&result->serial);
@@ -94,9 +90,6 @@ const char* ffDetectPowerAdapter(FFlist* results)
         parsePowerAdapter(&baseDir, entry->d_name, results);
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
-
-    if(results->length == 0)
-        return "\"/sys/class/power_supply/\" doesn't contain any power adapter folder";
 
     return NULL;
 }
