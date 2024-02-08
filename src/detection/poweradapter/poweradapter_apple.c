@@ -7,18 +7,18 @@
 
 const char* ffDetectPowerAdapter(FFlist* results)
 {
-    FFPowerAdapterResult* adapter = ffListAdd(results);
-
-    ffStrbufInit(&adapter->name);
-    ffStrbufInit(&adapter->description);
-    ffStrbufInit(&adapter->manufacturer);
-    ffStrbufInit(&adapter->modelName);
-    ffStrbufInit(&adapter->serial);
-    adapter->watts = FF_POWERADAPTER_NOT_CONNECTED;
-
     FF_CFTYPE_AUTO_RELEASE CFDictionaryRef details = IOPSCopyExternalPowerAdapterDetails();
-    if (details)
+    if (details && CFDictionaryContainsKey(details, CFSTR(kIOPSPowerAdapterWattsKey)))
     {
+        FFPowerAdapterResult* adapter = ffListAdd(results);
+
+        ffStrbufInit(&adapter->name);
+        ffStrbufInit(&adapter->description);
+        ffStrbufInit(&adapter->manufacturer);
+        ffStrbufInit(&adapter->modelName);
+        ffStrbufInit(&adapter->serial);
+        adapter->watts = FF_POWERADAPTER_NOT_CONNECTED;
+
         ffCfDictGetString(details, CFSTR(kIOPSNameKey), &adapter->name);
         if (ffCfDictGetString(details, CFSTR("Model"), &adapter->modelName) != NULL)
         {
