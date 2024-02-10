@@ -1,4 +1,4 @@
-# 2.8.0
+# 2.8.1
 
 Changes:
 * The linux binaries are now built with glibc 2.35, which means they no longer support Debian 11 and Ubuntu 20.04. Users using these distros may download the artifacts `fastfetch-linux-old` from GitHub Actions.
