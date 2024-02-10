@@ -473,6 +473,10 @@ jobs:
         if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         uses: actions/download-artifact@v4
 
+      - name: rm old artifacts
+        run: |
+          rm -rf fastfetch-*-old-*
+
       - name: create release
         if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
