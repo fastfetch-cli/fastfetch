@@ -1107,6 +1107,11 @@ install(
 ##################
 
 set(CPACK_GENERATOR "TGZ;ZIP")
+if(APPLE)
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-macos-universal" CPACK_PACKAGE_FILE_NAME)
+else() # We don't use this in Windows
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
+endif()
 
 if(LINUX)
     set(CPACK_GENERATOR "${CPACK_GENERATOR};DEB;RPM")
@@ -1123,7 +1128,7 @@ set(CPACK_SET_DESTDIR ON)
 set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
 set(CPACK_PACKAGE_DESCRIPTION "\
 fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way. \
-It is written in c to achieve much better performance.\
+It is written mostly in C to achieve much better performance.\
 ")
 
 include(CPack)
