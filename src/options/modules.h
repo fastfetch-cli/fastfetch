@@ -12,6 +12,7 @@ typedef struct FFOptionsModules
     FFBrightnessOptions brightness;
     FFCPUOptions cpu;
     FFCPUUsageOptions cpuUsage;
+    FFCameraOptions camera;
     FFChassisOptions chassis;
     FFColorsOptions colors;
     FFCommandOptions command;

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.7.1
+    VERSION 2.8.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -42,7 +42,6 @@ include(CheckIncludeFile)
 
 include(CMakeDependentOption)
 
-cmake_dependent_option(ENABLE_LIBPCI "Enable libpci" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
@@ -70,7 +69,6 @@ cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_PCI_MEMORY "Enable detecting GPU memory size with libpci" OFF "LINUX OR BSD" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
@@ -310,6 +308,7 @@ set(LIBFASTFETCH_SRC
     src/modules/board/board.c
     src/modules/brightness/brightness.c
     src/modules/break/break.c
+    src/modules/camera/camera.c
     src/modules/chassis/chassis.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
@@ -434,6 +433,7 @@ if(LINUX)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(ANDROID)
@@ -487,6 +487,7 @@ elseif(ANDROID)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/camera/camera_android.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(BSD)
@@ -549,6 +550,7 @@ elseif(BSD)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
     )
 elseif(APPLE)
@@ -604,6 +606,7 @@ elseif(APPLE)
         src/detection/wm/wm_apple.c
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
+        src/detection/camera/camera_apple.m
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/platform/FFPlatform_unix.c
@@ -659,6 +662,7 @@ elseif(WIN32)
         src/detection/wm/wm_windows.cpp
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
+        src/detection/camera/camera_windows.cpp
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -792,10 +796,6 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     endforeach()
 endfunction()
 
-ff_lib_enable(LIBPCI
-    "libpci"
-    "Pci"
-)
 ff_lib_enable(VULKAN
     "vulkan"
     "Vulkan"
@@ -918,9 +918,11 @@ if(LINUX)
     )
 elseif(APPLE)
     target_link_libraries(libfastfetch
+        PRIVATE "-framework AVFoundation"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
         PRIVATE "-framework CoreAudio"
+        PRIVATE "-framework CoreMedia"
         PRIVATE "-framework CoreVideo"
         PRIVATE "-framework CoreWLAN"
         PRIVATE "-framework IOBluetooth"

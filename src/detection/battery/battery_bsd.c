@@ -54,13 +54,13 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             else if(battio.battinfo.state & ACPI_BATT_STAT_CHARGING)
                 ffStrbufAppendS(&battery->status, "Charging, ");
             if(battio.battinfo.state & ACPI_BATT_STAT_CRITICAL)
-                ffStrbufAppendS(&battery->status, "Ctritical, ");
+                ffStrbufAppendS(&battery->status, "Critical, ");
         }
 
         int acadStatus;
         if (ioctl(acpifd, ACPIIO_ACAD_GET_STATUS, &acadStatus) >= 0 && acadStatus)
         {
-            ffStrbufAppendS(&battery->status, "AC connected");
+            ffStrbufAppendS(&battery->status, "AC Connected");
         }
         else
         {

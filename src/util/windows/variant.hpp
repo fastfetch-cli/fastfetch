@@ -1,16 +1,12 @@
 #include <oaidl.h>
+#include <propidl.h>
 #include <type_traits>
 #include <utility>
 #include <string_view>
 
-struct FFWmiVariant: VARIANT
+template <typename TVariant>
+struct FFBaseVariant: TVariant
 {
-    explicit FFWmiVariant() { VariantInit(this); }
-    ~FFWmiVariant() { VariantClear(this); }
-
-    FFWmiVariant(const FFWmiVariant&) = delete;
-    FFWmiVariant(FFWmiVariant&&); // don't define it to enforce NRVO optimization
-
     bool hasValue() {
         return this->vt != VT_EMPTY;
     }
@@ -33,11 +29,11 @@ struct FFWmiVariant: VARIANT
             return this->cVal;
         }
         else if constexpr (std::is_same_v<T, int16_t>) {
-            assert(vt == VT_I2);
+            assert(this->vt == VT_I2);
             return this->iVal;
         }
         else if constexpr (std::is_same_v<T, int32_t>) {
-            assert(this->vt == VT_I4 || vt == VT_INT);
+            assert(this->vt == VT_I4 || this->vt == VT_INT);
             return this->intVal;
         }
         else if constexpr (std::is_same_v<T, int64_t>) {
@@ -55,7 +51,7 @@ struct FFWmiVariant: VARIANT
             return this->uiVal;
         }
         else if constexpr (std::is_same_v<T, uint32_t>) {
-            assert(this->vt == VT_UI4 || vt == VT_UINT);
+            assert(this->vt == VT_UI4 || this->vt == VT_UINT);
             return this->uintVal;
         }
         else if constexpr (std::is_same_v<T, uint64_t>) {
@@ -135,3 +131,21 @@ struct FFWmiVariant: VARIANT
         }
     }
 };
+
+struct FFWmiVariant: FFBaseVariant<VARIANT>
+{
+    FFWmiVariant(const FFWmiVariant&) = delete;
+    FFWmiVariant(FFWmiVariant&&); // don't define it to enforce NRVO optimization
+    explicit FFWmiVariant() { VariantInit(this); }
+    ~FFWmiVariant() { VariantClear(this); }
+};
+static_assert(sizeof(FFWmiVariant) == sizeof(VARIANT), "");
+
+struct FFPropVariant: FFBaseVariant<PROPVARIANT>
+{
+    FFPropVariant(const FFPropVariant&) = delete;
+    FFPropVariant(FFPropVariant&&); // don't define it to enforce NRVO optimization
+    explicit FFPropVariant() { PropVariantInit(this); }
+    ~FFPropVariant() { PropVariantClear(this); }
+};
+static_assert(sizeof(FFPropVariant) == sizeof(PROPVARIANT), "");

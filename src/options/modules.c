@@ -9,6 +9,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitBoardOptions(&options->board);
     ffInitBreakOptions(&options->break_);
     ffInitBrightnessOptions(&options->brightness);
+    ffInitCameraOptions(&options->camera);
     ffInitCPUOptions(&options->cpu);
     ffInitCPUUsageOptions(&options->cpuUsage);
     ffInitChassisOptions(&options->chassis);
@@ -72,6 +73,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyBoardOptions(&options->board);
     ffDestroyBreakOptions(&options->break_);
     ffDestroyBrightnessOptions(&options->brightness);
+    ffDestroyCameraOptions(&options->camera);
     ffDestroyCPUOptions(&options->cpu);
     ffDestroyCPUUsageOptions(&options->cpuUsage);
     ffDestroyChassisOptions(&options->chassis);

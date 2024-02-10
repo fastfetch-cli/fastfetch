@@ -8,6 +8,7 @@
 #include "modules/board/option.h"
 #include "modules/break/option.h"
 #include "modules/brightness/option.h"
+#include "modules/camera/option.h"
 #include "modules/chassis/option.h"
 #include "modules/cpu/option.h"
 #include "modules/cpuusage/option.h"

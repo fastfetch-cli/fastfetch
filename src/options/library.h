@@ -12,7 +12,6 @@ typedef struct FFOptionsLibrary
     FFstrbuf libZ;
 
 #if defined(__linux__) || defined(__FreeBSD__)
-    FFstrbuf libPCI;
     FFstrbuf libWayland;
     FFstrbuf libXcbRandr;
     FFstrbuf libXcb;

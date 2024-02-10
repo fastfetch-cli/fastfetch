@@ -50,6 +50,7 @@
         "users",
         "bluetooth",
         "sound",
+        "camera",
         "gamepad",
         "weather",
         "netio",

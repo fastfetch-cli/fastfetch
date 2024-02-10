@@ -4,6 +4,7 @@
 #include "common/properties.h"
 #include "detection/temps/temps_linux.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -34,6 +35,10 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
     FF_AUTO_FREE char* line = NULL;
     size_t len = 0;
 
+    #ifdef __aarch64__
+    FF_STRBUF_AUTO_DESTROY implementer = ffStrbufCreate();
+    #endif
+
     while(getline(&line, &len, cpuinfo) != -1)
     {
         //Stop after the first CPU
@@ -47,11 +52,35 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
             ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
+
+            #ifdef __aarch64__
+            (cpu->vendor.length == 0 && ffParsePropLine(line, "CPU implementer :", &implementer)) ||
+            #endif
+
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) || //For POWER
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu model               :", &cpu->name)) //For MIPS
         );
     }
+
+    #ifdef __aarch64__
+    // https://github.com/util-linux/util-linux/blob/2cd89de14549d2b2c079a4f8b73f75500d229fee/sys-utils/lscpu-arm.c#L286
+    if (cpu->vendor.length == 0 && implementer.length > 2 /* 0xX */)
+    {
+        uint32_t implId = (uint32_t) strtoul(implementer.chars, NULL, 16);
+        switch (implId)
+        {
+        case 0x41: ffStrbufSetStatic(&cpu->vendor, "ARM"); break;
+        case 0x42: ffStrbufSetStatic(&cpu->vendor, "Broadcom"); break;
+        case 0x48: ffStrbufSetStatic(&cpu->vendor, "HiSilicon"); break;
+        case 0x4e: ffStrbufSetStatic(&cpu->vendor, "Nvidia"); break;
+        case 0x51: ffStrbufSetStatic(&cpu->vendor, "Qualcomm"); break;
+        case 0x53: ffStrbufSetStatic(&cpu->vendor, "Samsung"); break;
+        case 0x61: ffStrbufSetStatic(&cpu->vendor, "Apple"); break;
+        case 0x69: ffStrbufSetStatic(&cpu->vendor, "Intel"); break;
+        }
+    }
+    #endif
 
     return NULL;
 }
@@ -121,6 +150,44 @@ static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
+void detectAsahi(FFCPUResult* cpu)
+{
+    // In Asahi Linux, reading /proc/device-tree/compatible gives
+    // information on the device model. It consists of 3 NUL terminated
+    // strings, the second of which gives the actual SoC model. But it
+    // is not the marketing name, i.e. for M2 there is "apple,t8112" in
+    // the compatible string.
+    if (cpu->name.length == 0 && ffStrbufEqualS(&cpu->vendor, "Apple"))
+    {
+        char content[32];
+        ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
+        if (length <= 0) return;
+
+        // get the second NUL terminated string
+        char* modelName = memchr(content, '\0', (size_t) length) + 1;
+        if (modelName - content < length && ffStrStartsWith(modelName, "apple,t"))
+        {
+            // https://github.com/AsahiLinux/docs/wiki/Codenames
+            switch (strtoul(modelName + strlen("apple,t"), NULL, 10))
+            {
+                case 8103: ffStrbufSetStatic(&cpu->name, "Apple M1"); break;
+                case 6000: ffStrbufSetStatic(&cpu->name, "Apple M1 Pro"); break;
+                case 6001: ffStrbufSetStatic(&cpu->name, "Apple M1 Max"); break;
+                case 6002: ffStrbufSetStatic(&cpu->name, "Apple M1 Ultra"); break;
+                case 8112: ffStrbufSetStatic(&cpu->name, "Apple M2"); break;
+                case 6020: ffStrbufSetStatic(&cpu->name, "Apple M2 Pro"); break;
+                case 6021: ffStrbufSetStatic(&cpu->name, "Apple M2 Max"); break;
+                case 6022: ffStrbufSetStatic(&cpu->name, "Apple M2 Ultra"); break;
+                case 8122: ffStrbufSetStatic(&cpu->name, "Apple M3"); break;
+                case 6030: ffStrbufSetStatic(&cpu->name, "Apple M3 Pro"); break;
+                case 6031:
+                case 6034: ffStrbufSetStatic(&cpu->name, "Apple M3 Max"); break;
+                default: ffStrbufSetStatic(&cpu->name, "Apple Silicon"); break;
+            }
+        }
+    }
+}
+
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
@@ -165,6 +232,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     #ifdef __ANDROID__
     detectAndroid(cpu);
+    #endif
+
+    #if defined(__linux__) && defined(__aarch64__)
+    detectAsahi(cpu);
     #endif
 
     if (cpu->name.length == 0)
