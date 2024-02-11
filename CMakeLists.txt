@@ -401,6 +401,7 @@ if(LINUX)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
@@ -518,6 +519,7 @@ elseif(BSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_bsd.c
+        src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c

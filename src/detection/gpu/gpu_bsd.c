@@ -64,7 +64,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         gpu->deviceId = ((uint64_t) pc->pc_sel.pc_domain << 6) | ((uint64_t) pc->pc_sel.pc_bus << 4) | ((uint64_t) pc->pc_sel.pc_dev << 2) | pc->pc_sel.pc_func;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
+        ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, pc->pc_subvendor, pc->pc_subdevice, gpu);
 
         #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))

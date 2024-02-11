@@ -98,9 +98,9 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
             continue;
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
 
-        uint32_t vendorId, deviceId;
+        uint32_t vendorId, deviceId, subVendorId, subDeviceId;
         uint8_t classId, subclassId;
-        if (sscanf(buffer.chars, "pci:v%8" SCNx32 "d%8" SCNx32 "sv%*8ssd%*8sbc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &classId, &subclassId) != 4)
+        if (sscanf(buffer.chars, "pci:v%8" SCNx32 "d%8" SCNx32 "sv%8" SCNx32 "sd%8" SCNx32 "bc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &subVendorId, &subDeviceId, &classId, &subclassId) != 6)
             continue;
 
         if (classId != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
@@ -122,7 +122,7 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         gpu->deviceId = ((uint64_t) pciDomain << 6) | ((uint64_t) pciBus << 4) | (deviceId << 2) | pciFunc;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, (uint16_t) subVendorId, (uint16_t) subDeviceId, gpu);
 
         pciDetectDriver(gpu, &pciDir, &buffer);
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
