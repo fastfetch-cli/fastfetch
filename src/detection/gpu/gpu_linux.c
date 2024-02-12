@@ -2,6 +2,7 @@
 #include "detection/vulkan/vulkan.h"
 #include "detection/temps/temps_linux.h"
 #include "common/io/io.h"
+#include "common/properties.h"
 #include "util/stringUtils.h"
 
 #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
@@ -80,7 +81,6 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
-    loadPciIds(&pciids);
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
@@ -98,9 +98,9 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
             continue;
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
 
-        uint32_t vendorId, deviceId;
+        uint32_t vendorId, deviceId, subVendorId, subDeviceId;
         uint8_t classId, subclassId;
-        if (sscanf(buffer.chars, "pci:v%8" SCNx32 "d%8" SCNx32 "sv%*8ssd%*8sbc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &classId, &subclassId) != 4)
+        if (sscanf(buffer.chars, "pci:v%8" SCNx32 "d%8" SCNx32 "sv%8" SCNx32 "sd%8" SCNx32 "bc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &subVendorId, &subDeviceId, &classId, &subclassId) != 6)
             continue;
 
         if (classId != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
@@ -122,7 +122,29 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         gpu->deviceId = ((uint64_t) pciDomain << 6) | ((uint64_t) pciBus << 4) | (deviceId << 2) | pciFunc;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
+        {
+            ffStrbufAppendS(&pciDir, "/revision");
+            if (ffReadFileBuffer(pciDir.chars, &buffer))
+            {
+                char* pend;
+                uint64_t revision = strtoul(buffer.chars, &pend, 16);
+                if (pend != buffer.chars)
+                {
+                    char query[32];
+                    snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
+                    ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
+                }
+            }
+            ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
+        }
+
+        if (gpu->name.length == 0)
+        {
+            if (!pciids.length)
+                loadPciIds(&pciids);
+            ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, (uint16_t) subVendorId, (uint16_t) subDeviceId, gpu);
+        }
 
         pciDetectDriver(gpu, &pciDir, &buffer);
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);

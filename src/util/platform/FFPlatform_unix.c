@@ -7,6 +7,7 @@
 #include <pwd.h>
 #include <limits.h>
 #include <sys/utsname.h>
+#include <paths.h>
 
 #ifdef __APPLE__
     #include <libproc.h>
@@ -135,6 +136,9 @@ static void getDataDirs(FFPlatform* platform)
 
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
     platformPathAddEnv(&platform->dataDirs, "XDG_DATA_DIRS");
+#ifdef _PATH_LOCALBASE
+    ffPlatformPathAddAbsolute(&platform->dataDirs, _PATH_LOCALBASE "/share/");
+#endif
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/local/share/");
     ffPlatformPathAddAbsolute(&platform->dataDirs, FASTFETCH_TARGET_DIR_USR "/share/");
 }

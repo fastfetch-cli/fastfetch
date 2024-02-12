@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.8.2
+    VERSION 2.8.3
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -401,6 +401,7 @@ if(LINUX)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
@@ -518,6 +519,7 @@ elseif(BSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_bsd.c
+        src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
@@ -1108,9 +1110,9 @@ install(
 
 set(CPACK_GENERATOR "TGZ;ZIP")
 if(APPLE)
-    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-macos-universal" CPACK_PACKAGE_FILE_NAME)
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-universal" CPACK_PACKAGE_FILE_NAME)
 else() # We don't use this in Windows
-    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
 endif()
 
 if(LINUX)

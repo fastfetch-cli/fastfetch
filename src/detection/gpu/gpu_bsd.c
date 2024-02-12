@@ -1,9 +1,9 @@
 #include "gpu_driver_specific.h"
 
 #include "common/io/io.h"
+#include "common/properties.h"
 #include "3rdparty/nvml/nvml.h"
 #include "util/mallocHelper.h"
-#include "common/io/io.h"
 
 #include <dev/pci/pcireg.h>
 #include <sys/pciio.h>
@@ -46,7 +46,6 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         return "ioctl(fd, PCIOCGETCONF, &pc) returned error";
 
     FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
-    loadPciIds(&pciids);
 
     for (uint32_t i = 0; i < pcio.num_matches; ++i)
     {
@@ -64,7 +63,19 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         gpu->deviceId = ((uint64_t) pc->pc_sel.pc_domain << 6) | ((uint64_t) pc->pc_sel.pc_bus << 4) | ((uint64_t) pc->pc_sel.pc_dev << 2) | pc->pc_sel.pc_func;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
+        {
+            char query[32];
+            snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) pc->pc_device, (unsigned) pc->pc_revid);
+            ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
+        }
+
+        if (gpu->name.length == 0)
+        {
+            if (pciids.length == 0)
+                loadPciIds(&pciids);
+            ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, pc->pc_subvendor, pc->pc_subdevice, gpu);
+        }
 
         #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
