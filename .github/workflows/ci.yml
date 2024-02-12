@@ -380,7 +380,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-windows-amd64
-          path: ./fastfetch-*-windows-amd64.*
+          path: ./fastfetch-windows-amd64.*
 
   windows-i686:
     name: Windows-i686
@@ -447,7 +447,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-windows-i686
-          path: ./fastfetch-*-windows-i686.*
+          path: ./fastfetch-windows-i686.*
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
