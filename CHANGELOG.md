@@ -1,3 +1,8 @@
+# 2.8.3
+
+Bugfixes:
+* Fix GPU name detection for AMD graphic cards (GPU, Linux / FreeBSD)
+
 # 2.8.2
 
 Changes:
