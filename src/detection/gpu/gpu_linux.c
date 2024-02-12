@@ -81,7 +81,6 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
-    loadPciIds(&pciids);
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
@@ -141,7 +140,11 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         }
 
         if (gpu->name.length == 0)
+        {
+            if (!pciids.length)
+                loadPciIds(&pciids);
             ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, (uint16_t) subVendorId, (uint16_t) subDeviceId, gpu);
+        }
 
         pciDetectDriver(gpu, &pciDir, &buffer);
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
