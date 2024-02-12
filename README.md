@@ -42,7 +42,13 @@ Replace sudo with doas depending on what you use.
 
 ### macOS
 
+...via [HomeBrew](https://brew.sh):
+
 `brew install fastfetch`
+
+...via [MacPorts](https://www.macports.org):
+
+`sudo port install fastfetch`
 
 ### Windows
 
