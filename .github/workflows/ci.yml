@@ -371,10 +371,10 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-windows-amd64.zip *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-amd64.zip *.dll fastfetch.exe flashfetch.exe presets
 
       - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-windows-amd64.7z *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-amd64.7z *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -438,10 +438,10 @@ jobs:
         run: ctest
 
       - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-windows-i686.zip *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-i686.zip *.dll fastfetch.exe flashfetch.exe presets
 
       - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-$(./fastfetch --version-raw)-windows-i686.7z *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-i686.7z *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -474,6 +474,7 @@ jobs:
         uses: actions/download-artifact@v4
 
       - name: rm old artifacts
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         run: |
           rm -rf fastfetch-*-old-*
 
