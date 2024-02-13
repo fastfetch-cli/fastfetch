@@ -46,9 +46,7 @@ Output of `fastfetch --list-features`:
 Paste the stacktrace here. You may get it with:
 
 ```
-$ gdb /path/to/fastfetch
-$ run
-$ bt
+$ gdb -q -ex 'set confirm off' -ex run -ex 'bt full' -ex quit --args /path/to/fastfetch --no-buffer
 ```
 
 If you are able to identify which module crashed, the strace can be helpful too
