@@ -222,7 +222,22 @@ static bool printSpecificCommandHelp(const char* command)
 
                 yyjson_val* remarkKey = yyjson_obj_get(flagObj, "remark");
                 if (remarkKey)
-                    printf("%10s: %s\n", "Remark", yyjson_get_str(remarkKey));
+                {
+                    if (yyjson_is_str(remarkKey))
+                        printf("%10s: %s\n", "Remark", yyjson_get_str(remarkKey));
+                    else if (yyjson_is_arr(remarkKey) && yyjson_arr_size(remarkKey) > 0)
+                    {
+                        yyjson_val* remarkStr;
+                        size_t remarkIdx, remarkMax;
+                        yyjson_arr_foreach(remarkKey, remarkIdx, remarkMax, remarkStr)
+                        {
+                            if (remarkIdx == 0)
+                                printf("%10s: %s\n", "Remark", yyjson_get_str(remarkStr));
+                            else
+                                printf("            %s\n", yyjson_get_str(remarkStr));
+                        }
+                    }
+                }
 
                 return true;
             }

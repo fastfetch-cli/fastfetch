@@ -1007,6 +1007,29 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
+                                    },
+                                    "block": {
+                                        "description": "Set behavior of block printing",
+                                        "type": "object",
+                                        "properties": {
+                                            "width": {
+                                                "description": "Set the block width in spaces",
+                                                "type": "integer",
+                                                "minimum": 1,
+                                                "default": 3
+                                            },
+                                            "range": {
+                                                "description": "Set the range of colors in the blocks to print",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 15
+                                                },
+                                                "minItems": 2,
+                                                "maxItems": 2
+                                            }
+                                        }
                                     }
                                 }
                             },

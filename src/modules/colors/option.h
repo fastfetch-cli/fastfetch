@@ -14,6 +14,12 @@ typedef enum FFColorsSymbol
     FF_COLORS_SYMBOL_STAR,
 } FFColorsSymbol;
 
+typedef struct FFBlockConfig
+{
+    uint8_t width;
+    uint8_t range[2];
+} FFBlockConfig;
+
 typedef struct FFColorsOptions
 {
     FFModuleBaseInfo moduleInfo;
@@ -21,4 +27,5 @@ typedef struct FFColorsOptions
 
     FFColorsSymbol symbol;
     uint32_t paddingLeft;
+    FFBlockConfig block;
 } FFColorsOptions;
