@@ -238,6 +238,23 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
 
     if (defaultOptions.paddingLeft != options->paddingLeft)
         yyjson_mut_obj_add_uint(doc, module, "paddingLeft", options->paddingLeft);
+
+    {
+        yyjson_mut_val* block = yyjson_mut_obj(doc);
+
+        if (defaultOptions.block.width != options->block.width)
+            yyjson_mut_obj_add_uint(doc, block, "width", options->block.width);
+
+        if (memcmp(defaultOptions.block.range, options->block.range, sizeof(options->block.range)) != 0)
+        {
+            yyjson_mut_val* range = yyjson_mut_obj_add_arr(doc, block, "range");
+            for (uint8_t i = 0; i < 2; i++)
+                yyjson_mut_arr_add_uint(doc, range, options->block.range[i]);
+        }
+
+        if (yyjson_mut_obj_size(block) > 0)
+            yyjson_mut_obj_add_val(doc, module, "block", block);
+    }
 }
 
 void ffInitColorsOptions(FFColorsOptions* options)
