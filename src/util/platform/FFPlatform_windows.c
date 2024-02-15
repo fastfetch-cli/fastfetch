@@ -217,7 +217,21 @@ static void getSystemArchitectureAndPageSize(FFPlatform* platform)
             ffStrbufAppendS(&platform->systemArchitecture, "ia64");
             break;
         case PROCESSOR_ARCHITECTURE_INTEL:
-            ffStrbufAppendS(&platform->systemArchitecture, "i686");
+            switch (sysInfo.wProcessorLevel)
+            {
+                case 4:
+                    ffStrbufAppendS(&platform->systemArchitecture, "i486");
+                    break;
+                case 5:
+                    ffStrbufAppendS(&platform->systemArchitecture, "i586");
+                    break;
+                case 6:
+                    ffStrbufAppendS(&platform->systemArchitecture, "i686");
+                    break;
+                default:
+                    ffStrbufAppendS(&platform->systemArchitecture, "i386");
+                    break;
+            }
             break;
         case PROCESSOR_ARCHITECTURE_ARM64:
             ffStrbufAppendS(&platform->systemArchitecture, "aarch64");
@@ -230,6 +244,12 @@ static void getSystemArchitectureAndPageSize(FFPlatform* platform)
             break;
         case PROCESSOR_ARCHITECTURE_MIPS:
             ffStrbufAppendS(&platform->systemArchitecture, "mips");
+            break;
+        case PROCESSOR_ARCHITECTURE_ALPHA:
+            ffStrbufAppendS(&platform->systemArchitecture, "alpha");
+            break;
+        case PROCESSOR_ARCHITECTURE_ALPHA64:
+            ffStrbufAppendS(&platform->systemArchitecture, "alpha64");
             break;
         case PROCESSOR_ARCHITECTURE_UNKNOWN:
         default:
