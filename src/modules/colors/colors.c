@@ -19,7 +19,7 @@ void ffPrintColors(FFColorsOptions* options)
     if(instance.config.display.pipe)
         return;
 
-    ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+    bool flag = false;
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(128);
 
@@ -34,13 +34,15 @@ void ffPrintColors(FFColorsOptions* options)
         }
         if (result.length > 0)
         {
+            ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            flag = true;
+
             if(options->paddingLeft > 0)
                 ffPrintCharTimes(' ', options->paddingLeft);
 
             ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
             ffStrbufPutTo(&result, stdout);
             ffStrbufClear(&result);
-            ffLogoPrintLine();
         }
 
         // 1: Set everything to bolt. This causes normal colors on some systems to be bright.
@@ -70,10 +72,23 @@ void ffPrintColors(FFColorsOptions* options)
 
     if (result.length > 0)
     {
+        if (flag)
+            ffLogoPrintLine();
+        else
+        {
+            ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            flag = true;
+        }
+
         if(options->paddingLeft > 0)
             ffPrintCharTimes(' ', options->paddingLeft);
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
         ffStrbufPutTo(&result, stdout);
+    }
+
+    if (!flag)
+    {
+        ffPrintError(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, "%s", "Nothing to print");
     }
 }
 
@@ -223,6 +238,23 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
 
     if (defaultOptions.paddingLeft != options->paddingLeft)
         yyjson_mut_obj_add_uint(doc, module, "paddingLeft", options->paddingLeft);
+
+    {
+        yyjson_mut_val* block = yyjson_mut_obj(doc);
+
+        if (defaultOptions.block.width != options->block.width)
+            yyjson_mut_obj_add_uint(doc, block, "width", options->block.width);
+
+        if (memcmp(defaultOptions.block.range, options->block.range, sizeof(options->block.range)) != 0)
+        {
+            yyjson_mut_val* range = yyjson_mut_obj_add_arr(doc, block, "range");
+            for (uint8_t i = 0; i < 2; i++)
+                yyjson_mut_arr_add_uint(doc, range, options->block.range[i]);
+        }
+
+        if (yyjson_mut_obj_size(block) > 0)
+            yyjson_mut_obj_add_val(doc, module, "block", block);
+    }
 }
 
 void ffInitColorsOptions(FFColorsOptions* options)

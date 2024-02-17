@@ -192,13 +192,13 @@ static void getSystemReleaseAndVersion(FFPlatform* platform)
     switch (osVersion.dwPlatformId)
     {
     case VER_PLATFORM_WIN32s:
-        ffStrbufAppendS(&platform->systemName, "WIN32s");
+        ffStrbufSetStatic(&platform->systemName, "WIN32s");
         break;
     case VER_PLATFORM_WIN32_WINDOWS:
-        ffStrbufAppendS(&platform->systemName, "WIN32_WINDOWS");
+        ffStrbufSetStatic(&platform->systemName, "WIN32_WINDOWS");
         break;
     case VER_PLATFORM_WIN32_NT:
-        ffStrbufAppendS(&platform->systemName, "WIN32_NT");
+        ffStrbufSetStatic(&platform->systemName, "WIN32_NT");
         break;
     }
 }
@@ -211,25 +211,45 @@ static void getSystemArchitectureAndPageSize(FFPlatform* platform)
     switch(sysInfo.wProcessorArchitecture)
     {
         case PROCESSOR_ARCHITECTURE_AMD64:
-            ffStrbufAppendS(&platform->systemArchitecture, "x86_64");
+            ffStrbufSetStatic(&platform->systemArchitecture, "x86_64");
             break;
         case PROCESSOR_ARCHITECTURE_IA64:
-            ffStrbufAppendS(&platform->systemArchitecture, "ia64");
+            ffStrbufSetStatic(&platform->systemArchitecture, "ia64");
             break;
         case PROCESSOR_ARCHITECTURE_INTEL:
-            ffStrbufAppendS(&platform->systemArchitecture, "i686");
+            switch (sysInfo.wProcessorLevel)
+            {
+                case 4:
+                    ffStrbufSetStatic(&platform->systemArchitecture, "i486");
+                    break;
+                case 5:
+                    ffStrbufSetStatic(&platform->systemArchitecture, "i586");
+                    break;
+                case 6:
+                    ffStrbufSetStatic(&platform->systemArchitecture, "i686");
+                    break;
+                default:
+                    ffStrbufSetStatic(&platform->systemArchitecture, "i386");
+                    break;
+            }
             break;
         case PROCESSOR_ARCHITECTURE_ARM64:
-            ffStrbufAppendS(&platform->systemArchitecture, "aarch64");
+            ffStrbufSetStatic(&platform->systemArchitecture, "aarch64");
             break;
         case PROCESSOR_ARCHITECTURE_ARM:
-            ffStrbufAppendS(&platform->systemArchitecture, "arm");
+            ffStrbufSetStatic(&platform->systemArchitecture, "arm");
             break;
         case PROCESSOR_ARCHITECTURE_PPC:
-            ffStrbufAppendS(&platform->systemArchitecture, "ppc");
+            ffStrbufSetStatic(&platform->systemArchitecture, "ppc");
             break;
         case PROCESSOR_ARCHITECTURE_MIPS:
-            ffStrbufAppendS(&platform->systemArchitecture, "mips");
+            ffStrbufSetStatic(&platform->systemArchitecture, "mips");
+            break;
+        case PROCESSOR_ARCHITECTURE_ALPHA:
+            ffStrbufSetStatic(&platform->systemArchitecture, "alpha");
+            break;
+        case PROCESSOR_ARCHITECTURE_ALPHA64:
+            ffStrbufSetStatic(&platform->systemArchitecture, "alpha64");
             break;
         case PROCESSOR_ARCHITECTURE_UNKNOWN:
         default:
