@@ -10,4 +10,5 @@ typedef struct FFDiskIOOptions
     FFModuleArgs moduleArgs;
 
     FFstrbuf namePrefix;
+    bool detectTotal;
 } FFDiskIOOptions;

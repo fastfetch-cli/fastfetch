@@ -973,6 +973,14 @@
             }
         },
         {
+            "long": "diskio-detect-total",
+            "desc": "Detect total bytes instead of current rate",
+            "arg": {
+                "type": "bool",
+                "default": false
+            }
+        },
+        {
             "long": "diskio-name-prefix",
             "desc": "Show disks with given name prefix only",
             "arg": {

@@ -1196,6 +1196,11 @@
                                         "description": "Show disks with given name prefix only",
                                         "type": "string"
                                     },
+                                    "detectTotal": {
+                                        "description": "Detect total bytes instead of current rate",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
