@@ -60,10 +60,14 @@ void ffPrintNetIO(FFNetIOOptions* options)
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             ffParseSize(inf->rxBytes, &buffer);
-            ffStrbufAppendS(&buffer, "/s (IN) - ");
+            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
+            ffStrbufAppendS(&buffer, " (IN) - ");
+
             ffParseSize(inf->txBytes, &buffer);
-            ffStrbufAppendS(&buffer, "/s (OUT)");
-            if (!options->defaultRouteOnly && inf->defaultRoute)
+            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
+            ffStrbufAppendS(&buffer, " (OUT)");
+
+            if (inf->defaultRoute)
                 ffStrbufAppendS(&buffer, " *");
             ffStrbufPutTo(&buffer, stdout);
         }
@@ -71,9 +75,9 @@ void ffPrintNetIO(FFNetIOOptions* options)
         {
             ffStrbufClear(&buffer2);
             ffParseSize(inf->rxBytes, &buffer);
-            ffStrbufAppendS(&buffer, "/s");
+            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffParseSize(inf->txBytes, &buffer2);
-            ffStrbufAppendS(&buffer2, "/s");
+            if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETIO_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
@@ -118,6 +122,12 @@ bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const 
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "detect-total"))
+    {
+        options->detectTotal = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
@@ -146,6 +156,12 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "detectTotal"))
+        {
+            options->detectTotal = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
 }
@@ -162,6 +178,9 @@ void ffGenerateNetIOJsonConfig(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 
     if (options->defaultRouteOnly != defaultOptions.defaultRouteOnly)
         yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", options->defaultRouteOnly);
+
+    if (options->detectTotal != defaultOptions.detectTotal)
+        yyjson_mut_obj_add_bool(doc, module, "detectTotal", options->detectTotal);
 }
 
 void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -200,18 +219,18 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 void ffPrintNetIOHelpFormat(void)
 {
     ffPrintModuleFormatHelp(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT)", FF_NETIO_NUM_FORMAT_ARGS, (const char* []) {
-        "Size of data received per second (formatted)",
-        "Size of data sent per second (formatted)",
+        "Size of data received [per second] (formatted)",
+        "Size of data sent [per second] (formatted)",
         "Interface name",
         "Is default route",
-        "Size of data received per second (in bytes)",
-        "Size of data sent per second (in bytes)",
-        "Number of packets received per second",
-        "Number of packets sent per second",
-        "Number of errors received per second",
-        "Number of errors sent per second",
-        "Number of packets dropped when receiving per second",
-        "Number of packets dropped when sending per second",
+        "Size of data received [per second] (in bytes)",
+        "Size of data sent [per second] (in bytes)",
+        "Number of packets received [per second]",
+        "Number of packets sent [per second]",
+        "Number of errors received [per second]",
+        "Number of errors sent [per second]",
+        "Number of packets dropped when receiving [per second]",
+        "Number of packets dropped when sending [per second]",
     });
 }
 

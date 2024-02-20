@@ -1410,6 +1410,11 @@
                                         "type": "boolean",
                                         "default": true
                                     },
+                                    "detectTotal": {
+                                        "description": "Detect total bytes instead of current rate",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

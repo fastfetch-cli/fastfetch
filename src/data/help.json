@@ -1256,6 +1256,14 @@
             }
         },
         {
+            "long": "netio-detect-total",
+            "desc": "Detect total bytes instead of current rate",
+            "arg": {
+                "type": "bool",
+                "default": false
+            }
+        },
+        {
             "long": "publicip-timeout",
             "desc": "Time in milliseconds to wait for the public ip server to respond",
             "remark": "0 to disable timeout",
