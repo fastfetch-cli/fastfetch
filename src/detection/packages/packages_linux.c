@@ -290,7 +290,7 @@ static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* package
 
     ffStrbufAppendS(baseDir, "/bedrock/strata");
 
-    DIR* dir = opendir(baseDir->chars);
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(baseDir->chars);
     if(dir == NULL)
     {
         ffStrbufSubstrBefore(baseDir, baseDirLength);
@@ -313,7 +313,6 @@ static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* package
         ffStrbufSubstrBefore(baseDir, baseDirLength2);
     }
 
-    closedir(dir);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 

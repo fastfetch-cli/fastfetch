@@ -28,7 +28,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             { \
                 printf("%u (%s)", counts.var, (name)); \
                 if((all -= counts.var) > 0) \
-                    printf(", "); \
+                    fputs(", ", stdout); \
             };
 
         #define FF_PRINT_PACKAGE(name) FF_PRINT_PACKAGE_NAME(name, #name)
@@ -40,7 +40,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             if(counts.pacmanBranch.length > 0)
                 printf("[%s]", counts.pacmanBranch.chars);
             if((all -= counts.pacman) > 0)
-                printf(", ");
+                fputs(", ", stdout);
         };
 
         FF_PRINT_PACKAGE(dpkg)
