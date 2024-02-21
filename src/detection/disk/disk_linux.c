@@ -33,8 +33,8 @@ static bool isPhysicalDevice(const struct mntent* device)
     if(ffStrEquals(device->mnt_type, "9p"))
         return true;
 
-    //ZFS pool
-    if(ffStrEquals(device->mnt_type, "zfs"))
+    //ZFS pool or bcachefs filesystem
+    if(ffStrEquals(device->mnt_type, "zfs") || ffStrEquals(device->mnt_type, "bcachefs"))
         return true;
 
     //Pseudo filesystems don't have a device in /dev
