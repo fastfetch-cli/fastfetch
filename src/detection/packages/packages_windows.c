@@ -107,9 +107,8 @@ static void detectWinget(FFPackagesResult* result)
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
-    detectScoop(result);
-    detectChoco(result);
-    detectPacman(result);
-    if (options->winget)
-        detectWinget(result);
+    if (!(options->disabled & FF_PACKAGES_FLAG_SCOOP_BIT)) detectScoop(result);
+    if (!(options->disabled & FF_PACKAGES_FLAG_CHOCO_BIT)) detectChoco(result);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) detectPacman(result);
+    if (!(options->disabled & FF_PACKAGES_FLAG_WINGET_BIT)) detectWinget(result);
 }

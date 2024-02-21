@@ -99,14 +99,16 @@ static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
     return num_elements;
 }
 
-void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
+void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
-    getBrewPackages(result);
-    result->macports = getMacPortsPackages();
-
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(FASTFETCH_TARGET_DIR_ROOT);
-    result->nixDefault += getNixPackages(&baseDir, "/nix/var/nix/profiles/default");
-    result->nixSystem += getNixPackages(&baseDir, "/run/current-system");
-    ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
-    result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
+    if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT)) getBrewPackages(result);
+    if (!(options->disabled & FF_PACKAGES_FLAG_MACPORTS_BIT)) result->macports = getMacPortsPackages();
+    if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
+    {
+        FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(FASTFETCH_TARGET_DIR_ROOT);
+        result->nixDefault += getNixPackages(&baseDir, "/nix/var/nix/profiles/default");
+        result->nixSystem += getNixPackages(&baseDir, "/run/current-system");
+        ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
+        result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
+    }
 }

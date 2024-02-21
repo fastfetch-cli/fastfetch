@@ -1013,17 +1013,16 @@
             }
         },
         {
-            "long": "packages-winget",
-            "desc": "Set if winget package count should be detected",
+            "long": "packages-disabled",
+            "desc": "A colon separated list of package managers to be disabled when detecting",
             "remark": [
-                "This option is extremely slow.",
+                "Some detection methods can be very slow.",
                 "You may need to increase value of '--processing-timeout' to make it actually work.",
-                "Windows only"
+                "Use `--packages-disabled none` to enable all."
             ],
             "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
+                "type": "string",
+                "default": "winget"
             }
         },
         {
