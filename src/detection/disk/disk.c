@@ -2,9 +2,9 @@
 
 const char* ffDetectDisksImpl(FFlist* disks);
 
-static int compareDisks(const void* disk1, const void* disk2)
+static int compareDisks(const FFDisk* disk1, const FFDisk* disk2)
 {
-    return ffStrbufCompAlphabetically(&((const FFDisk*) disk1)->mountpoint, &((const FFDisk*) disk2)->mountpoint);
+    return ffStrbufComp(&disk1->mountpoint, &disk2->mountpoint);
 }
 
 const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
@@ -18,7 +18,7 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
     // For example for /boot/efi/bootmgr we need to check /boot/efi before /boot
     //Note that we sort alphabetically here for a better ordering when printing the list,
     // so the check must be done in reverse order
-    ffListSort(disks, compareDisks);
+    ffListSort(disks, (void*) compareDisks);
     FF_LIST_FOR_EACH(FFDisk, disk, *disks)
     {
         if(disk->bytesTotal == 0)
