@@ -35,21 +35,37 @@ void ffPrintDisplay(FFDisplayOptions* options)
     {
         ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        int index = 0;
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
         {
             if (options->compactType & FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT)
             {
-                if (index++) putchar(' ');
-                printf("%ix%i", result->width, result->height);
+                ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
             }
-            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_SCALED_BIT)
+            else
             {
-                if (index++) putchar(' ');
-                printf("%ix%i", result->scaledWidth, result->scaledHeight);
+                ffStrbufAppendF(&buffer, "%ix%i", result->scaledWidth, result->scaledHeight);
+            }
+
+            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT)
+            {
+                if (result->refreshRate > 0)
+                {
+                    if (options->preciseRefreshRate)
+                        ffStrbufAppendF(&buffer, " @ %gHz", result->refreshRate);
+                    else
+                        ffStrbufAppendF(&buffer, " @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+                }
+                ffStrbufAppendS(&buffer, ", ");
+            }
+            else
+            {
+                ffStrbufAppendC(&buffer, ' ');
             }
         }
-        putchar('\n');
+        ffStrbufTrimRight(&buffer, ' ');
+        ffStrbufTrimRight(&buffer, ',');
+        ffStrbufPutTo(&buffer, stdout);
         return;
     }
 
@@ -137,6 +153,8 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
             { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
             { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
             { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+            { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+            { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
             {},
         });
         return true;
@@ -182,6 +200,8 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
                 { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
                 { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
                 { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+                { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
                 {},
             });
             if (error)
@@ -226,7 +246,7 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
 
     if (options->compactType != defaultOptions.compactType)
     {
-        switch (options->compactType)
+        switch ((int) options->compactType)
         {
             case FF_DISPLAY_COMPACT_TYPE_NONE:
                 yyjson_mut_obj_add_str(doc, module, "compactType", "none");
@@ -236,6 +256,12 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
                 break;
             case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT:
                 yyjson_mut_obj_add_str(doc, module, "compactType", "scaled");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "original-with-refresh-rate");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "scaled-with-refresh-rate");
                 break;
         }
     }

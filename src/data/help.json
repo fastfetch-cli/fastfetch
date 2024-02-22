@@ -1033,7 +1033,9 @@
                 "enum": {
                     "none": "Disable this compact mode",
                     "original": "Print original resolutions",
-                    "scaled": "Print scaled resolutions"
+                    "scaled": "Print scaled resolutions",
+                    "original-with-refresh-rate": "Print original resolutions with refresh rate",
+                    "scaled-with-refresh-rate": "Print scaled resolutions with refresh rate"
                 },
                 "default": "none"
             }

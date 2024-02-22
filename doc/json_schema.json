@@ -1101,7 +1101,9 @@
                                         "enum": [
                                             "none",
                                             "original",
-                                            "scaled"
+                                            "scaled",
+                                            "original-with-refresh-rate",
+                                            "scaled-with-refresh-rate"
                                         ],
                                         "description": "Set if all displays should be printed in one line",
                                         "default": "none"

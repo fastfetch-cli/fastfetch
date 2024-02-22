@@ -9,6 +9,7 @@ typedef enum FFDisplayCompactType
     FF_DISPLAY_COMPACT_TYPE_NONE = 0,
     FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT = 1 << 0,
     FF_DISPLAY_COMPACT_TYPE_SCALED_BIT = 1 << 1,
+    FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT = 1 << 2,
 } FFDisplayCompactType;
 
 typedef enum FFDisplayOrder
