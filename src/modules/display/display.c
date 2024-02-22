@@ -6,6 +6,16 @@
 
 #define FF_DISPLAY_NUM_FORMAT_ARGS 8
 
+static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
+{
+    return ffStrbufComp(&a->name, &b->name);
+}
+
+static int sortByNameDesc(FFDisplayResult* a, FFDisplayResult* b)
+{
+    return -ffStrbufComp(&a->name, &b->name);
+}
+
 void ffPrintDisplay(FFDisplayOptions* options)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
@@ -14,6 +24,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
     {
         ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect display");
         return;
+    }
+
+    if (options->order != FF_DISPLAY_ORDER_NONE)
+    {
+        ffListSort((FFlist*) &dsResult->displays, (void*) (options->order == FF_DISPLAY_ORDER_ASC ? sortByNameAsc : sortByNameDesc));
     }
 
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE)
@@ -133,6 +148,17 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "order"))
+    {
+        options->order = (FFDisplayOrder) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "asc", FF_DISPLAY_ORDER_ASC },
+            { "desc", FF_DISPLAY_ORDER_DESC },
+            { "none", FF_DISPLAY_ORDER_NONE },
+            {},
+        });
+        return true;
+    }
+
     return false;
 }
 
@@ -168,6 +194,22 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
         {
             options->preciseRefreshRate = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "order"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "asc", FF_DISPLAY_ORDER_ASC },
+                { "desc", FF_DISPLAY_ORDER_DESC },
+                { "none", FF_DISPLAY_ORDER_NONE },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->order = (FFDisplayOrder) value;
             continue;
         }
 

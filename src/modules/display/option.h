@@ -11,6 +11,13 @@ typedef enum FFDisplayCompactType
     FF_DISPLAY_COMPACT_TYPE_SCALED_BIT = 1 << 1,
 } FFDisplayCompactType;
 
+typedef enum FFDisplayOrder
+{
+    FF_DISPLAY_ORDER_NONE,
+    FF_DISPLAY_ORDER_ASC,
+    FF_DISPLAY_ORDER_DESC,
+} FFDisplayOrder;
+
 typedef struct FFDisplayOptions
 {
     FFModuleBaseInfo moduleInfo;
@@ -18,4 +25,5 @@ typedef struct FFDisplayOptions
 
     FFDisplayCompactType compactType;
     bool preciseRefreshRate;
+    FFDisplayOrder order;
 } FFDisplayOptions;

@@ -1111,6 +1111,15 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "order": {
+                                        "description": "Set the order should be used when printing",
+                                        "enum": [
+                                            "none",
+                                            "asc",
+                                            "desc"
+                                        ],
+                                        "default": "none"
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

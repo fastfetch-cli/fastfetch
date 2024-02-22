@@ -1048,6 +1048,19 @@
             }
         },
         {
+            "long": "display-order",
+            "desc": "Set the order should be used when printing displays",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "none": "Use the detected order",
+                    "asc": "Sort by display name ascendingly",
+                    "desc": "Sort by display name descendingly"
+                },
+                "default": "none"
+            }
+        },
+        {
             "long": "brightness-ddcci-sleep",
             "desc": "Set the sleep times (in ms) when sending DDC/CI requests",
             "remark": "See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail",
