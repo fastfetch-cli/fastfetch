@@ -1,3 +1,18 @@
+# 2.8.4
+
+Bugfixes:
+* Fix segfault if we fail to find `Vendor ID` in `lscpu` (#718, CPU, Linux)
+* Fix multi-device bcachefs filesystem compatibility (#731, Disk, Linux)
+
+Features:
+* Support portable Windows Terminal settings (#720, Terminal, Windows)
+* Support `--color-block-width` and `--color-block-range` (#721, Colors)
+* Support `--diskio-detect-total` to show total bytes read/written (DiskIO)
+* Support `--netio-detect-total` to show total bytes received/sent (NetIO)
+* Support `--packages-disabled` to disable specified package manager (#729, Packages)
+* Support `--display-order` to sort multiple displays in a specific order (Display)
+* Support `--display-compact-type original-with-refresh-rate` to show refresh rates in compact (oneline) mode (Display)
+
 # 2.8.3
 
 Bugfixes:
