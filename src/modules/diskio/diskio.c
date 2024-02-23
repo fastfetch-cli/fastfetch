@@ -220,6 +220,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     ffStrbufInit(&options->namePrefix);
+    options->detectTotal = false;
 }
 
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options)

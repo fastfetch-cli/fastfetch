@@ -27,6 +27,7 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ### Linux
 
+* Ubuntu: `ppa:zhangsongcui3371/fastfetch`
 * Debian / Ubuntu: Download `fastfetch-<version>-Linux.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and `dpkg -i fastfetch-<version>-Linux.deb`
 * Arch Linux: `sudo pacman -S fastfetch`. You can also find fastfetch [on the AUR](https://aur.archlinux.org/packages/fastfetch-git).
 * Fedora: `sudo dnf install fastfetch`

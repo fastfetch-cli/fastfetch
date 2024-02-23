@@ -257,6 +257,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
             true
         #endif
     ;
+    options->detectTotal = false;
 }
 
 void ffDestroyNetIOOptions(FFNetIOOptions* options)
