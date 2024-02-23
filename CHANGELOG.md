@@ -1,3 +1,8 @@
+# 2.8.5
+
+Bugfixes:
+* Fix uninitialized variables
+
 # 2.8.4
 
 Bugfixes:
