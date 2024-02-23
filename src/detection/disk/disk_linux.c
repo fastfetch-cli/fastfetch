@@ -41,6 +41,10 @@ static bool isPhysicalDevice(const struct mntent* device)
     if(!ffStrStartsWith(device->mnt_fsname, "/dev/"))
         return false;
 
+    //#731
+    if(ffStrEquals(device->mnt_type, "bcachefs"))
+        return true;
+
     if(
         ffStrStartsWith(device->mnt_fsname + 5, "loop") || //Ignore loop devices
         ffStrStartsWith(device->mnt_fsname + 5, "ram")  || //Ignore ram devices

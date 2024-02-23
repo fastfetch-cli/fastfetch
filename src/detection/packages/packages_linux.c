@@ -253,44 +253,53 @@ static uint32_t getRpmFromLibrpm(void)
 
 #endif //FF_HAVE_RPM
 
-static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
-    packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
-    packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed");
-    packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
-    packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
-    packageCounts->flatpakSystem += getFlatpak(baseDir, "/var/lib/flatpak");
-    packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
-    packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
-    packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
-    packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", DT_REG);
-    packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Packages");
-    packageCounts->snap += getSnap(baseDir);
-    packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
-    packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
-    packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
-    packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
-    packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
+    if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
+    if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed");
+    if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
+    if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
+    if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpak(baseDir, "/var/lib/flatpak");
+    if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
+    {
+        packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
+        packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
+    }
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", DT_REG);
+    if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT)) packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Packages");
+    if (!(options->disabled & FF_PACKAGES_FLAG_SNAP_BIT)) packageCounts->snap += getSnap(baseDir);
+    if (!(options->disabled & FF_PACKAGES_FLAG_XBPS_BIT)) packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
+    if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT))
+    {
+        packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
+        packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
+    }
+    if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
+    if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
 }
 
-static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
-    getPackageCounts(baseDir, packageCounts);
+    getPackageCounts(baseDir, packageCounts, options);
 
-    uint32_t baseDirLength = baseDir->length;
-    ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ETC "/pacman-mirrors.conf");
-    if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
-        ffStrbufAppendS(&packageCounts->pacmanBranch, "stable");
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT))
+    {
+        uint32_t baseDirLength = baseDir->length;
+        ffStrbufAppendS(baseDir, FASTFETCH_TARGET_DIR_ETC "/pacman-mirrors.conf");
+        if(ffParsePropFile(baseDir->chars, "Branch =", &packageCounts->pacmanBranch) && packageCounts->pacmanBranch.length == 0)
+            ffStrbufAppendS(&packageCounts->pacmanBranch, "stable");
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+    }
 }
 
-static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* packageCounts)
+static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     uint32_t baseDirLength = baseDir->length;
 
     ffStrbufAppendS(baseDir, "/bedrock/strata");
 
-    DIR* dir = opendir(baseDir->chars);
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(baseDir->chars);
     if(dir == NULL)
     {
         ffStrbufSubstrBefore(baseDir, baseDirLength);
@@ -309,33 +318,34 @@ static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* package
             continue;
 
         ffStrbufAppendS(baseDir, entry->d_name);
-        getPackageCounts(baseDir, packageCounts);
+        getPackageCounts(baseDir, packageCounts, options);
         ffStrbufSubstrBefore(baseDir, baseDirLength2);
     }
 
-    closedir(dir);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
 }
 
-void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
+void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(512);
     ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
 
     if(ffStrbufIgnCaseEqualS(&ffDetectOS()->id, "bedrock"))
-        getPackageCountsBedrock(&baseDir, result);
+        getPackageCountsBedrock(&baseDir, result, options);
     else
-        getPackageCountsRegular(&baseDir, result);
+        getPackageCountsRegular(&baseDir, result, options);
 
     // If SQL failed, we can still try with librpm.
     // This is needed on openSUSE, which seems to use a proprietary database file
     // This method doesn't work on bedrock, so we do it here.
     #ifdef FF_HAVE_RPM
-        if(result->rpm == 0)
+        if(!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT) && result->rpm == 0)
             result->rpm = getRpmFromLibrpm();
     #endif
 
     ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
-    result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
-    result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
+    if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
+        result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
+    if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))
+        result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
 }

@@ -28,7 +28,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             { \
                 printf("%u (%s)", counts.var, (name)); \
                 if((all -= counts.var) > 0) \
-                    printf(", "); \
+                    fputs(", ", stdout); \
             };
 
         #define FF_PRINT_PACKAGE(name) FF_PRINT_PACKAGE_NAME(name, #name)
@@ -42,7 +42,6 @@ void ffPrintPackages(FFPackagesOptions* options)
             if((all -= counts.pacman) > 0)
                 printf(", ");
         };
-
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
         FF_PRINT_PACKAGE(emerge)
@@ -109,13 +108,52 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    #ifdef _WIN32
-    if(ffStrEqualsIgnCase(subKey, "winget"))
+    if (ffStrEqualsIgnCase(subKey, "disabled"))
     {
-        options->winget = ffOptionParseBoolean(value);
+        options->disabled = FF_PACKAGES_FLAG_NONE;
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        ffOptionParseString(key, value, &buffer);
+
+        char *start = buffer.chars, *end = strchr(start, ':');
+        while (true)
+        {
+            if (end)
+                *end = '\0';
+
+            #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(start, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
+            if (false);
+            FF_TEST_PACKAGE_NAME(APK)
+            FF_TEST_PACKAGE_NAME(BREW)
+            FF_TEST_PACKAGE_NAME(CHOCO)
+            FF_TEST_PACKAGE_NAME(DPKG)
+            FF_TEST_PACKAGE_NAME(EMERGE)
+            FF_TEST_PACKAGE_NAME(EOPKG)
+            FF_TEST_PACKAGE_NAME(FLATPAK)
+            FF_TEST_PACKAGE_NAME(NIX)
+            FF_TEST_PACKAGE_NAME(OPKG)
+            FF_TEST_PACKAGE_NAME(PACMAN)
+            FF_TEST_PACKAGE_NAME(PALUDIS)
+            FF_TEST_PACKAGE_NAME(PKG)
+            FF_TEST_PACKAGE_NAME(PKGTOOL)
+            FF_TEST_PACKAGE_NAME(MACPORTS)
+            FF_TEST_PACKAGE_NAME(RPM)
+            FF_TEST_PACKAGE_NAME(SCOOP)
+            FF_TEST_PACKAGE_NAME(SNAP)
+            FF_TEST_PACKAGE_NAME(WINGET)
+            FF_TEST_PACKAGE_NAME(XBPS)
+            #undef FF_TEST_PACKAGE_NAME
+
+            if (end)
+            {
+                start = end + 1;
+                end = strchr(end, ':');
+            }
+            else
+                break;
+        }
+
         return true;
     }
-    #endif
 
     return false;
 }
@@ -127,19 +165,55 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
     yyjson_obj_foreach(module, idx, max, key_, val)
     {
         const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
+        if (ffStrEqualsIgnCase(key, "type"))
             continue;
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        #ifdef _WIN32
-        if (ffStrEqualsIgnCase(key, "winget"))
+        if (ffStrEqualsIgnCase(key, "disabled"))
         {
-            options->winget = yyjson_get_bool(val);
-            continue;
+            if (!yyjson_is_null(val) && !yyjson_is_arr(val))
+            {
+                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Invalid JSON value for %s", key);
+                continue;
+            }
+
+            options->disabled = FF_PACKAGES_FLAG_NONE;
+
+            if (yyjson_is_arr(val))
+            {
+                yyjson_val* flagObj;
+                size_t flagIdx, flagMax;
+                yyjson_arr_foreach(val, flagIdx, flagMax, flagObj)
+                {
+                    const char* flag = yyjson_get_str(flagObj);
+
+                    #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(flag, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
+                    if (false);
+                    FF_TEST_PACKAGE_NAME(APK)
+                    FF_TEST_PACKAGE_NAME(BREW)
+                    FF_TEST_PACKAGE_NAME(CHOCO)
+                    FF_TEST_PACKAGE_NAME(DPKG)
+                    FF_TEST_PACKAGE_NAME(EMERGE)
+                    FF_TEST_PACKAGE_NAME(EOPKG)
+                    FF_TEST_PACKAGE_NAME(FLATPAK)
+                    FF_TEST_PACKAGE_NAME(NIX)
+                    FF_TEST_PACKAGE_NAME(OPKG)
+                    FF_TEST_PACKAGE_NAME(PACMAN)
+                    FF_TEST_PACKAGE_NAME(PALUDIS)
+                    FF_TEST_PACKAGE_NAME(PKG)
+                    FF_TEST_PACKAGE_NAME(PKGTOOL)
+                    FF_TEST_PACKAGE_NAME(MACPORTS)
+                    FF_TEST_PACKAGE_NAME(RPM)
+                    FF_TEST_PACKAGE_NAME(SCOOP)
+                    FF_TEST_PACKAGE_NAME(SNAP)
+                    FF_TEST_PACKAGE_NAME(WINGET)
+                    FF_TEST_PACKAGE_NAME(XBPS)
+                    #undef FF_TEST_PACKAGE_NAME
+                }
+            }
         }
-        #endif
 
         ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
@@ -152,10 +226,32 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
-    #ifdef _WIN32
-    if (options->winget != defaultOptions.winget)
-        yyjson_mut_obj_add_bool(doc, module, "winget", options->winget);
-    #endif
+    if (options->disabled != defaultOptions.disabled)
+    {
+        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "disabled");
+        #define FF_TEST_PACKAGE_NAME(name) else if ((options->disabled & FF_PACKAGES_FLAG_ ## name ## _BIT) != (defaultOptions.disabled & FF_PACKAGES_FLAG_ ## name ## _BIT)) { yyjson_mut_arr_add_str(doc, arr, #name); }
+        if (false);
+        FF_TEST_PACKAGE_NAME(APK)
+        FF_TEST_PACKAGE_NAME(BREW)
+        FF_TEST_PACKAGE_NAME(CHOCO)
+        FF_TEST_PACKAGE_NAME(DPKG)
+        FF_TEST_PACKAGE_NAME(EMERGE)
+        FF_TEST_PACKAGE_NAME(EOPKG)
+        FF_TEST_PACKAGE_NAME(FLATPAK)
+        FF_TEST_PACKAGE_NAME(NIX)
+        FF_TEST_PACKAGE_NAME(OPKG)
+        FF_TEST_PACKAGE_NAME(PACMAN)
+        FF_TEST_PACKAGE_NAME(PALUDIS)
+        FF_TEST_PACKAGE_NAME(PKG)
+        FF_TEST_PACKAGE_NAME(PKGTOOL)
+        FF_TEST_PACKAGE_NAME(MACPORTS)
+        FF_TEST_PACKAGE_NAME(RPM)
+        FF_TEST_PACKAGE_NAME(SCOOP)
+        FF_TEST_PACKAGE_NAME(SNAP)
+        FF_TEST_PACKAGE_NAME(WINGET)
+        FF_TEST_PACKAGE_NAME(XBPS)
+        #undef FF_TEST_PACKAGE_NAME
+    }
 }
 
 void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -248,9 +344,7 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    #ifdef _WIN32
-    options->winget = false;
-    #endif
+    options->disabled = FF_PACKAGES_FLAG_WINGET_BIT;
 }
 
 void ffDestroyPackagesOptions(FFPackagesOptions* options)

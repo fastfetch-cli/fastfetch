@@ -6,6 +6,16 @@
 
 #define FF_DISPLAY_NUM_FORMAT_ARGS 8
 
+static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
+{
+    return ffStrbufComp(&a->name, &b->name);
+}
+
+static int sortByNameDesc(FFDisplayResult* a, FFDisplayResult* b)
+{
+    return -ffStrbufComp(&a->name, &b->name);
+}
+
 void ffPrintDisplay(FFDisplayOptions* options)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
@@ -16,25 +26,46 @@ void ffPrintDisplay(FFDisplayOptions* options)
         return;
     }
 
+    if (options->order != FF_DISPLAY_ORDER_NONE)
+    {
+        ffListSort((FFlist*) &dsResult->displays, (void*) (options->order == FF_DISPLAY_ORDER_ASC ? sortByNameAsc : sortByNameDesc));
+    }
+
     if (options->compactType != FF_DISPLAY_COMPACT_TYPE_NONE)
     {
         ffPrintLogoAndKey(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        int index = 0;
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         FF_LIST_FOR_EACH(FFDisplayResult, result, dsResult->displays)
         {
             if (options->compactType & FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT)
             {
-                if (index++) putchar(' ');
-                printf("%ix%i", result->width, result->height);
+                ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
             }
-            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_SCALED_BIT)
+            else
             {
-                if (index++) putchar(' ');
-                printf("%ix%i", result->scaledWidth, result->scaledHeight);
+                ffStrbufAppendF(&buffer, "%ix%i", result->scaledWidth, result->scaledHeight);
+            }
+
+            if (options->compactType & FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT)
+            {
+                if (result->refreshRate > 0)
+                {
+                    if (options->preciseRefreshRate)
+                        ffStrbufAppendF(&buffer, " @ %gHz", result->refreshRate);
+                    else
+                        ffStrbufAppendF(&buffer, " @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+                }
+                ffStrbufAppendS(&buffer, ", ");
+            }
+            else
+            {
+                ffStrbufAppendC(&buffer, ' ');
             }
         }
-        putchar('\n');
+        ffStrbufTrimRight(&buffer, ' ');
+        ffStrbufTrimRight(&buffer, ',');
+        ffStrbufPutTo(&buffer, stdout);
         return;
     }
 
@@ -122,6 +153,8 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
             { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
             { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
             { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+            { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+            { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
             {},
         });
         return true;
@@ -130,6 +163,17 @@ bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, co
     if (ffStrEqualsIgnCase(subKey, "precise-refresh-rate"))
     {
         options->preciseRefreshRate = ffOptionParseBoolean(value);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "order"))
+    {
+        options->order = (FFDisplayOrder) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "asc", FF_DISPLAY_ORDER_ASC },
+            { "desc", FF_DISPLAY_ORDER_DESC },
+            { "none", FF_DISPLAY_ORDER_NONE },
+            {},
+        });
         return true;
     }
 
@@ -156,6 +200,8 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
                 { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
                 { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
                 { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+                { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
                 {},
             });
             if (error)
@@ -168,6 +214,22 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
         {
             options->preciseRefreshRate = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "order"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "asc", FF_DISPLAY_ORDER_ASC },
+                { "desc", FF_DISPLAY_ORDER_DESC },
+                { "none", FF_DISPLAY_ORDER_NONE },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+            else
+                options->order = (FFDisplayOrder) value;
             continue;
         }
 
@@ -184,7 +246,7 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
 
     if (options->compactType != defaultOptions.compactType)
     {
-        switch (options->compactType)
+        switch ((int) options->compactType)
         {
             case FF_DISPLAY_COMPACT_TYPE_NONE:
                 yyjson_mut_obj_add_str(doc, module, "compactType", "none");
@@ -194,6 +256,12 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
                 break;
             case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT:
                 yyjson_mut_obj_add_str(doc, module, "compactType", "scaled");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "original-with-refresh-rate");
+                break;
+            case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
+                yyjson_mut_obj_add_str(doc, module, "compactType", "scaled-with-refresh-rate");
                 break;
         }
     }

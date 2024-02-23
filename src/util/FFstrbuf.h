@@ -300,11 +300,6 @@ static inline int ffStrbufComp(const FFstrbuf* strbuf, const FFstrbuf* comp)
     return memcmp(strbuf->chars, comp->chars, length + 1);
 }
 
-static inline int ffStrbufCompAlphabetically(const FFstrbuf* strbuf, const FFstrbuf* comp)
-{
-    return strcmp(strbuf->chars, comp->chars);
-}
-
 static inline FF_C_NODISCARD bool ffStrbufEqual(const FFstrbuf* strbuf, const FFstrbuf* comp)
 {
     return ffStrbufComp(strbuf, comp) == 0;

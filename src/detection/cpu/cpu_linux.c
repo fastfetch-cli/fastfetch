@@ -266,6 +266,10 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                             return NULL;
                     }
                 }
+                else
+                {
+                    pstart = buffer.chars;
+                }
             }
 
             while ((pstart = strstr(pstart, "Model name:")))

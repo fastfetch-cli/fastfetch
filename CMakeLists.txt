@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.8.3
+    VERSION 2.8.4
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1112,6 +1112,9 @@ set(CPACK_GENERATOR "TGZ;ZIP")
 if(APPLE)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-universal" CPACK_PACKAGE_FILE_NAME)
 else() # We don't use this in Windows
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+        set(CMAKE_SYSTEM_PROCESSOR "amd64")
+    endif()
     string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
 endif()
 

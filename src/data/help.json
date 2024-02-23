@@ -122,7 +122,10 @@
         {
             "long": "ds-force-drm",
             "desc": "Set if only DRM should be used to detect displays",
-            "remark": "Use this option if you encountered problems with other detection method. Linux only",
+            "remark": [
+                "Use this option if you encountered problems with other detection method.",
+                "Linux only"
+            ],
             "arg": {
                 "type": "enum",
                 "optional": true,
@@ -537,7 +540,13 @@
         {
             "long": "percent-type",
             "desc": "Set the percentage output type",
-            "remark": "1 for percentage number, 2 for bar, 3 for both, 6 for bar only, 9 for colored number",
+            "remark": [
+                "1 for percentage number",
+                "2 for bar",
+                "3 for both",
+                "6 for bar only",
+                "9 for colored number"
+            ],
             "arg": {
                 "type": "num",
                 "default": 9
@@ -964,6 +973,14 @@
             }
         },
         {
+            "long": "diskio-detect-total",
+            "desc": "Detect total bytes instead of current rate",
+            "arg": {
+                "type": "bool",
+                "default": false
+            }
+        },
+        {
             "long": "diskio-name-prefix",
             "desc": "Show disks with given name prefix only",
             "arg": {
@@ -996,13 +1013,16 @@
             }
         },
         {
-            "long": "packages-winget",
-            "desc": "Set if winget package count should be detected",
-            "remark": "This option is extremely slow. You may need to increase value of '--processing-timeout' to make it actually work",
+            "long": "packages-disabled",
+            "desc": "A colon separated list of package managers to be disabled when detecting",
+            "remark": [
+                "Some detection methods can be very slow.",
+                "You may need to increase value of '--processing-timeout' to make it actually work.",
+                "Use `--packages-disabled none` to enable all."
+            ],
             "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
+                "type": "string",
+                "default": "winget"
             }
         },
         {
@@ -1013,7 +1033,9 @@
                 "enum": {
                     "none": "Disable this compact mode",
                     "original": "Print original resolutions",
-                    "scaled": "Print scaled resolutions"
+                    "scaled": "Print scaled resolutions",
+                    "original-with-refresh-rate": "Print original resolutions with refresh rate",
+                    "scaled-with-refresh-rate": "Print scaled resolutions with refresh rate"
                 },
                 "default": "none"
             }
@@ -1025,6 +1047,19 @@
                 "type": "bool",
                 "optional": true,
                 "default": false
+            }
+        },
+        {
+            "long": "display-order",
+            "desc": "Set the order should be used when printing displays",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "none": "Use the detected order",
+                    "asc": "Sort by display name ascendingly",
+                    "desc": "Sort by display name descendingly"
+                },
+                "default": "none"
             }
         },
         {
@@ -1052,7 +1087,10 @@
         {
             "long": "battery-use-setup-api",
             "desc": "Set if \"SetupAPI\" should be used on Windows to detect battery info",
-            "remark": "SetupAPI supports multi batteries, but slower. Windows only",
+            "remark": [
+                "SetupAPI supports multi batteries, but slower.",
+                "Windows only"
+            ],
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1088,7 +1126,10 @@
         {
             "long": "de-slow-version-detection",
             "desc": "Set if DE version should be detected with slow operations",
-            "remark": "Usually is not necessary. Linux only",
+            "remark": [
+                "It's only used as a fallback method. Please file a bug report if you encounter any issues.",
+                "Linux only"
+            ],
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1107,7 +1148,10 @@
         {
             "long": "gpu-driver-specific",
             "desc": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
-            "remark": "Correctly NVML (NVIDIA) and IGCL (Intel, Windows only) are supported. Both require the latest proprietary driver to be installed",
+            "remark": [
+                "Correctly NVML (NVIDIA) and IGCL (Intel, Windows only) are supported.",
+                "Both require the latest proprietary driver to be installed."
+            ],
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1226,6 +1270,14 @@
             }
         },
         {
+            "long": "netio-detect-total",
+            "desc": "Detect total bytes instead of current rate",
+            "arg": {
+                "type": "bool",
+                "default": false
+            }
+        },
+        {
             "long": "publicip-timeout",
             "desc": "Time in milliseconds to wait for the public ip server to respond",
             "remark": "0 to disable timeout",
@@ -1341,6 +1393,44 @@
             "arg": {
                 "type": "num",
                 "default": 0
+            }
+        },
+        {
+            "long": "colors-block-width",
+            "desc": "Set the block width in spaces",
+            "arg": {
+                "type": "num",
+                "default": 3
+            }
+        },
+        {
+            "long": "colors-block-range-start",
+            "desc": "Set the start range of colors in the blocks to print",
+            "remark": [
+                "Display colors 0-15 in the blocks. (16 colors)",
+                "Display colors 0-7 in the blocks. (8 colors)",
+                "Only works for `--colors-symbol block`.",
+                "Must be in range 0-15",
+                "See also `--colors-range-end`"
+            ],
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
+            "long": "colors-block-range-end",
+            "desc": "Set the end range of colors in the blocks to print",
+            "remark": [
+                "Display colors 0-15 in the blocks. (16 colors)",
+                "Display colors 0-7 in the blocks. (8 colors)",
+                "Only works for `--colors-symbol block`.",
+                "Must be in range 0-15",
+                "See also `--colors-range-start`"
+            ],
+            "arg": {
+                "type": "num",
+                "default": 15
             }
         }
     ],

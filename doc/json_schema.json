@@ -1007,6 +1007,29 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
+                                    },
+                                    "block": {
+                                        "description": "Set behavior of block printing",
+                                        "type": "object",
+                                        "properties": {
+                                            "width": {
+                                                "description": "Set the block width in spaces",
+                                                "type": "integer",
+                                                "minimum": 1,
+                                                "default": 3
+                                            },
+                                            "range": {
+                                                "description": "Set the range of colors in the blocks to print",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "integer",
+                                                    "minimum": 0,
+                                                    "maximum": 15
+                                                },
+                                                "minItems": 2,
+                                                "maxItems": 2
+                                            }
+                                        }
                                     }
                                 }
                             },
@@ -1078,7 +1101,9 @@
                                         "enum": [
                                             "none",
                                             "original",
-                                            "scaled"
+                                            "scaled",
+                                            "original-with-refresh-rate",
+                                            "scaled-with-refresh-rate"
                                         ],
                                         "description": "Set if all displays should be printed in one line",
                                         "default": "none"
@@ -1087,6 +1112,15 @@
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "order": {
+                                        "description": "Set the order should be used when printing",
+                                        "enum": [
+                                            "none",
+                                            "asc",
+                                            "desc"
+                                        ],
+                                        "default": "none"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1172,6 +1206,11 @@
                                     "namePrefix": {
                                         "description": "Show disks with given name prefix only",
                                         "type": "string"
+                                    },
+                                    "detectTotal": {
+                                        "description": "Detect total bytes instead of current rate",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1382,6 +1421,11 @@
                                         "type": "boolean",
                                         "default": true
                                     },
+                                    "detectTotal": {
+                                        "description": "Detect total bytes instead of current rate",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -1436,10 +1480,10 @@
                                         "const": "packages",
                                         "description": "List installed package managers and count of installed packages"
                                     },
-                                    "winget": {
-                                        "description": "Set if winget package count should be detected.\nNote this is very slow operation. Please make sure `winget list` works before enable this option\nWindows only",
-                                        "type": "boolean",
-                                        "default": false
+                                    "disabled": {
+                                        "description": "A colon separated list of package managers to be disabled when detecting",
+                                        "type": "string",
+                                        "default": "winget"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

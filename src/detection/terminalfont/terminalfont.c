@@ -170,7 +170,17 @@ static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFo
     if(terminalExe && terminalExe->length > 0 && !ffStrbufEqualS(terminalExe, "Windows Terminal"))
     {
         char jsonPath[MAX_PATH + 1];
-        if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, jsonPath)))
+        strncpy(jsonPath, terminalExe->chars, ffStrbufLastIndexC(terminalExe, '\\') + 1);
+        char* pathEnd = jsonPath + strlen(jsonPath);
+        strncpy(pathEnd, ".portable", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
+
+        if(ffPathExists(jsonPath, FF_PATHTYPE_FILE))
+        {
+            strncpy(pathEnd, "settings\\settings.json", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
+            if(!ffAppendFileBuffer(jsonPath, &json))
+                error = "Error reading Windows Terminal portable settings JSON file";
+        }
+        else if(SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, jsonPath)))
         {
             size_t remaining = sizeof(jsonPath) - strlen(jsonPath) - 1;
             if(ffStrbufContainIgnCaseS(terminalExe, "_8wekyb3d8bbwe\\"))

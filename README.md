@@ -32,7 +32,7 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 * Fedora: `sudo dnf install fastfetch`
 * Gentoo: `sudo emerge --ask app-misc/fastfetch`
 * Alpine: `apk add --upgrade fastfetch`
-* NixOS: `sudo nix-shell -p fastfetch`
+* NixOS: `nix-shell -p fastfetch`
 * openSUSE: `sudo zypper install fastfetch`
 * ALT Linux: `sudo apt-get install fastfetch`
 

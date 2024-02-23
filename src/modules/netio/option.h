@@ -11,4 +11,5 @@ typedef struct FFNetIOOptions
 
     FFstrbuf namePrefix;
     bool defaultRouteOnly;
+    bool detectTotal;
 } FFNetIOOptions;
