@@ -1,3 +1,9 @@
+fastfetch (2.8.4) jammy; urgency=medium
+
+  * Update to 2.8.4
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 23 Feb 2024 16:14:57 +0800
+
 fastfetch (2.7.1ubuntu2) jammy; urgency=medium
 
   * Ignore .git
