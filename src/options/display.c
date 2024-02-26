@@ -94,20 +94,46 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
         }
-        else if (ffStrEqualsIgnCase(key, "temperatureUnit"))
+        else if (ffStrEqualsIgnCase(key, "temperature"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
-                { "C", FF_TEMPERATURE_UNIT_CELSIUS },
-                { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-                { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-                { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
-                { "K", FF_TEMPERATURE_UNIT_KELVIN },
-                {},
-            });
-            if (error) return error;
-            options->temperatureUnit = (FFTemperatureUnit) value;
+            if (!yyjson_is_obj(val))
+                return "display.temperature must be an object";
+
+            yyjson_val* unit = yyjson_obj_get(val, "unit");
+            if (unit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(unit, &value, (FFKeyValuePair[]) {
+                    { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
+                    { "C", FF_TEMPERATURE_UNIT_CELSIUS },
+                    { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                    { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                    { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
+                    { "K", FF_TEMPERATURE_UNIT_KELVIN },
+                    {},
+                });
+                if (error) return error;
+                options->temperatureUnit = (FFTemperatureUnit) value;
+            }
+
+            yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+            if (ndigits) options->temperatureNdigits = (uint8_t) yyjson_get_uint(ndigits);
+
+            yyjson_val* color = yyjson_obj_get(val, "color");
+            if (color)
+            {
+                if (!yyjson_is_obj(color))
+                    return "display.temperature.color must be an object";
+
+                yyjson_val* green = yyjson_obj_get(color, "green");
+                if (green) ffOptionParseColor(yyjson_get_str(green), &options->temperatureColorGreen);
+
+                yyjson_val* yellow = yyjson_obj_get(color, "yellow");
+                if (yellow) ffOptionParseColor(yyjson_get_str(yellow), &options->temperatureColorYellow);
+
+                yyjson_val* red = yyjson_obj_get(color, "red");
+                if (red) ffOptionParseColor(yyjson_get_str(red), &options->temperatureColorRed);
+            }
         }
         else if (ffStrEqualsIgnCase(key, "percent"))
         {
@@ -253,17 +279,31 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             {}
         });
     }
-    else if(ffStrEqualsIgnCase(key, "--temperature-unit"))
+    else if(ffStrStartsWithIgnCase(key, "--temperature-"))
     {
-        options->temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
-            { "C", FF_TEMPERATURE_UNIT_CELSIUS },
-            { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-            { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
-            { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
-            { "K", FF_TEMPERATURE_UNIT_KELVIN },
-            {},
-        });
+        const char* subkey = key + strlen("--temperature-");
+        if(ffStrEqualsIgnCase(subkey, "unit"))
+        {
+            options->temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
+                { "C", FF_TEMPERATURE_UNIT_CELSIUS },
+                { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                { "F", FF_TEMPERATURE_UNIT_FAHRENHEIT },
+                { "KELVIN", FF_TEMPERATURE_UNIT_KELVIN },
+                { "K", FF_TEMPERATURE_UNIT_KELVIN },
+                {},
+            });
+        }
+        else if (ffStrEqualsIgnCase(subkey, "ndigits"))
+            options->temperatureNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "color-green"))
+            ffOptionParseColor(value, &options->temperatureColorGreen);
+        else if(ffStrEqualsIgnCase(subkey, "color-yellow"))
+            ffOptionParseColor(value, &options->temperatureColorYellow);
+        else if(ffStrEqualsIgnCase(subkey, "color-red"))
+            ffOptionParseColor(value, &options->temperatureColorRed);
+        else
+            return false;
     }
     else if(ffStrStartsWithIgnCase(key, "--percent-"))
     {
@@ -323,10 +363,15 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
     options->sizeMaxPrefix = UINT8_MAX;
-    options->temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
     options->stat = false;
     options->noBuffer = false;
     options->keyWidth = 0;
+
+    options->temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
+    options->temperatureNdigits = 1;
+    ffStrbufInitStatic(&options->temperatureColorGreen, FF_COLOR_FG_GREEN);
+    ffStrbufInitStatic(&options->temperatureColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->temperatureColorRed, FF_COLOR_FG_LIGHT_RED);
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
     ffStrbufInitStatic(&options->barCharTotal, "-");
@@ -430,20 +475,38 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
             yyjson_mut_obj_add_val(doc, obj, "size", size);
     }
 
-    if (options->temperatureUnit != defaultOptions.temperatureUnit)
     {
-        switch (options->temperatureUnit)
+        yyjson_mut_val* temperature = yyjson_mut_obj(doc);
+        if (options->temperatureUnit != defaultOptions.temperatureUnit)
         {
-            case FF_TEMPERATURE_UNIT_CELSIUS:
-                yyjson_mut_obj_add_str(doc, obj, "temperatureUnit", "C");
-                break;
-            case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-                yyjson_mut_obj_add_str(doc, obj, "temperatureUnit", "F");
-                break;
-            case FF_TEMPERATURE_UNIT_KELVIN:
-                yyjson_mut_obj_add_str(doc, obj, "temperatureUnit", "K");
-                break;
+            switch (options->temperatureUnit)
+            {
+                case FF_TEMPERATURE_UNIT_CELSIUS:
+                    yyjson_mut_obj_add_str(doc, obj, "unit", "C");
+                    break;
+                case FF_TEMPERATURE_UNIT_FAHRENHEIT:
+                    yyjson_mut_obj_add_str(doc, obj, "unit", "F");
+                    break;
+                case FF_TEMPERATURE_UNIT_KELVIN:
+                    yyjson_mut_obj_add_str(doc, obj, "unit", "K");
+                    break;
+            }
         }
+        if (options->temperatureNdigits != defaultOptions.temperatureNdigits)
+            yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->temperatureNdigits);
+        {
+            yyjson_mut_val* color = yyjson_mut_obj(doc);
+            if (!ffStrbufEqual(&options->temperatureColorGreen, &defaultOptions.temperatureColorGreen))
+                yyjson_mut_obj_add_strbuf(doc, color, "green", &options->temperatureColorGreen);
+            if (!ffStrbufEqual(&options->temperatureColorYellow, &defaultOptions.temperatureColorYellow))
+                yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->temperatureColorYellow);
+            if (!ffStrbufEqual(&options->temperatureColorRed, &defaultOptions.temperatureColorRed))
+                yyjson_mut_obj_add_strbuf(doc, color, "red", &options->temperatureColorRed);
+            if (yyjson_mut_obj_size(color) > 0)
+                yyjson_mut_obj_add_val(doc, temperature, "color", color);
+        }
+        if (yyjson_mut_obj_size(temperature) > 0)
+            yyjson_mut_obj_add_val(doc, obj, "temperature", temperature);
     }
 
     {

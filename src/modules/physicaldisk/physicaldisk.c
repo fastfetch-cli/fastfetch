@@ -102,6 +102,8 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
         }
         else
         {
+            FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
+            ffParseTemperature(dev->temperature, &tempStr);
             if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
                 readOnlyType = "Read-write";
             ffParseSize(dev->size, &buffer);
@@ -115,7 +117,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
                 {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &dev->temperature},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &tempStr},
             });
         }
         ++index;
@@ -263,7 +265,7 @@ void ffPrintPhysicalDiskHelpFormat(void)
         "Device kind (Removable or Fixed)",
         "Device kind (Read-only or Read-write)",
         "Product revision",
-        "Device temperature",
+        "Device temperature (formatted)",
     });
 }
 

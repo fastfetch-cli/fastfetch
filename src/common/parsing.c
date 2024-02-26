@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/parsing.h"
+#include "util/textModifier.h"
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -98,18 +99,39 @@ void ffParseSize(uint64_t bytes, FFstrbuf* result)
 
 void ffParseTemperature(double celsius, FFstrbuf* buffer)
 {
-    switch (instance.config.display.temperatureUnit)
+    if (celsius != celsius) // ignores NaN
+        return;
+
+    const FFOptionsDisplay* options = &instance.config.display;
+    const char* colorGreen = options->temperatureColorGreen.chars;
+    const char* colorYellow = options->temperatureColorYellow.chars;
+    const char* colorRed = options->temperatureColorRed.chars;
+
+    if (!options->pipe)
+    {
+        if (celsius < 50)
+            ffStrbufAppendF(buffer, "\e[%sm", colorGreen);
+        else if (celsius < 80)
+            ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
+        else
+            ffStrbufAppendF(buffer, "\e[%sm", colorRed);
+    }
+
+    switch (options->temperatureUnit)
     {
         case FF_TEMPERATURE_UNIT_CELSIUS:
-            ffStrbufAppendF(buffer, "%.1f°C", celsius);
+            ffStrbufAppendF(buffer, "%.*f°C", options->temperatureNdigits, celsius);
             break;
         case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-            ffStrbufAppendF(buffer, "%.1f°F", celsius * 1.8 + 32);
+            ffStrbufAppendF(buffer, "%.*f°F", options->temperatureNdigits, celsius * 1.8 + 32);
             break;
         case FF_TEMPERATURE_UNIT_KELVIN:
-            ffStrbufAppendF(buffer, "%.1f K", celsius + 273.15);
+            ffStrbufAppendF(buffer, "%.*f K", options->temperatureNdigits, celsius + 273.15);
             break;
     }
+
+    if (!options->pipe)
+        ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)

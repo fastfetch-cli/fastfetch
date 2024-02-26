@@ -72,11 +72,13 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
+        ffParseTemperature(gpu->temperature, &tempStr);
         ffPrintFormat(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
             {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
             {FF_FORMAT_ARG_TYPE_STRING, type},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.total},

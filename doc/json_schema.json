@@ -407,11 +407,42 @@
                         }
                     }
                 },
-                "temperatureUnit": {
-                    "type": "string",
-                    "description": "Set the unit of the temperature",
-                    "enum": ["CELSIUS", "C", "FAHRENHEIT", "F", "KELVIN", "K"],
-                    "default": "C"
+                "temperature": {
+                    "type": "object",
+                    "description": "Set how a temperature value should be displayed",
+                    "properties": {
+                        "unit": {
+                            "type": "string",
+                            "description": "Set the unit of the temperature",
+                            "enum": ["CELSIUS", "C", "FAHRENHEIT", "F", "KELVIN", "K"],
+                            "default": "C"
+                        },
+                        "ndigits": {
+                            "type": "integer",
+                            "description": "Set the number of digits to keep after the decimal point when formatting temperature values",
+                            "minimum": 0,
+                            "maximum": 9,
+                            "default": 1
+                        },
+                        "color": {
+                            "type": "object",
+                            "description": "Set color used in different states of temperature values",
+                            "properties": {
+                                "green": {
+                                    "description": "Color used in green state",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "yellow": {
+                                    "description": "Color used in yellow state",
+                                    "$ref": "#/$defs/colors"
+                                },
+                                "red": {
+                                    "description": "Color used in red state",
+                                    "$ref": "#/$defs/colors"
+                                }
+                            }
+                        }
+                    }
                 },
                 "bar": {
                     "type": "object",

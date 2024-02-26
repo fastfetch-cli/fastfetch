@@ -667,6 +667,41 @@
                 },
                 "default": "C"
             }
+        },
+        {
+            "long": "temperature-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing temperature",
+            "arg": {
+                "type": "num",
+                "default": 2
+            }
+        },
+        {
+            "long": "temperature-color-green",
+            "desc": "Set color used in green state of temperature values",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "green"
+            }
+        },
+        {
+            "long": "temperature-color-yellow",
+            "desc": "Set color used in yellow state of temperature values",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "light_yellow"
+            }
+        },
+        {
+            "long": "temperature-color-red",
+            "desc": "Set color used in red state of temperature values",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "light_red"
+            }
         }
     ],
     "Library path": [

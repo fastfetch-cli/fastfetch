@@ -60,6 +60,8 @@ void ffPrintCPU(FFCPUOptions* options)
         }
         else
         {
+            FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
+            ffParseTemperature(cpu.temperature, &tempStr);
             ffPrintFormat(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor},
@@ -68,7 +70,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMin},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMax},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.temperature}
+                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr}
             });
         }
     }
@@ -193,7 +195,7 @@ void ffPrintCPUHelpFormat(void)
         "Online core count",
         "Min frequency",
         "Max frequency",
-        "Temperature"
+        "Temperature (formatted)"
     });
 }
 

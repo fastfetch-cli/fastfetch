@@ -58,13 +58,15 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     {
         FF_STRBUF_AUTO_DESTROY capacityStr = ffStrbufCreate();
         ffPercentAppendNum(&capacityStr, result->capacity, options->percent, false);
+        FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
+        ffParseTemperature(result->temperature, &tempStr);
         ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
             {FF_FORMAT_ARG_TYPE_STRBUF, &capacityStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result->temperature},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
             {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate},
@@ -226,7 +228,7 @@ void ffPrintBatteryHelpFormat(void)
         "Battery technology",
         "Battery capacity (percentage)",
         "Battery status",
-        "Battery temperature",
+        "Battery temperature (formatted)",
         "Battery cycle count",
         "Battery serial number",
         "Battery manufactor date",

@@ -1,3 +1,16 @@
+# 2.8.6
+
+Changes:
+* Due to newly introduced configs, JSONC option `{ "temperatureUnit": "C" }` has been changed to `{ "temperature": { "unit": "C" } }`
+
+Bugfixes:
+* Fix incorrect GPU name detection for Intel iGPU on Linux (#736, GPU, Linux)
+
+Features:
+* Support additional temperature formatting options (#737)
+    * `{ "temperature": { "ndigits": 1 } }`
+    * `{ "temperature": { "color": { "green": "green", "yellow": "yellow", "red": "red" } } }`
+
 # 2.8.5
 
 Bugfixes:
