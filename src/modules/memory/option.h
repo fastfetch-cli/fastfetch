@@ -10,5 +10,5 @@ typedef struct FFMemoryOptions
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    FFPercentConfig percent;
+    FFColorRangeConfig percent;
 } FFMemoryOptions;

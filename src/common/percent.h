@@ -1,6 +1,7 @@
 #pragma once
 
 #include "util/FFstrbuf.h"
+#include "common/parsing.h"
 
 enum
 {
@@ -9,12 +10,6 @@ enum
     FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT = 1 << 2,
     FF_PERCENTAGE_TYPE_NUM_COLOR_BIT = 1 << 3,
 };
-
-typedef struct FFPercentConfig
-{
-    uint8_t green;
-    uint8_t yellow;
-} FFPercentConfig;
 
 // if (green <= yellow)
 // [0, green]: print green
@@ -26,12 +21,12 @@ typedef struct FFPercentConfig
 // [yellow, green): print yellow
 // [0, yellow): print red
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentConfig config);
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config, bool parentheses);
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config);
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses);
 
 typedef struct yyjson_val yyjson_val;
 typedef struct yyjson_mut_doc yyjson_mut_doc;
 typedef struct yyjson_mut_val yyjson_mut_val;
-bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentConfig* config);
-bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentConfig* config);
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentConfig defaultConfig, FFPercentConfig config);
+bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFColorRangeConfig* config);
+bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFColorRangeConfig* config);
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFColorRangeConfig defaultConfig, FFColorRangeConfig config);

@@ -484,7 +484,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     ffStrbufInit(&options->folders);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
-    options->percent = (FFPercentConfig) { 50, 80 };
+    options->percent = (FFColorRangeConfig) { 50, 80 };
 }
 
 void ffDestroyDiskOptions(FFDiskOptions* options)

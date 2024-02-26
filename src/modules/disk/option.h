@@ -30,5 +30,5 @@ typedef struct FFDiskOptions
     FFstrbuf folders;
     FFDiskVolumeType showTypes;
     FFDiskCalcType calcType;
-    FFPercentConfig percent;
+    FFColorRangeConfig percent;
 } FFDiskOptions;

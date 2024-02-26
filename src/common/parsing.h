@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
 
 #include <stdint.h>
 
@@ -10,6 +10,12 @@ typedef struct FFVersion
     uint32_t minor;
     uint32_t patch;
 } FFVersion;
+
+typedef struct FFColorRangeConfig
+{
+    uint8_t green;
+    uint8_t yellow;
+} FFColorRangeConfig;
 
 #define FF_VERSION_INIT ((FFVersion) {0})
 

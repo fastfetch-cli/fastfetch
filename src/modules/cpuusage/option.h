@@ -11,5 +11,5 @@ typedef struct FFCPUUsageOptions
     FFModuleArgs moduleArgs;
 
     bool separate;
-    FFPercentConfig percent;
+    FFColorRangeConfig percent;
 } FFCPUUsageOptions;

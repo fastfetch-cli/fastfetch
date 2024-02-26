@@ -9,5 +9,5 @@ typedef struct FFGamepadOptions
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    FFPercentConfig percent;
+    FFColorRangeConfig percent;
 } FFGamepadOptions;

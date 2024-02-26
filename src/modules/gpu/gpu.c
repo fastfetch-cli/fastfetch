@@ -373,7 +373,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
-    options->percent = (FFPercentConfig) { 50, 80 };
+    options->percent = (FFColorRangeConfig) { 50, 80 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options)

@@ -205,7 +205,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->ddcciSleep = 10;
-    options->percent = (FFPercentConfig) { 100, 100 };
+    options->percent = (FFColorRangeConfig) { 100, 100 };
 }
 
 void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
