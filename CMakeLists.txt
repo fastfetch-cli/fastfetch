@@ -724,8 +724,8 @@ if(yyjson_FOUND)
 else()
     # Used for dlopen finding dylibs installed by homebrew
     # `/opt/homebrew/lib` is not on in dlopen search path by default
-    if(APPLE AND DEFINED ENV{HOMEBREW_PREFIX})
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,$ENV{HOMEBREW_PREFIX}/lib")
+    if(APPLE)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
     endif()
 endif()
 
