@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/schema",
+    "$schema": "https://json-schema.org/draft-07/schema",
     "$defs": {
         "colors": {
             "type": "string",
@@ -44,6 +44,32 @@
                     "description": "Value greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
                 }
             }
+        },
+        "temperature": {
+            "description": "Detect and display temperature if supported",
+            "oneOf": [
+                {
+                    "type": "boolean",
+                    "default": false
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "green": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "description": "Value less then green will be shown in green"
+                        },
+                        "yellow": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100,
+                            "description": "Value greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
+                        }
+                    }
+                }
+            ]
         }
     },
     "type": "object",
@@ -272,7 +298,7 @@
                     "description": "Force display detection to use DRM. Linux only",
                     "oneOf": [
                         {
-                            "type": "bool",
+                            "type": "boolean",
                             "const": false,
                             "description": "Try `wayland`, then `x11`, then `drm`"
                         },
@@ -282,7 +308,7 @@
                             "const": "sysfs-only"
                         },
                         {
-                            "type": "bool",
+                            "type": "boolean",
                             "const": true,
                             "description": "Try `libdrm` first, then `sysfs` if libdrm failed"
                         }
@@ -870,9 +896,7 @@
                                         "default": false
                                     },
                                     "temp": {
-                                        "description": "Detect and display Battery temperature if supported",
-                                        "type": "boolean",
-                                        "default": false
+                                        "$ref": "#/$defs/temperature"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -970,9 +994,7 @@
                                         "const": "cpu"
                                     },
                                     "temp": {
-                                        "description": "Detect and display CPU temperature if supported",
-                                        "type": "boolean",
-                                        "default": false
+                                        "$ref": "#/$defs/temperature"
                                     },
                                     "freqNdigits": {
                                         "description": "Set the number of digits to keep after the decimal point when printing CPU frequency",
@@ -1317,9 +1339,7 @@
                                         "const": "gpu"
                                     },
                                     "temp": {
-                                        "description": "Detect and display GPU temperature if supported",
-                                        "type": "boolean",
-                                        "default": false
+                                        "$ref": "#/$defs/temperature"
                                     },
                                     "driverSpecific": {
                                         "description": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
@@ -1542,9 +1562,7 @@
                                         "type": "string"
                                     },
                                     "temp": {
-                                        "description": "Detect and display SSD temperature if supported",
-                                        "type": "boolean",
-                                        "default": false
+                                        "$ref": "#/$defs/temperature"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

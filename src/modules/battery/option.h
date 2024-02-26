@@ -11,6 +11,7 @@ typedef struct FFBatteryOptions
     FFModuleArgs moduleArgs;
 
     bool temp;
+    FFColorRangeConfig tempConfig;
     FFColorRangeConfig percent;
 
     #ifdef _WIN32

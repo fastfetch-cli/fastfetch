@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
+#include "common/temps.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
@@ -53,7 +54,7 @@ void ffPrintCPU(FFCPUOptions* options)
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
             {
                 ffStrbufAppendS(&str, " - ");
-                ffParseTemperature(cpu.temperature, &str);
+                ffTempsAppendNum(cpu.temperature, &str, options->tempConfig);
             }
 
             ffStrbufPutTo(&str, stdout);
@@ -61,7 +62,7 @@ void ffPrintCPU(FFCPUOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-            ffParseTemperature(cpu.temperature, &tempStr);
+            ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig);
             ffPrintFormat(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor},
@@ -86,11 +87,8 @@ bool ffParseCPUCPUOptions(FFCPUOptions* options, const char* key, const char* va
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(subKey, "temp"))
-    {
-        options->temp = ffOptionParseBoolean(value);
+    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
         return true;
-    }
 
     if (ffStrEqualsIgnCase(subKey, "freq-ndigits"))
     {
@@ -114,11 +112,8 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "temp"))
-        {
-            options->temp = yyjson_get_bool(val);
+        if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
-        }
 
         if (ffStrEqualsIgnCase(key, "freqNdigits"))
         {
@@ -137,8 +132,7 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
-    if (defaultOptions.temp != options->temp)
-        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
 
     if (defaultOptions.freqNdigits != options->freqNdigits)
         yyjson_mut_obj_add_uint(doc, module, "freqNdigits", options->freqNdigits);
@@ -214,6 +208,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->freqNdigits = 2;
 }
 

@@ -10,5 +10,6 @@ typedef struct FFCPUOptions
     FFModuleArgs moduleArgs;
 
     bool temp;
+    FFColorRangeConfig tempConfig;
     uint8_t freqNdigits;
 } FFCPUOptions;

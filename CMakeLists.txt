@@ -277,6 +277,7 @@ set(LIBFASTFETCH_SRC
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/common/temps.c
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c

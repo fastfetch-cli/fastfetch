@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/percent.h"
 #include "common/parsing.h"
+#include "common/temps.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
@@ -49,7 +50,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             if(str.length > 0)
                 ffStrbufAppendS(&str, " - ");
 
-            ffParseTemperature(result->temperature, &str);
+            ffTempsAppendNum(result->temperature, &str, options->tempConfig);
         }
 
         ffStrbufPutTo(&str, stdout);
@@ -59,7 +60,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         FF_STRBUF_AUTO_DESTROY capacityStr = ffStrbufCreate();
         ffPercentAppendNum(&capacityStr, result->capacity, options->percent, false);
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-        ffParseTemperature(result->temperature, &tempStr);
+        ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig);
         ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
@@ -110,11 +111,8 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if (ffStrEqualsIgnCase(subKey, "temp"))
-    {
-        options->temp = ffOptionParseBoolean(value);
+    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
         return true;
-    }
 
     #ifdef _WIN32
         if (ffStrEqualsIgnCase(subKey, "use-setup-api"))
@@ -151,11 +149,8 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         }
         #endif
 
-        if (ffStrEqualsIgnCase(key, "temp"))
-        {
-            options->temp = yyjson_get_bool(val);
+        if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
-        }
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
@@ -176,8 +171,7 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_bool(doc, module, "useSetupApi", options->useSetupApi);
     #endif
 
-    if (options->temp != defaultOptions.temp)
-        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
 
     ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
@@ -250,6 +244,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->percent = (FFColorRangeConfig) { 50, 20 };
 
     #ifdef _WIN32

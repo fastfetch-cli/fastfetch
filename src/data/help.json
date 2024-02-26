@@ -1532,6 +1532,29 @@
                 "type": "num"
             },
             "pseudo": true
+        },
+        {
+            "long": "<module>-temp-green",
+            "desc": [
+                "Threshold of temperature colors",
+                "Value less then temp-green will be shown in green"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-temp-yellow",
+            "desc": [
+                "Threshold of temperature colors",
+                "Value greater than temp-green and less then yellow will be shown in yellow",
+                "Value greater than temp-yellow will be shown in red"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
         }
     ]
 }
