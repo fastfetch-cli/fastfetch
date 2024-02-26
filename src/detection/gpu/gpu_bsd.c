@@ -17,7 +17,7 @@ static bool loadPciIds(FFstrbuf* pciids)
     ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
-    ffReadFileBuffer("/usr/share/pciids/pci.ids", pciids);
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/pciids/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
     return false;

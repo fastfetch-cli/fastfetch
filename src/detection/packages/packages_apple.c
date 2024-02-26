@@ -45,14 +45,14 @@ static void getBrewPackages(FFPackagesResult* result)
     if(ffStrSet(prefix))
         return countBrewPackages(prefix, result);
 
-    countBrewPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/homebrew", result);
-    countBrewPackages(FASTFETCH_TARGET_DIR_ROOT"/usr/local", result);
+    countBrewPackages(FASTFETCH_TARGET_DIR_ROOT "/opt/homebrew", result);
+    countBrewPackages(FASTFETCH_TARGET_DIR_USR "/local", result);
 }
 
 static uint32_t countMacPortsPackages(const char* dirname)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
-    ffStrbufAppendS(&baseDir, "/var/macports/software");
+    ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT "/var/macports/software");
 
     return getNumElements(baseDir.chars, DT_DIR);
 }
@@ -63,7 +63,7 @@ static uint32_t getMacPortsPackages()
     if(ffStrSet(prefix))
         return countMacPortsPackages(prefix);
 
-    return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT"/opt/local");
+    return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT "/opt/local");
 }
 
 static uint32_t getNixPackagesImpl(char* path)
@@ -81,7 +81,7 @@ static uint32_t getNixPackagesImpl(char* path)
     ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq | wc -l");
 
     ffProcessAppendStdOut(&output, (char* const[]) {
-        "/bin/sh",
+        FASTFETCH_TARGET_DIR_ROOT "/bin/sh",
         "-c",
         command.chars,
         NULL

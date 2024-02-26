@@ -53,13 +53,13 @@ static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
 
 static bool loadPciIds(FFstrbuf* pciids)
 {
-    ffReadFileBuffer("/usr/share/hwdata/pci.ids", pciids);
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
-    ffReadFileBuffer("/usr/share/misc/pci.ids", pciids); // debian?
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/misc/pci.ids", pciids); // debian?
     if (pciids->length > 0) return true;
 
-    ffReadFileBuffer("/usr/local/share/hwdata/pci.ids", pciids);
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
     return false;
