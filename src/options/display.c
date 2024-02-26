@@ -452,6 +452,17 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
             yyjson_mut_obj_add_uint(doc, percent, "type", options->percentType);
         if (options->percentNdigits != defaultOptions.percentNdigits)
             yyjson_mut_obj_add_uint(doc, percent, "ndigits", options->percentNdigits);
+        {
+            yyjson_mut_val* color = yyjson_mut_obj(doc);
+            if (!ffStrbufEqual(&options->percentColorGreen, &defaultOptions.percentColorGreen))
+                yyjson_mut_obj_add_strbuf(doc, color, "green", &options->percentColorGreen);
+            if (!ffStrbufEqual(&options->percentColorYellow, &defaultOptions.percentColorYellow))
+                yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->percentColorYellow);
+            if (!ffStrbufEqual(&options->percentColorRed, &defaultOptions.percentColorRed))
+                yyjson_mut_obj_add_strbuf(doc, color, "red", &options->percentColorRed);
+            if (yyjson_mut_obj_size(color) > 0)
+                yyjson_mut_obj_add_val(doc, percent, "color", color);
+        }
         if (yyjson_mut_obj_size(percent) > 0)
             yyjson_mut_obj_add_val(doc, obj, "percent", percent);
     }

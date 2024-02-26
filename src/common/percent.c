@@ -89,9 +89,9 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config
 
     if (colored && !options->pipe)
     {
-        const char* colorGreen = instance.config.display.percentColorGreen.chars;
-        const char* colorYellow = instance.config.display.percentColorYellow.chars;
-        const char* colorRed = instance.config.display.percentColorRed.chars;
+        const char* colorGreen = options->percentColorGreen.chars;
+        const char* colorYellow = options->percentColorYellow.chars;
+        const char* colorRed = options->percentColorRed.chars;
 
         if(percent != percent)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
