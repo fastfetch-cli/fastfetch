@@ -11,6 +11,7 @@ Features:
     * `{ "temp": { "ndigits": 1 } }`
     * `{ "temp": { "color": { "green": "green", "yellow": "yellow", "red": "red" } } }`
 * Support specifying custom `pci.ids` path for Linux (GPU, Linux)
+* Support warp-linux terminal version & terminal font detection (Terminal, Linux)
 
 # 2.8.5
 
