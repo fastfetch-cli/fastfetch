@@ -303,6 +303,34 @@ static void detectSt(FFTerminalFontResult* terminalFont, uint32_t pid)
     ffFontInitValues(&terminalFont->font, font.chars, size.chars);
 }
 
+static void detectWarp(FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
+
+    FF_LIST_FOR_EACH(FFstrbuf, dirPrefix, instance.state.platform.configDirs)
+    {
+        //We need to copy the dir each time, because it used by multiple threads, so we can't directly write to it.
+        ffStrbufSet(&baseDir, dirPrefix);
+        ffStrbufAppendS(&baseDir, "warp-terminal/user_preferences.json");
+
+        yyjson_doc* doc = yyjson_read_file(baseDir.chars, YYJSON_READ_INSITU | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_COMMENTS, NULL, NULL);
+        if (!doc) continue;
+
+        yyjson_val* prefs = yyjson_obj_get(yyjson_doc_get_root(doc), "prefs");
+        if (yyjson_is_obj(prefs))
+        {
+            const char* fontName = yyjson_get_str(yyjson_obj_get(prefs, "FontName"));
+            if (!fontName) fontName = "Hack";
+            const char* fontSize = yyjson_get_str(yyjson_obj_get(prefs, "FontSize"));
+            if (!fontSize) fontSize = "13";
+
+            ffFontInitValues(&terminalFont->font, fontName, fontSize);
+        }
+        yyjson_doc_free(doc);
+        return;
+    }
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminal->processName, "konsole"))
@@ -331,4 +359,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectXterm(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "st"))
         detectSt(terminalFont, terminal->pid);
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "warp"))
+        detectWarp(terminalFont);
 }

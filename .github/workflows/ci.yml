@@ -288,7 +288,7 @@ jobs:
 
   freebsd-amd64:
     name: FreeBSD-amd64
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
       contents: read
@@ -300,6 +300,9 @@ jobs:
         uses: cross-platform-actions/action@master
         with:
           operating_system: freebsd
+          architecture: x86-64
+          cpu_count: 3
+          shell: bash
           version: '13.2'
           run: |
             uname -a
@@ -318,6 +321,43 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-freebsd-amd64
+          path: ./fastfetch-*.*
+
+  freebsd-aarch64:
+    name: FreeBSD-aarch64
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: freebsd
+          architecture: arm64
+          cpu_count: 3
+          shell: bash
+          version: '13.2'
+          run: |
+            uname -a
+            sudo pkg update
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf ImageMagick6 ImageMagick7 chafa egl libosmesa opencl ocl-icd v4l_compat
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch
+            time ./fastfetch --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-freebsd-aarch64
           path: ./fastfetch-*.*
 
   windows-amd64:
@@ -458,6 +498,7 @@ jobs:
       - linux-aarch64
       - macos-universal
       - freebsd-amd64
+      - freebsd-aarch64
       - windows-amd64
       - windows-i686
     permissions:
