@@ -562,7 +562,13 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         {
             if(ffStrbufStartsWithIgnCaseS(processName, termProgram) || // processName ends with `.exe` on Windows
                 (ffStrEquals(termProgram, "vscode") && ffStrbufStartsWithIgnCaseS(processName, "code")) ||
-                (ffStrEquals(termProgram, "iTerm.app") && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-"))
+
+                #ifdef __APPLE__
+                (ffStrEquals(termProgram, "iTerm.app") && ffStrbufStartsWithIgnCaseS(processName, "iTermServer-")) ||
+                #elif defined(__linux__)
+                (ffStrEquals(termProgram, "WarpTerminal") && ffStrbufEqualS(processName, "warp")) ||
+                #endif
+                false
             ) {
                 ffStrbufSetS(version, termProgramVersion);
                 return true;
