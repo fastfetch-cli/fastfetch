@@ -76,6 +76,10 @@ option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVM
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 
+if (LINUX)
+    set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
+endif()
+
 ####################
 # Compiler options #
 ####################
@@ -761,6 +765,11 @@ endif()
 
 if(HAVE_WCWIDTH)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WCWIDTH)
+endif()
+
+if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
+    message(STATUS "Custom file path of pci.ids: ${CUSTOM_PCI_IDS_PATH}")
+    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_PCI_IDS_PATH=${CUSTOM_PCI_IDS_PATH})
 endif()
 
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)

@@ -10,6 +10,7 @@ Features:
 * Support additional temperature formatting options (#737)
     * `{ "temp": { "ndigits": 1 } }`
     * `{ "temp": { "color": { "green": "green", "yellow": "yellow", "red": "red" } } }`
+* Support specifying custom `pci.ids` path for Linux (GPU, Linux)
 
 # 2.8.5
 

@@ -9,6 +9,9 @@
     #include "detection/gpu/gpu_driver_specific.h"
 #endif
 
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
+
 #include <inttypes.h>
 
 FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, uint32_t deviceClass)
@@ -53,6 +56,11 @@ static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
 
 static bool loadPciIds(FFstrbuf* pciids)
 {
+    #ifdef FF_CUSTOM_PCI_IDS_PATH
+    ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
+    if (pciids->length > 0) return true;
+    #endif
+
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
