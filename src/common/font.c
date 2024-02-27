@@ -211,6 +211,7 @@ void ffFontInitValues(FFfont* font, const char* name, const char* size)
     ffFontInit(font);
 
     ffStrbufAppendS(&font->name, name);
+    ffStrbufTrim(&font->name, '"');
     ffStrbufAppendS(&font->size, size);
 
     fontInitPretty(font);
