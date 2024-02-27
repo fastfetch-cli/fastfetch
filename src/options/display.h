@@ -35,10 +35,10 @@ typedef struct FFOptionsDisplay
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
     FFTemperatureUnit temperatureUnit;
-    uint8_t temperatureNdigits;
-    FFstrbuf temperatureColorGreen;
-    FFstrbuf temperatureColorYellow;
-    FFstrbuf temperatureColorRed;
+    uint8_t tempNdigits;
+    FFstrbuf tempColorGreen;
+    FFstrbuf tempColorYellow;
+    FFstrbuf tempColorRed;
     FFstrbuf barCharElapsed;
     FFstrbuf barCharTotal;
     uint8_t barWidth;

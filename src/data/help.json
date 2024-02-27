@@ -656,7 +656,7 @@
             }
         },
         {
-            "long": "temperature-unit",
+            "long": "temp-unit",
             "desc": "Set the unit of the temperature",
             "arg": {
                 "type": "enum",
@@ -669,7 +669,7 @@
             }
         },
         {
-            "long": "temperature-ndigits",
+            "long": "temp-ndigits",
             "desc": "Set the number of digits to keep after the decimal point when printing temperature",
             "arg": {
                 "type": "num",
@@ -677,7 +677,7 @@
             }
         },
         {
-            "long": "temperature-color-green",
+            "long": "temp-color-green",
             "desc": "Set color used in green state of temperature values",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
@@ -686,7 +686,7 @@
             }
         },
         {
-            "long": "temperature-color-yellow",
+            "long": "temp-color-yellow",
             "desc": "Set color used in yellow state of temperature values",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
@@ -695,7 +695,7 @@
             }
         },
         {
-            "long": "temperature-color-red",
+            "long": "temp-color-red",
             "desc": "Set color used in red state of temperature values",
             "remark": "See `-h color` for the list of available colors",
             "arg": {

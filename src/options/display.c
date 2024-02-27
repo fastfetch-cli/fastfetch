@@ -94,10 +94,10 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
         }
-        else if (ffStrEqualsIgnCase(key, "temperature"))
+        else if (ffStrEqualsIgnCase(key, "temp"))
         {
             if (!yyjson_is_obj(val))
-                return "display.temperature must be an object";
+                return "display.temp must be an object";
 
             yyjson_val* unit = yyjson_obj_get(val, "unit");
             if (unit)
@@ -117,7 +117,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->temperatureNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits) options->tempNdigits = (uint8_t) yyjson_get_uint(ndigits);
 
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color)
@@ -126,13 +126,13 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                     return "display.temperature.color must be an object";
 
                 yyjson_val* green = yyjson_obj_get(color, "green");
-                if (green) ffOptionParseColor(yyjson_get_str(green), &options->temperatureColorGreen);
+                if (green) ffOptionParseColor(yyjson_get_str(green), &options->tempColorGreen);
 
                 yyjson_val* yellow = yyjson_obj_get(color, "yellow");
-                if (yellow) ffOptionParseColor(yyjson_get_str(yellow), &options->temperatureColorYellow);
+                if (yellow) ffOptionParseColor(yyjson_get_str(yellow), &options->tempColorYellow);
 
                 yyjson_val* red = yyjson_obj_get(color, "red");
-                if (red) ffOptionParseColor(yyjson_get_str(red), &options->temperatureColorRed);
+                if (red) ffOptionParseColor(yyjson_get_str(red), &options->tempColorRed);
             }
         }
         else if (ffStrEqualsIgnCase(key, "percent"))
@@ -295,13 +295,13 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             });
         }
         else if (ffStrEqualsIgnCase(subkey, "ndigits"))
-            options->temperatureNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+            options->tempNdigits = (uint8_t) ffOptionParseUInt32(key, value);
         else if(ffStrEqualsIgnCase(subkey, "color-green"))
-            ffOptionParseColor(value, &options->temperatureColorGreen);
+            ffOptionParseColor(value, &options->tempColorGreen);
         else if(ffStrEqualsIgnCase(subkey, "color-yellow"))
-            ffOptionParseColor(value, &options->temperatureColorYellow);
+            ffOptionParseColor(value, &options->tempColorYellow);
         else if(ffStrEqualsIgnCase(subkey, "color-red"))
-            ffOptionParseColor(value, &options->temperatureColorRed);
+            ffOptionParseColor(value, &options->tempColorRed);
         else
             return false;
     }
@@ -368,10 +368,10 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->keyWidth = 0;
 
     options->temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
-    options->temperatureNdigits = 1;
-    ffStrbufInitStatic(&options->temperatureColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->temperatureColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->temperatureColorRed, FF_COLOR_FG_LIGHT_RED);
+    options->tempNdigits = 1;
+    ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
+    ffStrbufInitStatic(&options->tempColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->tempColorRed, FF_COLOR_FG_LIGHT_RED);
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
     ffStrbufInitStatic(&options->barCharTotal, "-");
@@ -492,21 +492,21 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
                     break;
             }
         }
-        if (options->temperatureNdigits != defaultOptions.temperatureNdigits)
-            yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->temperatureNdigits);
+        if (options->tempNdigits != defaultOptions.tempNdigits)
+            yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
         {
             yyjson_mut_val* color = yyjson_mut_obj(doc);
-            if (!ffStrbufEqual(&options->temperatureColorGreen, &defaultOptions.temperatureColorGreen))
-                yyjson_mut_obj_add_strbuf(doc, color, "green", &options->temperatureColorGreen);
-            if (!ffStrbufEqual(&options->temperatureColorYellow, &defaultOptions.temperatureColorYellow))
-                yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->temperatureColorYellow);
-            if (!ffStrbufEqual(&options->temperatureColorRed, &defaultOptions.temperatureColorRed))
-                yyjson_mut_obj_add_strbuf(doc, color, "red", &options->temperatureColorRed);
+            if (!ffStrbufEqual(&options->tempColorGreen, &defaultOptions.tempColorGreen))
+                yyjson_mut_obj_add_strbuf(doc, color, "green", &options->tempColorGreen);
+            if (!ffStrbufEqual(&options->tempColorYellow, &defaultOptions.tempColorYellow))
+                yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->tempColorYellow);
+            if (!ffStrbufEqual(&options->tempColorRed, &defaultOptions.tempColorRed))
+                yyjson_mut_obj_add_strbuf(doc, color, "red", &options->tempColorRed);
             if (yyjson_mut_obj_size(color) > 0)
                 yyjson_mut_obj_add_val(doc, temperature, "color", color);
         }
         if (yyjson_mut_obj_size(temperature) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "temperature", temperature);
+            yyjson_mut_obj_add_val(doc, obj, "temp", temperature);
     }
 
     {

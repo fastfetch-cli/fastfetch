@@ -9,9 +9,9 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
         return;
 
     const FFOptionsDisplay* options = &instance.config.display;
-    const char* colorGreen = options->temperatureColorGreen.chars;
-    const char* colorYellow = options->temperatureColorYellow.chars;
-    const char* colorRed = options->temperatureColorRed.chars;
+    const char* colorGreen = options->tempColorGreen.chars;
+    const char* colorYellow = options->tempColorYellow.chars;
+    const char* colorRed = options->tempColorRed.chars;
 
     uint8_t green = config.green, yellow = config.yellow;
 
@@ -40,13 +40,13 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
     switch (options->temperatureUnit)
     {
         case FF_TEMPERATURE_UNIT_CELSIUS:
-            ffStrbufAppendF(buffer, "%.*f°C", options->temperatureNdigits, celsius);
+            ffStrbufAppendF(buffer, "%.*f°C", options->tempNdigits, celsius);
             break;
         case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-            ffStrbufAppendF(buffer, "%.*f°F", options->temperatureNdigits, celsius * 1.8 + 32);
+            ffStrbufAppendF(buffer, "%.*f°F", options->tempNdigits, celsius * 1.8 + 32);
             break;
         case FF_TEMPERATURE_UNIT_KELVIN:
-            ffStrbufAppendF(buffer, "%.*f K", options->temperatureNdigits, celsius + 273.15);
+            ffStrbufAppendF(buffer, "%.*f K", options->tempNdigits, celsius + 273.15);
             break;
     }
 

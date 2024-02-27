@@ -59,13 +59,13 @@
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 100,
-                            "description": "Value less then green will be shown in green"
+                            "description": "Value (in celsius) less then green will be shown in green"
                         },
                         "yellow": {
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 100,
-                            "description": "Value greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
+                            "description": "Value (in celsius) greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
                         }
                     }
                 }
@@ -433,9 +433,9 @@
                         }
                     }
                 },
-                "temperature": {
+                "temp": {
                     "type": "object",
-                    "description": "Set how a temperature value should be displayed",
+                    "description": "Set how temperature values should be displayed",
                     "properties": {
                         "unit": {
                             "type": "string",
