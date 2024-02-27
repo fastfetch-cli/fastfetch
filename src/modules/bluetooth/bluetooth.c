@@ -198,7 +198,7 @@ void ffInitBluetoothOptions(FFBluetoothOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->showDisconnected = false;
-    options->percent = (FFPercentConfig) { 50, 20 };
+    options->percent = (FFColorRangeConfig) { 50, 20 };
 }
 
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options)

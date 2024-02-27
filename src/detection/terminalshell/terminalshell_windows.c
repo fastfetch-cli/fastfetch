@@ -406,6 +406,7 @@ const FFTerminalResult* ffDetectTerminal(void)
     ffStrbufInit(&result.exePath);
     ffStrbufInit(&result.prettyName);
     ffStrbufInit(&result.version);
+    ffStrbufInit(&result.tty);
     result.pid = 0;
     result.ppid = 0;
 

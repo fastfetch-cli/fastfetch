@@ -2,6 +2,7 @@
 #include "common/parsing.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/temps.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
@@ -44,7 +45,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
         {
             ffStrbufAppendS(&output, " - ");
-            ffParseTemperature(gpu->temperature, &output);
+            ffTempsAppendNum(gpu->temperature, &output, options->tempConfig);
         }
 
         if(gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.total != 0)
@@ -72,11 +73,13 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
+        ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig);
         ffPrintFormat(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->temperature},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
             {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
             {FF_FORMAT_ARG_TYPE_STRING, type},
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.total},
@@ -146,11 +149,8 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "temp"))
-    {
-        options->temp = ffOptionParseBoolean(value);
+    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
         return true;
-    }
 
     if (ffStrEqualsIgnCase(subKey, "hide-type"))
     {
@@ -181,11 +181,8 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "temp"))
-        {
-            options->temp = yyjson_get_bool(val);
+        if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
-        }
 
         if (ffStrEqualsIgnCase(key, "driverSpecific"))
         {
@@ -235,8 +232,7 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     if (options->forceVulkan != defaultOptions.forceVulkan)
         yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
 
-    if (options->temp != defaultOptions.temp)
-        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
 
     if (options->hideType != defaultOptions.hideType)
     {
@@ -371,7 +367,8 @@ void ffInitGPUOptions(FFGPUOptions* options)
     options->forceVulkan = false;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
-    options->percent = (FFPercentConfig) { 50, 80 };
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->percent = (FFColorRangeConfig) { 50, 80 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options)

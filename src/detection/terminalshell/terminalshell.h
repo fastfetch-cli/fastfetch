@@ -23,6 +23,7 @@ typedef struct FFTerminalResult
     const char* exeName; //pointer to a char in exe
     FFstrbuf exePath; //Full real path to executable file
     FFstrbuf version;
+    FFstrbuf tty;
     uint32_t pid;
     uint32_t ppid;
 } FFTerminalResult;

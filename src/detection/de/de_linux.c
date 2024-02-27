@@ -12,7 +12,7 @@
 
 static void getKDE(FFstrbuf* result, FFDEOptions* options)
 {
-    ffParsePropFileValues("/usr/share/xsessions/plasmax11.desktop", 1, (FFpropquery[]) {
+    ffParsePropFileValues(FASTFETCH_TARGET_DIR_USR "/share/xsessions/plasmax11.desktop", 1, (FFpropquery[]) {
         {"X-KDE-PluginInfo-Version =", result}
     });
     if(result->length == 0)
@@ -21,7 +21,7 @@ static void getKDE(FFstrbuf* result, FFDEOptions* options)
         ffParsePropFileData("xsessions/plasma5.desktop", "X-KDE-PluginInfo-Version =", result);
     if(result->length == 0)
     {
-        ffParsePropFileValues("/usr/share/wayland-sessions/plasma.desktop", 1, (FFpropquery[]) {
+        ffParsePropFileValues(FASTFETCH_TARGET_DIR_USR "/share/wayland-sessions/plasma.desktop", 1, (FFpropquery[]) {
             {"X-KDE-PluginInfo-Version =", result}
         });
     }

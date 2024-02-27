@@ -1,6 +1,6 @@
 #include "gpu.h"
 
-void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, uint16_t subVendor, uint16_t subDevice, FFGPUResult* gpu)
+void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu)
 {
     if (content->length)
     {
@@ -40,13 +40,6 @@ void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint
             if (start)
             {
                 start += len;
-
-                // Search for subvendor and subdevice
-                len = (uint32_t) snprintf(buffer, sizeof(buffer), "\n\t\t%04x %04x  ", subVendor, subDevice);
-                char* subStart = memmem(start, (size_t) (end - start), buffer, len);
-                if (subStart)
-                    start = subStart + len;
-
                 end = memchr(start, '\n', (uint32_t) (end - start));
                 if (!end)
                     end = content->chars + content->length;

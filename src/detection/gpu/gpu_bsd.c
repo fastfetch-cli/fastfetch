@@ -17,7 +17,7 @@ static bool loadPciIds(FFstrbuf* pciids)
     ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
-    ffReadFileBuffer("/usr/share/pciids/pci.ids", pciids);
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/pciids/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
     return false;
@@ -74,7 +74,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         {
             if (pciids.length == 0)
                 loadPciIds(&pciids);
-            ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, pc->pc_subvendor, pc->pc_subdevice, gpu);
+            ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }
 
         #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API

@@ -96,22 +96,6 @@ void ffParseSize(uint64_t bytes, FFstrbuf* result)
     }
 }
 
-void ffParseTemperature(double celsius, FFstrbuf* buffer)
-{
-    switch (instance.config.display.temperatureUnit)
-    {
-        case FF_TEMPERATURE_UNIT_CELSIUS:
-            ffStrbufAppendF(buffer, "%.1f°C", celsius);
-            break;
-        case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-            ffStrbufAppendF(buffer, "%.1f°F", celsius * 1.8 + 32);
-            break;
-        case FF_TEMPERATURE_UNIT_KELVIN:
-            ffStrbufAppendF(buffer, "%.1f K", celsius + 273.15);
-            break;
-    }
-}
-
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)
 {
     if(gtk2->length > 0 && gtk3->length > 0 && gtk4->length > 0)

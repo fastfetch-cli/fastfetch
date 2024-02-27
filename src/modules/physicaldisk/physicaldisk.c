@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
+#include "common/temps.h"
 #include "detection/physicaldisk/physicaldisk.h"
 #include "modules/physicaldisk/physicaldisk.h"
 #include "util/stringUtils.h"
@@ -96,12 +97,14 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 if(buffer.length > 0)
                     ffStrbufAppendS(&buffer, " - ");
 
-                ffParseTemperature(dev->temperature, &buffer);
+                ffTempsAppendNum(dev->temperature, &buffer, options->tempConfig);
             }
             ffStrbufPutTo(&buffer, stdout);
         }
         else
         {
+            FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
+            ffTempsAppendNum(dev->temperature, &tempStr, options->tempConfig);
             if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
                 readOnlyType = "Read-write";
             ffParseSize(dev->size, &buffer);
@@ -115,7 +118,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
                 {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &dev->temperature},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &tempStr},
             });
         }
         ++index;
@@ -143,11 +146,8 @@ bool ffParsePhysicalDiskCommandOptions(FFPhysicalDiskOptions* options, const cha
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "temp"))
-    {
-        options->temp = ffOptionParseBoolean(value);
+    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
         return true;
-    }
 
     return false;
 }
@@ -171,11 +171,8 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "temp"))
-        {
-            options->temp = yyjson_get_bool(val);
+        if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
-        }
 
         ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
     }
@@ -191,8 +188,7 @@ void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut
     if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
         yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 
-    if (options->temp != defaultOptions.temp)
-        yyjson_mut_obj_add_bool(doc, module, "temp", options->temp);
+    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
 }
 
 void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -263,7 +259,7 @@ void ffPrintPhysicalDiskHelpFormat(void)
         "Device kind (Removable or Fixed)",
         "Device kind (Read-only or Read-write)",
         "Product revision",
-        "Device temperature",
+        "Device temperature (formatted)",
     });
 }
 
@@ -284,6 +280,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
 
     ffStrbufInit(&options->namePrefix);
     options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 40, 60 };
 }
 
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options)

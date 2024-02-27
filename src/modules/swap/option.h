@@ -10,5 +10,5 @@ typedef struct FFSwapOptions
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    FFPercentConfig percent;
+    FFColorRangeConfig percent;
 } FFSwapOptions;

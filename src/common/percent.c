@@ -6,7 +6,7 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentConfig config)
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -75,7 +75,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentConfig config
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config, bool parentheses)
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -89,9 +89,9 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config
 
     if (colored && !options->pipe)
     {
-        const char* colorGreen = instance.config.display.percentColorGreen.chars;
-        const char* colorYellow = instance.config.display.percentColorYellow.chars;
-        const char* colorRed = instance.config.display.percentColorRed.chars;
+        const char* colorGreen = options->percentColorGreen.chars;
+        const char* colorYellow = options->percentColorYellow.chars;
+        const char* colorRed = options->percentColorRed.chars;
 
         if(percent != percent)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
@@ -126,7 +126,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentConfig config
         ffStrbufAppendC(buffer, ')');
 }
 
-bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentConfig* config)
+bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFColorRangeConfig* config)
 {
     if (!ffStrStartsWithIgnCase(subkey, "percent-"))
         return false;
@@ -160,7 +160,7 @@ bool ffPercentParseCommandOptions(const char* key, const char* subkey, const cha
     return false;
 }
 
-bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentConfig* config)
+bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFColorRangeConfig* config)
 {
     if (!ffStrEqualsIgnCase(key, "percent"))
         return false;
@@ -198,7 +198,7 @@ bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentConfi
     return true;
 }
 
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentConfig defaultConfig, FFPercentConfig config)
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFColorRangeConfig defaultConfig, FFColorRangeConfig config)
 {
     if (config.green == defaultConfig.green && config.yellow == defaultConfig.yellow)
         return;

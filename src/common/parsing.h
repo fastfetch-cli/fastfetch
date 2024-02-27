@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
 
 #include <stdint.h>
 
@@ -11,6 +11,12 @@ typedef struct FFVersion
     uint32_t patch;
 } FFVersion;
 
+typedef struct FFColorRangeConfig
+{
+    uint8_t green;
+    uint8_t yellow;
+} FFColorRangeConfig;
+
 #define FF_VERSION_INIT ((FFVersion) {0})
 
 void ffParseSemver(FFstrbuf* buffer, const FFstrbuf* major, const FFstrbuf* minor, const FFstrbuf* patch);
@@ -20,4 +26,3 @@ void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty);
 int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
 
 void ffParseSize(uint64_t bytes, FFstrbuf* result);
-void ffParseTemperature(double celsius, FFstrbuf* buffer);

@@ -656,7 +656,7 @@
             }
         },
         {
-            "long": "temperature-unit",
+            "long": "temp-unit",
             "desc": "Set the unit of the temperature",
             "arg": {
                 "type": "enum",
@@ -666,6 +666,41 @@
                     "K": "Kelvin"
                 },
                 "default": "C"
+            }
+        },
+        {
+            "long": "temp-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing temperature",
+            "arg": {
+                "type": "num",
+                "default": 2
+            }
+        },
+        {
+            "long": "temp-color-green",
+            "desc": "Set color used in green state of temperature values",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "green"
+            }
+        },
+        {
+            "long": "temp-color-yellow",
+            "desc": "Set color used in yellow state of temperature values",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "light_yellow"
+            }
+        },
+        {
+            "long": "temp-color-red",
+            "desc": "Set color used in red state of temperature values",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color",
+                "default": "light_red"
             }
         }
     ],
@@ -1492,6 +1527,29 @@
                 "Threshold of percentage colors",
                 "Value greater than percent-green and less then yellow will be shown in yellow",
                 "Value greater than percent-yellow will be shown in red"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-temp-green",
+            "desc": [
+                "Threshold of temperature colors",
+                "Value less then temp-green will be shown in green"
+            ],
+            "arg": {
+                "type": "num"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-temp-yellow",
+            "desc": [
+                "Threshold of temperature colors",
+                "Value greater than temp-green and less then yellow will be shown in yellow",
+                "Value greater than temp-yellow will be shown in red"
             ],
             "arg": {
                 "type": "num"

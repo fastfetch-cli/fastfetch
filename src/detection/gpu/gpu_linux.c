@@ -9,6 +9,9 @@
     #include "detection/gpu/gpu_driver_specific.h"
 #endif
 
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
+
 #include <inttypes.h>
 
 FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, uint32_t deviceClass)
@@ -53,13 +56,18 @@ static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
 
 static bool loadPciIds(FFstrbuf* pciids)
 {
-    ffReadFileBuffer("/usr/share/hwdata/pci.ids", pciids);
+    #ifdef FF_CUSTOM_PCI_IDS_PATH
+    ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
+    if (pciids->length > 0) return true;
+    #endif
+
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
-    ffReadFileBuffer("/usr/share/misc/pci.ids", pciids); // debian?
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/misc/pci.ids", pciids); // debian?
     if (pciids->length > 0) return true;
 
-    ffReadFileBuffer("/usr/local/share/hwdata/pci.ids", pciids);
+    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
 
     return false;
@@ -143,7 +151,7 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         {
             if (!pciids.length)
                 loadPciIds(&pciids);
-            ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, (uint16_t) subVendorId, (uint16_t) subDeviceId, gpu);
+            ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
 
         pciDetectDriver(gpu, &pciDir, &buffer);

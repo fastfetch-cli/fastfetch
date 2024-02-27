@@ -18,5 +18,5 @@ typedef struct FFSoundOptions
     FFModuleArgs moduleArgs;
 
     FFSoundType soundType;
-    FFPercentConfig percent;
+    FFColorRangeConfig percent;
 } FFSoundOptions;

@@ -190,7 +190,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     options->separate = false;
-    options->percent = (FFPercentConfig) { 50, 80 };
+    options->percent = (FFColorRangeConfig) { 50, 80 };
 }
 
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)

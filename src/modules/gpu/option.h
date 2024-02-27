@@ -21,5 +21,6 @@ typedef struct FFGPUOptions
     bool temp;
     bool driverSpecific;
     bool forceVulkan;
-    FFPercentConfig percent;
+    FFColorRangeConfig tempConfig;
+    FFColorRangeConfig percent;
 } FFGPUOptions;

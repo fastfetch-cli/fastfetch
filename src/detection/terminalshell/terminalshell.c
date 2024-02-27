@@ -423,6 +423,20 @@ static bool getTerminalVersionScreen(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+static bool getTerminalVersionTmux(FFstrbuf* exe, FFstrbuf* version)
+{
+    if (ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "-V",
+        NULL
+    }) != NULL)
+        return false;
+
+    // tmux 3.4
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -571,6 +585,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
             }
         }
     }
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "tmux"))
+        return getTerminalVersionTmux(exe, version);
 
     #ifdef _WIN32
 
