@@ -148,12 +148,7 @@ static const char* getProcessNameAndPpid(pid_t pid, char* name, pid_t* ppid, int
         return "sscanf(stat) failed";
 
     if (tty)
-    {
-        if ((tty_ >> 8) == 0x88)
-            *tty = tty_ & 0xFF;
-        else
-            *tty = -1;
-    }
+        *tty = tty_ & 0xFF;
 
     #elif defined(__APPLE__)
 
