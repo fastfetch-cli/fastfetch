@@ -571,6 +571,7 @@ const FFTerminalResult* ffDetectTerminal()
     result.exeName = result.exe.chars;
     ffStrbufInit(&result.exePath);
     ffStrbufInit(&result.version);
+    ffStrbufInitS(&result.tty, ttyname(STDOUT_FILENO));
     result.pid = 0;
     result.ppid = 0;
 
