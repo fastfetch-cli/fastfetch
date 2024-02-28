@@ -30,6 +30,7 @@
         "percent": {
             "description": "Threshold of percentage colors",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "green": {
                     "type": "integer",
@@ -54,6 +55,7 @@
                 },
                 {
                     "type": "object",
+                    "additionalProperties": false,
                     "properties": {
                         "green": {
                             "type": "integer",
@@ -73,6 +75,7 @@
         }
     },
     "type": "object",
+    "additionalProperties": false,
     "title": "JSON config",
     "description": "JSON config file for fastfetch. Usually be `~/.config/fastfetch.jsonc`",
     "properties": {
@@ -95,6 +98,7 @@
                 {
                     "description": "Fastfetch logo configurations",
                     "type": "object",
+                    "additionalProperties": false,
                     "properties": {
                         "type": {
                             "description": "Set the type of the logo given",
@@ -122,6 +126,7 @@
                         },
                         "color": {
                             "type": "object",
+                            "additionalProperties": false,
                             "description": "Overwrite a color in the logo",
                             "properties": {
                                 "1": {
@@ -160,8 +165,7 @@
                                     "description": "Color 9",
                                     "$ref": "#/$defs/colors"
                                 }
-                            },
-                            "additionalProperties": false
+                            }
                         },
                         "width": {
                             "type": "integer",
@@ -175,6 +179,7 @@
                         },
                         "padding": {
                             "type": "object",
+                            "additionalProperties": false,
                             "description": "Set the padding of the logo",
                             "properties": {
                                 "top": {
@@ -192,8 +197,7 @@
                                     "description": "Set the right padding of the logo",
                                     "minimum": 0
                                 }
-                            },
-                            "additionalProperties": false
+                            }
                         },
                         "printRemaining": {
                             "type": "boolean",
@@ -217,6 +221,7 @@
                         },
                         "chafa": {
                             "type": "object",
+                            "additionalProperties": false,
                             "description": "Chafa configuration. See chafa document for details",
                             "properties": {
                                 "fgOnly": {
@@ -259,17 +264,16 @@
                                         "DIFFUSION"
                                     ]
                                 }
-                            },
-                            "additionalProperties": false
+                            }
                         }
-                    },
-                    "additionalProperties": false
+                    }
                 }
             ]
         },
         "general": {
             "description": "Fastfetch general configurations",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "multithreading": {
                     "type": "boolean",
@@ -325,12 +329,12 @@
                     "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
                     "default": 1000
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "display": {
             "description": "Configure how things to be displayed",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "stat": {
                     "type": "boolean",
@@ -371,6 +375,7 @@
                         },
                         {
                             "type": "object",
+                            "additionalProperties": false,
                             "properties": {
                                 "keys": {
                                     "description": "Set the color of the keys",
@@ -380,8 +385,7 @@
                                     "description": "Set the color of the title",
                                     "$ref": "#/$defs/colors"
                                 }
-                            },
-                            "additionalProperties": false
+                            }
                         }
                     ]
                 },
@@ -416,6 +420,7 @@
                 },
                 "size": {
                     "type": "object",
+                    "additionalProperties": false,
                     "description": "Set how a size value should be displayed",
                     "properties": {
                         "maxPrefix": {
@@ -435,6 +440,7 @@
                 },
                 "temp": {
                     "type": "object",
+                    "additionalProperties": false,
                     "description": "Set how temperature values should be displayed",
                     "properties": {
                         "unit": {
@@ -452,6 +458,7 @@
                         },
                         "color": {
                             "type": "object",
+                            "additionalProperties": false,
                             "description": "Set color used in different states of temperature values",
                             "properties": {
                                 "green": {
@@ -472,6 +479,7 @@
                 },
                 "bar": {
                     "type": "object",
+                    "additionalProperties": false,
                     "description": "Set the bar configuration",
                     "properties": {
                         "charElapsed": {
@@ -499,6 +507,7 @@
                 },
                 "percent": {
                     "type": "object",
+                    "additionalProperties": false,
                     "description": "Set how a percentage value should be displayed",
                     "properties": {
                         "type": {
@@ -517,6 +526,7 @@
                         },
                         "color": {
                             "type": "object",
+                            "additionalProperties": false,
                             "description": "Set color used in different states of percentage bars and numbers",
                             "properties": {
                                 "green": {
@@ -540,12 +550,12 @@
                     "description": "Whether to disable the stdout application buffer",
                     "default": false
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "library": {
             "description": "Set the path of a library to load",
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "pci": {
                     "type": "string",
@@ -647,8 +657,7 @@
                     "description": "Used for brightness detection of external displays (Linux)",
                     "type": "string"
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "modules": {
             "description": "Fastfetch modules to run",
@@ -721,6 +730,7 @@
                     },
                     {
                         "type": "object",
+                        "additionalProperties": false,
                         "description": "Run module with custom configurations",
                         "required": [
                             "type"
@@ -733,16 +743,20 @@
                         "oneOf": [
                             {
                                 "title": "Break",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "break",
                                         "description": "Print a empty line"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
+                                "title": "module",
                                 "description": "No additional properties",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "anyOf": [
@@ -880,11 +894,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Battery",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "battery",
@@ -913,11 +928,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Bluetooth",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "List bluetooth devices",
@@ -943,11 +959,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Brightness",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "brightness",
@@ -967,6 +984,8 @@
                             },
                             {
                                 "title": "Chassis",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "chassis",
@@ -988,6 +1007,8 @@
                             },
                             {
                                 "title": "CPU",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print CPU name, frequency, etc",
@@ -1015,11 +1036,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "CPU Usage",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "cpuusage",
@@ -1037,6 +1059,8 @@
                             },
                             {
                                 "title": "Colors",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print some colored blocks",
@@ -1064,6 +1088,7 @@
                                     "block": {
                                         "description": "Set behavior of block printing",
                                         "type": "object",
+                                        "additionalProperties": false,
                                         "properties": {
                                             "width": {
                                                 "description": "Set the block width in spaces",
@@ -1088,6 +1113,8 @@
                             },
                             {
                                 "title": "Command",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Running custom shell scripts",
@@ -1113,11 +1140,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Custom",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print a custom string, with or without key",
@@ -1140,11 +1168,12 @@
                                 },
                                 "required": [
                                     "format"
-                                ],
-                                "additionalProperties": false
+                                ]
                             },
                             {
                                 "title": "Display",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print resolutions, refresh rates, etc",
@@ -1187,11 +1216,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Disk",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print partitions, space usage, disk type, etc",
@@ -1246,11 +1276,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "DiskIO",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print physical disk I/O throughput",
@@ -1277,11 +1308,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "DE",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "de",
@@ -1308,6 +1340,8 @@
                             },
                             {
                                 "title": "Gamepad",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "gamepad",
@@ -1328,11 +1362,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "GPU",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print GPU names, graphic memory size, type, etc",
@@ -1372,11 +1407,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Local IP",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "List local IP addresses (v4 or v6), MAC addresses, etc",
@@ -1428,11 +1464,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Memory",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "memory",
@@ -1453,11 +1490,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "NetIO",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print network I/O throughput",
@@ -1489,11 +1527,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "OpenGL",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print highest OpenGL version supported by the GPU",
@@ -1521,11 +1560,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Packages",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "packages",
@@ -1552,6 +1592,8 @@
                             },
                             {
                                 "title": "Physical Disk",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print physical disk information",
@@ -1576,11 +1618,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Public IP",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print your public IP address, etc",
@@ -1610,11 +1653,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Separator",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print a separator line",
@@ -1625,11 +1669,12 @@
                                         "type": "string",
                                         "default": "-"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Sound",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print sound devices, volume, etc",
@@ -1660,11 +1705,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Swap",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "swap",
@@ -1685,11 +1731,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Title",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print title, which contains your user name, hostname",
@@ -1702,6 +1749,8 @@
                                     },
                                     "color": {
                                         "description": "Set colors of the different part of title",
+                                        "type": "object",
+                                        "additionalProperties": false,
                                         "properties": {
                                             "user": {
                                                 "description": "Set color of the user name (left part)",
@@ -1715,8 +1764,7 @@
                                                 "description": "Set color of the host name (right part)",
                                                 "$ref": "#/$defs/colors"
                                             }
-                                        },
-                                        "additionalProperties": false
+                                        }
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1730,11 +1778,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "Weather",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "description": "Print weather information",
@@ -1767,11 +1816,12 @@
                                     "format": {
                                         "$ref": "#/$defs/format"
                                     }
-                                },
-                                "additionalProperties": false
+                                }
                             },
                             {
                                 "title": "WM",
+                                "type": "object",
+                                "additionalProperties": false,
                                 "properties": {
                                     "type": {
                                         "const": "wm",
@@ -1801,6 +1851,5 @@
                 ]
             }
         }
-    },
-    "additionalProperties": false
+    }
 }
