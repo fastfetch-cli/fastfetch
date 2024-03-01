@@ -78,7 +78,7 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
     //https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-bus-pci
     const char* pciDirPath = "/sys/bus/pci/devices/";
 
-    DIR* dirp = opendir(pciDirPath);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDirPath);
     if(dirp == NULL)
         return "Failed to open `/sys/bus/pci/devices/`";
 

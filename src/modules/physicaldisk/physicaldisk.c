@@ -130,6 +130,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
         ffStrbufDestroy(&dev->interconnect);
         ffStrbufDestroy(&dev->devPath);
         ffStrbufDestroy(&dev->serial);
+        ffStrbufDestroy(&dev->revision);
     }
 }
 
@@ -244,6 +245,8 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
         ffStrbufDestroy(&dev->name);
         ffStrbufDestroy(&dev->interconnect);
         ffStrbufDestroy(&dev->devPath);
+        ffStrbufDestroy(&dev->serial);
+        ffStrbufDestroy(&dev->revision);
     }
 }
 
