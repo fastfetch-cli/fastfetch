@@ -114,7 +114,7 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
     {
         FF_SUPPRESS_IO();
         // Ref: https://github.com/rockowitz/ddcutil/issues/344
-        if (ffddca_init("--disable-watch-displays", -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0)
+        if (ffddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0)
             return "ddca_init() failed";
     }
     else
