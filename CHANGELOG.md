@@ -1,3 +1,17 @@
+# 2.8.7
+
+Bugfixes:
+* Fix max CPU frequency detection for some cases (CPU, Linux)
+* Fix some memory leaks
+* Fix ddcutil 2.1 compatibility (Brightness, Linux)
+* Workaround `permission denied` error when reading `/proc/uptime` (Uptime, Android)
+
+Features:
+* Support zellij version detection (Linux, Terminal)
+
+Logo:
+* Fix PostMarketOS
+
 # 2.8.6
 
 Changes:

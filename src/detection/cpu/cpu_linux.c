@@ -85,30 +85,58 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
     return NULL;
 }
 
-static double getGHz(const char* file)
+static double getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, const char* scalingFileName, FFstrbuf* buffer)
 {
-    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-    if(ffAppendFileBuffer(file, &content))
-    {
-        double herz = ffStrbufToDouble(&content);
+    uint32_t baseLen = basePath->length;
+    ffStrbufAppendS(basePath, cpuinfoFileName);
+    bool ok = ffReadFileBuffer(basePath->chars, buffer);
+    ffStrbufSubstrBefore(basePath, baseLen);
+    if (ok)
+        return ffStrbufToDouble(buffer) / 1e6;
 
-        //ffStrbufToDouble failed
-        if(herz != herz)
-            return 0;
+    ffStrbufAppendS(basePath, scalingFileName);
+    ok = ffReadFileBuffer(basePath->chars, buffer);
+    ffStrbufSubstrBefore(basePath, baseLen);
+    if (ok)
+        return ffStrbufToDouble(buffer) / 1e6;
 
-        herz /= 1000.0; //to MHz
-        return herz / 1000.0; //to GHz
-    }
-    return 0;
+    return 0.0/0.0;
 }
 
-static double getFrequency(const char* info, const char* scaling)
+static bool detectFrequency(FFCPUResult* cpu)
 {
-    double frequency = getGHz(info);
-    if(frequency > 0.0)
-        return frequency;
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/devices/system/cpu/cpufreq/");
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(path.chars);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    uint32_t baseLen = path.length;
+    bool flag = false;
 
-    return getGHz(scaling);
+    struct dirent* entry;
+    while((entry = readdir(dir)) != NULL)
+    {
+        if (ffStrStartsWith(entry->d_name, "policy") && isdigit(entry->d_name[strlen("policy")]))
+        {
+            ffStrbufAppendS(&path, entry->d_name);
+            double fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
+            if (fmin != fmin) continue;
+            double fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
+            if (fmax != fmax) continue;
+
+            if (flag)
+            {
+                cpu->frequencyMin = cpu->frequencyMin < fmin ? cpu->frequencyMin : fmin;
+                cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
+            }
+            else
+            {
+                cpu->frequencyMin = fmin;
+                cpu->frequencyMax = fmax;
+                flag = true;
+            }
+            ffStrbufSubstrBefore(&path, baseLen);
+        }
+    }
+    return flag;
 }
 
 static double detectCPUTemp(void)
@@ -204,16 +232,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
 
-    #define BP "/sys/devices/system/cpu/cpufreq/policy0/"
-    if(ffPathExists(BP, FF_PATHTYPE_DIRECTORY))
-    {
-        cpu->frequencyMin = getFrequency(BP"cpuinfo_min_freq", BP"scaling_min_freq");
-        cpu->frequencyMax = getFrequency(BP"cpuinfo_max_freq", BP"scaling_max_freq");
-    }
-    else
-    {
+    if (!detectFrequency(cpu))
         cpu->frequencyMin = cpu->frequencyMax = ffStrbufToDouble(&cpuMHz) / 1000;
-    }
 
     if(cpuUarch.length > 0)
     {
