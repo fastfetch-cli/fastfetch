@@ -437,6 +437,15 @@ static bool getTerminalVersionTmux(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version)) return false;
+
+    // zellij 0.39.2
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -553,6 +562,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "screen"))
         return getTerminalVersionScreen(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "zellij"))
+        return getTerminalVersionZellij(exe, version);
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)
