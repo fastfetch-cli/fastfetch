@@ -26,7 +26,7 @@ void ffPrepareCommandOption(FFdata* data)
     FFOptionsModules* const options = &instance.config.modules;
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
-        ffStrbufSetStatic(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
+        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME))
         ffPrepareCPUUsage();
@@ -168,7 +168,7 @@ void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
 {
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
-        ffStrbufSetStatic(&data->structure, FASTFETCH_DATATEXT_STRUCTURE);
+        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
 
     //Parse the structure and call the modules
     uint32_t startIndex = 0;
