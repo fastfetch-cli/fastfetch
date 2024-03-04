@@ -236,7 +236,6 @@ fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
-fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
