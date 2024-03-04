@@ -135,7 +135,7 @@ static void printFullHelp()
     }
     yyjson_doc_free(doc);
 
-    puts("\n" FASTFETCH_DATATEXT_HELP);
+    puts("\n" FASTFETCH_DATATEXT_HELP_FOOTER);
 }
 
 static bool printSpecificCommandHelp(const char* command)
