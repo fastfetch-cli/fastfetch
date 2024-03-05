@@ -6,7 +6,7 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
-static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, bool defaultRoute)
+static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, bool gateway, bool defaultRoute)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -17,6 +17,8 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
+        ffStrbufInit(&ip->gateway4);
+        ffStrbufInit(&ip->gateway6);
         ip->defaultRoute = defaultRoute;
     }
     else
@@ -27,10 +29,10 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
     switch (type)
     {
         case AF_INET:
-            ffStrbufSetS(&ip->ipv4, value);
+            ffStrbufSetS(gateway ? &ip->gateway4 : &ip->ipv4, value);
             break;
         case AF_INET6:
-            ffStrbufSetS(&ip->ipv6, value);
+            ffStrbufSetS(gateway ? &ip->gateway6 : &ip->ipv6, value);
             break;
         case -1:
             ffStrbufSetS(&ip->mac, value);
@@ -57,7 +59,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             options->showType & FF_LOCALIP_TYPE_IPV4_BIT
                 ? options->showType & FF_LOCALIP_TYPE_IPV6_BIT ? AF_UNSPEC : AF_INET
                 : AF_INET6,
-            GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
+            GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER | (options->showType & FF_LOCALIP_TYPE_GATEWAY_BIT ? GAA_FLAG_INCLUDE_GATEWAYS : 0),
             NULL,
             adapter_addresses,
             &adapter_addresses_buffer_size);
@@ -96,8 +98,28 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = adapter->PhysicalAddress;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, name, addressBuffer, -1, newIp, isDefaultRoute);
+            addNewIp(results, name, addressBuffer, -1, newIp, false, isDefaultRoute);
             newIp = false;
+        }
+
+        for (IP_ADAPTER_GATEWAY_ADDRESS_LH* ifa = adapter->FirstGatewayAddress; ifa; ifa = ifa->Next)
+        {
+            if (ifa->Address.lpSockaddr->sa_family == AF_INET)
+            {
+                SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
+                char addressBuffer[INET_ADDRSTRLEN + 4];
+                inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
+                addNewIp(results, name, addressBuffer, AF_INET, newIp, true, isDefaultRoute);
+                newIp = false;
+            }
+            else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
+            {
+                SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
+                char addressBuffer[INET6_ADDRSTRLEN];
+                inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
+                addNewIp(results, name, addressBuffer, AF_INET6, newIp, true, isDefaultRoute);
+                newIp = false;
+            }
         }
 
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
@@ -114,7 +136,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
                 }
 
-                addNewIp(results, name, addressBuffer, AF_INET, newIp, isDefaultRoute);
+                addNewIp(results, name, addressBuffer, AF_INET, newIp, false, isDefaultRoute);
                 newIp = false;
             }
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
@@ -122,7 +144,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-                addNewIp(results, name, addressBuffer, AF_INET6, newIp, isDefaultRoute);
+                addNewIp(results, name, addressBuffer, AF_INET6, newIp, false, isDefaultRoute);
                 newIp = false;
             }
         }

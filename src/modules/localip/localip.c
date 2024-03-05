@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
-#define FF_LOCALIP_NUM_FORMAT_ARGS 5
+#define FF_LOCALIP_NUM_FORMAT_ARGS 7
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
@@ -40,12 +40,18 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute)
     {
         ffStrbufWriteTo(&ip->ipv4, stdout);
         flag = true;
+
+        if (ip->gateway4.length)
+            printf(" [%s]", ip->gateway4.chars);
     }
     if (ip->ipv6.length)
     {
         if (flag) putchar(' ');
         ffStrbufWriteTo(&ip->ipv6, stdout);
         flag = true;
+
+        if (ip->gateway6.length)
+            printf(" [%s]", ip->gateway6.chars);
     }
     if (ip->mac.length)
     {
@@ -116,6 +122,8 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name},
                     {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->gateway4},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->gateway6},
                 });
             }
             ++index;
@@ -127,6 +135,8 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
         ffStrbufDestroy(&ip->name);
         ffStrbufDestroy(&ip->ipv4);
         ffStrbufDestroy(&ip->ipv6);
+        ffStrbufDestroy(&ip->gateway4);
+        ffStrbufDestroy(&ip->gateway6);
         ffStrbufDestroy(&ip->mac);
     }
 }
@@ -162,6 +172,15 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
             options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
         else
             options->showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "show-gateway"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_GATEWAY_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_GATEWAY_BIT;
         return true;
     }
 
@@ -235,6 +254,15 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
                 options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
             else
                 options->showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showGateway"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_GATEWAY_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_GATEWAY_BIT;
             continue;
         }
 
@@ -329,6 +357,8 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
         yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", ip->defaultRoute);
         yyjson_mut_obj_add_strbuf(doc, obj, "ipv4", &ip->ipv4);
         yyjson_mut_obj_add_strbuf(doc, obj, "ipv6", &ip->ipv6);
+        yyjson_mut_obj_add_strbuf(doc, obj, "gateway4", &ip->gateway4);
+        yyjson_mut_obj_add_strbuf(doc, obj, "gateway6", &ip->gateway6);
         yyjson_mut_obj_add_strbuf(doc, obj, "mac", &ip->mac);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
     }
@@ -339,6 +369,8 @@ exit:
         ffStrbufDestroy(&ip->name);
         ffStrbufDestroy(&ip->ipv4);
         ffStrbufDestroy(&ip->ipv6);
+        ffStrbufDestroy(&ip->gateway4);
+        ffStrbufDestroy(&ip->gateway6);
         ffStrbufDestroy(&ip->mac);
     }
 }
@@ -350,7 +382,9 @@ void ffPrintLocalIpHelpFormat(void)
         "Local IPv6 address",
         "Physical (MAC) address",
         "Interface name",
-        "Is default route"
+        "Is default route",
+        "Gateway IPv4 address",
+        "Gateway IPv6 address",
     });
 }
 
