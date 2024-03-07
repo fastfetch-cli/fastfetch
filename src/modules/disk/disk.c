@@ -462,7 +462,9 @@ void ffPrintDiskHelpFormat(void)
         "Files percentage",
         "True if external volume",
         "True if hidden volume",
-        "Filesystem"
+        "Filesystem",
+        "Label / name",
+        "True if read-only",
     });
 }
 
