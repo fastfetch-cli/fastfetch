@@ -1,3 +1,11 @@
+# 2.8.8
+
+Bugfixes:
+* Fix old fish version compatibility (#744)
+* Fix truncated texts in `--help format` (#745)
+* Fix old vulkan-header library compatibility (#748)
+* Fix possible segfaults in `--help *-format` (#749)
+
 # 2.8.7
 
 Bugfixes:
