@@ -143,7 +143,7 @@ static inline const char* drmType2Name(uint32_t connector_type)
         return "DPI";
     case DRM_MODE_CONNECTOR_WRITEBACK:
         return "Writeback";
-    case DRM_MODE_CONNECTOR_SPI:
+    case 19 /*DRM_MODE_CONNECTOR_SPI*/:
         return "SPI";
     case 20 /*DRM_MODE_CONNECTOR_USB*/:
         return "USB";
