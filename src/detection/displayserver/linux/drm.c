@@ -250,8 +250,8 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     drmModeCrtc* crtc = ffdrmModeGetCrtc(fd, encoder->crtc_id);
                     if (crtc)
                     {
-                        width = crtc->mode.vdisplay;
-                        height = crtc->mode.hdisplay;
+                        width = crtc->mode.hdisplay;
+                        height = crtc->mode.vdisplay;
                         refreshRate = crtc->mode.vrefresh;
                         if (refreshRate == 0)
                         {

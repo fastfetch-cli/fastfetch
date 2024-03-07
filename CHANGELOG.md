@@ -5,6 +5,7 @@ Bugfixes:
 * Fix truncated texts in `--help format` (#745)
 * Fix old vulkan-header library compatibility (#748)
 * Fix possible segfaults in `--help *-format` (#749)
+* Fix invalid resolution detection when using libdrm (Linux, Display)
 
 # 2.8.7
 
