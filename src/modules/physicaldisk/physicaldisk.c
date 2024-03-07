@@ -38,7 +38,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_PHYSICALDISK_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_PHYSICALDISK_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -175,7 +175,7 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
 
-        ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

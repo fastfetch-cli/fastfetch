@@ -16,7 +16,7 @@ void ffPrintCursor(FFCursorOptions* options)
     ffDetectCursor(&result);
 
     if(result.error.length)
-        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "%s", result.error.chars);
+        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result.error.chars);
     else
     {
         ffStrbufRemoveIgnCaseEndS(&result.theme, "cursors");
@@ -73,7 +73,7 @@ void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

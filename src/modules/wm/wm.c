@@ -13,7 +13,7 @@ void ffPrintWM(FFWMOptions* options)
 
     if(result->wmPrettyName.length == 0)
     {
-        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "No WM found");
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No WM found");
         return;
     }
 
@@ -89,7 +89,7 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

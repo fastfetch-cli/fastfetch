@@ -13,7 +13,7 @@ void ffPrintVulkan(FFVulkanOptions* options)
 
     if(vulkan->error)
     {
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "%s", vulkan->error);
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", vulkan->error);
         return;
     }
 
@@ -75,7 +75,7 @@ void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

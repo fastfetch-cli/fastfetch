@@ -13,7 +13,7 @@ void ffPrintDE(FFDEOptions* options)
 
     if(result->dePrettyName.length == 0)
     {
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "No DE found");
+        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No DE found");
         return;
     }
 
@@ -79,7 +79,7 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

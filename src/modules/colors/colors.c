@@ -88,7 +88,7 @@ void ffPrintColors(FFColorsOptions* options)
 
     if (!flag)
     {
-        ffPrintError(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, "%s", "Nothing to print");
+        ffPrintError(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Nothing to print");
     }
 }
 
@@ -166,7 +166,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
             else
                 options->symbol = (FFColorsSymbol) value;
             continue;
@@ -181,7 +181,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "block"))
         {
             if (!yyjson_is_obj(val))
-                ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: must be an object", key);
+                ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: must be an object", key);
             else
             {
                 yyjson_val* width = yyjson_obj_get(val, "width");
@@ -192,15 +192,15 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
                 if (range)
                 {
                     if (!yyjson_is_arr(range) || yyjson_arr_size(range) != 2)
-                        ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: must be an array of 2 elements", key);
+                        ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: must be an array of 2 elements", key);
                     else
                     {
                         uint8_t start = (uint8_t) yyjson_get_uint(yyjson_arr_get(range, 0));
                         uint8_t end = (uint8_t) yyjson_get_uint(yyjson_arr_get(range, 1));
                         if (start > end)
-                            ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[0] > range[1]", key);
+                            ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[0] > range[1]", key);
                         else if (end > 15)
-                            ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[1] > 15", key);
+                            ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s.range value: range[1] > 15", key);
                         else
                         {
                             options->block.range[0] = start;
@@ -212,7 +212,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintErrorString(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+        ffPrintError(FF_COLORS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
 }
 

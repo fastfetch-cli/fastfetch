@@ -16,7 +16,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
     if(!ffDetectTerminalFont(&terminalFont))
     {
-        ffPrintError(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, "%s", terminalFont.error.chars);
+        ffPrintError(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", terminalFont.error.chars);
     }
     else
     {
@@ -70,7 +70,7 @@ void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* m
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

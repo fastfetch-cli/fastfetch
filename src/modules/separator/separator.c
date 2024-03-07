@@ -105,7 +105,7 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintErrorString(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+        ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
 }
 

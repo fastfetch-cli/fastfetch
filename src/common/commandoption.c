@@ -118,7 +118,7 @@ static void parseStructureCommand(
         }
     }
 
-    ffPrintErrorString(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
+    ffPrintError(line, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "<no implementation provided>");
 }
 
 void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)

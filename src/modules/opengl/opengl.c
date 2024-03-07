@@ -17,7 +17,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     const char* error = ffDetectOpenGL(options, &result);
     if(error)
     {
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -90,14 +90,14 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->library = (FFOpenGLLibrary) value;
             continue;
         }
         #endif
 
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

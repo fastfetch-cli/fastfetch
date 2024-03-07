@@ -13,7 +13,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -54,7 +54,7 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

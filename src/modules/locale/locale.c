@@ -13,7 +13,7 @@ void ffPrintLocale(FFLocaleOptions* options)
     ffDetectLocale(&locale);
     if(locale.length == 0)
     {
-        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, "No locale found");
+        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No locale found");
         return;
     }
 
@@ -53,7 +53,7 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

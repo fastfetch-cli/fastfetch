@@ -22,7 +22,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
     if(dsResult->displays.length == 0)
     {
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect display");
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
         return;
     }
 
@@ -205,7 +205,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->compactType = (FFDisplayCompactType) value;
             continue;
@@ -227,13 +227,13 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->order = (FFDisplayOrder) value;
             continue;
         }
 
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

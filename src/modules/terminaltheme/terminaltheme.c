@@ -15,7 +15,7 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
 
     if(!ffDetectTerminalTheme(&result))
     {
-        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to detect terminal theme");
+        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal theme");
     }
     else
     {
@@ -65,7 +65,7 @@ void ffParseTerminalThemeJsonObject(FFTerminalThemeOptions* options, yyjson_val*
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

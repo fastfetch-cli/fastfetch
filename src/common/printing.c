@@ -93,19 +93,11 @@ static void printError(const char* moduleName, uint8_t moduleIndex, const FFModu
     putchar('\n');
 }
 
-void ffPrintErrorString(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...)
+void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...)
 {
     va_list arguments;
     va_start(arguments, message);
     printError(moduleName, moduleIndex, moduleArgs, printType, message, arguments);
-    va_end(arguments);
-}
-
-void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...)
-{
-    va_list arguments;
-    va_start(arguments, message);
-    printError(moduleName, moduleIndex, moduleArgs, FF_PRINT_TYPE_DEFAULT, message, arguments);
     va_end(arguments);
 }
 

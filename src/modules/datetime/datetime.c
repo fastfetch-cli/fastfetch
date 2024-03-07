@@ -106,7 +106,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     char buffer[32];
     if (strftime(buffer, sizeof(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
     {
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "strftime() failed");
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
         return;
     }
 
@@ -138,7 +138,7 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

@@ -16,7 +16,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
     const char* error = ffDetectOpenCL(&opencl);
 
     if(error != NULL)
-        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     else
     {
         if(options->moduleArgs.outputFormat.length == 0)
@@ -62,7 +62,7 @@ void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

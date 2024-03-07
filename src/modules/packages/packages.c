@@ -15,7 +15,7 @@ void ffPrintPackages(FFPackagesOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -175,7 +175,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
         {
             if (!yyjson_is_null(val) && !yyjson_is_arr(val))
             {
-                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Invalid JSON value for %s", key);
+                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", key);
                 continue;
             }
 
@@ -215,7 +215,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
             }
         }
 
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

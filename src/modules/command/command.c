@@ -22,13 +22,13 @@ void ffPrintCommand(FFCommandOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
     if(!result.length)
     {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "No result printed");
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result printed");
         return;
     }
 
@@ -92,7 +92,7 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

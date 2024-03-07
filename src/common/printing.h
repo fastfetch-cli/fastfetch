@@ -17,8 +17,7 @@ void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
     static_assert(sizeof(arguments) / sizeof(*(arguments)) == (numArgs), "Invalid number of format arguments");\
     ffPrintFormat((moduleName), (moduleIndex), (moduleArgs), (printType), (numArgs), (arguments));\
 } while (0)
-FF_C_PRINTF(5, 6) void ffPrintErrorString(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...);
-FF_C_PRINTF(4, 5) void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...);
+FF_C_PRINTF(5, 6) void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...);
 void ffPrintColor(const FFstrbuf* colorValue);
 void ffPrintCharTimes(char c, uint32_t times);
 

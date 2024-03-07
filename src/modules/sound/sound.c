@@ -66,7 +66,7 @@ void ffPrintSound(FFSoundOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -86,7 +86,7 @@ void ffPrintSound(FFSoundOptions* options)
 
     if(filtered.length == 0)
     {
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "No active sound devices found");
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No active sound devices found");
         return;
     }
 
@@ -150,7 +150,7 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->soundType = (FFSoundType) value;
             continue;
@@ -159,7 +159,7 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

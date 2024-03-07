@@ -49,7 +49,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
     if(media->error.length > 0)
     {
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
         return;
     }
 
@@ -128,7 +128,7 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

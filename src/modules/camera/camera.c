@@ -45,13 +45,13 @@ void ffPrintCamera(FFCameraOptions* options)
 
     if (error)
     {
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
     if (result.length == 0)
     {
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, "No camera found");
+        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No camera found");
         return;
     }
 
@@ -92,7 +92,7 @@ void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

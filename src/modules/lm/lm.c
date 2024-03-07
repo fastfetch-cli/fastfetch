@@ -16,13 +16,13 @@ void ffPrintLM(FFLMOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
     if(result.service.length == 0)
     {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "No LM service found");
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
         return;
     }
 
@@ -72,7 +72,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

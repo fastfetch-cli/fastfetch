@@ -21,11 +21,11 @@ void ffPrintCPU(FFCPUOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     }
     else if(cpu.vendor.length == 0 && cpu.name.length == 0 && cpu.coresOnline <= 1)
     {
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "No CPU detected");
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No CPU detected");
     }
     else
     {
@@ -121,7 +121,7 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

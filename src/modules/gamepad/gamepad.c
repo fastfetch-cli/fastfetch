@@ -44,13 +44,13 @@ void ffPrintGamepad(FFGamepadOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
     if(!result.length)
     {
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, "No devices detected");
+        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         return;
     }
 
@@ -92,7 +92,7 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

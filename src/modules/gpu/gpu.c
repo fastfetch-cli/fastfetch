@@ -98,7 +98,7 @@ void ffPrintGPU(FFGPUOptions* options)
     const char* error = ffDetectGPU(options, &gpus);
     if (error)
     {
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -120,7 +120,7 @@ void ffPrintGPU(FFGPUOptions* options)
         printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), * (const FFGPUResult**) ffListGet(&selectedGPUs, i));
 
     if(selectedGPUs.length == 0)
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "No GPUs found");
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No GPUs found");
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
     {
@@ -206,7 +206,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->hideType = (FFGPUType) value;
             continue;
@@ -215,7 +215,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 

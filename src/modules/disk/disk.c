@@ -139,7 +139,7 @@ static void printMountpoint(FFDiskOptions* options, const FFlist* disks, const c
         }
     }
 
-    ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "No disk found for mountpoint: %s", mountpoint);
+    ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disk found for mountpoint: %s", mountpoint);
 }
 
 static void printMountpoints(FFDiskOptions* options, const FFlist* disks)
@@ -183,7 +183,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     }
     else
     {
@@ -360,7 +360,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
