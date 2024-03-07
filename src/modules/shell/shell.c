@@ -4,7 +4,7 @@
 #include "modules/shell/shell.h"
 #include "util/stringUtils.h"
 
-#define FF_SHELL_NUM_FORMAT_ARGS 6
+#define FF_SHELL_NUM_FORMAT_ARGS 8
 
 void ffPrintShell(FFShellOptions* options)
 {
@@ -31,7 +31,7 @@ void ffPrintShell(FFShellOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_SHELL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SHELL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe},
             {FF_FORMAT_ARG_TYPE_STRING, result->exeName},
@@ -40,7 +40,7 @@ void ffPrintShell(FFShellOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
             {FF_FORMAT_ARG_TYPE_INT, &result->tty},
-        });
+        }));
     }
 }
 
@@ -106,7 +106,7 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
 
 void ffPrintShellHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_SHELL_MODULE_NAME, "{3} {4}", FF_SHELL_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SHELL_MODULE_NAME, "{3} {4}", FF_SHELL_NUM_FORMAT_ARGS, ((const char* []) {
         "Shell process name",
         "The first argument of the command line when running the shell",
         "Shell base name of arg0",
@@ -114,7 +114,8 @@ void ffPrintShellHelpFormat(void)
         "Shell pid",
         "Shell pretty name",
         "Shell full exe path",
-    });
+        "Shell tty used",
+    }));
 }
 
 void ffInitShellOptions(FFShellOptions* options)

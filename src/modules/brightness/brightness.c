@@ -37,10 +37,10 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         else
         {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
-            ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name}
-            });
+            }));
         }
 
         const double percent = (item->current - item->min) / (item->max - item->min) * 100;
@@ -69,13 +69,13 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         {
             FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
             ffPercentAppendNum(&valueStr, percent, options->percent, false);
-            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->max},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->min},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->current},
-            });
+            }));
         }
 
         ffStrbufClear(&key);
@@ -180,13 +180,13 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
 
 void ffPrintBrightnessHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_BRIGHTNESS_MODULE_NAME, "{1}", FF_BRIGHTNESS_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BRIGHTNESS_MODULE_NAME, "{1}", FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((const char* []) {
         "Screen brightness (percentage)",
         "Screen name",
         "Maximum brightness value",
         "Minimum brightness value",
         "Current brightness value",
-    });
+    }));
 }
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)

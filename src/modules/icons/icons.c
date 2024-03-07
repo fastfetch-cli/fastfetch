@@ -24,9 +24,9 @@ void ffPrintIcons(FFIconsOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_ICONS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_ICONS_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &icons}
-        });
+        }));
     }
 }
 
@@ -81,9 +81,9 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
 
 void ffPrintIconsHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_ICONS_MODULE_NAME, "{1}", FF_ICONS_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_ICONS_MODULE_NAME, "{1}", FF_ICONS_NUM_FORMAT_ARGS, ((const char* []) {
         "Combined icons"
-    });
+    }));
 }
 
 void ffInitIconsOptions(FFIconsOptions* options)

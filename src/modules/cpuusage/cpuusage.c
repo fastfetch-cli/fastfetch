@@ -79,13 +79,13 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         ffPercentAppendNum(&minStr, minValue, options->percent, false);
         FF_STRBUF_AUTO_DESTROY maxStr = ffStrbufCreate();
         ffPercentAppendNum(&maxStr, maxValue, options->percent, false);
-        ffPrintFormat(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_CPUUSAGE_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPUUSAGE_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &avgStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &maxStr},
             {FF_FORMAT_ARG_TYPE_UINT, &maxIndex},
             {FF_FORMAT_ARG_TYPE_STRBUF, &minStr},
             {FF_FORMAT_ARG_TYPE_UINT, &minIndex},
-        });
+        }));
     }
 }
 
@@ -166,13 +166,13 @@ void ffGenerateCPUUsageJsonResult(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yy
 
 void ffPrintCPUUsageHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_CPUUSAGE_MODULE_NAME, "{1}", FF_CPUUSAGE_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CPUUSAGE_MODULE_NAME, "{1}", FF_CPUUSAGE_NUM_FORMAT_ARGS, ((const char* []) {
         "CPU usage (percentage, average)",
         "CPU usage (percentage, maximum)",
         "CPU core index of maximum usage",
         "CPU usage (percentage, minimum)",
         "CPU core index of minimum usage",
-    });
+    }));
 }
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)

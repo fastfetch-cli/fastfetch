@@ -63,7 +63,7 @@ void ffPrintCPU(FFCPUOptions* options)
         {
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig);
-            ffPrintFormat(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_CPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPU_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical},
@@ -72,7 +72,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMin},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMax},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr}
-            });
+            }));
         }
     }
 
@@ -181,7 +181,7 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
 void ffPrintCPUHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_CPU_MODULE_NAME, "{1} ({5}) @ {7} GHz", FF_CPU_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CPU_MODULE_NAME, "{1} ({5}) @ {7} GHz", FF_CPU_NUM_FORMAT_ARGS, ((const char* []) {
         "Name",
         "Vendor",
         "Physical core count",
@@ -190,7 +190,7 @@ void ffPrintCPUHelpFormat(void)
         "Min frequency",
         "Max frequency",
         "Temperature (formatted)"
-    });
+    }));
 }
 
 void ffInitCPUOptions(FFCPUOptions* options)

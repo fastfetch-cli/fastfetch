@@ -31,7 +31,7 @@ void ffPrintVersion(FFVersionOptions* options)
             }
         }
 
-        ffPrintFormat(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_VERSION_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_VERSION_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, result.projectName},
             {FF_FORMAT_ARG_TYPE_STRING, result.version},
             {FF_FORMAT_ARG_TYPE_STRING, result.versionTweak},
@@ -41,7 +41,7 @@ void ffPrintVersion(FFVersionOptions* options)
             {FF_FORMAT_ARG_TYPE_STRING, result.compileTime},
             {FF_FORMAT_ARG_TYPE_STRING, result.compiler},
             {FF_FORMAT_ARG_TYPE_STRBUF, &buf},
-        });
+        }));
     }
 }
 
@@ -114,7 +114,7 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
 
 void ffPrintVersionHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_VERSION_MODULE_NAME, "{1} {2}{3} ({5})", FF_VERSION_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_VERSION_MODULE_NAME, "{1} {2}{3} ({5})", FF_VERSION_NUM_FORMAT_ARGS, ((const char* []) {
         "Project name",
         "Version",
         "Version tweak",
@@ -124,7 +124,7 @@ void ffPrintVersionHelpFormat(void)
         "Date time when compiling",
         "Compiler used",
         "Libc used"
-    });
+    }));
 }
 
 void ffInitVersionOptions(FFVersionOptions* options)

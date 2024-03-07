@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_PUBLICIP_DISPLAY_NAME "Public IP"
-#define FF_PUBLICIP_NUM_FORMAT_ARGS 1
+#define FF_PUBLICIP_NUM_FORMAT_ARGS 2
 
 void ffPrintPublicIp(FFPublicIpOptions* options)
 {
@@ -30,10 +30,10 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PUBLICIP_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PUBLICIP_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.ip},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.location},
-        });
+        }));
     }
 
     ffStrbufDestroy(&result.ip);
@@ -125,10 +125,10 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
 
 void ffPrintPublicIpHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_PUBLICIP_MODULE_NAME, "{1} ({2})", FF_PUBLICIP_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PUBLICIP_MODULE_NAME, "{1} ({2})", FF_PUBLICIP_NUM_FORMAT_ARGS, ((const char* []) {
         "Public IP address",
         "Location"
-    });
+    }));
 }
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)

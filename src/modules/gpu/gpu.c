@@ -75,7 +75,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     {
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig);
-        ffPrintFormat(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_GPU_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
@@ -88,7 +88,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi},
             {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency},
-        });
+        }));
     }
 }
 
@@ -332,7 +332,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
 void ffPrintGPUHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_GPU_MODULE_NAME, "{1} {2}", FF_GPU_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_GPU_MODULE_NAME, "{1} {2}", FF_GPU_NUM_FORMAT_ARGS, ((const char* []) {
         "GPU vendor",
         "GPU name",
         "GPU driver",
@@ -345,7 +345,7 @@ void ffPrintGPUHelpFormat(void)
         "GPU used shared memory",
         "The platform API that GPU supports",
         "Current frequency in GHz",
-    });
+    }));
 }
 
 void ffInitGPUOptions(FFGPUOptions* options)

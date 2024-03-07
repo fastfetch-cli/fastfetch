@@ -4,7 +4,7 @@
 #include "modules/display/display.h"
 #include "util/stringUtils.h"
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 8
+#define FF_DISPLAY_NUM_FORMAT_ARGS 9
 
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
@@ -89,11 +89,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
         else
         {
-            ffParseFormatString(&key, &options->moduleArgs.key, 3, (FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
                 {FF_FORMAT_ARG_TYPE_STRING, displayType},
-            });
+            }));
         }
 
         if(options->moduleArgs.outputFormat.length == 0)
@@ -125,7 +125,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
         else
         {
-            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_UINT, &result->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->height},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate},
@@ -135,7 +135,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, displayType},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->rotation},
                 {FF_FORMAT_ARG_TYPE_BOOL, &result->primary},
-            });
+            }));
         }
     }
 }
@@ -309,7 +309,7 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 
 void ffPrintDisplayHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_DISPLAY_MODULE_NAME, "{1}x{2} @ {3}Hz (as {4}x{5}) [{7}]", FF_DISPLAY_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DISPLAY_MODULE_NAME, "{1}x{2} @ {3}Hz (as {4}x{5}) [{7}]", FF_DISPLAY_NUM_FORMAT_ARGS, ((const char* []) {
         "Screen width (in pixels)",
         "Screen height (in pixels)",
         "Screen refresh rate (in Hz)",
@@ -318,7 +318,8 @@ void ffPrintDisplayHelpFormat(void)
         "Screen name",
         "Screen type (builtin, external or unknown)",
         "Screen rotation (in degrees)",
-    });
+        "True if being the primary screen",
+    }));
 }
 
 void ffInitDisplayOptions(FFDisplayOptions* options)

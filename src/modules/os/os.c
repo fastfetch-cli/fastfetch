@@ -119,7 +119,7 @@ void ffPrintOS(FFOSOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_OS_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OS_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName},
@@ -132,7 +132,7 @@ void ffPrintOS(FFOSOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->codename},
             {FF_FORMAT_ARG_TYPE_STRBUF, &os->buildID},
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemArchitecture}
-        });
+        }));
     }
 }
 
@@ -196,7 +196,7 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
 
 void ffPrintOSHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_OS_MODULE_NAME, "{3} {10} {12}", FF_OS_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OS_MODULE_NAME, "{3} {10} {12}", FF_OS_NUM_FORMAT_ARGS, ((const char* []) {
         "Name of the kernel (Linux, WIN32_NT, Darwin, FreeBSD)",
         "Name of the OS",
         "Pretty name of the OS",
@@ -209,7 +209,7 @@ void ffPrintOSHelpFormat(void)
         "Version codename of the OS",
         "Build ID of the OS",
         "Architecture of the OS"
-    });
+    }));
 }
 
 void ffInitOSOptions(FFOSOptions* options)

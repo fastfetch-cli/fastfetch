@@ -35,10 +35,10 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_WALLPAPER_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WALLPAPER_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRING, filename},
             {FF_FORMAT_ARG_TYPE_STRBUF, &fullpath},
-        });
+        }));
     }
 }
 
@@ -91,9 +91,10 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
 
 void ffPrintWallpaperHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_WALLPAPER_MODULE_NAME, "{1}", FF_WALLPAPER_NUM_FORMAT_ARGS, (const char* []) {
-        "Wallpaper image file"
-    });
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WALLPAPER_MODULE_NAME, "{1}", FF_WALLPAPER_NUM_FORMAT_ARGS, ((const char* []) {
+        "File name",
+        "Full path",
+    }));
 }
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)

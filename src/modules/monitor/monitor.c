@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#define FF_MONITOR_NUM_FORMAT_ARGS 7
+#define FF_MONITOR_NUM_FORMAT_ARGS 10
 
 void ffPrintMonitor(FFMonitorOptions* options)
 {
@@ -41,10 +41,10 @@ void ffPrintMonitor(FFMonitorOptions* options)
         else
         {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
-            ffParseFormatString(&key, &options->moduleArgs.key, 2, (FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
-            });
+            }));
         }
 
         if(options->moduleArgs.outputFormat.length == 0)
@@ -68,7 +68,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
             else
                 buf[0] = '\0';
 
-            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_MONITOR_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_MONITOR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &display->name},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->width},
                 {FF_FORMAT_ARG_TYPE_UINT, &display->height},
@@ -79,7 +79,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureYear},
                 {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureWeek},
                 {FF_FORMAT_ARG_TYPE_STRING, buf},
-            });
+            }));
         }
 
         ffStrbufDestroy(&display->name);
@@ -179,17 +179,18 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
 
 void ffPrintMonitorHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_MONITOR_MODULE_NAME, "{2}x{3} px - {4}x{5} mm ({6} inches, {7} ppi)", FF_MONITOR_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MONITOR_MODULE_NAME, "{2}x{3} px - {4}x{5} mm ({6} inches, {7} ppi)", FF_MONITOR_NUM_FORMAT_ARGS, ((const char* []) {
         "Display name",
-        "Display native resolution width in pixels",
-        "Display native resolution height in pixels",
-        "Display physical width in millimeters",
-        "Display physical height in millimeters",
-        "Display physical diagonal length in inches",
+        "Native resolution width in pixels",
+        "Native resolution height in pixels",
+        "Physical width in millimeters",
+        "Physical height in millimeters",
+        "Physical diagonal length in inches",
+        "Pixels per inch (PPI)",
         "Year of manufacturing",
         "Nth week of manufacturing in the year",
         "Serial number",
-    });
+    }));
 }
 
 void ffInitMonitorOptions(FFMonitorOptions* options)

@@ -48,7 +48,7 @@ void ffPrintHost(FFHostOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_HOST_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_HOST_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.family},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.version},
@@ -56,7 +56,7 @@ void ffPrintHost(FFHostOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.serial},
             {FF_FORMAT_ARG_TYPE_STRBUF, &host.uuid},
-        });
+        }));
     }
 
 exit:
@@ -149,7 +149,7 @@ exit:
 
 void ffPrintHostHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_HOST_MODULE_NAME, "{2} {3}", FF_HOST_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_HOST_MODULE_NAME, "{2} {3}", FF_HOST_NUM_FORMAT_ARGS, ((const char* []) {
         "product family",
         "product name",
         "product version",
@@ -157,7 +157,7 @@ void ffPrintHostHelpFormat(void)
         "product vendor",
         "product serial number",
         "product uuid",
-    });
+    }));
 }
 
 void ffInitHostOptions(FFHostOptions* options)
