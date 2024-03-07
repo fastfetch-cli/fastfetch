@@ -18,7 +18,7 @@ static inline void applyVulkanVersion(uint32_t vulkanVersion, FFVersion* ffVersi
     ffVersion->patch = VK_VERSION_PATCH(vulkanVersion);
 }
 
-static void applyDriverName(VkPhysicalDeviceDriverProperties* properties, FFstrbuf* result)
+static void applyDriverName(VkPhysicalDeviceDriverPropertiesKHR* properties, FFstrbuf* result)
 {
     if(!ffStrSet(properties->driverName))
         return;
@@ -127,8 +127,8 @@ static const char* detectVulkan(FFVulkanResult* result)
         //On VK 1.1 and up, we use vkGetPhysicalDeviceProperties2, so we can put VkPhysicalDeviceDriverProperties in the pNext chain.
         //This is required to get the driver name and conformance version.
 
-        VkPhysicalDeviceDriverProperties driverProperties = {
-            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES,
+        VkPhysicalDeviceDriverPropertiesKHR driverProperties = {
+            .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES_KHR,
         };
         VkPhysicalDeviceProperties2 physicalDeviceProperties = {
             .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2,
