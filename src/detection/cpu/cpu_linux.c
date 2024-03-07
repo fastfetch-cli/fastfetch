@@ -107,6 +107,8 @@ static bool detectFrequency(FFCPUResult* cpu)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/devices/system/cpu/cpufreq/");
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(path.chars);
+    if (!dir) return false;
+
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     uint32_t baseLen = path.length;
     bool flag = false;
