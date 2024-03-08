@@ -8,6 +8,7 @@ Bugfixes:
 * Fix invalid resolution detection when using libdrm (Linux, Display)
 * Fix segfault when `/sys/devices/system/cpu/cpufreq/` doesn't exist (#750, CPU, Linux)
 * Don't detect `SessionLeader` as terminal (Terminal, Linux)
+* Fix detection of client IP (Users, Linux)
 
 # 2.8.7
 
