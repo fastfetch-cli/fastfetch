@@ -14,7 +14,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
 
     if(result->processName.length == 0)
     {
-        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, "Couldn't detect terminal");
+        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect terminal");
         return;
     }
 
@@ -29,7 +29,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_TERMINAL_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINAL_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe},
             {FF_FORMAT_ARG_TYPE_STRING, result->exeName},
@@ -38,7 +38,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->tty},
-        });
+        }));
     }
 }
 
@@ -65,7 +65,7 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -101,7 +101,7 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
 
 void ffPrintTerminalHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_TERMINAL_MODULE_NAME, "{5} {6}", FF_TERMINAL_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINAL_MODULE_NAME, "{5} {6}", FF_TERMINAL_NUM_FORMAT_ARGS, ((const char* []) {
         "Terminal process name",
         "The first argument of the command line when running the terminal",
         "Terminal base name of arg0",
@@ -110,7 +110,7 @@ void ffPrintTerminalHelpFormat(void)
         "Terminal version",
         "Terminal full exe path",
         "Terminal tty / pts used",
-    });
+    }));
 }
 
 void ffInitTerminalOptions(FFTerminalOptions* options)

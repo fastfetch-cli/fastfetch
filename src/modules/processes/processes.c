@@ -13,7 +13,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -25,9 +25,9 @@ void ffPrintProcesses(FFProcessesOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PROCESSES_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PROCESSES_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &numProcesses}
-        });
+        }));
     }
 }
 
@@ -54,7 +54,7 @@ void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -82,7 +82,7 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
 
 void ffPrintProcessesHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_PROCESSES_MODULE_NAME, "{1}", FF_PROCESSES_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PROCESSES_MODULE_NAME, "{1}", FF_PROCESSES_NUM_FORMAT_ARGS, (const char* []) {
         "Count"
     });
 }

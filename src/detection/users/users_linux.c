@@ -10,6 +10,10 @@
     #define setutxent setutent
     #define getutxent getutent
 #endif
+#ifdef __linux__
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+#endif
 
 const char* ffDetectUsers(FFlist* users)
 {
@@ -33,11 +37,11 @@ next:
         ffStrbufInitS(&user->hostName, n->ut_host);
         ffStrbufInitS(&user->sessionName, n->ut_line);
         #ifdef __linux__
-        if(n->ut_addr_v6[0] || n->ut_addr_v6[1] || n->ut_addr_v6[2] || n->ut_addr_v6[3])
-            ffStrbufInitF(&user->clientIp, "%u.%u.%u.%u", n->ut_addr_v6[0], n->ut_addr_v6[1], n->ut_addr_v6[2], n->ut_addr_v6[3]);
-        else
-        #endif
+        // https://www.linuxquestions.org/questions/programming-9/get-the-ip-addr-out-from-an-int32_t-value-287687/#post1458622
+        ffStrbufInitS(&user->clientIp, inet_ntoa((struct in_addr) { .s_addr = (in_addr_t) n->ut_addr_v6[0] }));
+        #else
         ffStrbufInit(&user->clientIp);
+        #endif
         user->loginTime = (uint64_t) n->ut_tv.tv_sec * 1000 + (uint64_t) n->ut_tv.tv_usec / 1000;
     }
 

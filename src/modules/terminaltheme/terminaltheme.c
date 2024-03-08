@@ -15,7 +15,7 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
 
     if(!ffDetectTerminalTheme(&result))
     {
-        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to detect terminal theme");
+        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal theme");
     }
     else
     {
@@ -32,12 +32,12 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
             char fg[32], bg[32];
             snprintf(fg, sizeof(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
             snprintf(bg, sizeof(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
-            ffPrintFormat(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_TERMINALTHEME_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRING, fg},
                 {FF_FORMAT_ARG_TYPE_STRING, result.fg.dark ? "Dark" : "Light"},
                 {FF_FORMAT_ARG_TYPE_STRING, bg},
                 {FF_FORMAT_ARG_TYPE_STRING, result.bg.dark ? "Dark" : "Light"},
-            });
+            }));
         }
     }
 }
@@ -65,7 +65,7 @@ void ffParseTerminalThemeJsonObject(FFTerminalThemeOptions* options, yyjson_val*
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -104,12 +104,12 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* option
 
 void ffPrintTerminalThemeHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_TERMINALTHEME_MODULE_NAME, "{1} (FG) {3} (BG) [{4}]", FF_TERMINALTHEME_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALTHEME_MODULE_NAME, "{1} (FG) {3} (BG) [{4}]", FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((const char* []) {
         "Terminal foreground color",
         "Terminal foreground type (Dark / Light)",
         "Terminal background color",
         "Terminal background type (Dark / Light)",
-    });
+    }));
 }
 
 void ffInitTerminalThemeOptions(FFTerminalThemeOptions* options)

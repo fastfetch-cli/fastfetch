@@ -231,6 +231,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
             ffStrEquals(name, "ltrace")              ||
             ffStrEquals(name, "perf")                ||
             ffStrEquals(name, "guake-wrapped")       ||
+            ffStrEquals(name, "SessionLeader")       || // #750
             ffStrContainsIgnCase(name, "debug")      ||
             ffStrContainsIgnCase(name, "not-found")  ||
             ffStrEndsWith(name, ".sh")

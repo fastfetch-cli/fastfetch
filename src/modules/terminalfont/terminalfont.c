@@ -16,7 +16,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
 
     if(!ffDetectTerminalFont(&terminalFont))
     {
-        ffPrintError(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, "%s", terminalFont.error.chars);
+        ffPrintError(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", terminalFont.error.chars);
     }
     else
     {
@@ -33,12 +33,12 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_TERMINALFONT_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALFONT_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.pretty},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.size},
                 {FF_FORMAT_ARG_TYPE_LIST,   &terminalFont.font.styles}
-            });
+            }));
         }
     }
 
@@ -70,7 +70,7 @@ void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* m
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -123,12 +123,12 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 
 void ffPrintTerminalFontHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_TERMINALFONT_MODULE_NAME, "{1}", FF_TERMINALFONT_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALFONT_MODULE_NAME, "{1}", FF_TERMINALFONT_NUM_FORMAT_ARGS, ((const char* []) {
         "Terminal font combined",
         "Terminal font name",
         "Terminal font size",
         "Terminal font styles"
-    });
+    }));
 }
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)

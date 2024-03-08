@@ -19,14 +19,14 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_WMTHEME_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WMTHEME_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &themeOrError}
-            });
+            }));
         }
     }
     else
     {
-        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "%*s", themeOrError.length, themeOrError.chars);
+        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%*s", themeOrError.length, themeOrError.chars);
     }
 }
 
@@ -53,7 +53,7 @@ void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -79,9 +79,9 @@ void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjs
 
 void ffPrintWMthemeHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_WMTHEME_MODULE_NAME, "{1}", FF_WMTHEME_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WMTHEME_MODULE_NAME, "{1}", FF_WMTHEME_NUM_FORMAT_ARGS, ((const char* []) {
         "WM theme"
-    });
+    }));
 }
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)

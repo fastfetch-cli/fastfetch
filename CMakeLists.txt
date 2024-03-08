@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.8.7
+    VERSION 2.8.8
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -233,10 +233,9 @@ endif()
 
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
-fastfetch_load_text(src/data/help.txt DATATEXT_HELP)
+fastfetch_load_text(src/data/help_footer.txt DATATEXT_HELP_FOOTER)
 fastfetch_load_text(src/data/help_color.txt DATATEXT_HELP_COLOR)
 fastfetch_load_text(src/data/help_format.txt DATATEXT_HELP_FORMAT)
-fastfetch_load_text(src/data/help_config.txt DATATEXT_HELP_CONFIG)
 
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)

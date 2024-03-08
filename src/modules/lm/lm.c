@@ -16,13 +16,13 @@ void ffPrintLM(FFLMOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
     if(result.service.length == 0)
     {
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "No LM service found");
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
         return;
     }
 
@@ -38,11 +38,11 @@ void ffPrintLM(FFLMOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_LM_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LM_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.service},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
-        });
+        }));
     }
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
@@ -72,7 +72,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -117,11 +117,11 @@ exit:
 
 void ffPrintLMHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_LM_MODULE_NAME, "{1} {3} ({2})", FF_LM_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LM_MODULE_NAME, "{1} {3} ({2})", FF_LM_NUM_FORMAT_ARGS, ((const char* []) {
         "LM service",
         "LM type",
         "LM version"
-    });
+    }));
 }
 
 void ffInitLMOptions(FFLMOptions* options)

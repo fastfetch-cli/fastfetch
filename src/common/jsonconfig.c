@@ -235,6 +235,6 @@ void ffPrintJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
             yyjson_mut_doc_set_root(jsonDoc, obj);
         }
         else
-            ffPrintErrorString("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
+            ffPrintError("JsonConfig", 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "%s", error);
     }
 }

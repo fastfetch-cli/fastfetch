@@ -56,7 +56,7 @@ void ffPrintTitle(FFTitleOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_TITLE_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TITLE_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &hostName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.homeDir},
@@ -65,7 +65,7 @@ void ffPrintTitle(FFTitleOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &userNameColored},
             {FF_FORMAT_ARG_TYPE_STRBUF, &atColored},
             {FF_FORMAT_ARG_TYPE_STRBUF, &hostNameColored},
-        });
+        }));
     }
 }
 
@@ -139,7 +139,7 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintErrorString(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+        ffPrintError(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
     }
 }
 
@@ -181,7 +181,7 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
 
 void ffPrintTitleHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_TITLE_MODULE_NAME, "{6}{7}{8}", FF_TITLE_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TITLE_MODULE_NAME, "{6}{7}{8}", FF_TITLE_NUM_FORMAT_ARGS, ((const char* []) {
         "User name",
         "Host name",
         "Home directory",
@@ -190,7 +190,7 @@ void ffPrintTitleHelpFormat(void)
         "User name (colored)",
         "@ symbol (colored)",
         "Host name (colored)"
-    });
+    }));
 }
 
 void ffInitTitleOptions(FFTitleOptions* options)

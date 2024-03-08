@@ -34,11 +34,11 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
     else
     {
-        ffParseFormatString(&key, &options->moduleArgs.key, 3, (FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountFrom},
-        });
+        }));
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
@@ -112,7 +112,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
-        ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageStr},
@@ -124,7 +124,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
             {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly},
-        });
+        }));
     }
 }
 
@@ -139,7 +139,7 @@ static void printMountpoint(FFDiskOptions* options, const FFlist* disks, const c
         }
     }
 
-    ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "No disk found for mountpoint: %s", mountpoint);
+    ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disk found for mountpoint: %s", mountpoint);
 }
 
 static void printMountpoints(FFDiskOptions* options, const FFlist* disks)
@@ -183,7 +183,7 @@ void ffPrintDisk(FFDiskOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     }
     else
     {
@@ -360,7 +360,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -453,7 +453,7 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 
 void ffPrintDiskHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_DISK_MODULE_NAME, "{1} / {2} ({3}) - {9}", FF_DISK_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DISK_MODULE_NAME, "{1} / {2} ({3}) - {9}", FF_DISK_NUM_FORMAT_ARGS, ((const char* []) {
         "Size used",
         "Size total",
         "Size percentage",
@@ -462,8 +462,10 @@ void ffPrintDiskHelpFormat(void)
         "Files percentage",
         "True if external volume",
         "True if hidden volume",
-        "Filesystem"
-    });
+        "Filesystem",
+        "Label / name",
+        "True if read-only",
+    }));
 }
 
 void ffInitDiskOptions(FFDiskOptions* options)

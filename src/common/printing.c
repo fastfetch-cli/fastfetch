@@ -37,9 +37,9 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     else
     {
         FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
-        ffParseFormatString(&key, &moduleArgs->key, 1, (FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 1, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
-        });
+        }));
         ffStrbufWriteTo(&key, stdout);
     }
 
@@ -60,7 +60,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     }
 }
 
-void ffPrintFormatString(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments)
+void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, uint32_t numArgs, const FFformatarg* arguments)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (moduleArgs)
@@ -93,19 +93,11 @@ static void printError(const char* moduleName, uint8_t moduleIndex, const FFModu
     putchar('\n');
 }
 
-void ffPrintErrorString(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...)
+void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, ...)
 {
     va_list arguments;
     va_start(arguments, message);
     printError(moduleName, moduleIndex, moduleArgs, printType, message, arguments);
-    va_end(arguments);
-}
-
-void ffPrintError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, const char* message, ...)
-{
-    va_list arguments;
-    va_start(arguments, message);
-    printError(moduleName, moduleIndex, moduleArgs, FF_PRINT_TYPE_DEFAULT, message, arguments);
     va_end(arguments);
 }
 

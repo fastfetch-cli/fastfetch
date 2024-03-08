@@ -1,15 +1,15 @@
 A format string is a string that contains placeholders for values.
 These placeholders begin with a '{', containing the index of the value, and end with a '}'.
-For example the format string "Values: {1} ({2})", with the values "First" and "My second val", will produce
+For example the format string "Values: {1} ({2})", with the values "First" and "My second val", will produce "Values: First (My second val)".
 The format string can contain placeholders in any order and have multiple occurrences.
 To include spaces when setting from the command line, surround the whole string with double quotes (").
 
 If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.
 This means that the format string "Values: {1} ({2})" is equivalent to "Values: {} ({})".
-Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second v
+Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.
 
-To make formatting easier, a double open curly brace ("{{") will be printed as a single open curly brace and not
-If a value index is misformatted or wants a non-existing value, it will be printed as is, with the curly braces aro
+To make formatting easier, a double open curly brace ("{{") will be printed as a single open curly brace and not counted as the beginning of a placeholder.
+If a value index is misformatted or wants a non-existing value, it will be printed as is, with the curly braces around it.
 If the last placeholder isn't closed, it will be treated like it was at the end of the format string.
 
 To only print something if a variable is set, use "{?<index>} ... {?}".
@@ -17,7 +17,7 @@ For example, to only print a second value if it is set, use "{?2} Second value: 
 If a "{?}" is found without an opener, it is printed as is.
 
 To only print something if a variable is not set, do the same as with if, just replace every '?' with a '!'.
-For example to print a fallback for a second value if it is not set, use "{?2}{2}{?}{/2}Second value fallback{/}"
+For example to print a fallback for a second value if it is not set, use "{?2}{2}{?}{/2}Second value fallback{/}".
 
 To stop formatting at any point in the format string, use "{-}".
 
@@ -25,7 +25,7 @@ To print something with color, start a placeholder with a '#' and then the linux
 "\033[" at the start, and an 'm' at the end is automatically added, so don't do that.
 A "{#}" is equivalent to a "{#0}" and resets everything to normal.
 For example to print something pink and underline, use "{#4;35}...{#}".
-Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Sele
+Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
 Which escape codes are supported and how they look is defined by your terminal.
 
 If a format string evaluates to an empty value, the whole line in the output will be discarded.

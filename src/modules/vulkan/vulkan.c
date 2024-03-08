@@ -5,7 +5,7 @@
 #include "modules/vulkan/vulkan.h"
 #include "util/stringUtils.h"
 
-#define FF_VULKAN_NUM_FORMAT_ARGS 3
+#define FF_VULKAN_NUM_FORMAT_ARGS 4
 
 void ffPrintVulkan(FFVulkanOptions* options)
 {
@@ -13,7 +13,7 @@ void ffPrintVulkan(FFVulkanOptions* options)
 
     if(vulkan->error)
     {
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "%s", vulkan->error);
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", vulkan->error);
         return;
     }
 
@@ -43,11 +43,12 @@ void ffPrintVulkan(FFVulkanOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_VULKAN_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_VULKAN_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->driver},
             {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->apiVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->conformanceVersion}
-        });
+            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->conformanceVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->instanceVersion},
+        }));
     }
 }
 
@@ -74,7 +75,7 @@ void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -144,12 +145,12 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
 
 void ffPrintVulkanHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_VULKAN_MODULE_NAME, "{2} - {1}", FF_VULKAN_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_VULKAN_MODULE_NAME, "{2} - {1}", FF_VULKAN_NUM_FORMAT_ARGS, ((const char* []) {
         "Driver name",
         "API version",
         "Conformance version",
         "Instance version",
-    });
+    }));
 }
 
 void ffInitVulkanOptions(FFVulkanOptions* options)

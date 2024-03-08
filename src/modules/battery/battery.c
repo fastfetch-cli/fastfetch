@@ -7,7 +7,7 @@
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
 
-#define FF_BATTERY_NUM_FORMAT_ARGS 8
+#define FF_BATTERY_NUM_FORMAT_ARGS 9
 
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
@@ -61,7 +61,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         ffPercentAppendNum(&capacityStr, result->capacity, options->percent, false);
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig);
-        ffPrintFormat(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_BATTERY_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
@@ -71,7 +71,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate},
-        });
+        }));
     }
 }
 
@@ -83,7 +83,7 @@ void ffPrintBattery(FFBatteryOptions* options)
 
     if (error)
     {
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     }
     else
     {
@@ -100,7 +100,7 @@ void ffPrintBattery(FFBatteryOptions* options)
             ffStrbufDestroy(&result->manufactureDate);
         }
         if(results.length == 0)
-            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "No batteries found");
+            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No batteries found");
     }
 }
 
@@ -155,7 +155,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -216,7 +216,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 
 void ffPrintBatteryHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_BATTERY_MODULE_NAME, "{4}, {5}", FF_BATTERY_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BATTERY_MODULE_NAME, "{4}, {5}", FF_BATTERY_NUM_FORMAT_ARGS, ((const char* []) {
         "Battery manufactor",
         "Battery model",
         "Battery technology",
@@ -226,7 +226,7 @@ void ffPrintBatteryHelpFormat(void)
         "Battery cycle count",
         "Battery serial number",
         "Battery manufactor date",
-    });
+    }));
 }
 
 void ffInitBatteryOptions(FFBatteryOptions* options)

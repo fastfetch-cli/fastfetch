@@ -15,7 +15,7 @@ void ffPrintSwap(FFSwapOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -67,11 +67,11 @@ void ffPrintSwap(FFSwapOptions* options)
     {
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
         ffPercentAppendNum(&percentageStr, percentage, options->percent, false);
-        ffPrintFormat(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_SWAP_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SWAP_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
-        });
+        }));
     }
 }
 
@@ -104,7 +104,7 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -136,11 +136,11 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
 
 void ffPrintSwapHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_SWAP_MODULE_NAME, "{1} / {2} ({3})", FF_SWAP_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SWAP_MODULE_NAME, "{1} / {2} ({3})", FF_SWAP_NUM_FORMAT_ARGS, ((const char* []) {
         "Used size",
         "Total size",
         "Percentage used"
-    });
+    }));
 }
 
 void ffInitSwapOptions(FFSwapOptions* options)

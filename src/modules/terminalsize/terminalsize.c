@@ -13,7 +13,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 
     if(!ffDetectTerminalSize(&result))
     {
-        ffPrintError(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, "Failed to detect terminal size");
+        ffPrintError(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal size");
     }
     else
     {
@@ -29,12 +29,12 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_TERMINALSIZE_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALSIZE_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_UINT16, &result.rows},
                 {FF_FORMAT_ARG_TYPE_UINT16, &result.columns},
                 {FF_FORMAT_ARG_TYPE_UINT16, &result.width},
                 {FF_FORMAT_ARG_TYPE_UINT16, &result.height}
-            });
+            }));
         }
     }
 }
@@ -62,7 +62,7 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINALSIZE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -93,12 +93,12 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 
 void ffPrintTerminalSizeHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_TERMINALSIZE_MODULE_NAME, "{1} columns x {2} rows ({3}px x {4}px)", FF_TERMINALSIZE_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALSIZE_MODULE_NAME, "{1} columns x {2} rows ({3}px x {4}px)", FF_TERMINALSIZE_NUM_FORMAT_ARGS, ((const char* []) {
         "Terminal rows",
         "Terminal columns",
         "Terminal width (in pixels)",
         "Terminal height (in pixels)"
-    });
+    }));
 }
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)

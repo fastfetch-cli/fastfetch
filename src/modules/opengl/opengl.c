@@ -17,7 +17,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     const char* error = ffDetectOpenGL(options, &result);
     if(error)
     {
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -28,12 +28,12 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_OPENGL_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENGL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv}
-        });
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv},
+        }));
     }
 
     ffStrbufDestroy(&result.version);
@@ -90,14 +90,14 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->library = (FFOpenGLLibrary) value;
             continue;
         }
         #endif
 
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -160,12 +160,12 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
 
 void ffPrintOpenGLHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_OPENGL_MODULE_NAME, "{1}", FF_OPENGL_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OPENGL_MODULE_NAME, "{1}", FF_OPENGL_NUM_FORMAT_ARGS, ((const char* []) {
         "version",
         "renderer",
         "vendor",
         "shading language version"
-    });
+    }));
 }
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)

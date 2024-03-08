@@ -3,7 +3,7 @@
 #include "modules/kernel/kernel.h"
 #include "util/stringUtils.h"
 
-#define FF_KERNEL_NUM_FORMAT_ARGS 4
+#define FF_KERNEL_NUM_FORMAT_ARGS 5
 
 void ffPrintKernel(FFKernelOptions* options)
 {
@@ -20,13 +20,13 @@ void ffPrintKernel(FFKernelOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_KERNEL_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_KERNEL_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &platform->systemName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &platform->systemRelease},
             {FF_FORMAT_ARG_TYPE_STRBUF, &platform->systemVersion},
             {FF_FORMAT_ARG_TYPE_STRBUF, &platform->systemArchitecture},
             {FF_FORMAT_ARG_TYPE_STRBUF, &platform->systemDisplayVersion}
-        });
+        }));
     }
 }
 
@@ -53,7 +53,7 @@ void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -77,11 +77,13 @@ void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson
 
 void ffPrintKernelHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_KERNEL_MODULE_NAME, "{2}", FF_KERNEL_NUM_FORMAT_ARGS, (const char* []) {
-        "Kernel sysname",
-        "Kernel release",
-        "Kernel version"
-    });
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_KERNEL_MODULE_NAME, "{2}", FF_KERNEL_NUM_FORMAT_ARGS, ((const char* []) {
+        "Sysname",
+        "Release",
+        "Version",
+        "Architecture",
+        "Display version",
+    }));
 }
 
 void ffInitKernelOptions(FFKernelOptions* options)

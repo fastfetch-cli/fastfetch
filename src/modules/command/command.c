@@ -22,13 +22,13 @@ void ffPrintCommand(FFCommandOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
     if(!result.length)
     {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "No result printed");
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result printed");
         return;
     }
 
@@ -39,9 +39,9 @@ void ffPrintCommand(FFCommandOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_COMMAND_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_COMMAND_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result}
-        });
+        }));
     }
 }
 
@@ -92,7 +92,7 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -141,9 +141,9 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
 
 void ffPrintCommandHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, ((const char* []) {
         "Command result"
-    });
+    }));
 }
 
 void ffInitCommandOptions(FFCommandOptions* options)

@@ -13,12 +13,12 @@ void ffPrintWifi(FFWifiOptions* options)
     const char* error = ffDetectWifi(&result);
     if(error)
     {
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
     if(!result.length)
     {
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "No Wifi interfaces found");
+        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No Wifi interfaces found");
         return;
     }
 
@@ -46,7 +46,7 @@ void ffPrintWifi(FFWifiOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_WIFI_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WIFI_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.description},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.status},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.status},
@@ -57,7 +57,7 @@ void ffPrintWifi(FFWifiOptions* options)
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.security},
-            });
+            }));
         }
 
         ffStrbufDestroy(&item->inf.description);
@@ -93,7 +93,7 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -154,7 +154,7 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
 
 void ffPrintWifiHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_WIFI_MODULE_NAME, "{4} - {10}", FF_WIFI_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WIFI_MODULE_NAME, "{4} - {10}", FF_WIFI_NUM_FORMAT_ARGS, ((const char* []) {
         "Interface description",
         "Interface status",
         "Connection status",
@@ -165,7 +165,7 @@ void ffPrintWifiHelpFormat(void)
         "Connection RX rate",
         "Connection TX rate",
         "Connection Security algorithm"
-    });
+    }));
 }
 
 void ffInitWifiOptions(FFWifiOptions* options)

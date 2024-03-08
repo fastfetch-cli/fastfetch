@@ -49,12 +49,12 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
         ffPercentAppendNum(&percentageStr, device->volume, options->percent, false);
 
-        ffPrintFormat(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_SOUND_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SOUND_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier}
-        });
+        }));
     }
 }
 
@@ -66,7 +66,7 @@ void ffPrintSound(FFSoundOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -86,7 +86,7 @@ void ffPrintSound(FFSoundOptions* options)
 
     if(filtered.length == 0)
     {
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "No active sound devices found");
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No active sound devices found");
         return;
     }
 
@@ -150,7 +150,7 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
             else
                 options->soundType = (FFSoundType) value;
             continue;
@@ -159,7 +159,7 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -231,12 +231,12 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
 
 void ffPrintSoundHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_SOUND_MODULE_NAME, "{2} ({3}%)", FF_SOUND_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SOUND_MODULE_NAME, "{2} ({3}%)", FF_SOUND_NUM_FORMAT_ARGS, ((const char* []) {
         "Is main sound device",
         "Device name",
         "Volume",
         "Identifier"
-    });
+    }));
 }
 
 void ffInitSoundOptions(FFSoundOptions* options)

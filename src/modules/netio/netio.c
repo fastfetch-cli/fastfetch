@@ -25,10 +25,10 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
     else
     {
         ffStrbufClear(key);
-        ffParseFormatString(key, &options->moduleArgs.key, 2, (FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, 2, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &index},
             {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name},
-        });
+        }));
     }
 }
 
@@ -39,7 +39,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_NETIO_DISPLAY_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_NETIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return;
     }
 
@@ -79,7 +79,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
             ffParseSize(inf->txBytes, &buffer2);
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
-            ffPrintFormatString(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETIO_NUM_FORMAT_ARGS, (FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETIO_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer2},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name},
@@ -92,7 +92,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txErrors},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxDrops},
                 {FF_FORMAT_ARG_TYPE_UINT64, &inf->txDrops},
-            });
+            }));
         }
         ++index;
     }
@@ -162,7 +162,7 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -218,7 +218,7 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 
 void ffPrintNetIOHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT)", FF_NETIO_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT)", FF_NETIO_NUM_FORMAT_ARGS, ((const char* []) {
         "Size of data received [per second] (formatted)",
         "Size of data sent [per second] (formatted)",
         "Interface name",
@@ -231,7 +231,7 @@ void ffPrintNetIOHelpFormat(void)
         "Number of errors sent [per second]",
         "Number of packets dropped when receiving [per second]",
         "Number of packets dropped when sending [per second]",
-    });
+    }));
 }
 
 void ffInitNetIOOptions(FFNetIOOptions* options)

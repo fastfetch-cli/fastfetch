@@ -65,7 +65,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     strftime(result.offsetFromUtc, sizeof(result.offsetFromUtc), "%z", tm);
     strftime(result.timezoneName, sizeof(result.timezoneName), "%Z", tm);
 
-    ffPrintFormat(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_DATETIME_NUM_FORMAT_ARGS, (FFformatarg[]) {
+    FF_PRINT_FORMAT_CHECKED(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DATETIME_NUM_FORMAT_ARGS, ((FFformatarg[]) {
         {FF_FORMAT_ARG_TYPE_UINT16, &result.year}, // 1
         {FF_FORMAT_ARG_TYPE_UINT8, &result.yearShort}, // 2
         {FF_FORMAT_ARG_TYPE_UINT8, &result.month}, // 3
@@ -88,7 +88,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
         {FF_FORMAT_ARG_TYPE_STRING, result.secondPretty}, // 20
         {FF_FORMAT_ARG_TYPE_STRING, result.offsetFromUtc}, // 21
         {FF_FORMAT_ARG_TYPE_STRING, result.timezoneName}, // 22
-    });
+    }));
 }
 
 void ffPrintDateTime(FFDateTimeOptions* options)
@@ -106,7 +106,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     char buffer[32];
     if (strftime(buffer, sizeof(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
     {
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "strftime() failed");
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
         return;
     }
 
@@ -138,7 +138,7 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -157,7 +157,7 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
 
 void ffPrintDateTimeHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_DATETIME_MODULE_NAME, "{1}-{4}-{11} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DATETIME_MODULE_NAME, "{1}-{4}-{11} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, ((const char* []) {
         "year",
         "last two digits of year",
         "month",
@@ -180,7 +180,7 @@ void ffPrintDateTimeHelpFormat(void)
         "second with leading zero",
         "offset from UTC in the ISO 8601 format",
         "locale-dependent timezone name or abbreviation",
-    });
+    }));
 }
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)

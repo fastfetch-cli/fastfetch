@@ -32,12 +32,12 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
         ffPercentAppendNum(&percentageStr, device->battery, options->percent, false);
 
-        ffPrintFormat(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_BLUETOOTH_NUM_FORMAT_ARGS, (FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BLUETOOTH_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->address},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->type},
             {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr}
-        });
+        }));
     }
 }
 
@@ -48,7 +48,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     }
     else
     {
@@ -64,7 +64,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
 
         if(filtered.length == 0)
         {
-            ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "No bluetooth devices found");
+            ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
         }
 
         for(uint32_t i = 0; i < filtered.length; i++)
@@ -123,7 +123,7 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -175,12 +175,12 @@ void ffGenerateBluetoothJsonResult(FF_MAYBE_UNUSED FFBluetoothOptions* options, 
 
 void ffPrintBluetoothHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_BLUETOOTH_MODULE_NAME, "{1} ({4})", FF_BLUETOOTH_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BLUETOOTH_MODULE_NAME, "{1} ({4})", FF_BLUETOOTH_NUM_FORMAT_ARGS, ((const char* []) {
         "Name",
         "Address",
         "Type",
         "Battery percentage"
-    });
+    }));
 }
 
 void ffInitBluetoothOptions(FFBluetoothOptions* options)

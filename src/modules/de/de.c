@@ -13,7 +13,7 @@ void ffPrintDE(FFDEOptions* options)
 
     if(result->dePrettyName.length == 0)
     {
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "No DE found");
+        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No DE found");
         return;
     }
 
@@ -36,11 +36,11 @@ void ffPrintDE(FFDEOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_DE_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DE_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &version}
-        });
+        }));
     }
 }
 
@@ -79,7 +79,7 @@ void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -115,11 +115,11 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
 
 void ffPrintDEHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_DE_MODULE_NAME, "{2} {3}", FF_DE_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DE_MODULE_NAME, "{2} {3}", FF_DE_NUM_FORMAT_ARGS, ((const char* []) {
         "DE process name",
         "DE pretty name",
         "DE version"
-    });
+    }));
 }
 
 void ffInitDEOptions(FFDEOptions* options)

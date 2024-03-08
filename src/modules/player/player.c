@@ -15,7 +15,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
 
     if(media->error.length > 0)
     {
-        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
+        ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
         return;
     }
 
@@ -64,12 +64,12 @@ void ffPrintPlayer(FFPlayerOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PLAYER_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PLAYER_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->player},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
-        });
+        }));
     }
 }
 
@@ -96,7 +96,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_PLAYER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -126,12 +126,12 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
 
 void ffPrintPlayerHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_PLAYER_MODULE_NAME, "{1}", FF_PLAYER_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PLAYER_MODULE_NAME, "{1}", FF_PLAYER_NUM_FORMAT_ARGS, ((const char* []) {
         "Pretty player name",
         "Player name",
         "Player Identifier",
         "URL name"
-    });
+    }));
 }
 
 void ffInitPlayerOptions(FFPlayerOptions* options)

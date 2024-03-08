@@ -17,7 +17,7 @@ void ffPrintFont(FFFontOptions* options)
 
     if(error)
     {
-        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "%s", error);
+        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
     }
     else
     {
@@ -28,13 +28,13 @@ void ffPrintFont(FFFontOptions* options)
         }
         else
         {
-            ffPrintFormat(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_FONT_NUM_FORMAT_ARGS, (FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_FONT_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[0]},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[1]},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[2]},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[3]},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &font.display},
-            });
+            }));
         }
     }
 
@@ -66,7 +66,7 @@ void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -106,13 +106,13 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
 
 void ffPrintFontHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_FONT_MODULE_NAME, "{5}", FF_FONT_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_FONT_MODULE_NAME, "{5}", FF_FONT_NUM_FORMAT_ARGS, ((const char* []) {
         "Font 1",
         "Font 2",
         "Font 3",
         "Font 4",
         "Combined fonts"
-    });
+    }));
 }
 
 void ffInitFontOptions(FFFontOptions* options)

@@ -1,3 +1,15 @@
+# 2.8.8
+
+Bugfixes:
+* Fix old fish version compatibility (#744)
+* Fix truncated texts in `--help format` (#745)
+* Fix old vulkan-header and libdrm library compatibility (#748, Linux)
+* Fix possible segfaults in `--help *-format` (#749)
+* Fix invalid resolution detection when using libdrm (Linux, Display)
+* Fix segfault when `/sys/devices/system/cpu/cpufreq/` doesn't exist (#750, CPU, Linux)
+* Don't detect `SessionLeader` as terminal (Terminal, Linux)
+* Fix detection of client IP (Users, Linux)
+
 # 2.8.7
 
 Bugfixes:

@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 
 if not type -q fastfetch
-    return
+    exit
 end
 
 complete -c fastfetch -f

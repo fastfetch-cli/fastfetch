@@ -13,7 +13,7 @@ void ffPrintWM(FFWMOptions* options)
 
     if(result->wmPrettyName.length == 0)
     {
-        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "No WM found");
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No WM found");
         return;
     }
 
@@ -45,12 +45,12 @@ void ffPrintWM(FFWMOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_WM_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WM_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName},
             {FF_FORMAT_ARG_TYPE_STRBUF, &pluginName},
-        });
+        }));
     }
 }
 
@@ -89,7 +89,7 @@ void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -127,12 +127,12 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 
 void ffPrintWMHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_WM_MODULE_NAME, "{2} ({3})", FF_WM_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WM_MODULE_NAME, "{2} ({3})", FF_WM_NUM_FORMAT_ARGS, ((const char* []) {
         "WM process name",
         "WM pretty name",
         "WM protocol name",
         "WM plugin name"
-    });
+    }));
 }
 
 void ffInitWMOptions(FFWMOptions* options)

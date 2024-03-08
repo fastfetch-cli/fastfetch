@@ -49,7 +49,7 @@ void ffPrintMedia(FFMediaOptions* options)
 
     if(media->error.length > 0)
     {
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "%s", media->error.chars);
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
         return;
     }
 
@@ -95,13 +95,13 @@ void ffPrintMedia(FFMediaOptions* options)
     }
     else
     {
-        ffPrintFormat(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_MEDIA_NUM_FORMAT_ARGS, (FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_MEDIA_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->album},
             {FF_FORMAT_ARG_TYPE_STRBUF, &media->status}
-        });
+        }));
     }
 }
 
@@ -128,7 +128,7 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, "Unknown JSON key %s", key);
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
 
@@ -159,13 +159,13 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
 
 void ffPrintMediaHelpFormat(void)
 {
-    ffPrintModuleFormatHelp(FF_MEDIA_MODULE_NAME, "{3} - {1} ({5})", FF_MEDIA_NUM_FORMAT_ARGS, (const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MEDIA_MODULE_NAME, "{3} - {1} ({5})", FF_MEDIA_NUM_FORMAT_ARGS, ((const char* []) {
         "Pretty media name",
         "Media name",
         "Artist name",
         "Album name",
         "Status",
-    });
+    }));
 }
 
 void ffInitMediaOptions(FFMediaOptions* options)
