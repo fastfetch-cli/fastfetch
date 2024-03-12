@@ -111,6 +111,8 @@ static const char* getProductNameWithHwModel(const FFstrbuf* hwModel)
     else if(ffStrbufStartsWithS(hwModel, "Mac"))
     {
         const char* version = hwModel->chars + strlen("Mac");
+        if(ffStrEquals(version, "15,13"))       return "MacBook Air (15-inch, M3, 2024)";
+        if(ffStrEquals(version, "15,2"))        return "MacBook Air (13-inch, M3, 2024)";
         if(ffStrEquals(version, "15,3"))        return "MacBook Pro (14-inch, Nov 2023, Two Thunderbolt / USB 4 ports)";
         if(ffStrEquals(version, "15,4"))        return "iMac (24-inch, 2023, Two Thunderbolt / USB 4 ports)";
         if(ffStrEquals(version, "15,5"))        return "iMac (24-inch, 2023, Two Thunderbolt / USB 4 ports, Two USB 3 ports)";
