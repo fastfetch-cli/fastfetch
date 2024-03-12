@@ -154,3 +154,17 @@ bool ffRegGetSubKey(HKEY hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error
     ffStrbufSetWS(result, resultW);
     return true;
 }
+
+bool ffRegGetNSubKeys(HKEY hKey, uint32_t* result, FFstrbuf* error)
+{
+    DWORD buffer;
+    if(RegQueryInfoKeyW(hKey, NULL, NULL, NULL, &buffer, NULL, NULL, NULL, NULL, NULL, NULL, NULL) != ERROR_SUCCESS)
+    {
+        if (error)
+            ffStrbufAppendS(error, "RegQueryInfoKeyW(hKey) failed");
+        return false;
+    }
+
+    *result = buffer;
+    return true;
+}

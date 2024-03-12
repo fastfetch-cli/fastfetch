@@ -94,11 +94,14 @@ static double getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, cons
     if (ok)
         return ffStrbufToDouble(buffer) / 1e6;
 
-    ffStrbufAppendS(basePath, scalingFileName);
-    ok = ffReadFileBuffer(basePath->chars, buffer);
-    ffStrbufSubstrBefore(basePath, baseLen);
-    if (ok)
-        return ffStrbufToDouble(buffer) / 1e6;
+    if (scalingFileName)
+    {
+        ffStrbufAppendS(basePath, scalingFileName);
+        ok = ffReadFileBuffer(basePath->chars, buffer);
+        ffStrbufSubstrBefore(basePath, baseLen);
+        if (ok)
+            return ffStrbufToDouble(buffer) / 1e6;
+    }
 
     return 0.0/0.0;
 }
@@ -119,19 +122,19 @@ static bool detectFrequency(FFCPUResult* cpu)
         if (ffStrStartsWith(entry->d_name, "policy") && isdigit(entry->d_name[strlen("policy")]))
         {
             ffStrbufAppendS(&path, entry->d_name);
-            double fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
-            if (fmin != fmin) continue;
+            double fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
+            if (fbase != fbase) continue;
             double fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
             if (fmax != fmax) continue;
 
             if (flag)
             {
-                cpu->frequencyMin = cpu->frequencyMin < fmin ? cpu->frequencyMin : fmin;
+                cpu->frequencyMin = cpu->frequencyMin > fbase ? cpu->frequencyMin : fbase;
                 cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
             }
             else
             {
-                cpu->frequencyMin = fmin;
+                cpu->frequencyMin = fbase;
                 cpu->frequencyMax = fmax;
                 flag = true;
             }

@@ -68,7 +68,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
 #else
 static const char* detectFrequency(FFCPUResult* cpu)
 {
-    cpu->frequencyMin = ffSysctlGetInt64("hw.cpufrequency_min", 0) / 1000.0 / 1000.0 / 1000.0;
+    cpu->frequencyMin = ffSysctlGetInt64("hw.cpufrequency", 0) / 1000.0 / 1000.0 / 1000.0;
     cpu->frequencyMax = ffSysctlGetInt64("hw.cpufrequency_max", 0);
     if(cpu->frequencyMax > 0.0)
         cpu->frequencyMax /= 1000.0 * 1000.0 * 1000.0;
