@@ -1,3 +1,11 @@
+# 2.8.9
+
+Bugfixes:
+* Don't detect `SessionLeader` as terminal, actually (Terminal, Linux)
+
+Features:
+* Support new MacBook Air (Host, macOS)
+
 # 2.8.8
 
 Bugfixes:
