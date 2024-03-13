@@ -3299,6 +3299,17 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Proxmox
+    {
+        .names = {"proxmox"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PROXMOX,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_256 "202"
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_256 "202",
+    },
     // PuffOS
     {
         .names = {"PuffOS"},
@@ -3557,17 +3568,6 @@ static const FFlogo R[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
-    },
-    // Proxmox
-    {
-        .names = {"proxmox"},
-        .lines = FASTFETCH_DATATEXT_LOGO_PROXMOX,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_256 "202"
-        },
-        .colorKeys = FF_COLOR_FG_WHITE,
-        .colorTitle = FF_COLOR_FG_256 "202",
     },
     // LAST
     {},
