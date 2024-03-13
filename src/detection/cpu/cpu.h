@@ -13,7 +13,7 @@ typedef struct FFCPUResult
     uint16_t coresLogical;
     uint16_t coresOnline;
 
-    double frequencyMin; // GHz
+    double frequencyBase; // GHz
     double frequencyMax; // GHz
 
     double temperature;

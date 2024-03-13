@@ -119,7 +119,7 @@ static const char* detectByRegistry(FFCPUResult* cpu)
     {
         uint32_t mhz;
         if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-            cpu->frequencyMin = cpu->frequencyMax = mhz / 1000.0;
+            cpu->frequencyBase = cpu->frequencyMax = mhz / 1000.0;
     }
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);

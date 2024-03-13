@@ -129,12 +129,12 @@ static bool detectFrequency(FFCPUResult* cpu)
 
             if (flag)
             {
-                cpu->frequencyMin = cpu->frequencyMin > fbase ? cpu->frequencyMin : fbase;
+                cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
                 cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
             }
             else
             {
-                cpu->frequencyMin = fbase;
+                cpu->frequencyBase = fbase;
                 cpu->frequencyMax = fmax;
                 flag = true;
             }
@@ -238,7 +238,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
 
     if (!detectFrequency(cpu))
-        cpu->frequencyMin = cpu->frequencyMax = ffStrbufToDouble(&cpuMHz) / 1000;
+        cpu->frequencyBase = cpu->frequencyMax = ffStrbufToDouble(&cpuMHz) / 1000;
 
     if(cpuUarch.length > 0)
     {

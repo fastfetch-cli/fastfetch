@@ -53,7 +53,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
     if (ffCfDictGetData(properties, CFSTR("voltage-states1-sram"), 0, 4, (uint8_t*) &eMin, NULL) != NULL) // eCore
         return "\"voltage-states1-sram\" in \"pmgr\" is not found";
 
-    cpu->frequencyMin = (pMin < eMin ? pMin : eMin) / (1000.0 * 1000 * 1000);
+    cpu->frequencyBase = (pMin < eMin ? pMin : eMin) / (1000.0 * 1000 * 1000);
 
     if (pCoreLength >= 8)
     {
@@ -68,7 +68,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
 #else
 static const char* detectFrequency(FFCPUResult* cpu)
 {
-    cpu->frequencyMin = ffSysctlGetInt64("hw.cpufrequency", 0) / 1000.0 / 1000.0 / 1000.0;
+    cpu->frequencyBase = ffSysctlGetInt64("hw.cpufrequency", 0) / 1000.0 / 1000.0 / 1000.0;
     cpu->frequencyMax = ffSysctlGetInt64("hw.cpufrequency_max", 0);
     if(cpu->frequencyMax > 0.0)
         cpu->frequencyMax /= 1000.0 * 1000.0 * 1000.0;
