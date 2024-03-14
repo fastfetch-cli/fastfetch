@@ -102,7 +102,7 @@ static double getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, cons
         if (ok)
             return ffStrbufToDouble(buffer) / 1e6;
     }
-
+    
     return 0.0/0.0;
 }
 
@@ -114,7 +114,6 @@ static bool detectFrequency(FFCPUResult* cpu)
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     uint32_t baseLen = path.length;
-    bool flag = false;
 
     struct dirent* entry;
     while((entry = readdir(dir)) != NULL)
@@ -123,25 +122,15 @@ static bool detectFrequency(FFCPUResult* cpu)
         {
             ffStrbufAppendS(&path, entry->d_name);
             double fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
-            if (fbase != fbase) continue;
-            double fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
-            if (fmax != fmax) continue;
-
-            if (flag)
-            {
+            if (fbase == fbase)
                 cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
+            double fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
+            if (fmax == fmax)
                 cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
-            }
-            else
-            {
-                cpu->frequencyBase = fbase;
-                cpu->frequencyMax = fmax;
-                flag = true;
-            }
             ffStrbufSubstrBefore(&path, baseLen);
         }
     }
-    return flag;
+    return true;
 }
 
 static double detectCPUTemp(void)
