@@ -15,6 +15,7 @@ typedef struct FFCPUResult
 
     double frequencyBase; // GHz
     double frequencyMax; // GHz
+    double frequencyMin; // GHz
 
     double temperature;
 } FFCPUResult;

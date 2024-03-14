@@ -26,7 +26,7 @@ static void detectAndroid(FFCPUResult* cpu)
 }
 #endif
 
-static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
+static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch)
 {
     FF_AUTO_CLOSE_FILE FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
     if(cpuinfo == NULL)
@@ -49,7 +49,6 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
             ffParsePropLine(line, "model name :", &cpu->name) ||
             ffParsePropLine(line, "vendor_id :", &cpu->vendor) ||
             ffParsePropLine(line, "cpu cores :", physicalCoresBuffer) ||
-            ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
 
@@ -102,7 +101,7 @@ static double getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, cons
         if (ok)
             return ffStrbufToDouble(buffer) / 1e6;
     }
-    
+
     return 0.0/0.0;
 }
 
@@ -123,10 +122,28 @@ static bool detectFrequency(FFCPUResult* cpu)
             ffStrbufAppendS(&path, entry->d_name);
             double fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
             if (fbase == fbase)
-                cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
+            {
+                if (cpu->frequencyBase == cpu->frequencyBase)
+                    cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
+                else
+                    cpu->frequencyBase = fbase;
+            }
             double fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
             if (fmax == fmax)
-                cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
+            {
+                if (cpu->frequencyMax == cpu->frequencyMax)
+                    cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
+                else
+                    cpu->frequencyMax = fmax;
+            }
+            double fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
+            if (fmin == fmin)
+            {
+                if (cpu->frequencyMin == cpu->frequencyMin)
+                    cpu->frequencyMin = cpu->frequencyMin < fmin ? cpu->frequencyMin : fmin;
+                else
+                    cpu->frequencyMin = fmin;
+            }
             ffStrbufSubstrBefore(&path, baseLen);
         }
     }
@@ -215,19 +232,18 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
 
     FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuIsa = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuUarch = ffStrbufCreate();
 
-    const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch);
+    const char* error = parseCpuInfo(cpu, &physicalCoresBuffer, &cpuIsa, &cpuUarch);
     if (error) return error;
 
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
 
-    if (!detectFrequency(cpu))
-        cpu->frequencyBase = cpu->frequencyMax = ffStrbufToDouble(&cpuMHz) / 1000;
+    detectFrequency(cpu);
+    // cpu MHz is current frequency, not max or base
 
     if(cpuUarch.length > 0)
     {

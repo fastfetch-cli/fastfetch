@@ -64,14 +64,13 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
             return "No active CPU is found in SMBIOS data";
     }
 
-    double speed;
     if (data->MaxSpeed > 0 && data->MaxSpeed < 30000) // VMware reports weird values
-        speed = data->MaxSpeed / 1000.0;
-    else
-        speed = data->CurrentSpeed / 1000.0;
+    {
+        double speed = data->MaxSpeed / 1000.0;
+        if (cpu->frequencyBase < speed)
+            cpu->frequencyMax = speed;
+    }
 
-    if (cpu->frequencyMax < speed)
-        cpu->frequencyMax = speed;
 
     return NULL;
 }
@@ -119,7 +118,7 @@ static const char* detectByRegistry(FFCPUResult* cpu)
     {
         uint32_t mhz;
         if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-            cpu->frequencyBase = cpu->frequencyMax = mhz / 1000.0;
+            cpu->frequencyBase = mhz / 1000.0;
     }
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
