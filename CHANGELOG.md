@@ -6,6 +6,10 @@ Bugfixes:
 
 Features:
 * Support new MacBook Air (Host, macOS)
+* Detect base frequency (CPU)
+
+Logo:
+* Fix proxmox
 
 # 2.8.8
 
