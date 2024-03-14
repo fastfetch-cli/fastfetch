@@ -2,6 +2,7 @@
 
 Bugfixes:
 * Don't detect `SessionLeader` as terminal, actually (Terminal, Linux)
+* Fix blurry chafa result when specifying both width and height (#757, Logo)
 
 Features:
 * Support new MacBook Air (Host, macOS)
