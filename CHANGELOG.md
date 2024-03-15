@@ -6,7 +6,7 @@ Bugfixes:
 
 Features:
 * Support new MacBook Air (Host, macOS)
-* Detect base frequency (CPU)
+* Distinguish min frequency and base frequency (CPU)
 
 Logo:
 * Fix proxmox
