@@ -413,7 +413,7 @@ static const FFlogo A[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_ARCO,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
@@ -425,7 +425,7 @@ static const FFlogo A[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_ARCO_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
