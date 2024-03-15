@@ -13,7 +13,7 @@ void ffPrintCPU(FFCPUOptions* options)
     FFCPUResult cpu;
     cpu.temperature = FF_CPU_TEMP_UNSET;
     cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
-    cpu.frequencyMax = cpu.frequencyMin = 0;
+    cpu.frequencyMin = cpu.frequencyMax = cpu.frequencyBase = 0.0/0.0;
     ffStrbufInit(&cpu.name);
     ffStrbufInit(&cpu.vendor);
 
@@ -48,8 +48,11 @@ void ffPrintCPU(FFCPUOptions* options)
             if(cpu.coresOnline > 1)
                 ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
-            if(cpu.frequencyMax > 0.0)
-                ffStrbufAppendF(&str, " @ %.*f GHz", options->freqNdigits, cpu.frequencyMax);
+            double freq = cpu.frequencyMax;
+            if(freq != freq)
+                freq = cpu.frequencyBase;
+            if(freq == freq)
+                ffStrbufAppendF(&str, " @ %.*f GHz", options->freqNdigits, freq);
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
             {
@@ -69,7 +72,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresLogical},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMin},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyBase},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMax},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr}
             }));
@@ -143,7 +146,7 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
     FFCPUResult cpu;
     cpu.temperature = FF_CPU_TEMP_UNSET;
     cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
-    cpu.frequencyMax = cpu.frequencyMin = 0;
+    cpu.frequencyMin = cpu.frequencyMax = cpu.frequencyBase = 0.0/0.0;
     ffStrbufInit(&cpu.name);
     ffStrbufInit(&cpu.vendor);
 
@@ -169,8 +172,9 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_uint(doc, cores, "online", cpu.coresOnline);
 
         yyjson_mut_val* frequency = yyjson_mut_obj_add_obj(doc, obj, "frequency");
-        yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
+        yyjson_mut_obj_add_real(doc, frequency, "base", cpu.frequencyBase);
         yyjson_mut_obj_add_real(doc, frequency, "max", cpu.frequencyMax);
+        yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
 
         yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
     }
@@ -187,7 +191,7 @@ void ffPrintCPUHelpFormat(void)
         "Physical core count",
         "Logical core count",
         "Online core count",
-        "Min frequency",
+        "Base frequency",
         "Max frequency",
         "Temperature (formatted)"
     }));

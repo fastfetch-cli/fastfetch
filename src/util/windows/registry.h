@@ -21,5 +21,6 @@ bool ffRegReadData(HKEY hKey, const wchar_t* valueNameW, uint8_t** result, uint3
 bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstrbuf* error);
 bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFstrbuf* error);
 bool ffRegGetSubKey(HKEY hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error);
+bool ffRegGetNSubKeys(HKEY hKey, uint32_t* result, FFstrbuf* error);
 
 #endif

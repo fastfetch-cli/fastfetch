@@ -1,20 +1,15 @@
 #include "fastfetch.h"
 #include "common/commandoption.h"
-#include "common/printing.h"
-#include "common/parsing.h"
 #include "common/io/io.h"
-#include "common/time.h"
 #include "common/jsonconfig.h"
 #include "detection/version/version.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
-#include "logo/logo.h"
 #include "fastfetch_datatext.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <inttypes.h>
 
 #ifdef WIN32
     #include "util/windows/getline.h"
@@ -824,7 +819,10 @@ static void run(FFdata* data)
         ffPrintCommandOption(data, instance.state.resultDoc);
 
     if (instance.state.resultDoc)
+    {
         yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+        putchar('\n');
+    }
     else
         ffFinish();
 }

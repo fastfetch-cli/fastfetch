@@ -1,3 +1,16 @@
+# 2.8.9
+
+Bugfixes:
+* Don't detect `SessionLeader` as terminal, actually (Terminal, Linux)
+* Fix blurry chafa result when specifying both width and height (#757, Logo)
+
+Features:
+* Support new MacBook Air (Host, macOS)
+* Distinguish min frequency and base frequency (CPU)
+
+Logo:
+* Fix proxmox
+
 # 2.8.8
 
 Bugfixes:

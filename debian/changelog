@@ -1,3 +1,9 @@
+fastfetch (2.8.8) jammy; urgency=medium
+
+  * Update to 2.8.8
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 08 Mar 2024 09:59:41 +0800
+
 fastfetch (2.8.6) jammy; urgency=medium
 
   * Update to 2.8.6

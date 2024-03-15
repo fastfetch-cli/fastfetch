@@ -768,10 +768,8 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
     requestData.characterPixelWidth = 1;
     requestData.characterPixelHeight = 1;
 
-    if(
-        (type != FF_LOGO_TYPE_IMAGE_CHAFA || instance.config.logo.width == 0 || instance.config.logo.height == 0) &&
-        !getCharacterPixelDimensions(&requestData)
-    ) {
+    if(!getCharacterPixelDimensions(&requestData))
+    {
         if(printError)
             fputs("Logo: getCharacterPixelDimensions() failed", stderr);
         return false;

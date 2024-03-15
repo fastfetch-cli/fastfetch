@@ -13,10 +13,12 @@ typedef struct FFCPUResult
     uint16_t coresLogical;
     uint16_t coresOnline;
 
-    double frequencyMin; // GHz
+    double frequencyBase; // GHz
     double frequencyMax; // GHz
+    double frequencyMin; // GHz
 
     double temperature;
 } FFCPUResult;
 
+const char* ffCPUDetectByCpuid(FFCPUResult* cpu);
 const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu);

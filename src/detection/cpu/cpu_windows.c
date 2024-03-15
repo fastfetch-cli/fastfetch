@@ -64,50 +64,53 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
             return "No active CPU is found in SMBIOS data";
     }
 
-    double speed;
     if (data->MaxSpeed > 0 && data->MaxSpeed < 30000) // VMware reports weird values
-        speed = data->MaxSpeed / 1000.0;
-    else
-        speed = data->CurrentSpeed / 1000.0;
+    {
+        double speed = data->MaxSpeed / 1000.0;
+        if (cpu->frequencyBase < speed)
+            cpu->frequencyMax = speed;
+    }
 
-    if (cpu->frequencyMax < speed)
-        cpu->frequencyMax = speed;
 
     return NULL;
 }
 
-static const char* detectByOS(FFCPUResult* cpu)
+static const char* detectNCores(FFCPUResult* cpu)
 {
+    DWORD length = 0;
+    GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
+    if (length == 0)
+        return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
+
+    SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
+        pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
+
+    if (!pProcessorInfo || !GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
+        return "GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length) failed";
+
+    for(
+        SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
+        (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
+        ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
+    )
     {
-        DWORD length = 0;
-        GetLogicalProcessorInformationEx(RelationAll, NULL, &length);
-        if (length == 0)
-            return "GetLogicalProcessorInformationEx(RelationAll, NULL, &length) failed";
-
-        SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* FF_AUTO_FREE
-            pProcessorInfo = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)malloc(length);
-
-        if (pProcessorInfo && GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length))
+        if(ptr->Relationship == RelationProcessorCore)
+            ++cpu->coresPhysical;
+        else if(ptr->Relationship == RelationGroup)
         {
-            for(
-                SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* ptr = pProcessorInfo;
-                (uint8_t*)ptr < ((uint8_t*)pProcessorInfo) + length;
-                ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
-            )
+            for (uint32_t index = 0; index < ptr->Group.ActiveGroupCount; ++index)
             {
-                if(ptr->Relationship == RelationProcessorCore)
-                    ++cpu->coresPhysical;
-                else if(ptr->Relationship == RelationGroup)
-                {
-                    cpu->coresOnline += ptr->Group.GroupInfo->ActiveProcessorCount;
-                    cpu->coresLogical += ptr->Group.GroupInfo->MaximumProcessorCount;
-                }
+                cpu->coresOnline += ptr->Group.GroupInfo[index].ActiveProcessorCount;
+                cpu->coresLogical += ptr->Group.GroupInfo[index].MaximumProcessorCount;
             }
         }
-        else
-            return "GetLogicalProcessorInformationEx(RelationAll, pProcessorInfo, &length) failed";
     }
 
+    return NULL;
+}
+
+static const char* detectByRegistry(FFCPUResult* cpu)
+{
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
@@ -115,24 +118,34 @@ static const char* detectByOS(FFCPUResult* cpu)
     {
         uint32_t mhz;
         if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-            cpu->frequencyMin = cpu->frequencyMax = mhz / 1000.0;
+            cpu->frequencyBase = mhz / 1000.0;
     }
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
     ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
+
+    if (cpu->coresLogical == 0)
+    {
+        DWORD cores;
+        if (RegQueryInfoKeyW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor", NULL, NULL, &cores, NULL, NULL, NULL, NULL, NULL, NULL, NULL) == ERROR_SUCCESS)
+            cpu->coresOnline = cpu->coresPhysical = cpu->coresLogical = (uint16_t) cores;
+    }
 
     return NULL;
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    const char* error = detectByOS(cpu);
+    detectNCores(cpu);
+
+    const char* error = detectByRegistry(cpu);
     if (error)
         return error;
+
+    detectMaxSpeedBySmbios(cpu);
 
     if(options->temp)
         ffDetectSmbiosTemp(&cpu->temperature, NULL);
 
-    detectMaxSpeedBySmbios(cpu);
     return NULL;
 }
