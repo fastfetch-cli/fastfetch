@@ -1,20 +1,15 @@
 #include "fastfetch.h"
 #include "common/commandoption.h"
-#include "common/printing.h"
-#include "common/parsing.h"
 #include "common/io/io.h"
-#include "common/time.h"
 #include "common/jsonconfig.h"
 #include "detection/version/version.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
-#include "logo/logo.h"
 #include "fastfetch_datatext.h"
 
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include <inttypes.h>
 
 #ifdef WIN32
     #include "util/windows/getline.h"
