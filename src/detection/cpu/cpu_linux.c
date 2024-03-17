@@ -17,7 +17,10 @@
 static void detectAndroid(FFCPUResult* cpu)
 {
     if (cpu->name.length == 0)
+    {
         ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name);
+        ffStrbufClear(&cpu->vendor); // We usually detect the vendor of CPU core as ARM, but instead we want the vendor of SOC
+    }
     if (cpu->vendor.length == 0)
     {
         if (!ffSettingsGetAndroidProperty("ro.soc.manufacturer", &cpu->vendor))
