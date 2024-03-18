@@ -280,6 +280,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrEquals(name, "login")      ||
             ffStrEquals(name, "sshd")       ||
+            ffStrEquals(name, "chezmoi")    || // #762
             #ifdef __linux__
             ffStrStartsWith(name, "flatpak-") || // #707
             #endif
