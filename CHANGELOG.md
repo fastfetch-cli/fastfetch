@@ -1,3 +1,14 @@
+# 2.8.10
+
+Bugfixes:
+* Don't display 0.00 GHz (CPU, FreeBSD)
+* Don't detect manufactor of Qualcomm as ARM (CPU, Android)
+* Ignore `chezmoi` (Terminal, Linux)
+* Trim trailing possible whitespaces (PublicIP)
+
+Logo:
+* Fix color of Arco Linux
+
 # 2.8.9
 
 Bugfixes:
