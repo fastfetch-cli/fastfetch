@@ -69,5 +69,6 @@ const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* resul
 
     ffStrbufDestroy(&result->ip);
     ffStrbufInitMove(&result->ip, &response);
+    ffStrbufTrimRightSpace(&result->ip);
     return NULL;
 }

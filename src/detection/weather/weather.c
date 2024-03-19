@@ -29,7 +29,11 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result)
 
     ffStrbufEnsureFree(result, 4095);
     bool success = ffNetworkingRecvHttpResponse(&state, result, options->timeout);
-    if (success) ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");
+    if (success)
+    {
+        ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");
+        ffStrbufTrimRightSpace(result);
+    }
 
     if(!success || result->length == 0)
         return "Failed to receive the server response";
