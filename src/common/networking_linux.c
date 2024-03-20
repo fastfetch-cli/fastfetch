@@ -5,6 +5,8 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <netinet/in.h> // For FreeBSD
+#include <netinet/tcp.h>
 
 static const char* connectAndSend(FFNetworkingState* state)
 {
@@ -26,6 +28,20 @@ static const char* connectAndSend(FFNetworkingState* state)
         freeaddrinfo(addr);
         ret = "socket() failed";
         goto error;
+    }
+
+    if (state->timeout > 0)
+    {
+        FF_MAYBE_UNUSED uint32_t sec = state->timeout / 1000;
+        if (sec == 0) sec = 1;
+
+        #ifdef TCP_CONNECTIONTIMEOUT
+        setsockopt(state->sockfd, IPPROTO_TCP, TCP_CONNECTIONTIMEOUT, &sec, sizeof(sec));
+        #elif defined(TCP_KEEPINIT)
+        setsockopt(state->sockfd, IPPROTO_TCP, TCP_KEEPINIT, &sec, sizeof(sec));
+        #elif defined(TCP_USER_TIMEOUT)
+        setsockopt(state->sockfd, IPPROTO_TCP, TCP_USER_TIMEOUT, &state->timeout, sizeof(state->timeout));
+        #endif
     }
 
     if(connect(state->sockfd, addr->ai_addr, addr->ai_addrlen) == -1)
@@ -83,8 +99,10 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     return connectAndSend(state);
 }
 
-const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout)
+const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer)
 {
+    uint32_t timeout = state->timeout;
+
     #ifdef FF_HAVE_THREADS
     if (instance.config.general.multithreading)
     {

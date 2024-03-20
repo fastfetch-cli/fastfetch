@@ -20,7 +20,9 @@ typedef struct FFNetworkingState {
             FFThreadType thread;
         #endif
     #endif
+
+    uint32_t timeout;
 } FFNetworkingState;
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);
-const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout);
+const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer);

@@ -12,6 +12,8 @@ void ffPrepareWeather(FFWeatherOptions* options)
         exit(1);
     }
 
+    state.timeout = options->timeout;
+
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/");
     if (options->location.length)
         ffStrbufAppend(&path, &options->location);
@@ -29,7 +31,7 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result)
         return status;
 
     ffStrbufEnsureFree(result, 4095);
-    const char* error = ffNetworkingRecvHttpResponse(&state, result, options->timeout);
+    const char* error = ffNetworkingRecvHttpResponse(&state, result);
     if (error == NULL)
     {
         ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");

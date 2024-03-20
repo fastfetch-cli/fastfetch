@@ -13,6 +13,8 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
         exit(1);
     }
 
+    state.timeout = options->timeout;
+
     if (options->url.length == 0)
         status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/json", NULL);
     else
@@ -49,7 +51,7 @@ const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* resul
         return status;
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
-    const char* error = ffNetworkingRecvHttpResponse(&state, &response, options->timeout);
+    const char* error = ffNetworkingRecvHttpResponse(&state, &response);
     if (error == NULL)
         ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
     else
