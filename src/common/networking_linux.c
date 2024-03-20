@@ -6,22 +6,25 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-static void connectAndSend(FFNetworkingState* state)
+static const char* connectAndSend(FFNetworkingState* state)
 {
-    struct addrinfo hints = {
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_STREAM,
-    };
-
+    const char* ret = NULL;
     struct addrinfo* addr;
 
-    if(getaddrinfo(state->host.chars, "80", &hints, &addr) != 0)
+    if(getaddrinfo(state->host.chars, "80", &(struct addrinfo) {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+    }, &addr) != 0)
+    {
+        ret = "getaddrinfo() failed";
         goto error;
+    }
 
     state->sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
     if(state->sockfd == -1)
     {
         freeaddrinfo(addr);
+        ret = "socket() failed";
         goto error;
     }
 
@@ -29,6 +32,7 @@ static void connectAndSend(FFNetworkingState* state)
     {
         close(state->sockfd);
         freeaddrinfo(addr);
+        ret = "connect() failed";
         goto error;
     }
 
@@ -37,6 +41,7 @@ static void connectAndSend(FFNetworkingState* state)
     if(send(state->sockfd, state->command.chars, state->command.length, 0) < 0)
     {
         close(state->sockfd);
+        ret = "send() failed";
         goto error;
     }
 
@@ -48,11 +53,13 @@ error:
 exit:
     ffStrbufDestroy(&state->host);
     ffStrbufDestroy(&state->command);
+
+    return ret;
 }
 
 FF_THREAD_ENTRY_DECL_WRAPPER(connectAndSend, FFNetworkingState*);
 
-bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
+const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
 {
     ffStrbufInitS(&state->host, host);
 
@@ -66,22 +73,28 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
     ffStrbufAppendS(&state->command, "\r\n");
 
     #ifdef FF_HAVE_THREADS
+    if (instance.config.general.multithreading)
+    {
         state->thread = ffThreadCreate(connectAndSendThreadMain, state);
-        return !!state->thread;
-    #else
-        connectAndSend(state);
-        return state->sockfd != -1;
+        return state->thread ? NULL : "ffThreadCreate(connectAndSend) failed";
+    }
     #endif
+
+    return connectAndSend(state);
 }
 
-bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout)
+const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout)
 {
     #ifdef FF_HAVE_THREADS
+    if (instance.config.general.multithreading)
+    {
         if (!ffThreadJoin(state->thread, timeout))
-            return false;
+            return "ffThreadJoin() failed or timeout";
+    }
     #endif
+
     if(state->sockfd == -1)
-        return false;
+        return "ffNetworkingSendHttpRequest() failed";
 
     if(timeout > 0)
     {
@@ -100,5 +113,5 @@ bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, ui
     }
 
     close(state->sockfd);
-    return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n");
+    return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n") ? NULL : "Invalid response";
 }

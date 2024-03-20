@@ -1,12 +1,13 @@
 #include "publicip.h"
 #include "common/networking.h"
 
+#define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
 static FFNetworkingState state;
-static int status = -1;
+static const char* status = FF_UNITIALIZED;
 
 void ffPreparePublicIp(FFPublicIpOptions* options)
 {
-    if (status != -1)
+    if (status != FF_UNITIALIZED)
     {
         fputs("Error: this module can only be used once due to internal limitations\n", stderr);
         exit(1);
@@ -41,18 +42,21 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 
 const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* result)
 {
-    if (status == -1)
+    if (status == FF_UNITIALIZED)
         ffPreparePublicIp(options);
 
-    if (status == 0)
-        return "Failed to connect to an IP detection server";
+    if (status != NULL)
+        return status;
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
-    bool success = ffNetworkingRecvHttpResponse(&state, &response, options->timeout);
-    if (success) ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
+    const char* error = ffNetworkingRecvHttpResponse(&state, &response, options->timeout);
+    if (error == NULL)
+        ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
+    else
+        return error;
 
-    if (!success || response.length == 0)
-        return "Failed to receive the server response";
+    if (response.length == 0)
+        return "Empty server response received";
 
     if (options->url.length == 0)
     {

@@ -22,13 +22,5 @@ typedef struct FFNetworkingState {
     #endif
 } FFNetworkingState;
 
-bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);
-bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout);
-
-static inline bool ffNetworkingGetHttp(const char* host, const char* path, uint32_t timeout, const char* headers, FFstrbuf* buffer)
-{
-    FFNetworkingState state;
-    if(ffNetworkingSendHttpRequest(&state, host, path, headers))
-        return ffNetworkingRecvHttpResponse(&state, buffer, timeout);
-    return false;
-}
+const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);
+const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout);

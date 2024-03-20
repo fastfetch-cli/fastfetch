@@ -1,11 +1,12 @@
 #include "weather.h"
 
+#define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
 static FFNetworkingState state;
-static int status = -1;
+static const char* status = FF_UNITIALIZED;
 
 void ffPrepareWeather(FFWeatherOptions* options)
 {
-    if (status != -1)
+    if (status != FF_UNITIALIZED)
     {
         fputs("Error: this module can only be used once due to internal limitations\n", stderr);
         exit(1);
@@ -21,22 +22,24 @@ void ffPrepareWeather(FFWeatherOptions* options)
 
 const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result)
 {
-    if(status == -1)
+    if(status == FF_UNITIALIZED)
         ffPrepareWeather(options);
 
-    if(status == 0)
-        return "Failed to connect to 'wttr.in'";
+    if(status != NULL)
+        return status;
 
     ffStrbufEnsureFree(result, 4095);
-    bool success = ffNetworkingRecvHttpResponse(&state, result, options->timeout);
-    if (success)
+    const char* error = ffNetworkingRecvHttpResponse(&state, result, options->timeout);
+    if (error == NULL)
     {
         ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");
         ffStrbufTrimRightSpace(result);
     }
+    else
+        return error;
 
-    if(!success || result->length == 0)
-        return "Failed to receive the server response";
+    if(result->length == 0)
+        return "Empty server response received";
 
     return NULL;
 }
