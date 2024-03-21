@@ -6,6 +6,9 @@ Bugfixes:
 * Ignore `chezmoi` (Terminal, Linux)
 * Trim trailing possible whitespaces (PublicIP)
 
+Features:
+* Improve stability; print more useful error message; avoid misuse (PublicIP / Weather)
+
 Logo:
 * Fix color of Arco Linux
 
