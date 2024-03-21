@@ -122,13 +122,14 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
 
-    ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
-
-    if(received > 0)
-    {
+    uint32_t recvStart;
+    do {
+        recvStart = buffer->length;
+        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
+        if (received <= 0) break;
         buffer->length += (uint32_t) received;
         buffer->chars[buffer->length] = '\0';
-    }
+    } while (ffStrbufGetFree(buffer) > 0 && strstr(buffer->chars + recvStart, "\r\n\r\n") == NULL);
 
     close(state->sockfd);
     return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n") ? NULL : "Invalid response";
