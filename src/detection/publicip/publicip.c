@@ -20,7 +20,16 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);
-        ffStrbufSubstrAfterFirstS(&host, "://");
+        uint32_t hostStartIndex = ffStrbufFirstIndexS(&host, "://");
+        if (hostStartIndex < host.length)
+        {
+            if (hostStartIndex != 4 || !ffStrbufStartsWithIgnCaseS(&host, "http"))
+            {
+                fputs("Error: only http: protocol is supported. Use `Command` module with `curl` if needed\n", stderr);
+                exit(1);
+            }
+            ffStrbufSubstrAfter(&host, hostStartIndex + (strlen("://") - 1));
+        }
         uint32_t pathStartIndex = ffStrbufFirstIndexC(&host, '/');
 
         FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
