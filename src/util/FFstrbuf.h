@@ -44,7 +44,7 @@ void ffStrbufAppendNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufAppendTransformS(FFstrbuf* strbuf, const char* value, int(*transformFunc)(int));
 FF_C_PRINTF(2, 3) void ffStrbufAppendF(FFstrbuf* strbuf, const char* format, ...);
 void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
-void ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until);
+const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until);
 
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 
