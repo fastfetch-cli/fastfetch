@@ -1,9 +1,9 @@
-**/build/
-**/.vscode/
-**/.cache/
-**/.kdev4/
-**/.DS_Store
-/.vs
+build/
+.vs/
+.vscode/
+.cache/
+.kdev4/
+.DS_Store
 cscope.*
 tags
 fastfetch.kdev4

@@ -15,7 +15,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
     for(uint32_t i = 0; i < length; i++)
     {
-        const wchar_t* mountpoint = buf + i;
+        wchar_t* mountpoint = buf + i;
 
         UINT driveType = GetDriveTypeW(mountpoint);
         if(driveType == DRIVE_NO_ROOT_DIR)
@@ -25,13 +25,6 @@ const char* ffDetectDisksImpl(FFlist* disks)
         }
 
         FFDisk* disk = ffListAdd(disks);
-        ffStrbufInitWS(&disk->mountpoint, mountpoint);
-
-        wchar_t volumeName[64];
-        if(GetVolumeNameForVolumeMountPointW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
-            ffStrbufInitWS(&disk->mountFrom, volumeName);
-        else
-            ffStrbufInit(&disk->mountFrom);
 
         if(!GetDiskFreeSpaceExW(
             mountpoint,
@@ -76,6 +69,17 @@ const char* ffDetectDisksImpl(FFlist* disks)
             ffStrbufSetWS(&disk->name, diskName);
             if(diskFlags & FILE_READ_ONLY_VOLUME)
                 disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+        }
+
+        ffStrbufInitWS(&disk->mountpoint, mountpoint);
+        if (mountpoint[2] == L'\\' && mountpoint[3] == L'\0')
+        {
+            wchar_t volumeName[MAX_PATH + 1];
+            mountpoint[2] = L'\0';
+            if(QueryDosDeviceW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
+                ffStrbufInitWS(&disk->mountFrom, volumeName);
+            else
+                ffStrbufInit(&disk->mountFrom);
         }
 
         //Unsupported

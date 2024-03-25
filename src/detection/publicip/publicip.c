@@ -1,23 +1,35 @@
 #include "publicip.h"
 #include "common/networking.h"
 
+#define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
 static FFNetworkingState state;
-static int status = -1;
+static const char* status = FF_UNITIALIZED;
 
 void ffPreparePublicIp(FFPublicIpOptions* options)
 {
-    if (status != -1)
+    if (status != FF_UNITIALIZED)
     {
         fputs("Error: this module can only be used once due to internal limitations\n", stderr);
         exit(1);
     }
+
+    state.timeout = options->timeout;
 
     if (options->url.length == 0)
         status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/json", NULL);
     else
     {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);
-        ffStrbufSubstrAfterFirstS(&host, "://");
+        uint32_t hostStartIndex = ffStrbufFirstIndexS(&host, "://");
+        if (hostStartIndex < host.length)
+        {
+            if (hostStartIndex != 4 || !ffStrbufStartsWithIgnCaseS(&host, "http"))
+            {
+                fputs("Error: only http: protocol is supported. Use `Command` module with `curl` if needed\n", stderr);
+                exit(1);
+            }
+            ffStrbufSubstrAfter(&host, hostStartIndex + (strlen("://") - 1));
+        }
         uint32_t pathStartIndex = ffStrbufFirstIndexC(&host, '/');
 
         FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
@@ -41,18 +53,21 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 
 const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* result)
 {
-    if (status == -1)
+    if (status == FF_UNITIALIZED)
         ffPreparePublicIp(options);
 
-    if (status == 0)
-        return "Failed to connect to an IP detection server";
+    if (status != NULL)
+        return status;
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
-    bool success = ffNetworkingRecvHttpResponse(&state, &response, options->timeout);
-    if (success) ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
+    const char* error = ffNetworkingRecvHttpResponse(&state, &response);
+    if (error == NULL)
+        ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
+    else
+        return error;
 
-    if (!success || response.length == 0)
-        return "Failed to receive the server response";
+    if (response.length == 0)
+        return "Empty server response received";
 
     if (options->url.length == 0)
     {
@@ -69,5 +84,6 @@ const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* resul
 
     ffStrbufDestroy(&result->ip);
     ffStrbufInitMove(&result->ip, &response);
+    ffStrbufTrimRightSpace(&result->ip);
     return NULL;
 }

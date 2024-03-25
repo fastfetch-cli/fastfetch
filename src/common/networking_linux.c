@@ -5,30 +5,50 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <netinet/in.h> // For FreeBSD
+#include <netinet/tcp.h>
 
-static void connectAndSend(FFNetworkingState* state)
+static const char* connectAndSend(FFNetworkingState* state)
 {
-    struct addrinfo hints = {
-        .ai_family = AF_INET,
-        .ai_socktype = SOCK_STREAM,
-    };
-
+    const char* ret = NULL;
     struct addrinfo* addr;
 
-    if(getaddrinfo(state->host.chars, "80", &hints, &addr) != 0)
+    if(getaddrinfo(state->host.chars, "80", &(struct addrinfo) {
+        .ai_family = AF_INET,
+        .ai_socktype = SOCK_STREAM,
+    }, &addr) != 0)
+    {
+        ret = "getaddrinfo() failed";
         goto error;
+    }
 
     state->sockfd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
     if(state->sockfd == -1)
     {
         freeaddrinfo(addr);
+        ret = "socket() failed";
         goto error;
+    }
+
+    if (state->timeout > 0)
+    {
+        FF_MAYBE_UNUSED uint32_t sec = state->timeout / 1000;
+        if (sec == 0) sec = 1;
+
+        #ifdef TCP_CONNECTIONTIMEOUT
+        setsockopt(state->sockfd, IPPROTO_TCP, TCP_CONNECTIONTIMEOUT, &sec, sizeof(sec));
+        #elif defined(TCP_KEEPINIT)
+        setsockopt(state->sockfd, IPPROTO_TCP, TCP_KEEPINIT, &sec, sizeof(sec));
+        #elif defined(TCP_USER_TIMEOUT)
+        setsockopt(state->sockfd, IPPROTO_TCP, TCP_USER_TIMEOUT, &state->timeout, sizeof(state->timeout));
+        #endif
     }
 
     if(connect(state->sockfd, addr->ai_addr, addr->ai_addrlen) == -1)
     {
         close(state->sockfd);
         freeaddrinfo(addr);
+        ret = "connect() failed";
         goto error;
     }
 
@@ -37,6 +57,7 @@ static void connectAndSend(FFNetworkingState* state)
     if(send(state->sockfd, state->command.chars, state->command.length, 0) < 0)
     {
         close(state->sockfd);
+        ret = "send() failed";
         goto error;
     }
 
@@ -48,11 +69,13 @@ error:
 exit:
     ffStrbufDestroy(&state->host);
     ffStrbufDestroy(&state->command);
+
+    return ret;
 }
 
 FF_THREAD_ENTRY_DECL_WRAPPER(connectAndSend, FFNetworkingState*);
 
-bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
+const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers)
 {
     ffStrbufInitS(&state->host, host);
 
@@ -66,22 +89,30 @@ bool ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, con
     ffStrbufAppendS(&state->command, "\r\n");
 
     #ifdef FF_HAVE_THREADS
+    if (instance.config.general.multithreading)
+    {
         state->thread = ffThreadCreate(connectAndSendThreadMain, state);
-        return !!state->thread;
-    #else
-        connectAndSend(state);
-        return state->sockfd != -1;
+        return state->thread ? NULL : "ffThreadCreate(connectAndSend) failed";
+    }
     #endif
+
+    return connectAndSend(state);
 }
 
-bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, uint32_t timeout)
+const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer)
 {
+    uint32_t timeout = state->timeout;
+
     #ifdef FF_HAVE_THREADS
+    if (instance.config.general.multithreading)
+    {
         if (!ffThreadJoin(state->thread, timeout))
-            return false;
+            return "ffThreadJoin() failed or timeout";
+    }
     #endif
+
     if(state->sockfd == -1)
-        return false;
+        return "ffNetworkingSendHttpRequest() failed";
 
     if(timeout > 0)
     {
@@ -91,14 +122,15 @@ bool ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer, ui
         setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
 
-    ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
-
-    if(received > 0)
-    {
+    uint32_t recvStart;
+    do {
+        recvStart = buffer->length;
+        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
+        if (received <= 0) break;
         buffer->length += (uint32_t) received;
         buffer->chars[buffer->length] = '\0';
-    }
+    } while (ffStrbufGetFree(buffer) > 0 && strstr(buffer->chars + recvStart, "\r\n\r\n") == NULL);
 
     close(state->sockfd);
-    return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n");
+    return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n") ? NULL : "Invalid response";
 }
