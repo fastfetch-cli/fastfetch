@@ -313,7 +313,8 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
             ffStrbufSubstrBefore(&result->prettyName, result->prettyName.length - 4);
 
         if(ffStrbufIgnCaseEqualS(&result->prettyName, "sihost")           ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")
+            ffStrbufIgnCaseEqualS(&result->prettyName, "explorer")        ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "wininit")
         ) {
             // A CUI program created by Windows Explorer will spawn a conhost as its child.
             // However the conhost process is just a placeholder;
