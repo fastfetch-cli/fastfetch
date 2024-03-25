@@ -1,5 +1,8 @@
 # 2.8.10
 
+Changes:
+* Use MS-DOS device name as mountFrom result, instead of useless GUID volume name (Windows, Disk)
+
 Bugfixes:
 * Don't display 0.00 GHz (CPU, FreeBSD)
 * Don't detect manufactor of Qualcomm as ARM (CPU, Android)
