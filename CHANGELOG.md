@@ -2,6 +2,10 @@
 
 Changes:
 * Use MS-DOS device name as mountFrom result, instead of useless GUID volume name (Windows, Disk)
+* Some adjustments to Terminal detection (Terminal, Windows)
+    * Don't pretty print CMD
+    * Print conhost as Windows Console
+    * Don't detect `wininit` as Terminal
 
 Bugfixes:
 * Don't display 0.00 GHz (CPU, FreeBSD)
