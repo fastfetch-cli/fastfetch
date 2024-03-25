@@ -5,6 +5,8 @@ Bugfixes:
 * Don't detect manufactor of Qualcomm as ARM (CPU, Android)
 * Ignore `chezmoi` (Terminal, Linux)
 * Trim trailing possible whitespaces (PublicIP)
+* Fix detection compatibility for KDE 6 (Font, Linux)
+* Always use Metal API to detect vmem size (GPU, macOS)
 
 Features:
 * Improve stability; print more useful error message; avoid misuse (PublicIP / Weather)
