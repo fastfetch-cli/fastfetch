@@ -1,4 +1,0 @@
-version=4
-opts="filenamemangle=s%.*/@ANY_VERSION@%@PACKAGE@-$1.tar.gz%,searchmode=plain" \
-https://api.github.com/repos/fastfetch-cli/fastfetch/releases?per_page=100 \
-https://api.github.com/repos/fastfetch-cli/fastfetch/tarball/@ANY_VERSION@

@@ -1,48 +1,121 @@
-fastfetch (2.8.10) jammy; urgency=medium
+fastfetch (2.8.10) unstable; urgency=medium
 
-  * Update to 2.8.10
+  * Remove libpci-dev in deps(2.8.2)
+  * Submit the Debian directory to upstream
+  * Update to new version
+  * Use the built-in yyjson
 
- -- Carter Li <zhangsongcui@live.cn>  Mon, 25 Mar 2024 15:01:53 +0800
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 26 Mar 2024 20:19:26 +0800
 
-fastfetch (2.8.9) jammy; urgency=medium
+fastfetch (2.4.0-0deepin) unstable; urgency=medium
 
-  * Update to 2.8.9
+  * New upstream version
+  * Improve performance of detecting rpm and pkg package count (Packages, Linux / FreeBSD)
+  * Support Apple M3X temperature detection (CPU / GPU, macOS)
+  * `--ds-force-drm` support a new option `sysfs-only`
+  * Improve xfce4 version detection
+  * Detect WM and DE by enumerating running processes (WM / DE, FreeBSD)
+  * Add a new module `Physical Disk`, which detects product name, full size, serial number and so on.
 
- -- Carter Li <zhangsongcui@live.cn>  Fri, 15 Mar 2024 10:49:42 +0800
+ -- zhangkun <zhangkun2@uniontech.com>  Sun, 24 Dec 2023 16:45:31 +0800
 
-fastfetch (2.8.8) jammy; urgency=medium
+fastfetch (2.2.3-deepin) stable; urgency=medium
 
-  * Update to 2.8.8
+  * New upstream version
+  * Update the latest mac models (Host, macOS)
+  * Fix local ips detection on Android. Regression from v2.2.0 (LocalIP, Android)
+  * Fix terminal detection on NixOS (Terminal)
+  * Fixed some bugs and added some new features
 
- -- Carter Li <zhangsongcui@live.cn>  Fri, 08 Mar 2024 09:59:41 +0800
+ -- zhangkun <zhangkun2@uniontech.com>  Mon, 13 Nov 2023 19:05:14 +0800
 
-fastfetch (2.8.6) jammy; urgency=medium
+fastfetch (2.1.2-deepin) stable; urgency=medium
 
-  * Update to 2.8.6
+  * New upstream version
+  * Fix icon detection on Windows. It shows enabled system icons in desktop (`This PC`, `Recycle Bin`, etc) (Icon, Windows)
+  * Fix compatibility with ddcutil 2.0 (Brightness, Linux)
+  * Fix a compile warning (CPUUsage, FreeBSD)
 
- -- Carter Li <zhangsongcui@live.cn>  Wed, 28 Feb 2024 10:01:40 +0800
+ -- zhangkun <zhangkun2@uniontech.com>  Sun, 22 Oct 2023 18:50:24 +0800
 
-fastfetch (2.8.4) jammy; urgency=medium
+fastfetch (2.1.1-deepin) stable; urgency=medium
 
-  * Update to 2.8.4
+  * New upstream version
+  * Support opkg (Packages, Linux)
+  * Support GNOME Console terminal version and font detection (Terminal, Linux)
+  * Add --cpu-freq-ndigits to set number of digits for CPU frequency (CPU)
+  * New module to detect physical disk I/O usage (DiskIO)
+  * Add --cpuusage-separate to display CPU usage per CPU logical core
+  * Add --brightness-ddcci-sleep to set the sleep times (in ms) when sending DDC/CI requests (Brightness, #580)
+  * Add Chimera Linux
+  * Add EndeavourSmall
+  * Add Xenia
 
- -- Carter Li <zhangsongcui@live.cn>  Fri, 23 Feb 2024 16:14:57 +0800
+ -- zhangkun <zhangkun2@uniontech.com>  Sun, 15 Oct 2023 21:36:21 +0800
 
-fastfetch (2.7.1ubuntu2) jammy; urgency=medium
+fastfetch (2.1.0-deepin) stable; urgency=medium
 
-  * Ignore .git
+  * New upstream version
+  * Add `--format json`, which prints system information as JSON format
+  * Add fast path for xfce4 version detection (DE, FreeBSD)
+  * Support contour terminal version and font detection (Terminal / TerminalFont)
+  * Support `kitty-direct` / `iterm` without specifying logo width / height. Note: in this case, the entre screen will be cleared.
+  * Support new flag `--logo-separate`. If true, print modules at bottom of the logo
+  * Support Apple Silicon CPU frequency detection (CPU, macOS)
+  * Support user login time detection (Users)
+  * Support winget package manager detection, guarded behind `--allow-slow-operations` (Packages, Windows)
+  * Print monitor type (built-in or external) (Display)
+  * Support full GPU detection in WSL (Linux, GPU)
+  * Add `--module-key " "` as a special case for hiding keys
+  * Support `--title-format`. See `fastfetch --help title-format` for detail
+  * Support `--colors-key` (Colors)
+  * Add `-c` as a shortcut of `--load-config`. Note it was used as the shortcut of `--color` before 2.0.5
+  * Support Windows Service Pack vers  * Fix fastfetch hanging in specific environment (#561)
+  * Fix short read when reading from stdin (Logo)
+  * Fix `poll() timeout or failed` error when image is very large (Logo)
+  * Fix Termux Monet terminal version detection (Terminal)
+  * Fix zpool volumes detection (Disk, Linux)
+  * Fix external volumes detection (Disk, Linux)
+  * Fix snap package number detection on systems other than Ubuntu (Packages, Linux)
+  * Fix dpkg / apt package number detection (Packages, Linux)
+  * Fix bluetooth mac address detection (Bluetooth, Windows)ion detection (Kernel, Windows)
+  * Support Debian point releases detection (OS, Linux)
+  * Add new module `NetIO` which prints network throughput (usage) of specified interface. Note this module costs about 1 second to finish.
+  * Use `lscpu` to detect CPU name for ARM CPUs (CPU, Linux)
 
- -- Carter Li <zhangsongcui@live.cn>  Wed, 07 Feb 2024 14:23:23 +0800
+ -- zhangkun <zhangkun2@uniontech.com>  Tue, 03 Oct 2023 17:29:43 +0800
 
-fastfetch (2.7.1ubuntu1) jammy; urgency=medium
+fastfetch (2.0.5-0deepin) stable; urgency=medium
 
-  * Update build scripts
+  * New upstream version
+  * Add option `--disk-use-available` (#543)
+  * Add option `--disk-show-readonly` 
 
- -- Carter Li <zhangsongcui@live.cn>  Wed, 07 Feb 2024 13:53:37 +0800
+ -- xiangzelong <xiangzelong@deepin.com>  Mon, 04 Sep 2023 09:49:08 +0800
 
-fastfetch (2.7.1) jammy; urgency=medium
+fastfetch (2.0.1-0deepin1) stable; urgency=medium
 
-  * Initial release.
+  * enable system yyjson
 
- -- Carter Li <zhangsongcui@live.cn>  Tue, 06 Feb 2024 15:01:11 +0800
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 22 Aug 2023 17:39:04 +0800
 
+fastfetch (2.0.1-0deepin) stable; urgency=medium
+
+  * new upstream release
+  * ntroduces a new configuration file format: JSON config
+  * Add LM (Login Manager) module. 
+  * Fix used spaces calculation (Disk, Linux / BSD / macOS)
+
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 22 Aug 2023 12:47:26 +0800
+
+fastfetch (1.12.2-0deepin1) unstable; urgency=medium
+
+  * fix byteUsed not correctly in ext4
+
+ -- xiangzelong <xiangzelong@deepin.org>  Tue, 01 Aug 2023 16:47:34 +0800
+
+fastfetch (1.12.2-0deepin) unstable; urgency=medium
+
+  * Initial Release.
+
+ -- xiangzelong <xiangzelong@deepin.org>  Mon, 31 Jul 2023 13:30:50 +0800

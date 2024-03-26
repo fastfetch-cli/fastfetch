@@ -1,13 +1,32 @@
 Source: fastfetch
-Section: universe/utils
+Section: utils
 Priority: optional
-Maintainer: Carter Li <zhangsongcui@live.cn>
-Build-Depends: libvulkan-dev, libwayland-dev, libxrandr-dev, libxcb-randr0-dev, libdconf-dev, libdbus-1-dev, libmagickcore-dev, libxfconf-0-dev, libsqlite3-dev, librpm-dev, libegl-dev, libglx-dev, libosmesa6-dev, ocl-icd-opencl-dev, libnm-dev, libpulse-dev, libdrm-dev, libddcutil-dev, libchafa-dev, directx-headers-dev, pkgconf, cmake (>= 3.12), debhelper (>= 11.2), dh-cmake, dh-cmake-compat (= 1), dh-sequence-cmake, dh-sequence-ctest, ninja-build
-Standards-Version: 4.0.0
+Maintainer: xiangzelong <xiangzelong@deepin.org>
+Build-Depends: debhelper-compat (= 13),
+                libvulkan-dev,
+                libwayland-dev,
+                libxrandr-dev,
+                libxcb-randr0-dev,
+                libdconf-dev,
+                libdbus-1-dev,
+                libmagickcore-dev,
+                libxfconf-0-dev,
+                libsqlite3-dev,
+                libzstd-dev,
+                libegl-dev,
+                libglx-dev,
+                libosmesa6-dev,
+                ocl-icd-opencl-dev,
+                libnm-dev,
+                libpulse-dev,
+                cmake (>=3.12.0),
+Standards-Version: 4.6.2.0
 Homepage: https://github.com/fastfetch-cli/fastfetch
 
 Package: fastfetch
+Section: utils
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way.
- It is written mainly in C, with performance and customizability in mind.
+Description: This is a neofetch-like tool for fetching system information and displaying them in a pretty way.
+ It is written mainly in C, with performance and customizability in mind. 
+ Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
