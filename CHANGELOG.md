@@ -1,3 +1,8 @@
+# 2.8.11
+
+Features:
+* Support Lxterminal version detection
+
 # 2.8.10
 
 Bugfixes:
