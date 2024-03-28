@@ -325,6 +325,19 @@ static void detectWarp(FFTerminalFontResult* terminalFont)
     }
 }
 
+static void detectWestonTerminal(FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY size = ffStrbufCreate();
+    ffParsePropFileConfigValues("weston.ini", 2, (FFpropquery[]) {
+        {"font=", &font},
+        {"font-size=", &size},
+    });
+    if (!font.length) ffStrbufSetStatic(&font, "DejaVu Sans Mono");
+    if (!size.length) ffStrbufSetStatic(&size, "14");
+    ffFontInitValues(&terminalFont->font, font.chars, size.chars);
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminal->processName, "konsole"))
@@ -355,4 +368,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectSt(terminalFont, terminal->pid);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "warp"))
         detectWarp(terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "weston-terminal"))
+        detectWestonTerminal(terminalFont);
 }
