@@ -1,7 +1,8 @@
 # 2.8.11
 
 Features:
-* Support Lxterminal version detection
+* Support Lxterminal version detection (Terminal, Linux)
+* Support weston-terminal version and font detection (TerminalFont, Linux)
 
 # 2.8.10
 
