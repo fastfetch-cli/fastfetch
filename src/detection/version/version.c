@@ -32,7 +32,21 @@ void ffDetectVersion(FFVersionResult* version)
     version->cmakeBuiltType = FASTFETCH_PROJECT_CMAKE_BUILD_TYPE;
     version->compileTime = __DATE__ ", " __TIME__;
     #ifdef __clang__
-        version->compiler = "clang " FF_STR(__clang_major__) "." FF_STR(__clang_minor__) "." FF_STR(__clang_patchlevel__);
+        version->compiler =
+            #ifdef _MSC_VER
+                "clang-cl " ;
+            #elif defined(__APPLE__) && defined(__apple_build_version__)
+                "Apple clang "
+            #else
+                "clang "
+            #endif
+
+            FF_STR(__clang_major__) "." FF_STR(__clang_minor__) "." FF_STR(__clang_patchlevel__)
+
+            #if defined(__APPLE__) && defined(__apple_build_version__)
+                " (" FF_STR(__apple_build_version__) ")"
+            #endif
+            ;
     #elif defined(__GNUC__)
         version->compiler = "gcc " FF_STR(__GNUC__) "." FF_STR(__GNUC_MINOR__) "." FF_STR(__GNUC_PATCHLEVEL__);
     #elif defined(_MSC_VER)
