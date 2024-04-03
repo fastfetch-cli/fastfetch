@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 25
+#define FF_PACKAGES_NUM_FORMAT_ARGS 26
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -64,6 +64,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(paludis)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(opkg)
+        FF_PRINT_PACKAGE(am)
 
         putchar('\n');
     }
@@ -95,6 +96,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.paludis},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.winget},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.opkg},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.am},
         }));
     }
 
@@ -141,6 +143,7 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
             FF_TEST_PACKAGE_NAME(SNAP)
             FF_TEST_PACKAGE_NAME(WINGET)
             FF_TEST_PACKAGE_NAME(XBPS)
+            FF_TEST_PACKAGE_NAME(AM)
             #undef FF_TEST_PACKAGE_NAME
 
             if (end)
@@ -210,6 +213,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                     FF_TEST_PACKAGE_NAME(SNAP)
                     FF_TEST_PACKAGE_NAME(WINGET)
                     FF_TEST_PACKAGE_NAME(XBPS)
+                    FF_TEST_PACKAGE_NAME(AM)
                     #undef FF_TEST_PACKAGE_NAME
                 }
             }
@@ -250,6 +254,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(SNAP)
         FF_TEST_PACKAGE_NAME(WINGET)
         FF_TEST_PACKAGE_NAME(XBPS)
+        FF_TEST_PACKAGE_NAME(AM)
         #undef FF_TEST_PACKAGE_NAME
     }
 }
@@ -295,6 +300,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
     FF_APPEND_PACKAGE_COUNT(opkg)
+    FF_APPEND_PACKAGE_COUNT(am)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
@@ -325,7 +331,8 @@ void ffPrintPackagesHelpFormat(void)
         "Number of pkgtool packages",
         "Number of paludis packages",
         "Number of winget packages",
-        "Number of opkg packages"
+        "Number of opkg packages",
+        "Number of am packages",
     }));
 }
 
