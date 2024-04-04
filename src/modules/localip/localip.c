@@ -174,6 +174,15 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "show-prefix-len"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
+        return true;
+    }
+
     if(ffStrEqualsIgnCase(subKey, "compact"))
     {
         if (ffOptionParseBoolean(value))
@@ -247,6 +256,15 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "showPrefixLen"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
+            continue;
+        }
+
         if (ffStrEqualsIgnCase(key, "compact"))
         {
             if (yyjson_get_bool(val))
@@ -292,6 +310,9 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
 
         if (options->showType & FF_LOCALIP_TYPE_LOOP_BIT)
             yyjson_mut_obj_add_bool(doc, module, "showLoop", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showPrefixLen", true);
 
         if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
             yyjson_mut_obj_add_bool(doc, module, "compact", true);
@@ -369,7 +390,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    options->showType = FF_LOCALIP_TYPE_IPV4_BIT;
+    options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
     ffStrbufInit(&options->namePrefix);
     options->defaultRouteOnly =
         #ifdef __ANDROID__

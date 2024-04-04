@@ -1,11 +1,18 @@
-# 2.8.10
+# 2.9.0
 
-Changes:
-* Use MS-DOS device name as mountFrom result, instead of useless GUID volume name (Windows, Disk)
-* Some adjustments to Terminal detection (Terminal, Windows)
-    * Don't pretty print CMD
-    * Print conhost as Windows Console
-    * Don't detect `wininit` as Terminal
+Features:
+* Support Lxterminal version detection (Terminal, Linux)
+* Support weston-terminal version and font detection (TerminalFont, Linux)
+* Support `am` package manager detection (#771, Packages, Linux)
+* Support network prefix length detection for IPv6 (LocalIP)
+* Display all IPs when multiple IPs are assigned to the same interface (LocalIP)
+* Add option `--localip-show-prefix-len` to show network prefix length for both IPv4 and IPv6. Defaults to `true` (LocalIP)
+
+Bugfixes:
+* Fix network prefix length detection when the value is greater than 24 (#773, LocalIP, Linux)
+* For xfce4-terminal, use system mono font if no config file is found (TerminalFont, Linux)
+
+# 2.8.10
 
 Bugfixes:
 * Don't display 0.00 GHz (CPU, FreeBSD)
@@ -17,6 +24,11 @@ Bugfixes:
 
 Features:
 * Improve stability; print more useful error message; avoid misuse (PublicIP / Weather)
+* Use MS-DOS device name as mountFrom result, instead of useless GUID volume name (Windows, Disk)
+* Some adjustments to Terminal detection (Terminal, Windows)
+    * Don't pretty print CMD
+    * Print conhost as Windows Console
+    * Don't detect `wininit` as Terminal
 
 Logo:
 * Fix color of Arco Linux

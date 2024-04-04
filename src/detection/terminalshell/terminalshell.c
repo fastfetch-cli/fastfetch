@@ -400,6 +400,29 @@ FF_MAYBE_UNUSED static bool getTerminalVersionSt(FF_MAYBE_UNUSED FFstrbuf* exe, 
     return version->length > 0;
 }
 
+FF_MAYBE_UNUSED static bool getTerminalVersionLxterminal(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(!getExeVersionRaw(exe, version)) return false;
+    // lxterminal 0.3.2
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    return version->length > 0;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionWeston(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
+{
+    // weston-terminal doesn't report a version, use weston version instead
+    if(ffProcessAppendStdOut(version, (char* const[]){
+        "weston",
+        "--version",
+        NULL
+    })) return false;
+
+    //weston 8.0.0
+    ffStrbufSubstrAfterFirstC(version, ' ');
+
+    return version->length > 0;
+}
+
 static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
 {
     const char* env = getenv("TERMINAL_VERSION_STRING");
@@ -410,7 +433,7 @@ static bool getTerminalVersionContour(FFstrbuf* exe, FFstrbuf* version)
     }
     if(!getExeVersionRaw(exe, version)) return false;
     // Contour Terminal Emulator 0.3.12.262
-    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrAfterLastC(version, ' ');
     return version->length > 0;
 }
 
@@ -524,6 +547,12 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "st"))
         return getTerminalVersionSt(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "lxterminal"))
+        return getTerminalVersionLxterminal(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "weston-terminal"))
+        return getTerminalVersionWeston(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "urxvt") ||
         ffStrbufIgnCaseEqualS(processName, "urxvtd") ||

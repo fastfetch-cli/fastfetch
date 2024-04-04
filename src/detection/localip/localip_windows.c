@@ -6,7 +6,7 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
-static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, bool defaultRoute)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool newIp, bool defaultRoute)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -27,13 +27,15 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
     switch (type)
     {
         case AF_INET:
-            ffStrbufSetS(&ip->ipv4, value);
+            if (ip->ipv4.length) ffStrbufAppendC(&ip->ipv4, ',');
+            ffStrbufAppendS(&ip->ipv4, addr);
             break;
         case AF_INET6:
-            ffStrbufSetS(&ip->ipv6, value);
+            if (ip->ipv6.length) ffStrbufAppendC(&ip->ipv6, ',');
+            ffStrbufAppendS(&ip->ipv6, addr);
             break;
         case -1:
-            ffStrbufSetS(&ip->mac, value);
+            ffStrbufSetS(&ip->mac, addr);
             break;
     }
 }
@@ -108,7 +110,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 char addressBuffer[INET_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
-                if (ifa->OnLinkPrefixLength)
+                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
                 {
                     size_t len = strlen(addressBuffer);
                     snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
@@ -120,8 +122,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
             {
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
-                char addressBuffer[INET6_ADDRSTRLEN];
+                char addressBuffer[INET6_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
+
+                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
+                {
+                    size_t len = strlen(addressBuffer);
+                    snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
+                }
+
                 addNewIp(results, name, addressBuffer, AF_INET6, newIp, isDefaultRoute);
                 newIp = false;
             }

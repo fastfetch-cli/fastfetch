@@ -40,10 +40,12 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
     switch (type)
     {
         case AF_INET:
-            ffStrbufSetS(&ip->ipv4, addr);
+            if (ip->ipv4.length) ffStrbufAppendC(&ip->ipv4, ',');
+            ffStrbufAppendS(&ip->ipv4, addr);
             break;
         case AF_INET6:
-            ffStrbufSetS(&ip->ipv6, addr);
+            if (ip->ipv6.length) ffStrbufAppendC(&ip->ipv6, ',');
+            ffStrbufAppendS(&ip->ipv6, addr);
             break;
         case -1:
             ffStrbufSetS(&ip->mac, addr);
@@ -83,12 +85,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             char addressBuffer[INET_ADDRSTRLEN + 4];
             inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
-            struct sockaddr_in* netmask = (struct sockaddr_in*) ifa->ifa_netmask;
-            int cidr = __builtin_popcount(inet_netof(netmask->sin_addr));
-            if (cidr != 0)
+            if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
             {
-                size_t len = strlen(addressBuffer);
-                snprintf(addressBuffer + len, 4, "/%d", cidr);
+                struct sockaddr_in* netmask = (struct sockaddr_in*) ifa->ifa_netmask;
+                int cidr = __builtin_popcount(netmask->sin_addr.s_addr);
+                if (cidr != 0)
+                {
+                    size_t len = strlen(addressBuffer);
+                    snprintf(addressBuffer + len, 4, "/%d", cidr);
+                }
             }
 
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute);
@@ -99,8 +104,23 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
-            char addressBuffer[INET6_ADDRSTRLEN];
+            char addressBuffer[INET6_ADDRSTRLEN + 4];
             inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
+
+            if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
+            {
+                struct sockaddr_in6* netmask = (struct sockaddr_in6*) ifa->ifa_netmask;
+                int cidr = 0;
+                static_assert(sizeof(netmask->sin6_addr) % sizeof(uint64_t) == 0, "");
+                for (uint32_t i = 0; i < sizeof(netmask->sin6_addr) / sizeof(uint64_t); ++i)
+                    cidr += __builtin_popcountll(((uint64_t*) &netmask->sin6_addr)[i]);
+                if (cidr != 0)
+                {
+                    size_t len = strlen(addressBuffer);
+                    snprintf(addressBuffer + len, 4, "/%d", cidr);
+                }
+            }
+
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute);
         }
         #if defined(__FreeBSD__) || defined(__APPLE__)

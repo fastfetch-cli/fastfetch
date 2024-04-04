@@ -253,6 +253,43 @@ static uint32_t getRpmFromLibrpm(void)
 
 #endif //FF_HAVE_RPM
 
+static uint32_t getAM(FFstrbuf* baseDir)
+{
+    // #771
+    uint32_t baseDirLength = baseDir->length;
+
+    ffStrbufAppendS(baseDir, "/opt");
+    uint32_t optDirLength = baseDir->length;
+
+    uint32_t result = 0;
+
+    ffStrbufAppendS(baseDir, "/am/APP-MANAGER");
+    if (ffPathExists(baseDir->chars, FF_PATHTYPE_FILE))
+    {
+        ++result; // `am` itself is counted as a package too
+        ffStrbufSubstrBefore(baseDir, optDirLength);
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+        if(dirp)
+        {
+            struct dirent *entry;
+            while ((entry = readdir(dirp)) != NULL)
+            {
+                if (entry->d_name[0] == '.') continue;
+                if (entry->d_type == DT_DIR)
+                {
+                    ffStrbufAppendF(baseDir, "/%s/AM-updater", entry->d_name);
+                    if (ffPathExists(baseDir->chars, FF_PATHTYPE_FILE))
+                        ++result;
+                    ffStrbufSubstrBefore(baseDir, optDirLength);
+                }
+            }
+        }
+    }
+
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return result;
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
@@ -277,6 +314,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
     if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
+    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->am = getAM(baseDir);
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)

@@ -21,6 +21,7 @@ int main(void)
         &options->title,
         &options->separator,
         &options->os,
+        &options->host,
         &options->kernel,
         &options->uptime,
         &options->packages,
