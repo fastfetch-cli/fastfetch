@@ -1,8 +1,15 @@
-# 2.8.11
+# 2.9.0
 
 Features:
 * Support Lxterminal version detection (Terminal, Linux)
 * Support weston-terminal version and font detection (TerminalFont, Linux)
+* Support `am` package manager detection (#771, Packages, Linux)
+* Support network prefix length detection for IPv6 (LocalIP)
+* Display all IPs when multiple IPs are assigned to the same interface (LocalIP)
+* Add option `--localip-show-prefix-len` to show network prefix length for both IPv4 and IPv6. Defaults to `true` (LocalIP)
+
+Bugfixes:
+* Fix network prefix length detection when the value is greater than 24 (#773, LocalIP, Linux)
 
 # 2.8.10
 
