@@ -84,7 +84,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
             struct sockaddr_in* netmask = (struct sockaddr_in*) ifa->ifa_netmask;
-            int cidr = __builtin_popcount(inet_netof(netmask->sin_addr));
+            int cidr = __builtin_popcount(netmask->sin_addr.s_addr);
             if (cidr != 0)
             {
                 size_t len = strlen(addressBuffer);
