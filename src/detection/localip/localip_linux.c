@@ -101,8 +101,19 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
-            char addressBuffer[INET6_ADDRSTRLEN];
+            char addressBuffer[INET6_ADDRSTRLEN + 4];
             inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
+
+            struct sockaddr_in6* netmask = (struct sockaddr_in6*) ifa->ifa_netmask;
+            int cidr = 0;
+            for (uint32_t i = 0; i < sizeof(netmask->sin6_addr.s6_addr32) / sizeof(netmask->sin6_addr.s6_addr32[0]); ++i)
+                cidr += __builtin_popcount(netmask->sin6_addr.s6_addr32[i]);
+            if (cidr != 0)
+            {
+                size_t len = strlen(addressBuffer);
+                snprintf(addressBuffer + len, 4, "/%d", cidr);
+            }
+
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute);
         }
         #if defined(__FreeBSD__) || defined(__APPLE__)

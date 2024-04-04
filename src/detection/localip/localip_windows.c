@@ -122,8 +122,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
             {
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
-                char addressBuffer[INET6_ADDRSTRLEN];
+                char addressBuffer[INET6_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
+
+                if (ifa->OnLinkPrefixLength)
+                {
+                    size_t len = strlen(addressBuffer);
+                    snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
+                }
+
                 addNewIp(results, name, addressBuffer, AF_INET6, newIp, isDefaultRoute);
                 newIp = false;
             }
