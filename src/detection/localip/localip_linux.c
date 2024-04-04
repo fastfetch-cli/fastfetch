@@ -111,8 +111,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             {
                 struct sockaddr_in6* netmask = (struct sockaddr_in6*) ifa->ifa_netmask;
                 int cidr = 0;
-                for (uint32_t i = 0; i < sizeof(netmask->sin6_addr.s6_addr32) / sizeof(netmask->sin6_addr.s6_addr32[0]); ++i)
-                    cidr += __builtin_popcount(netmask->sin6_addr.s6_addr32[i]);
+                static_assert(sizeof(netmask->sin6_addr) % sizeof(uint64_t) == 0, "");
+                for (uint32_t i = 0; i < sizeof(netmask->sin6_addr) / sizeof(uint64_t); ++i)
+                    cidr += __builtin_popcountll(((uint64_t*) &netmask->sin6_addr)[i]);
                 if (cidr != 0)
                 {
                     size_t len = strlen(addressBuffer);
