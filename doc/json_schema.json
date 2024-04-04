@@ -1438,6 +1438,11 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "showPrefixLen": {
+                                        "description": "Show network prefix length (/N)",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
                                     "compact": {
                                         "description": "Show all IPs in one line",
                                         "type": "boolean",

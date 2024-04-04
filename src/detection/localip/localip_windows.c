@@ -110,7 +110,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 char addressBuffer[INET_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
-                if (ifa->OnLinkPrefixLength)
+                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
                 {
                     size_t len = strlen(addressBuffer);
                     snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
@@ -125,7 +125,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 char addressBuffer[INET6_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 
-                if (ifa->OnLinkPrefixLength)
+                if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
                 {
                     size_t len = strlen(addressBuffer);
                     snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);

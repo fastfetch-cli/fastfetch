@@ -1262,6 +1262,15 @@
             }
         },
         {
+            "long": "localip-show-prefix-len",
+            "desc": "Show network prefix length (/N) in local ip module",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
             "long": "localip-name-prefix",
             "desc": "Show interfaces with given interface name prefix only",
             "arg": {
