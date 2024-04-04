@@ -10,6 +10,7 @@ Features:
 
 Bugfixes:
 * Fix network prefix length detection when the value is greater than 24 (#773, LocalIP, Linux)
+* For xfce4-terminal, use system mono font if no config file is found (TerminalFont, Linux)
 
 # 2.8.10
 
