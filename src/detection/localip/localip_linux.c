@@ -40,10 +40,12 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
     switch (type)
     {
         case AF_INET:
-            ffStrbufSetS(&ip->ipv4, addr);
+            if (ip->ipv4.length) ffStrbufAppendC(&ip->ipv4, ',');
+            ffStrbufAppendS(&ip->ipv4, addr);
             break;
         case AF_INET6:
-            ffStrbufSetS(&ip->ipv6, addr);
+            if (ip->ipv6.length) ffStrbufAppendC(&ip->ipv6, ',');
+            ffStrbufAppendS(&ip->ipv6, addr);
             break;
         case -1:
             ffStrbufSetS(&ip->mac, addr);

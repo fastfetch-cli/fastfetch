@@ -6,7 +6,7 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
-static void addNewIp(FFlist* list, const char* name, const char* value, int type, bool newIp, bool defaultRoute)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool newIp, bool defaultRoute)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -27,13 +27,15 @@ static void addNewIp(FFlist* list, const char* name, const char* value, int type
     switch (type)
     {
         case AF_INET:
-            ffStrbufSetS(&ip->ipv4, value);
+            if (ip->ipv4.length) ffStrbufAppendC(&ip->ipv4, ',');
+            ffStrbufAppendS(&ip->ipv4, addr);
             break;
         case AF_INET6:
-            ffStrbufSetS(&ip->ipv6, value);
+            if (ip->ipv6.length) ffStrbufAppendC(&ip->ipv6, ',');
+            ffStrbufAppendS(&ip->ipv6, addr);
             break;
         case -1:
-            ffStrbufSetS(&ip->mac, value);
+            ffStrbufSetS(&ip->mac, addr);
             break;
     }
 }
