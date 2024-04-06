@@ -1,8 +1,13 @@
+# 2.9.1
+
+Features:
+* Support weston-terminal (TerminalFont, Linux)
+
 # 2.9.0
 
 Features:
 * Support Lxterminal version detection (Terminal, Linux)
-* Support weston-terminal version and font detection (TerminalFont, Linux)
+* Support weston-terminal version detection (Terminal, Linux)
 * Support `am` package manager detection (#771, Packages, Linux)
 * Support network prefix length detection for IPv6 (LocalIP)
 * Display all IPs when multiple IPs are assigned to the same interface (LocalIP)
