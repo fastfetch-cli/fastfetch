@@ -151,9 +151,9 @@ const FFQtResult* ffDetectQt(void)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA) == 0)
+    if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))
         detectPlasma(&result);
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectLXQt(&result);
 
     return &result;

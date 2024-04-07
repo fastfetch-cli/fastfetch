@@ -91,7 +91,7 @@ void ffDetectCursor(FFCursorResult* result)
         ffStrbufAppendS(&result->error, "Cursor isn't supported in TTY");
     else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))
         detectCursorFromConfigFile("kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
-    else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectCursorFromConfigFile("lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
     else if(ffStrbufIgnCaseEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_HYPRLAND) && detectCursorHyprcursor(result))
         return;
