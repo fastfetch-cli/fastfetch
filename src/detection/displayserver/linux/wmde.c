@@ -52,6 +52,9 @@ static const char* parseEnv(void)
     if(getenv("TDE_FULL_SESSION") != NULL)
         return "Trinity";
 
+    if(getenv("HYPRLAND_CMD") != NULL)
+        return "Hyprland";
+
     #ifdef __linux__
     if(
         getenv("WAYLAND_DISPLAY") != NULL &&
@@ -116,6 +119,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
     else if(ffStrEqualsIgnCase(name, "dtwm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DTWM);
+    else if(ffStrEqualsIgnCase(name, "hyprland"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HYPRLAND);
 }
 
 static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)

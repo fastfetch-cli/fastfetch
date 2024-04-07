@@ -68,6 +68,19 @@ static bool detectCursorFromEnv(FFCursorResult* result)
     return true;
 }
 
+static bool detectCursorHyprcursor(FFCursorResult* result)
+{
+    const char* hyprcursor_theme = getenv("HYPRCURSOR_THEME");
+
+    if(!ffStrSet(hyprcursor_theme))
+        return false;
+
+    ffStrbufAppendS(&result->theme, hyprcursor_theme);
+    ffStrbufAppendS(&result->size, getenv("HYPRCURSOR_SIZE"));
+
+    return true;
+}
+
 void ffDetectCursor(FFCursorResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
@@ -80,6 +93,8 @@ void ffDetectCursor(FFCursorResult* result)
         detectCursorFromConfigFile("kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
     else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectCursorFromConfigFile("lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
+    else if(ffStrbufIgnCaseEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_HYPRLAND) && detectCursorHyprcursor(result))
+        return;
     else if(
         !detectCursorGTK(result) &&
         !detectCursorFromEnv(result) &&

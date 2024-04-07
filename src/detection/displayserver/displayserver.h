@@ -21,6 +21,7 @@
 #define FF_WM_PRETTY_XFWM4 "Xfwm4"
 #define FF_WM_PRETTY_OPENBOX "Openbox"
 #define FF_WM_PRETTY_I3 "i3"
+#define FF_WM_PRETTY_HYPRLAND "Hyprland"
 #define FF_WM_PRETTY_WAYFIRE "Wayfire"
 #define FF_WM_PRETTY_SWAY "Sway"
 #define FF_WM_PRETTY_BSPWM "bspwm"

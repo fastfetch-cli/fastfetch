@@ -2,6 +2,7 @@
 
 Features:
 * Support weston-terminal (TerminalFont, Linux)
+* Support hyprcursor detection (Cursor, Linux)
 
 # 2.9.0
 
