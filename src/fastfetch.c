@@ -841,7 +841,10 @@ static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
     ffMigrateCommandOptionToJsonc(data, doc);
 
     if (ffStrbufEqualS(filename, "-"))
+    {
         yyjson_mut_write_fp(stdout, doc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES, NULL, NULL);
+        putchar('\n');
+    }
     else
     {
         size_t len;
@@ -851,7 +854,12 @@ static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
             printf("Error: failed to generate config file\n");
             exit(1);
         }
-        if (ffWriteFileData(filename->chars, len, str))
+        //TODO clean up when new version of yyjson is available
+        FF_STRBUF_AUTO_DESTROY buf;
+        ffStrbufInitA(&buf, (uint32_t)(strlen(str) + 2));
+        ffStrbufAppendS(&buf, str);
+        ffStrbufAppendC(&buf, '\n');
+        if (ffWriteFileData(filename->chars, buf.length, buf.chars))
             printf("The generated config file has been written in `%s`\n", filename->chars);
         else
         {
