@@ -1,8 +1,11 @@
 # 2.9.1
 
 Features:
-* Support weston-terminal (TerminalFont, Linux)
-* Support hyprcursor detection (Cursor, Linux)
+* Support weston-terminal (missed commit in v2.9.0) (TerminalFont, Linux)
+* Support hyprcursor detection (#776, Cursor, Linux)
+
+Bugfixes:
+* Fix `fastfetch --gen-config` raises SIGSEGV when `~/.config/fastfetch` doesn't exist. Regression of `2.9.0` (#778)
 
 # 2.9.0
 
