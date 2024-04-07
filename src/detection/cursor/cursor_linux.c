@@ -68,18 +68,33 @@ static bool detectCursorFromEnv(FFCursorResult* result)
     return true;
 }
 
+static bool detectCursorHyprcursor(FFCursorResult* result)
+{
+    const char* hyprcursor_theme = getenv("HYPRCURSOR_THEME");
+
+    if(!ffStrSet(hyprcursor_theme))
+        return false;
+
+    ffStrbufAppendS(&result->theme, hyprcursor_theme);
+    ffStrbufAppendS(&result->size, getenv("HYPRCURSOR_SIZE"));
+
+    return true;
+}
+
 void ffDetectCursor(FFCursorResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufCompS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG) == 0)
+    if(ffStrbufEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG))
         ffStrbufAppendS(&result->error, "WSLg uses native windows cursor");
-    else if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         ffStrbufAppendS(&result->error, "Cursor isn't supported in TTY");
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))
         detectCursorFromConfigFile("kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
-    else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectCursorFromConfigFile("lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
+    else if(ffStrbufIgnCaseEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_HYPRLAND) && detectCursorHyprcursor(result))
+        return;
     else if(
         !detectCursorGTK(result) &&
         !detectCursorFromEnv(result) &&
