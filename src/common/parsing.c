@@ -100,19 +100,19 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
 {
     if(gtk2->length > 0 && gtk3->length > 0 && gtk4->length > 0)
     {
-        if((ffStrbufIgnCaseComp(gtk2, gtk3) == 0) && (ffStrbufIgnCaseComp(gtk2, gtk4) == 0))
+        if((ffStrbufIgnCaseEqual(gtk2, gtk3)) && (ffStrbufIgnCaseEqual(gtk2, gtk4)))
         {
             ffStrbufAppend(buffer, gtk4);
             ffStrbufAppendS(buffer, " [GTK2/3/4]");
         }
-        else if(ffStrbufIgnCaseComp(gtk2, gtk3) == 0)
+        else if(ffStrbufIgnCaseEqual(gtk2, gtk3))
         {
             ffStrbufAppend(buffer, gtk3);
             ffStrbufAppendS(buffer, " [GTK2/3], ");
             ffStrbufAppend(buffer, gtk4);
             ffStrbufAppendS(buffer, " [GTK4]");
         }
-        else if(ffStrbufIgnCaseComp(gtk3, gtk4) == 0)
+        else if(ffStrbufIgnCaseEqual(gtk3, gtk4))
         {
             ffStrbufAppend(buffer, gtk2);
             ffStrbufAppendS(buffer, " [GTK2], ");
@@ -131,7 +131,7 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
     }
     else if(gtk2->length > 0 && gtk3->length > 0)
     {
-        if(ffStrbufIgnCaseComp(gtk2, gtk3) == 0)
+        if(ffStrbufIgnCaseEqual(gtk2, gtk3))
         {
             ffStrbufAppend(buffer, gtk3);
             ffStrbufAppendS(buffer, " [GTK2/3]");
@@ -146,7 +146,7 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
     }
     else if(gtk3->length > 0 && gtk4->length > 0)
     {
-        if(ffStrbufIgnCaseComp(gtk3, gtk4) == 0)
+        if(ffStrbufIgnCaseEqual(gtk3, gtk4))
         {
             ffStrbufAppend(buffer, gtk4);
             ffStrbufAppendS(buffer, " [GTK3/4]");

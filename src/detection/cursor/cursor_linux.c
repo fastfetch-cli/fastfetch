@@ -72,11 +72,11 @@ void ffDetectCursor(FFCursorResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufCompS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG) == 0)
+    if(ffStrbufEqualS(&wmde->wmPrettyName, FF_WM_PRETTY_WSLG))
         ffStrbufAppendS(&result->error, "WSLg uses native windows cursor");
-    else if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         ffStrbufAppendS(&result->error, "Cursor isn't supported in TTY");
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))
         detectCursorFromConfigFile("kcminputrc", "cursorTheme =", "Breeze", "cursorSize =", "24", result);
     else if(ffStrbufStartsWithIgnCaseS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectCursorFromConfigFile("lxqt/session.conf", "cursor_theme =", "Adwaita", "cursor_size =", "24", result);
