@@ -294,7 +294,7 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 
     while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &hasGui))
     {
-        if(!hasGui)
+        if(!hasGui || ffStrbufIgnCaseEqualS(&result->processName, "far.exe")) // Far includes GUI objects...
         {
             //We are in nested shell
             ffStrbufClear(&result->processName);
