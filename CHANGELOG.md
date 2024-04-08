@@ -1,3 +1,8 @@
+# 2.9.2
+
+Bugfixes:
+* Better portable mode detection of Windows Terminal (TerminalFont, Windows)
+
 # 2.9.1
 
 Features:

@@ -174,7 +174,7 @@ static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFo
         char* pathEnd = jsonPath + strlen(jsonPath);
         strncpy(pathEnd, ".portable", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
 
-        if(ffPathExists(jsonPath, FF_PATHTYPE_FILE))
+        if(ffPathExists(jsonPath, FF_PATHTYPE_ANY))
         {
             strncpy(pathEnd, "settings\\settings.json", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
             if(!ffAppendFileBuffer(jsonPath, &json))
