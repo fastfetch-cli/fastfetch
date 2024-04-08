@@ -52,6 +52,7 @@ void ffPlatformDestroy(FFPlatform* platform)
     FF_LIST_FOR_EACH(FFstrbuf, dir, platform->dataDirs)
         ffStrbufDestroy(dir);
     ffListDestroy(&platform->dataDirs);
+    ffStrbufDestroy(&platform->exePath);
 
     ffStrbufDestroy(&platform->userName);
     ffStrbufDestroy(&platform->hostName);
