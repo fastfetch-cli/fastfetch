@@ -71,6 +71,12 @@ const char* ffDetectDisksImpl(FFlist* disks)
                 disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
         }
 
+        WIN32_FILE_ATTRIBUTE_DATA data;
+        if(GetFileAttributesExW(mountpoint, GetFileExInfoStandard, &data) && data.ftCreationTime.dwHighDateTime > 0)
+            disk->createTime = (*(uint64_t*) &data.ftCreationTime - 116444736000000000ull) / 10000ull;
+        else
+            disk->createTime = 0;
+
         ffStrbufInitWS(&disk->mountpoint, mountpoint);
         if (mountpoint[2] == L'\\' && mountpoint[3] == L'\0')
         {
