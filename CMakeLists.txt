@@ -699,6 +699,7 @@ check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
     list(APPEND LIBFASTFETCH_SRC src/3rdparty/mk_wcwidch/wcwidth.c)
 endif()
+check_function_exists(statx HAVE_STATX)
 
 if(ENABLE_SYSTEM_YYJSON)
     find_package(yyjson)
@@ -760,6 +761,10 @@ if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 elseif(APPLE)
     target_compile_definitions(libfastfetch PUBLIC _DARWIN_C_SOURCE)
+endif()
+
+if(HAVE_STATX)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_STATX)
 endif()
 
 if(HAVE_WCWIDTH)

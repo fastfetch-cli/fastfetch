@@ -6,9 +6,9 @@
 #include <limits.h>
 #include <ctype.h>
 #include <dirent.h>
+#include <mntent.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <mntent.h>
 #include <sys/mount.h>
 
 #ifdef __USE_LARGEFILE64
@@ -241,6 +241,13 @@ static void detectStats(FFDisk* disk)
 
     if(fs.f_flag & ST_RDONLY)
         disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+
+    disk->createTime = 0;
+    #ifdef FF_HAVE_STATX
+    struct statx stx;
+    if (statx(0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME))
+        disk->createTime = (uint64_t)((stx.stx_btime.tv_sec * 1000) + (stx.stx_btime.tv_nsec / 1000000));
+    #endif
 }
 
 const char* ffDetectDisksImpl(FFlist* disks)
