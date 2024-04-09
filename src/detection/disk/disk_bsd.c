@@ -3,6 +3,7 @@
 #include "util/stringUtils.h"
 
 #include <sys/mount.h>
+#include <sys/stat.h>
 
 #ifdef __FreeBSD__
 #include <libgeom.h>
@@ -130,6 +131,10 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
         if(fs->f_flags & MNT_RDONLY)
             disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+
+        struct stat st;
+        if(stat(fs->f_mntonname, &st) == 0)
+            disk->createTime = (uint64_t)((st.st_birthtimespec.tv_sec * 1000) + (st.st_birthtimespec.tv_nsec / 1000000));
     }
 
     return NULL;
