@@ -1407,6 +1407,7 @@ bool yyjson_mut_doc_set_val_pool_size(yyjson_mut_doc *doc, size_t count) {
 void yyjson_mut_doc_free(yyjson_mut_doc *doc) {
     if (doc) {
         yyjson_alc alc = doc->alc;
+        memset(&doc->alc, 0, sizeof(alc));
         unsafe_yyjson_str_pool_release(&doc->str_pool, &alc);
         unsafe_yyjson_val_pool_release(&doc->val_pool, &alc);
         alc.free(alc.ctx, doc);
@@ -8309,13 +8310,15 @@ static_inline u8 *yyjson_write_single(yyjson_val *val,
     bool cpy = (enc_table == enc_table_cpy);
     bool esc = has_write_flag(ESCAPE_UNICODE) != 0;
     bool inv = has_write_flag(ALLOW_INVALID_UNICODE) != 0;
+    bool newline = has_write_flag(NEWLINE_AT_END) != 0;
+    const usize end_len = 2; /* '\n' and '\0' */
     
     switch (unsafe_yyjson_get_type(val)) {
         case YYJSON_TYPE_RAW:
             str_len = unsafe_yyjson_get_len(val);
             str_ptr = (const u8 *)unsafe_yyjson_get_str(val);
             check_str_len(str_len);
-            incr_len(str_len + 1);
+            incr_len(str_len + end_len);
             cur = write_raw(cur, str_ptr, str_len);
             break;
             
@@ -8323,7 +8326,7 @@ static_inline u8 *yyjson_write_single(yyjson_val *val,
             str_len = unsafe_yyjson_get_len(val);
             str_ptr = (const u8 *)unsafe_yyjson_get_str(val);
             check_str_len(str_len);
-            incr_len(str_len * 6 + 4);
+            incr_len(str_len * 6 + 2 + end_len);
             if (likely(cpy) && unsafe_yyjson_get_subtype(val)) {
                 cur = write_string_noesc(cur, str_ptr, str_len);
             } else {
@@ -8333,7 +8336,7 @@ static_inline u8 *yyjson_write_single(yyjson_val *val,
             break;
             
         case YYJSON_TYPE_NUM:
-            incr_len(32);
+            incr_len(32 + end_len);
             cur = write_number(cur, val, flg);
             if (unlikely(!cur)) goto fail_num;
             break;
@@ -8349,13 +8352,13 @@ static_inline u8 *yyjson_write_single(yyjson_val *val,
             break;
             
         case YYJSON_TYPE_ARR:
-            incr_len(4);
+            incr_len(2 + end_len);
             byte_copy_2(cur, "[]");
             cur += 2;
             break;
             
         case YYJSON_TYPE_OBJ:
-            incr_len(4);
+            incr_len(2 + end_len);
             byte_copy_2(cur, "{}");
             cur += 2;
             break;
@@ -8364,6 +8367,7 @@ static_inline u8 *yyjson_write_single(yyjson_val *val,
             goto fail_type;
     }
     
+    if (newline) *cur++ = '\n';
     *cur = '\0';
     *dat_len = (usize)(cur - hdr);
     memset(err, 0, sizeof(yyjson_write_err));
@@ -8436,6 +8440,7 @@ static_inline u8 *yyjson_write_minify(const yyjson_val *root,
     bool cpy = (enc_table == enc_table_cpy);
     bool esc = has_write_flag(ESCAPE_UNICODE) != 0;
     bool inv = has_write_flag(ALLOW_INVALID_UNICODE) != 0;
+    bool newline = has_write_flag(NEWLINE_AT_END) != 0;
     
     alc_len = root->uni.ofs / sizeof(yyjson_val);
     alc_len = alc_len * YYJSON_WRITER_ESTIMATED_MINIFY_RATIO + 64;
@@ -8542,6 +8547,11 @@ ctn_end:
     }
     
 doc_end:
+    if (newline) {
+        incr_len(2);
+        *(cur - 1) = '\n';
+        cur++;
+    }
     *--cur = '\0';
     *dat_len = (usize)(cur - hdr);
     memset(err, 0, sizeof(yyjson_write_err));
@@ -8615,6 +8625,7 @@ static_inline u8 *yyjson_write_pretty(const yyjson_val *root,
     bool esc = has_write_flag(ESCAPE_UNICODE) != 0;
     bool inv = has_write_flag(ALLOW_INVALID_UNICODE) != 0;
     usize spaces = has_write_flag(PRETTY_TWO_SPACES) ? 2 : 4;
+    bool newline = has_write_flag(NEWLINE_AT_END) != 0;
     
     alc_len = root->uni.ofs / sizeof(yyjson_val);
     alc_len = alc_len * YYJSON_WRITER_ESTIMATED_PRETTY_RATIO + 64;
@@ -8745,6 +8756,10 @@ ctn_end:
     }
     
 doc_end:
+    if (newline) {
+        incr_len(2);
+        *cur++ = '\n';
+    }
     *cur = '\0';
     *dat_len = (usize)(cur - hdr);
     memset(err, 0, sizeof(yyjson_write_err));
@@ -8977,6 +8992,7 @@ static_inline u8 *yyjson_mut_write_minify(const yyjson_mut_val *root,
     bool cpy = (enc_table == enc_table_cpy);
     bool esc = has_write_flag(ESCAPE_UNICODE) != 0;
     bool inv = has_write_flag(ALLOW_INVALID_UNICODE) != 0;
+    bool newline = has_write_flag(NEWLINE_AT_END) != 0;
     
     alc_len = estimated_val_num * YYJSON_WRITER_ESTIMATED_MINIFY_RATIO + 64;
     alc_len = size_align_up(alc_len, sizeof(yyjson_mut_write_ctx));
@@ -9087,6 +9103,11 @@ ctn_end:
     }
     
 doc_end:
+    if (newline) {
+        incr_len(2);
+        *(cur - 1) = '\n';
+        cur++;
+    }
     *--cur = '\0';
     *dat_len = (usize)(cur - hdr);
     err->code = YYJSON_WRITE_SUCCESS;
@@ -9162,6 +9183,7 @@ static_inline u8 *yyjson_mut_write_pretty(const yyjson_mut_val *root,
     bool esc = has_write_flag(ESCAPE_UNICODE) != 0;
     bool inv = has_write_flag(ALLOW_INVALID_UNICODE) != 0;
     usize spaces = has_write_flag(PRETTY_TWO_SPACES) ? 2 : 4;
+    bool newline = has_write_flag(NEWLINE_AT_END) != 0;
     
     alc_len = estimated_val_num * YYJSON_WRITER_ESTIMATED_PRETTY_RATIO + 64;
     alc_len = size_align_up(alc_len, sizeof(yyjson_mut_write_ctx));
@@ -9296,6 +9318,10 @@ ctn_end:
     }
     
 doc_end:
+    if (newline) {
+        incr_len(2);
+        *cur++ = '\n';
+    }
     *cur = '\0';
     *dat_len = (usize)(cur - hdr);
     err->code = YYJSON_WRITE_SUCCESS;
