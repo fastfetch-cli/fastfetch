@@ -14,8 +14,7 @@
         },
         {
             "type": "icons",
-            "key": "I",
-            "format": "{5}"
+            "key": "I"
         },
         {
             "type": "font",
