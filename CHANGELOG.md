@@ -1,6 +1,13 @@
 # 2.9.2
 
+Changes:
+* To make use of the newly introduced `yyjson` flag `YYJSON_WRITE_NEWLINE_AT_END`, fastfetch now requires `yyjson` 0.9.0 or later
+
+Features:
+* Always add a final new-line when generating JSON output
+
 Bugfixes:
+* Fix a memory leak
 * Better portable mode detection of Windows Terminal (TerminalFont, Windows)
 
 # 2.9.1
