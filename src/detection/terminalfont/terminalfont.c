@@ -160,7 +160,7 @@ static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* s
     #include <shlobj.h>
 #endif
 
-static void detectFromWindowsTeriminal(const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
+static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFontResult* terminalFont)
 {
     //https://learn.microsoft.com/en-us/windows/terminal/install#settings-json-file
     FF_STRBUF_AUTO_DESTROY json = ffStrbufCreate();
@@ -432,7 +432,7 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
     //Used by both Linux (WSL) and Windows
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "Windows Terminal") ||
         ffStrbufIgnCaseEqualS(&terminal->processName, "WindowsTerminal.exe"))
-        detectFromWindowsTeriminal(&terminal->exe, terminalFont);
+        detectFromWindowsTerminal(&terminal->exe, terminalFont);
     #endif
 
     else

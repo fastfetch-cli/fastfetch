@@ -260,6 +260,7 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
                     if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
                     {
                         result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
+                        ffStrbufSet(&result->exePath, &result->exe);
                     }
                     else
                     {
