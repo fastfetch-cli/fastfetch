@@ -224,7 +224,7 @@ static const FFlogo A[] = {
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_BLACK,
-            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_RED,
             FF_COLOR_FG_YELLOW,
         },
     },
