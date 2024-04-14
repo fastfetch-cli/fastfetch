@@ -19,15 +19,15 @@
         },
         {
             "type": "host",
-            "key": "  "
+            "key": "  󰌢"
         },
         {
             "type": "cpu",
-            "key": "  "
+            "key": "  󰻠"
         },
         {
             "type": "gpu",
-            "key": "  ﬙"
+            "key": "  󰍛"
         },
         {
             "type": "disk",

@@ -77,17 +77,17 @@
         "break",
         {
             "type": "host",
-            "key": " PC",
+            "key": "󰌢 PC",
             "keyColor": "green"
         },
         {
             "type": "cpu",
-            "key": "├",
+            "key": "├󰻠",
             "keyColor": "green"
         },
         {
             "type": "gpu",
-            "key": "├﬙",
+            "key": "├󰍛",
             "keyColor": "green"
         },
         {
