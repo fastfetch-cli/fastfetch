@@ -98,16 +98,14 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
         if(
             ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "doas")          ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "strace")        ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "sshd")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "guake-wrapped") ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "python")        || // python on windows generates shim executables
             ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || // scoop warps the real binaries with a "shim" exe
             ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
             ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
+            ffStrbufContainIgnCaseS(&result->prettyName, "time")        ||
             ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
         ) {
             ffStrbufClear(&result->processName);
