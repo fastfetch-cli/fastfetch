@@ -98,16 +98,14 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
         if(
             ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "doas")          ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "strace")        ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "sshd")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "guake-wrapped") ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "python")        || // python on windows generates shim executables
             ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || // scoop warps the real binaries with a "shim" exe
             ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
             ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
+            ffStrbufContainIgnCaseS(&result->prettyName, "time")        ||
             ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
         ) {
             ffStrbufClear(&result->processName);
@@ -260,6 +258,7 @@ static bool detectDefaultTerminal(FFTerminalResult* result)
                     if(ffPathExists(result->exe.chars, FF_PATHTYPE_FILE))
                     {
                         result->exeName = result->exe.chars + ffStrbufLastIndexC(&result->exe, '\\') + 1;
+                        ffStrbufSet(&result->exePath, &result->exe);
                     }
                     else
                     {
@@ -294,7 +293,7 @@ static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 
     while (pid != 0 && getProcessInfo(pid, &ppid, &result->processName, &result->exe, &result->exeName, &result->exePath, &hasGui))
     {
-        if(!hasGui)
+        if(!hasGui || ffStrbufIgnCaseEqualS(&result->processName, "far.exe")) // Far includes GUI objects...
         {
             //We are in nested shell
             ffStrbufClear(&result->processName);

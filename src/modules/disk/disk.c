@@ -2,11 +2,12 @@
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
 #include "common/percent.h"
+#include "common/time.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
 #include "util/stringUtils.h"
 
-#define FF_DISK_NUM_FORMAT_ARGS 11
+#define FF_DISK_NUM_FORMAT_ARGS 12
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static void printDisk(FFDiskOptions* options, const FFDisk* disk)
@@ -112,6 +113,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
+
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
@@ -124,6 +126,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
             {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly},
+            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(disk->createTime)},
         }));
     }
 }
@@ -448,6 +451,12 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
             yyjson_mut_arr_add_str(doc, typeArr, "Hidden");
         if(item->type & FF_DISK_VOLUME_TYPE_READONLY_BIT)
             yyjson_mut_arr_add_str(doc, typeArr, "Read-only");
+
+        const char* pstr = ffTimeToFullStr(item->createTime);
+        if (*pstr)
+            yyjson_mut_obj_add_strcpy(doc, obj, "createTime", pstr);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "createTime");
     }
 
     FF_LIST_FOR_EACH(FFDisk, item, disks)
@@ -473,6 +482,7 @@ void ffPrintDiskHelpFormat(void)
         "Filesystem",
         "Label / name",
         "True if read-only",
+        "Create time in local timezone",
     }));
 }
 

@@ -1,10 +1,11 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/time.h"
 #include "detection/uptime/uptime.h"
 #include "modules/uptime/uptime.h"
 #include "util/stringUtils.h"
 
-#define FF_UPTIME_NUM_FORMAT_ARGS 7
+#define FF_UPTIME_NUM_FORMAT_ARGS 6
 
 void ffPrintUptime(FFUptimeOptions* options)
 {
@@ -83,8 +84,7 @@ void ffPrintUptime(FFUptimeOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &minutes},
             {FF_FORMAT_ARG_TYPE_UINT, &seconds},
             {FF_FORMAT_ARG_TYPE_UINT, &milliseconds},
-            {FF_FORMAT_ARG_TYPE_UINT64, &result.uptime},
-            {FF_FORMAT_ARG_TYPE_UINT64, &result.bootTime},
+            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.uptime)},
         }));
     }
 }
@@ -137,7 +137,7 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_uint(doc, obj, "uptime", result.uptime);
-    yyjson_mut_obj_add_uint(doc, obj, "bootTime", result.bootTime);
+    yyjson_mut_obj_add_strcpy(doc, obj, "bootTime", ffTimeToFullStr(result.bootTime));
 }
 
 void ffPrintUptimeHelpFormat(void)
@@ -148,8 +148,7 @@ void ffPrintUptimeHelpFormat(void)
         "Minutes",
         "Seconds",
         "Milliseconds",
-        "Uptime in unix timestamp (ms)",
-        "Boot time in unix timestamp (ms)",
+        "Boot time in local timezone",
     }));
 }
 

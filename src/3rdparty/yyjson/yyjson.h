@@ -527,16 +527,16 @@ extern "C" {
 #define YYJSON_VERSION_MAJOR  0
 
 /** The minor version of yyjson. */
-#define YYJSON_VERSION_MINOR  8
+#define YYJSON_VERSION_MINOR  9
 
 /** The patch version of yyjson. */
 #define YYJSON_VERSION_PATCH  0
 
 /** The version of yyjson in hex: `(major << 16) | (minor << 8) | (patch)`. */
-#define YYJSON_VERSION_HEX    0x000800
+#define YYJSON_VERSION_HEX    0x000900
 
 /** The version string of yyjson. */
-#define YYJSON_VERSION_STRING "0.8.0"
+#define YYJSON_VERSION_STRING "0.9.0"
 
 /** The version of yyjson in hex, same as `YYJSON_VERSION_HEX`. */
 yyjson_api uint32_t yyjson_version(void);
@@ -738,7 +738,7 @@ typedef uint32_t yyjson_read_flag;
     - Report error if double number is infinity.
     - Report error if string contains invalid UTF-8 character or BOM.
     - Report error on trailing commas, comments, inf and nan literals. */
-static const yyjson_read_flag YYJSON_READ_NOFLAG                = 0 << 0;
+static const yyjson_read_flag YYJSON_READ_NOFLAG                = 0;
 
 /** Read the input data in-situ.
     This option allows the reader to modify and use input data to store string
@@ -1067,7 +1067,7 @@ typedef uint32_t yyjson_write_flag;
     - Report error on inf or nan number.
     - Report error on invalid UTF-8 string.
     - Do not escape unicode or slash. */
-static const yyjson_write_flag YYJSON_WRITE_NOFLAG                  = 0 << 0;
+static const yyjson_write_flag YYJSON_WRITE_NOFLAG                  = 0;
 
 /** Write JSON pretty with 4 space indent. */
 static const yyjson_write_flag YYJSON_WRITE_PRETTY                  = 1 << 0;
@@ -1095,6 +1095,10 @@ static const yyjson_write_flag YYJSON_WRITE_ALLOW_INVALID_UNICODE   = 1 << 5;
 /** Write JSON pretty with 2 space indent.
     This flag will override `YYJSON_WRITE_PRETTY` flag. */
 static const yyjson_write_flag YYJSON_WRITE_PRETTY_TWO_SPACES       = 1 << 6;
+
+/** Adds a newline character `\n` at the end of the JSON.
+    This can be helpful for text editors or NDJSON. */
+static const yyjson_write_flag YYJSON_WRITE_NEWLINE_AT_END          = 1 << 7;
 
 
 
@@ -3695,7 +3699,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_strcpy(yyjson_mut_doc *doc,
     The `len` should be the length of the `val`, in bytes.
     This function allows duplicated key in one object.
     
-    @warning The key/value strings are not copied, you should keep these strings
+    @warning The key strings are not copied, you should keep these strings
         unmodified for the lifetime of this JSON document. */
 yyjson_api_inline bool yyjson_mut_obj_add_strncpy(yyjson_mut_doc *doc,
                                                   yyjson_mut_val *obj,
@@ -4829,6 +4833,7 @@ yyjson_api_inline size_t yyjson_doc_get_val_count(yyjson_doc *doc) {
 yyjson_api_inline void yyjson_doc_free(yyjson_doc *doc) {
     if (doc) {
         yyjson_alc alc = doc->alc;
+        memset(&doc->alc, 0, sizeof(alc));
         if (doc->str_pool) alc.free(alc.ctx, doc->str_pool);
         alc.free(alc.ctx, doc);
     }
@@ -5668,6 +5673,7 @@ yyjson_api_inline yyjson_mut_val *yyjson_mut_bool(yyjson_mut_doc *doc,
     if (yyjson_likely(doc)) {
         yyjson_mut_val *val = unsafe_yyjson_mut_val(doc, 1);
         if (yyjson_likely(val)) {
+            _val = !!_val;
             val->tag = YYJSON_TYPE_BOOL | (uint8_t)((uint8_t)_val << 3);
             return val;
         }
@@ -5920,7 +5926,8 @@ yyjson_api_inline yyjson_mut_val *yyjson_mut_arr(yyjson_mut_doc *doc) {
 yyjson_api_inline yyjson_mut_val *yyjson_mut_arr_with_bool(
     yyjson_mut_doc *doc, const bool *vals, size_t count) {
     yyjson_mut_arr_with_func({
-        val->tag = YYJSON_TYPE_BOOL | (uint8_t)((uint8_t)vals[i] << 3);
+        bool _val = !!vals[i];
+        val->tag = YYJSON_TYPE_BOOL | (uint8_t)((uint8_t)_val << 3);
     });
 }
 
@@ -6872,6 +6879,7 @@ yyjson_api_inline bool yyjson_mut_obj_add_bool(yyjson_mut_doc *doc,
                                                const char *_key,
                                                bool _val) {
     yyjson_mut_obj_add_func({
+        _val = !!_val;
         val->tag = YYJSON_TYPE_BOOL | (uint8_t)((uint8_t)(_val) << 3);
     });
 }
@@ -7730,33 +7738,39 @@ yyjson_api_inline bool yyjson_ptr_get_bool(
 }
 
 /**
- Set provided `value` if the JSON Pointer (RFC 6901) exists and is type uint.
- Returns true if value at `ptr` exists and is the correct type, otherwise false.
+ Set provided `value` if the JSON Pointer (RFC 6901) exists and is an integer
+ that fits in `uint64_t`. Returns true if successful, otherwise false.
  */
 yyjson_api_inline bool yyjson_ptr_get_uint(
     yyjson_val *root, const char *ptr, uint64_t *value) {
     yyjson_val *val = yyjson_ptr_get(root, ptr);
-    if (value && yyjson_is_uint(val)) {
-        *value = unsafe_yyjson_get_uint(val);
-        return true;
-    } else {
-        return false;
+    if (value && val) {
+        uint64_t ret = val->uni.u64;
+        if (unsafe_yyjson_is_uint(val) ||
+            (unsafe_yyjson_is_sint(val) && !(ret >> 63))) {
+            *value = ret;
+            return true;
+        }
     }
+    return false;
 }
 
 /**
- Set provided `value` if the JSON Pointer (RFC 6901) exists and is type sint.
- Returns true if value at `ptr` exists and is the correct type, otherwise false.
+ Set provided `value` if the JSON Pointer (RFC 6901) exists and is an integer
+ that fits in `int64_t`. Returns true if successful, otherwise false.
  */
 yyjson_api_inline bool yyjson_ptr_get_sint(
     yyjson_val *root, const char *ptr, int64_t *value) {
     yyjson_val *val = yyjson_ptr_get(root, ptr);
-    if (value && yyjson_is_sint(val)) {
-        *value = unsafe_yyjson_get_sint(val);
-        return true;
-    } else {
-        return false;
+    if (value && val) {
+        int64_t ret = val->uni.i64;
+        if (unsafe_yyjson_is_sint(val) ||
+            (unsafe_yyjson_is_uint(val) && ret >= 0)) {
+            *value = ret;
+            return true;
+        }
     }
+    return false;
 }
 
 /**

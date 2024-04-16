@@ -123,33 +123,63 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                 *end = '\0';
 
             #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(start, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
-            if (false);
-            FF_TEST_PACKAGE_NAME(APK)
-            FF_TEST_PACKAGE_NAME(BREW)
-            FF_TEST_PACKAGE_NAME(CHOCO)
-            FF_TEST_PACKAGE_NAME(DPKG)
-            FF_TEST_PACKAGE_NAME(EMERGE)
-            FF_TEST_PACKAGE_NAME(EOPKG)
-            FF_TEST_PACKAGE_NAME(FLATPAK)
-            FF_TEST_PACKAGE_NAME(NIX)
-            FF_TEST_PACKAGE_NAME(OPKG)
-            FF_TEST_PACKAGE_NAME(PACMAN)
-            FF_TEST_PACKAGE_NAME(PALUDIS)
-            FF_TEST_PACKAGE_NAME(PKG)
-            FF_TEST_PACKAGE_NAME(PKGTOOL)
-            FF_TEST_PACKAGE_NAME(MACPORTS)
-            FF_TEST_PACKAGE_NAME(RPM)
-            FF_TEST_PACKAGE_NAME(SCOOP)
-            FF_TEST_PACKAGE_NAME(SNAP)
-            FF_TEST_PACKAGE_NAME(WINGET)
-            FF_TEST_PACKAGE_NAME(XBPS)
-            FF_TEST_PACKAGE_NAME(AM)
+            switch (toupper(start[0]))
+            {
+                case 'A': if (false);
+                    FF_TEST_PACKAGE_NAME(APK)
+                    FF_TEST_PACKAGE_NAME(AM)
+                    break;
+                case 'B': if (false);
+                    FF_TEST_PACKAGE_NAME(BREW)
+                    break;
+                case 'C': if (false);
+                    FF_TEST_PACKAGE_NAME(CHOCO)
+                    break;
+                case 'D': if (false);
+                    FF_TEST_PACKAGE_NAME(DPKG)
+                    break;
+                case 'E': if (false);
+                    FF_TEST_PACKAGE_NAME(EMERGE)
+                    FF_TEST_PACKAGE_NAME(EOPKG)
+                    break;
+                case 'F': if (false);
+                    FF_TEST_PACKAGE_NAME(FLATPAK)
+                    break;
+                case 'M': if (false);
+                    FF_TEST_PACKAGE_NAME(MACPORTS)
+                    break;
+                case 'N': if (false);
+                    FF_TEST_PACKAGE_NAME(NIX)
+                    break;
+                case 'O': if (false);
+                    FF_TEST_PACKAGE_NAME(OPKG)
+                    break;
+                case 'P': if (false);
+                    FF_TEST_PACKAGE_NAME(PACMAN)
+                    FF_TEST_PACKAGE_NAME(PKG)
+                    FF_TEST_PACKAGE_NAME(PKGTOOL)
+                    FF_TEST_PACKAGE_NAME(PALUDIS)
+                    break;
+                case 'R': if (false);
+                    FF_TEST_PACKAGE_NAME(RPM)
+                    break;
+                case 'S': if (false);
+                    FF_TEST_PACKAGE_NAME(SCOOP)
+                    FF_TEST_PACKAGE_NAME(SNAP)
+                    break;
+                case 'W': if (false);
+                    FF_TEST_PACKAGE_NAME(WINGET)
+                    break;
+                case 'X': if (false);
+                    FF_TEST_PACKAGE_NAME(XBPS)
+                    break;
+            }
             #undef FF_TEST_PACKAGE_NAME
 
             if (end)
             {
                 start = end + 1;
-                end = strchr(end, ':');
+                end = strchr(start, ':');
             }
             else
                 break;
@@ -193,29 +223,60 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                     const char* flag = yyjson_get_str(flagObj);
 
                     #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(flag, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
-                    if (false);
-                    FF_TEST_PACKAGE_NAME(APK)
-                    FF_TEST_PACKAGE_NAME(BREW)
-                    FF_TEST_PACKAGE_NAME(CHOCO)
-                    FF_TEST_PACKAGE_NAME(DPKG)
-                    FF_TEST_PACKAGE_NAME(EMERGE)
-                    FF_TEST_PACKAGE_NAME(EOPKG)
-                    FF_TEST_PACKAGE_NAME(FLATPAK)
-                    FF_TEST_PACKAGE_NAME(NIX)
-                    FF_TEST_PACKAGE_NAME(OPKG)
-                    FF_TEST_PACKAGE_NAME(PACMAN)
-                    FF_TEST_PACKAGE_NAME(PALUDIS)
-                    FF_TEST_PACKAGE_NAME(PKG)
-                    FF_TEST_PACKAGE_NAME(PKGTOOL)
-                    FF_TEST_PACKAGE_NAME(MACPORTS)
-                    FF_TEST_PACKAGE_NAME(RPM)
-                    FF_TEST_PACKAGE_NAME(SCOOP)
-                    FF_TEST_PACKAGE_NAME(SNAP)
-                    FF_TEST_PACKAGE_NAME(WINGET)
-                    FF_TEST_PACKAGE_NAME(XBPS)
-                    FF_TEST_PACKAGE_NAME(AM)
+                    switch (toupper(flag[0]))
+                    {
+                        case 'A': if (false);
+                            FF_TEST_PACKAGE_NAME(APK)
+                            FF_TEST_PACKAGE_NAME(AM)
+                            break;
+                        case 'B': if (false);
+                            FF_TEST_PACKAGE_NAME(BREW)
+                            break;
+                        case 'C': if (false);
+                            FF_TEST_PACKAGE_NAME(CHOCO)
+                            break;
+                        case 'D': if (false);
+                            FF_TEST_PACKAGE_NAME(DPKG)
+                            break;
+                        case 'E': if (false);
+                            FF_TEST_PACKAGE_NAME(EMERGE)
+                            FF_TEST_PACKAGE_NAME(EOPKG)
+                            break;
+                        case 'F': if (false);
+                            FF_TEST_PACKAGE_NAME(FLATPAK)
+                            break;
+                        case 'M': if (false);
+                            FF_TEST_PACKAGE_NAME(MACPORTS)
+                            break;
+                        case 'N': if (false);
+                            FF_TEST_PACKAGE_NAME(NIX)
+                            break;
+                        case 'O': if (false);
+                            FF_TEST_PACKAGE_NAME(OPKG)
+                            break;
+                        case 'P': if (false);
+                            FF_TEST_PACKAGE_NAME(PACMAN)
+                            FF_TEST_PACKAGE_NAME(PKG)
+                            FF_TEST_PACKAGE_NAME(PKGTOOL)
+                            FF_TEST_PACKAGE_NAME(PALUDIS)
+                            break;
+                        case 'R': if (false);
+                            FF_TEST_PACKAGE_NAME(RPM)
+                            break;
+                        case 'S': if (false);
+                            FF_TEST_PACKAGE_NAME(SCOOP)
+                            FF_TEST_PACKAGE_NAME(SNAP)
+                            break;
+                        case 'W': if (false);
+                            FF_TEST_PACKAGE_NAME(WINGET)
+                            break;
+                        case 'X': if (false);
+                            FF_TEST_PACKAGE_NAME(XBPS)
+                            break;
+                    }
                     #undef FF_TEST_PACKAGE_NAME
                 }
+                continue;
             }
         }
 

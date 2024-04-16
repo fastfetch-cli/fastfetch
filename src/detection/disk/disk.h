@@ -17,6 +17,8 @@ typedef struct FFDisk
 
     uint32_t filesUsed;
     uint32_t filesTotal;
+
+    uint64_t createTime;
 } FFDisk;
 
 /**

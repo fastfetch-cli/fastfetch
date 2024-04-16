@@ -23,7 +23,7 @@
             "type": "os"
         },
         {
-            "key": "     Machine      ",
+            "key": "    󰌢 Machine      ",
             "keyColor": "green",
             "type": "host"
         },
@@ -64,12 +64,12 @@
             "type": "terminal"
         },
         {
-            "key": "     CPU          ",
+            "key": "    󰻠 CPU          ",
             "keyColor": "yellow",
             "type": "cpu"
         },
         {
-            "key": "    ﬙ GPU          ",
+            "key": "    󰍛 GPU          ",
             "keyColor": "blue",
             "type": "gpu"
         },

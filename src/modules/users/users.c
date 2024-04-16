@@ -1,10 +1,9 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/time.h"
 #include "detection/users/users.h"
 #include "modules/users/users.h"
 #include "util/stringUtils.h"
-
-#include <time.h>
 
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
@@ -57,12 +56,7 @@ void ffPrintUsers(FFUsersOptions* options)
                     ffStrbufAppendF(&result, "@%s", user->hostName.chars);
 
                 if(user->loginTime)
-                {
-                    char buf[64];
-                    time_t time = (time_t) (user->loginTime / 1000);
-                    strftime(buf, sizeof(buf), "%FT%T%z", localtime(&time));
-                    ffStrbufAppendF(&result, " - login time %s", buf);
-                }
+                    ffStrbufAppendF(&result, " - login time %s", ffTimeToShortStr(user->loginTime));
 
                 ffStrbufPutTo(&result, stdout);
             }
@@ -79,7 +73,7 @@ void ffPrintUsers(FFUsersOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostName},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->sessionName},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &user->clientIp},
-                {FF_FORMAT_ARG_TYPE_UINT64, &user->loginTime},
+                {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(user->loginTime)},
             }));
         }
     }
@@ -163,7 +157,11 @@ void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_m
         yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &user->hostName);
         yyjson_mut_obj_add_strbuf(doc, obj, "sessionName", &user->sessionName);
         yyjson_mut_obj_add_strbuf(doc, obj, "clientIp", &user->clientIp);
-        yyjson_mut_obj_add_uint(doc, obj, "loginTime", user->loginTime);
+        const char* pstr = ffTimeToFullStr(user->loginTime);
+        if (*pstr)
+            yyjson_mut_obj_add_strcpy(doc, obj, "loginTime", pstr);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "loginTime");
     }
 
 exit:
@@ -183,7 +181,7 @@ void ffPrintUsersHelpFormat(void)
         "Host name",
         "Session name",
         "Client IP",
-        "Login Time"
+        "Login Time in local timezone"
     }));
 }
 

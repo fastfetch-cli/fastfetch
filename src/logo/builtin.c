@@ -224,7 +224,7 @@ static const FFlogo A[] = {
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_BLACK,
-            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_RED,
             FF_COLOR_FG_YELLOW,
         },
     },
@@ -2931,6 +2931,14 @@ static const FFlogo O[] = {
         },
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // openSuseMicroOS
+    {
+        .names = {"opensuse-microos", "opensuse_microos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_MICROOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
     },
     // OpenSuseLeap
     {

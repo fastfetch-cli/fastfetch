@@ -13,6 +13,7 @@ assignees: ''
 
 * What happened:
 * What should happen:
+* Fastfetch version used: <!-- please use the latest version, if possible -->
 * Did it work in an older version: <!-- if yes, which version -->
 * Where did you get the binary: <!-- Github Release / Github Actions / Installed with a package manager (What package manager) / Built from source yourself -->
 * Does this issue still occurs in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)?
@@ -41,18 +42,19 @@ Output of `fastfetch --list-features`:
 //paste here
 ```
 
-## If fastfatch crashed
+## If fastfatch crashed or freezed
 
 Paste the stacktrace here. You may get it with:
 
-```
-$ gdb -q -ex 'set confirm off' -ex run -ex 'bt full' -ex quit --args /path/to/fastfetch
+```shell
+# You may need Ctrl+C to stop the process if it freezes
+gdb -q -ex 'set confirm off' -ex run -ex 'bt full' -ex quit --args /path/to/fastfetch
 ```
 
 If you are able to identify which module crashed, the strace can be helpful too
 
-```
-$ strace /path/to/fastfetch --multithreading false --structure {MODULE} --pipe
+```shell
+strace /path/to/fastfetch --multithreading false -s {MODULE} --pipe
 ```
 
 If you cannot do the instructions above, please upload the core dump file:
