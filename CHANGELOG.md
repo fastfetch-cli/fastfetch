@@ -11,6 +11,8 @@ Features:
 Bugfixes:
 * Fix a memory leak
 * Better portable mode detection of Windows Terminal (TerminalFont, Windows)
+* Fix parsing of option `--packages-disabled` (Packages)
+* Don't use command `time` as a shell (Shell)
 
 Logos:
 * Add openSUSE MicroOS
