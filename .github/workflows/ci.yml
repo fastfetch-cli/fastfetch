@@ -19,58 +19,6 @@ jobs:
       - name: Run Spellchecker
         run: codespell
 
-  linux-buildtest:
-    name: Linux build test
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        compiler: [
-          { cc: gcc, cxx: "g++" },
-          { cc: clang, cxx: "clang++" },
-          { cc: "musl-gcc", cxx: "musl-g++" }
-        ]
-        enableFeatures: [ON, OFF]
-        exclude:
-          # The feature libraries are all build against glibc, so they can't be used with musl
-          - compiler: { cc: "musl-gcc", cxx: "musl-g++" }
-            enableFeatures: ON
-    runs-on: ubuntu-22.04
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: uname -a
-        run: uname -a
-
-      - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y musl-dev musl-tools linux-headers-generic libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libddcutil-dev libchafa-dev libdrm-dev directx-headers-dev
-
-      - name: configure project
-        env:
-          CC: ${{ matrix.compiler.cc }}
-          CXX: ${{ matrix.compiler.cxx }}
-        run: cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_VULKAN=${{ matrix.enableFeatures }} -DENABLE_WAYLAND=${{ matrix.enableFeatures }} -DENABLE_XCB_RANDR=${{ matrix.enableFeatures }} -DENABLE_XCB=${{ matrix.enableFeatures }} -DENABLE_XRANDR=${{ matrix.enableFeatures }} -DENABLE_X11=${{ matrix.enableFeatures }} -DENABLE_GIO=${{ matrix.enableFeatures }} -DENABLE_DCONF=${{ matrix.enableFeatures }} -DENABLE_DBUS=${{ matrix.enableFeatures }} -DENABLE_XFCONF=${{ matrix.enableFeatures }} -DENABLE_SQLITE3=${{ matrix.enableFeatures }} -DENABLE_RPM=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK7=${{ matrix.enableFeatures }} -DENABLE_IMAGEMAGICK6=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} -DENABLE_ZLIB=${{ matrix.enableFeatures }} -DENABLE_EGL=${{ matrix.enableFeatures }} -DENABLE_GLX=${{ matrix.enableFeatures }} -DENABLE_OSMESA=${{ matrix.enableFeatures }} -DENABLE_OPENCL=${{ matrix.enableFeatures }} -DENABLE_LIBNM=${{ matrix.enableFeatures }} -DENABLE_PULSE=${{ matrix.enableFeatures }} -DENABLE_DIRECTX_HEADERS=${{ matrix.enableFeatures }} -DENABLE_DRM=${{ matrix.enableFeatures }} -DENABLE_DDCUTIL=${{ matrix.enableFeatures }} -DENABLE_CHAFA=${{ matrix.enableFeatures }} .
-
-      - name: build project
-        run: cmake --build . --verbose -j4
-
-      - name: run tests
-        run: ctest
-
-      - name: run fastfetch --list-features
-        run: ./fastfetch --list-features
-
-      - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
-
-      - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
-
-      - name: run flashfetch
-        run: time ./flashfetch
-
   Linux-old-amd64:
     name: Linux-old-amd64
     runs-on: ubuntu-20.04
@@ -228,6 +176,84 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-linux-aarch64
+          path: ./fastfetch-*.*
+
+  musl-amd64:
+    name: Musl-amd64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup alpine linux
+        uses: jirutka/setup-alpine@master
+
+      - name: install dependencies
+        run: |
+          cat /etc/alpine-release
+          uname -a
+          apk add cmake samurai vulkan-loader-dev libxcb-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev gcc g++
+        shell: alpine.sh --root {0}
+
+      - name: build
+        run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -GNinja .
+            cmake --build . --target package --verbose -j4
+        shell: alpine.sh {0}
+
+      - name: run
+        run: |
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+        shell: alpine.sh {0}
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-musl-amd64
+          path: ./fastfetch-*.*
+
+  musl-aarch64:
+    name: Musl-aarch64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup alpine linux
+        uses: jirutka/setup-alpine@master
+        with:
+          arch: aarch64
+
+      - name: install dependencies
+        run: |
+          cat /etc/alpine-release
+          uname -a
+          apk add cmake samurai vulkan-loader-dev libxcb-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev gcc g++
+        shell: alpine.sh --root {0}
+
+      - name: build
+        run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -GNinja .
+            cmake --build . --target package --verbose -j4
+        shell: alpine.sh {0}
+
+      - name: run
+        run: |
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+        shell: alpine.sh {0}
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-musl-aarch64
           path: ./fastfetch-*.*
 
   macos-universal:
@@ -495,6 +521,8 @@ jobs:
     needs:
       - linux-amd64
       - linux-aarch64
+      - musl-amd64
+      - musl-aarch64
       - macos-universal
       - freebsd-amd64
       - freebsd-aarch64
