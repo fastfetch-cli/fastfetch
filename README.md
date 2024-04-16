@@ -27,7 +27,7 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ### Linux
 
-Some distros packaged a outdated fastfetch version. Older version is not supported, please always ensure that the latest version is used.
+Some distros packaged an outdated fastfetch version. Older version is not supported, please always ensure that the latest version is used.
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or above)
 * Debian / Ubuntu: Download `fastfetch-<version>-Linux.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and `dpkg -i fastfetch-<version>-Linux.deb` (for Ubuntu 22.04 or above and Debian 12 or above).
@@ -41,7 +41,9 @@ Some distros packaged a outdated fastfetch version. Older version is not support
 
 Replace sudo with doas depending on what you use.
 
-[See also if fastfetch has been packaged for your favorite Linux distro](#Packaging)
+[See also if fastfetch has been packaged for your favorite Linux distro](#Packaging).
+
+If fastfetch is not packaged for your distro or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternate: `brew install fastfetch`
 
 ### macOS
 
