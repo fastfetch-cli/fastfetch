@@ -1576,9 +1576,35 @@
                                         "description": "List installed package managers and count of installed packages"
                                     },
                                     "disabled": {
-                                        "description": "A colon separated list of package managers to be disabled when detecting",
-                                        "type": "string",
-                                        "default": "winget"
+                                        "description": "List of package managers to be disabled when detecting",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "am",
+                                                "apk",
+                                                "brew",
+                                                "choco",
+                                                "dpkg",
+                                                "emerge",
+                                                "eopkg",
+                                                "flatpak",
+                                                "macports",
+                                                "nix",
+                                                "opkg",
+                                                "pacman",
+                                                "paludis",
+                                                "pkg",
+                                                "pkgtool",
+                                                "rpm",
+                                                "scoop",
+                                                "snap",
+                                                "winget",
+                                                "xbps"
+                                            ],
+                                            "uniqueItems": true
+                                        },
+                                        "default": ["winget"]
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

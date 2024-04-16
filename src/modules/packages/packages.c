@@ -276,6 +276,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                     }
                     #undef FF_TEST_PACKAGE_NAME
                 }
+                continue;
             }
         }
 
