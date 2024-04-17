@@ -5,6 +5,9 @@
 
 #include "detection/displayserver/displayserver.h"
 
+bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName);
+
+const char* ffdsConnectWlroots(FFDisplayServerResult* result);
 void ffdsConnectWayland(FFDisplayServerResult* result);
 
 void ffdsConnectXcbRandr(FFDisplayServerResult* result);

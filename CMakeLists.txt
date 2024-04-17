@@ -400,6 +400,7 @@ if(LINUX)
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
+        src/detection/displayserver/linux/wlroots.c
         src/detection/displayserver/linux/wayland.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
