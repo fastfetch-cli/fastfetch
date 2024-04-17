@@ -56,7 +56,7 @@ static void getGnome(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
     getGnomeBySo(result);
 
-    if (result->length == 0)
+    if (result->length == 0 && options->slowVersionDetection)
     {
         if (ffProcessAppendStdOut(result, (char* const[]){
             "gnome-shell",
