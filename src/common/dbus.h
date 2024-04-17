@@ -48,6 +48,6 @@ bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result);
 bool ffDBusGetByte(FFDBusData* dbus, DBusMessageIter* iter, uint8_t* result);
 DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method);
 DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property);
-void ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
+bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
 
 #endif // FF_HAVE_DBUS
