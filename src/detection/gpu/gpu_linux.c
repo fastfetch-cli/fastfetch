@@ -20,8 +20,9 @@ FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, uint32_t deviceClass
 
     FF_LIST_FOR_EACH(FFTempValue, tempValue, *tempsResult)
     {
+        // https://www.kernel.org/doc/html/v5.10/gpu/amdgpu.html#hwmon-interfaces
         // FIXME: this code doesn't take multiGPUs into count
-        //The kernel exposes the device class multiplied by 256 for some reason
+        // The kernel exposes the device class multiplied by 256 for some reason
         if(tempValue->deviceClass == deviceClass * 256)
         {
             gpu->temperature = tempValue->value;
@@ -50,6 +51,31 @@ static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
             ffStrbufTrimRightSpace(buffer);
             ffStrbufAppendC(&gpu->driver, ' ');
             ffStrbufAppend(&gpu->driver, buffer);
+        }
+    }
+}
+
+static void pciDetectVmem(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+{
+    // https://www.kernel.org/doc/html/v5.10/gpu/amdgpu.html#mem-info-vis-vram-total
+    ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
+    uint64_t size = 0;
+    if (ffReadFileBuffer(pciDir->chars, buffer) && (size = ffStrbufToUInt(buffer, 0)))
+    {
+        gpu->type = size > 1024UL * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        if (gpu->type == FF_GPU_TYPE_DISCRETE)
+            gpu->dedicated.total = size;
+        else
+            gpu->shared.total = size;
+
+        ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
+        ffStrbufAppendS(pciDir, "/mem_info_vram_used");
+        if (ffReadFileBuffer(pciDir->chars, buffer) && (size = ffStrbufToUInt(buffer, 0)))
+        {
+            if (gpu->type == FF_GPU_TYPE_DISCRETE)
+                gpu->dedicated.used = size;
+            else
+                gpu->shared.used = size;
         }
     }
 }
@@ -153,6 +179,9 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
                 loadPciIds(&pciids);
             ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
+
+        pciDetectVmem(gpu, &pciDir, &buffer);
+        ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
 
         pciDetectDriver(gpu, &pciDir, &buffer);
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
