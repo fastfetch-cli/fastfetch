@@ -469,6 +469,32 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
+{
+    // kitty is written in python. `kitty --version` can be expensive
+    char buffer[1024] = {};
+    if (ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
+        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer))
+    {
+        // Starts from version 0.17.0
+        // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
+        const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
+        if (p)
+        {
+            p += strlen("version: Version = Version(");
+            int major, minor, patch;
+            if (sscanf(p, "%d,%d,%d", &major, &minor, &patch) == 3)
+            {
+                ffStrbufSetF(version, "%d.%d.%d", major, minor, patch);
+                return true;
+            }
+        }
+    }
+
+    //kitty 0.21.2 created by Kovid Goyal
+    return getExeVersionGeneral(exe, version);
+}
+
 #ifdef _WIN32
 
 static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
@@ -576,7 +602,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     #ifndef _WIN32
 
     if(ffStrbufIgnCaseEqualS(processName, "kitty"))
-        return getExeVersionGeneral(exe, version); //kitty 0.21.2 created by Kovid Goyal
+        return getTerminalVersionKitty(exe, version);
 
     if (ffStrbufIgnCaseEqualS(processName, "Tabby") && getExeVersionRaw(exe, version))
         return true;
