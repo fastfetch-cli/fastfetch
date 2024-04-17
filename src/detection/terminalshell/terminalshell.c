@@ -469,6 +469,7 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+#ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
     // kitty is written in python. `kitty --version` can be expensive
@@ -494,6 +495,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
     //kitty 0.21.2 created by Kovid Goyal
     return getExeVersionGeneral(exe, version);
 }
+#endif
 
 #ifdef _WIN32
 
