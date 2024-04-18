@@ -66,7 +66,13 @@ const char* ffdsConnectWlroots(FFDisplayServerResult* result)
 
             FF_STRBUF_AUTO_DESTROY displayName = ffStrbufCreate();
             if (!ffdsMatchDrmConnector(connName, &displayName))
-                ffStrbufSetS(&displayName, yyjson_get_str(yyjson_obj_get(device, "description")));
+            {
+                const char* desc = yyjson_get_str(yyjson_obj_get(device, "description"));
+                if (ffStrContains(desc, "(null)"))
+                    ffStrbufSetS(&displayName, connName);
+                else
+                    ffStrbufSetS(&displayName, desc);
+            }
             uint32_t rotation = 0;
             const char* transform = yyjson_get_str(yyjson_obj_get(device, "transform"));
             if (!ffStrEquals(transform, "normal"))
