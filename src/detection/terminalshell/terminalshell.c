@@ -223,6 +223,8 @@ static bool getShellVersionGeneric(FFstrbuf* exe, const char* exeName, FFstrbuf*
 
 bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
+    if (!instance.config.display.tsVersion) return false;
+
     if(strcasecmp(exeName, "bash") == 0 || strcasecmp(exeName, "sh") == 0)
         return getShellVersionBash(exe, version);
     if(strcasecmp(exeName, "zsh") == 0)
@@ -530,6 +532,8 @@ static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
+    if (!instance.config.display.tsVersion) return false;
+
     #ifdef __ANDROID__
 
     if(ffStrbufEqualS(processName, "com.termux"))

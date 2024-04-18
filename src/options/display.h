@@ -50,6 +50,7 @@ typedef struct FFOptionsDisplay
     FFstrbuf percentColorRed;
     bool noBuffer;
     uint32_t keyWidth;
+    bool tsVersion;
 } FFOptionsDisplay;
 
 const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_val* root);
