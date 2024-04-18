@@ -7,6 +7,25 @@ void ffEdidGetPhysicalResolution(const uint8_t edid[128], uint32_t* width, uint3
     *height = (((uint32_t) edid[dtd + 7] >> 4) << 8) | edid[dtd + 5];
 }
 
+void ffEdidGetPreferredResolutionAndRefreshRate(const uint8_t edid[128], uint32_t* width, uint32_t* height, double* refreshRate)
+{
+    for (uint32_t i = 0x36; i < 0x7E; i += 0x12)
+    { // read through descriptor blocks...
+        if (edid[i] != 0x00 && edid[i + 1] != 0x00)
+        { // a dtd
+            uint32_t hactive = edid[i+2] + ((edid[i + 4] & 0xf0) << 4);
+            uint32_t hblank = edid[i+3] + ((edid[i + 4] & 0x0f) << 8);
+            uint32_t vactive = edid[i+5] + ((edid[i + 7] & 0xf0) << 4);
+            uint32_t vblank = edid[i+6] + ((edid[i + 7] & 0x0f) << 8);
+            uint32_t pixclk = (edid[i+1] << 8) | (edid[i]);
+            *width = hactive;
+            *height = vactive;
+            *refreshRate = (double)pixclk * 10000 / (double)(hactive+hblank) / (double)(vactive+vblank);
+            return;
+        }
+    }
+}
+
 void ffEdidGetVendorAndModel(const uint8_t edid[128], FFstrbuf* result)
 {
     // https://github.com/jinksong/read_edid/blob/master/parse-edid/parse-edid.c
