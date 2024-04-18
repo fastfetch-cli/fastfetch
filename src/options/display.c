@@ -189,7 +189,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             options->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
             options->keyWidth = (uint32_t) yyjson_get_uint(val);
-        else if (ffStrEndsWithIgnCase(key, "tsVersion"))
+        else if (ffStrEqualsIgnCase(key, "tsVersion"))
             options->tsVersion = yyjson_get_bool(val);
         else
             return "Unknown display property";
