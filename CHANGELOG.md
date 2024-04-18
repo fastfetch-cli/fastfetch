@@ -3,9 +3,11 @@
 Features:
 * We now use `wlr-randr` to detect displays for hyprland, which correctly reports fractional scale factors. Experimental (Display, Linux)
 * Support GPU memory usage detection for AMD GPUs (GPU, Linux)
+* Support GPU frequency detection for Intel GPUs (GPU, Linux)
 * Improve performance of Gnome version detection (DE, Linux)
 * Improve performance of kitty version detection (Terminal, Linux)
 * Detect refresh rate when using `--ds-force-drm sysfs-only` (Display, Linux)
+* Add option `--ts-version` to disable terminal and shell version detection
 
 Bugfixes:
 * Correctly detect `/bin/sh` as current shell if it's used as default shell (Shell, Linux)
