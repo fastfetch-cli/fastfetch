@@ -84,7 +84,7 @@ static void pciDetectVmem(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 
 static void pciDetectVfreq(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
-    if (ffStrbufEndsWithS(pciDir, "/device")) // Must be in `/sys/class/drm/cardN/device`
+    if (!ffStrbufEndsWithS(pciDir, "/device")) // Must be in `/sys/class/drm/cardN/device`
         return;
 
     // Works for Intel GPUs
