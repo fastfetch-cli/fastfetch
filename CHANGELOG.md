@@ -1,3 +1,15 @@
+# 2.10.0
+
+Features:
+* We now use `wlr-randr` to detect displays for hyprland, which correctly reports fractional scale factors. Experimental (Display, Linux)
+* Support GPU memory usage detection for AMD GPUs (GPU, Linux)
+* Improve performance of Gnome version detection (DE, Linux)
+* Improve performance of kitty version detection (Terminal, Linux)
+* Detect refresh rate when using `--ds-force-drm sysfs-only` (Display, Linux)
+
+Bugfixes:
+* Correctly detect `/bin/sh` as current shell if it's used as default shell (Shell, Linux)
+
 # 2.9.2
 
 Changes:
