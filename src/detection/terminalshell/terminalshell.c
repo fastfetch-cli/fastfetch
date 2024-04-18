@@ -474,24 +474,21 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
     #ifdef __linux__
     // kitty is written in python. `kitty --version` can be expensive
-    if (ffStrbufStartsWithS(exe, FASTFETCH_TARGET_DIR_USR "/bin/"))
+    char buffer[1024] = {};
+    if (ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
+        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer))
     {
-        char buffer[1024] = {};
-        if (ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
-            ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer))
+        // Starts from version 0.17.0
+        // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
+        const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
+        if (p)
         {
-            // Starts from version 0.17.0
-            // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
-            const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
-            if (p)
+            p += strlen("version: Version = Version(");
+            int major, minor, patch;
+            if (sscanf(p, "%d,%d,%d", &major, &minor, &patch) == 3)
             {
-                p += strlen("version: Version = Version(");
-                int major, minor, patch;
-                if (sscanf(p, "%d,%d,%d", &major, &minor, &patch) == 3)
-                {
-                    ffStrbufSetF(version, "%d.%d.%d", major, minor, patch);
-                    return true;
-                }
+                ffStrbufSetF(version, "%d.%d.%d", major, minor, patch);
+                return true;
             }
         }
     }
