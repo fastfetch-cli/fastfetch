@@ -472,25 +472,30 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
+    #ifdef __linux__
     // kitty is written in python. `kitty --version` can be expensive
-    char buffer[1024] = {};
-    if (ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
-        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer))
+    if (ffStrbufStartsWithS(exe, FASTFETCH_TARGET_DIR_USR "/bin/"))
     {
-        // Starts from version 0.17.0
-        // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
-        const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
-        if (p)
+        char buffer[1024] = {};
+        if (ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
+            ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer))
         {
-            p += strlen("version: Version = Version(");
-            int major, minor, patch;
-            if (sscanf(p, "%d,%d,%d", &major, &minor, &patch) == 3)
+            // Starts from version 0.17.0
+            // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
+            const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
+            if (p)
             {
-                ffStrbufSetF(version, "%d.%d.%d", major, minor, patch);
-                return true;
+                p += strlen("version: Version = Version(");
+                int major, minor, patch;
+                if (sscanf(p, "%d,%d,%d", &major, &minor, &patch) == 3)
+                {
+                    ffStrbufSetF(version, "%d.%d.%d", major, minor, patch);
+                    return true;
+                }
             }
         }
     }
+    #endif
 
     //kitty 0.21.2 created by Kovid Goyal
     return getExeVersionGeneral(exe, version);
