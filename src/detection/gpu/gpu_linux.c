@@ -84,10 +84,13 @@ static void pciDetectVmem(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 
 static void pciDetectVfreq(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
+    if (ffStrbufEndsWithS(pciDir, "/device")) // Must be in `/sys/class/drm/cardN/device`
+        return;
+
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
-    ffStrbufSetNS(buffer, ffStrbufLastIndexC(pciDir, '/'), pciDir->chars);
-    ffStrbufAppendS(buffer, "/gt_cur_freq_mhz");
+    ffStrbufSetNS(buffer, pciDir->length - (uint32_t) strlen("device"), pciDir->chars);
+    ffStrbufAppendS(buffer, "gt_cur_freq_mhz");
     char str[16];
     ssize_t len = ffReadFileData(buffer->chars, sizeof(str) - 1, str);
     if (len > 1)
@@ -125,7 +128,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         return "Invalid modalias string";
 
     if (classId != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
-        return "Should not happen";
+        return "Not a GPU device";
 
     char pciPath[PATH_MAX];
     ssize_t pathLength = readlink(drmDir->chars, pciPath, sizeof(pciPath) - 1);
@@ -232,7 +235,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
 
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     gpu->deviceId = strtoul(buffer->chars + index, NULL, 10);
-    ffStrbufInitStatic(&gpu->name, ffCPUAppleCodeToName(gpu->deviceId));
+    ffStrbufInitStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
     ffStrbufInitStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
     ffStrbufInit(&gpu->driver);
     ffStrbufInit(&gpu->platformApi);
@@ -255,7 +258,7 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(drmDir.chars);
     if(dir == NULL)
-        return "/sys/class/drm doesn't exist";
+        return "Failed to open `/sys/class/drm/`";
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
@@ -286,13 +289,56 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
     return NULL;
 }
 
+
+static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
+{
+    //https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-bus-pci
+    const char* pciDirPath = "/sys/bus/pci/devices/";
+
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDirPath);
+    if(dirp == NULL)
+        return "Failed to open `/sys/bus/pci/devices/`";
+
+    FF_STRBUF_AUTO_DESTROY pciDir = ffStrbufCreateA(64);
+    ffStrbufAppendS(&pciDir, pciDirPath);
+
+    const uint32_t pciBaseDirLength = pciDir.length;
+
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        if(entry->d_name[0] == '.')
+            continue;
+
+        ffStrbufSubstrBefore(&pciDir, pciBaseDirLength);
+        ffStrbufAppendS(&pciDir, entry->d_name);
+        const uint32_t pciDevDirLength = pciDir.length;
+
+        ffStrbufAppendS(&pciDir, "/modalias");
+        if (!ffReadFileBuffer(pciDir.chars, &buffer))
+            continue;
+        ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
+        assert(ffStrbufStartsWithS(&buffer, "pci:"));
+
+        detectPci(options, gpus, &buffer, &pciDir);
+        ffStrbufSubstrBefore(&pciDir, pciBaseDirLength);
+    }
+
+    return NULL;
+}
+
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
     #ifdef FF_HAVE_DIRECTX_HEADERS
         const char* ffGPUDetectByDirectX(const FFGPUOptions* options, FFlist* gpus);
-        if (!ffGPUDetectByDirectX(options, gpus))
+        if (ffGPUDetectByDirectX(options, gpus) == NULL)
             return NULL;
     #endif
 
-    return drmDetectGPUs(options, gpus);
+    if (drmDetectGPUs(options, gpus) == NULL && gpus->length > 0)
+        return NULL;
+
+    return pciDetectGPUs(options, gpus);
 }
