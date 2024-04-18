@@ -214,31 +214,43 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
     pid_t ppid = 0;
     int32_t tty = -1;
 
+    const char* userShellName = NULL;
+    {
+        uint32_t index = ffStrbufLastIndexC(&instance.state.platform.userShell, '/');
+        if (index == instance.state.platform.userShell.length)
+            userShellName = instance.state.platform.userShell.chars;
+        else
+            userShellName = instance.state.platform.userShell.chars + index + 1;
+    }
+
     while (getProcessNameAndPpid(pid, name, &ppid, &tty) == NULL)
     {
-        //Common programs that are between terminal and own process, but are not the shell
-        if(
-            // tty < 0                                  || //A shell should connect to a tty
-            ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
-            ffStrEquals(name, "sudo")                ||
-            ffStrEquals(name, "su")                  ||
-            ffStrEquals(name, "strace")              ||
-            ffStrEquals(name, "sshd")                ||
-            ffStrEquals(name, "gdb")                 ||
-            ffStrEquals(name, "lldb")                ||
-            ffStrEquals(name, "lldb-mi")             ||
-            ffStrEquals(name, "login")               ||
-            ffStrEquals(name, "ltrace")              ||
-            ffStrEquals(name, "perf")                ||
-            ffStrEquals(name, "guake-wrapped")       ||
-            ffStrEquals(name, "time")                ||
-            ffStrContainsIgnCase(name, "debug")      ||
-            ffStrContainsIgnCase(name, "not-found")  ||
-            ffStrEndsWith(name, ".sh")
-        )
+        if (!ffStrEquals(userShellName, name))
         {
-            pid = ppid;
-            continue;
+            //Common programs that are between terminal and own process, but are not the shell
+            if(
+                // tty < 0                                  || //A shell should connect to a tty
+                ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
+                ffStrEquals(name, "sudo")                ||
+                ffStrEquals(name, "su")                  ||
+                ffStrEquals(name, "strace")              ||
+                ffStrEquals(name, "sshd")                ||
+                ffStrEquals(name, "gdb")                 ||
+                ffStrEquals(name, "lldb")                ||
+                ffStrEquals(name, "lldb-mi")             ||
+                ffStrEquals(name, "login")               ||
+                ffStrEquals(name, "ltrace")              ||
+                ffStrEquals(name, "perf")                ||
+                ffStrEquals(name, "guake-wrapped")       ||
+                ffStrEquals(name, "time")                ||
+                ffStrContainsIgnCase(name, "debug")      ||
+                ffStrContainsIgnCase(name, "not-found")  ||
+                ffStrEndsWith(name, ".sh")
+            )
+            {
+                pid = ppid;
+                continue;
+            }
         }
 
         result->pid = (uint32_t) pid;
