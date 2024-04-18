@@ -22,3 +22,4 @@ typedef struct FFCPUResult
 
 const char* ffCPUDetectByCpuid(FFCPUResult* cpu);
 const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu);
+const char* ffCPUAppleCodeToName(uint32_t code);

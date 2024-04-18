@@ -18,3 +18,24 @@ const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu)
     ffStrbufTrimRight(&cpu->name, ' '); //If we removed the @ in previous step there was most likely a space before it
     return NULL;
 }
+
+const char* ffCPUAppleCodeToName(uint32_t code)
+{
+    // https://github.com/AsahiLinux/docs/wiki/Codenames
+    switch (code)
+    {
+        case 8103: return "Apple M1";
+        case 6000: return "Apple M1 Pro";
+        case 6001: return "Apple M1 Max";
+        case 6002: return "Apple M1 Ultra";
+        case 8112: return "Apple M2";
+        case 6020: return "Apple M2 Pro";
+        case 6021: return "Apple M2 Max";
+        case 6022: return "Apple M2 Ultra";
+        case 8122: return "Apple M3";
+        case 6030: return "Apple M3 Pro";
+        case 6031:
+        case 6034: return "Apple M3 Max";
+        default: return "Apple Silicon";
+    }
+}
