@@ -13,11 +13,11 @@ void ffEdidGetPreferredResolutionAndRefreshRate(const uint8_t edid[128], uint32_
     { // read through descriptor blocks...
         if (edid[i] != 0x00 && edid[i + 1] != 0x00)
         { // a dtd
-            uint32_t hactive = edid[i+2] + ((edid[i + 4] & 0xf0) << 4);
-            uint32_t hblank = edid[i+3] + ((edid[i + 4] & 0x0f) << 8);
-            uint32_t vactive = edid[i+5] + ((edid[i + 7] & 0xf0) << 4);
-            uint32_t vblank = edid[i+6] + ((edid[i + 7] & 0x0f) << 8);
-            uint32_t pixclk = (edid[i+1] << 8) | (edid[i]);
+            uint32_t hactive = edid[i+2] + (uint32_t) ((edid[i + 4] & 0xf0) << 4);
+            uint32_t hblank = edid[i+3] + (uint32_t) ((edid[i + 4] & 0x0f) << 8);
+            uint32_t vactive = edid[i+5] + (uint32_t) ((edid[i + 7] & 0xf0) << 4);
+            uint32_t vblank = edid[i+6] + (uint32_t) ((edid[i + 7] & 0x0f) << 8);
+            uint32_t pixclk = ((uint32_t) edid[i+1] << 8) | (edid[i]);
             *width = hactive;
             *height = vactive;
             *refreshRate = (double)pixclk * 10000 / (double)(hactive+hblank) / (double)(vactive+vblank);
