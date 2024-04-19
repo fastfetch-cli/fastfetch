@@ -5,6 +5,9 @@
 #include "util/stringUtils.h"
 
 #include <ctype.h>
+#ifdef __FreeBSD__
+    #include <paths.h>
+#endif
 
 #ifdef _WIN32
 
@@ -474,11 +477,17 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__FreeBSD__)
     // kitty is written in python. `kitty --version` can be expensive
     char buffer[1024] = {};
-    if (ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
-        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer))
+    if (
+        #ifdef __linux__
+        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
+        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer)
+        #else
+        ffReadFileData(_PATH_LOCALBASE "/share/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer)
+        #endif
+    )
     {
         // Starts from version 0.17.0
         // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
