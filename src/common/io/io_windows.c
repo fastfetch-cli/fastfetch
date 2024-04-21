@@ -1,4 +1,5 @@
 #include "io.h"
+#include "fastfetch.h"
 #include "util/stringUtils.h"
 
 #include <windows.h>
@@ -174,6 +175,9 @@ void ffListFilesRecursively(const char* path, bool pretty)
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
+    if (instance.config.display.pipe)
+        return "Not supported in --pipe mode";
+
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
     DWORD prev_mode;
     GetConsoleMode(hInput, &prev_mode);
