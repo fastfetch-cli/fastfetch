@@ -4,7 +4,7 @@ Changes:
 * We now always detect max frequency of GPUs for consistent, instead of current frequency
 
 Features:
-* We now use `wlr-randr` to detect displays for hyprland, which correctly reports fractional scale factors (Display, Linux)
+* We now use `wlr-randr` to detect displays for wlroots based WMs, which correctly reports fractional scale factors (Display, Linux)
 * Improve GPU detection on Linux (GPU, Linux)
     * Support GPU memory usage detection for AMD GPUs
     * Support GPU frequency detection for Intel GPUs

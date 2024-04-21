@@ -11,20 +11,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     if (instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE)
     {
-        #ifdef __linux__
-        {
-            const char* desktopSession = getenv("DESKTOP_SESSION");
-            if (desktopSession && ffStrEquals(desktopSession, "hyprland"))
-            {
-                ffStrbufSetStatic(&ds->wmProcessName, "xdg-desktop-portal-hyprland");
-                ffStrbufSetStatic(&ds->wmPrettyName, FF_WM_PRETTY_HYPRLAND);
-                ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
-                if (ffdsConnectWlroots(ds) == NULL)
-                    return;
-            }
-        }
-        #endif
-
         //We try wayland as our preferred display server, as it supports the most features.
         //This method can't detect the name of our WM / DE
         ffdsConnectWayland(ds);
