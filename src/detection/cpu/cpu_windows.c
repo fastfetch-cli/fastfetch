@@ -64,13 +64,12 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
             return "No active CPU is found in SMBIOS data";
     }
 
-    if (data->MaxSpeed > 0 && data->MaxSpeed < 30000) // VMware reports weird values
-    {
-        double speed = data->MaxSpeed / 1000.0;
-        if (cpu->frequencyBase < speed)
-            cpu->frequencyMax = speed;
-    }
+    double speed = data->MaxSpeed / 1000.0;
+    // Sometimes SMBIOS reports invalid value. We assume that max speed is small than 2x of base
+    if (speed < cpu->frequencyBase || speed > cpu->frequencyBase * 2)
+        return "Possible invalid CPU max speed in SMBIOS data. See #800";
 
+    cpu->frequencyMax = speed;
 
     return NULL;
 }
