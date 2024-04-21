@@ -11,7 +11,7 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetTemperature)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMemoryInfo_v2)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetNumGpuCores)
-    FF_LIBRARY_SYMBOL(nvmlDeviceGetClockInfo)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxClockInfo)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetBrand)
 
     bool inited;
@@ -32,7 +32,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetTemperature)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMemoryInfo_v2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetNumGpuCores)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetClockInfo)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxClockInfo)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetBrand)
 
         if (ffnvmlInit_v2() != NVML_SUCCESS)
@@ -122,7 +122,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     if (result.frequency)
     {
         uint32_t clockMHz;
-        if (nvmlData.ffnvmlDeviceGetClockInfo(device, NVML_CLOCK_GRAPHICS, &clockMHz) == NVML_SUCCESS)
+        if (nvmlData.ffnvmlDeviceGetMaxClockInfo(device, NVML_CLOCK_GRAPHICS, &clockMHz) == NVML_SUCCESS)
             *result.frequency = clockMHz / 1000.;
     }
 

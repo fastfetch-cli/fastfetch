@@ -14,7 +14,7 @@ struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlEnumMemoryModules)
     FF_LIBRARY_SYMBOL(ctlMemoryGetState)
     FF_LIBRARY_SYMBOL(ctlEnumFrequencyDomains)
-    FF_LIBRARY_SYMBOL(ctlFrequencyGetState)
+    FF_LIBRARY_SYMBOL(ctlFrequencyGetProperties)
 
     bool inited;
     ctl_api_handle_t apiHandle;
@@ -44,7 +44,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumMemoryModules)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetState)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumFrequencyDomains)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlFrequencyGetState)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlFrequencyGetProperties)
 
         if (ffctlInit(&(ctl_init_args_t) {
             .AppVersion = CTL_MAKE_VERSION(CTL_IMPL_MAJOR_VERSION, CTL_IMPL_MINOR_VERSION),
@@ -177,22 +177,21 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
 
     if (result.frequency)
     {
-        ctl_freq_handle_t freqs[16];
-        uint32_t freqCount = sizeof(freqs) / sizeof(freqs[0]);
-        if (igclData.ffctlEnumFrequencyDomains(device, &freqCount, freqs) == CTL_RESULT_SUCCESS && freqCount > 0)
+        ctl_freq_handle_t domains[16];
+        uint32_t domainCount = sizeof(domains) / sizeof(domains[0]);
+        if (igclData.ffctlEnumFrequencyDomains(device, &domainCount, domains) == CTL_RESULT_SUCCESS && domainCount > 0)
         {
-            double sumValue = 0;
-            uint32_t availableCount = 0;
-            for (uint32_t iFreq = 0; iFreq < freqCount; iFreq++)
+            double maxValue = 0;
+            ctl_freq_properties_t props = { .Size = sizeof(props), .Version = 0 };
+            for (uint32_t iDomain = 0; iDomain < domainCount; iDomain++)
             {
-                ctl_freq_state_t state = { .Size = sizeof(state), .Version = 0 };
-                if (igclData.ffctlFrequencyGetState(freqs[iFreq], &state) == CTL_RESULT_SUCCESS)
+                if (igclData.ffctlFrequencyGetProperties(domains[iDomain], &props) == CTL_RESULT_SUCCESS)
                 {
-                    sumValue += state.actual;
-                    availableCount++;
+                    if (props.type == CTL_FREQ_DOMAIN_GPU && props.max > maxValue)
+                        maxValue = props.max;
                 }
             }
-            *result.frequency = (sumValue / availableCount) / 1000.;
+            *result.frequency = maxValue / 1000;
         }
     }
 

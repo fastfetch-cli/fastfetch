@@ -90,7 +90,7 @@ static void pciDetectVfreq(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
     ffStrbufSetNS(buffer, pciDir->length - (uint32_t) strlen("device"), pciDir->chars);
-    ffStrbufAppendS(buffer, "gt_cur_freq_mhz");
+    ffStrbufAppendS(buffer, "gt_max_freq_mhz");
     char str[16];
     ssize_t len = ffReadFileData(buffer->chars, sizeof(str) - 1, str);
     if (len > 1)
