@@ -1,16 +1,23 @@
 # 2.10.0
 
+Changes:
+* We now always detect max frequency of GPUs for consistent, instead of current frequency
+
 Features:
-* We now use `wlr-randr` to detect displays for hyprland, which correctly reports fractional scale factors. Experimental (Display, Linux)
-* Support GPU memory usage detection for AMD GPUs (GPU, Linux)
-* Support GPU frequency detection for Intel GPUs (GPU, Linux)
+* We now use `wlr-randr` to detect displays for hyprland, which correctly reports fractional scale factors (Display, Linux)
+* Improve GPU detection on Linux (GPU, Linux)
+    * Support GPU memory usage detection for AMD GPUs
+    * Support GPU frequency detection for Intel GPUs
 * Improve performance of Gnome version detection (DE, Linux)
 * Improve performance of kitty version detection (Terminal, Linux)
 * Detect refresh rate when using `--ds-force-drm sysfs-only` (Display, Linux)
-* Add option `--ts-version` to disable terminal and shell version detection
+* Add option `--ts-version` to disable terminal and shell version detection. Mainly for benchmarking purposes
+* Improve performance of detecting WSL version (Host, Linux)
 
 Bugfixes:
-* Correctly detect `/bin/sh` as current shell if it's used as default shell (Shell, Linux)
+* Correctly detect `/bin/sh` as current shell if it's used as default shell (#798, Shell, Linux)
+* Work around an issue which CPU module reports incorrect CPU frequency that is too high (#800, CPU, Linux)
+* Don't print ANSI escape codes in `--pipe` mode
 
 # 2.9.2
 
