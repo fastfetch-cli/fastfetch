@@ -31,7 +31,7 @@ static bool isPhysicalDevice(const struct mntent* device)
 
     //DrvFs is a filesystem plugin to WSL that was designed to support interop between WSL and the Windows filesystem.
     if(ffStrEquals(device->mnt_type, "9p"))
-        return true;
+        return ffStrContains(device->mnt_opts, "aname=drvfs");
 
     //ZFS pool
     if(ffStrEquals(device->mnt_type, "zfs"))
