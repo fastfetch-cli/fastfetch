@@ -1,7 +1,7 @@
 # 2.10.1
 
 Bugfixes:
-* fix build with ENABLE_DBUS=OFF
+* fix build with `-DENABLE_DBUS=OFF`
 
 # 2.10.0
 
