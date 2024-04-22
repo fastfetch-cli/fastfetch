@@ -36,21 +36,21 @@ static void waylandZwlrRefreshListener(void* data, FF_MAYBE_UNUSED struct zwlr_o
     mode->refreshRate = rate;
 }
 
+static const struct zwlr_output_mode_v1_listener modeListener = {
+    .size = waylandZwlrSizeListener,
+    .refresh = waylandZwlrRefreshListener,
+    .preferred = (void*) stubListener,
+    .finished = (void*) stubListener,
+};
+
 static void waylandZwlrModeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, struct zwlr_output_mode_v1 *mode)
 {
     WaylandDisplay* wldata = (WaylandDisplay*) data;
     WaylandZwlrMode* newMode = ffListAdd((FFlist*) wldata->internal);
     newMode->pMode = mode;
-    const struct zwlr_output_mode_v1_listener listener = {
-        .size = waylandZwlrSizeListener,
-        .refresh = waylandZwlrRefreshListener,
-        .preferred = (void*) stubListener,
-        .finished = (void*) stubListener,
-    };
 
     // Strangely, the listener is called only in this function, but not in `waylandZwlrCurrentModeListener`
-    wldata->parent->ffwl_proxy_add_listener((struct wl_proxy *) mode, (void (**)(void)) &listener, newMode);
-    wldata->parent->ffwl_display_roundtrip(wldata->parent->display);
+    wldata->parent->ffwl_proxy_add_listener((struct wl_proxy *) mode, (void (**)(void)) &modeListener, newMode);
 }
 
 static void waylandZwlrCurrentModeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, struct zwlr_output_mode_v1 *mode)
@@ -86,6 +86,8 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
         .transform = waylandZwlrTransformListener,
         .scale = waylandZwlrScaleListener,
         .finished = (void*) stubListener,
+        .make = (void*) stubListener,
+        .model = (void*) stubListener,
         .serial_number = (void*) stubListener,
         .adaptive_sync = (void*) stubListener,
     };
@@ -148,8 +150,8 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
-        (uint32_t) (display.width / display.scale),
-        (uint32_t) (display.height / display.scale),
+        (uint32_t) (display.width / display.scale + 0.5),
+        (uint32_t) (display.height / display.scale + 0.5),
         rotation,
         display.edidName.length
             ? &display.edidName
