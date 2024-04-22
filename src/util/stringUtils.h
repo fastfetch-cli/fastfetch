@@ -64,3 +64,8 @@ static inline bool ffStrContainsIgnCase(const char* str, const char* compareTo)
 {
     return strcasestr(str, compareTo) != NULL;
 }
+
+static inline bool ffStrContainsC(const char* str, char compareTo)
+{
+    return strchr(str, compareTo) != NULL;
+}

@@ -1230,6 +1230,18 @@ typedef struct _ctl_lda_args_t ctl_lda_args_t;
 typedef struct _ctl_dce_args_t ctl_dce_args_t;
 
 ///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_wire_format_t
+typedef struct _ctl_wire_format_t ctl_wire_format_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_get_set_wire_format_config_t
+typedef struct _ctl_get_set_wire_format_config_t ctl_get_set_wire_format_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Forward-declare ctl_display_settings_t
+typedef struct _ctl_display_settings_t ctl_display_settings_t;
+
+///////////////////////////////////////////////////////////////////////////////
 /// @brief Forward-declare ctl_engine_properties_t
 typedef struct _ctl_engine_properties_t ctl_engine_properties_t;
 
@@ -2029,6 +2041,8 @@ typedef enum _ctl_std_display_feature_flag_t
     CTL_STD_DISPLAY_FEATURE_FLAG_VESA_COMPRESSION = CTL_BIT(4), ///< [out] Is display compression (VESA DSC) supported
     CTL_STD_DISPLAY_FEATURE_FLAG_HDR = CTL_BIT(5),  ///< [out] Is HDR supported
     CTL_STD_DISPLAY_FEATURE_FLAG_HDMI_QMS = CTL_BIT(6), ///< [out] Is HDMI QMS supported
+    CTL_STD_DISPLAY_FEATURE_FLAG_HDR10_PLUS_CERTIFIED = CTL_BIT(7), ///< [out] Is HDR10+ certified
+    CTL_STD_DISPLAY_FEATURE_FLAG_VESA_HDR_CERTIFIED = CTL_BIT(8),   ///< [out] Is VESA HDR certified - for future use
     CTL_STD_DISPLAY_FEATURE_FLAG_MAX = 0x80000000
 
 } ctl_std_display_feature_flag_t;
@@ -2042,6 +2056,7 @@ typedef enum _ctl_intel_display_feature_flag_t
     CTL_INTEL_DISPLAY_FEATURE_FLAG_DPST = CTL_BIT(0),   ///< [out] Is DPST supported
     CTL_INTEL_DISPLAY_FEATURE_FLAG_LACE = CTL_BIT(1),   ///< [out] Is LACE supported
     CTL_INTEL_DISPLAY_FEATURE_FLAG_DRRS = CTL_BIT(2),   ///< [out] Is DRRS supported
+    CTL_INTEL_DISPLAY_FEATURE_FLAG_ARC_ADAPTIVE_SYNC_CERTIFIED = CTL_BIT(3),///< [out] Is Intel Arc certified adaptive sync display
     CTL_INTEL_DISPLAY_FEATURE_FLAG_MAX = 0x80000000
 
 } ctl_intel_display_feature_flag_t;
@@ -4396,6 +4411,232 @@ CTL_APIEXPORT ctl_result_t CTL_APICALL
 ctlGetSetDynamicContrastEnhancement(
     ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
     ctl_dce_args_t* pDceArgs                        ///< [in,out] Dynamic Contrast Enhancement arguments
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Color model
+typedef enum _ctl_wire_format_color_model_t
+{
+    CTL_WIRE_FORMAT_COLOR_MODEL_RGB = 0,            ///< Color model RGB
+    CTL_WIRE_FORMAT_COLOR_MODEL_YCBCR_420 = 1,      ///< Color model YCBCR 420
+    CTL_WIRE_FORMAT_COLOR_MODEL_YCBCR_422 = 2,      ///< Color model YCBCR 422
+    CTL_WIRE_FORMAT_COLOR_MODEL_YCBCR_444 = 3,      ///< Color model YCBCR 444
+    CTL_WIRE_FORMAT_COLOR_MODEL_MAX
+
+} ctl_wire_format_color_model_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Operation type
+typedef enum _ctl_wire_format_operation_type_t
+{
+    CTL_WIRE_FORMAT_OPERATION_TYPE_GET = 0,         ///< Get request
+    CTL_WIRE_FORMAT_OPERATION_TYPE_SET = 1,         ///< Set request
+    CTL_WIRE_FORMAT_OPERATION_TYPE_RESTORE_DEFAULT = 2, ///< Restore to default values
+    CTL_WIRE_FORMAT_OPERATION_TYPE_MAX
+
+} ctl_wire_format_operation_type_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Wire Format
+typedef struct _ctl_wire_format_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_wire_format_color_model_t ColorModel;       ///< [in,out] Color model
+    ctl_output_bpc_flags_t ColorDepth;              ///< [in,out] Color Depth
+
+} ctl_wire_format_t;
+
+///////////////////////////////////////////////////////////////////////////////
+#ifndef CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED
+/// @brief Maximum Wire Formats Supported
+#define CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED  4
+#endif // CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get Set Wire Format
+typedef struct _ctl_get_set_wire_format_config_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    ctl_wire_format_operation_type_t Operation;     ///< [in] Get/Set Operation
+    ctl_wire_format_t SupportedWireFormat[CTL_MAX_WIREFORMAT_COLOR_MODELS_SUPPORTED];   ///< [out] Array of WireFormats supported
+    ctl_wire_format_t WireFormat;                   ///< [in,out]  Current/Requested WireFormat based on Operation. During SET
+                                                    ///< Operation, if multiple bpc is set, the MIN bpc will be applied
+
+} ctl_get_set_wire_format_config_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Color Format and Color Depth
+/// 
+/// @details
+///     - Get and Set the Color Format and Color Depth of a target
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pGetSetWireFormatSetting`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid data passed as argument, WireFormat is not supported"
+///     - ::CTL_RESULT_ERROR_DISPLAY_NOT_ACTIVE - "Display not active"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetWireFormat(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in][release] Handle to display output
+    ctl_get_set_wire_format_config_t* pGetSetWireFormatSetting  ///< [in][release] Get/Set Wire Format settings to be fetched/applied
+    );
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Various display settings
+typedef uint32_t ctl_display_setting_flags_t;
+typedef enum _ctl_display_setting_flag_t
+{
+    CTL_DISPLAY_SETTING_FLAG_LOW_LATENCY = CTL_BIT(0),  ///< Low latency
+    CTL_DISPLAY_SETTING_FLAG_SOURCE_TM = CTL_BIT(1),///< Source tone mapping
+    CTL_DISPLAY_SETTING_FLAG_CONTENT_TYPE = CTL_BIT(2), ///< Content type
+    CTL_DISPLAY_SETTING_FLAG_QUANTIZATION_RANGE = CTL_BIT(3),   ///< Quantization range, full range or limited range
+    CTL_DISPLAY_SETTING_FLAG_PICTURE_AR = CTL_BIT(4),   ///< Picture aspect ratio
+    CTL_DISPLAY_SETTING_FLAG_AUDIO = CTL_BIT(5),    ///< Audio settings
+    CTL_DISPLAY_SETTING_FLAG_MAX = 0x80000000
+
+} ctl_display_setting_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Low latency setting
+typedef enum _ctl_display_setting_low_latency_t
+{
+    CTL_DISPLAY_SETTING_LOW_LATENCY_DEFAULT = 0,    ///< Default
+    CTL_DISPLAY_SETTING_LOW_LATENCY_DISABLED = 1,   ///< Disabled
+    CTL_DISPLAY_SETTING_LOW_LATENCY_ENABLED = 2,    ///< Enabled
+    CTL_DISPLAY_SETTING_LOW_LATENCY_MAX
+
+} ctl_display_setting_low_latency_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Source tone mapping setting
+typedef enum _ctl_display_setting_sourcetm_t
+{
+    CTL_DISPLAY_SETTING_SOURCETM_DEFAULT = 0,       ///< Default
+    CTL_DISPLAY_SETTING_SOURCETM_DISABLED = 1,      ///< Disabled
+    CTL_DISPLAY_SETTING_SOURCETM_ENABLED = 2,       ///< Enabled
+    CTL_DISPLAY_SETTING_SOURCETM_MAX
+
+} ctl_display_setting_sourcetm_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Content type settings
+typedef enum _ctl_display_setting_content_type_t
+{
+    CTL_DISPLAY_SETTING_CONTENT_TYPE_DEFAULT = 0,   ///< Default content type used by driver. Driver will use internal
+                                                    ///< techniques to determine content type and indicate to panel
+    CTL_DISPLAY_SETTING_CONTENT_TYPE_DISABLED = 1,  ///< Content type indication is disabled
+    CTL_DISPLAY_SETTING_CONTENT_TYPE_DESKTOP = 2,   ///< Typical desktop with a mix of text and graphics
+    CTL_DISPLAY_SETTING_CONTENT_TYPE_MEDIA = 3,     ///< Video or media content
+    CTL_DISPLAY_SETTING_CONTENT_TYPE_GAMING = 4,    ///< Gaming content
+    CTL_DISPLAY_SETTING_CONTENT_TYPE_MAX
+
+} ctl_display_setting_content_type_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Quantization range
+typedef enum _ctl_display_setting_quantization_range_t
+{
+    CTL_DISPLAY_SETTING_QUANTIZATION_RANGE_DEFAULT = 0, ///< Default based on video format
+    CTL_DISPLAY_SETTING_QUANTIZATION_RANGE_LIMITED_RANGE = 1,   ///< Limited range
+    CTL_DISPLAY_SETTING_QUANTIZATION_RANGE_FULL_RANGE = 2,  ///< Full range
+    CTL_DISPLAY_SETTING_QUANTIZATION_RANGE_MAX
+
+} ctl_display_setting_quantization_range_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Picture aspect ratio
+typedef uint32_t ctl_display_setting_picture_ar_flags_t;
+typedef enum _ctl_display_setting_picture_ar_flag_t
+{
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_DEFAULT = CTL_BIT(0),   ///< Default picture aspect ratio
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_DISABLED = CTL_BIT(1),  ///< Picture aspect ratio indication is explicitly disabled
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_AR_4_3 = CTL_BIT(2),///< Aspect ratio of 4:3
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_AR_16_9 = CTL_BIT(3),   ///< Aspect ratio of 16:9
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_AR_64_27 = CTL_BIT(4),  ///< Aspect ratio of 64:27 or 21:9 anamorphic
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_AR_256_135 = CTL_BIT(5),///< Aspect ratio of 256:135
+    CTL_DISPLAY_SETTING_PICTURE_AR_FLAG_MAX = 0x80000000
+
+} ctl_display_setting_picture_ar_flag_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Audio settings
+typedef enum _ctl_display_setting_audio_t
+{
+    CTL_DISPLAY_SETTING_AUDIO_DEFAULT = 0,          ///< Default audio settings, always enumerated and enabled if display
+                                                    ///< supports it
+    CTL_DISPLAY_SETTING_AUDIO_DISABLED = 1,         ///< Forcefully disable display audio end point enumeration to OS
+    CTL_DISPLAY_SETTING_AUDIO_MAX
+
+} ctl_display_setting_audio_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set end display settings
+typedef struct _ctl_display_settings_t
+{
+    uint32_t Size;                                  ///< [in] size of this structure
+    uint8_t Version;                                ///< [in] version of this structure
+    bool Set;                                       ///< [in] Flag to indicate Set or Get operation. Default option for all
+                                                    ///< features are reserved for Set=true calls, which will reset the setting
+                                                    ///< to driver defaults.
+    ctl_display_setting_flags_t SupportedFlags;     ///< [out] Display setting flags supported by the display.
+    ctl_display_setting_flags_t ControllableFlags;  ///< [out] Display setting flags which can be controlled by the caller.
+                                                    ///< Features which doesn't have this flag set cannot be changed by caller.
+    ctl_display_setting_flags_t ValidFlags;         ///< [in,out] Display setting flags which caller can use to indicate the
+                                                    ///< features it's interested in. This cannot have a bit set which is not
+                                                    ///< supported by SupportedFlags and ControllableFlags.
+    ctl_display_setting_low_latency_t LowLatency;   ///< [in,out] Low latency state of panel. For HDR10+ Gaming this need to be
+                                                    ///< in ENABLED state.
+    ctl_display_setting_sourcetm_t SourceTM;        ///< [in,out] Source tone mapping state known to panel. For HDR10+ Gaming
+                                                    ///< this need to be in ENABLED state.
+    ctl_display_setting_content_type_t ContentType; ///< [in,out] Source content type known to panel.
+    ctl_display_setting_quantization_range_t QuantizationRange; ///< [in,out] Quantization range
+    ctl_display_setting_picture_ar_flags_t SupportedPictureAR;  ///< [out] Supported Picture aspect ratios
+    ctl_display_setting_picture_ar_flag_t PictureAR;///< [in,out] Picture aspect ratio
+    ctl_display_setting_audio_t AudioSettings;      ///< [in,out] Audio settings
+    uint32_t Reserved[25];                          ///< [out] Reserved fields for future enumerations
+
+} ctl_display_settings_t;
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Get/Set Display settings
+/// 
+/// @details
+///     - To get/set end display settings like low latency, HDR10+ signaling
+///       etc. which are controlled via info-frames/secondary data packets
+/// 
+/// @returns
+///     - CTL_RESULT_SUCCESS
+///     - CTL_RESULT_ERROR_UNINITIALIZED
+///     - CTL_RESULT_ERROR_DEVICE_LOST
+///     - CTL_RESULT_ERROR_INVALID_NULL_HANDLE
+///         + `nullptr == hDisplayOutput`
+///     - CTL_RESULT_ERROR_INVALID_NULL_POINTER
+///         + `nullptr == pDisplaySettings`
+///     - ::CTL_RESULT_ERROR_UNSUPPORTED_VERSION - "Unsupported version"
+///     - ::CTL_RESULT_ERROR_NULL_OS_DISPLAY_OUTPUT_HANDLE - "Null OS display output handle"
+///     - ::CTL_RESULT_ERROR_NULL_OS_INTERFACE - "Null OS interface"
+///     - ::CTL_RESULT_ERROR_NULL_OS_ADAPATER_HANDLE - "Null OS adapter handle"
+///     - ::CTL_RESULT_ERROR_KMD_CALL - "Kernel mode driver call failure"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_HANDLE - "Invalid or Null handle passed"
+///     - ::CTL_RESULT_ERROR_INVALID_NULL_POINTER - "Invalid null pointer"
+///     - ::CTL_RESULT_ERROR_INVALID_OPERATION_TYPE - "Invalid operation type"
+///     - ::CTL_RESULT_ERROR_INVALID_ARGUMENT - "Invalid combination of parameters"
+CTL_APIEXPORT ctl_result_t CTL_APICALL
+ctlGetSetDisplaySettings(
+    ctl_display_output_handle_t hDisplayOutput,     ///< [in] Handle to display output
+    ctl_display_settings_t* pDisplaySettings        ///< [in,out] End display capabilities
     );
 
 
@@ -7226,6 +7467,22 @@ typedef ctl_result_t (CTL_APICALL *ctl_pfnGetLinkedDisplayAdapters_t)(
 typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDynamicContrastEnhancement_t)(
     ctl_display_output_handle_t,
     ctl_dce_args_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetWireFormat 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetWireFormat_t)(
+    ctl_display_output_handle_t,
+    ctl_get_set_wire_format_config_t*
+    );
+
+
+///////////////////////////////////////////////////////////////////////////////
+/// @brief Function-pointer for ctlGetSetDisplaySettings 
+typedef ctl_result_t (CTL_APICALL *ctl_pfnGetSetDisplaySettings_t)(
+    ctl_display_output_handle_t,
+    ctl_display_settings_t*
     );
 
 

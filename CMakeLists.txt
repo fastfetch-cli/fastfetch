@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.9.2
+    VERSION 2.10.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -75,6 +75,7 @@ option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVML, IGCL and AGS)" ON)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
+option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 
 if (LINUX)
     set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
@@ -399,7 +400,10 @@ if(LINUX)
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
-        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
@@ -517,7 +521,10 @@ elseif(BSD)
         src/detection/diskio/diskio_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
-        src/detection/displayserver/linux/wayland.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
         src/detection/displayserver/linux/wmde.c
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
@@ -1131,11 +1138,19 @@ else() # We don't use this in Windows
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
         set(CMAKE_SYSTEM_PROCESSOR "amd64")
     endif()
-    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
+    if(IS_MUSL)
+        string(TOLOWER "${CMAKE_PROJECT_NAME}-musl-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
+    else()
+        string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
+    endif()
 endif()
 
 if(LINUX)
-    set(CPACK_GENERATOR "${CPACK_GENERATOR};DEB;RPM")
+    find_program(HAVE_DPKG "dpkg")
+    find_program(HAVE_RPMBUILD "rpmbuild")
+    if(HAVE_DPKG AND HAVE_RPMBUILD)
+        set(CPACK_GENERATOR "${CPACK_GENERATOR};DEB;RPM")
+    endif()
 
     set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")

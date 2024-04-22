@@ -702,6 +702,16 @@
                 "type": "color",
                 "default": "light_red"
             }
+        },
+        {
+            "long": "ts-version",
+            "desc": "Whether to detect and display the version of terminal and shell",
+            "remark": "Mainly for benchmarking",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
         }
     ],
     "Library path": [

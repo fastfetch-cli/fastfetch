@@ -154,16 +154,13 @@ bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uin
 {
     bool foundAFile = false;
 
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-
     FF_LIST_FOR_EACH(FFstrbuf, dirPrefix, *list)
     {
-        //We need to copy the dir each time, because it used by multiple threads, so we can't directly write to it.
-        ffStrbufSet(&baseDir, dirPrefix);
-        ffStrbufAppendS(&baseDir, relativeFile);
-
-        if(ffParsePropFileValues(baseDir.chars, numQueries, queries))
+        const uint32_t dirPrefixLength = dirPrefix->length;
+        ffStrbufAppendS(dirPrefix, relativeFile);
+        if(ffParsePropFileValues(dirPrefix->chars, numQueries, queries))
             foundAFile = true;
+        ffStrbufSubstrBefore(dirPrefix, dirPrefixLength);
 
         bool allSet = true;
         for(uint32_t k = 0; k < numQueries; k++)

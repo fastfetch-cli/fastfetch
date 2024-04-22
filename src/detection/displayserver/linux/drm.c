@@ -36,31 +36,28 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             continue;
         }
 
-        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
-        ffStrbufAppendS(&drmDir, "/modes");
-
-        char modes[32];
-        if (ffReadFileData(drmDir.chars, sizeof(modes), modes) < 3)
-        {
-            ffStrbufSubstrBefore(&drmDir, drmDirLength);
-            continue;
-        }
-
         unsigned width = 0, height = 0;
+        double refreshRate = 0;
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
-        int scanned = sscanf(modes, "%ux%u", &width, &height);
-        if(scanned == 2 && width > 0 && height > 0)
+        ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+        ffStrbufAppendS(&drmDir, "/edid");
+
+        uint8_t edidData[128];
+        if(ffReadFileData(drmDir.chars, sizeof(edidData), edidData) == sizeof(edidData))
         {
-            ffStrbufSubstrBefore(&drmDir, drmDirLength);
-            ffStrbufAppendS(&drmDir, entry->d_name);
-            ffStrbufAppendS(&drmDir, "/edid");
+            ffEdidGetName(edidData, &name);
+            ffEdidGetPreferredResolutionAndRefreshRate(edidData, &width, &height, &refreshRate);
+        }
+        else
+        {
+            ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+            ffStrbufAppendS(&drmDir, "/modes");
 
-            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-            uint8_t edidData[128];
-            if(ffReadFileData(drmDir.chars, sizeof(edidData), edidData) == sizeof(edidData))
-                ffEdidGetName(edidData, &name);
-            else
+            char modes[32];
+            if (ffReadFileData(drmDir.chars, sizeof(modes), modes) >= 3)
             {
+                sscanf(modes, "%ux%u", &width, &height);
                 const char* plainName = entry->d_name;
                 if (ffStrStartsWith(plainName, "card"))
                 {
@@ -69,19 +66,19 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
                 }
                 ffStrbufAppendS(&name, plainName);
             }
-
-            ffdsAppendDisplay(
-                result,
-                width, height,
-                0,
-                0, 0,
-                0,
-                &name,
-                FF_DISPLAY_TYPE_UNKNOWN,
-                false,
-                0
-            );
         }
+
+        ffdsAppendDisplay(
+            result,
+            width, height,
+            refreshRate,
+            0, 0,
+            0,
+            &name,
+            FF_DISPLAY_TYPE_UNKNOWN,
+            false,
+            0
+        );
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
     }

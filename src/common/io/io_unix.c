@@ -1,6 +1,6 @@
 #include "io.h"
+#include "fastfetch.h"
 #include "util/stringUtils.h"
-#include "util/unused.h"
 
 #include <fcntl.h>
 #include <termios.h>
@@ -133,6 +133,9 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
+    if (instance.config.display.pipe)
+        return "Not supported in --pipe mode";
+
     struct termios oldTerm, newTerm;
     if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
         return "tcgetattr(STDIN_FILENO, &oldTerm) failed";

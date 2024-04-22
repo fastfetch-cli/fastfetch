@@ -181,22 +181,24 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
     return reply;
 }
 
-void ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result)
+bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result)
 {
     DBusMessage* reply = ffDBusGetProperty(dbus, busName, objectPath, interface, property);
     if(reply == NULL)
-        return;
+        return false;
 
     DBusMessageIter rootIterator;
     if(!dbus->lib->ffdbus_message_iter_init(reply, &rootIterator))
     {
         dbus->lib->ffdbus_message_unref(reply);
-        return;
+        return false;
     }
 
-    ffDBusGetValue(dbus, &rootIterator, result);
+    bool ret = ffDBusGetValue(dbus, &rootIterator, result);
 
     dbus->lib->ffdbus_message_unref(reply);
+
+    return ret;
 }
 
 #endif //FF_HAVE_DBUS

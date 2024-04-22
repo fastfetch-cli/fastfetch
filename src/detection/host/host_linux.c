@@ -78,20 +78,12 @@ const char* ffDetectHost(FFHostResult* host)
                 ffStrbufAppendF(&host->name, " - %s", wslDistroName);
             ffStrbufAppendS(&host->family, "WSL");
 
-            FF_STRBUF_AUTO_DESTROY wslVer = ffStrbufCreate(); //Wide characters
-            if(!ffProcessAppendStdOut(&wslVer, (char* const[]){
-                "wsl.exe",
-                "--version",
-                NULL
-            }) && wslVer.length > 0)
-            {
-                ffStrbufSubstrBeforeFirstC(&wslVer, '\r'); //CRLF
-                ffStrbufSubstrAfterLastC(&wslVer, ' ');
-                for(uint32_t i = 0; i < wslVer.length; ++i) {
-                    if(wslVer.chars[i]) //don't append \0
-                        ffStrbufAppendC(&host->version, wslVer.chars[i]);
-                }
-            }
+            ffProcessAppendStdOut(&host->version, (char* const[]){
+                "wslinfo",
+                "--wsl-version",
+                "-n",
+                NULL,
+            }); // supported in 2.2.3 and later
         }
     }
 

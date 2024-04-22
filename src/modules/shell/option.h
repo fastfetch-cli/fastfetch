@@ -8,6 +8,4 @@ typedef struct FFShellOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
-
-    bool version;
 } FFShellOptions;

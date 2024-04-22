@@ -210,23 +210,8 @@ void detectAsahi(FFCPUResult* cpu)
         char* modelName = memchr(content, '\0', (size_t) length) + 1;
         if (modelName - content < length && ffStrStartsWith(modelName, "apple,t"))
         {
-            // https://github.com/AsahiLinux/docs/wiki/Codenames
-            switch (strtoul(modelName + strlen("apple,t"), NULL, 10))
-            {
-                case 8103: ffStrbufSetStatic(&cpu->name, "Apple M1"); break;
-                case 6000: ffStrbufSetStatic(&cpu->name, "Apple M1 Pro"); break;
-                case 6001: ffStrbufSetStatic(&cpu->name, "Apple M1 Max"); break;
-                case 6002: ffStrbufSetStatic(&cpu->name, "Apple M1 Ultra"); break;
-                case 8112: ffStrbufSetStatic(&cpu->name, "Apple M2"); break;
-                case 6020: ffStrbufSetStatic(&cpu->name, "Apple M2 Pro"); break;
-                case 6021: ffStrbufSetStatic(&cpu->name, "Apple M2 Max"); break;
-                case 6022: ffStrbufSetStatic(&cpu->name, "Apple M2 Ultra"); break;
-                case 8122: ffStrbufSetStatic(&cpu->name, "Apple M3"); break;
-                case 6030: ffStrbufSetStatic(&cpu->name, "Apple M3 Pro"); break;
-                case 6031:
-                case 6034: ffStrbufSetStatic(&cpu->name, "Apple M3 Max"); break;
-                default: ffStrbufSetStatic(&cpu->name, "Apple Silicon"); break;
-            }
+            uint32_t deviceId = (uint32_t) strtoul(modelName + strlen("apple,t"), NULL, 10);
+            ffStrbufSetStatic(&cpu->name, ffCPUAppleCodeToName(deviceId));
         }
     }
 }
