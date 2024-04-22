@@ -377,38 +377,38 @@ zwlr_output_manager_v1_destroy(struct zwlr_output_manager_v1 *zwlr_output_manage
 	wl_proxy_destroy((struct wl_proxy *) zwlr_output_manager_v1);
 }
 
-/**
- * @ingroup iface_zwlr_output_manager_v1
- *
- * Create a new output configuration object. This allows to update head
- * properties.
- */
-static inline struct zwlr_output_configuration_v1 *
-zwlr_output_manager_v1_create_configuration(struct zwlr_output_manager_v1 *zwlr_output_manager_v1, uint32_t serial)
-{
-	struct wl_proxy *id;
+// /**
+//  * @ingroup iface_zwlr_output_manager_v1
+//  *
+//  * Create a new output configuration object. This allows to update head
+//  * properties.
+//  */
+// static inline struct zwlr_output_configuration_v1 *
+// zwlr_output_manager_v1_create_configuration(struct zwlr_output_manager_v1 *zwlr_output_manager_v1, uint32_t serial)
+// {
+// 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_manager_v1,
-			 ZWLR_OUTPUT_MANAGER_V1_CREATE_CONFIGURATION, &zwlr_output_configuration_v1_interface, wl_proxy_get_version((struct wl_proxy *) zwlr_output_manager_v1), 0, NULL, serial);
+// 	id = wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_manager_v1,
+// 			 ZWLR_OUTPUT_MANAGER_V1_CREATE_CONFIGURATION, &zwlr_output_configuration_v1_interface, wl_proxy_get_version((struct wl_proxy *) zwlr_output_manager_v1), 0, NULL, serial);
 
-	return (struct zwlr_output_configuration_v1 *) id;
-}
+// 	return (struct zwlr_output_configuration_v1 *) id;
+// }
 
-/**
- * @ingroup iface_zwlr_output_manager_v1
- *
- * Indicates the client no longer wishes to receive events for output
- * configuration changes. However the compositor may emit further events,
- * until the finished event is emitted.
- *
- * The client must not send any more requests after this one.
- */
-static inline void
-zwlr_output_manager_v1_stop(struct zwlr_output_manager_v1 *zwlr_output_manager_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_manager_v1,
-			 ZWLR_OUTPUT_MANAGER_V1_STOP, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_manager_v1), 0);
-}
+// /**
+//  * @ingroup iface_zwlr_output_manager_v1
+//  *
+//  * Indicates the client no longer wishes to receive events for output
+//  * configuration changes. However the compositor may emit further events,
+//  * until the finished event is emitted.
+//  *
+//  * The client must not send any more requests after this one.
+//  */
+// static inline void
+// zwlr_output_manager_v1_stop(struct zwlr_output_manager_v1 *zwlr_output_manager_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_manager_v1,
+// 			 ZWLR_OUTPUT_MANAGER_V1_STOP, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_manager_v1), 0);
+// }
 
 #ifndef ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
 #define ZWLR_OUTPUT_HEAD_V1_ADAPTIVE_SYNC_STATE_ENUM
@@ -759,18 +759,18 @@ zwlr_output_head_v1_destroy(struct zwlr_output_head_v1 *zwlr_output_head_v1)
 	wl_proxy_destroy((struct wl_proxy *) zwlr_output_head_v1);
 }
 
-/**
- * @ingroup iface_zwlr_output_head_v1
- *
- * This request indicates that the client will no longer use this head
- * object.
- */
-static inline void
-zwlr_output_head_v1_release(struct zwlr_output_head_v1 *zwlr_output_head_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_head_v1,
-			 ZWLR_OUTPUT_HEAD_V1_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_head_v1), WL_MARSHAL_FLAG_DESTROY);
-}
+// /**
+//  * @ingroup iface_zwlr_output_head_v1
+//  *
+//  * This request indicates that the client will no longer use this head
+//  * object.
+//  */
+// static inline void
+// zwlr_output_head_v1_release(struct zwlr_output_head_v1 *zwlr_output_head_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_head_v1,
+// 			 ZWLR_OUTPUT_HEAD_V1_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_head_v1), WL_MARSHAL_FLAG_DESTROY);
+// }
 
 /**
  * @ingroup iface_zwlr_output_mode_v1
@@ -881,18 +881,18 @@ zwlr_output_mode_v1_destroy(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
 	wl_proxy_destroy((struct wl_proxy *) zwlr_output_mode_v1);
 }
 
-/**
- * @ingroup iface_zwlr_output_mode_v1
- *
- * This request indicates that the client will no longer use this mode
- * object.
- */
-static inline void
-zwlr_output_mode_v1_release(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_mode_v1,
-			 ZWLR_OUTPUT_MODE_V1_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_mode_v1), WL_MARSHAL_FLAG_DESTROY);
-}
+// /**
+//  * @ingroup iface_zwlr_output_mode_v1
+//  *
+//  * This request indicates that the client will no longer use this mode
+//  * object.
+//  */
+// static inline void
+// zwlr_output_mode_v1_release(struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_mode_v1,
+// 			 ZWLR_OUTPUT_MODE_V1_RELEASE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_mode_v1), WL_MARSHAL_FLAG_DESTROY);
+// }
 
 #ifndef ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
 #define ZWLR_OUTPUT_CONFIGURATION_V1_ERROR_ENUM
@@ -1032,92 +1032,92 @@ zwlr_output_configuration_v1_get_version(struct zwlr_output_configuration_v1 *zw
 	return wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1);
 }
 
-/**
- * @ingroup iface_zwlr_output_configuration_v1
- *
- * Enable a head. This request creates a head configuration object that can
- * be used to change the head's properties.
- */
-static inline struct zwlr_output_configuration_head_v1 *
-zwlr_output_configuration_v1_enable_head(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1, struct zwlr_output_head_v1 *head)
-{
-	struct wl_proxy *id;
+// /**
+//  * @ingroup iface_zwlr_output_configuration_v1
+//  *
+//  * Enable a head. This request creates a head configuration object that can
+//  * be used to change the head's properties.
+//  */
+// static inline struct zwlr_output_configuration_head_v1 *
+// zwlr_output_configuration_v1_enable_head(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1, struct zwlr_output_head_v1 *head)
+// {
+// 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_V1_ENABLE_HEAD, &zwlr_output_configuration_head_v1_interface, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0, NULL, head);
+// 	id = wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_V1_ENABLE_HEAD, &zwlr_output_configuration_head_v1_interface, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0, NULL, head);
 
-	return (struct zwlr_output_configuration_head_v1 *) id;
-}
+// 	return (struct zwlr_output_configuration_head_v1 *) id;
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_v1
- *
- * Disable a head.
- */
-static inline void
-zwlr_output_configuration_v1_disable_head(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1, struct zwlr_output_head_v1 *head)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_V1_DISABLE_HEAD, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0, head);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_v1
+//  *
+//  * Disable a head.
+//  */
+// static inline void
+// zwlr_output_configuration_v1_disable_head(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1, struct zwlr_output_head_v1 *head)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_V1_DISABLE_HEAD, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0, head);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_v1
- *
- * Apply the new output configuration.
- *
- * In case the configuration is successfully applied, there is no guarantee
- * that the new output state matches completely the requested
- * configuration. For instance, a compositor might round the scale if it
- * doesn't support fractional scaling.
- *
- * After this request has been sent, the compositor must respond with an
- * succeeded, failed or cancelled event. Sending a request that isn't the
- * destructor is a protocol error.
- */
-static inline void
-zwlr_output_configuration_v1_apply(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_V1_APPLY, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_v1
+//  *
+//  * Apply the new output configuration.
+//  *
+//  * In case the configuration is successfully applied, there is no guarantee
+//  * that the new output state matches completely the requested
+//  * configuration. For instance, a compositor might round the scale if it
+//  * doesn't support fractional scaling.
+//  *
+//  * After this request has been sent, the compositor must respond with an
+//  * succeeded, failed or cancelled event. Sending a request that isn't the
+//  * destructor is a protocol error.
+//  */
+// static inline void
+// zwlr_output_configuration_v1_apply(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_V1_APPLY, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_v1
- *
- * Test the new output configuration. The configuration won't be applied,
- * but will only be validated.
- *
- * Even if the compositor succeeds to test a configuration, applying it may
- * fail.
- *
- * After this request has been sent, the compositor must respond with an
- * succeeded, failed or cancelled event. Sending a request that isn't the
- * destructor is a protocol error.
- */
-static inline void
-zwlr_output_configuration_v1_test(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_V1_TEST, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_v1
+//  *
+//  * Test the new output configuration. The configuration won't be applied,
+//  * but will only be validated.
+//  *
+//  * Even if the compositor succeeds to test a configuration, applying it may
+//  * fail.
+//  *
+//  * After this request has been sent, the compositor must respond with an
+//  * succeeded, failed or cancelled event. Sending a request that isn't the
+//  * destructor is a protocol error.
+//  */
+// static inline void
+// zwlr_output_configuration_v1_test(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_V1_TEST, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), 0);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_v1
- *
- * Using this request a client can tell the compositor that it is not going
- * to use the configuration object anymore. Any changes to the outputs
- * that have not been applied will be discarded.
- *
- * This request also destroys wlr_output_configuration_head objects created
- * via this object.
- */
-static inline void
-zwlr_output_configuration_v1_destroy(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), WL_MARSHAL_FLAG_DESTROY);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_v1
+//  *
+//  * Using this request a client can tell the compositor that it is not going
+//  * to use the configuration object anymore. Any changes to the outputs
+//  * that have not been applied will be discarded.
+//  *
+//  * This request also destroys wlr_output_configuration_head objects created
+//  * via this object.
+//  */
+// static inline void
+// zwlr_output_configuration_v1_destroy(struct zwlr_output_configuration_v1 *zwlr_output_configuration_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_v1), WL_MARSHAL_FLAG_DESTROY);
+// }
 
 #ifndef ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
 #define ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_ERROR_ENUM
@@ -1214,82 +1214,82 @@ zwlr_output_configuration_head_v1_destroy(struct zwlr_output_configuration_head_
 	wl_proxy_destroy((struct wl_proxy *) zwlr_output_configuration_head_v1);
 }
 
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- *
- * This request sets the head's mode.
- */
-static inline void
-zwlr_output_configuration_head_v1_set_mode(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, struct zwlr_output_mode_v1 *mode)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_MODE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, mode);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_head_v1
+//  *
+//  * This request sets the head's mode.
+//  */
+// static inline void
+// zwlr_output_configuration_head_v1_set_mode(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, struct zwlr_output_mode_v1 *mode)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_MODE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, mode);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- *
- * This request assigns a custom mode to the head. The size is given in
- * physical hardware units of the output device. If set to zero, the
- * refresh rate is unspecified.
- *
- * It is a protocol error to set both a mode and a custom mode.
- */
-static inline void
-zwlr_output_configuration_head_v1_set_custom_mode(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, int32_t width, int32_t height, int32_t refresh)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_CUSTOM_MODE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, width, height, refresh);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_head_v1
+//  *
+//  * This request assigns a custom mode to the head. The size is given in
+//  * physical hardware units of the output device. If set to zero, the
+//  * refresh rate is unspecified.
+//  *
+//  * It is a protocol error to set both a mode and a custom mode.
+//  */
+// static inline void
+// zwlr_output_configuration_head_v1_set_custom_mode(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, int32_t width, int32_t height, int32_t refresh)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_CUSTOM_MODE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, width, height, refresh);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- *
- * This request sets the head's position in the global compositor space.
- */
-static inline void
-zwlr_output_configuration_head_v1_set_position(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, int32_t x, int32_t y)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_POSITION, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, x, y);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_head_v1
+//  *
+//  * This request sets the head's position in the global compositor space.
+//  */
+// static inline void
+// zwlr_output_configuration_head_v1_set_position(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, int32_t x, int32_t y)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_POSITION, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, x, y);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- *
- * This request sets the head's transform.
- */
-static inline void
-zwlr_output_configuration_head_v1_set_transform(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, int32_t transform)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_TRANSFORM, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, transform);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_head_v1
+//  *
+//  * This request sets the head's transform.
+//  */
+// static inline void
+// zwlr_output_configuration_head_v1_set_transform(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, int32_t transform)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_TRANSFORM, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, transform);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- *
- * This request sets the head's scale.
- */
-static inline void
-zwlr_output_configuration_head_v1_set_scale(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, wl_fixed_t scale)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_SCALE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, scale);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_head_v1
+//  *
+//  * This request sets the head's scale.
+//  */
+// static inline void
+// zwlr_output_configuration_head_v1_set_scale(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, wl_fixed_t scale)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_SCALE, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, scale);
+// }
 
-/**
- * @ingroup iface_zwlr_output_configuration_head_v1
- *
- * This request enables/disables adaptive sync. Adaptive sync is also
- * known as Variable Refresh Rate or VRR.
- */
-static inline void
-zwlr_output_configuration_head_v1_set_adaptive_sync(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, uint32_t state)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
-			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_ADAPTIVE_SYNC, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, state);
-}
+// /**
+//  * @ingroup iface_zwlr_output_configuration_head_v1
+//  *
+//  * This request enables/disables adaptive sync. Adaptive sync is also
+//  * known as Variable Refresh Rate or VRR.
+//  */
+// static inline void
+// zwlr_output_configuration_head_v1_set_adaptive_sync(struct zwlr_output_configuration_head_v1 *zwlr_output_configuration_head_v1, uint32_t state)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zwlr_output_configuration_head_v1,
+// 			 ZWLR_OUTPUT_CONFIGURATION_HEAD_V1_SET_ADAPTIVE_SYNC, NULL, wl_proxy_get_version((struct wl_proxy *) zwlr_output_configuration_head_v1), 0, state);
+// }
 
 #ifdef  __cplusplus
 }
