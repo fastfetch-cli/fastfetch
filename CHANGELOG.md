@@ -1,3 +1,8 @@
+# 2.10.1
+
+Bugfixes:
+* fix build with `-DENABLE_DBUS=OFF`
+
 # 2.10.0
 
 Changes:
