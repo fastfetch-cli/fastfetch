@@ -43,7 +43,7 @@ static void getKDE(FFstrbuf* result, FFDEOptions* options)
     }
 }
 
-static const char* getGnomeBySo(FFstrbuf* result)
+static const char* getGnomeByDbus(FF_MAYBE_UNUSED FFstrbuf* result)
 {
 #ifdef FF_HAVE_DBUS
     FFDBusData dbus;
@@ -59,7 +59,7 @@ static const char* getGnomeBySo(FFstrbuf* result)
 
 static void getGnome(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 {
-    getGnomeBySo(result);
+    getGnomeByDbus(result);
 
     if (result->length == 0 && options->slowVersionDetection)
     {
