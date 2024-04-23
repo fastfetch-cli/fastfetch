@@ -75,7 +75,9 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrEqualsIgnCase(name, "kwin_wayland_wrapper") ||
         ffStrEqualsIgnCase(name, "kwin_x11") ||
         ffStrEqualsIgnCase(name, "kwin_x11_wrapper") ||
-        ffStrEqualsIgnCase(name, "kwin")
+        ffStrEqualsIgnCase(name, "kwin") ||
+        ffStrEndsWithIgnCase(name, "-kwin_wayland") ||
+        ffStrEndsWithIgnCase(name, "-kwin_x11")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
     else if(
         ffStrEqualsIgnCase(name, "gnome-shell") ||
@@ -230,6 +232,13 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     ) {
         ffStrbufSetS(&result->deProcessName, "dtsession");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_CDE);
+    }
+
+    else if(
+        ffStrEqualsIgnCase(name, "ukui-session")
+    ) {
+        ffStrbufSetS(&result->deProcessName, "ukui-session");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_UKUI);
     }
 }
 
