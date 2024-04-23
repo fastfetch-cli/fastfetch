@@ -7,7 +7,7 @@
 
 const char* ffDetectSwap(FFSwapResult* swap)
 {
-    ULONG size = sizeof(SYSTEM_PAGEFILE_INFORMATION);
+    ULONG size = sizeof(SYSTEM_PAGEFILE_INFORMATION) * 2;
     SYSTEM_PAGEFILE_INFORMATION* FF_AUTO_FREE pstart = (SYSTEM_PAGEFILE_INFORMATION*)malloc(size);
     while(true)
     {
@@ -16,6 +16,7 @@ const char* ffDetectSwap(FFSwapResult* swap)
         {
             if(!(pstart = (SYSTEM_PAGEFILE_INFORMATION*)realloc(pstart, size)))
                 return "realloc(pstart, size) failed";
+            continue;
         }
         else if(!NT_SUCCESS(status))
             return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
