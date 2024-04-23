@@ -1,7 +1,12 @@
+# 2.10.2
+
+Bugfixes:
+* Fix a regression that detect x11 as wayland (#805, WM, Linux)
+
 # 2.10.1
 
 Bugfixes:
-* fix build with `-DENABLE_DBUS=OFF`
+* Fix build with `-DENABLE_DBUS=OFF` (Linux)
 
 # 2.10.0
 
