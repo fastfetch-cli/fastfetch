@@ -1147,16 +1147,20 @@ endif()
 
 if(LINUX)
     find_program(HAVE_DPKG "dpkg")
-    find_program(HAVE_RPMBUILD "rpmbuild")
-    if(HAVE_DPKG AND HAVE_RPMBUILD)
-        set(CPACK_GENERATOR "${CPACK_GENERATOR};DEB;RPM")
+    if(HAVE_DPKG)
+        set(CPACK_GENERATOR "${CPACK_GENERATOR};DEB")
+
+        set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
+        set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
     endif()
 
-    set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
-    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
+    find_program(HAVE_RPMBUILD "rpmbuild")
+    if(HAVE_RPMBUILD)
+        set(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
 
-    set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+        set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+    endif()
 endif()
 
 set(CPACK_SET_DESTDIR ON)
