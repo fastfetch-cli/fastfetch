@@ -135,7 +135,7 @@ void ffdsConnectWayland(FFDisplayServerResult* result)
     const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
 
     //If XDG_SESSION_TYPE is set, and doesn't contain "wayland", we are probably not running in a wayland session.
-    if(xdgSessionType != NULL && ffStrEqualsIgnCase(xdgSessionType, "wayland"))
+    if(xdgSessionType != NULL && !ffStrEqualsIgnCase(xdgSessionType, "wayland"))
         return;
 
     //If XDG_SESSION_TYPE is not set, check if WAYLAND_DISPLAY or WAYLAND_SOCKET is set.
