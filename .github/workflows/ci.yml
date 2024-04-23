@@ -258,7 +258,7 @@ jobs:
 
   macos-universal:
     name: macOS-universal
-    runs-on: macos-latest
+    runs-on: macos-12
     permissions:
       security-events: write
       contents: read
