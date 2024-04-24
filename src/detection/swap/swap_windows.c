@@ -7,21 +7,11 @@
 
 const char* ffDetectSwap(FFSwapResult* swap)
 {
-    ULONG size = sizeof(SYSTEM_PAGEFILE_INFORMATION) * 2;
-    SYSTEM_PAGEFILE_INFORMATION* FF_AUTO_FREE pstart = (SYSTEM_PAGEFILE_INFORMATION*)malloc(size);
-    while(true)
-    {
-        NTSTATUS status = NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size);
-        if(status == STATUS_INFO_LENGTH_MISMATCH)
-        {
-            if(!(pstart = (SYSTEM_PAGEFILE_INFORMATION*)realloc(pstart, size)))
-                return "realloc(pstart, size) failed";
-            continue;
-        }
-        else if(!NT_SUCCESS(status))
-            return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
-        break;
-    }
+    uint8_t buffer[1024];
+    ULONG size = sizeof(buffer);
+    SYSTEM_PAGEFILE_INFORMATION* pstart = (SYSTEM_PAGEFILE_INFORMATION*) buffer;
+    if(!NT_SUCCESS(NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size)))
+        return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
 
     uint32_t pageSize = instance.state.platform.pageSize;
     swap->bytesUsed = (uint64_t)pstart->TotalUsed * pageSize;
