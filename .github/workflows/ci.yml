@@ -14,12 +14,51 @@ jobs:
 
       - name: Install codespell
         shell: bash
-        run: sudo apt update && sudo apt install -y codespell
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y codespell
 
       - name: Run Spellchecker
         run: codespell
 
-  Linux-amd64:
+  no-features-test:
+    name: No-features-test
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: uname -a
+        run: uname -a
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_XFCONF=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OSMESA=OFF -DENABLE_OPENCL=OFF -DENABLE_LIBNM=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_DIRECTX_HEADERS=OFF -DENABLE_THREADS=OFF
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest
+
+  linux-amd64:
     name: Linux-amd64
     runs-on: ubuntu-20.04
     permissions:
