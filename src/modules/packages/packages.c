@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 26
+#define FF_PACKAGES_NUM_FORMAT_ARGS 29
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -70,6 +70,9 @@ void ffPrintPackages(FFPackagesOptions* options)
     }
     else
     {
+        uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
+        uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
+        uint32_t brewAll = counts.brew + counts.brewCask;
         FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PACKAGES_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &counts.all},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pacman},
@@ -97,6 +100,9 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.winget},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.opkg},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.am},
+            {FF_FORMAT_ARG_TYPE_UINT, &nixAll},
+            {FF_FORMAT_ARG_TYPE_UINT, &flatpakAll},
+            {FF_FORMAT_ARG_TYPE_UINT, &brewAll},
         }));
     }
 
@@ -394,6 +400,9 @@ void ffPrintPackagesHelpFormat(void)
         "Number of winget packages",
         "Number of opkg packages",
         "Number of am packages",
+        "Total number of all nix packages",
+        "Total number of all flatpak packages",
+        "Total number of all brew packages",
     }));
 }
 
