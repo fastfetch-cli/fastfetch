@@ -354,12 +354,11 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
 
     #ifdef NDEBUG
     options->disableLinewrap = !options->pipe;
-    options->hideCursor = !options->pipe;
     #else
     options->disableLinewrap = false;
-    options->hideCursor = false;
     #endif
 
+    options->hideCursor = false;
     options->binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
     options->sizeMaxPrefix = UINT8_MAX;
