@@ -337,7 +337,8 @@ static const char* detectWifiWithIoctls(FFlist* result)
 const char* ffDetectWifi(FFlist* result)
 {
     #ifdef FF_HAVE_LIBNM
-    if(!detectWifiWithLibnm(result))
+    detectWifiWithLibnm(result);
+    if(result->length) // NetworkManager not enabled? #811
         return NULL;
     #endif
 
