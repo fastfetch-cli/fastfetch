@@ -487,7 +487,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
         // We use processName when detecting version and font, overriding it for simplification
         ffStrbufSubstrBefore(&result->processName, result->processName.length - (uint32_t) strlen("-wrapped"));
-        ffStrbufSubstrAfter(&result->processName, 1);
+        ffStrbufSubstrAfter(&result->processName, 0);
     }
 
     if(ffStrbufEqualS(&result->processName, "wezterm-gui"))
