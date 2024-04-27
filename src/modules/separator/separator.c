@@ -12,9 +12,20 @@ static inline uint32_t max(uint32_t a, uint32_t b)
 
 static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate_t* state)
 {
+    int result = 1;
+    for (uint32_t i = 0; i < mbstr->length; i++)
+    {
+        if (!isascii(mbstr->chars[i]))
+        {
+            result = 0;
+            break;
+        }
+    }
+    if (__builtin_expect(result, 1)) return mbstr->length;
+
     const char* str = mbstr->chars;
     uint32_t wstrLength = (uint32_t) mbsrtowcs(wstr, &str, mbstr->length, state);
-    int result = mk_wcswidth(wstr, wstrLength);
+    result = mk_wcswidth(wstr, wstrLength);
     return result > 0 ? (uint32_t) result : mbstr->length;
 }
 
@@ -32,9 +43,9 @@ void ffPrintSeparator(FFSeparatorOptions* options)
         + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
     ffLogoPrintLine();
 
-    if(options->string.length == 0)
+    if(__builtin_expect(options->string.length == 1, 1))
     {
-        ffPrintCharTimes('-', titleLength);
+        ffPrintCharTimes(options->string.chars[0], titleLength);
     }
     else
     {
@@ -131,7 +142,7 @@ void ffInitSeparatorOptions(FFSeparatorOptions* options)
         NULL,
         ffGenerateSeparatorJsonConfig
     );
-    ffStrbufInit(&options->string);
+    ffStrbufInitStatic(&options->string, "-");
 }
 
 void ffDestroySeparatorOptions(FFSeparatorOptions* options)
