@@ -482,14 +482,12 @@ static void setShellInfoDetails(FFShellResult* result)
 
 static void setTerminalInfoDetails(FFTerminalResult* result)
 {
-    if(result->exeName[0] == '.' && ffStrEndsWith(result->exeName, "-wrapped"))
+    if(ffStrbufStartsWithC(&result->processName, '.') && ffStrbufEndsWithS(&result->processName, "-wrapped"))
     {
         // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
         // We use processName when detecting version and font, overriding it for simplification
-        ffStrbufSetNS(
-            &result->processName,
-            (uint32_t) (strlen(result->exeName) - strlen(".-wrapped")),
-            result->exeName + 1);
+        ffStrbufSubstrBefore(&result->processName, result->processName.length - (uint32_t) strlen("-wrapped"));
+        ffStrbufSubstrAfter(&result->processName, 1);
     }
 
     if(ffStrbufEqualS(&result->processName, "wezterm-gui"))
