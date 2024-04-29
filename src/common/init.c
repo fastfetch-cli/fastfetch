@@ -238,9 +238,6 @@ void ffListFeatures(void)
         #ifdef FF_HAVE_DDCUTIL
             "libddcutil\n"
         #endif
-        #if __has_include(<linux/videodev2.h>)
-            "videodev2\n"
-        #endif
         #ifdef FF_HAVE_DIRECTX_HEADERS
             "Directx Headers\n"
         #endif
@@ -250,8 +247,11 @@ void ffListFeatures(void)
         #ifdef FF_USE_SYSTEM_YYJSON
             "System yyjson\n"
         #endif
-        #ifdef FF_USE_PCI_MEMORY
-            "PCI memory\n"
+        #if __has_include(<linux/videodev2.h>)
+            "linux/videodev2\n"
+        #endif
+        #if __has_include(<linux/wireless.h>)
+            "linux/wireless\n"
         #endif
         ""
     , stdout);

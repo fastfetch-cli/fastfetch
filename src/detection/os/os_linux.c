@@ -150,8 +150,11 @@ static void detectOS(FFOSResult* os)
 
         if(os->prettyName.length == 0)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
+        
+        parseFile("/bedrock"FASTFETCH_TARGET_DIR_ETC"/os-release", os);
 
-        return;
+        if(allRelevantValuesSet(os))
+            return;
     }
 
     parseFile(FASTFETCH_TARGET_DIR_ETC"/os-release", os);

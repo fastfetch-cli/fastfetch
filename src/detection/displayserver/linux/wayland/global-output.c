@@ -118,7 +118,7 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         rotation,
         display.edidName.length
             ? &display.edidName
-            : display.description.length
+            : display.description.length && !ffStrbufEndsWithS(&display.description, "-unknown")
                 ? &display.description
                 : &display.name,
         display.type,

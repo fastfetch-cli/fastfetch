@@ -14,13 +14,52 @@ jobs:
 
       - name: Install codespell
         shell: bash
-        run: sudo apt update && sudo apt install -y codespell
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y codespell
 
       - name: Run Spellchecker
         run: codespell
 
-  Linux-old-amd64:
-    name: Linux-old-amd64
+  no-features-test:
+    name: No-features-test
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: uname -a
+        run: uname -a
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_XFCONF=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OSMESA=OFF -DENABLE_OPENCL=OFF -DENABLE_LIBNM=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_DIRECTX_HEADERS=OFF -DENABLE_THREADS=OFF
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest
+
+  linux-amd64:
+    name: Linux-amd64
     runs-on: ubuntu-20.04
     permissions:
       security-events: write
@@ -71,71 +110,6 @@ jobs:
 
       - name: run tests
         run: ctest
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-linux-old-amd64
-          path: ./fastfetch-*.*
-
-  linux-amd64:
-    name: Linux-amd64
-    runs-on: ubuntu-22.04 # Ubuntu 22.04 uses Glibc 2.35. Should be fine with Debian 12, which uses Glibc 2.36 (https://packages.debian.org/source/bookworm/glibc)
-    permissions:
-      security-events: write
-      contents: read
-    outputs:
-      ffversion: ${{ steps.ffversion.outputs.ffversion }}
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: uname -a
-        run: uname -a
-
-      - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev libddcutil-dev libchafa-dev directx-headers-dev
-
-      - name: install linuxbrew packages
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick --ignore-dependencies
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: c
-
-      - name: configure project
-        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
-
-      - name: build project
-        run: cmake --build . --target package --verbose -j4
-
-      - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-
-      - name: list features
-        run: ./fastfetch --list-features
-
-      - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
-
-      - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
-
-      - name: run flashfetch
-        run: time ./flashfetch
-
-      - name: print dependencies
-        run: ldd fastfetch
-
-      - name: run tests
-        run: ctest
-
-      - name: get fastfetch version
-        id: ffversion
-        run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -258,7 +232,7 @@ jobs:
 
   macos-universal:
     name: macOS-universal
-    runs-on: macos-latest
+    runs-on: macos-12
     permissions:
       security-events: write
       contents: read
@@ -540,11 +514,6 @@ jobs:
       - name: download artifacts
         if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
         uses: actions/download-artifact@v4
-
-      - name: rm old artifacts
-        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
-        run: |
-          rm -rf fastfetch-*-old-*
 
       - name: create release
         if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release

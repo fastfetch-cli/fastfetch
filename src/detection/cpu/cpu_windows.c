@@ -50,6 +50,31 @@ typedef struct FFSmbiosProcessorInfo
     uint16_t ThreadEnabled; // varies
 } FFSmbiosProcessorInfo;
 
+#if defined(__x86_64__) || defined(__i386__)
+
+#include <cpuid.h>
+
+inline static const char* detectSpeedByCpuid(FFCPUResult* cpu)
+{
+    uint32_t base = 0, max = 0, bus = 0, unused = 0;
+    if (!__get_cpuid(0x16, &base, &max, &bus, &unused))
+        return "Unsupported instruction";
+
+    // cpuid returns 0 MHz when hyper-v is enabled
+    if (base) cpu->frequencyBase = base / 1000.0;
+    if (max) cpu->frequencyMax = max / 1000.0;
+    return NULL;
+}
+
+#else
+
+inline static const char* detectSpeedByCpuid(FFCPUResult* cpu)
+{
+    return "Unsupported platform";
+}
+
+#endif
+
 static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
 {
     const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_PROCESSOR_INFO];
@@ -114,6 +139,7 @@ static const char* detectByRegistry(FFCPUResult* cpu)
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
+    if (detectSpeedByCpuid(cpu) != NULL || cpu->frequencyBase != cpu->frequencyBase)
     {
         uint32_t mhz;
         if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
@@ -141,7 +167,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (error)
         return error;
 
-    detectMaxSpeedBySmbios(cpu);
+    if (cpu->frequencyMax != cpu->frequencyMax)
+        detectMaxSpeedBySmbios(cpu);
 
     if(options->temp)
         ffDetectSmbiosTemp(&cpu->temperature, NULL);

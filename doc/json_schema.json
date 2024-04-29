@@ -679,6 +679,7 @@
                             "board",
                             "break",
                             "brightness",
+                            "camera",
                             "chassis",
                             "cpu",
                             "cpuusage",
@@ -771,6 +772,10 @@
                                             {
                                                 "const": "board",
                                                 "description": "Print mather board name and other info"
+                                            },
+                                            {
+                                                "const": "camera",
+                                                "description": "Print available cameras"
                                             },
                                             {
                                                 "const": "cursor",
