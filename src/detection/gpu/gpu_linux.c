@@ -69,7 +69,7 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
         ffStrbufSubstrBefore(pciDir, hwmonLen);
         ffStrbufAppendS(pciDir, "temp1_input"); // The on die GPU temperature in millidegrees Celsius
         if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-            gpu->frequency = (double) value / 1000;
+            gpu->temperature = (double) value / 1000;
     }
 
     ffStrbufSubstrBefore(pciDir, hwmonLen);
