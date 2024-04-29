@@ -3,19 +3,21 @@
 Changes:
 * Default `hideCursor` to false. It doesn't make much difference but makes user's terminal unusable if fastfetch is not exited correctly.
 * Linux amd64 binaries are built with Ubuntu 20.04 again (#808)
-    * Note aarch64 binaries are unchanged (built with Ubuntu 22.04)
 
 Bugfixes:
 * Fix swap usage detection in x86-32 build (Windows, Swap)
 * Fix minimum cmake version support (#810)
 * Fix wifi detection on platforms that don't use NetworkManager (#811, Wifi, Linux)
-* Fix nixos wrapped process name (#814)
+* Fix NixOS wrapped process name (#814, Terminal, Linux)
+* Fix GPU type detection for AMD cards (#816, GPU, Linux)
 
 Features:
 * Add basic support DE detection support for UKUI (DE, Linux)
 * Support printing total number of nix / flatpak / brew packages (Packages)
+    * See `fastfetch -h packages-format` for detail
 * Better max CPU frequency detection support with `CPUID / 16H` instruction (CPU, Windows)
     * This requires Core I Gen 6 or newer, and with `Virtual Machine Platform` Windows feature disabled. X86 only.
+* Improve performance of nix packages detection (Packages, Linux)
 
 # 2.10.2
 
