@@ -15,23 +15,6 @@
 
 #include <inttypes.h>
 
-FF_MAYBE_UNUSED static void pciDetectTemp(FFGPUResult* gpu, uint32_t deviceClass)
-{
-    const FFlist* tempsResult = ffDetectTemps();
-
-    FF_LIST_FOR_EACH(FFTempValue, tempValue, *tempsResult)
-    {
-        // https://www.kernel.org/doc/html/v5.10/gpu/amdgpu.html#hwmon-interfaces
-        // FIXME: this code doesn't take multiGPUs into count
-        // The kernel exposes the device class multiplied by 256 for some reason
-        if(tempValue->deviceClass == deviceClass * 256)
-        {
-            gpu->temperature = tempValue->value;
-            return;
-        }
-    }
-}
-
 static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
     ffStrbufAppendS(pciDir, "/driver");
@@ -56,33 +39,59 @@ static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
     }
 }
 
-static void pciDetectVmem(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
-    // Works for AMD GPUs
     // https://www.kernel.org/doc/html/v5.10/gpu/amdgpu.html#mem-info-vis-vram-total
-    ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
-    uint64_t size = 0;
-    if (ffReadFileBuffer(pciDir->chars, buffer) && (size = ffStrbufToUInt(buffer, 0)))
-    {
-        gpu->type = size > 1024UL * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
-        if (gpu->type == FF_GPU_TYPE_DISCRETE)
-            gpu->dedicated.total = size;
-        else
-            gpu->shared.total = size;
+    const uint32_t pciDirLen = pciDir->length;
 
-        ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
-        ffStrbufAppendS(pciDir, "/mem_info_vram_used");
-        if (ffReadFileBuffer(pciDir->chars, buffer) && (size = ffStrbufToUInt(buffer, 0)))
+    ffStrbufAppendS(pciDir, "/hwmon/");
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+    struct dirent* entry = readdir(dirp);
+    if (!entry) return;
+    ffStrbufAppendS(pciDir, entry->d_name);
+    ffStrbufAppendC(pciDir, '/');
+
+    const uint32_t hwmonLen = pciDir->length;
+    ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
+    if (ffPathExists(pciDir->chars, FF_PATHTYPE_FILE))
+        gpu->type = FF_GPU_TYPE_INTEGRATED;
+    else
+        gpu->type = FF_GPU_TYPE_DISCRETE;
+
+    uint64_t value = 0;
+    if (options->temp)
+    {
+        ffStrbufSubstrBefore(pciDir, hwmonLen);
+        ffStrbufAppendS(pciDir, "temp1_input"); // The on die GPU temperature in millidegrees Celsius
+        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+            gpu->frequency = (double) value / 1000;
+    }
+
+    ffStrbufSubstrBefore(pciDir, hwmonLen);
+    ffStrbufAppendS(pciDir, "freq1_input"); // The gfx/compute clock in hertz
+    if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+        gpu->frequency = (double) value / (1000 * 1000 * 1000);
+
+    if (options->driverSpecific)
+    {
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+        ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
+        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
         {
-            if (gpu->type == FF_GPU_TYPE_DISCRETE)
-                gpu->dedicated.used = size;
-            else
-                gpu->shared.used = size;
+            ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
+            ffStrbufAppendS(pciDir, "/mem_info_vram_used");
+            if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+            {
+                if (gpu->type == FF_GPU_TYPE_DISCRETE)
+                    gpu->dedicated.used = value;
+                else
+                    gpu->shared.used = value;
+            }
         }
     }
 }
 
-static void pciDetectVfreq(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
     if (!ffStrbufEndsWithS(pciDir, "/device")) // Must be in `/sys/class/drm/cardN/device`
         return;
@@ -98,6 +107,10 @@ static void pciDetectVfreq(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
         str[len] = '\0';
         gpu->frequency = (double) strtoul(str, NULL, 10) / 1000.0;
     }
+
+    if (ffStrbufStartsWithS(&gpu->name, "Intel "))
+        ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel "));
+    gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
 }
 
 static bool loadPciIds(FFstrbuf* pciids)
@@ -186,47 +199,50 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
-    // Temporarily disabled for now #816
-    if (false)
-    {
-        pciDetectVmem(gpu, drmDir, buffer);
-        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
-    }
-
-    pciDetectVfreq(gpu, drmDir, buffer);
-    ffStrbufSubstrBefore(drmDir, drmDirPathLength);
-
     pciDetectDriver(gpu, drmDir, buffer);
     ffStrbufSubstrBefore(drmDir, drmDirPathLength);
 
-    #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
-    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
+    if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
     {
-        ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
-            .type = FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID,
-            .pciBusId = {
-                .domain = pciDomain,
-                .bus = pciBus,
-                .device = pciDevice,
-                .func = pciFunc,
-            },
-        }, (FFGpuDriverResult) {
-            .temp = options->temp ? &gpu->temperature : NULL,
-            .memory = options->driverSpecific ? &gpu->dedicated : NULL,
-            .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-            .type = &gpu->type,
-            .frequency = &gpu->frequency,
-        }, "libnvidia-ml.so");
-
-        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
-            gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        pciDetectAmdSpecific(options, gpu, drmDir, buffer);
+        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
     }
-    #endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
+    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+    {
+        pciDetectIntelSpecific(gpu, drmDir, buffer);
+        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+    }
+    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+    {
+        #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
+        if (options->temp || options->driverSpecific)
+        {
+            ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
+                .type = FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID,
+                .pciBusId = {
+                    .domain = pciDomain,
+                    .bus = pciBus,
+                    .device = pciDevice,
+                    .func = pciFunc,
+                },
+            }, (FFGpuDriverResult) {
+                .temp = options->temp ? &gpu->temperature : NULL,
+                .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                .type = &gpu->type,
+                .frequency = &gpu->frequency,
+            }, "libnvidia-ml.so");
+        }
+        #endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
 
-    #ifdef __linux__
-    if(options->temp && gpu->temperature != gpu->temperature)
-        pciDetectTemp(gpu, ((uint32_t) classId << 8) + subclassId);
-    #endif
+        if (gpu->type == FF_GPU_TYPE_UNKNOWN)
+        {
+            if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                gpu->type = FF_GPU_TYPE_DISCRETE;
+        }
+    }
 
     return NULL;
 }
