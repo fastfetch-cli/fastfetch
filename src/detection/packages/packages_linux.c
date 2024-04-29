@@ -171,8 +171,7 @@ static bool checkNixCache(FFstrbuf* cacheDir, FFstrbuf* hash, uint32_t* count)
     if (!ffPathExists(cacheDir->chars, FF_PATHTYPE_FILE))
         return false;
 
-    FF_STRBUF_AUTO_DESTROY cacheContent;
-    ffStrbufInit(&cacheContent);
+    FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreate();
     if (!ffReadFileBuffer(cacheDir->chars, &cacheContent))
         return false;
 
@@ -189,11 +188,8 @@ static bool checkNixCache(FFstrbuf* cacheDir, FFstrbuf* hash, uint32_t* count)
 
 static bool writeNixCache(FFstrbuf* cacheDir, FFstrbuf* hash, uint32_t count)
 {
-    FF_STRBUF_AUTO_DESTROY cacheContent;
-    ffStrbufInit(&cacheContent);
-    ffStrbufAppend(&cacheContent, hash);
-    ffStrbufAppendC(&cacheContent, '\n');
-    ffStrbufAppendF(&cacheContent, "%u", count);
+    FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreateCopy(hash);
+    ffStrbufAppendF(&cacheContent, "\n%u", count);
     return ffWriteFileBuffer(cacheDir->chars, &cacheContent);
 }
 
@@ -203,9 +199,7 @@ static uint32_t getNixPackagesImpl(char* path)
     if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
         return 0;
 
-    FF_STRBUF_AUTO_DESTROY cacheDir;
-    ffStrbufInit(&cacheDir);
-    ffStrbufAppend(&cacheDir, &instance.state.platform.cacheDir);
+    FF_STRBUF_AUTO_DESTROY cacheDir = ffStrbufCreateCopy(&instance.state.platform.cacheDir);
     ffStrbufEnsureEndsWithC(&cacheDir, '/');
     ffStrbufAppendS(&cacheDir, "fastfetch/packages/nix");
     ffStrbufAppendS(&cacheDir, path);
@@ -231,7 +225,7 @@ static uint32_t getNixPackagesImpl(char* path)
 
     //Implementation based on bash script from here:
     //https://github.com/fastfetch-cli/fastfetch/issues/195#issuecomment-1191748222
-    
+
     FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(1024);
 
     ffProcessAppendStdOut(&output, (char* const[]) {
@@ -261,7 +255,7 @@ static uint32_t getNixPackagesImpl(char* path)
             count++;
         lineLength = 0;
     }
-    
+
     writeNixCache(&cacheDir, &hash, count);
     return count;
 }
