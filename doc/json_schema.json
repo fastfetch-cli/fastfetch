@@ -1265,6 +1265,11 @@
                                         "description": "Set if unknown (unable to detect sizes) volumes should be printed",
                                         "default": false
                                     },
+                                    "ignoreRemote": {
+                                        "type": "boolean",
+                                        "description": "Set if remote volumes should be ignored when detecting for performance reasons. Windows only",
+                                        "default": false
+                                    },
                                     "useAvailable": {
                                         "type": "boolean",
                                         "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",

@@ -250,7 +250,7 @@ static void detectStats(FFDisk* disk)
     #endif
 }
 
-const char* ffDetectDisksImpl(FFlist* disks)
+const char* ffDetectDisksImpl(FF_MAYBE_UNUSED FFDiskOptions* options, FFlist* disks)
 {
     FILE* mountsFile = setmntent("/proc/mounts", "r");
     if(mountsFile == NULL)

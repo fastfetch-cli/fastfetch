@@ -1008,6 +1008,16 @@
             }
         },
         {
+            "long": "disk-ignore-remote",
+            "desc": "Set if remote volumes should be ignored when detecting for performance reasons",
+            "remark": "Windows only",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "disk-use-available",
             "desc": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
             "remark": "Maybe required for macOS to print correct results",

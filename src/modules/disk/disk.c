@@ -281,6 +281,12 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "ignore-remote"))
+    {
+        options->ignoreRemote = ffOptionParseBoolean(value);
+        return true;
+    }
+
     if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
         return true;
 
@@ -351,6 +357,12 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "ignoreRemote"))
+        {
+            options->ignoreRemote = yyjson_get_bool(val);
+            continue;
+        }
+
         if (ffStrEqualsIgnCase(key, "useAvailable"))
         {
             if (yyjson_get_bool(val))
@@ -397,6 +409,9 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 
     if (defaultOptions.calcType != options->calcType)
         yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
+
+    if (defaultOptions.ignoreRemote != options->ignoreRemote)
+        yyjson_mut_obj_add_bool(doc, module, "ignoreRemote", options->ignoreRemote);
 
     ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }

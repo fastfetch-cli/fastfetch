@@ -18,6 +18,7 @@ Features:
 * Better max CPU frequency detection support with `CPUID / 16H` instruction (CPU, Windows)
     * This requires Core I Gen 6 or newer, and with `Virtual Machine Platform` Windows feature disabled. X86 only.
 * Improve performance of nix packages detection (Packages, Linux)
+* Add option `--disk-ignore-remote` to ignore remote disks to improve performance (Disk, Windows)
 
 # 2.10.2
 
