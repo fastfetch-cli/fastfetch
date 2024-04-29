@@ -186,8 +186,12 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
-    pciDetectVmem(gpu, drmDir, buffer);
-    ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+    // Temporarily disabled for now #816
+    if (false)
+    {
+        pciDetectVmem(gpu, drmDir, buffer);
+        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+    }
 
     pciDetectVfreq(gpu, drmDir, buffer);
     ffStrbufSubstrBefore(drmDir, drmDirPathLength);
