@@ -59,6 +59,10 @@ strace /path/to/fastfetch --multithreading false -s {MODULE} --pipe
 
 If you cannot do the instructions above, please upload the core dump file:
 
+## If fastfetch is slow
+
+Use `time fastfetch --stat` to show time usage for each module.
+
 ## If my image logo didn't show / work
 
 <!-- Please make sure the terminal does support the image protocol you used. Note Gnome terminal doesn't support any image protocols -->
