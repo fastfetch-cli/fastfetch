@@ -131,54 +131,6 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
 }
 
-static void printMountpoint(FFDiskOptions* options, const FFlist* disks, const char* mountpoint)
-{
-    FF_LIST_FOR_EACH(FFDisk, disk, *disks)
-    {
-        if(ffStrbufEqualS(&disk->mountpoint, mountpoint))
-        {
-            printDisk(options, disk);
-            return;
-        }
-    }
-
-    ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disk found for mountpoint: %s", mountpoint);
-}
-
-static void printMountpoints(FFDiskOptions* options, const FFlist* disks)
-{
-    #ifdef _WIN32
-    const char separator = ';';
-    #else
-    const char separator = ':';
-    #endif
-
-    FF_STRBUF_AUTO_DESTROY mountpoints = ffStrbufCreateCopy(&options->folders);
-    ffStrbufTrim(&mountpoints, separator);
-
-    uint32_t startIndex = 0;
-    while(startIndex < mountpoints.length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(&mountpoints, startIndex, separator);
-        mountpoints.chars[colonIndex] = '\0';
-
-        printMountpoint(options, disks, mountpoints.chars + startIndex);
-
-        startIndex = colonIndex + 1;
-    }
-}
-
-static void printAutodetected(FFDiskOptions* options, const FFlist* disks)
-{
-    FF_LIST_FOR_EACH(FFDisk, disk, *disks)
-    {
-        if(disk->type & ~options->showTypes)
-            continue;
-
-        printDisk(options, disk);
-    }
-}
-
 void ffPrintDisk(FFDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
@@ -190,10 +142,13 @@ void ffPrintDisk(FFDiskOptions* options)
     }
     else
     {
-        if(options->folders.length == 0)
-            printAutodetected(options, &disks);
-        else
-            printMountpoints(options, &disks);
+        FF_LIST_FOR_EACH(FFDisk, disk, disks)
+        {
+            if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
+                continue;
+
+            printDisk(options, disk);
+        }
     }
 
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
