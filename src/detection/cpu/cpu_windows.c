@@ -68,7 +68,7 @@ inline static const char* detectSpeedByCpuid(FFCPUResult* cpu)
 
 #else
 
-inline static const char* detectSpeedByCpuid(FFCPUResult* cpu)
+inline static const char* detectSpeedByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
 {
     return "Unsupported platform";
 }
