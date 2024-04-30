@@ -3791,14 +3791,14 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // SourceMage
+    // Source Mage
     {
-        .names = {"Source Mage", "source_mage"},
+        .names = {"Source Mage", "Source Mage GNU/Linux", "source_mage", "sourcemage"},
         .lines = FASTFETCH_DATATEXT_LOGO_SOURCE_MAGE,
         .colors = {
             FF_COLOR_FG_WHITE,
         },
-        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
     // Solaris
