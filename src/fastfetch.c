@@ -321,21 +321,42 @@ static void parseOption(FFdata* data, const char* key, const char* value);
 
 static bool parseJsoncFile(const char* path)
 {
-    yyjson_read_err error;
-    yyjson_doc* doc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, &error);
-    if (!doc)
+    assert(!instance.state.configDoc);
+
     {
-        if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
+        yyjson_read_err error;
+        instance.state.configDoc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, &error);
+        if (!instance.state.configDoc)
         {
-            fprintf(stderr, "Error: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
+            if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
+            {
+                fprintf(stderr, "Error: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
+                exit(477);
+            }
+            return false;
+        }
+    }
+
+    {
+        const char* error = NULL;
+
+        yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
+        if (!yyjson_is_obj(root))
+            error = "Invalid JSON config format. Root value must be an object";
+
+        if (
+            error ||
+            (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
+            (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
+            (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
+            (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
+            false
+        ) {
+            fprintf(stderr, "JsonConfig Error: %s\n", error);
             exit(477);
         }
-        return false;
     }
-    if (instance.state.configDoc)
-        yyjson_doc_free(instance.state.configDoc); // for `--load-config`
 
-    instance.state.configDoc = doc;
     return true;
 }
 
@@ -779,27 +800,6 @@ static void parseArguments(FFdata* data, int argc, char** argv, void (*parser)(F
 
 static void run(FFdata* data)
 {
-    if (instance.state.configDoc)
-    {
-        const char* error = NULL;
-
-        yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
-        if (!yyjson_is_obj(root))
-            error = "Invalid JSON config format. Root value must be an object";
-
-        if (
-            error ||
-            (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
-            (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
-            (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
-            (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
-            false
-        ) {
-            fprintf(stderr, "JsonConfig Error: %s\n", error);
-            exit(477);
-        }
-    }
-
     const bool useJsonConfig = data->structure.length == 0 && instance.state.configDoc;
 
     if (useJsonConfig)
