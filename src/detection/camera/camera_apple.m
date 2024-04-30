@@ -4,7 +4,14 @@
 
 const char* ffDetectCamera(FFlist* result)
 {
-    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera] mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionUnspecified];
+    AVCaptureDeviceType externalType;
+    if (@available(macOS 14, *)) // #822
+        externalType = AVCaptureDeviceTypeContinuityCamera;
+    else
+        externalType = AVCaptureDeviceTypeExternalUnknown;
+    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, externalType]
+                                                                                mediaType:AVMediaTypeVideo
+                                                                                position:AVCaptureDevicePositionUnspecified];
     if (!session)
         return "Failed to create AVCaptureDeviceDiscoverySession";
 
