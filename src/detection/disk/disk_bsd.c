@@ -90,7 +90,7 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 }
 #endif
 
-const char* ffDetectDisksImpl(FFlist* disks)
+const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
     int size = getfsstat(NULL, 0, MNT_WAIT);
 
@@ -103,7 +103,12 @@ const char* ffDetectDisksImpl(FFlist* disks)
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
-        if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
+        if(__builtin_expect(options->folders.length, 0))
+        {
+            if(!ffDiskMatchMountpoint(options, fs->f_mntonname))
+                continue;
+        }
+        else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
             continue;
 
         #ifdef __FreeBSD__

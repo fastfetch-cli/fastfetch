@@ -6,23 +6,31 @@
 #include <winioctl.h>
 #include <assert.h>
 
-const char* ffDetectDisksImpl(FFlist* disks)
+const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
     wchar_t buf[MAX_PATH + 1];
     uint32_t length = GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf);
     if (length == 0 || length >= sizeof(buf) / sizeof(*buf))
         return "GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf) failed";
 
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
     for(uint32_t i = 0; i < length; i++)
     {
         wchar_t* mountpoint = buf + i;
 
+        ffStrbufSetWS(&buffer, mountpoint);
+        i += buffer.length;
+
         UINT driveType = GetDriveTypeW(mountpoint);
-        if(driveType == DRIVE_NO_ROOT_DIR)
+
+        if (__builtin_expect((long) options->folders.length, 0))
         {
-            i += (uint32_t)wcslen(mountpoint);
-            continue;
+            if (!ffDiskMatchMountpoint(options, buffer.chars))
+                continue;
         }
+        else if(driveType == DRIVE_NO_ROOT_DIR)
+            continue;
 
         FFDisk* disk = ffListAdd(disks);
 
@@ -77,7 +85,7 @@ const char* ffDetectDisksImpl(FFlist* disks)
         else
             disk->createTime = 0;
 
-        ffStrbufInitWS(&disk->mountpoint, mountpoint);
+        ffStrbufInitMove(&disk->mountpoint, &buffer);
         if (mountpoint[2] == L'\\' && mountpoint[3] == L'\0')
         {
             wchar_t volumeName[MAX_PATH + 1];
@@ -91,8 +99,6 @@ const char* ffDetectDisksImpl(FFlist* disks)
         //Unsupported
         disk->filesUsed = 0;
         disk->filesTotal = 0;
-
-        i += disk->mountpoint.length;
     }
 
     return NULL;

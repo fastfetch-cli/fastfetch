@@ -1,6 +1,29 @@
 #include "disk.h"
 
-const char* ffDetectDisksImpl(FFlist* disks);
+bool ffDiskMatchMountpoint(FFDiskOptions* options, const char* mountpoint)
+{
+    #ifdef _WIN32
+    const char separator = ';';
+    #else
+    const char separator = ':';
+    #endif
+
+    uint32_t mountpointLength = (uint32_t) strlen(mountpoint);
+
+    uint32_t startIndex = 0;
+    while(startIndex < options->folders.length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(&options->folders, startIndex, separator);
+
+        uint32_t folderLength = colonIndex - startIndex;
+        if (folderLength == mountpointLength && memcmp(options->folders.chars + startIndex, mountpoint, mountpointLength) == 0)
+            return true;
+
+        startIndex = colonIndex + 1;
+    }
+
+    return false;
+}
 
 static int compareDisks(const FFDisk* disk1, const FFDisk* disk2)
 {
@@ -9,7 +32,7 @@ static int compareDisks(const FFDisk* disk1, const FFDisk* disk2)
 
 const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
 {
-    const char* error = ffDetectDisksImpl(disks);
+    const char* error = ffDetectDisksImpl(options, disks);
 
     if (error) return error;
     if (disks->length == 0) return "No disks found";

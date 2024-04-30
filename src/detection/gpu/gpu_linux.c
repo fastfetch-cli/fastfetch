@@ -84,7 +84,7 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
         if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
         {
             ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
-            ffStrbufAppendS(pciDir, "/mem_info_vram_used");
+            ffStrbufAppendS(pciDir, "/mem_info_vis_vram_used");
             if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
             {
                 if (gpu->type == FF_GPU_TYPE_DISCRETE)

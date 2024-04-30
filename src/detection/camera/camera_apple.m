@@ -1,10 +1,14 @@
 #include "camera.h"
+#include "common/io/io.h"
 
 #import <AVFoundation/AVCaptureDevice.h>
 
 const char* ffDetectCamera(FFlist* result)
 {
-    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera] mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionUnspecified];
+    FF_SUPPRESS_IO(); // #822
+    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeExternalUnknown]
+                                                                                mediaType:AVMediaTypeVideo
+                                                                                position:AVCaptureDevicePositionUnspecified];
     if (!session)
         return "Failed to create AVCaptureDeviceDiscoverySession";
 
