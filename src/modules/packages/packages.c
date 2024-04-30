@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 29
+#define FF_PACKAGES_NUM_FORMAT_ARGS 30
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
