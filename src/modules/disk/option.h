@@ -31,5 +31,4 @@ typedef struct FFDiskOptions
     FFDiskVolumeType showTypes;
     FFDiskCalcType calcType;
     FFColorRangeConfig percent;
-    bool ignoreRemote;
 } FFDiskOptions;

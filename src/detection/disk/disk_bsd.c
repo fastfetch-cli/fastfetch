@@ -90,7 +90,7 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 }
 #endif
 
-const char* ffDetectDisksImpl(FF_MAYBE_UNUSED FFDiskOptions* options, FFlist* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     int size = getfsstat(NULL, 0, MNT_WAIT);
 

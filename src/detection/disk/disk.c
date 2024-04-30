@@ -1,6 +1,6 @@
 #include "disk.h"
 
-const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks);
+const char* ffDetectDisksImpl(FFlist* disks);
 
 static int compareDisks(const FFDisk* disk1, const FFDisk* disk2)
 {
@@ -9,7 +9,7 @@ static int compareDisks(const FFDisk* disk1, const FFDisk* disk2)
 
 const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
 {
-    const char* error = ffDetectDisksImpl(options, disks);
+    const char* error = ffDetectDisksImpl(disks);
 
     if (error) return error;
     if (disks->length == 0) return "No disks found";

@@ -6,7 +6,7 @@
 #include <winioctl.h>
 #include <assert.h>
 
-const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
+const char* ffDetectDisksImpl(FFlist* disks)
 {
     wchar_t buf[MAX_PATH + 1];
     uint32_t length = GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf);
@@ -18,7 +18,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         wchar_t* mountpoint = buf + i;
 
         UINT driveType = GetDriveTypeW(mountpoint);
-        if(driveType == DRIVE_NO_ROOT_DIR || (driveType == DRIVE_REMOTE && options->ignoreRemote))
+        if(driveType == DRIVE_NO_ROOT_DIR)
         {
             i += (uint32_t)wcslen(mountpoint);
             continue;
