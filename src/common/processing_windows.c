@@ -96,7 +96,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 {
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
-                    return "WaitForSingleObject(hChildPipeRead) failed or timeout";
+                    return "WaitForSingleObject(hChildPipeRead) failed or timeout (try increasing --processing-timeout)";
                 }
 
                 if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, FALSE))

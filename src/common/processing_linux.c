@@ -68,7 +68,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             {
                 kill(childPid, SIGTERM);
                 waitpid(childPid, NULL, 0);
-                return "poll(&pollfd, 1, timeout) timeout";
+                return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
             }
             else if (pollfd.revents & POLLERR)
             {
