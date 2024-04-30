@@ -1,15 +1,12 @@
 #include "camera.h"
+#include "common/io/io.h"
 
 #import <AVFoundation/AVCaptureDevice.h>
 
 const char* ffDetectCamera(FFlist* result)
 {
-    AVCaptureDeviceType externalType;
-    if (@available(macOS 14, *)) // #822
-        externalType = AVCaptureDeviceTypeContinuityCamera;
-    else
-        externalType = AVCaptureDeviceTypeExternalUnknown;
-    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, externalType]
+    FF_SUPPRESS_IO(); // #822
+    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeExternalUnknown]
                                                                                 mediaType:AVMediaTypeVideo
                                                                                 position:AVCaptureDevicePositionUnspecified];
     if (!session)
