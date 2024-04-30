@@ -1,4 +1,4 @@
-# 2.10.3
+# 2.11.0
 
 Changes:
 * Default `hideCursor` to false. It doesn't make much difference but makes user's terminal unusable if fastfetch is not exited correctly.
@@ -10,14 +10,21 @@ Bugfixes:
 * Fix wifi detection on platforms that don't use NetworkManager (#811, Wifi, Linux)
 * Fix NixOS wrapped process name (#814, Terminal, Linux)
 * Fix GPU type detection for AMD cards (#816, GPU, Linux)
+* Silence system deprecation warnings (#822, Camera, macOS)
 
 Features:
 * Add basic support DE detection support for UKUI (DE, Linux)
 * Support printing total number of nix / flatpak / brew packages (Packages)
     * See `fastfetch -h packages-format` for detail
 * Better max CPU frequency detection support with `CPUID / 16H` instruction (CPU, Windows)
-    * This requires Core I Gen 6 or newer, and with `Virtual Machine Platform` Windows feature disabled. X86 only.
+    * This requires Intel Core I Gen 6 or newer, and with `Virtual Machine Platform` Windows feature disabled. X86 only.
 * Improve performance of nix packages detection (Packages, Linux)
+* Make config specified in JSONC overridable by command line flags
+    * Note this change only make global config overridable; module configs are still not
+* Suggest increasing `--processing-timeout` when child process timeouts
+* Only detect folders that specified by `--disk-folders`
+    * Previously `--disk-folders` only omits unmatched disks from output
+    * This option can be used to improve detection performance by ignoring slow network drives
 
 # 2.10.2
 
