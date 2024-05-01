@@ -4,7 +4,6 @@
 
 #include <windows.h>
 #include <winioctl.h>
-#include <assert.h>
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
@@ -18,8 +17,9 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     // For cross-platform portability; used by `presets/examples/13.jsonc`
     if (__builtin_expect(options->folders.length == 1 && options->folders.chars[0] == '/', 0))
     {
-        ffStrbufSetS(&options->folders, getenv("SystemDrive"));
-        ffStrbufEnsureEndsWithC(&options->folders, '\\');
+        wchar_t path[MAX_PATH + 1];
+        GetSystemWindowsDirectoryW(path, sizeof(path) / sizeof(*path));
+        ffStrbufSetF(&options->folders, "%c:\\", (char) path[0]);
     }
 
     for(uint32_t i = 0; i < length; i++)
