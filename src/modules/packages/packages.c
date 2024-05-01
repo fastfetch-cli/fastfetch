@@ -406,7 +406,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of winget packages",
         "Number of opkg packages",
         "Number of am packages",
-        "Number of spells",
+        "Number of sorcery packages",
         "Total number of all nix packages",
         "Total number of all flatpak packages",
         "Total number of all brew packages",
