@@ -15,6 +15,13 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
+    // For cross-platform portability; used by `presets/examples/13.jsonc`
+    if (__builtin_expect(options->folders.length == 1 && options->folders.chars[0] == '/', 0))
+    {
+        ffStrbufSetS(&options->folders, getenv("SystemDrive"));
+        ffStrbufEnsureEndsWithC(&options->folders, '\\');
+    }
+
     for(uint32_t i = 0; i < length; i++)
     {
         wchar_t* mountpoint = buf + i;
