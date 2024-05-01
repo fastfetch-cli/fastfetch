@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 29
+#define FF_PACKAGES_NUM_FORMAT_ARGS 30
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -65,6 +65,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(opkg)
         FF_PRINT_PACKAGE(am)
+        FF_PRINT_PACKAGE(sorcery)
 
         putchar('\n');
     }
@@ -100,6 +101,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.winget},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.opkg},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.am},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.sorcery},
             {FF_FORMAT_ARG_TYPE_UINT, &nixAll},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpakAll},
             {FF_FORMAT_ARG_TYPE_UINT, &brewAll},
@@ -172,6 +174,7 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                 case 'S': if (false);
                     FF_TEST_PACKAGE_NAME(SCOOP)
                     FF_TEST_PACKAGE_NAME(SNAP)
+                    FF_TEST_PACKAGE_NAME(SORCERY)
                     break;
                 case 'W': if (false);
                     FF_TEST_PACKAGE_NAME(WINGET)
@@ -272,6 +275,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'S': if (false);
                             FF_TEST_PACKAGE_NAME(SCOOP)
                             FF_TEST_PACKAGE_NAME(SNAP)
+                            FF_TEST_PACKAGE_NAME(SORCERY)
                             break;
                         case 'W': if (false);
                             FF_TEST_PACKAGE_NAME(WINGET)
@@ -322,6 +326,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(WINGET)
         FF_TEST_PACKAGE_NAME(XBPS)
         FF_TEST_PACKAGE_NAME(AM)
+        FF_TEST_PACKAGE_NAME(SORCERY)
         #undef FF_TEST_PACKAGE_NAME
     }
 }
@@ -368,12 +373,13 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(xbps)
     FF_APPEND_PACKAGE_COUNT(opkg)
     FF_APPEND_PACKAGE_COUNT(am)
+    FF_APPEND_PACKAGE_COUNT(sorcery)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
 void ffPrintPackagesHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
         "Number of all packages",
         "Number of pacman packages",
         "Pacman branch on manjaro",
@@ -400,6 +406,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of winget packages",
         "Number of opkg packages",
         "Number of am packages",
+        "Number of sorcery packages",
         "Total number of all nix packages",
         "Total number of all flatpak packages",
         "Total number of all brew packages",
