@@ -6,12 +6,6 @@
 
 void ffPrintCustom(FFCustomOptions* options)
 {
-    if (options->moduleArgs.outputFormat.length == 0)
-    {
-        ffPrintError(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "output format must be set for custom module");
-        return;
-    }
-
     ffPrintLogoAndKey(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
     ffStrbufWriteTo(&options->moduleArgs.outputFormat, stdout);
     puts(FASTFETCH_TEXT_MODIFIER_RESET);

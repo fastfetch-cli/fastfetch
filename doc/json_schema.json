@@ -1117,6 +1117,9 @@
                                                 "maxItems": 2
                                             }
                                         }
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
                                     }
                                 }
                             },
@@ -1174,10 +1177,7 @@
                                         "description": "Text to print",
                                         "type": "string"
                                     }
-                                },
-                                "required": [
-                                    "format"
-                                ]
+                                }
                             },
                             {
                                 "title": "Display",
