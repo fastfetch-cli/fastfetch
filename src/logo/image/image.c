@@ -1,6 +1,7 @@
 #include "image.h"
 #include "common/io/io.h"
 #include "common/printing.h"
+#include "util/stringUtils.h"
 
 #include <limits.h>
 #include <math.h>
@@ -838,6 +839,22 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
             fprintf(stderr, "Logo: Image source \"%s\" does not exist\n", instance.config.logo.source.chars);
         return false;
     }
+
+    if (getenv("SSH_TTY"))
+    {
+        if(printError)
+            fputs("Logo: Image logo is not supported in SSH sessions\n", stderr);
+        return false;
+    }
+
+    const char* term = getenv("TERM");
+    if((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ") || getenv("TMUX"))
+    {
+        if(printError)
+            fputs("Logo: Image logo is not supported in terminal multiplexers\n", stderr);
+        return false;
+    }
+
 
     if(type == FF_LOGO_TYPE_IMAGE_ITERM)
         return printImageIterm();
