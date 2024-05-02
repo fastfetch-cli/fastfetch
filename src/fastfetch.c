@@ -318,7 +318,7 @@ static bool printSpecificCommandHelp(const char *command)
 
 static void printCommandHelp(const char *command)
 {
-    if(command == NULL)
+    if (command == NULL)
     {
         printFullHelp();
     }
