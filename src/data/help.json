@@ -948,7 +948,7 @@
         {
             "long": "disk-folders",
             "desc": "A colon (semicolon on Windows) separated list of folder paths to be detected",
-            "remark": "On Windows, a drive latter must be upper cased and end with \"\\\". \"/\" is used as an alias of the system drive. eg. \"/\" is the alias of \"C:\\\".",
+            "remark": "On Windows, a drive latter must be upper cased and end with \"\\\". \"/\" is used as an alias of the system drive. This option overrides other disk-show-* options",
             "arg": {
                 "type": "path",
                 "default": "Auto detection using mount-points"
