@@ -125,7 +125,7 @@ The specified configuration/preset files are searched in the following order:
 When both a '.jsonc' and a '.conf' file with the same name is found,
 the '.jsonc' file is preferred.
 
-Fastfetch provides some default presets. List them with \fB \-\-print\-available\-presets\fR.
+Fastfetch provides some default presets. List them with \fB\-\-list\-presets\fR.
 
 .SH "SEE ALSO"
 .BR neofetch (1)

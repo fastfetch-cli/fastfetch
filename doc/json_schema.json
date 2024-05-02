@@ -1117,6 +1117,9 @@
                                                 "maxItems": 2
                                             }
                                         }
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
                                     }
                                 }
                             },
@@ -1174,10 +1177,7 @@
                                         "description": "Text to print",
                                         "type": "string"
                                     }
-                                },
-                                "required": [
-                                    "format"
-                                ]
+                                }
                             },
                             {
                                 "title": "Display",
@@ -1238,7 +1238,7 @@
                                     },
                                     "folders": {
                                         "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options"
                                     },
                                     "showExternal": {
                                         "type": "boolean",

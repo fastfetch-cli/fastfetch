@@ -40,6 +40,7 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results)
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);
     ffStrbufInit(&battery->technology);
+    ffStrbufInit(&battery->serial);
     ffStrbufInit(&battery->manufactureDate);
 
     battery->capacity = yyjson_get_num(yyjson_obj_get(root, "percentage"));
@@ -77,6 +78,8 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);
     ffStrbufInit(&battery->technology);
+    ffStrbufInit(&battery->serial);
+    ffStrbufInit(&battery->manufactureDate);
 
     if (ffParsePropLines(start, "AC powered: ", &temp) && ffStrbufEqualS(&temp, "true"))
         ffStrbufAppendS(&battery->status, "AC powered");

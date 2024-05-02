@@ -1,3 +1,21 @@
+# 2.11.1
+
+Hotfix for Android
+
+Bugfixes:
+* Fix uninitialized variables which can cause crashes (#760 #838, Battery, Android)
+* Don't detect hyfetch as shell when used as a backend of hyfetch
+* Fix incorrect information in man page
+
+Features:
+* Support sorcery package manager detection (Packages, Linux)
+* Make `--custom-format` optional (Custom)
+* Make `/` an alias of `C:\` for `--disk-folders` (Disk, Windows)
+
+Logo:
+* Fix colors of Source Mage logo
+
+
 # 2.11.0
 
 Changes:

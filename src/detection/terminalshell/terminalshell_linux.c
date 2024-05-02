@@ -243,6 +243,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrEquals(name, "perf")                ||
                 ffStrEquals(name, "guake-wrapped")       ||
                 ffStrEquals(name, "time")                ||
+                ffStrEquals(name, "hyfetch")             || //when hyfetch uses fastfetch as backend
                 ffStrContainsIgnCase(name, "debug")      ||
                 ffStrContainsIgnCase(name, "not-found")  ||
                 ffStrEndsWith(name, ".sh")

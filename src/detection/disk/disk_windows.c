@@ -4,7 +4,6 @@
 
 #include <windows.h>
 #include <winioctl.h>
-#include <assert.h>
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
@@ -14,6 +13,14 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         return "GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf) failed";
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
+    // For cross-platform portability; used by `presets/examples/13.jsonc`
+    if (__builtin_expect(options->folders.length == 1 && options->folders.chars[0] == '/', 0))
+    {
+        wchar_t path[MAX_PATH + 1];
+        GetSystemWindowsDirectoryW(path, sizeof(path) / sizeof(*path));
+        ffStrbufSetF(&options->folders, "%c:\\", (char) path[0]);
+    }
 
     for(uint32_t i = 0; i < length; i++)
     {
