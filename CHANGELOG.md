@@ -4,17 +4,17 @@ Hotfix for Android
 
 Bugfixes:
 * Fix uninitialized variables which can cause crashes (#760 #838, Battery, Android)
-* Don't detect hyfetch as shell when used as a backend of hyfetch
-* Fix incorrect information in man page
+* Don't detect hyfetch as shell when used as backend of [hyfetch](https://github.com/hykilpikonna/hyfetch)
+* Fix incorrect information in man page (#828)
 
 Features:
 * Support sorcery package manager detection (Packages, Linux)
 * Make `--custom-format` optional (Custom)
 * Make `/` an alias of `C:\` for `--disk-folders` (Disk, Windows)
+* Build for Linux armv7
 
 Logo:
 * Fix colors of Source Mage logo
-
 
 # 2.11.0
 
