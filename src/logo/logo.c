@@ -393,7 +393,8 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
         : !ffAppendFileBuffer(options->source.chars, &content)
     )
     {
-        fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
+        if (instance.config.display.showErrors)
+            fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
         return false;
     }
 
@@ -448,7 +449,7 @@ static bool logoTryKnownType(void)
     if(options->type == FF_LOGO_TYPE_IMAGE_RAW)
         return logoPrintFileIfExists(false, true);
 
-    return logoPrintImageIfExists(options->type, true);
+    return logoPrintImageIfExists(options->type, instance.config.display.showErrors);
 }
 
 static void logoPrintKnownType(void)

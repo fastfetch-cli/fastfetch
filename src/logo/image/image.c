@@ -54,13 +54,14 @@ static FFstrbuf base64Encode(const FFstrbuf* in)
     return out;
 }
 
-static bool printImageIterm(void)
+static bool printImageIterm(bool printError)
 {
     const FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     if(!ffAppendFileBuffer(options->source.chars, &buf))
     {
-        fputs("Logo: Failed to load image file\n", stderr);
+        if (printError)
+            fputs("Logo (iterm): Failed to load image file\n", stderr);
         return false;
     }
 
@@ -135,9 +136,17 @@ static bool printImageIterm(void)
     return true;
 }
 
-static bool printImageKittyDirect(void)
+static bool printImageKittyDirect(bool printError)
 {
     const FFOptionsLogo* options = &instance.config.logo;
+
+    if (!ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
+    {
+        if (printError)
+            fputs("Logo (kitty-direct): Failed to load image file\n", stderr);
+        return false;
+    }
+
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&options->source);
 
     if (!options->width || !options->height)
@@ -857,10 +866,10 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
 
 
     if(type == FF_LOGO_TYPE_IMAGE_ITERM)
-        return printImageIterm();
+        return printImageIterm(printError);
 
     if(type == FF_LOGO_TYPE_IMAGE_KITTY_DIRECT)
-        return printImageKittyDirect();
+        return printImageKittyDirect(printError);
 
     #if !defined(FF_HAVE_CHAFA)
         if(type == FF_LOGO_TYPE_IMAGE_CHAFA)
