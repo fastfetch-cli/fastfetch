@@ -104,6 +104,7 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
             ffStrbufIgnCaseEqualS(&result->prettyName, "python")        || // python on windows generates shim executables
             ffStrbufIgnCaseEqualS(&result->prettyName, "fastfetch")     || // scoop warps the real binaries with a "shim" exe
             ffStrbufIgnCaseEqualS(&result->prettyName, "flashfetch")    ||
+            ffStrbufIgnCaseEqualS(&result->prettyName, "hyfetch")       || // uses fastfetch as backend
             ffStrbufContainIgnCaseS(&result->prettyName, "debug")       ||
             ffStrbufContainIgnCaseS(&result->prettyName, "time")        ||
             ffStrbufStartsWithIgnCaseS(&result->prettyName, "ConEmu") // https://github.com/fastfetch-cli/fastfetch/issues/488#issuecomment-1619982014
