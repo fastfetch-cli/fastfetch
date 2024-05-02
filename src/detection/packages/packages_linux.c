@@ -506,7 +506,6 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
         // check if ~/.nix-profile exists
         FF_STRBUF_AUTO_DESTROY profilePath = ffStrbufCreateCopy(&baseDir);
         ffStrbufAppendS(&profilePath, ".nix-profile");
-        printf("%s\n", profilePath.chars);
         if (ffPathExists(profilePath.chars, FF_PATHTYPE_DIRECTORY))
         {
             result->nixUser = getNixPackages(&baseDir, ".nix-profile");
@@ -529,7 +528,6 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
  
             ffStrbufSet(&profilePath, &stateDir);
             ffStrbufAppendS(&profilePath, "nix/profile");
-            printf("%s\n", profilePath.chars);
             result->nixUser = getNixPackages(&stateDir, "nix/profile");
         }
     }
