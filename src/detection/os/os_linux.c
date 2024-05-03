@@ -166,17 +166,21 @@ static void detectOS(FFOSResult* os)
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
-    // For MX Linux. Should not exist in other distros. See #847
-    if(parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/initrd-release", os) && allRelevantValuesSet(os))
-        return;
+    // Hack for MX Linux. See #847
+    if(parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os))
+    {
+        if (ffStrbufEqualS(&os->id, "MX"))
+        {
+            ffStrbufSetStatic(&os->name, "MX");
+            ffStrbufSetStatic(&os->idLike, "debian");
+            return;
+        }
+    }
 
     if(parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
         return;
 
-    if(parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os) && allRelevantValuesSet(os))
-        return;
-
-    parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
+    parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
 }
 
 void ffDetectOSImpl(FFOSResult* os)

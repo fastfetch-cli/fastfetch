@@ -22,7 +22,7 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
         ffStrbufAppend(result, &instance.state.platform.systemName);
 
     //Append code name if it is missing
-    if(os->codename.length > 0 && !ffStrbufContain(result, &os->versionID))
+    if(os->codename.length > 0 && !ffStrbufContain(result, &os->codename))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->codename);
