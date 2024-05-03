@@ -46,6 +46,8 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
 
     ffStrbufAppendS(pciDir, "/hwmon/");
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+    if (!dirp) return;
+
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL)
     {
