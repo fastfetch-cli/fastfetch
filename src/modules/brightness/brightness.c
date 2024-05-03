@@ -154,12 +154,6 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
         return;
     }
 
-    if(result.length == 0)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "No result is detected.");
-        return;
-    }
-
     yyjson_mut_val* arr = yyjson_mut_arr(doc);
     yyjson_mut_obj_add_val(doc, module, "result", arr);
 

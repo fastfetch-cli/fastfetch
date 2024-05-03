@@ -28,7 +28,7 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
                 fputs("Error: only http: protocol is supported. Use `Command` module with `curl` if needed\n", stderr);
                 exit(1);
             }
-            ffStrbufSubstrAfter(&host, hostStartIndex + (strlen("://") - 1));
+            ffStrbufSubstrAfter(&host, hostStartIndex + (uint32_t) (strlen("://") - 1));
         }
         uint32_t pathStartIndex = ffStrbufFirstIndexC(&host, '/');
 

@@ -228,7 +228,10 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
     if (!instance.config.display.tsVersion) return false;
 
-    if(strcasecmp(exeName, "bash") == 0 || strcasecmp(exeName, "sh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "sh")) // #849
+        return false;
+
+    if(strcasecmp(exeName, "bash") == 0)
         return getShellVersionBash(exe, version);
     if(strcasecmp(exeName, "zsh") == 0)
         return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)

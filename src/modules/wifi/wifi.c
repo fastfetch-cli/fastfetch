@@ -114,11 +114,6 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
         yyjson_mut_obj_add_str(doc, module, "error", error);
         return;
     }
-    if(!result.length)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "No Wifi interfaces found");
-        return;
-    }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH(FFWifiResult, wifi, result)

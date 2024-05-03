@@ -15,18 +15,25 @@ static inline bool allRelevantValuesSet(const FFOSResult* result)
     ;
 }
 
-static bool parseFile(const char* fileName, FFOSResult* result)
+static bool parseLsbRelease(const char* fileName, FFOSResult* result)
 {
-    return ffParsePropFileValues(fileName, 13, (FFpropquery[]) {
-        {"NAME =", &result->name},
-        {"DISTRIB_DESCRIPTION =", &result->prettyName},
-        {"PRETTY_NAME =", &result->prettyName},
+    return ffParsePropFileValues(fileName, 4, (FFpropquery[]) {
         {"DISTRIB_ID =", &result->id},
+        {"DISTRIB_DESCRIPTION =", &result->prettyName},
+        {"DISTRIB_RELEASE =", &result->version},
+        {"DISTRIB_CODENAME =", &result->codename},
+    });
+}
+
+static bool parseOsRelease(const char* fileName, FFOSResult* result)
+{
+    return ffParsePropFileValues(fileName, 10, (FFpropquery[]) {
+        {"PRETTY_NAME =", &result->prettyName},
+        {"NAME =", &result->name},
         {"ID =", &result->id},
         {"ID_LIKE =", &result->idLike},
         {"VARIANT =", &result->variant},
         {"VARIANT_ID =", &result->variantID},
-        {"DISTRIB_RELEASE =", &result->version},
         {"VERSION =", &result->version},
         {"VERSION_ID =", &result->versionID},
         {"VERSION_CODENAME =", &result->codename},
@@ -136,11 +143,12 @@ static void detectOS(FFOSResult* os)
 {
     if(instance.config.general.osFile.length > 0)
     {
-        parseFile(instance.config.general.osFile.chars, os);
+        parseLsbRelease(instance.config.general.osFile.chars, os);
+        parseOsRelease(instance.config.general.osFile.chars, os);
         return;
     }
 
-    if(instance.config.general.escapeBedrock && parseFile(FASTFETCH_TARGET_DIR_ROOT"/bedrock"FASTFETCH_TARGET_DIR_ETC"/bedrock-release", os))
+    if(instance.config.general.escapeBedrock && parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
     {
         if(os->id.length == 0)
             ffStrbufAppendS(&os->id, "bedrock");
@@ -150,22 +158,32 @@ static void detectOS(FFOSResult* os)
 
         if(os->prettyName.length == 0)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
-        
-        parseFile("/bedrock"FASTFETCH_TARGET_DIR_ETC"/os-release", os);
 
-        if(allRelevantValuesSet(os))
+        if(parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
             return;
     }
 
-    parseFile(FASTFETCH_TARGET_DIR_ETC"/os-release", os);
-    if(allRelevantValuesSet(os))
+    // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
+
+    // Hack for MX Linux. See #847
+    if(parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os))
+    {
+        if (ffStrbufEqualS(&os->id, "MX"))
+        {
+            ffStrbufSetStatic(&os->name, "MX");
+            ffStrbufSetStatic(&os->idLike, "debian");
+            return;
+        }
+
+        // For archlinux
+        if (ffStrbufEqualS(&os->version, "rolling"))
+            ffStrbufClear(&os->version);
+    }
+
+    if(parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
         return;
 
-    parseFile(FASTFETCH_TARGET_DIR_USR"/lib/os-release", os);
-    if(allRelevantValuesSet(os))
-        return;
-
-    parseFile(FASTFETCH_TARGET_DIR_ETC"/lsb-release", os);
+    parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
 }
 
 void ffDetectOSImpl(FFOSResult* os)

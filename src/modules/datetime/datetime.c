@@ -152,7 +152,7 @@ void ffGenerateDateTimeJsonConfig(FFDateTimeOptions* options, yyjson_mut_doc* do
 
 void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    yyjson_mut_obj_add_uint(doc, module, "result", ffTimeGetNow());
+    yyjson_mut_obj_add_strcpy(doc, module, "result", ffTimeToFullStr(ffTimeGetNow()));
 }
 
 void ffPrintDateTimeHelpFormat(void)

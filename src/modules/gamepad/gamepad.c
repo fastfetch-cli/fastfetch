@@ -118,12 +118,6 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
         return;
     }
 
-    if(!result.length)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "No devices detected");
-        return;
-    }
-
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
     {

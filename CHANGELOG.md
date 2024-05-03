@@ -1,20 +1,44 @@
+# 2.11.2
+
+Hotfix V2 for old kernel
+
+Changes:
+* Error messages when trying to print image logo will only be printed with `--show-errors`
+* When generating JSON output, fastfetch will generate an empty array when no result is detected, instead of an error.
+
+Bugfixes:
+* Fix segfault in Debian 11 and some old kernels. Regression in 2.11.0 (#845, GPU, Linux)
+* Don't try detecting version of raw `sh` shell (#849, Shell, Linux)
+* Trim `\r` on Windows
+
+Features:
+* Check xdg state home for nix user packages (#837, Packages, Linux)
+* Disable image logos in ssh and tmux sessions (#839)
+* Support MX Linux distro detection (OS, Linux)
+
+Logo:
+* Add KernelOS
+* Fix name of DraugerOS
+* Add missing `FF_LOGO_LINE_TYPE_SMALL_BIT` flags
+* Add MX2
+
 # 2.11.1
 
 Hotfix for Android
 
 Bugfixes:
 * Fix uninitialized variables which can cause crashes (#760 #838, Battery, Android)
-* Don't detect hyfetch as shell when used as a backend of hyfetch
-* Fix incorrect information in man page
+* Don't detect hyfetch as shell when used as backend of [hyfetch](https://github.com/hykilpikonna/hyfetch)
+* Fix incorrect information in man page (#828)
 
 Features:
 * Support sorcery package manager detection (Packages, Linux)
 * Make `--custom-format` optional (Custom)
 * Make `/` an alias of `C:\` for `--disk-folders` (Disk, Windows)
+* Build for Linux armv7
 
 Logo:
 * Fix colors of Source Mage logo
-
 
 # 2.11.0
 

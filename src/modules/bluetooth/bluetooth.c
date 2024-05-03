@@ -150,19 +150,17 @@ void ffGenerateBluetoothJsonResult(FF_MAYBE_UNUSED FFBluetoothOptions* options, 
         yyjson_mut_obj_add_str(doc, module, "error", error);
         return;
     }
-    else
-    {
-        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
 
-        FF_LIST_FOR_EACH(FFBluetoothResult, item, results)
-        {
-            yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-            yyjson_mut_obj_add_strbuf(doc, obj, "address", &item->address);
-            yyjson_mut_obj_add_uint(doc, obj, "battery", item->battery);
-            yyjson_mut_obj_add_bool(doc, obj, "connected", item->connected);
-            yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
-            yyjson_mut_obj_add_strbuf(doc, obj, "type", &item->type);
-        }
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+
+    FF_LIST_FOR_EACH(FFBluetoothResult, item, results)
+    {
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_strbuf(doc, obj, "address", &item->address);
+        yyjson_mut_obj_add_uint(doc, obj, "battery", item->battery);
+        yyjson_mut_obj_add_bool(doc, obj, "connected", item->connected);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "type", &item->type);
     }
 
     FF_LIST_FOR_EACH(FFBluetoothResult, device, results)

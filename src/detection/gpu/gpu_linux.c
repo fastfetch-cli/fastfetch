@@ -46,6 +46,8 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
 
     ffStrbufAppendS(pciDir, "/hwmon/");
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+    if (!dirp) return;
+
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL)
     {
@@ -256,7 +258,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
 {
     uint32_t index = ffStrbufFirstIndexS(buffer, "apple,agx-t");
     if (index == buffer->length) return "display-subsystem?";
-    index += strlen("apple,agx-t");
+    index += (uint32_t) strlen("apple,agx-t");
 
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     gpu->deviceId = strtoul(buffer->chars + index, NULL, 10);
