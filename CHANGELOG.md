@@ -4,14 +4,17 @@ Hotfix V2 for old kernel
 
 Changes:
 * Error messages when trying to print image logo will only be printed with `--show-errors`
+* When generating JSON output, fastfetch will generate an empty array when no result is detected, instead of an error.
 
 Bugfixes:
 * Fix segfault in Debian 11 and some old kernels. Regression in 2.11.0 (#845, GPU, Linux)
 * Don't try detecting version of raw `sh` shell (#849, Shell, Linux)
+* Trim `\r` on Windows
 
 Features:
 * Check xdg state home for nix user packages (#837, Packages, Linux)
 * Disable image logos in ssh and tmux sessions (#839)
+* Support MX Linux distro detection (OS, Linux)
 
 Logo:
 * Add KernelOS
