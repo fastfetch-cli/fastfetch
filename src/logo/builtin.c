@@ -209,6 +209,7 @@ static const FFlogo A[] = {
     // AoscOsRetro_small
     {
         .names = {"Aosc OS/Retro_small", "aoscosretro_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_AOSCOSRETRO_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -764,6 +765,7 @@ static const FFlogo C[] = {
     // CalinixOSSmall
     {
         .names = {"Calinix_small", "calinixos_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -1336,8 +1338,8 @@ static const FFlogo E[] = {
     // EndeavourSmall
     {
         .names = {"Endeavour_small", "endeavour-linux_small", "endeavouros_small", "endeavouros-linux_small"},
-        .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
@@ -1823,6 +1825,7 @@ static const FFlogo G[] = {
     // GuixSmall
     {
         .names = {"Guix_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_GUIX_SMALL,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -2471,6 +2474,7 @@ static const FFlogo M[] = {
     // MageiaSmall
     {
         .names = {"Mageia_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MAGEIA_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -2669,6 +2673,7 @@ static const FFlogo M[] = {
     // MXSmall
     {
         .names = {"MX_small", "mx-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MX_SMALL,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -2739,6 +2744,7 @@ static const FFlogo N[] = {
     // NixOSSmall
     {
         .names = {"NixOS_small", "nix_small", "nixos-linux-small", "nix-linux-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -3310,6 +3316,7 @@ static const FFlogo P[] = {
     // PostMarketOSSmall
     {
         .names = {"PostMarketOS_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_POSTMARKETOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3569,6 +3576,7 @@ static const FFlogo R[] = {
     // RockyLinuxSmall
     {
         .names = {"rocky_small", "rocky-linux_small", "rockylinux_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ROCKY_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
