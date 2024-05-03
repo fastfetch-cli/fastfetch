@@ -12,7 +12,6 @@ static inline bool allRelevantValuesSet(const FFOSResult* result)
     return result->id.length > 0
         && result->name.length > 0
         && result->prettyName.length > 0
-        && result->version.length > 0
     ;
 }
 
@@ -175,6 +174,10 @@ static void detectOS(FFOSResult* os)
             ffStrbufSetStatic(&os->idLike, "debian");
             return;
         }
+
+        // For archlinux
+        if (ffStrbufEqualS(&os->version, "rolling"))
+            ffStrbufClear(&os->version);
     }
 
     if(parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
