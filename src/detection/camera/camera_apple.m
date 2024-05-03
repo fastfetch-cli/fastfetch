@@ -8,7 +8,7 @@ const char* ffDetectCamera(FFlist* result)
     FF_SUPPRESS_IO(); // #822
 
     AVCaptureDeviceDiscoverySession* session = NULL;
-    if (@available(macOS 10.15, *)) {
+    if (@available(macOS 14.0, *)) {
         session =  [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeExternal]
                                                                           mediaType:AVMediaTypeVideo
                                                                            position:AVCaptureDevicePositionUnspecified];
