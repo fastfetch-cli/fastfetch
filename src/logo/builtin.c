@@ -1241,9 +1241,9 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
-    // Drauger
+    // DraugerOS
     {
-        .names = {"Drauger"},
+        .names = {"DraugerOS", "Drauger"},
         .lines = FASTFETCH_DATATEXT_LOGO_DRAUGER,
         .colors = {
             FF_COLOR_FG_RED,
