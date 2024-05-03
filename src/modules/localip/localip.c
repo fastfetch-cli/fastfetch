@@ -334,13 +334,7 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        goto exit;
-    }
-
-    if(results.length == 0)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect any IPs");
-        goto exit;
+        return;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -354,7 +348,6 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
     }
 
-exit:
     FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
     {
         ffStrbufDestroy(&ip->name);

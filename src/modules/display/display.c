@@ -279,6 +279,7 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect display");
         return;
     }
+
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH(FFDisplayResult, item, dsResult->displays)
     {

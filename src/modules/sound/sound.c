@@ -200,12 +200,6 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
         return;
     }
 
-    if(result.length == 0)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "No active sound devices found");
-        return;
-    }
-
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH(FFSoundDevice, item, result)
     {

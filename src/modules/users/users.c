@@ -146,7 +146,7 @@ void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_m
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        goto exit;
+        return;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -164,7 +164,6 @@ void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_m
             yyjson_mut_obj_add_null(doc, obj, "loginTime");
     }
 
-exit:
     FF_LIST_FOR_EACH(FFUserResult, user, results)
     {
         ffStrbufDestroy(&user->clientIp);

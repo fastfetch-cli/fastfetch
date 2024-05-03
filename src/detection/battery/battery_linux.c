@@ -170,8 +170,5 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
 
-    if(results->length == 0)
-        return "\"/sys/class/power_supply/\" doesn't contain any battery folder";
-
     return NULL;
 }

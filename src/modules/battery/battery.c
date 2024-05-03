@@ -84,23 +84,28 @@ void ffPrintBattery(FFBatteryOptions* options)
     if (error)
     {
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        return;
     }
-    else
+    if(results.length == 0)
     {
-        for(uint8_t i = 0; i < (uint8_t) results.length; i++)
-        {
-            FFBatteryResult* result = ffListGet(&results, i);
-            printBattery(options, result, i);
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No batteries found");
+        return;
+    }
 
-            ffStrbufDestroy(&result->manufacturer);
-            ffStrbufDestroy(&result->modelName);
-            ffStrbufDestroy(&result->technology);
-            ffStrbufDestroy(&result->status);
-            ffStrbufDestroy(&result->serial);
-            ffStrbufDestroy(&result->manufactureDate);
-        }
-        if(results.length == 0)
-            ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No batteries found");
+    for(uint32_t i = 0; i < results.length; i++)
+    {
+        FFBatteryResult* result = ffListGet(&results, i);
+        printBattery(options, result, (uint8_t) i);
+    }
+
+    FF_LIST_FOR_EACH(FFBatteryResult, result, results)
+    {
+        ffStrbufDestroy(&result->manufacturer);
+        ffStrbufDestroy(&result->modelName);
+        ffStrbufDestroy(&result->technology);
+        ffStrbufDestroy(&result->status);
+        ffStrbufDestroy(&result->serial);
+        ffStrbufDestroy(&result->manufactureDate);
     }
 }
 
