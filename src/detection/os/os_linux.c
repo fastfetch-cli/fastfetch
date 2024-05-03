@@ -12,6 +12,7 @@ static inline bool allRelevantValuesSet(const FFOSResult* result)
     return result->id.length > 0
         && result->name.length > 0
         && result->prettyName.length > 0
+        && result->version.length > 0
     ;
 }
 
@@ -150,22 +151,20 @@ static void detectOS(FFOSResult* os)
 
         if(os->prettyName.length == 0)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
-        
-        parseFile("/bedrock"FASTFETCH_TARGET_DIR_ETC"/os-release", os);
 
-        if(allRelevantValuesSet(os))
+        if(parseFile("/bedrock"FASTFETCH_TARGET_DIR_ETC"/os-release", os) && allRelevantValuesSet(os))
             return;
     }
 
-    parseFile(FASTFETCH_TARGET_DIR_ETC"/os-release", os);
-    if(allRelevantValuesSet(os))
+    // Seems some distros contain real distro name only in lsb-release
+    // https://github.com/fastfetch-cli/fastfetch/issues/847#issuecomment-2091999419
+    if(parseFile(FASTFETCH_TARGET_DIR_ETC"/lsb-release", os) && allRelevantValuesSet(os))
+        return;
+
+    if(parseFile(FASTFETCH_TARGET_DIR_ETC"/os-release", os) && allRelevantValuesSet(os))
         return;
 
     parseFile(FASTFETCH_TARGET_DIR_USR"/lib/os-release", os);
-    if(allRelevantValuesSet(os))
-        return;
-
-    parseFile(FASTFETCH_TARGET_DIR_ETC"/lsb-release", os);
 }
 
 void ffDetectOSImpl(FFOSResult* os)
