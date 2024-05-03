@@ -2089,6 +2089,15 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // KernelOS
+    {
+        .names = {"KernelOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KERNELOS,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+        }
+    },
     // KDENeon
     {
         .names = {"KDE", "kde-neon"},
