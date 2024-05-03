@@ -1,3 +1,24 @@
+# 2.11.2
+
+Hotfix V2 for old kernel
+
+Changes:
+* Error messages when trying to print image logo will only be printed with `--show-errors`
+
+Bugfixes:
+* Fix segfault in Debian 11 and some old kernels. Regression in 2.11.0 (#845, GPU, Linux)
+* Don't try detecting version of raw `sh` shell (#849, Shell, Linux)
+
+Features:
+* Check xdg state home for nix user packages (#837, Packages, Linux)
+* Disable image logos in ssh and tmux sessions (#839)
+
+Logo:
+* Add KernelOS
+* Fix name of DraugerOS
+* Add missing `FF_LOGO_LINE_TYPE_SMALL_BIT` flags
+* Add MX2
+
 # 2.11.1
 
 Hotfix for Android
