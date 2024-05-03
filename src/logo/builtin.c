@@ -2662,7 +2662,7 @@ static const FFlogo M[] = {
     },
     // MX
     {
-        .names = {"MX"},
+        .names = {"MX", "MX Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_MX,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -2672,9 +2672,20 @@ static const FFlogo M[] = {
     },
     // MXSmall
     {
-        .names = {"MX_small", "mx-small"},
+        .names = {"MX_small", "mx linux_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MX_SMALL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // MX2
+    {
+        .names = {"MX2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_MX2,
         .colors = {
             FF_COLOR_FG_WHITE,
         },
