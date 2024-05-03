@@ -6,9 +6,19 @@
 const char* ffDetectCamera(FFlist* result)
 {
     FF_SUPPRESS_IO(); // #822
-    AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeExternalUnknown]
-                                                                                mediaType:AVMediaTypeVideo
-                                                                                position:AVCaptureDevicePositionUnspecified];
+
+    AVCaptureDeviceDiscoverySession* session = NULL;
+    if (@available(macOS 10.15, *)) {
+        session =  [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeExternal]
+                                                                          mediaType:AVMediaTypeVideo
+                                                                           position:AVCaptureDevicePositionUnspecified];
+
+    } else {
+        session =  [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeExternalUnknown]
+                                                                          mediaType:AVMediaTypeVideo
+                                                                           position:AVCaptureDevicePositionUnspecified];
+    }
+
     if (!session)
         return "Failed to create AVCaptureDeviceDiscoverySession";
 
