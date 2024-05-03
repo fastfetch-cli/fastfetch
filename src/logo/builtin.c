@@ -875,7 +875,7 @@ static const FFlogo C[] = {
     // Chimera Linux
     {
         .names = {"Chimera Linux"},
-        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERALINUX,
+        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERA_LINUX,
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
