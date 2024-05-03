@@ -117,7 +117,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
                 {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &tempStr},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
             }));
         }
         ++index;
