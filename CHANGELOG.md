@@ -9,6 +9,7 @@ Bugfixes:
 * Fix hanging when detecting disconnected network drive (Disk, Windows)
 * Ensure line ending is printed when printing image logo errors (Logo)
 * Revert image logo limitation change in 2.11.2; allow image logo in SSH session and tmux again (#861, Logo)
+* Fix doubled output in custom formation (PhysicalDisk, Windows)
 
 # 2.11.2
 
