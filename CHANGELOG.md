@@ -1,20 +1,32 @@
+# 2.11.3
+
+Hotfix for nix (https://github.com/NixOS/nixpkgs/issues/308849#issuecomment-2093962376)
+
+Features:
+* Add cmake option `CUSTOM_AMDGPU_IDS_PATH` for specifying custom path of `amdgpu.ids`
+
+Bugfixes:
+* Fix hanging when detecting disconnected network drive (Disk, Windows)
+* Ensure line ending is printed when printing image logo errors (Logo)
+* Revert image logo limitation change in 2.11.2; allow image logo in SSH session and tmux again (#861, Logo)
+
 # 2.11.2
 
-Hotfix V2 for old kernel
+Hotfix for Debian 11
 
 Changes:
 * Error messages when trying to print image logo will only be printed with `--show-errors`
 * When generating JSON output, fastfetch will generate an empty array when no result is detected, instead of an error.
 
 Bugfixes:
-* Fix segfault in Debian 11 and some old kernels. Regression in 2.11.0 (#845, GPU, Linux)
+* Fix segfault in Debian 11 and some old kernels. Regression introduced in 2.11.0 (#845, GPU, Linux)
 * Don't try detecting version of raw `sh` shell (#849, Shell, Linux)
 * Trim `\r` on Windows
 
 Features:
 * Check xdg state home for nix user packages (#837, Packages, Linux)
 * Disable image logos in ssh and tmux sessions (#839)
-* Support MX Linux distro detection (OS, Linux)
+* Support MX Linux distro detection (#847, OS, Linux)
 
 Logo:
 * Add KernelOS
