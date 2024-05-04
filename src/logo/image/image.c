@@ -781,7 +781,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
     if(!getCharacterPixelDimensions(&requestData))
     {
         if(printError)
-            fputs("Logo: getCharacterPixelDimensions() failed", stderr);
+            fputs("Logo: getCharacterPixelDimensions() failed\n", stderr);
         return false;
     }
 
@@ -798,7 +798,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
         if(printError)
-            fputs("Logo: Querying realpath of the image source failed", stderr);
+            fputs("Logo: Querying realpath of the image source failed\n", stderr);
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
@@ -849,21 +849,13 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
         return false;
     }
 
-    if (getenv("SSH_TTY"))
-    {
-        if(printError)
-            fputs("Logo: Image logo is not supported in SSH sessions\n", stderr);
-        return false;
-    }
-
     const char* term = getenv("TERM");
-    if((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ") || getenv("TMUX"))
+    if((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ"))
     {
         if(printError)
             fputs("Logo: Image logo is not supported in terminal multiplexers\n", stderr);
         return false;
     }
-
 
     if(type == FF_LOGO_TYPE_IMAGE_ITERM)
         return printImageIterm(printError);

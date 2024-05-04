@@ -123,9 +123,11 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
 static bool loadPciIds(FFstrbuf* pciids)
 {
     #ifdef FF_CUSTOM_PCI_IDS_PATH
+
     ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
     if (pciids->length > 0) return true;
-    #endif
+
+    #else
 
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
@@ -135,6 +137,8 @@ static bool loadPciIds(FFstrbuf* pciids)
 
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
+
+    #endif
 
     return false;
 }
@@ -188,7 +192,11 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             {
                 char query[32];
                 snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
+                #ifdef FF_CUSTOM_AMDGPU_IDS_PATH
+                ffParsePropFile(FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), query, &gpu->name);
+                #else
                 ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
+                #endif
             }
         }
         ffStrbufSubstrBefore(drmDir, drmDirPathLength);
@@ -202,8 +210,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             ffStrbufInit(&pciids);
             loadPciIds(&pciids);
         }
-        if (pciids.length)
-            ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
     pciDetectDriver(gpu, drmDir, buffer);

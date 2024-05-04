@@ -1,4 +1,6 @@
 #include "battery.h"
+
+#include "common/io/io.h"
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"
 #include "util/smbiosHelper.h"
@@ -20,11 +22,6 @@ NtPowerInformation(
     OUT PVOID OutputBuffer OPTIONAL,
     IN ULONG OutputBufferLength);
 
-static inline void wrapCloseHandle(HANDLE* handle)
-{
-    if(*handle)
-        CloseHandle(*handle);
-}
 static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
 {
     if(*hdev)
@@ -52,7 +49,7 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
         if(!SetupDiGetDeviceInterfaceDetailW(hdev, &did, pdidd, cbRequired, &cbRequired, NULL))
             continue;
 
-        HANDLE __attribute__((__cleanup__(wrapCloseHandle))) hBattery =
+        HANDLE FF_AUTO_CLOSE_FD hBattery =
             CreateFileW(pdidd->DevicePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
         if(hBattery == INVALID_HANDLE_VALUE)

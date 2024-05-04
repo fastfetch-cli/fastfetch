@@ -1,9 +1,23 @@
 #include "disk.h"
 #include "common/io/io.h"
+#include "common/thread.h"
 #include "util/windows/unicode.h"
 
 #include <windows.h>
 #include <winioctl.h>
+
+static unsigned __stdcall testRemoteVolumeAccessable(void* mountpoint)
+{
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(
+        (wchar_t*) mountpoint,
+        READ_CONTROL,
+        FILE_SHARE_READ,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS,
+        NULL);
+    return 0;
+}
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
@@ -41,28 +55,48 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         FFDisk* disk = ffListAdd(disks);
 
-        if(!GetDiskFreeSpaceExW(
+        disk->filesUsed = 0;
+        disk->filesTotal = 0;
+        disk->bytesTotal = 0;
+        disk->bytesFree = 0;
+        disk->bytesUsed = 0; // To be filled in ./disk.c
+        disk->bytesAvailable = 0;
+        disk->createTime = 0;
+        ffStrbufInit(&disk->filesystem);
+        ffStrbufInit(&disk->name);
+        ffStrbufInitMove(&disk->mountpoint, &buffer);
+        ffStrbufInit(&disk->mountFrom);
+        disk->type = driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM
+            ? FF_DISK_VOLUME_TYPE_EXTERNAL_BIT
+            : driveType == DRIVE_FIXED
+                ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
+                : FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+
+        if (mountpoint[2] == L'\\' && mountpoint[3] == L'\0')
+        {
+            wchar_t volumeName[MAX_PATH + 1];
+            mountpoint[2] = L'\0';
+            if(QueryDosDeviceW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
+                ffStrbufSetWS(&disk->mountFrom, volumeName);
+            mountpoint[2] = L'\\';
+        }
+
+        #ifdef FF_HAVE_THREADS
+        if (driveType == DRIVE_REMOTE)
+        {
+            FFThreadType thread = ffThreadCreate(testRemoteVolumeAccessable, mountpoint);
+            if (!ffThreadJoin(thread, 500))
+                continue;
+        }
+        #endif
+
+        GetDiskFreeSpaceExW(
             mountpoint,
             (PULARGE_INTEGER)&disk->bytesAvailable,
             (PULARGE_INTEGER)&disk->bytesTotal,
             (PULARGE_INTEGER)&disk->bytesFree
-        ))
-        {
-            disk->bytesTotal = 0;
-            disk->bytesFree = 0;
-            disk->bytesAvailable = 0;
-        }
-        disk->bytesUsed = 0; // To be filled in ./disk.c
+        );
 
-        if(driveType == DRIVE_REMOVABLE || driveType == DRIVE_REMOTE || driveType == DRIVE_CDROM)
-            disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
-        else if(driveType == DRIVE_FIXED)
-            disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-        else
-            disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-
-        ffStrbufInit(&disk->filesystem);
-        ffStrbufInit(&disk->name);
         wchar_t diskName[MAX_PATH + 1], diskFileSystem[MAX_PATH + 1];
 
         //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationa#remarks
@@ -89,23 +123,6 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         WIN32_FILE_ATTRIBUTE_DATA data;
         if(GetFileAttributesExW(mountpoint, GetFileExInfoStandard, &data) && data.ftCreationTime.dwHighDateTime > 0)
             disk->createTime = (*(uint64_t*) &data.ftCreationTime - 116444736000000000ull) / 10000ull;
-        else
-            disk->createTime = 0;
-
-        ffStrbufInitMove(&disk->mountpoint, &buffer);
-        if (mountpoint[2] == L'\\' && mountpoint[3] == L'\0')
-        {
-            wchar_t volumeName[MAX_PATH + 1];
-            mountpoint[2] = L'\0';
-            if(QueryDosDeviceW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
-                ffStrbufInitWS(&disk->mountFrom, volumeName);
-            else
-                ffStrbufInit(&disk->mountFrom);
-        }
-
-        //Unsupported
-        disk->filesUsed = 0;
-        disk->filesTotal = 0;
     }
 
     return NULL;
