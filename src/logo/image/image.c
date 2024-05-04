@@ -849,15 +849,8 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
         return false;
     }
 
-    if (getenv("SSH_TTY"))
-    {
-        if(printError)
-            fputs("Logo: Image logo is not supported in SSH sessions\n", stderr);
-        return false;
-    }
-
     const char* term = getenv("TERM");
-    if((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ") || getenv("TMUX"))
+    if((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ"))
     {
         if(printError)
             fputs("Logo: Image logo is not supported in terminal multiplexers\n", stderr);
