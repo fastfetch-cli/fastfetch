@@ -94,7 +94,7 @@ static inline void genJsonResult(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc
 
 static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_mut_doc* jsonDoc)
 {
-    if(!isalpha(type[0])) return false;
+    if(!ffCharIsEnglishAlphabet(type[0])) return false;
 
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(type[0]) - 'A']; *modules; ++modules)
     {
