@@ -406,6 +406,8 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
             yyjson_mut_arr_add_str(doc, typeArr, "Hidden");
         if(item->type & FF_DISK_VOLUME_TYPE_READONLY_BIT)
             yyjson_mut_arr_add_str(doc, typeArr, "Read-only");
+        if(item->type & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "Unknown");
 
         const char* pstr = ffTimeToFullStr(item->createTime);
         if (*pstr)
