@@ -79,6 +79,7 @@ option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 
 if (LINUX)
     set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
+    set(CUSTOM_AMDGPU_IDS_PATH "" CACHE STRING "Custom path to file amdgpu.ids, defaults to `/usr/share/libdrm/amdgpu.ids`")
 endif()
 
 ####################
@@ -783,6 +784,10 @@ endif()
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
     message(STATUS "Custom file path of pci.ids: ${CUSTOM_PCI_IDS_PATH}")
     target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_PCI_IDS_PATH=${CUSTOM_PCI_IDS_PATH})
+endif()
+if(NOT "${CUSTOM_AMDGPU_IDS_PATH}" STREQUAL "")
+    message(STATUS "Custom file path of amdgpu.ids: ${CUSTOM_AMDGPU_IDS_PATH}")
+    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_AMDGPU_IDS_PATH=${CUSTOM_AMDGPU_IDS_PATH})
 endif()
 
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
