@@ -10,7 +10,7 @@ Here i just add things that are easy to forget.
 - [ ] Split the project in different libs / executables, all linking static by default:
   - `libffdetect`: contains all the detection stuff. To be used by anything that needs system information
   - `libffprint`: contains the printing functions, logos, format etc
-  - `fastfetch` and `flashfetch`: Executables, that initialize the config of libffprint. Fist one at runtime, second one at compile time
+  - `fastfetch` and `flashfetch`: Executables, that initialize the config of libffprint. First one at runtime, second one at compile time
 - [ ] Make LocalIP module more configurable
 - [ ] Automatic migrate old config files to newer versions
 - [ ] ZSH completions
