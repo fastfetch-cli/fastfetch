@@ -249,7 +249,7 @@ static void printCommandHelp(const char* command)
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
+    else if(ffCharIsEnglishAlphabet(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
         printCommandFormatHelp(command);
     else if(!printSpecificCommandHelp(command))
         fprintf(stderr, "Error: No specific help for command '%s' provided\n", command);
