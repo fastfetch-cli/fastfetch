@@ -842,6 +842,13 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
 
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
 {
+    if(instance.config.display.pipe)
+    {
+        if(printError)
+            fputs("Logo: Image logo is not supported in pipe mode\n", stderr);
+        return false;
+    }
+
     if(!ffPathExists(instance.config.logo.source.chars, FF_PATHTYPE_FILE))
     {
         if(printError)
