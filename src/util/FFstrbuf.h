@@ -275,22 +275,16 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateS(const char* str)
 static inline void ffStrbufAppend(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict value)
 {
     assert(value != strbuf);
-    if(value == NULL)
-        return;
     ffStrbufAppendNS(strbuf, value->length, value->chars);
 }
 
 static inline void ffStrbufPrepend(FFstrbuf* strbuf, FFstrbuf* value)
 {
-    if(value == NULL)
-        return;
     ffStrbufPrependNS(strbuf, value->length, value->chars);
 }
 
 static inline void ffStrbufPrependS(FFstrbuf* strbuf, const char* value)
 {
-    if(value == NULL)
-        return;
     ffStrbufPrependNS(strbuf, (uint32_t) strlen(value), value);
 }
 
