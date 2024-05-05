@@ -1153,7 +1153,15 @@ if(LINUX)
 
         set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
         set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
+
+        if(NOT IS_MUSL)
+            EXECUTE_PROCESS (
+                COMMAND getconf GNU_LIBC_VERSION
+                OUTPUT_VARIABLE GLIBC_VERSION
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+            STRING (REPLACE "glibc " "" GLIBC_VERSION ${GLIBC_VERSION})
+            set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= ${GLIBC_VERSION})")
+        endif()
     endif()
 
     find_program(HAVE_RPMBUILD "rpmbuild")
