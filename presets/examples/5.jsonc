@@ -9,8 +9,7 @@
     "modules": [
         {
             "type": "theme",
-            "key": "T",
-            "format": "{7}"
+            "key": "T"
         },
         {
             "type": "icons",
