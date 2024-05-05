@@ -61,7 +61,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
 
-    if (instance.config.display.brightColor)
+    if (!instance.config.display.pipe && instance.config.display.brightColor)
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
 
     ffStrbufAppendNC(&result, options->paddingTop, '\n');

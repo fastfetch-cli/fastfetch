@@ -350,7 +350,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
-    options->pipe = !isatty(STDOUT_FILENO);
+    options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
 
     #ifdef NDEBUG
     options->disableLinewrap = !options->pipe;
