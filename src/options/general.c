@@ -27,8 +27,6 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "playerName"))
             ffStrbufSetS(&options->playerName, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "osFile"))
-            ffStrbufSetS(&options->osFile, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
         {
             if (yyjson_is_str(val))
@@ -79,8 +77,6 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
         options->escapeBedrock = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--player-name"))
         ffOptionParseString(key, value, &options->playerName);
-    else if (ffStrEqualsIgnCase(key, "--os-file"))
-        ffOptionParseString(key, value, &options->osFile);
     else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
     {
         if (ffOptionParseBoolean(value))
@@ -109,7 +105,6 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
     #if defined(__linux__) || defined(__FreeBSD__)
     options->escapeBedrock = true;
     ffStrbufInit(&options->playerName);
-    ffStrbufInit(&options->osFile);
     options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
     #elif defined(_WIN32)
     options->wmiTimeout = 5000;
@@ -120,7 +115,6 @@ void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 {
     #if defined(__linux__) || defined(__FreeBSD__)
     ffStrbufDestroy(&options->playerName);
-    ffStrbufDestroy(&options->osFile);
     #endif
 }
 
@@ -144,9 +138,6 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
 
     if (!ffStrbufEqual(&options->playerName, &defaultOptions.playerName))
         yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
-
-    if (!ffStrbufEqual(&options->osFile, &defaultOptions.osFile))
-        yyjson_mut_obj_add_strbuf(doc, obj, "osFile", &options->osFile);
 
     if (options->dsForceDrm != defaultOptions.dsForceDrm)
     {

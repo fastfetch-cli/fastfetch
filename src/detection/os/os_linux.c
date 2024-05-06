@@ -7,6 +7,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
+
 static inline bool allRelevantValuesSet(const FFOSResult* result)
 {
     return result->id.length > 0
@@ -141,12 +144,11 @@ static void getDebianVersion(FFOSResult* result)
 
 static void detectOS(FFOSResult* os)
 {
-    if(instance.config.general.osFile.length > 0)
-    {
-        parseLsbRelease(instance.config.general.osFile.chars, os);
-        parseOsRelease(instance.config.general.osFile.chars, os);
-        return;
-    }
+    #ifdef FF_CUSTOM_OS_RELEASE_PATH
+    parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+    parseLsbRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+    return;
+    #endif
 
     if(instance.config.general.escapeBedrock && parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
     {

@@ -17,7 +17,6 @@ typedef struct FFOptionsGeneral
     // Module options that cannot be put in module option structure
     #if defined(__linux__) || defined(__FreeBSD__)
     FFstrbuf playerName;
-    FFstrbuf osFile;
     bool escapeBedrock;
     FFDsForceDrmType dsForceDrm;
     #elif defined(_WIN32)
