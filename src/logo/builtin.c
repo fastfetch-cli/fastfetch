@@ -376,6 +376,24 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Armbian
+    {
+        .names = {"Armbian"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ARMBIAN,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+        },
+    },
+    // Armbian2
+    {
+        .names = {"Armbian2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ARMBIAN2,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+    },
     // Artix
     {
         .names = {"artix", "artixlinux", "artix-linux"},
