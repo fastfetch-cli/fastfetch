@@ -249,7 +249,7 @@ static void printCommandHelp(const char* command)
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
-    else if(isalpha(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
+    else if(ffCharIsEnglishAlphabet(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
         printCommandFormatHelp(command);
     else if(!printSpecificCommandHelp(command))
         fprintf(stderr, "Error: No specific help for command '%s' provided\n", command);
@@ -863,6 +863,7 @@ static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
 int main(int argc, char** argv)
 {
     ffInitInstance();
+    atexit(ffDestroyInstance);
 
     //Data stores things only needed for the configuration of fastfetch
     FFdata data = {
@@ -888,6 +889,4 @@ int main(int argc, char** argv)
         ffStrbufDestroy(&customValue->value);
     }
     ffListDestroy(&data.customValues);
-
-    ffDestroyInstance();
 }

@@ -294,10 +294,6 @@
                     "type": "string",
                     "description": "The name of the player to use for module Media and Player. Linux only"
                 },
-                "osFile": {
-                    "type": "string",
-                    "description": "Set the path to the file containing OS information. Linux only"
-                },
                 "dsForceDrm": {
                     "description": "Force display detection to use DRM. Linux only",
                     "oneOf": [

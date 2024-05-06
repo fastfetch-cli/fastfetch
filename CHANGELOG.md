@@ -1,3 +1,29 @@
+# 2.11.4
+
+Changes:
+
+* Fastfetch will print a colorless ascii logo in `--pipe` mode for better `lolcat` compatibility. `fastfetch | lolcat` should work and no `--pipe false` needed.
+    * Previously the logo would be disabled in `--pipe` mode.
+* `--os-file` was removed and CMake option `-DCUSTOM_OS_RELEASE_PATH=/path/to/os-release` was added. This option should not used in most cases.
+
+Bugfixes:
+
+* Fix possible out-of-bound memory access (#868)
+* Fix Apple Terminal detection (macOS, Terminal)
+* Fix doubled output in custom formation (#852)
+* Fix deprecation warning for macOS 14.0 hopefully (#860, macOS, Camera)
+* Fix memory leaks when passing informative options
+* Fix JSON config `size.ndigits` doesn't work 
+
+Features:
+
+* Enable `--pipe` mode if environment variable `$NO_COLOR` is set
+* Support Armbian and Proxmox distro detection (OS, Linux)
+
+Logo:
+
+* Add Armbian
+
 # 2.11.3
 
 Hotfix for nix (https://github.com/NixOS/nixpkgs/issues/308849#issuecomment-2093962376)

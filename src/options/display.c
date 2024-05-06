@@ -92,7 +92,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits) options->sizeNdigits = (uint8_t) yyjson_get_uint(ndigits);
         }
         else if (ffStrEqualsIgnCase(key, "temp"))
         {
@@ -350,7 +350,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
-    options->pipe = !isatty(STDOUT_FILENO);
+    options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
 
     #ifdef NDEBUG
     options->disableLinewrap = !options->pipe;

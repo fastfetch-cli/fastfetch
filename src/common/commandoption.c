@@ -11,7 +11,7 @@
 
 bool ffParseModuleOptions(const char* key, const char* value)
 {
-    if (!ffStrStartsWith(key, "--") || !isalpha(key[2])) return false;
+    if (!ffStrStartsWith(key, "--") || !ffCharIsEnglishAlphabet(key[2])) return false;
 
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(key[2]) - 'A']; *modules; ++modules)
     {
@@ -102,7 +102,7 @@ static void parseStructureCommand(
         }
     }
 
-    if(isalpha(line[0]))
+    if(ffCharIsEnglishAlphabet(line[0]))
     {
         for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(line[0]) - 'A']; *modules; ++modules)
         {

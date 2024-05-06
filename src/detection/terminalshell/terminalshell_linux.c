@@ -519,6 +519,11 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 
     else if(ffStrbufEqualS(&result->processName, "iTerm.app") || ffStrbufStartsWithS(&result->processName, "iTermServer-"))
         ffStrbufInitStatic(&result->prettyName, "iTerm");
+    else if(ffStrbufEndsWithS(&result->exePath, "Terminal.app/Contents/MacOS/Terminal"))
+    {
+        ffStrbufSetStatic(&result->processName, "Apple_Terminal"); // for terminal font detection
+        ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
+    }
     else if(ffStrbufEqualS(&result->processName, "Apple_Terminal"))
         ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result->processName, "WarpTerminal"))

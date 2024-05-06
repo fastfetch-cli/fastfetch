@@ -2,10 +2,14 @@
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/io/io.h"
+#include "common/processing.h"
 #include "util/stringUtils.h"
 
 #include <string.h>
 #include <stdlib.h>
+
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
 
 static inline bool allRelevantValuesSet(const FFOSResult* result)
 {
@@ -139,14 +143,46 @@ static void getDebianVersion(FFOSResult* result)
     ffStrbufSet(&result->versionID, &debianVersion);
 }
 
+static bool detectDebianDerived(FFOSResult* result)
+{
+    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Armbian 24.2.1 bookworm
+    {
+        ffStrbufSetS(&result->name, "Armbian");
+        ffStrbufSetS(&result->id, "armbian");
+        ffStrbufSetS(&result->idLike, "debian");
+        ffStrbufClear(&result->versionID);
+        uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
+        uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
+        ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+        return true;
+    }
+    else if (ffPathExists("/usr/bin/pveversion", FF_PATHTYPE_FILE))
+    {
+        ffStrbufSetS(&result->id, "pve");
+        ffStrbufSetS(&result->idLike, "debian");
+        ffStrbufSetS(&result->name, "Proxmox VE");
+        ffStrbufClear(&result->versionID);
+        if (ffProcessAppendStdOut(&result->versionID, (char* const[]) {
+            "/usr/bin/pveversion",
+            NULL,
+        }) == NULL) // pve-manager/8.2.2/9355359cd7afbae4 (running kernel: 6.8.4-2-pve)
+        {
+            ffStrbufSubstrBeforeLastC(&result->versionID, '/');
+            ffStrbufSubstrAfterFirstC(&result->versionID, '/');
+        }
+        ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
+        return true;
+    }
+    return false;
+}
+
 static void detectOS(FFOSResult* os)
 {
-    if(instance.config.general.osFile.length > 0)
-    {
-        parseLsbRelease(instance.config.general.osFile.chars, os);
-        parseOsRelease(instance.config.general.osFile.chars, os);
-        return;
-    }
+    #ifdef FF_CUSTOM_OS_RELEASE_PATH
+    parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+    parseLsbRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+    return;
+    #endif
 
     if(instance.config.general.escapeBedrock && parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
     {
@@ -193,5 +229,8 @@ void ffDetectOSImpl(FFOSResult* os)
     if(ffStrbufIgnCaseEqualS(&os->id, "ubuntu"))
         getUbuntuFlavour(os);
     else if(ffStrbufIgnCaseEqualS(&os->id, "debian"))
-        getDebianVersion(os);
+    {
+        if (!detectDebianDerived(os))
+            getDebianVersion(os);
+    }
 }

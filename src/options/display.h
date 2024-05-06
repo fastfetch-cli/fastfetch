@@ -27,7 +27,7 @@ typedef struct FFOptionsDisplay
     FFstrbuf keyValueSeparator;
 
     bool stat;
-    bool pipe; //disables logo and all escape sequences
+    bool pipe; //disables all escape sequences
     bool showErrors;
     bool disableLinewrap;
     bool hideCursor;
