@@ -143,6 +143,13 @@ static bool loadPciIds(FFstrbuf* pciids)
     return false;
 }
 
+static FFstrbuf pciids;
+
+static void cleanupPciids(void)
+{
+    ffStrbufDestroy(&pciids);
+}
+
 static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir)
 {
     const uint32_t drmDirPathLength = drmDir->length;
@@ -204,11 +211,11 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     if (gpu->name.length == 0)
     {
-        static FFstrbuf pciids;
         if (pciids.chars == NULL)
         {
             ffStrbufInit(&pciids);
             loadPciIds(&pciids);
+            atexit(cleanupPciids);
         }
         ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
