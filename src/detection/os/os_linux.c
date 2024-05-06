@@ -143,7 +143,7 @@ static void getDebianVersion(FFOSResult* result)
     ffStrbufSet(&result->versionID, &debianVersion);
 }
 
-static void detectDebianDerived(FFOSResult* result)
+static bool detectDebianDerived(FFOSResult* result)
 {
     if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Armbian 24.2.1 bookworm
     {
@@ -154,6 +154,7 @@ static void detectDebianDerived(FFOSResult* result)
         uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
         uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
         ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+        return true;
     }
     else if (ffPathExists("/usr/bin/pveversion", FF_PATHTYPE_FILE))
     {
@@ -170,7 +171,9 @@ static void detectDebianDerived(FFOSResult* result)
             ffStrbufSubstrAfterFirstC(&result->versionID, '/');
         }
         ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
+        return true;
     }
+    return false;
 }
 
 static void detectOS(FFOSResult* os)
@@ -227,7 +230,7 @@ void ffDetectOSImpl(FFOSResult* os)
         getUbuntuFlavour(os);
     else if(ffStrbufIgnCaseEqualS(&os->id, "debian"))
     {
-        detectDebianDerived(os);
-        getDebianVersion(os);
+        if (!detectDebianDerived(os))
+            getDebianVersion(os);
     }
 }
