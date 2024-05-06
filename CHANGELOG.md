@@ -1,3 +1,10 @@
+# 2.11.5
+
+Bugfix:
+
+* Fix logo printing for OpenMandriva (#896)
+* Remove `--os-file` in help messages
+
 # 2.11.4
 
 Changes:
