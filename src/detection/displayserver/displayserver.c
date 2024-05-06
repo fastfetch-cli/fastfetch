@@ -33,9 +33,31 @@ bool ffdsAppendDisplay(
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);
 
+
+static inline void ffDisplayServerResultDestory(FFDisplayServerResult* result)
+{
+    if (!result) return;
+    ffStrbufDestroy(&result->wmProcessName);
+    ffStrbufDestroy(&result->wmPrettyName);
+    ffStrbufDestroy(&result->wmProtocolName);
+    ffStrbufDestroy(&result->deProcessName);
+    ffStrbufDestroy(&result->dePrettyName);
+    FF_LIST_FOR_EACH(FFDisplayResult, display, result->displays)
+    {
+        ffStrbufDestroy(&display->name);
+    }
+    ffListDestroy(&result->displays);
+}
+
+static FFDisplayServerResult result;
+
+void ffDisplayServerCleanResult(void)
+{
+    ffDisplayServerResultDestory(&result);
+}
+
 const FFDisplayServerResult* ffConnectDisplayServer()
 {
-    static FFDisplayServerResult result;
     if (result.displays.elementSize == 0)
     {
         ffStrbufInit(&result.wmProcessName);
@@ -45,6 +67,7 @@ const FFDisplayServerResult* ffConnectDisplayServer()
         ffStrbufInit(&result.dePrettyName);
         ffListInit(&result.displays, sizeof(FFDisplayResult));
         ffConnectDisplayServerImpl(&result);
+        atexit(ffDisplayServerCleanResult);
     }
     return &result;
 }
