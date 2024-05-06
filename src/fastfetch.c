@@ -863,6 +863,7 @@ static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
 int main(int argc, char** argv)
 {
     ffInitInstance();
+    atexit(ffDestroyInstance);
 
     //Data stores things only needed for the configuration of fastfetch
     FFdata data = {
@@ -888,6 +889,4 @@ int main(int argc, char** argv)
         ffStrbufDestroy(&customValue->value);
     }
     ffListDestroy(&data.customValues);
-
-    ffDestroyInstance();
 }
