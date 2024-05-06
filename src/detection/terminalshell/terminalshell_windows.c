@@ -11,6 +11,7 @@
 #include <tlhelp32.h>
 #include <ntstatus.h>
 #include <winternl.h>
+#include <stdbool.h>
 
 static bool getProductVersion(const wchar_t* filePath, FFstrbuf* version)
 {
@@ -354,75 +355,99 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
-const FFShellResult* ffDetectShell(void)
-{
-    static FFShellResult result;
-    static bool init = false;
-    if(init)
-        return &result;
-    init = true;
+static FFShellResult cachedShellResult;
 
-    ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, MAX_PATH);
-    result.exeName = "";
-    ffStrbufInit(&result.exePath);
-    ffStrbufInit(&result.prettyName);
-    ffStrbufInit(&result.version);
-    result.pid = 0;
-    result.ppid = 0;
-    result.tty = -1;
+static void ffDestoryCachedShellResults(void)
+{
+    ffShellResultDestory(&cachedShellResult);
+}
+
+static inline void ffDetectShellImpl(void)
+{
+    ffStrbufInit(&cachedShellResult.processName);
+    ffStrbufInitA(&cachedShellResult.exe, MAX_PATH);
+    cachedShellResult.exeName = "";
+    ffStrbufInit(&cachedShellResult.exePath);
+    ffStrbufInit(&cachedShellResult.prettyName);
+    ffStrbufInit(&cachedShellResult.version);
+    cachedShellResult.pid = 0;
+    cachedShellResult.ppid = 0;
+    cachedShellResult.tty = -1;
 
     uint32_t ppid;
     if(!getProcessInfo(0, &ppid, NULL, NULL, NULL, NULL, NULL))
-        return &result;
+        return;
 
-    ppid = getShellInfo(&result, ppid);
+    ppid = getShellInfo(&cachedShellResult, ppid);
 
-    if (result.processName.length > 0)
+    if (cachedShellResult.processName.length > 0)
     {
-        setShellInfoDetails(&result);
+        setShellInfoDetails(&cachedShellResult);
         char tmp[MAX_PATH];
-        strcpy(tmp, result.exeName);
+        strcpy(tmp, cachedShellResult.exeName);
         char* ext = strrchr(tmp, '.');
         if (ext) *ext = '\0';
-        fftsGetShellVersion(&result.exe, tmp, &result.version);
+        fftsGetShellVersion(&cachedShellResult.exe, tmp, &cachedShellResult.version);
     }
 
-    return &result;
+    atexit(ffDestoryCachedShellResults);
+}
+
+const FFShellResult* ffDetectShell(void)
+{
+    static bool inited = false;
+    if (!inited)
+    {
+        ffDetectShellImpl();
+        inited = true;
+    }
+    return &cachedShellResult;
+}
+
+static FFTerminalResult cachedTerminalResult;
+
+static void ffDestoryCachedTerminalResults(void)
+{
+    ffTerminalResultDestory(&cachedTerminalResult);
+}
+
+static inline void ffDetectTerminalImpl(void)
+{
+    ffStrbufInit(&cachedTerminalResult.processName);
+    ffStrbufInitA(&cachedTerminalResult.exe, MAX_PATH);
+    cachedTerminalResult.exeName = "";
+    ffStrbufInit(&cachedTerminalResult.exePath);
+    ffStrbufInit(&cachedTerminalResult.prettyName);
+    ffStrbufInit(&cachedTerminalResult.version);
+    ffStrbufInit(&cachedTerminalResult.tty);
+    cachedTerminalResult.pid = 0;
+    cachedTerminalResult.ppid = 0;
+
+    uint32_t ppid = ffDetectShell()->ppid;
+    if(ppid)
+        getTerminalInfo(&cachedTerminalResult, ppid);
+
+    if(cachedTerminalResult.processName.length == 0)
+        getTerminalFromEnv(&cachedTerminalResult);
+    if(cachedTerminalResult.processName.length == 0)
+        detectDefaultTerminal(&cachedTerminalResult);
+
+    if(cachedTerminalResult.processName.length > 0)
+    {
+        setTerminalInfoDetails(&cachedTerminalResult);
+        fftsGetTerminalVersion(&cachedTerminalResult.processName, &cachedTerminalResult.exe, &cachedTerminalResult.version);
+    }
+
+    atexit(ffDestoryCachedTerminalResults);
 }
 
 const FFTerminalResult* ffDetectTerminal(void)
 {
-    static FFTerminalResult result;
-    static bool init = false;
-    if(init)
-        return &result;
-    init = true;
-
-    ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, MAX_PATH);
-    result.exeName = "";
-    ffStrbufInit(&result.exePath);
-    ffStrbufInit(&result.prettyName);
-    ffStrbufInit(&result.version);
-    ffStrbufInit(&result.tty);
-    result.pid = 0;
-    result.ppid = 0;
-
-    uint32_t ppid = ffDetectShell()->ppid;
-    if(ppid)
-        getTerminalInfo(&result, ppid);
-
-    if(result.processName.length == 0)
-        getTerminalFromEnv(&result);
-    if(result.processName.length == 0)
-        detectDefaultTerminal(&result);
-
-    if(result.processName.length > 0)
+    static bool inited = false;
+    if (!inited)
     {
-        setTerminalInfoDetails(&result);
-        fftsGetTerminalVersion(&result.processName, &result.exe, &result.version);
+        ffDetectTerminalImpl();
+        inited = true;
     }
-
-    return &result;
+    return &cachedTerminalResult;
 }

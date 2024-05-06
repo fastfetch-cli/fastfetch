@@ -7,6 +7,7 @@
 #include "util/mallocHelper.h"
 
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -547,54 +548,76 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 #define FF_EXE_PATH_LEN 260
 #endif
 
-const FFShellResult* ffDetectShell()
+static FFShellResult cachedShellResult;
+
+static void ffDestoryCachedShellResults(void)
 {
-    static FFShellResult result;
-    static bool init = false;
-    if(init)
-        return &result;
-    init = true;
-
-    ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
-    result.exeName = result.exe.chars;
-    ffStrbufInit(&result.exePath);
-    ffStrbufInit(&result.version);
-    result.pid = 0;
-    result.ppid = 0;
-    result.tty = -1;
-
-    pid_t ppid = getppid();
-    ppid = getShellInfo(&result, ppid);
-    getUserShellFromEnv(&result);
-    setShellInfoDetails(&result);
-
-    return &result;
+    ffShellResultDestory(&cachedShellResult);
 }
 
-const FFTerminalResult* ffDetectTerminal()
+static inline void ffDetectShellImpl(void)
 {
-    static FFTerminalResult result;
-    static bool init = false;
-    if(init)
-        return &result;
-    init = true;
+    ffStrbufInit(&cachedShellResult.processName);
+    ffStrbufInitA(&cachedShellResult.exe, FF_EXE_PATH_LEN);
+    cachedShellResult.exeName = cachedShellResult.exe.chars;
+    ffStrbufInit(&cachedShellResult.exePath);
+    ffStrbufInit(&cachedShellResult.version);
+    cachedShellResult.pid = 0;
+    cachedShellResult.ppid = 0;
+    cachedShellResult.tty = -1;
 
-    ffStrbufInit(&result.processName);
-    ffStrbufInitA(&result.exe, FF_EXE_PATH_LEN);
-    result.exeName = result.exe.chars;
-    ffStrbufInit(&result.exePath);
-    ffStrbufInit(&result.version);
-    ffStrbufInitS(&result.tty, ttyname(STDOUT_FILENO));
-    result.pid = 0;
-    result.ppid = 0;
+    pid_t ppid = getppid();
+    ppid = getShellInfo(&cachedShellResult, ppid);
+    getUserShellFromEnv(&cachedShellResult);
+    setShellInfoDetails(&cachedShellResult);
+    atexit(ffDestoryCachedShellResults);
+}
+
+const FFShellResult* ffDetectShell()
+{
+    static bool inited = false;
+    if (!inited)
+    {
+        ffDetectShellImpl();
+        inited = true;
+    }
+    return &cachedShellResult;
+}
+
+static FFTerminalResult cachedTerminalResult;
+
+static void ffDestoryCachedTerminalResults(void)
+{
+    ffTerminalResultDestory(&cachedTerminalResult);
+}
+
+static inline void ffDetectTerminalImpl(void)
+{
+    ffStrbufInit(&cachedTerminalResult.processName);
+    ffStrbufInitA(&cachedTerminalResult.exe, FF_EXE_PATH_LEN);
+    cachedTerminalResult.exeName = cachedTerminalResult.exe.chars;
+    ffStrbufInit(&cachedTerminalResult.exePath);
+    ffStrbufInit(&cachedTerminalResult.version);
+    ffStrbufInitS(&cachedTerminalResult.tty, ttyname(STDOUT_FILENO));
+    cachedTerminalResult.pid = 0;
+    cachedTerminalResult.ppid = 0;
 
     pid_t ppid = (pid_t) ffDetectShell()->ppid;
 
     if (ppid)
-        ppid = getTerminalInfo(&result, ppid);
-    getTerminalFromEnv(&result);
-    setTerminalInfoDetails(&result);
+        ppid = getTerminalInfo(&cachedTerminalResult, ppid);
+    getTerminalFromEnv(&cachedTerminalResult);
+    setTerminalInfoDetails(&cachedTerminalResult);
+    atexit(ffDestoryCachedTerminalResults);
+}
 
-    return &result;
+const FFTerminalResult* ffDetectTerminal()
+{
+    static bool inited = false;
+    if (!inited)
+    {
+        ffDetectTerminalImpl();
+        inited = true;
+    }
+    return &cachedTerminalResult;
 }

@@ -15,6 +15,17 @@ typedef struct FFShellResult
     int32_t tty;
 } FFShellResult;
 
+static inline void ffShellResultDestory(FFShellResult *result)
+{
+    if (!result) return;
+    ffStrbufDestroy(&result->processName);
+    result->exeName = NULL;
+    ffStrbufDestroy(&result->exe);
+    ffStrbufDestroy(&result->exePath);
+    ffStrbufDestroy(&result->prettyName);
+    ffStrbufDestroy(&result->version);
+}
+
 typedef struct FFTerminalResult
 {
     FFstrbuf processName;
@@ -27,6 +38,18 @@ typedef struct FFTerminalResult
     uint32_t pid;
     uint32_t ppid;
 } FFTerminalResult;
+
+static inline void ffTerminalResultDestory(FFTerminalResult *result)
+{
+    if (!result) return;
+    ffStrbufDestroy(&result->processName);
+    result->exeName = NULL;
+    ffStrbufDestroy(&result->exe);
+    ffStrbufDestroy(&result->prettyName);
+    ffStrbufDestroy(&result->exePath);
+    ffStrbufDestroy(&result->version);
+    ffStrbufDestroy(&result->tty);
+}
 
 const FFShellResult* ffDetectShell();
 const FFTerminalResult* ffDetectTerminal();
