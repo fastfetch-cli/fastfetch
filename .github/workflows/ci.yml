@@ -177,7 +177,11 @@ jobs:
           githubToken: ${{ github.token }}
           run: |
             uname -a
-            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev directx-headers-dev rpm
+            apt-get update && apt-get install -y wget
+            # CMake installed by apt has bug `list sub-command REMOVE_ITEM requires two or more arguments`
+            wget --no-check-certificate https://apt.kitware.com/ubuntu/pool/main/c/cmake/{cmake_3.29.2-0kitware1ubuntu20.04.1_armhf.deb,cmake-data_3.29.2-0kitware1ubuntu20.04.1_all.deb}
+            dpkg -i *.deb
+            apt-get install -y make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev directx-headers-dev rpm
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
