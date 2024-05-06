@@ -360,7 +360,6 @@ __fastfetch_completion()
     local FF_OPTIONS_PATH=(
         "-c"
         "--config"
-        "--os-file"
         "--lib-pci"
         "--lib-vulkan"
         "--lib-wayland"

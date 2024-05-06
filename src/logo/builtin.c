@@ -3006,7 +3006,7 @@ static const FFlogo O[] = {
     },
     // OpenMandriva
     {
-        .names = {"openmandriva", "open-mandriva", "open_mandriva"},
+        .names = {"openmandriva", "open-mandriva", "open_mandriva", "openmandriva lx"},
         .lines = FASTFETCH_DATATEXT_LOGO_OPENMANDRIVA,
         .colors = {
             FF_COLOR_FG_BLUE,
