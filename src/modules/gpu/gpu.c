@@ -45,7 +45,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
         {
             ffStrbufAppendS(&output, " - ");
-            ffTempsAppendNum(gpu->temperature, &output, options->tempConfig);
+            ffTempsAppendNum(gpu->temperature, &output, options->tempConfig, &options->moduleArgs);
         }
 
         if(gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.total != 0)
@@ -61,7 +61,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
                 ffStrbufAppendS(&output, ", ");
-                ffPercentAppendNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, options->percent, false);
+                ffPercentAppendNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, options->percent, false, &options->moduleArgs);
             }
             ffStrbufAppendC(&output, ')');
         }
@@ -74,7 +74,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     else
     {
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-        ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig);
+        ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},

@@ -24,7 +24,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
                 if (str.length)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendBar(&str, device->volume, options->percent);
+                ffPercentAppendBar(&str, device->volume, options->percent, &options->moduleArgs);
             }
 
             if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -32,7 +32,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
                 if (str.length)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendNum(&str, device->volume, options->percent, str.length > 0);
+                ffPercentAppendNum(&str, device->volume, options->percent, str.length > 0, &options->moduleArgs);
             }
         }
 
@@ -47,7 +47,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&percentageStr, device->volume, options->percent, false);
+        ffPercentAppendNum(&percentageStr, device->volume, options->percent, false, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SOUND_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_BOOL, &device->main},

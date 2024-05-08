@@ -25,7 +25,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffPercentAppendBar(&str, result->capacity, options->percent);
+                ffPercentAppendBar(&str, result->capacity, options->percent, &options->moduleArgs);
             }
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -33,7 +33,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendNum(&str, result->capacity, options->percent, str.length > 0);
+                ffPercentAppendNum(&str, result->capacity, options->percent, str.length > 0, &options->moduleArgs);
             }
         }
 
@@ -50,7 +50,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             if(str.length > 0)
                 ffStrbufAppendS(&str, " - ");
 
-            ffTempsAppendNum(result->temperature, &str, options->tempConfig);
+            ffTempsAppendNum(result->temperature, &str, options->tempConfig, &options->moduleArgs);
         }
 
         ffStrbufPutTo(&str, stdout);
@@ -58,9 +58,9 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     else
     {
         FF_STRBUF_AUTO_DESTROY capacityStr = ffStrbufCreate();
-        ffPercentAppendNum(&capacityStr, result->capacity, options->percent, false);
+        ffPercentAppendNum(&capacityStr, result->capacity, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-        ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig);
+        ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},

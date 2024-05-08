@@ -52,12 +52,12 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         if (!options->separate)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
-                ffPercentAppendBar(&str, avgValue, options->percent);
+                ffPercentAppendBar(&str, avgValue, options->percent, &options->moduleArgs);
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffPercentAppendNum(&str, avgValue, options->percent, str.length > 0);
+                ffPercentAppendNum(&str, avgValue, options->percent, str.length > 0, &options->moduleArgs);
             }
         }
         else
@@ -66,7 +66,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
-                ffPercentAppendNum(&str, *percent, options->percent, false);
+                ffPercentAppendNum(&str, *percent, options->percent, false, &options->moduleArgs);
             }
         }
         ffStrbufPutTo(&str, stdout);
@@ -74,11 +74,11 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY avgStr = ffStrbufCreate();
-        ffPercentAppendNum(&avgStr, avgValue, options->percent, false);
+        ffPercentAppendNum(&avgStr, avgValue, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY minStr = ffStrbufCreate();
-        ffPercentAppendNum(&minStr, minValue, options->percent, false);
+        ffPercentAppendNum(&minStr, minValue, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY maxStr = ffStrbufCreate();
-        ffPercentAppendNum(&maxStr, maxValue, options->percent, false);
+        ffPercentAppendNum(&maxStr, maxValue, options->percent, false, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPUUSAGE_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &avgStr},
             {FF_FORMAT_ARG_TYPE_STRBUF, &maxStr},
