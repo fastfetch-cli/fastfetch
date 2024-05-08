@@ -48,6 +48,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 const char* colorTitle = yyjson_get_str(yyjson_obj_get(val, "title"));
                 if (colorTitle)
                     ffOptionParseColor(colorTitle, &options->colorTitle);
+                const char* colorOutput = yyjson_get_str(yyjson_obj_get(val, "output"));
+                if (colorOutput)
+                    ffOptionParseColor(colorOutput, &options->colorOutput);
             }
             else
                 return "display.color must be either a string or an object";
@@ -244,6 +247,11 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             optionCheckString(key, value, &options->colorTitle);
             ffOptionParseColor(value, &options->colorTitle);
         }
+        else if(ffStrEqualsIgnCase(subkey, "output"))
+        {
+            optionCheckString(key, value, &options->colorOutput);
+            ffOptionParseColor(value, &options->colorOutput);
+        }
         else
             return false;
     }
@@ -346,6 +354,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
 {
     ffStrbufInit(&options->colorKeys);
     ffStrbufInit(&options->colorTitle);
+    ffStrbufInit(&options->colorOutput);
     options->brightColor = true;
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
@@ -389,6 +398,7 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
 {
     ffStrbufDestroy(&options->colorKeys);
     ffStrbufDestroy(&options->colorTitle);
+    ffStrbufDestroy(&options->colorOutput);
     ffStrbufDestroy(&options->keyValueSeparator);
     ffStrbufDestroy(&options->barCharElapsed);
     ffStrbufDestroy(&options->barCharTotal);

@@ -21,6 +21,7 @@ typedef struct FFOptionsDisplay
     //If one of those is empty, ffLogoPrint will set them
     FFstrbuf colorKeys;
     FFstrbuf colorTitle;
+    FFstrbuf colorOutput;
 
     bool brightColor;
 
