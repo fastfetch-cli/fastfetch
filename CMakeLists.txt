@@ -541,7 +541,7 @@ elseif(BSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_bsd.c
-        src/detection/loadavg/loadavg_linux.c
+        src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
@@ -598,7 +598,7 @@ elseif(APPLE)
         src/detection/host/host_apple.c
         src/detection/icons/icons_nosupport.c
         src/detection/lm/lm_nosupport.c
-        src/detection/loadavg/loadavg_linux.c
+        src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
