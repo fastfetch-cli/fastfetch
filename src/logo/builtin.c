@@ -1115,9 +1115,9 @@ static const FFlogo C[] = {
 };
 
 static const FFlogo D[] = {
-    // Dahlia
+    // DahliaOS
     {
-        .names = {"dahlia"},
+        .names = {"dahliaOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_DAHLIA,
         .colors = {
             FF_COLOR_FG_RED,
