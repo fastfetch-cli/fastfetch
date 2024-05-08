@@ -30,6 +30,7 @@ typedef struct FFOptionsModules
     FFIconsOptions icons;
     FFKernelOptions kernel;
     FFLMOptions lm;
+    FFLoadavgOptions loadavg;
     FFLocalIpOptions localIP;
     FFLocaleOptions locale;
     FFMediaOptions media;

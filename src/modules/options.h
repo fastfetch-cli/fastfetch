@@ -27,6 +27,7 @@
 #include "modules/gpu/option.h"
 #include "modules/icons/option.h"
 #include "modules/kernel/option.h"
+#include "modules/loadavg/option.h"
 #include "modules/locale/option.h"
 #include "modules/lm/option.h"
 #include "modules/localip/option.h"

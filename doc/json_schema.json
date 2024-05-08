@@ -702,6 +702,7 @@
                             "icons",
                             "kernel",
                             "lm",
+                            "loadavg",
                             "locale",
                             "localip",
                             "media",
@@ -1537,6 +1538,32 @@
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Loadavg",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "loadavg",
+                                        "description": "Print system load averages"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
