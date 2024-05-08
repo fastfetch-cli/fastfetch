@@ -46,7 +46,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
     if (length > 0) // doesn't contain trailing NUL
     {
-        exePath->chars[length + 1] = '\0';
+        exePath->chars[length] = '\0';
         exePath->length = (uint32_t) length;
     }
 
