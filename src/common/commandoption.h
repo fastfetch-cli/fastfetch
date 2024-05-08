@@ -2,18 +2,10 @@
 
 #include "fastfetch.h"
 
-typedef struct FFCustomValue
-{
-    bool printKey;
-    FFstrbuf key;
-    FFstrbuf value;
-} FFCustomValue;
-
 // Things only needed by fastfetch
 typedef struct FFdata
 {
     FFstrbuf structure;
-    FFlist customValues; // List of FFCustomValue
     bool configLoaded;
 } FFdata;
 

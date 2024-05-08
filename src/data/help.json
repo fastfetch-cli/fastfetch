@@ -482,22 +482,6 @@
             }
         },
         {
-            "long": "set",
-            "desc": "Hard set the value of a key",
-            "remark": "Deprecated. Use \"Custom\" module instead",
-            "arg": {
-                "type": "key=value"
-            }
-        },
-        {
-            "long": "set-keyless",
-            "desc": "Hard set the value of a key, but don't print the key or the separator",
-            "remark": "Deprecated. Use \"Custom\" module instead",
-            "arg": {
-                "type": "key=value"
-            }
-        },
-        {
             "long": "show-errors",
             "desc": "Print occurring errors",
             "arg": {

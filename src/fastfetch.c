@@ -695,38 +695,7 @@ static void parseCommand(FFdata* data, char* key, char* value)
 
 static void parseOption(FFdata* data, const char* key, const char* value)
 {
-    if(ffStrEqualsIgnCase(key, "--set") || ffStrEqualsIgnCase(key, "--set-keyless"))
-    {
-        FF_STRBUF_AUTO_DESTROY customValueStr = ffStrbufCreate();
-        ffOptionParseString(key, value, &customValueStr);
-        uint32_t index = ffStrbufFirstIndexC(&customValueStr, '=');
-        if(index == 0 || index == customValueStr.length)
-        {
-            fprintf(stderr, "Error: usage: %s <key>=<str>\n", key);
-            exit(477);
-        }
-
-        FF_STRBUF_AUTO_DESTROY customKey = ffStrbufCreateNS(index, customValueStr.chars);
-
-        FFCustomValue* customValue = NULL;
-        FF_LIST_FOR_EACH(FFCustomValue, x, data->customValues)
-        {
-            if(ffStrbufEqual(&x->key, &customKey))
-            {
-                ffStrbufDestroy(&x->key);
-                ffStrbufDestroy(&x->value);
-                customValue = x;
-                break;
-            }
-        }
-        if(!customValue) customValue = (FFCustomValue*) ffListAdd(&data->customValues);
-        ffStrbufInitMove(&customValue->key, &customKey);
-        ffStrbufSubstrAfter(&customValueStr, index);
-        ffStrbufInitMove(&customValue->value, &customValueStr);
-        customValue->printKey = key[5] == '\0';
-    }
-
-    else if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
+    if(ffStrEqualsIgnCase(key, "-s") || ffStrEqualsIgnCase(key, "--structure"))
         ffOptionParseString(key, value, &data->structure);
 
     else if(
@@ -868,7 +837,6 @@ int main(int argc, char** argv)
     //Data stores things only needed for the configuration of fastfetch
     FFdata data = {
         .structure = ffStrbufCreate(),
-        .customValues = ffListCreate(sizeof(FFCustomValue)),
         .configLoaded = false,
     };
 
@@ -883,10 +851,4 @@ int main(int argc, char** argv)
         writeConfigFile(&data, &instance.state.genConfigPath);
 
     ffStrbufDestroy(&data.structure);
-    FF_LIST_FOR_EACH(FFCustomValue, customValue, data.customValues)
-    {
-        ffStrbufDestroy(&customValue->key);
-        ffStrbufDestroy(&customValue->value);
-    }
-    ffListDestroy(&data.customValues);
 }
