@@ -436,7 +436,7 @@
         {
             "long": "color-keys",
             "desc": "Set the color of the keys",
-            "remark": "See `-h color` for the list of available colors",
+            "remark": "Doesn't affect module Title, Separator and Colors. See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
             }
@@ -444,6 +444,14 @@
         {
             "long": "color-title",
             "desc": "Set the color of the title",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
+            "long": "color-output",
+            "desc": "Set the color of module output",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
@@ -1501,6 +1509,14 @@
         {
             "long": "<module>-key-color",
             "desc": "Override the global \"--color-keys\" option for each specific module",
+            "arg": {
+                "type": "color"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-output-color",
+            "desc": "Override the global \"--color-output\" option for each specific module",
             "arg": {
                 "type": "color"
             },
