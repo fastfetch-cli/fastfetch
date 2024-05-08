@@ -191,7 +191,6 @@ __fastfetch_completion()
         "--escape-bedrock"
         "--pipe"
         "--title-fqdn"
-        "--escape-bedrock"
         "--disk-folders"
         "--disk-show-external"
         "--disk-show-hidden"
