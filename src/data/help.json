@@ -505,7 +505,7 @@
             "arg": {
                 "type": "bool",
                 "optional": true,
-                "default": true
+                "default": false
             }
         },
         {
