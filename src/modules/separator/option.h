@@ -9,4 +9,5 @@ typedef struct FFSeparatorOptions
     FFModuleBaseInfo moduleInfo;
 
     FFstrbuf string;
+    FFstrbuf outputColor;
 } FFSeparatorOptions;

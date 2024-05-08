@@ -43,6 +43,8 @@ void ffPrintSeparator(FFSeparatorOptions* options)
         + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
     ffLogoPrintLine();
 
+    if(options->outputColor.length)
+        ffPrintColor(&options->outputColor);
     if(__builtin_expect(options->string.length == 1, 1))
     {
         ffPrintCharTimes(options->string.chars[0], titleLength);
@@ -97,6 +99,12 @@ bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "output-color"))
+    {
+        ffOptionParseColor(value, &options->outputColor);
+        return true;
+    }
+
     return false;
 }
 
@@ -113,6 +121,12 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "string"))
         {
             ffStrbufSetS(&options->string, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEndsWithIgnCase(key, "outputColor"))
+        {
+            ffOptionParseColor(yyjson_get_str(val), &options->outputColor);
             continue;
         }
 

@@ -1772,6 +1772,9 @@
                                         "description": "Set the string to be printed",
                                         "type": "string",
                                         "default": "-"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     }
                                 }
                             },

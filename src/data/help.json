@@ -922,6 +922,14 @@
             }
         },
         {
+            "long": "separator-output-color",
+            "desc": "Set the color of the separator module",
+            "arg": {
+                "type": "color",
+                "default": "default"
+            }
+        },
+        {
             "long": "disk-folders",
             "desc": "A colon (semicolon on Windows) separated list of folder paths to be detected",
             "remark": "On Windows, a drive latter must be upper cased and end with \"\\\". \"/\" is used as an alias of the system drive. This option overrides other disk-show-* options",
