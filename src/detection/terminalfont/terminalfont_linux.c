@@ -3,6 +3,7 @@
 #include "common/properties.h"
 #include "common/parsing.h"
 #include "common/io/io.h"
+#include "common/processing.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/mallocHelper.h"
@@ -265,9 +266,9 @@ static void detectXterm(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-static void detectSt(FFTerminalFontResult* terminalFont, uint32_t pid)
+static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult* terminal)
 {
-    FF_STRBUF_AUTO_DESTROY size = ffStrbufCreateF("/proc/%u/cmdline", pid);
+    FF_STRBUF_AUTO_DESTROY size = ffStrbufCreateF("/proc/%u/cmdline", terminal->pid);
     FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
     if (!ffAppendFileBuffer(size.chars, &font))
     {
@@ -276,20 +277,53 @@ static void detectSt(FFTerminalFontResult* terminalFont, uint32_t pid)
     }
 
     const char* p = memmem(font.chars, font.length, "\0-f", sizeof("\0-f")); // find parameter of `-f`
-    if (!p)
+    if (p)
     {
-        ffStrbufAppendF(&terminalFont->error, "st was not executed with `-f` parameter");
-        return;
+        // st was executed with `-f` parameter
+        ffStrbufSubstrAfter(&font, (uint32_t) (p + (sizeof("\0-f") - 1) - font.chars));
+        ffStrbufRecalculateLength(&font);
+    }
+    else
+    {
+        ffStrbufClear(&font);
+        if (ffProcessAppendStdOut(&font, (char* const[]) {
+            "strings",
+            terminal->exePath.chars,
+            NULL,
+        }) != NULL || font.length == 0)
+        {
+            ffStrbufAppendS(&terminalFont->error, "Failed to run `strings st`");
+            return;
+        }
+
+        // Search font config string in st binary
+        uint32_t middleIndex = ffStrbufFirstIndexS(&font, "size=");
+        if (middleIndex == font.length)
+        {
+            ffStrbufAppendS(&terminalFont->error, "No font config found in st binary");
+            return;
+        }
+
+        uint32_t startIndex = ffStrbufPreviousIndexC(&font, middleIndex, '\n');
+        if (startIndex == font.length) startIndex = 0;
+        uint32_t endIndex = ffStrbufNextIndexC(&font, middleIndex, '\n');
+
+        ffStrbufSubstrBefore(&font, endIndex);
+        ffStrbufSubstrAfter(&font, startIndex);
     }
 
-    ffStrbufSubstrAfter(&font, (uint32_t) (p + (sizeof("\0-f") - 1) - font.chars));
-    ffStrbufRecalculateLength(&font);
+    // JetBrainsMono Nerd Font Mono:pixelsize=12:antialias=true:autohint=true
 
-    // `monospace:size=15` || `monospace` || `:size=15`
-    uint32_t index = ffStrbufFirstIndexS(&font, ":size=");
+    uint32_t index = ffStrbufFirstIndexC(&font, ':');
     if (index != font.length)
     {
-        ffStrbufSetS(&size, font.chars + index + strlen(":size="));
+        uint32_t sIndex = ffStrbufNextIndexS(&font, index + 1, "size=");
+        if (sIndex != font.length)
+        {
+            sIndex += strlen("size=");
+            uint32_t sIndexEnd = ffStrbufNextIndexC(&font, sIndex, ':');
+            ffStrbufSetNS(&size, sIndexEnd - sIndex, font.chars + sIndex);
+        }
         ffStrbufSubstrBefore(&font, index);
     }
     else
@@ -365,7 +399,7 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "xterm"))
         detectXterm(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "st"))
-        detectSt(terminalFont, terminal->pid);
+        detectSt(terminalFont, terminal);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "warp"))
         detectWarp(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "weston-terminal"))
