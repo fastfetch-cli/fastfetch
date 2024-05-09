@@ -2,6 +2,12 @@
 
 #include <sys/sysctl.h>
 
+#ifdef __FreeBSD__
+    #include <sys/types.h>
+    #include <sys/resource.h>
+    #include <vm/vm_param.h>
+#endif
+
 const char* ffDetectLoadavg(double result[3])
 {
     struct loadavg load;
