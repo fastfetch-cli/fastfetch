@@ -51,7 +51,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     struct addrinfo* addr;
 
     if(getaddrinfo(host, "80", &(struct addrinfo) {
-        .ai_family = state.ipv6 ? AF_INET6 : AF_INET,
+        .ai_family = state->ipv6 ? AF_INET6 : AF_INET,
         .ai_socktype = SOCK_STREAM,
     }, &addr) != 0)
         return "getaddrinfo() failed";
