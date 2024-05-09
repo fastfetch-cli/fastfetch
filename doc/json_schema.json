@@ -1565,6 +1565,13 @@
                                         "const": "loadavg",
                                         "description": "Print system load averages"
                                     },
+                                    "ndigits": {
+                                        "type": "integer",
+                                        "description": "Set the number of digits to keep after the decimal point",
+                                        "minimum": 0,
+                                        "maximum": 9,
+                                        "default": 2
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

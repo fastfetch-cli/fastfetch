@@ -1229,6 +1229,14 @@
             }
         },
         {
+            "long": "loadavg-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing load average",
+            "arg": {
+                "type": "num",
+                "default": 2
+            }
+        },
+        {
             "long": "localip-show-ipv4",
             "desc": "Show IPv4 addresses in local ip module",
             "arg": {

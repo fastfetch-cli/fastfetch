@@ -20,7 +20,7 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        printf("%.2f, %.2f, %.2f\n", result[0], result[1], result[2]);
+        printf("%.*f, %.*f, %.*f\n", options->ndigits, result[0], options->ndigits, result[1], options->ndigits, result[2]);
     }
     else
     {
@@ -39,6 +39,12 @@ bool ffParseLoadavgCommandOptions(FFLoadavgOptions* options, const char* key, co
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
+    if (ffStrEqualsIgnCase(subKey, "ndigits"))
+    {
+        options->ndigits = (uint8_t) ffOptionParseUInt32(key, value);
+        return true;
+    }
+
     return false;
 }
 
@@ -55,6 +61,12 @@ void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (ffStrEqualsIgnCase(key, "ndigits"))
+        {
+            options->ndigits = (uint8_t) yyjson_get_uint(val);
+            continue;
+        }
+
         ffPrintError(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
@@ -65,6 +77,9 @@ void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc,
     ffInitLoadavgOptions(&defaultOptions);
 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+
+    if (defaultOptions.ndigits != options->ndigits)
+        yyjson_mut_obj_add_uint(doc, module, "ndigits", options->ndigits);
 }
 
 void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -106,6 +121,8 @@ void ffInitLoadavgOptions(FFLoadavgOptions* options)
         ffGenerateLoadavgJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs);
+
+    options->ndigits = 2;
 }
 
 void ffDestroyLoadavgOptions(FFLoadavgOptions* options)

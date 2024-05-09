@@ -8,4 +8,6 @@ typedef struct FFLoadavgOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    uint8_t ndigits;
 } FFLoadavgOptions;
