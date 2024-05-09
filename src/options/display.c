@@ -116,7 +116,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                     {},
                 });
                 if (error) return error;
-                options->temperatureUnit = (FFTemperatureUnit) value;
+                options->tempUnit = (FFTemperatureUnit) value;
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
@@ -285,12 +285,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             {}
         });
     }
-    else if(ffStrStartsWithIgnCase(key, "--temperature-"))
+    else if(ffStrStartsWithIgnCase(key, "--temp-"))
     {
-        const char* subkey = key + strlen("--temperature-");
+        const char* subkey = key + strlen("--temp-");
         if(ffStrEqualsIgnCase(subkey, "unit"))
         {
-            options->temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            options->tempUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
                 { "C", FF_TEMPERATURE_UNIT_CELSIUS },
                 { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
@@ -375,7 +375,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->noBuffer = false;
     options->keyWidth = 0;
 
-    options->temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
+    options->tempUnit = FF_TEMPERATURE_UNIT_CELSIUS;
     options->tempNdigits = 1;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->tempColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
@@ -488,9 +488,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
 
     {
         yyjson_mut_val* temperature = yyjson_mut_obj(doc);
-        if (options->temperatureUnit != defaultOptions.temperatureUnit)
+        if (options->tempUnit != defaultOptions.tempUnit)
         {
-            switch (options->temperatureUnit)
+            switch (options->tempUnit)
             {
                 case FF_TEMPERATURE_UNIT_CELSIUS:
                     yyjson_mut_obj_add_str(doc, obj, "unit", "C");

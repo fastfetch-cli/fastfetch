@@ -35,7 +35,7 @@ typedef struct FFOptionsDisplay
     FFBinaryPrefixType binaryPrefixType;
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
-    FFTemperatureUnit temperatureUnit;
+    FFTemperatureUnit tempUnit;
     uint8_t tempNdigits;
     FFstrbuf tempColorGreen;
     FFstrbuf tempColorYellow;

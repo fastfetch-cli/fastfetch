@@ -37,7 +37,7 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
         }
     }
 
-    switch (options->temperatureUnit)
+    switch (options->tempUnit)
     {
         case FF_TEMPERATURE_UNIT_CELSIUS:
             ffStrbufAppendF(buffer, "%.*f°C", options->tempNdigits, celsius);
