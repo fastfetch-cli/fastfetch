@@ -307,10 +307,19 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
         #ifdef __APPLE__
         // https://github.com/fastfetch-cli/fastfetch/discussions/501
-        if (ffStrEndsWith(name, " (figterm)") || ffStrEndsWith(name, " (cwterm)") || ffStrEndsWith(name, " (qterm)"))
+        const char* pLeft = strstr(name, " (");
+        if (pLeft)
         {
-            if (__builtin_expect(getProcessNameAndPpid(ppid, name, &ppid, NULL) != NULL, false))
-                return 0;
+            pLeft += 2;
+            const char* pRight = strstr(pLeft, "term)");
+            if (pRight && pRight[5] == '\0')
+            {
+                for (; pLeft < pRight; ++pLeft)
+                    if (*pLeft < 'a' || *pLeft > 'z')
+                        break;
+                if (pLeft == pRight && getProcessNameAndPpid(ppid, name, &ppid, NULL) != NULL)
+                    return 0;
+            }
         }
         #endif
 
