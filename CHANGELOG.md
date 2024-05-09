@@ -1,34 +1,45 @@
+# 2.12.0
+
+Changes:
+* The long deprecated options `--set` and `--set-keyless` are removed.
+
+Features:
+* Support st terminal font detection for font configuration compiled in st binary (TerminalFont, Linux)
+* Support option `--color-output` to change output color of all modules except `Title`, `Separator` and `Colors`
+    * `display.color.output` in JSONC config file
+* Support option `--<module>-output-color` to change output color of one specified module, which overrides the global option `--color-output`
+* Add new module `Loadavg` to print load averages (Loadavg)
+* Add option `--publicip-ipv6` to print IPv6 address (PublicIP)
+
+Bugfixes:
+* Rename option `--temperature-unit` to `--temp-unit` as stated in help messages
+
 # 2.11.5
 
 Bugfix:
-
 * Fix logo printing for OpenMandriva (#896)
 * Remove `--os-file` in help messages
 
 # 2.11.4
 
 Changes:
-
 * Fastfetch will print a colorless ascii logo in `--pipe` mode for better `lolcat` compatibility. `fastfetch | lolcat` should work and no `--pipe false` needed.
     * Previously the logo would be disabled in `--pipe` mode.
-* `--os-file` was removed and CMake option `-DCUSTOM_OS_RELEASE_PATH=/path/to/os-release` was added. This option should not used in most cases.
+    * Use `--pipe -l none` to get the old beheavior
+* `--os-file` was removed and CMake option `-DCUSTOM_OS_RELEASE_PATH=/path/to/os-release` was introduced for configuring at compile time by package managers if needed. This option should not used in most cases.
 
 Bugfixes:
-
 * Fix possible out-of-bound memory access (#868)
-* Fix Apple Terminal detection (macOS, Terminal)
-* Fix doubled output in custom formation (#852)
+* Fix Apple Terminal detection (#878, macOS, Terminal)
 * Fix deprecation warning for macOS 14.0 hopefully (#860, macOS, Camera)
-* Fix memory leaks when passing informative options
+* Fix memory leaks when passing informative options (#888)
 * Fix JSON config `size.ndigits` doesn't work 
 
 Features:
-
 * Enable `--pipe` mode if environment variable `$NO_COLOR` is set
 * Support Armbian and Proxmox distro detection (OS, Linux)
 
 Logo:
-
 * Add Armbian
 
 # 2.11.3
