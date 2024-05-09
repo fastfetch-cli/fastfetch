@@ -9,7 +9,7 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
 {
     if (status != FF_UNITIALIZED)
     {
-        fputs("Error: this module can only be used once due to internal limitations\n", stderr);
+        fputs("Error: PublicIp module can only be used once due to internal limitations\n", stderr);
         exit(1);
     }
 
