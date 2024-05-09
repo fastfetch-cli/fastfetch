@@ -14,6 +14,9 @@ Features:
 Bugfixes:
 * Rename option `--temperature-unit` to `--temp-unit` as stated in help messages
 
+Logos:
+* Fix DahliaOS detection
+
 # 2.11.5
 
 Bugfix:
