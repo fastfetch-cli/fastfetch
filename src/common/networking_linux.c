@@ -14,7 +14,7 @@ static const char* connectAndSend(FFNetworkingState* state)
     struct addrinfo* addr;
 
     if(getaddrinfo(state->host.chars, "80", &(struct addrinfo) {
-        .ai_family = AF_INET,
+        .ai_family = state->ipv6 ? AF_INET6 : AF_INET,
         .ai_socktype = SOCK_STREAM,
     }, &addr) != 0)
     {

@@ -1776,6 +1776,11 @@
                                         "minimum": 0,
                                         "default": "disabled (0)"
                                     },
+                                    "ipv6": {
+                                        "description": "Whether to use IPv6 for public IP detection server",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

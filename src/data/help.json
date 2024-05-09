@@ -1349,6 +1349,14 @@
             }
         },
         {
+            "long": "publicip-ipv6",
+            "desc": "Whether to use IPv6 for public IP detection server",
+            "arg": {
+                "type": "bool",
+                "default": false
+            }
+        },
+        {
             "long": "weather-location",
             "desc": "Set the location to be used",
             "remark": "Must be URI encoded (e.g. a whitespace must be encoded as \"+\")",

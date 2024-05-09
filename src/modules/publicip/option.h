@@ -11,4 +11,5 @@ typedef struct FFPublicIpOptions
 
     FFstrbuf url;
     uint32_t timeout;
+    bool ipv6;
 } FFPublicIpOptions;
