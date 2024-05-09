@@ -27,6 +27,7 @@ typedef enum FFPackagesFlags
     FF_PACKAGES_FLAG_WINGET_BIT = 1 << 17,
     FF_PACKAGES_FLAG_XBPS_BIT = 1 << 18,
     FF_PACKAGES_FLAG_AM_BIT = 1 << 19,
+    FF_PACKAGES_FLAG_SORCERY_BIT = 1 << 20,
 } FFPackagesFlags;
 
 typedef struct FFPackagesOptions

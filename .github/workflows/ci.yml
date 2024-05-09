@@ -64,6 +64,8 @@ jobs:
     permissions:
       security-events: write
       contents: read
+    outputs:
+      ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
@@ -111,6 +113,10 @@ jobs:
       - name: run tests
         run: ctest
 
+      - name: get fastfetch version
+        id: ffversion
+        run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
+
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -150,6 +156,45 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-linux-aarch64
+          path: ./fastfetch-*.*
+
+  linux-armv7:
+    name: Linux-armv7
+    runs-on: ubuntu-22.04
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: uraimo/run-on-arch-action@v2
+        id: runcmd
+        with:
+          arch: armv7
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          run: |
+            uname -a
+            apt-get update && apt-get install -y wget
+            # CMake installed by apt has bug `list sub-command REMOVE_ITEM requires two or more arguments`
+            wget --no-check-certificate https://apt.kitware.com/ubuntu/pool/main/c/cmake/{cmake_3.29.2-0kitware1ubuntu20.04.1_armhf.deb,cmake-data_3.29.2-0kitware1ubuntu20.04.1_all.deb}
+            dpkg -i *.deb
+            apt-get install -y make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev directx-headers-dev rpm
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-linux-armv7
           path: ./fastfetch-*.*
 
   musl-amd64:
@@ -495,6 +540,7 @@ jobs:
     needs:
       - linux-amd64
       - linux-aarch64
+      - linux-armv7
       - musl-amd64
       - musl-aarch64
       - macos-universal

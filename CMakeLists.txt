@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.10.3
+    VERSION 2.11.5
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -79,6 +79,8 @@ option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 
 if (LINUX)
     set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
+    set(CUSTOM_AMDGPU_IDS_PATH "" CACHE STRING "Custom path to file amdgpu.ids, defaults to `/usr/share/libdrm/amdgpu.ids`")
+    set(CUSTOM_OS_RELEASE_PATH "" CACHE STRING "Custom path to file os-release, defaults to `/etc/os-release`")
 endif()
 
 ####################
@@ -332,6 +334,7 @@ set(LIBFASTFETCH_SRC
     src/modules/gamepad/gamepad.c
     src/modules/kernel/kernel.c
     src/modules/lm/lm.c
+    src/modules/loadavg/loadavg.c
     src/modules/locale/locale.c
     src/modules/localip/localip.c
     src/modules/memory/memory.c
@@ -415,6 +418,7 @@ if(LINUX)
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
+        src/detection/loadavg/loadavg_linux.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
@@ -470,6 +474,7 @@ elseif(ANDROID)
         src/detection/icons/icons_nosupport.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_linux.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
@@ -536,6 +541,7 @@ elseif(BSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_bsd.c
+        src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
@@ -590,8 +596,9 @@ elseif(APPLE)
         src/detection/gpu/gpu_apple.c
         src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
-        src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
@@ -649,6 +656,7 @@ elseif(WIN32)
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
@@ -783,6 +791,14 @@ endif()
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
     message(STATUS "Custom file path of pci.ids: ${CUSTOM_PCI_IDS_PATH}")
     target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_PCI_IDS_PATH=${CUSTOM_PCI_IDS_PATH})
+endif()
+if(NOT "${CUSTOM_AMDGPU_IDS_PATH}" STREQUAL "")
+    message(STATUS "Custom file path of amdgpu.ids: ${CUSTOM_AMDGPU_IDS_PATH}")
+    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_AMDGPU_IDS_PATH=${CUSTOM_AMDGPU_IDS_PATH})
+endif()
+if(NOT "${CUSTOM_OS_RELEASE_PATH}" STREQUAL "")
+    message(STATUS "Custom file path of os_release: ${CUSTOM_OS_RELEASE_PATH}")
+    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_OS_RELEASE_PATH=${CUSTOM_OS_RELEASE_PATH})
 endif()
 
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
@@ -1148,7 +1164,15 @@ if(LINUX)
 
         set(CPACK_DEBIAN_PACKAGE_SECTION, "utils")
         set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-        set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6")
+
+        if(NOT IS_MUSL)
+            EXECUTE_PROCESS (
+                COMMAND getconf GNU_LIBC_VERSION
+                OUTPUT_VARIABLE GLIBC_VERSION
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+            STRING (REPLACE "glibc " "" GLIBC_VERSION ${GLIBC_VERSION})
+            set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= ${GLIBC_VERSION})")
+        endif()
     endif()
 
     find_program(HAVE_RPMBUILD "rpmbuild")

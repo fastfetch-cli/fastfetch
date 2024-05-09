@@ -52,7 +52,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
             if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffPercentAppendBar(&str, percent, options->percent);
+                ffPercentAppendBar(&str, percent, options->percent, &options->moduleArgs);
             }
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -60,7 +60,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
 
-                ffPercentAppendNum(&str, percent, options->percent, str.length > 0);
+                ffPercentAppendNum(&str, percent, options->percent, str.length > 0, &options->moduleArgs);
             }
 
             ffStrbufPutTo(&str, stdout);
@@ -68,7 +68,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
-            ffPercentAppendNum(&valueStr, percent, options->percent, false);
+            ffPercentAppendNum(&valueStr, percent, options->percent, false, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
@@ -151,12 +151,6 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
-    }
-
-    if(result.length == 0)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "No result is detected.");
         return;
     }
 

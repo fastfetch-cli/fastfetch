@@ -1,5 +1,7 @@
 #include "fastfetch.h"
 #include "common/properties.h"
+#include "common/io/io.h"
+#include "util/mallocHelper.h"
 
 #include <stdlib.h>
 #ifdef _WIN32
@@ -95,50 +97,44 @@ bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer)
 
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries)
 {
-    FILE* file = fopen(filename, "r");
-    if(file == NULL)
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(filename, "r");
+    if (file == NULL)
         return false;
 
-    bool valueStorage[4];
-    bool* unsetValues;
+    bool valueStorage[32];
+    bool* unsetValues = valueStorage;
 
-    if(numQueries > sizeof(valueStorage) / sizeof(valueStorage[0]))
+    if (numQueries > sizeof(valueStorage) / sizeof(valueStorage[0]))
         unsetValues = malloc(sizeof(bool) * numQueries);
-    else
-        unsetValues = valueStorage;
 
     bool allSet = true;
-    for(uint32_t i = 0; i < numQueries; i++)
+    for (uint32_t i = 0; i < numQueries; i++)
     {
-        if((unsetValues[i] = queries[i].buffer->length == 0))
+        unsetValues[i] = queries[i].buffer->length == 0;
+        if (unsetValues[i])
             allSet = false;
     }
 
-    if(allSet)
-        goto done;
-
-    char* line = NULL;
-    size_t len = 0;
-
-    while (getline(&line, &len, file) != -1)
+    if (!allSet)
     {
-        for(uint32_t i = 0; i < numQueries; i++)
-        {
-            if(!unsetValues[i])
-                continue;
+        FF_AUTO_FREE char* line = NULL;
+        size_t len = 0;
 
-            uint32_t currentLength = queries[i].buffer->length;
-            queries[i].buffer->length = 0;
-            if(!ffParsePropLine(line, queries[i].start, queries[i].buffer))
-                queries[i].buffer->length = currentLength;
+        while (getline(&line, &len, file) != -1)
+        {
+            for(uint32_t i = 0; i < numQueries; i++)
+            {
+                if(!unsetValues[i])
+                    continue;
+
+                uint32_t currentLength = queries[i].buffer->length;
+                queries[i].buffer->length = 0;
+                if(!ffParsePropLine(line, queries[i].start, queries[i].buffer))
+                    queries[i].buffer->length = currentLength;
+            }
         }
     }
 
-    if(line != NULL)
-        free(line);
-
-done:
-    fclose(file);
     if(unsetValues != valueStorage)
         free(unsetValues);
     return true;

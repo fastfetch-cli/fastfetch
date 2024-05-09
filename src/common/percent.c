@@ -6,7 +6,15 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config)
+static void appendOutputColor(FFstrbuf* buffer, const FFModuleArgs* module)
+{
+    if (module->outputColor.length)
+        ffStrbufAppendF(buffer, "\e[%sm", module->outputColor.chars);
+    else if (instance.config.display.colorOutput.length)
+        ffStrbufAppendF(buffer, "\e[%sm", instance.config.display.colorOutput.chars);
+}
+
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -66,16 +74,19 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
     if(options->barBorder)
     {
         if(!options->pipe)
-            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m ]");
+            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m ]");\
         else
             ffStrbufAppendS(buffer, " ]");
     }
 
     if(!options->pipe)
+    {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
+        appendOutputColor(buffer, module);
+    }
 }
 
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses)
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -120,6 +131,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig con
     if (colored && !options->pipe)
     {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
+        appendOutputColor(buffer, module);
     }
 
     if (parentheses)

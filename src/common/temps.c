@@ -3,7 +3,7 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig config)
+void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig config, const FFModuleArgs* module)
 {
     if (celsius != celsius) // ignores NaN
         return;
@@ -37,7 +37,7 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
         }
     }
 
-    switch (options->temperatureUnit)
+    switch (options->tempUnit)
     {
         case FF_TEMPERATURE_UNIT_CELSIUS:
             ffStrbufAppendF(buffer, "%.*f°C", options->tempNdigits, celsius);
@@ -51,7 +51,13 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
     }
 
     if (!options->pipe)
+    {
         ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
+        if (module->outputColor.length)
+            ffStrbufAppendF(buffer, "\e[%sm", module->outputColor.chars);
+        else if (instance.config.display.colorOutput.length)
+            ffStrbufAppendF(buffer, "\e[%sm", instance.config.display.colorOutput.chars);
+    }
 }
 
 bool ffTempsParseCommandOptions(const char* key, const char* subkey, const char* value, bool* useTemp, FFColorRangeConfig* config)

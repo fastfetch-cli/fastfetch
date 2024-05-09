@@ -107,12 +107,12 @@ To list all available modules, use \fB \-\-list\-modules \fR
 
 .SS "Config Files"
 
-fastfetch supports two types of config files. The legacy
-configuration files and a JSONC based format.
+Fastfetch uses JSONC based format for configuration. Fastfetch doesn't generate
+config file automatically; it should be generated manually by \fB \-\-gen\-config\fR.
+The config file will be saved in \fB~/.config/fastfetch/config.jsonc\fR by default.
 
 A JSONC config file is a JSON file that also supports comments with (//). Those
-files must have the extension '.jsonc'. You can migrate a legacy config
-file to the JSONC format by using \fB\-\-gen\-config\fR.
+files must have the extension '.jsonc'.
 
 The specified configuration/preset files are searched in the following order:
 
@@ -122,10 +122,7 @@ The specified configuration/preset files are searched in the following order:
 
 3. relative to /usr/share/fastfetch/presets/
 
-When both a '.jsonc' and a '.conf' file with the same name is found,
-the '.jsonc' file is preferred.
-
-Fastfetch provides some default presets. List them with \fB \-\-print\-available\-presets\fR.
+Fastfetch provides some default presets. List them with \fB\-\-list\-presets\fR.
 
 .SH "SEE ALSO"
 .BR neofetch (1)

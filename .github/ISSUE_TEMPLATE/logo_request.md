@@ -11,7 +11,7 @@ Tip: A logo can be displayed by fastfetch without getting into fastfetch's offic
 
 # OS
 ```
-Paste content of /etc/os-release here. If this file doesn't exist, describe a way to identify the distro.
+Paste content of /etc/os-release and /etc/lsb-release here. If none of these files exist, describe a way to identify the distro
 ```
 
 # Ascii

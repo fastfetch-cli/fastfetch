@@ -48,6 +48,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 const char* colorTitle = yyjson_get_str(yyjson_obj_get(val, "title"));
                 if (colorTitle)
                     ffOptionParseColor(colorTitle, &options->colorTitle);
+                const char* colorOutput = yyjson_get_str(yyjson_obj_get(val, "output"));
+                if (colorOutput)
+                    ffOptionParseColor(colorOutput, &options->colorOutput);
             }
             else
                 return "display.color must be either a string or an object";
@@ -92,7 +95,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits) options->sizeNdigits = (uint8_t) yyjson_get_uint(ndigits);
         }
         else if (ffStrEqualsIgnCase(key, "temp"))
         {
@@ -113,7 +116,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                     {},
                 });
                 if (error) return error;
-                options->temperatureUnit = (FFTemperatureUnit) value;
+                options->tempUnit = (FFTemperatureUnit) value;
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
@@ -244,6 +247,11 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             optionCheckString(key, value, &options->colorTitle);
             ffOptionParseColor(value, &options->colorTitle);
         }
+        else if(ffStrEqualsIgnCase(subkey, "output"))
+        {
+            optionCheckString(key, value, &options->colorOutput);
+            ffOptionParseColor(value, &options->colorOutput);
+        }
         else
             return false;
     }
@@ -277,12 +285,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             {}
         });
     }
-    else if(ffStrStartsWithIgnCase(key, "--temperature-"))
+    else if(ffStrStartsWithIgnCase(key, "--temp-"))
     {
-        const char* subkey = key + strlen("--temperature-");
+        const char* subkey = key + strlen("--temp-");
         if(ffStrEqualsIgnCase(subkey, "unit"))
         {
-            options->temperatureUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            options->tempUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
                 { "C", FF_TEMPERATURE_UNIT_CELSIUS },
                 { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
@@ -346,11 +354,12 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
 {
     ffStrbufInit(&options->colorKeys);
     ffStrbufInit(&options->colorTitle);
+    ffStrbufInit(&options->colorOutput);
     options->brightColor = true;
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
-    options->pipe = !isatty(STDOUT_FILENO);
+    options->pipe = !isatty(STDOUT_FILENO) || !!getenv("NO_COLOR");
 
     #ifdef NDEBUG
     options->disableLinewrap = !options->pipe;
@@ -366,7 +375,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->noBuffer = false;
     options->keyWidth = 0;
 
-    options->temperatureUnit = FF_TEMPERATURE_UNIT_CELSIUS;
+    options->tempUnit = FF_TEMPERATURE_UNIT_CELSIUS;
     options->tempNdigits = 1;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->tempColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
@@ -389,6 +398,7 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
 {
     ffStrbufDestroy(&options->colorKeys);
     ffStrbufDestroy(&options->colorTitle);
+    ffStrbufDestroy(&options->colorOutput);
     ffStrbufDestroy(&options->keyValueSeparator);
     ffStrbufDestroy(&options->barCharElapsed);
     ffStrbufDestroy(&options->barCharTotal);
@@ -478,9 +488,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
 
     {
         yyjson_mut_val* temperature = yyjson_mut_obj(doc);
-        if (options->temperatureUnit != defaultOptions.temperatureUnit)
+        if (options->tempUnit != defaultOptions.tempUnit)
         {
-            switch (options->temperatureUnit)
+            switch (options->tempUnit)
             {
                 case FF_TEMPERATURE_UNIT_CELSIUS:
                     yyjson_mut_obj_add_str(doc, obj, "unit", "C");

@@ -16,9 +16,6 @@ static inline uint8_t max(uint8_t a, uint8_t b)
 
 void ffPrintColors(FFColorsOptions* options)
 {
-    if(instance.config.display.pipe)
-        return;
-
     bool flag = false;
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(128);
@@ -28,7 +25,8 @@ void ffPrintColors(FFColorsOptions* options)
         // 3%d: Set the foreground color
         for(uint8_t i = options->block.range[0]; i <= min(options->block.range[1], 7); i++)
         {
-            ffStrbufAppendF(&result, "\e[3%dm", i);
+            if(!instance.config.display.pipe)
+                ffStrbufAppendF(&result, "\e[3%dm", i);
             for (uint8_t j = 0; j < options->block.width; j++)
                 ffStrbufAppendS(&result, "█");
         }
@@ -40,7 +38,8 @@ void ffPrintColors(FFColorsOptions* options)
             if(options->paddingLeft > 0)
                 ffPrintCharTimes(' ', options->paddingLeft);
 
-            ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
+            if(!instance.config.display.pipe)
+                ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
             ffStrbufPutTo(&result, stdout);
             ffStrbufClear(&result);
         }
@@ -49,7 +48,8 @@ void ffPrintColors(FFColorsOptions* options)
         // 9%d: Set the foreground to the bright color
         for(uint8_t i = max(options->block.range[0], 8); i <= options->block.range[1]; i++)
         {
-            ffStrbufAppendF(&result, "\e[1;9%dm", i - 8);
+            if(!instance.config.display.pipe)
+                ffStrbufAppendF(&result, "\e[1;9%dm", i - 8);
             for (uint8_t j = 0; j < options->block.width; j++)
                 ffStrbufAppendS(&result, "█");
         }
@@ -82,7 +82,8 @@ void ffPrintColors(FFColorsOptions* options)
 
         if(options->paddingLeft > 0)
             ffPrintCharTimes(' ', options->paddingLeft);
-        ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
+        if(!instance.config.display.pipe)
+            ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
         ffStrbufPutTo(&result, stdout);
     }
 

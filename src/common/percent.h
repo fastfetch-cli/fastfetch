@@ -2,6 +2,7 @@
 
 #include "util/FFstrbuf.h"
 #include "common/parsing.h"
+#include "common/option.h"
 
 enum
 {
@@ -21,8 +22,8 @@ enum
 // [yellow, green): print yellow
 // [0, yellow): print red
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config);
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses);
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config, const FFModuleArgs* module);
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses, const FFModuleArgs* module);
 
 typedef struct yyjson_val yyjson_val;
 typedef struct yyjson_mut_doc yyjson_mut_doc;

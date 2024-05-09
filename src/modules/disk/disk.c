@@ -60,7 +60,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         {
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
-                ffPercentAppendBar(&str, bytesPercentage, options->percent);
+                ffPercentAppendBar(&str, bytesPercentage, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
 
@@ -69,7 +69,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
 
             if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
-                ffPercentAppendNum(&str, bytesPercentage, options->percent, str.length > 0);
+                ffPercentAppendNum(&str, bytesPercentage, options->percent, str.length > 0, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
         }
@@ -105,10 +105,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     else
     {
         FF_STRBUF_AUTO_DESTROY bytesPercentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&bytesPercentageStr, bytesPercentage, options->percent, false);
+        ffPercentAppendNum(&bytesPercentageStr, bytesPercentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY filesPercentageStr = ffStrbufCreate();
         double filesPercentage = disk->filesTotal > 0 ? ((double) disk->filesUsed / (double) disk->filesTotal) * 100.0 : 0;
-        ffPercentAppendNum(&filesPercentageStr, filesPercentage, options->percent, false);
+        ffPercentAppendNum(&filesPercentageStr, filesPercentage, options->percent, false, &options->moduleArgs);
 
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
@@ -406,6 +406,8 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
             yyjson_mut_arr_add_str(doc, typeArr, "Hidden");
         if(item->type & FF_DISK_VOLUME_TYPE_READONLY_BIT)
             yyjson_mut_arr_add_str(doc, typeArr, "Read-only");
+        if(item->type & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT)
+            yyjson_mut_arr_add_str(doc, typeArr, "Unknown");
 
         const char* pstr = ffTimeToFullStr(item->createTime);
         if (*pstr)

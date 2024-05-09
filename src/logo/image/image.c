@@ -1,6 +1,7 @@
 #include "image.h"
 #include "common/io/io.h"
 #include "common/printing.h"
+#include "util/stringUtils.h"
 
 #include <limits.h>
 #include <math.h>
@@ -53,13 +54,14 @@ static FFstrbuf base64Encode(const FFstrbuf* in)
     return out;
 }
 
-static bool printImageIterm(void)
+static bool printImageIterm(bool printError)
 {
     const FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     if(!ffAppendFileBuffer(options->source.chars, &buf))
     {
-        fputs("Logo: Failed to load image file\n", stderr);
+        if (printError)
+            fputs("Logo (iterm): Failed to load image file\n", stderr);
         return false;
     }
 
@@ -134,9 +136,17 @@ static bool printImageIterm(void)
     return true;
 }
 
-static bool printImageKittyDirect(void)
+static bool printImageKittyDirect(bool printError)
 {
     const FFOptionsLogo* options = &instance.config.logo;
+
+    if (!ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
+    {
+        if (printError)
+            fputs("Logo (kitty-direct): Failed to load image file\n", stderr);
+        return false;
+    }
+
     FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&options->source);
 
     if (!options->width || !options->height)
@@ -771,7 +781,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
     if(!getCharacterPixelDimensions(&requestData))
     {
         if(printError)
-            fputs("Logo: getCharacterPixelDimensions() failed", stderr);
+            fputs("Logo: getCharacterPixelDimensions() failed\n", stderr);
         return false;
     }
 
@@ -788,7 +798,7 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
         //We can safely return here, because if realpath failed, we surely won't be able to read the file
         ffStrbufDestroy(&requestData.cacheDir);
         if(printError)
-            fputs("Logo: Querying realpath of the image source failed", stderr);
+            fputs("Logo: Querying realpath of the image source failed\n", stderr);
         return false;
     }
     ffStrbufRecalculateLength(&requestData.cacheDir);
@@ -832,6 +842,13 @@ static bool printImageIfExistsSlowPath(FFLogoType type, bool printError)
 
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
 {
+    if(instance.config.display.pipe)
+    {
+        if(printError)
+            fputs("Logo: Image logo is not supported in pipe mode\n", stderr);
+        return false;
+    }
+
     if(!ffPathExists(instance.config.logo.source.chars, FF_PATHTYPE_FILE))
     {
         if(printError)
@@ -839,11 +856,19 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
         return false;
     }
 
+    const char* term = getenv("TERM");
+    if((term && ffStrEquals(term, "screen")) || getenv("ZELLIJ"))
+    {
+        if(printError)
+            fputs("Logo: Image logo is not supported in terminal multiplexers\n", stderr);
+        return false;
+    }
+
     if(type == FF_LOGO_TYPE_IMAGE_ITERM)
-        return printImageIterm();
+        return printImageIterm(printError);
 
     if(type == FF_LOGO_TYPE_IMAGE_KITTY_DIRECT)
-        return printImageKittyDirect();
+        return printImageKittyDirect(printError);
 
     #if !defined(FF_HAVE_CHAFA)
         if(type == FF_LOGO_TYPE_IMAGE_CHAFA)

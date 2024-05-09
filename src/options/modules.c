@@ -29,6 +29,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitIconsOptions(&options->icons);
     ffInitKernelOptions(&options->kernel);
     ffInitLMOptions(&options->lm);
+    ffInitLoadavgOptions(&options->loadavg);
     ffInitLocalIpOptions(&options->localIP);
     ffInitLocaleOptions(&options->locale);
     ffInitMediaOptions(&options->media);
@@ -93,6 +94,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyIconsOptions(&options->icons);
     ffDestroyKernelOptions(&options->kernel);
     ffDestroyLMOptions(&options->lm);
+    ffDestroyLoadavgOptions(&options->loadavg);
     ffDestroyLocalIpOptions(&options->localIP);
     ffDestroyLocaleOptions(&options->locale);
     ffDestroyMediaOptions(&options->media);

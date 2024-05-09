@@ -209,6 +209,7 @@ static const FFlogo A[] = {
     // AoscOsRetro_small
     {
         .names = {"Aosc OS/Retro_small", "aoscosretro_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_AOSCOSRETRO_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -374,6 +375,24 @@ static const FFlogo A[] = {
         },
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // Armbian
+    {
+        .names = {"Armbian"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ARMBIAN,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+        },
+    },
+    // Armbian2
+    {
+        .names = {"Armbian2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ARMBIAN2,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
     },
     // Artix
     {
@@ -764,6 +783,7 @@ static const FFlogo C[] = {
     // CalinixOSSmall
     {
         .names = {"Calinix_small", "calinixos_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_CALINIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_MAGENTA,
@@ -875,7 +895,7 @@ static const FFlogo C[] = {
     // Chimera Linux
     {
         .names = {"Chimera Linux"},
-        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERALINUX,
+        .lines = FASTFETCH_DATATEXT_LOGO_CHIMERA_LINUX,
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
@@ -1095,9 +1115,9 @@ static const FFlogo C[] = {
 };
 
 static const FFlogo D[] = {
-    // Dahlia
+    // DahliaOS
     {
-        .names = {"dahlia"},
+        .names = {"dahliaOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_DAHLIA,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1241,9 +1261,9 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
-    // Drauger
+    // DraugerOS
     {
-        .names = {"Drauger"},
+        .names = {"DraugerOS", "Drauger"},
         .lines = FASTFETCH_DATATEXT_LOGO_DRAUGER,
         .colors = {
             FF_COLOR_FG_RED,
@@ -1336,8 +1356,8 @@ static const FFlogo E[] = {
     // EndeavourSmall
     {
         .names = {"Endeavour_small", "endeavour-linux_small", "endeavouros_small", "endeavouros-linux_small"},
-        .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ENDEAVOUR_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_MAGENTA,
@@ -1823,6 +1843,7 @@ static const FFlogo G[] = {
     // GuixSmall
     {
         .names = {"Guix_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_GUIX_SMALL,
         .colors = {
             FF_COLOR_FG_YELLOW,
@@ -2088,6 +2109,15 @@ static const FFlogo K[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // KernelOS
+    {
+        .names = {"KernelOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KERNELOS,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+        }
     },
     // KDENeon
     {
@@ -2462,6 +2492,7 @@ static const FFlogo M[] = {
     // MageiaSmall
     {
         .names = {"Mageia_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MAGEIA_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -2649,7 +2680,7 @@ static const FFlogo M[] = {
     },
     // MX
     {
-        .names = {"MX"},
+        .names = {"MX", "MX Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_MX,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -2659,8 +2690,20 @@ static const FFlogo M[] = {
     },
     // MXSmall
     {
-        .names = {"MX_small", "mx-small"},
+        .names = {"MX_small", "mx linux_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_MX_SMALL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // MX2
+    {
+        .names = {"MX2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_MX2,
         .colors = {
             FF_COLOR_FG_WHITE,
         },
@@ -2730,6 +2773,7 @@ static const FFlogo N[] = {
     // NixOSSmall
     {
         .names = {"NixOS_small", "nix_small", "nixos-linux-small", "nix-linux-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_NIXOS_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -2962,7 +3006,7 @@ static const FFlogo O[] = {
     },
     // OpenMandriva
     {
-        .names = {"openmandriva", "open-mandriva", "open_mandriva"},
+        .names = {"openmandriva", "open-mandriva", "open_mandriva", "openmandriva lx"},
         .lines = FASTFETCH_DATATEXT_LOGO_OPENMANDRIVA,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -3301,6 +3345,7 @@ static const FFlogo P[] = {
     // PostMarketOSSmall
     {
         .names = {"PostMarketOS_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_POSTMARKETOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3309,7 +3354,7 @@ static const FFlogo P[] = {
     },
     // Proxmox
     {
-        .names = {"proxmox"},
+        .names = {"Proxmox", "pve"},
         .lines = FASTFETCH_DATATEXT_LOGO_PROXMOX,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -3560,6 +3605,7 @@ static const FFlogo R[] = {
     // RockyLinuxSmall
     {
         .names = {"rocky_small", "rocky-linux_small", "rockylinux_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_ROCKY_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3791,14 +3837,14 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // SourceMage
+    // Source Mage
     {
-        .names = {"Source Mage", "source_mage"},
+        .names = {"Source Mage", "Source Mage GNU/Linux", "source_mage", "sourcemage"},
         .lines = FASTFETCH_DATATEXT_LOGO_SOURCE_MAGE,
         .colors = {
             FF_COLOR_FG_WHITE,
         },
-        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
     // Solaris

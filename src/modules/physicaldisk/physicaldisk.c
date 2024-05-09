@@ -97,17 +97,16 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 if(buffer.length > 0)
                     ffStrbufAppendS(&buffer, " - ");
 
-                ffTempsAppendNum(dev->temperature, &buffer, options->tempConfig);
+                ffTempsAppendNum(dev->temperature, &buffer, options->tempConfig, &options->moduleArgs);
             }
             ffStrbufPutTo(&buffer, stdout);
         }
         else
         {
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-            ffTempsAppendNum(dev->temperature, &tempStr, options->tempConfig);
+            ffTempsAppendNum(dev->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
                 readOnlyType = "Read-write";
-            ffParseSize(dev->size, &buffer);
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_PHYSICALDISK_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &buffer},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->name},
@@ -118,7 +117,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, removableType},
                 {FF_FORMAT_ARG_TYPE_STRING, readOnlyType},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &dev->revision},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &tempStr},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
             }));
         }
         ++index;
@@ -252,7 +251,7 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
 
 void ffPrintPhysicalDiskHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PHYSICALDISK_MODULE_NAME, "{1}", FF_PHYSICALDISK_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PHYSICALDISK_MODULE_NAME, "{1} [{6}, {7}, {8}]", FF_PHYSICALDISK_NUM_FORMAT_ARGS, ((const char* []) {
         "Device size (formatted)",
         "Device name",
         "Device interconnect type",

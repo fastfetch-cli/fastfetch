@@ -46,7 +46,7 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
     if (length > 0) // doesn't contain trailing NUL
     {
-        exePath->chars[length + 1] = '\0';
+        exePath->chars[length] = '\0';
         exePath->length = (uint32_t) length;
     }
 
@@ -243,6 +243,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrEquals(name, "perf")                ||
                 ffStrEquals(name, "guake-wrapped")       ||
                 ffStrEquals(name, "time")                ||
+                ffStrEquals(name, "hyfetch")             || //when hyfetch uses fastfetch as backend
                 ffStrContainsIgnCase(name, "debug")      ||
                 ffStrContainsIgnCase(name, "not-found")  ||
                 ffStrEndsWith(name, ".sh")
@@ -518,6 +519,11 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
 
     else if(ffStrbufEqualS(&result->processName, "iTerm.app") || ffStrbufStartsWithS(&result->processName, "iTermServer-"))
         ffStrbufInitStatic(&result->prettyName, "iTerm");
+    else if(ffStrbufEndsWithS(&result->exePath, "Terminal.app/Contents/MacOS/Terminal"))
+    {
+        ffStrbufSetStatic(&result->processName, "Apple_Terminal"); // for terminal font detection
+        ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
+    }
     else if(ffStrbufEqualS(&result->processName, "Apple_Terminal"))
         ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result->processName, "WarpTerminal"))

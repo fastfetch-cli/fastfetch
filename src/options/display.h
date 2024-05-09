@@ -21,20 +21,21 @@ typedef struct FFOptionsDisplay
     //If one of those is empty, ffLogoPrint will set them
     FFstrbuf colorKeys;
     FFstrbuf colorTitle;
+    FFstrbuf colorOutput;
 
     bool brightColor;
 
     FFstrbuf keyValueSeparator;
 
     bool stat;
-    bool pipe; //disables logo and all escape sequences
+    bool pipe; //disables all escape sequences
     bool showErrors;
     bool disableLinewrap;
     bool hideCursor;
     FFBinaryPrefixType binaryPrefixType;
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
-    FFTemperatureUnit temperatureUnit;
+    FFTemperatureUnit tempUnit;
     uint8_t tempNdigits;
     FFstrbuf tempColorGreen;
     FFstrbuf tempColorYellow;

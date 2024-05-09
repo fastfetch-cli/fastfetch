@@ -101,24 +101,28 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
+        return;
     }
-    else if(results.length == 0)
+
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
+    FF_LIST_FOR_EACH(FFPowerAdapterResult, item, results)
     {
-        yyjson_mut_obj_add_str(doc, module, "error", "No power adapters found");
+        yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+        yyjson_mut_obj_add_strbuf(doc, obj, "description", &item->description);
+        yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &item->manufacturer);
+        yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &item->modelName);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
+        yyjson_mut_obj_add_strbuf(doc, obj, "serial", &item->serial);
+        yyjson_mut_obj_add_int(doc, obj, "watts", item->watts);
     }
-    else
+
+    FF_LIST_FOR_EACH(FFPowerAdapterResult, item, results)
     {
-        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-        FF_LIST_FOR_EACH(FFPowerAdapterResult, item, results)
-        {
-            yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-            yyjson_mut_obj_add_strbuf(doc, obj, "description", &item->description);
-            yyjson_mut_obj_add_strbuf(doc, obj, "manufacturer", &item->manufacturer);
-            yyjson_mut_obj_add_strbuf(doc, obj, "modelName", &item->modelName);
-            yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
-            yyjson_mut_obj_add_strbuf(doc, obj, "serial", &item->serial);
-            yyjson_mut_obj_add_int(doc, obj, "watts", item->watts);
-        }
+        ffStrbufDestroy(&item->manufacturer);
+        ffStrbufDestroy(&item->description);
+        ffStrbufDestroy(&item->modelName);
+        ffStrbufDestroy(&item->name);
+        ffStrbufDestroy(&item->serial);
     }
 }
 

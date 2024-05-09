@@ -22,6 +22,11 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
         ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
         return true;
     }
+    else if(ffStrEqualsIgnCase(key, "outputColor"))
+    {
+        ffOptionParseColor(yyjson_get_str(val), &moduleArgs->outputColor);
+        return true;
+    }
     else if(ffStrEqualsIgnCase(key, "keyColor"))
     {
         ffOptionParseColor(yyjson_get_str(val), &moduleArgs->keyColor);
@@ -94,7 +99,7 @@ static inline void genJsonResult(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc
 
 static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_mut_doc* jsonDoc)
 {
-    if(!isalpha(type[0])) return false;
+    if(!ffCharIsEnglishAlphabet(type[0])) return false;
 
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(type[0]) - 'A']; *modules; ++modules)
     {

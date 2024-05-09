@@ -433,6 +433,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
     if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
     if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->am = getAM(baseDir);
+    if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:");
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
@@ -501,7 +502,36 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 
     ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
-        result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
+    {
+        // check if ~/.nix-profile exists
+        FF_STRBUF_AUTO_DESTROY profilePath = ffStrbufCreateCopy(&baseDir);
+        ffStrbufAppendS(&profilePath, ".nix-profile");
+        if (ffPathExists(profilePath.chars, FF_PATHTYPE_DIRECTORY))
+        {
+            result->nixUser = getNixPackages(&baseDir, ".nix-profile");
+        }
+        // check if $XDG_STATE_HOME/nix/profile exists
+        else
+        {
+            FF_STRBUF_AUTO_DESTROY stateDir = ffStrbufCreate();
+            const char* stateHome = getenv("XDG_STATE_HOME");
+            if(ffStrSet(stateHome))
+            {
+                ffStrbufSetS(&stateDir, stateHome);
+                ffStrbufEnsureEndsWithC(&stateDir, '/');
+            }
+            else
+            {
+                ffStrbufSet(&stateDir, &instance.state.platform.homeDir);
+                ffStrbufAppendS(&stateDir, ".local/state/");
+            }
+ 
+            ffStrbufSet(&profilePath, &stateDir);
+            ffStrbufAppendS(&profilePath, "nix/profile");
+            result->nixUser = getNixPackages(&stateDir, "nix/profile");
+        }
+    }
+ 
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))
         result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
 }

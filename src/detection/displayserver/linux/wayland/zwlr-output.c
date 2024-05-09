@@ -6,7 +6,7 @@
 static void waylandZwlrTransformListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, int32_t transform)
 {
     WaylandDisplay* wldata = (WaylandDisplay*) data;
-    wldata->transform = transform;
+    wldata->transform = (enum wl_output_transform) transform;
 }
 
 static void waylandZwlrScaleListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, wl_fixed_t scale)

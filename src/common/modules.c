@@ -71,6 +71,7 @@ static FFModuleBaseInfo* K[] = {
 
 static FFModuleBaseInfo* L[] = {
     (void*) &instance.config.modules.lm,
+    (void*) &instance.config.modules.loadavg,
     (void*) &instance.config.modules.locale,
     (void*) &instance.config.modules.localIP,
     NULL,

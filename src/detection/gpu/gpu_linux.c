@@ -46,6 +46,8 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
 
     ffStrbufAppendS(pciDir, "/hwmon/");
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+    if (!dirp) return;
+
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL)
     {
@@ -121,9 +123,11 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
 static bool loadPciIds(FFstrbuf* pciids)
 {
     #ifdef FF_CUSTOM_PCI_IDS_PATH
+
     ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
     if (pciids->length > 0) return true;
-    #endif
+
+    #else
 
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
@@ -133,6 +137,8 @@ static bool loadPciIds(FFstrbuf* pciids)
 
     ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", pciids);
     if (pciids->length > 0) return true;
+
+    #endif
 
     return false;
 }
@@ -186,7 +192,11 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             {
                 char query[32];
                 snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
+                #ifdef FF_CUSTOM_AMDGPU_IDS_PATH
+                ffParsePropFile(FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), query, &gpu->name);
+                #else
                 ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
+                #endif
             }
         }
         ffStrbufSubstrBefore(drmDir, drmDirPathLength);
@@ -200,8 +210,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             ffStrbufInit(&pciids);
             loadPciIds(&pciids);
         }
-        if (pciids.length)
-            ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
     pciDetectDriver(gpu, drmDir, buffer);
@@ -256,7 +265,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
 {
     uint32_t index = ffStrbufFirstIndexS(buffer, "apple,agx-t");
     if (index == buffer->length) return "display-subsystem?";
-    index += strlen("apple,agx-t");
+    index += (uint32_t) strlen("apple,agx-t");
 
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     gpu->deviceId = strtoul(buffer->chars + index, NULL, 10);

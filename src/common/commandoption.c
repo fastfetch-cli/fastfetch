@@ -11,7 +11,7 @@
 
 bool ffParseModuleOptions(const char* key, const char* value)
 {
-    if (!ffStrStartsWith(key, "--") || !isalpha(key[2])) return false;
+    if (!ffStrStartsWith(key, "--") || !ffCharIsEnglishAlphabet(key[2])) return false;
 
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(key[2]) - 'A']; *modules; ++modules)
     {
@@ -79,30 +79,11 @@ static void genJsonResult(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
 
 static void parseStructureCommand(
     const char* line,
-    FFlist* customValues,
     void (*fn)(FFModuleBaseInfo *baseInfo, yyjson_mut_doc* jsonDoc),
     yyjson_mut_doc* jsonDoc
 )
 {
-    // handle `--set` and `--set-keyless`
-    FF_LIST_FOR_EACH(FFCustomValue, customValue, *customValues)
-    {
-        if (ffStrbufEqualS(&customValue->key, line))
-        {
-            __attribute__((__cleanup__(ffDestroyCustomOptions))) FFCustomOptions options;
-            ffInitCustomOptions(&options);
-            if (customValue->printKey)
-                ffStrbufAppend(&options.moduleArgs.key, &customValue->key);
-            ffStrbufAppend(&options.moduleArgs.outputFormat, &customValue->value);
-            if (__builtin_expect(jsonDoc != NULL, false))
-                fn((FFModuleBaseInfo*) &options, jsonDoc);
-            else
-                ffPrintCustom(&options);
-            return;
-        }
-    }
-
-    if(isalpha(line[0]))
+    if(ffCharIsEnglishAlphabet(line[0]))
     {
         for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(line[0]) - 'A']; *modules; ++modules)
         {
@@ -134,7 +115,7 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
         if(instance.config.display.stat)
             ms = ffTimeGetTick();
 
-        parseStructureCommand(data->structure.chars + startIndex, &data->customValues, genJsonResult, jsonDoc);
+        parseStructureCommand(data->structure.chars + startIndex, genJsonResult, jsonDoc);
 
         if(instance.config.display.stat)
         {
@@ -177,7 +158,7 @@ void ffMigrateCommandOptionToJsonc(FFdata* data, yyjson_mut_doc* jsonDoc)
         uint32_t colonIndex = ffStrbufNextIndexC(&data->structure, startIndex, ':');
         data->structure.chars[colonIndex] = '\0';
 
-        parseStructureCommand(data->structure.chars + startIndex, &data->customValues, genJsonConfig, jsonDoc);
+        parseStructureCommand(data->structure.chars + startIndex, genJsonConfig, jsonDoc);
 
         startIndex = colonIndex + 1;
     }

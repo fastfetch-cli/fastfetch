@@ -61,7 +61,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
 
-    if (instance.config.display.brightColor)
+    if (!instance.config.display.pipe && instance.config.display.brightColor)
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
 
     ffStrbufAppendNC(&result, options->paddingTop, '\n');
@@ -70,7 +70,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
     instance.state.logoHeight = options->paddingTop;
 
     //Use logoColor[0] as the default color
-    if(doColorReplacement)
+    if(doColorReplacement && !instance.config.display.pipe)
         ffStrbufAppendF(&result, "\e[%sm", options->colors[0].chars);
 
     while(*data != '\0')
@@ -143,19 +143,27 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
                 continue;
             }
 
-            //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-            int index = ((int) *data) - 49;
-
-            //If the index is valid, print the color. Otherwise continue as normal
-            if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
+            if(!instance.config.display.pipe)
             {
-                ffStrbufAppendC(&result, '$');
-                ++currentlineLength;
-                //Don't continue here, we want to print the current char as unicode
+                //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
+                int index = ((int) *data) - 49;
+
+                //If the index is valid, print the color. Otherwise continue as normal
+                if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
+                {
+                    ffStrbufAppendC(&result, '$');
+                    ++currentlineLength;
+                    //Don't continue here, we want to print the current char as unicode
+                }
+                else
+                {
+                    ffStrbufAppendF(&result, "\e[%sm", options->colors[index].chars);
+                    ++data;
+                    continue;
+                }
             }
             else
             {
-                ffStrbufAppendF(&result, "\e[%sm", options->colors[index].chars);
                 ++data;
                 continue;
             }
@@ -188,7 +196,8 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
         }
     }
 
-    ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
+    if(!instance.config.display.pipe)
+        ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
 
     if(!options->separate)
     {
@@ -393,7 +402,8 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
         : !ffAppendFileBuffer(options->source.chars, &content)
     )
     {
-        fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
+        if (instance.config.display.showErrors)
+            fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
         return false;
     }
 
@@ -448,7 +458,7 @@ static bool logoTryKnownType(void)
     if(options->type == FF_LOGO_TYPE_IMAGE_RAW)
         return logoPrintFileIfExists(false, true);
 
-    return logoPrintImageIfExists(options->type, true);
+    return logoPrintImageIfExists(options->type, instance.config.display.showErrors);
 }
 
 static void logoPrintKnownType(void)
@@ -459,10 +469,10 @@ static void logoPrintKnownType(void)
 
 void ffLogoPrint(void)
 {
-    //In pipe mode, we don't have a logo or padding.
+    //When generate JSON result, we don't have a logo or padding.
     //We also don't need to set main color, because it won't be printed anyway.
     //So we can return quickly here.
-    if(instance.config.display.pipe || instance.state.resultDoc)
+    if(instance.state.resultDoc)
     {
         instance.state.logoHeight = 0;
         instance.state.logoWidth = 0;
