@@ -345,6 +345,7 @@ set(LIBFASTFETCH_SRC
     src/modules/os/os.c
     src/modules/packages/packages.c
     src/modules/physicaldisk/physicaldisk.c
+    src/modules/physicalmemory/physicalmemory.c
     src/modules/processes/processes.c
     src/modules/player/player.c
     src/modules/poweradapter/poweradapter.c
@@ -400,6 +401,7 @@ if(LINUX)
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -466,6 +468,7 @@ elseif(ANDROID)
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/font/font_nosupport.c
@@ -523,6 +526,7 @@ elseif(BSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/physicaldisk/physicaldisk_bsd.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -590,6 +594,7 @@ elseif(APPLE)
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/physicaldisk/physicaldisk_apple.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
@@ -662,6 +667,7 @@ elseif(WIN32)
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
+        src/detection/physicalmemory/physicalmemory_windows.c
         src/detection/monitor/monitor_windows.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c

@@ -42,6 +42,7 @@ typedef struct FFOptionsModules
     FFOpenGLOptions openGL;
     FFPackagesOptions packages;
     FFPhysicalDiskOptions physicalDisk;
+    FFPhysicalMemoryOptions physicalMemory;
     FFPlayerOptions player;
     FFPowerAdapterOptions powerAdapter;
     FFProcessesOptions processes;

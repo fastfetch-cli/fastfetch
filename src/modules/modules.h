@@ -40,6 +40,7 @@
 #include "modules/os/os.h"
 #include "modules/packages/packages.h"
 #include "modules/physicaldisk/physicaldisk.h"
+#include "modules/physicalmemory/physicalmemory.h"
 #include "modules/player/player.h"
 #include "modules/poweradapter/poweradapter.h"
 #include "modules/processes/processes.h"

@@ -99,6 +99,7 @@ static FFModuleBaseInfo* O[] = {
 static FFModuleBaseInfo* P[] = {
     (void*) &instance.config.modules.packages,
     (void*) &instance.config.modules.physicalDisk,
+    (void*) &instance.config.modules.physicalMemory,
     (void*) &instance.config.modules.player,
     (void*) &instance.config.modules.powerAdapter,
     (void*) &instance.config.modules.processes,
