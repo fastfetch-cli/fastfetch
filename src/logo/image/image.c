@@ -84,9 +84,10 @@ static bool printImageIterm(bool printError)
             ffStrbufAppendNC(&buf, options->paddingTop, '\n');
             ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
         }
-        ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a",
-            base64.chars
-        );
+        if (options->width)
+            ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u:%s\a", (unsigned) options->width, base64.chars);
+        else
+            ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a", base64.chars);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
         if (!options->separate)
@@ -164,7 +165,11 @@ static bool printImageKittyDirect(bool printError)
             ffPrintCharTimes('\n', options->paddingTop);
             ffPrintCharTimes(' ', options->paddingLeft);
         }
-        printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
+
+        if (options->width)
+            printf("\e_Ga=T,f=100,t=f,c=%u;%s\e\\", (unsigned) options->width, base64.chars);
+        else
+            printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
         fflush(stdout);
         if (!options->separate)
         {
