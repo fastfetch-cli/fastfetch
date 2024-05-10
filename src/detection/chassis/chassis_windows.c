@@ -25,7 +25,10 @@ typedef struct FFSmbiosSystemEnclosure
     uint8_t ContainedElementCount; // varies
     uint8_t ContainedRecordLength; // varies
     uint8_t ContainedElements[]; // varies
-} FFSmbiosSystemEnclosure;
+} __attribute__((__packed__)) FFSmbiosSystemEnclosure;
+
+static_assert(offsetof(FFSmbiosSystemEnclosure, ContainedElements) == 0x15,
+    "FFSmbiosSystemEnclosure: Wrong struct alignment");
 
 const char* ffDetectChassis(FFChassisResult* result)
 {

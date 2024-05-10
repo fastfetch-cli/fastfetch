@@ -48,7 +48,10 @@ typedef struct FFSmbiosProcessorInfo
 
     // 3.6+
     uint16_t ThreadEnabled; // varies
-} FFSmbiosProcessorInfo;
+} __attribute__((__packed__)) FFSmbiosProcessorInfo;
+
+static_assert(offsetof(FFSmbiosProcessorInfo, ThreadEnabled) == 0x30,
+    "FFSmbiosProcessorInfo: Wrong struct alignment");
 
 #if defined(__x86_64__) || defined(__i386__)
 

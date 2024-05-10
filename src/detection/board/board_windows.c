@@ -14,9 +14,12 @@ typedef struct FFSmbiosBaseboard
     uint8_t LocationInChassis; // string
     uint16_t ChassisHandle; // varies
     uint8_t BoardType; // enum
-    uint8_t NumberOfContainedObjectHandle; // varies
-    uint16_t ContainedObjectHandle[]; // varies
-} FFSmbiosBaseboard;
+    uint8_t NumberOfContainedObjectHandles; // varies
+    uint16_t ContainedObjectHandles[]; // varies
+} __attribute__((__packed__)) FFSmbiosBaseboard;
+
+static_assert(offsetof(FFSmbiosBaseboard, ContainedObjectHandles) == 0x0F,
+    "FFSmbiosBaseboard: Wrong struct alignment");
 
 const char* ffDetectBoard(FFBoardResult* board)
 {

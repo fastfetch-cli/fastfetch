@@ -35,7 +35,7 @@ typedef struct FFSmbiosBios
     uint16_t BiosStartingAddressSegment; // varies
     uint8_t BiosReleaseDate; // string
     uint8_t BiosRomSize; // string
-    uint32_t BiosCharacteristics; // bit field
+    uint64_t BiosCharacteristics; // bit field
 
     // 2.4+
     uint8_t BiosCharacteristicsExtensionBytes[2]; // bit field
@@ -46,7 +46,10 @@ typedef struct FFSmbiosBios
 
     // 3.1+
     uint16_t ExtendedBiosRomSize; // bit field
-} FFSmbiosBios;
+} __attribute__((__packed__)) FFSmbiosBios;
+
+static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
+    "FFSmbiosBios: Wrong struct alignment");
 
 const char* ffDetectBios(FFBiosResult* bios)
 {

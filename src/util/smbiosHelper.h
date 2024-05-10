@@ -78,7 +78,7 @@ typedef struct FFSmbiosHeader
     FFSmbiosType Type;
     uint8_t Length;
     uint16_t Handle;
-} FFSmbiosHeader;
+} __attribute__((__packed__)) FFSmbiosHeader;
 static_assert(sizeof(FFSmbiosHeader) == 4, "FFSmbiosHeader should be 4 bytes");
 
 typedef struct FFRawSmbiosData
