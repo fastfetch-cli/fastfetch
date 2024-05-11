@@ -3004,6 +3004,16 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // openSUSESlowroll
+    {
+        .names = {"opensuse_slowroll", "opensuse-slowroll", "opensuse-tumbleweed-slowroll"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_SLOWROLL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // OpenMandriva
     {
         .names = {"openmandriva", "open-mandriva", "open_mandriva", "openmandriva lx"},
