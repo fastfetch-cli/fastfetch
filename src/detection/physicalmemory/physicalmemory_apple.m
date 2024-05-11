@@ -1,5 +1,6 @@
 #include "physicalmemory.h"
 #include "common/processing.h"
+#include "util/smbiosHelper.h"
 #include "util/stringUtils.h"
 
 #import <Foundation/Foundation.h>
@@ -20,7 +21,9 @@ static void appendDevice(
     ffStrbufInit(&device->formFactor);
     ffStrbufInitS(&device->deviceLocator, deviceLocator.UTF8String);
     ffStrbufInitS(&device->vendor, vendor.UTF8String);
+    ffCleanUpSmbiosValue(&device->vendor);
     ffStrbufInitS(&device->serial, serial.UTF8String);
+    ffCleanUpSmbiosValue(&device->serial);
     device->size = 0;
     device->maxSpeed = 0;
     device->runningSpeed = 0;

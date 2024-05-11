@@ -11,10 +11,8 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufStartsWithIgnCaseS(value, "To be set") &&
         !ffStrbufStartsWithIgnCaseS(value, "OEM") &&
         !ffStrbufStartsWithIgnCaseS(value, "O.E.M.") &&
+        !ffStrbufStartsWithIgnCaseS(value, "System Product") &&
         !ffStrbufIgnCaseEqualS(value, "None") &&
-        !ffStrbufIgnCaseEqualS(value, "System Product") &&
-        !ffStrbufIgnCaseEqualS(value, "System Product Name") &&
-        !ffStrbufIgnCaseEqualS(value, "System Product Version") &&
         !ffStrbufIgnCaseEqualS(value, "System Name") &&
         !ffStrbufIgnCaseEqualS(value, "System Version") &&
         !ffStrbufIgnCaseEqualS(value, "Default string") &&
@@ -28,7 +26,8 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "No Enclosure") &&
         !ffStrbufIgnCaseEqualS(value, "Chassis Version") &&
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
-        !ffStrbufIgnCaseEqualS(value, "N/A")
+        !ffStrbufIgnCaseEqualS(value, "N/A") &&
+        !ffStrbufIgnCaseEqualS(value, "0x0000")
     ;
 }
 
