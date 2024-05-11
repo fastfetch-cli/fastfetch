@@ -32,7 +32,10 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
 
         if(options->moduleArgs.key.length == 0)
         {
-            ffStrbufSetF(&key, "%s (%s %s-%u)", FF_PHYSICALMEMORY_DISPLAY_NAME, device->vendor.chars, device->type.chars, device->maxSpeed);
+            if (device->maxSpeed)
+                ffStrbufSetF(&key, "%s (%s %s-%u)", FF_PHYSICALMEMORY_DISPLAY_NAME, device->vendor.chars, device->type.chars, device->maxSpeed);
+            else
+                ffStrbufSetF(&key, "%s (%s %s)", FF_PHYSICALMEMORY_DISPLAY_NAME, device->vendor.chars, device->type.chars);
         }
         else
         {
@@ -48,7 +51,10 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
         if (options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            printf("%s, running at %u MT/s\n", prettySize.chars, device->runningSpeed);
+            if (device->runningSpeed > 0 && device->runningSpeed != device->maxSpeed)
+                printf("%s, running at %u MT/s\n", prettySize.chars, device->runningSpeed);
+            else
+                puts(prettySize.chars);
         }
         else
         {

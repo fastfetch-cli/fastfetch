@@ -594,7 +594,7 @@ elseif(APPLE)
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/physicaldisk/physicaldisk_apple.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
