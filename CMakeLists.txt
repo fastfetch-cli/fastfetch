@@ -401,7 +401,7 @@ if(LINUX)
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -667,7 +667,7 @@ elseif(WIN32)
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
-        src/detection/physicalmemory/physicalmemory_windows.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/monitor/monitor_windows.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c

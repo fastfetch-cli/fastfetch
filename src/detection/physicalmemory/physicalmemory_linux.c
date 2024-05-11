@@ -67,9 +67,13 @@ static_assert(offsetof(FFSmbiosMemoryDevice, RcdRevisionNumber) == 0x62,
 
 const char* ffDetectPhysicalMemory(FFlist* result)
 {
-    const FFSmbiosMemoryDevice* data = (const FFSmbiosMemoryDevice*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_MEMORY_DEVICE];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosMemoryDevice* data = (const FFSmbiosMemoryDevice*) (*smbiosTable)[FF_SMBIOS_TYPE_MEMORY_DEVICE];
     if (!data)
-        return "System enclosure is not found in SMBIOS data";
+        return "Memory device is not found in SMBIOS data";
 
     for (; data->Header.Type == FF_SMBIOS_TYPE_MEMORY_DEVICE;
            data = (const FFSmbiosMemoryDevice*) ffSmbiosNextEntry(&data->Header))
