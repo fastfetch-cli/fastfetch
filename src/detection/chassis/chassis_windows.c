@@ -32,7 +32,11 @@ static_assert(offsetof(FFSmbiosSystemEnclosure, ContainedElements) == 0x15,
 
 const char* ffDetectChassis(FFChassisResult* result)
 {
-    const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) (*smbiosTable)[FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE];
     if (!data)
         return "System enclosure is not found in SMBIOS data";
 

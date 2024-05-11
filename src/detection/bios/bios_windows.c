@@ -53,7 +53,11 @@ static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
 
 const char* ffDetectBios(FFBiosResult* bios)
 {
-    const FFSmbiosBios* data = (const FFSmbiosBios*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_BIOS];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosBios* data = (const FFSmbiosBios*) (*smbiosTable)[FF_SMBIOS_TYPE_BIOS];
     if (!data)
         return "BIOS section is not found in SMBIOS data";
 

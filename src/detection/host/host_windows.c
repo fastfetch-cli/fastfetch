@@ -31,7 +31,11 @@ static_assert(offsetof(FFSmbiosSystemInfo, Family) == 0x1A,
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_SYSTEM_INFO];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_SYSTEM_INFO];
     if (!data)
         return "System information is not found in SMBIOS data";
 

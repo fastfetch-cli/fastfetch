@@ -23,7 +23,11 @@ static_assert(offsetof(FFSmbiosBaseboard, ContainedObjectHandles) == 0x0F,
 
 const char* ffDetectBoard(FFBoardResult* board)
 {
-    const FFSmbiosBaseboard* data = (const FFSmbiosBaseboard*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_BASEBOARD_INFO];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosBaseboard* data = (const FFSmbiosBaseboard*) (*smbiosTable)[FF_SMBIOS_TYPE_BASEBOARD_INFO];
     if (!data)
         return "Baseboard information section is not found in SMBIOS data";
 
