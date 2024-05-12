@@ -44,7 +44,7 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
             if (device->maxSpeed > 0)
                 printf("-%u", device->maxSpeed);
             if (device->runningSpeed > 0 && device->runningSpeed != device->maxSpeed)
-                printf(" at %u MT/s\n", device->runningSpeed);
+                printf(" @ %u MT/s", device->runningSpeed);
             if (device->vendor.length > 0)
                 printf(" (%s)", device->vendor.chars);
             if (device->ecc)
