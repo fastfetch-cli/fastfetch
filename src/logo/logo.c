@@ -436,7 +436,7 @@ static bool logoTryKnownType(void)
     }
 
     if(options->type == FF_LOGO_TYPE_BUILTIN)
-        return logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_NORMAL);
+        return logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_UNKNOWN);
 
     if(options->type == FF_LOGO_TYPE_SMALL)
         return logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_SMALL);
@@ -459,12 +459,6 @@ static bool logoTryKnownType(void)
         return logoPrintFileIfExists(false, true);
 
     return logoPrintImageIfExists(options->type, instance.config.display.showErrors);
-}
-
-static void logoPrintKnownType(void)
-{
-    if(!logoTryKnownType())
-        logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
 }
 
 void ffLogoPrint(void)
@@ -497,7 +491,17 @@ void ffLogoPrint(void)
     //If the source and source type is set to something else than auto, always print with the set type.
     if(options->source.length > 0 && options->type != FF_LOGO_TYPE_AUTO)
     {
-        logoPrintKnownType();
+        if(!logoTryKnownType())
+        {
+            if (instance.config.display.showErrors)
+            {
+                // Image logo should have been handled
+                if(options->type == FF_LOGO_TYPE_BUILTIN || options->type == FF_LOGO_TYPE_SMALL)
+                    fprintf(stderr, "Logo: Failed to load %s logo: %s \n", options->type == FF_LOGO_TYPE_BUILTIN ? "builtin" : "builtin small", options->source.chars);
+            }
+
+            logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
+        }
         return;
     }
 
