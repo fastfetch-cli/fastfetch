@@ -47,9 +47,17 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     return (const FFSmbiosHeader*) (p + 1);
 }
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__)
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
+
+#ifdef __linux__
+    #include "common/properties.h"
+#else
+    #include "common/settings.h"
+    #define loff_t off_t // FreeBSD doesn't have loff_t
+#endif
 
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
 {
@@ -71,20 +79,87 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
     return false;
 }
 
+typedef struct FFSmbios30EntryPoint
+{
+    uint8_t AnchorString[5];
+    uint8_t EntryPointStructureChecksum;
+    uint8_t EntryPointLength;
+    uint8_t SmbiosMajorVersion;
+    uint8_t SmbiosMinorVersion;
+    uint8_t SmbiosDocrev;
+    uint8_t EntryPointRevision;
+    uint8_t Reversed;
+    uint32_t StructureTableMaximumSize;
+    uint64_t StructureTableAddress;
+} __attribute__((__packed__)) FFSmbios30EntryPoint;
+
+static_assert(offsetof(FFSmbios30EntryPoint, StructureTableAddress) == 0x10,
+    "FFSmbiosProcessorInfo: Wrong struct alignment");
+
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
-    static FFstrbuf buffer;
+    static void* buffer;
     static FFSmbiosHeaderTable table;
 
-    if (buffer.chars == NULL)
+    if (!buffer)
     {
-        ffStrbufInit(&buffer);
-        if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
-            return NULL;
+        uint64_t bufLen = 0;
+
+        #ifdef __linux__
+        {
+            FF_AUTO_CLOSE_FD int fd = open("/sys/firmware/dmi/tables/DMI", O_RDONLY);
+            if (fd > 0)
+            {
+                struct stat st;
+                if (fstat(fd, &st) == 0)
+                {
+                    buffer = mmap(NULL, (size_t) st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+                    if (buffer == MAP_FAILED)
+                        buffer = NULL;
+                    else
+                        bufLen = (uint64_t) st.st_size;
+                }
+            }
+        }
+        if (!buffer)
+        #endif
+        {
+            FF_STRBUF_AUTO_DESTROY strEntry = ffStrbufCreate();
+            // Only support SMBIOS 3.x for simplication
+            #ifdef __FreeBSD__
+            if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntry))
+                return NULL;
+            #else
+            if (!ffParsePropFile("/sys/firmware/efi/systab", "SMBIOS3=", &strEntry))
+                return NULL;
+            #endif
+
+            loff_t pEntry = (loff_t) strtol(strEntry.chars, NULL, 0);
+            if (pEntry == 0) return NULL;
+
+            FF_AUTO_CLOSE_FD int fd = open("/dev/mem", O_RDONLY);
+            if (fd < 0) return NULL;
+
+            FFSmbios30EntryPoint entryPoint;
+            if (pread(fd, &entryPoint, sizeof(entryPoint), pEntry) != sizeof(entryPoint))
+                return NULL;
+
+            if (memcmp(entryPoint.AnchorString, "_SM3_", sizeof(entryPoint.AnchorString)) != 0 ||
+                entryPoint.EntryPointLength != sizeof(entryPoint))
+                return NULL;
+
+            buffer = mmap(NULL, entryPoint.StructureTableMaximumSize, PROT_READ, MAP_SHARED, fd, (loff_t) entryPoint.StructureTableAddress);
+            if (buffer == MAP_FAILED)
+            {
+                buffer = NULL;
+                return NULL;
+            }
+            bufLen = entryPoint.StructureTableMaximumSize;
+        }
 
         for (
-            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer.chars;
-            (const uint8_t*) header < (const uint8_t*) buffer.chars + buffer.length;
+            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer;
+            (const uint8_t*) header < (const uint8_t*) buffer + bufLen;
             header = ffSmbiosNextEntry(header)
         )
         {
