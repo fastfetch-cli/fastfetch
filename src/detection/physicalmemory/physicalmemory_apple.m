@@ -14,6 +14,7 @@ static void appendDevice(
     // Intel only
     NSString* deviceLocator,
     NSString* serial,
+    NSString* partNumber,
     NSString* speed)
 {
     FFPhysicalMemoryResult* device = ffListAdd(result);
@@ -24,6 +25,8 @@ static void appendDevice(
     ffCleanUpSmbiosValue(&device->vendor);
     ffStrbufInitS(&device->serial, serial.UTF8String);
     ffCleanUpSmbiosValue(&device->serial);
+    ffStrbufInitS(&device->partNumber, partNumber.UTF8String);
+    ffCleanUpSmbiosValue(&device->partNumber);
     device->size = 0;
     device->maxSpeed = 0;
     device->runningSpeed = 0;
@@ -92,6 +95,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
                     item[@"dimm_size"],
                     item[@"_name"],
                     item[@"dimm_serial_number"],
+                    item[@"dimm_part_number"],
                     item[@"dimm_speed"]);
             }
         }
@@ -102,6 +106,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
                 data[@"dimm_type"],
                 data[@"dimm_manufacturer"],
                 data[@"SPMemoryDataType"],
+                nil,
                 nil,
                 nil,
                 nil);

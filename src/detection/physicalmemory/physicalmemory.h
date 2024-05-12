@@ -10,6 +10,7 @@ typedef struct FFPhysicalMemoryResult
     FFstrbuf type;
     FFstrbuf formFactor;
     FFstrbuf deviceLocator;
+    FFstrbuf partNumber;
     FFstrbuf vendor;
     FFstrbuf serial;
 } FFPhysicalMemoryResult;

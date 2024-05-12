@@ -88,6 +88,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
         ffStrbufInit(&device->deviceLocator);
         ffStrbufInit(&device->vendor);
         ffStrbufInit(&device->serial);
+        ffStrbufInit(&device->partNumber);
         device->size = 0;
         device->maxSpeed = 0;
         device->runningSpeed = 0;
@@ -183,6 +184,9 @@ const char* ffDetectPhysicalMemory(FFlist* result)
 
             ffStrbufSetStatic(&device->serial, ffSmbiosLocateString(strings, data->SerialNumber));
             ffCleanUpSmbiosValue(&device->serial);
+
+            ffStrbufSetStatic(&device->partNumber, ffSmbiosLocateString(strings, data->PartNumber));
+            ffCleanUpSmbiosValue(&device->partNumber);
         }
 
         if (data->Header.Length > offsetof(FFSmbiosMemoryDevice, ConfiguredMemorySpeed)) // 2.7+
