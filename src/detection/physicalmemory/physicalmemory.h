@@ -9,10 +9,11 @@ typedef struct FFPhysicalMemoryResult
     uint32_t runningSpeed; // MT/s
     FFstrbuf type;
     FFstrbuf formFactor;
-    FFstrbuf deviceLocator;
+    FFstrbuf locator;
     FFstrbuf partNumber;
     FFstrbuf vendor;
     FFstrbuf serial;
+    bool ecc;
 } FFPhysicalMemoryResult;
 
 const char* ffDetectPhysicalMemory(FFlist* result); // list of FFPhysicalMemoryResult

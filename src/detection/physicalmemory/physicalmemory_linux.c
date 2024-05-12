@@ -85,13 +85,17 @@ const char* ffDetectPhysicalMemory(FFlist* result)
         FFPhysicalMemoryResult* device = ffListAdd(result);
         ffStrbufInit(&device->type);
         ffStrbufInit(&device->formFactor);
-        ffStrbufInit(&device->deviceLocator);
+        ffStrbufInit(&device->locator);
         ffStrbufInit(&device->vendor);
         ffStrbufInit(&device->serial);
         ffStrbufInit(&device->partNumber);
         device->size = 0;
         device->maxSpeed = 0;
         device->runningSpeed = 0;
+        device->ecc = false;
+
+        if (data->TotalWidth != 0xFFFF && data->DataWidth != 0xFFFF)
+            device->ecc = data->TotalWidth > data->DataWidth;
 
         if (data->Size != 0xFFFF)
         {
@@ -109,8 +113,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             }
         }
 
-        ffStrbufSetStatic(&device->deviceLocator, ffSmbiosLocateString(strings, data->DeviceLocator));
-        ffCleanUpSmbiosValue(&device->deviceLocator);
+        ffStrbufSetF(&device->locator, "%s/%s", ffSmbiosLocateString(strings, data->BankLocator), ffSmbiosLocateString(strings, data->DeviceLocator));
 
         switch (data->FormFactor)
         {

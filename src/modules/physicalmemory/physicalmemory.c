@@ -6,7 +6,7 @@
 #include "modules/physicalmemory/physicalmemory.h"
 #include "util/stringUtils.h"
 
-#define FF_PHYSICALMEMORY_NUM_FORMAT_ARGS 10
+#define FF_PHYSICALMEMORY_NUM_FORMAT_ARGS 11
 #define FF_PHYSICALMEMORY_DISPLAY_NAME "Physical Memory"
 
 void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
@@ -40,7 +40,6 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
 
             fputs(prettySize.chars, stdout);
             fputs(" - ", stdout);
-
             ffStrbufWriteTo(&device->type, stdout);
             if (device->maxSpeed > 0)
                 printf("-%u", device->maxSpeed);
@@ -48,6 +47,8 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
                 printf(" at %u MT/s\n", device->runningSpeed);
             if (device->vendor.length > 0)
                 printf(" (%s)", device->vendor.chars);
+            if (device->ecc)
+                fputs(" - ECC", stdout);
             putchar('\n');
         }
         else
@@ -59,10 +60,11 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT, &device->runningSpeed},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &device->type},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &device->formFactor},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &device->deviceLocator},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &device->locator},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &device->vendor},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &device->serial},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &device->partNumber},
+                {FF_FORMAT_ARG_TYPE_BOOL, &device->ecc},
             }));
         }
     }
@@ -70,6 +72,7 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
     FF_LIST_FOR_EACH(FFPhysicalMemoryResult, device, result)
     {
         ffStrbufDestroy(&device->type);
+        ffStrbufDestroy(&device->locator);
         ffStrbufDestroy(&device->formFactor);
         ffStrbufDestroy(&device->vendor);
         ffStrbufDestroy(&device->serial);
@@ -131,15 +134,18 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
         yyjson_mut_obj_add_uint(doc, obj, "maxSpeed", device->maxSpeed);
         yyjson_mut_obj_add_uint(doc, obj, "runningSpeed", device->runningSpeed);
         yyjson_mut_obj_add_strbuf(doc, obj, "type", &device->type);
+        yyjson_mut_obj_add_strbuf(doc, obj, "locator", &device->locator);
         yyjson_mut_obj_add_strbuf(doc, obj, "formFactor", &device->formFactor);
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &device->vendor);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &device->serial);
         yyjson_mut_obj_add_strbuf(doc, obj, "partNumber", &device->partNumber);
+        yyjson_mut_obj_add_bool(doc, obj, "ecc", device->ecc);
     }
 
     FF_LIST_FOR_EACH(FFPhysicalMemoryResult, device, result)
     {
         ffStrbufDestroy(&device->type);
+        ffStrbufDestroy(&device->locator);
         ffStrbufDestroy(&device->formFactor);
         ffStrbufDestroy(&device->vendor);
         ffStrbufDestroy(&device->serial);
@@ -156,10 +162,11 @@ void ffPrintPhysicalMemoryHelpFormat(void)
         "Running speed (in MT/s)",
         "Type (DDR4, DDR5, etc.)",
         "Form factor (SODIMM, DIMM, etc.)",
-        "Device locator (SIMM1, SIMM2, etc.)",
+        "Bank/Device Locator (BANK0/SIMM0, BANK0/SIMM1, etc.)",
         "Vendor",
         "Serial number",
         "Part number",
+        "ECC enabled",
     }));
 }
 
