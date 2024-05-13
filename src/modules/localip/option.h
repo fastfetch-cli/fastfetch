@@ -13,7 +13,9 @@ typedef enum FFLocalIpType
     FF_LOCALIP_TYPE_MAC_BIT         = 1 << 3,
     FF_LOCALIP_TYPE_PREFIX_LEN_BIT  = 1 << 4,
 
-    FF_LOCALIP_TYPE_COMPACT_BIT     = 1 << 10,
+    FF_LOCALIP_TYPE_COMPACT_BIT            = 1 << 10,
+    FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT = 1 << 11,
+    FF_LOCALIP_TYPE_ALL_IPS_BIT            = 1 << 12,
 } FFLocalIpType;
 
 typedef struct FFLocalIpOptions
@@ -23,5 +25,4 @@ typedef struct FFLocalIpOptions
 
     FFLocalIpType showType;
     FFstrbuf namePrefix;
-    bool defaultRouteOnly;
 } FFLocalIpOptions;

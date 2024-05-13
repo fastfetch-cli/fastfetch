@@ -1510,6 +1510,11 @@
                                         "type": "boolean",
                                         "default": true
                                     },
+                                    "showAllIps": {
+                                        "description": "Show all IPs bound to the same interface.\nBy default only the first IP is shown",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "compact": {
                                         "description": "Show all IPs in one line",
                                         "type": "boolean",

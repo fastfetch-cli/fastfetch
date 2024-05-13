@@ -1299,6 +1299,15 @@
             }
         },
         {
+            "long": "localip-show-all-ips",
+            "desc": "Show all IPs bound to the same interface. By default only the first IP is shown",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "localip-compact",
             "desc": "Show all IPs in one line",
             "arg": {
