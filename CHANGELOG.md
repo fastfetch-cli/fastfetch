@@ -24,6 +24,7 @@ Bugfixes:
 Logos:
 * Add openSUSE Slowroll
 * Add macOS3
+* Add Quirinux
 
 # 2.11.5
 

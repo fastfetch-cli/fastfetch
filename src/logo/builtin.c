@@ -3467,6 +3467,15 @@ static const FFlogo Q[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Quirinux
+    {
+        .names = {"Quirinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_QUIRINUX,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_MAGENTA,
+        },
+    },
     // LAST
     {},
 };
