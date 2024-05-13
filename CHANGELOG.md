@@ -2,6 +2,7 @@
 
 Changes:
 * The long deprecated options `--set` and `--set-keyless` are removed.
+* `Kernel` module now prints kernel name by default
 
 Features:
 * Support `st` terminal font detection for font configuration compiled in `st` binary (TerminalFont, Linux)
