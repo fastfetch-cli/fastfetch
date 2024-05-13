@@ -22,6 +22,7 @@ Bugfixes:
 
 Logos:
 * Add openSUSE Slowroll
+* Add macOS3
 
 # 2.11.5
 

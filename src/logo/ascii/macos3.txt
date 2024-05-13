@@ -1,0 +1,16 @@
+${c1}                -:+:.
+${c1}               :++++.
+${c1}              /+++/.
+${c1}      .:-::- .+/:-\`\`.::-
+${c1}   .:/++++++/::::/++++++/::`
+${c2} .:///////////////////////::`
+${c2} /////////////////////////`
+${c3}+++++++++++++++++++++++++`
+${c3}++++++++++++++++++++++++
+${c4}ssssssssssssssssssssssss.
+${c4}:ssssssssssssssssssssssss-
+${c5} osssssssssssssssssssssssss`
+${c5} `syyyyyyyyyyyyyyyyyyyyyyyyys`
+${c6}  `ossssssssssssssssssssssss
+${c6}    :ooooooooooooooooooo+.
+${c6}     `:++oo+/:-  -:/+o+/-
