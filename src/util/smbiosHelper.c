@@ -98,34 +98,17 @@ static_assert(offsetof(FFSmbios30EntryPoint, StructureTableAddress) == 0x10,
 
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
-    static void* buffer;
+    static FFstrbuf buffer;
     static FFSmbiosHeaderTable table;
 
-    if (!buffer)
+    if (buffer.chars == NULL)
     {
-        uint64_t bufLen = 0;
-
         #ifdef __linux__
-        {
-            FF_AUTO_CLOSE_FD int fd = open("/sys/firmware/dmi/tables/DMI", O_RDONLY);
-            if (fd > 0)
-            {
-                struct stat st;
-                if (fstat(fd, &st) == 0)
-                {
-                    buffer = mmap(NULL, (size_t) st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-                    if (buffer == MAP_FAILED)
-                        buffer = NULL;
-                    else
-                        bufLen = (uint64_t) st.st_size;
-                }
-            }
-        }
-        if (!buffer)
+        if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
         #endif
         {
             FF_STRBUF_AUTO_DESTROY strEntry = ffStrbufCreate();
-            // Only support SMBIOS 3.x for simplication
+            // Only support SMBIOS 3.x for simplification
             #ifdef __FreeBSD__
             if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntry))
                 return NULL;
@@ -155,20 +138,30 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 entryPoint.EntryPointLength != sizeof(entryPoint))
                 return NULL;
 
-            // entryPoint.StructureTableAddress must be page aligned.
-            // Unaligned physical memory access results in all kinds of crashes.
-            buffer = mmap(NULL, entryPoint.StructureTableMaximumSize, PROT_READ, MAP_SHARED, fd, (loff_t) entryPoint.StructureTableAddress);
-            if (buffer == MAP_FAILED)
+            ffStrbufEnsureFixedLengthFree(&buffer, entryPoint.StructureTableMaximumSize);
+            if (pread(fd, buffer.chars, entryPoint.StructureTableMaximumSize, pEntry) == (loff_t) entryPoint.StructureTableMaximumSize)
             {
-                buffer = NULL;
-                return NULL;
+                buffer.length = (uint32_t) entryPoint.StructureTableMaximumSize;
+                buffer.chars[buffer.length] = '\0';
             }
-            bufLen = entryPoint.StructureTableMaximumSize;
+            else
+            {
+                // entryPoint.StructureTableAddress must be page aligned.
+                // Unaligned physical memory access results in all kinds of crashes.
+                void* p = mmap(NULL, entryPoint.StructureTableMaximumSize, PROT_READ, MAP_SHARED, fd, (loff_t) entryPoint.StructureTableAddress);
+                if (p == MAP_FAILED)
+                {
+                    ffStrbufDestroy(&buffer); // free buffer and reset state
+                    return NULL;
+                }
+                ffStrbufSetNS(&buffer, entryPoint.StructureTableMaximumSize, (char*) p);
+                munmap(p, entryPoint.StructureTableMaximumSize);
+            }
         }
 
         for (
-            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer;
-            (const uint8_t*) header < (const uint8_t*) buffer + bufLen;
+            const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer.chars;
+            (const uint8_t*) header < (const uint8_t*) buffer.chars + buffer.length;
             header = ffSmbiosNextEntry(header)
         )
         {
