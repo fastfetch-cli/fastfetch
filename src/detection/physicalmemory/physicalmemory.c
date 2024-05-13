@@ -5,15 +5,15 @@ static inline const char* getVendorString(unsigned vendorId)
     switch (vendorId)
     {
         case 0x017A: return "Apacer";
-        case 0x0198: return "HyperX";
+        case 0x0198: return "Kingston";
         case 0x029E: return "Corsair";
         case 0x04CB: return "A-DATA";
         case 0x04CD: return "G-Skill";
-        case 0x059B: case 0x859B: case 0x1315: return "Crucial";
+        case 0x059B: case 0x859B: return "Crucial";
         case 0x00CE: case 0x80CE: case 0xCE00: return "Samsung";
         case 0x014F: return "Transcend";
         case 0x2C00: case 0x802C: return "Micron";
-        case 0xAD00: case 0x80AD: return "Hynix";
+        case 0xAD00: case 0x80AD: return "SK Hynix";
         case 0x5105: case 0x8551: return "Qimonda";
         case 0x02FE: return "Elpida";
         default: return NULL;
