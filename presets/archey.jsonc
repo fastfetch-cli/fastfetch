@@ -1,0 +1,80 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "modules": [
+        {
+            "type": "title",
+            "key": "User",
+            "format": "{1}"
+        },
+        {
+            "type": "title",
+            "key": "Hostname",
+            "format": "{2}"
+        },
+        {
+            "type": "host",
+            "key": "Model"
+        },
+        {
+            "type": "os",
+            "format": "{3} {9} {12}"
+        },
+        "kernel",
+        "uptime",
+        {
+            "type": "loadavg",
+            "key": "Load Average"
+        },
+        "processes",
+        {
+            "type": "wm",
+            "key": "Window Manager"
+        },
+        {
+            "type": "de",
+            "key": "Desktop Environment"
+        },
+        {
+            "type": "shell",
+            "format": "{7}"
+        },
+        {
+            "type": "terminal",
+            "format": "{5} {6} \u001b[31m█\u001b[91m█ \u001b[32m█\u001b[92m█ \u001b[33m█\u001b[93m█ \u001b[34m█\u001b[94m█ \u001b[35m█\u001b[95m█ \u001b[36m█\u001b[96m█"
+        },
+        {
+            "type": "packages",
+            "format": "{1}"
+        },
+        {
+            "type": "cpu",
+            "key": "Temperature",
+            "temp": true,
+            "format": "{8}"
+        },
+        {
+            "type": "cpu",
+            "key": "CPU",
+            "format": "{4} x {1}"
+        },
+        {
+            "type": "gpu",
+            "format": "{2}"
+        },
+        {
+            "type": "memory",
+            "key": "RAM"
+        },
+        {
+            "type": "disk",
+            "key": "Disk",
+            "folders": "/"
+        },
+        {
+            "type": "localip",
+            "key": "LAN IP",
+            "showIpv6": true,
+            "showPrefixLen": false
+        }
+    ]
+}
