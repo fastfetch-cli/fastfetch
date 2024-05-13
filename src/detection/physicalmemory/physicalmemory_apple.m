@@ -23,7 +23,7 @@ static void appendDevice(
     ffStrbufInit(&device->formFactor);
     ffStrbufInitS(&device->locator, locator.UTF8String);
     ffStrbufInitS(&device->vendor, vendor.UTF8String);
-    ffCleanUpSmbiosValue(&device->vendor);
+    FFPhysicalMemoryUpdateVendorString(device);
     ffStrbufInitS(&device->serial, serial.UTF8String);
     ffCleanUpSmbiosValue(&device->serial);
     ffStrbufInitS(&device->partNumber, partNumber.UTF8String);

@@ -183,7 +183,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
                 device->maxSpeed = data->Speed == 0xFFFF ? data->ExtendedSpeed : data->Speed;
 
             ffStrbufSetStatic(&device->vendor, ffSmbiosLocateString(strings, data->Manufacturer));
-            ffCleanUpSmbiosValue(&device->vendor);
+            FFPhysicalMemoryUpdateVendorString(device);
 
             ffStrbufSetStatic(&device->serial, ffSmbiosLocateString(strings, data->SerialNumber));
             ffCleanUpSmbiosValue(&device->serial);
