@@ -142,12 +142,21 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
             FFSmbios30EntryPoint entryPoint;
             if (pread(fd, &entryPoint, sizeof(entryPoint), pEntry) != sizeof(entryPoint))
-                return NULL;
+            {
+                // `pread /dev/mem` returns EFAULT in FreeBSD
+                // https://stackoverflow.com/questions/69372330/how-to-read-dev-mem-using-read
+                void* p = mmap(NULL, sizeof(entryPoint), PROT_READ, MAP_SHARED, fd, pEntry);
+                if (p == MAP_FAILED) return NULL;
+                memcpy(&entryPoint, p, sizeof(entryPoint));
+                munmap(p, sizeof(entryPoint));
+            }
 
             if (memcmp(entryPoint.AnchorString, "_SM3_", sizeof(entryPoint.AnchorString)) != 0 ||
                 entryPoint.EntryPointLength != sizeof(entryPoint))
                 return NULL;
 
+            // entryPoint.StructureTableAddress must be page aligned.
+            // Unaligned physical memory access results in all kinds of crashes.
             buffer = mmap(NULL, entryPoint.StructureTableMaximumSize, PROT_READ, MAP_SHARED, fd, (loff_t) entryPoint.StructureTableAddress);
             if (buffer == MAP_FAILED)
             {
