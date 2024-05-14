@@ -23,7 +23,7 @@
             "default": 0
         },
         "format": {
-            "description": "Output format of the module",
+            "description": "Output format of the module. See `-h &lt;module&gt;-format` for detail",
             "type": "string"
         },
         "outputColor": {
