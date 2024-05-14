@@ -5,6 +5,6 @@ Infos about them can be found here: https://en.wikipedia.org/wiki/ANSI_escape_co
 Examples:
    --color 35:      sets the color to magenta. `--color magenta` is also supported
    --color 38;5;38: sets the color to 38th color of ANSI 256 colors
-   --color 4;92:    sets the color to bright Green with underline
+   --color 4;92:    sets the color to bright Green with underline. `--color underline_green` is also supported
    --color 5;104:   blinking text on a blue background
 If no color is set, the main color of the logo will be used.

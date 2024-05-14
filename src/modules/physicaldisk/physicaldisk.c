@@ -97,14 +97,14 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 if(buffer.length > 0)
                     ffStrbufAppendS(&buffer, " - ");
 
-                ffTempsAppendNum(dev->temperature, &buffer, options->tempConfig);
+                ffTempsAppendNum(dev->temperature, &buffer, options->tempConfig, &options->moduleArgs);
             }
             ffStrbufPutTo(&buffer, stdout);
         }
         else
         {
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-            ffTempsAppendNum(dev->temperature, &tempStr, options->tempConfig);
+            ffTempsAppendNum(dev->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             if (dev->type & FF_PHYSICALDISK_TYPE_READWRITE)
                 readOnlyType = "Read-write";
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_PHYSICALDISK_NUM_FORMAT_ARGS, ((FFformatarg[]){

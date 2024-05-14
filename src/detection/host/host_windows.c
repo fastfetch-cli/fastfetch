@@ -18,17 +18,24 @@ typedef struct FFSmbiosSystemInfo
         uint8_t ClockSeqHiAndReserved;
         uint8_t ClockSeqLow;
         uint8_t Node[6];
-    } UUID; // varies
+    } __attribute__((__packed__)) UUID; // varies
     uint8_t WakeUpType; // enum
 
     // 2.4+
     uint8_t SKUNumber; // string
     uint8_t Family; // string
-} FFSmbiosSystemInfo;
+} __attribute__((__packed__)) FFSmbiosSystemInfo;
+
+static_assert(offsetof(FFSmbiosSystemInfo, Family) == 0x1A,
+    "FFSmbiosSystemInfo: Wrong struct alignment");
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_SYSTEM_INFO];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosSystemInfo* data = (const FFSmbiosSystemInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_SYSTEM_INFO];
     if (!data)
         return "System information is not found in SMBIOS data";
 

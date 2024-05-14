@@ -2,21 +2,24 @@
 #include "common/networking.h"
 
 #define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
-static FFNetworkingState state;
-static const char* status = FF_UNITIALIZED;
+static FFNetworkingState states[2];
+static const char* statuses[2] = { FF_UNITIALIZED, FF_UNITIALIZED };
 
 void ffPreparePublicIp(FFPublicIpOptions* options)
 {
-    if (status != FF_UNITIALIZED)
+    FFNetworkingState* state = &states[options->ipv6];
+    const char** status = &statuses[options->ipv6];
+    if (*status != FF_UNITIALIZED)
     {
-        fputs("Error: this module can only be used once due to internal limitations\n", stderr);
+        fputs("Error: PublicIp module can only be used once due to internal limitations\n", stderr);
         exit(1);
     }
 
-    state.timeout = options->timeout;
+    state->timeout = options->timeout;
+    state->ipv6 = options->ipv6;
 
     if (options->url.length == 0)
-        status = ffNetworkingSendHttpRequest(&state, "ipinfo.io", "/json", NULL);
+        *status = ffNetworkingSendHttpRequest(state, options->ipv6 ? "v6.ipinfo.io" : "ipinfo.io", "/json", NULL);
     else
     {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);
@@ -40,7 +43,7 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
             host.chars[pathStartIndex] = '\0';
         }
 
-        status = ffNetworkingSendHttpRequest(&state, host.chars, path.length == 0 ? "/" : path.chars, NULL);
+        *status = ffNetworkingSendHttpRequest(state, host.chars, path.length == 0 ? "/" : path.chars, NULL);
     }
 }
 
@@ -53,14 +56,16 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 
 const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* result)
 {
-    if (status == FF_UNITIALIZED)
+    FFNetworkingState* state = &states[options->ipv6];
+    const char** status = &statuses[options->ipv6];
+    if (*status == FF_UNITIALIZED)
         ffPreparePublicIp(options);
 
-    if (status != NULL)
-        return status;
+    if (*status != NULL)
+        return *status;
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
-    const char* error = ffNetworkingRecvHttpResponse(&state, &response);
+    const char* error = ffNetworkingRecvHttpResponse(state, &response);
     if (error == NULL)
         ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
     else

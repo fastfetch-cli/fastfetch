@@ -14,42 +14,24 @@ const char* FF_GPU_VENDOR_NAME_MICROSOFT = "Microsoft";
 const char* FF_GPU_VENDOR_NAME_REDHAT = "RedHat";
 const char* FF_GPU_VENDOR_NAME_ORACLE = "Oracle";
 
-static inline bool arrayContains(const unsigned arr[], unsigned vendorId, unsigned length)
-{
-    for (unsigned i = 0; i < length; ++i)
-    {
-        if (arr[i] == vendorId)
-            return true;
-    }
-    return false;
-}
-
 const char* ffGetGPUVendorString(unsigned vendorId)
 {
     // https://devicehunt.com/all-pci-vendors
-    if(vendorId == 0x106b)
-        return FF_GPU_VENDOR_NAME_APPLE;
-    if(arrayContains((const unsigned[]) {0x1002, 0x1022}, vendorId, 2))
-        return FF_GPU_VENDOR_NAME_AMD;
-    else if(arrayContains((const unsigned[]) {0x03e7, 0x8086, 0x8087}, vendorId, 3))
-        return FF_GPU_VENDOR_NAME_INTEL;
-    else if(arrayContains((const unsigned[]) {0x0955, 0x10de, 0x12d2}, vendorId, 3))
-        return FF_GPU_VENDOR_NAME_NVIDIA;
-    else if(arrayContains((const unsigned[]) {0x5143}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_QUALCOMM;
-    else if(arrayContains((const unsigned[]) {0x14c3}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_MTK;
-    else if(arrayContains((const unsigned[]) {0x15ad}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_VMWARE;
-    else if(arrayContains((const unsigned[]) {0x1af4}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_REDHAT;
-    else if(arrayContains((const unsigned[]) {0x1ab8}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_PARALLEL;
-    else if(arrayContains((const unsigned[]) {0x1414}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_MICROSOFT;
-    else if(arrayContains((const unsigned[]) {0x108e}, vendorId, 1))
-        return FF_GPU_VENDOR_NAME_ORACLE;
-    return NULL;
+    switch (vendorId)
+    {
+        case 0x106b: return FF_GPU_VENDOR_NAME_APPLE;
+        case 0x1002: case 0x1022: return FF_GPU_VENDOR_NAME_AMD;
+        case 0x8086: case 0x8087: case 0x03e7: return FF_GPU_VENDOR_NAME_INTEL;
+        case 0x0955: case 0x10de: case 0x12d2: return FF_GPU_VENDOR_NAME_NVIDIA;
+        case 0x5143: return FF_GPU_VENDOR_NAME_QUALCOMM;
+        case 0x14c3: return FF_GPU_VENDOR_NAME_MTK;
+        case 0x15ad: return FF_GPU_VENDOR_NAME_VMWARE;
+        case 0x1af4: return FF_GPU_VENDOR_NAME_REDHAT;
+        case 0x1ab8: return FF_GPU_VENDOR_NAME_PARALLEL;
+        case 0x1414: return FF_GPU_VENDOR_NAME_MICROSOFT;
+        case 0x108e: return FF_GPU_VENDOR_NAME_ORACLE;
+        default: return NULL;
+    }
 }
 
 const char* detectByOpenGL(FFlist* gpus)

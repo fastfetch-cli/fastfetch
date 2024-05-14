@@ -22,6 +22,7 @@ typedef struct FFNetworkingState {
     #endif
 
     uint32_t timeout;
+    bool ipv6;
 } FFNetworkingState;
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);

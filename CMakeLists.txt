@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.11.5
+    VERSION 2.12.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -297,6 +297,7 @@ set(LIBFASTFETCH_SRC
     src/detection/opencl/opencl.c
     src/detection/os/os.c
     src/detection/packages/packages.c
+    src/detection/physicalmemory/physicalmemory.c
     src/detection/publicip/publicip.c
     src/detection/terminaltheme/terminaltheme.c
     src/detection/terminalfont/terminalfont.c
@@ -334,6 +335,7 @@ set(LIBFASTFETCH_SRC
     src/modules/gamepad/gamepad.c
     src/modules/kernel/kernel.c
     src/modules/lm/lm.c
+    src/modules/loadavg/loadavg.c
     src/modules/locale/locale.c
     src/modules/localip/localip.c
     src/modules/memory/memory.c
@@ -344,6 +346,7 @@ set(LIBFASTFETCH_SRC
     src/modules/os/os.c
     src/modules/packages/packages.c
     src/modules/physicaldisk/physicaldisk.c
+    src/modules/physicalmemory/physicalmemory.c
     src/modules/processes/processes.c
     src/modules/player/player.c
     src/modules/poweradapter/poweradapter.c
@@ -399,6 +402,7 @@ if(LINUX)
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -417,6 +421,7 @@ if(LINUX)
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
+        src/detection/loadavg/loadavg_linux.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_linux.c
@@ -464,6 +469,7 @@ elseif(ANDROID)
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/font/font_nosupport.c
@@ -472,6 +478,7 @@ elseif(ANDROID)
         src/detection/icons/icons_nosupport.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_linux.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
@@ -520,6 +527,7 @@ elseif(BSD)
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/physicaldisk/physicaldisk_bsd.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -538,6 +546,7 @@ elseif(BSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/libc/libc_bsd.c
+        src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_bsd.c
@@ -586,14 +595,16 @@ elseif(APPLE)
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
         src/detection/physicaldisk/physicaldisk_apple.c
+        src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
         src/detection/displayserver/displayserver_apple.c
         src/detection/font/font_apple.m
         src/detection/gpu/gpu_apple.c
         src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
-        src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_nosupport.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
@@ -651,11 +662,13 @@ elseif(WIN32)
         src/detection/icons/icons_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_windows.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/monitor/monitor_windows.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
@@ -767,7 +780,7 @@ if(BSD AND EXISTS "/usr/local/bin/objdump")
     endif()
 endif()
 
-target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1)
+target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1 _FILE_OFFSET_BITS=64)
 if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 elseif(APPLE)

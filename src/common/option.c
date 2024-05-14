@@ -39,6 +39,16 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseString(argumentKey, value, &result->outputFormat);
         return true;
     }
+    else if(ffStrEqualsIgnCase(subKey, "output-color"))
+    {
+        if(value == NULL)
+        {
+            fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
+            exit(477);
+        }
+        ffOptionParseColor(value, &result->outputColor);
+        return true;
+    }
     else if(ffStrEqualsIgnCase(subKey, "key-color"))
     {
         if(value == NULL)
@@ -148,6 +158,12 @@ void ffOptionParseColor(const char* value, FFstrbuf* buffer)
         FF_APPEND_COLOR_CODE_COND(reset_, FF_COLOR_MODE_RESET)
         else FF_APPEND_COLOR_CODE_COND(bright_, FF_COLOR_MODE_BOLD)
         else FF_APPEND_COLOR_CODE_COND(dim_, FF_COLOR_MODE_DIM)
+        else FF_APPEND_COLOR_CODE_COND(italic_, FF_COLOR_MODE_ITALIC)
+        else FF_APPEND_COLOR_CODE_COND(underline_, FF_COLOR_MODE_UNDERLINE)
+        else FF_APPEND_COLOR_CODE_COND(blink_, FF_COLOR_MODE_BLINK)
+        else FF_APPEND_COLOR_CODE_COND(inverse_, FF_COLOR_MODE_INVERSE)
+        else FF_APPEND_COLOR_CODE_COND(hidden_, FF_COLOR_MODE_HIDDEN)
+        else FF_APPEND_COLOR_CODE_COND(strike_, FF_COLOR_MODE_STRIKETHROUGH)
         else FF_APPEND_COLOR_CODE_COND(black, FF_COLOR_FG_BLACK)
         else FF_APPEND_COLOR_CODE_COND(red, FF_COLOR_FG_RED)
         else FF_APPEND_COLOR_CODE_COND(green, FF_COLOR_FG_GREEN)
@@ -180,6 +196,7 @@ void ffOptionInitModuleArg(FFModuleArgs* args)
     ffStrbufInit(&args->key);
     ffStrbufInit(&args->keyColor);
     ffStrbufInit(&args->outputFormat);
+    ffStrbufInit(&args->outputColor);
     args->keyWidth = 0;
 }
 
@@ -188,4 +205,5 @@ void ffOptionDestroyModuleArg(FFModuleArgs* args)
     ffStrbufDestroy(&args->key);
     ffStrbufDestroy(&args->keyColor);
     ffStrbufDestroy(&args->outputFormat);
+    ffStrbufDestroy(&args->outputColor);
 }

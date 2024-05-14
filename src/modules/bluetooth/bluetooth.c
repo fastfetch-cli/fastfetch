@@ -19,7 +19,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
         {
             if (buffer.length)
                 ffStrbufAppendC(&buffer, ' ');
-            ffPercentAppendNum(&buffer, device->battery, options->percent, buffer.length > 0);
+            ffPercentAppendNum(&buffer, device->battery, options->percent, buffer.length > 0, &options->moduleArgs);
         }
 
         if (!device->connected)
@@ -30,7 +30,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&percentageStr, device->battery, options->percent, false);
+        ffPercentAppendNum(&percentageStr, device->battery, options->percent, false, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BLUETOOTH_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name},

@@ -11,7 +11,7 @@ void ffPrintKernel(FFKernelOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&platform->systemRelease, stdout);
+        printf("%s %s", platform->systemName.chars, platform->systemRelease.chars);
 
         if(platform->systemDisplayVersion.length > 0)
             printf(" (%s)\n", platform->systemDisplayVersion.chars);
@@ -77,7 +77,7 @@ void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson
 
 void ffPrintKernelHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_KERNEL_MODULE_NAME, "{2}", FF_KERNEL_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_KERNEL_MODULE_NAME, "{1} {2}", FF_KERNEL_NUM_FORMAT_ARGS, ((const char* []) {
         "Sysname",
         "Release",
         "Version",

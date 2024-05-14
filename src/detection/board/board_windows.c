@@ -14,13 +14,20 @@ typedef struct FFSmbiosBaseboard
     uint8_t LocationInChassis; // string
     uint16_t ChassisHandle; // varies
     uint8_t BoardType; // enum
-    uint8_t NumberOfContainedObjectHandle; // varies
-    uint16_t ContainedObjectHandle[]; // varies
-} FFSmbiosBaseboard;
+    uint8_t NumberOfContainedObjectHandles; // varies
+    uint16_t ContainedObjectHandles[]; // varies
+} __attribute__((__packed__)) FFSmbiosBaseboard;
+
+static_assert(offsetof(FFSmbiosBaseboard, ContainedObjectHandles) == 0x0F,
+    "FFSmbiosBaseboard: Wrong struct alignment");
 
 const char* ffDetectBoard(FFBoardResult* board)
 {
-    const FFSmbiosBaseboard* data = (const FFSmbiosBaseboard*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_BASEBOARD_INFO];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosBaseboard* data = (const FFSmbiosBaseboard*) (*smbiosTable)[FF_SMBIOS_TYPE_BASEBOARD_INFO];
     if (!data)
         return "Baseboard information section is not found in SMBIOS data";
 

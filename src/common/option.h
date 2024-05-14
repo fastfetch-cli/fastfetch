@@ -50,6 +50,7 @@ typedef struct FFModuleArgs
     FFstrbuf key;
     FFstrbuf keyColor;
     FFstrbuf outputFormat;
+    FFstrbuf outputColor;
     uint32_t keyWidth;
 } FFModuleArgs;
 

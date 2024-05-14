@@ -17,7 +17,7 @@
 #include <netpacket/packet.h>
 #endif
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, bool firstOnly)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -40,11 +40,19 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
     switch (type)
     {
         case AF_INET:
-            if (ip->ipv4.length) ffStrbufAppendC(&ip->ipv4, ',');
+            if (ip->ipv4.length)
+            {
+                if (firstOnly) return;
+                ffStrbufAppendC(&ip->ipv4, ',');
+            }
             ffStrbufAppendS(&ip->ipv4, addr);
             break;
         case AF_INET6:
-            if (ip->ipv6.length) ffStrbufAppendC(&ip->ipv6, ',');
+            if (ip->ipv6.length)
+            {
+                if (firstOnly) return;
+                ffStrbufAppendC(&ip->ipv6, ',');
+            }
             ffStrbufAppendS(&ip->ipv6, addr);
             break;
         case -1:
@@ -67,7 +75,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             continue;
 
         bool isDefaultRoute = ffStrEquals(defaultRouteIfName, ifa->ifa_name);
-        if (options->defaultRouteOnly && !isDefaultRoute)
+        if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
             continue;
 
         if ((ifa->ifa_flags & IFF_LOOPBACK) && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
@@ -96,7 +104,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute);
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
@@ -121,7 +129,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute);
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         #if defined(__FreeBSD__) || defined(__APPLE__)
         else if (ifa->ifa_addr->sa_family == AF_LINK)
@@ -133,7 +141,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
@@ -145,7 +153,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
         }
         #endif
     }

@@ -57,7 +57,7 @@ void ffPrintCPU(FFCPUOptions* options)
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
             {
                 ffStrbufAppendS(&str, " - ");
-                ffTempsAppendNum(cpu.temperature, &str, options->tempConfig);
+                ffTempsAppendNum(cpu.temperature, &str, options->tempConfig, &options->moduleArgs);
             }
 
             ffStrbufPutTo(&str, stdout);
@@ -65,7 +65,7 @@ void ffPrintCPU(FFCPUOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
-            ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig);
+            ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPU_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor},

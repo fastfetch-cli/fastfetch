@@ -1115,9 +1115,9 @@ static const FFlogo C[] = {
 };
 
 static const FFlogo D[] = {
-    // Dahlia
+    // DahliaOS
     {
-        .names = {"dahlia"},
+        .names = {"dahliaOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_DAHLIA,
         .colors = {
             FF_COLOR_FG_RED,
@@ -2461,6 +2461,21 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // MacOS3
+    {
+        .names = {"macos3", "mac3"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_MACOS3,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // MainsailOS
     {
         .names = {"MainsailOS"},
@@ -3004,6 +3019,16 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // openSUSESlowroll
+    {
+        .names = {"opensuse_slowroll", "opensuse-slowroll", "opensuse-tumbleweed-slowroll"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_SLOWROLL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // OpenMandriva
     {
         .names = {"openmandriva", "open-mandriva", "open_mandriva", "openmandriva lx"},
@@ -3440,6 +3465,15 @@ static const FFlogo Q[] = {
         .colors = {
             FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_WHITE,
+        },
+    },
+    // Quirinux
+    {
+        .names = {"Quirinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_QUIRINUX,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_MAGENTA,
         },
     },
     // LAST

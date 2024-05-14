@@ -192,15 +192,27 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
+    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
     {
-        ffOptionParseString(key, value, &options->namePrefix);
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
+    if (ffStrEqualsIgnCase(subKey, "show-all-ips"))
     {
-        options->defaultRouteOnly = ffOptionParseBoolean(value);
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_ALL_IPS_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_ALL_IPS_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
+    {
+        ffOptionParseString(key, value, &options->namePrefix);
         return true;
     }
 
@@ -274,15 +286,27 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
         {
-            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+        if (ffStrEqualsIgnCase(key, "showAllIps"))
         {
-            options->defaultRouteOnly = yyjson_get_bool(val);
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_ALL_IPS_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_ALL_IPS_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        {
+            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
             continue;
         }
 
@@ -316,13 +340,16 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
 
         if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
             yyjson_mut_obj_add_bool(doc, module, "compact", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showAllIps", true);
     }
 
     if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
         yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
-
-    if (options->defaultRouteOnly != defaultOptions.defaultRouteOnly)
-        yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", options->defaultRouteOnly);
 }
 
 void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -383,15 +410,12 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
-    options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly =
-        #ifdef __ANDROID__
-            false
-        #else
-            true
+    options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT
+        #ifndef __ANDROID__
+            | FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT
         #endif
     ;
+    ffStrbufInit(&options->namePrefix);
 }
 
 void ffDestroyLocalIpOptions(FFLocalIpOptions* options)

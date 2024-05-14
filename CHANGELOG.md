@@ -1,34 +1,62 @@
+# 2.12.0
+
+Changes:
+* The long deprecated flag based config files are removed.
+    * They can still be used with `xargs fastfetch < /path/to/config.conf`
+    * `--gen-config` can be used to migrate them to json based config files
+* The long deprecated options `--set` and `--set-keyless` are removed.
+* `Kernel` module now prints kernel name by default
+
+Features:
+* Support `st` terminal font detection for font configuration compiled in `st` binary (TerminalFont, Linux)
+* Add option `--color-output` to change output color of all modules except `Title`, `Separator`
+    * `display.color.output` in JSONC config file
+* Add option `--<module>-output-color` to change output color of one specified module, which overrides the global option `--color-output`
+* Add option `--publicip-ipv6` to print IPv6 address (PublicIP)
+* Add new module `Loadavg` to print load averages (Loadavg)
+* Add new module `PhysicalMemory` to print information of physical memory devices (PhysicalMemory)
+    * Requires root permission to work on Linux and FreeBSD
+* Support specifying `--logo-width` only for `--kitty-direct` and `--iterm` (Logo)
+* Add option `--localip-show-all-ips` to show all IPs assigned to the same interface (LocalIP)
+    * Default to `false`
+* Improve compatibility with `(*term)` (#909, Terminal, macOS)
+
+Bugfixes:
+* Rename option `--temperature-unit` to `--temp-unit` as documented in help messages
+* Fix alternate logo doesn't work with `{ "type": "builtin" }` (#914, Logo)
+
+Logos:
+* Fix DahliaOS detection
+* Add openSUSE Slowroll
+* Add macOS3
+* Add Quirinux
+
 # 2.11.5
 
 Bugfix:
-
 * Fix logo printing for OpenMandriva (#896)
 * Remove `--os-file` in help messages
 
 # 2.11.4
 
 Changes:
-
 * Fastfetch will print a colorless ascii logo in `--pipe` mode for better `lolcat` compatibility. `fastfetch | lolcat` should work and no `--pipe false` needed.
     * Previously the logo would be disabled in `--pipe` mode.
-* `--os-file` was removed and CMake option `-DCUSTOM_OS_RELEASE_PATH=/path/to/os-release` was added. This option should not used in most cases.
+    * Use `--pipe -l none` to get the old beheavior
+* `--os-file` was removed and CMake option `-DCUSTOM_OS_RELEASE_PATH=/path/to/os-release` was introduced for configuring at compile time by package managers if needed. This option should not used in most cases.
 
 Bugfixes:
-
 * Fix possible out-of-bound memory access (#868)
-* Fix Apple Terminal detection (macOS, Terminal)
-* Fix doubled output in custom formation (#852)
+* Fix Apple Terminal detection (#878, macOS, Terminal)
 * Fix deprecation warning for macOS 14.0 hopefully (#860, macOS, Camera)
-* Fix memory leaks when passing informative options
+* Fix memory leaks when passing informative options (#888)
 * Fix JSON config `size.ndigits` doesn't work 
 
 Features:
-
 * Enable `--pipe` mode if environment variable `$NO_COLOR` is set
 * Support Armbian and Proxmox distro detection (OS, Linux)
 
 Logo:
-
 * Add Armbian
 
 # 2.11.3

@@ -436,7 +436,7 @@
         {
             "long": "color-keys",
             "desc": "Set the color of the keys",
-            "remark": "See `-h color` for the list of available colors",
+            "remark": "Doesn't affect module Title, Separator and Colors. See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
             }
@@ -444,6 +444,14 @@
         {
             "long": "color-title",
             "desc": "Set the color of the title",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
+            "long": "color-output",
+            "desc": "Set the color of module output",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
@@ -482,22 +490,6 @@
             }
         },
         {
-            "long": "set",
-            "desc": "Hard set the value of a key",
-            "remark": "Deprecated. Use \"Custom\" module instead",
-            "arg": {
-                "type": "key=value"
-            }
-        },
-        {
-            "long": "set-keyless",
-            "desc": "Hard set the value of a key, but don't print the key or the separator",
-            "remark": "Deprecated. Use \"Custom\" module instead",
-            "arg": {
-                "type": "key=value"
-            }
-        },
-        {
             "long": "show-errors",
             "desc": "Print occurring errors",
             "arg": {
@@ -521,7 +513,7 @@
             "arg": {
                 "type": "bool",
                 "optional": true,
-                "default": true
+                "default": false
             }
         },
         {
@@ -938,6 +930,14 @@
             }
         },
         {
+            "long": "separator-output-color",
+            "desc": "Set the color of the separator module",
+            "arg": {
+                "type": "color",
+                "default": "default"
+            }
+        },
+        {
             "long": "disk-folders",
             "desc": "A colon (semicolon on Windows) separated list of folder paths to be detected",
             "remark": "On Windows, a drive latter must be upper cased and end with \"\\\". \"/\" is used as an alias of the system drive. This option overrides other disk-show-* options",
@@ -1229,6 +1229,14 @@
             }
         },
         {
+            "long": "loadavg-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing load average",
+            "arg": {
+                "type": "num",
+                "default": 2
+            }
+        },
+        {
             "long": "localip-show-ipv4",
             "desc": "Show IPv4 addresses in local ip module",
             "arg": {
@@ -1291,6 +1299,15 @@
             }
         },
         {
+            "long": "localip-show-all-ips",
+            "desc": "Show all IPs bound to the same interface. By default only the first IP is shown",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "localip-compact",
             "desc": "Show all IPs in one line",
             "arg": {
@@ -1338,6 +1355,14 @@
             "desc": "The URL of public IP detection server to be used",
             "arg": {
                 "type": "str"
+            }
+        },
+        {
+            "long": "publicip-ipv6",
+            "desc": "Whether to use IPv6 for public IP detection server",
+            "arg": {
+                "type": "bool",
+                "default": false
             }
         },
         {
@@ -1509,6 +1534,14 @@
         {
             "long": "<module>-key-color",
             "desc": "Override the global \"--color-keys\" option for each specific module",
+            "arg": {
+                "type": "color"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-output-color",
+            "desc": "Override the global \"--color-output\" option for each specific module",
             "arg": {
                 "type": "color"
             },

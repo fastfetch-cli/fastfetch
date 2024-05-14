@@ -6,6 +6,7 @@
     "showErrors": true,
     "noBuffer": true
   },
+  "logo": null,
   "modules": [
     "title",
     "separator",
@@ -16,6 +17,7 @@
     "chassis",
     "kernel",
     "uptime",
+    "loadavg",
     "processes",
     "packages",
     "shell",
@@ -39,6 +41,7 @@
     "cpuusage",
     "gpu",
     "memory",
+    "physicalmemory",
     "swap",
     "disk",
     "battery",

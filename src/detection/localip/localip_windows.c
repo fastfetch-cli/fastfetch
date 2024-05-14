@@ -78,7 +78,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
         bool isDefaultRoute = adapter->IfIndex == defaultRouteIfIndex;
-        if (options->defaultRouteOnly && !isDefaultRoute)
+        if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
             continue;
 
         bool isLoop = adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK;
@@ -102,10 +102,14 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             newIp = false;
         }
 
+        uint32_t typesToAdd = options->showType & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT);
+
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
         {
             if (ifa->Address.lpSockaddr->sa_family == AF_INET)
             {
+                if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) continue;
+
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
@@ -118,9 +122,14 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
                 addNewIp(results, name, addressBuffer, AF_INET, newIp, isDefaultRoute);
                 newIp = false;
+
+                typesToAdd &= ~(unsigned) FF_LOCALIP_TYPE_IPV4_BIT;
+                if (typesToAdd == 0) break;
             }
             else if (ifa->Address.lpSockaddr->sa_family == AF_INET6)
             {
+                if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) continue;
+
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN + 4];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
@@ -133,6 +142,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
                 addNewIp(results, name, addressBuffer, AF_INET6, newIp, isDefaultRoute);
                 newIp = false;
+
+                typesToAdd &= ~(unsigned) FF_LOCALIP_TYPE_IPV6_BIT;
+                if (typesToAdd == 0) break;
             }
         }
     }

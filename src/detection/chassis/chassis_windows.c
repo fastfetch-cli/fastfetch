@@ -25,11 +25,18 @@ typedef struct FFSmbiosSystemEnclosure
     uint8_t ContainedElementCount; // varies
     uint8_t ContainedRecordLength; // varies
     uint8_t ContainedElements[]; // varies
-} FFSmbiosSystemEnclosure;
+} __attribute__((__packed__)) FFSmbiosSystemEnclosure;
+
+static_assert(offsetof(FFSmbiosSystemEnclosure, ContainedElements) == 0x15,
+    "FFSmbiosSystemEnclosure: Wrong struct alignment");
 
 const char* ffDetectChassis(FFChassisResult* result)
 {
-    const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosSystemEnclosure* data = (const FFSmbiosSystemEnclosure*) (*smbiosTable)[FF_SMBIOS_TYPE_SYSTEM_ENCLOSURE];
     if (!data)
         return "System enclosure is not found in SMBIOS data";
 

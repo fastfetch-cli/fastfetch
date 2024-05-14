@@ -48,7 +48,10 @@ typedef struct FFSmbiosProcessorInfo
 
     // 3.6+
     uint16_t ThreadEnabled; // varies
-} FFSmbiosProcessorInfo;
+} __attribute__((__packed__)) FFSmbiosProcessorInfo;
+
+static_assert(offsetof(FFSmbiosProcessorInfo, ThreadEnabled) == 0x30,
+    "FFSmbiosProcessorInfo: Wrong struct alignment");
 
 #if defined(__x86_64__) || defined(__i386__)
 
@@ -77,7 +80,11 @@ inline static const char* detectSpeedByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
 
 static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
 {
-    const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) (*ffGetSmbiosHeaderTable())[FF_SMBIOS_TYPE_PROCESSOR_INFO];
+    const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
+    if (!smbiosTable)
+        return "Failed to get SMBIOS data";
+
+    const FFSmbiosProcessorInfo* data = (const FFSmbiosProcessorInfo*) (*smbiosTable)[FF_SMBIOS_TYPE_PROCESSOR_INFO];
 
     if (!data)
         return "Processor information is not found in SMBIOS data";

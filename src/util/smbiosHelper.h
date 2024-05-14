@@ -12,9 +12,6 @@ static inline void ffCleanUpSmbiosValue(FFstrbuf* value)
         ffStrbufClear(value);
 }
 
-#ifdef __linux__
-bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
-#elif defined(_WIN32)
 // https://github.com/KunYi/DumpSMBIOS
 // https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.7.0.pdf
 
@@ -78,18 +75,8 @@ typedef struct FFSmbiosHeader
     FFSmbiosType Type;
     uint8_t Length;
     uint16_t Handle;
-} FFSmbiosHeader;
+} __attribute__((__packed__)) FFSmbiosHeader;
 static_assert(sizeof(FFSmbiosHeader) == 4, "FFSmbiosHeader should be 4 bytes");
-
-typedef struct FFRawSmbiosData
-{
-    uint8_t Used20CallingMethod;
-    uint8_t SMBIOSMajorVersion;
-    uint8_t SMBIOSMinorVersion;
-    uint8_t DmiRevision;
-    uint32_t Length;
-    uint8_t SMBIOSTableData[];
-} FFRawSmbiosData;
 
 static inline const char* ffSmbiosLocateString(const char* start, uint8_t index /* start from 1 */)
 {
@@ -104,6 +91,9 @@ typedef const FFSmbiosHeader* FFSmbiosHeaderTable[FF_SMBIOS_TYPE_END_OF_TABLE];
 
 const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header);
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable();
+
+#ifdef __linux__
+bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
 #endif
 
 #endif
