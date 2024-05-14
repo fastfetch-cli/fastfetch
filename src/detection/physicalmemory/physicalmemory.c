@@ -16,6 +16,7 @@ static inline const char* getVendorString(unsigned vendorId)
         case 0xAD00: case 0x80AD: return "SK Hynix";
         case 0x5105: case 0x8551: return "Qimonda";
         case 0x02FE: return "Elpida";
+        case 0x0467: return "Ramaxel";
         default: return NULL;
     }
 }
