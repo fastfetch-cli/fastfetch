@@ -40,7 +40,7 @@
         },
         {
             "type": "terminal",
-            "format": "{5} {6} \u001b[31m█\u001b[91m█ \u001b[32m█\u001b[92m█ \u001b[33m█\u001b[93m█ \u001b[34m█\u001b[94m█ \u001b[35m█\u001b[95m█ \u001b[36m█\u001b[96m█"
+            "format": "{5} {6} \u001b[37m█\u001b[97m█ \u001b[36m█\u001b[96m█ \u001b[35m█\u001b[95m█ \u001b[34m█\u001b[94m█ \u001b[33m█\u001b[93m█ \u001b[32m█\u001b[92m█ \u001b[31m█\u001b[91m█ \u001b[30m█\u001b[90m█"
         },
         {
             "type": "packages",
@@ -75,6 +75,10 @@
             "key": "LAN IP",
             "showIpv6": true,
             "showPrefixLen": false
+        },
+        {
+            "type": "publicip",
+            "key": "WAN IP"
         }
     ]
 }

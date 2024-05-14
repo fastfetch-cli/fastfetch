@@ -6,6 +6,7 @@
     "showErrors": true,
     "noBuffer": true
   },
+  "logo": null,
   "modules": [
     "title",
     "separator",
