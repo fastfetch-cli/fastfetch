@@ -317,8 +317,6 @@ static void listModules(bool pretty)
     }
 }
 
-static void parseOption(FFdata* data, const char* key, const char* value);
-
 // Temporary copy before new release of yyjson
 static bool ffyyjson_locate_pos(const char *str, size_t len, size_t pos,
                                 size_t *line, size_t *col, size_t *chr) {
@@ -402,104 +400,6 @@ static bool parseJsoncFile(const char* path)
     return true;
 }
 
-static bool parseConfigFile(FFdata* data, const char* path)
-{
-    FF_AUTO_CLOSE_FILE FILE* file = fopen(path, "r");
-    if(file == NULL)
-        return false;
-
-    char* line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    FF_STRBUF_AUTO_DESTROY unescaped = ffStrbufCreate();
-
-    while ((read = getline(&line, &len, file)) != -1)
-    {
-        char* lineStart = line;
-        char* lineEnd = line + read - 1;
-
-        //Trim line left
-        while(isspace(*lineStart))
-            ++lineStart;
-
-        //Continue if line is empty or a comment
-        if(*lineStart == '\0' || *lineStart == '#')
-            continue;
-
-        //Trim line right
-        while(lineEnd > lineStart && isspace(*lineEnd))
-            --lineEnd;
-        *(lineEnd + 1) = '\0';
-
-        char* valueStart = strchr(lineStart, ' ');
-
-        //If the line has no white space, it is only a key
-        if(valueStart == NULL)
-        {
-            parseOption(data, lineStart, NULL);
-            continue;
-        }
-
-        //separate the key from the value
-        *valueStart = '\0';
-        ++valueStart;
-
-        //Trim space of value left
-        while(isspace(*valueStart))
-            ++valueStart;
-
-        //If we want whitespace in values, we need to quote it. This is done to keep consistency with shell.
-        if((*valueStart == '"' || *valueStart == '\'') && *valueStart == *lineEnd && lineEnd > valueStart)
-        {
-            ++valueStart;
-            *lineEnd = '\0';
-            --lineEnd;
-        }
-
-        if (strchr(valueStart, '\\'))
-        {
-            // Unescape all `\x`s
-            const char* value = valueStart;
-            while(*value != '\0')
-            {
-                if(*value != '\\')
-                {
-                    ffStrbufAppendC(&unescaped, *value);
-                    ++value;
-                    continue;
-                }
-
-                ++value;
-
-                switch(*value)
-                {
-                    case 'n': ffStrbufAppendC(&unescaped, '\n'); break;
-                    case 't': ffStrbufAppendC(&unescaped, '\t'); break;
-                    case 'e': ffStrbufAppendC(&unescaped, '\e'); break;
-                    case '\\': ffStrbufAppendC(&unescaped, '\\'); break;
-                    default:
-                        ffStrbufAppendC(&unescaped, '\\');
-                        ffStrbufAppendC(&unescaped, *value);
-                        break;
-                }
-
-                ++value;
-            }
-            parseOption(data, lineStart, unescaped.chars);
-            ffStrbufClear(&unescaped);
-        }
-        else
-        {
-            parseOption(data, lineStart, valueStart);
-        }
-    }
-
-    if(line != NULL)
-        free(line);
-
-    return true;
-}
-
 static void generateConfigFile(bool force, const char* filePath)
 {
     if (!filePath)
@@ -509,11 +409,6 @@ static void generateConfigFile(bool force, const char* filePath)
     }
     else
     {
-        if (ffStrEqualsIgnCase(filePath, "conf") || ffStrEqualsIgnCase(filePath, "jsonc"))
-        {
-            fputs("Error: specifying file type is no longer supported\n", stderr);
-            exit(477);
-        }
         ffStrbufSetS(&instance.state.genConfigPath, filePath);
     }
 
@@ -549,19 +444,15 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
     if (ffStrEqualsIgnCase(value, "none"))
         return;
 
-    bool isJsonConfig = fileNameLen > strlen(".jsonc") && strcasecmp(value + fileNameLen - strlen(".jsonc"), ".jsonc") == 0;
+    if (ffStrEndsWithIgnCase(value, ".conf"))
+    {
+        fprintf(stderr, "Error: flag based config files are no longer not supported: %s\n", value);
+        exit(414);
+    }
 
     //Try to load as an absolute path
 
-    if(isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, value))
-        return;
-
-    {
-        bool success = isJsonConfig ? parseJsoncFile(value) : parseConfigFile(data, value);
-
-        if(success)
-            return;
-    }
+    if (parseJsoncFile(value)) return;
 
     //Try to load as a relative path
 
@@ -573,15 +464,14 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
         ffStrbufAppendS(&absolutePath, value);
 
-        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+        bool success = parseJsoncFile(absolutePath.chars);
         if (!success)
         {
             ffStrbufAppendS(&absolutePath, ".jsonc");
             success = parseJsoncFile(absolutePath.chars);
         }
 
-        if(success)
-            return;
+        if (success) return;
     }
 
     {
@@ -591,15 +481,14 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         ffStrbufAppendS(&absolutePath, "/presets/");
         ffStrbufAppendS(&absolutePath, value);
 
-        bool success = isJsonConfig ? parseJsoncFile(absolutePath.chars) : parseConfigFile(data, absolutePath.chars);
+        bool success = parseJsoncFile(absolutePath.chars);
         if (!success)
         {
             ffStrbufAppendS(&absolutePath, ".jsonc");
             success = parseJsoncFile(absolutePath.chars);
         }
 
-        if(success)
-            return;
+        if (success) return;
     }
 
     //File not found
@@ -755,7 +644,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     }
 }
 
-static void parseConfigFiles(FFdata* data)
+static void parseConfigFiles(void)
 {
     if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
     {
@@ -768,15 +657,6 @@ static void parseConfigFiles(FFdata* data)
             ffStrbufSubstrBefore(dir, dirLength);
             if (success) return;
         }
-    }
-    FF_LIST_FOR_EACH(FFstrbuf, dir, instance.state.platform.configDirs)
-    {
-        uint32_t dirLength = dir->length;
-
-        ffStrbufAppendS(dir, "fastfetch/config.conf");
-        bool success = parseConfigFile(data, dir->chars);
-        ffStrbufSubstrBefore(dir, dirLength);
-        if (success) return;
     }
 }
 
@@ -884,7 +764,7 @@ int main(int argc, char** argv)
 
     parseArguments(&data, argc, argv, parseCommand);
     if(!data.configLoaded && !getenv("NO_CONFIG"))
-        parseConfigFiles(&data);
+        parseConfigFiles();
     parseArguments(&data, argc, argv, (void*) parseOption);
 
     if (__builtin_expect(instance.state.genConfigPath.length == 0, true))

@@ -1,7 +1,10 @@
 # 2.12.0
 
 Changes:
-* The long deprecated options `--set` and `--set-keyless` are removed.
+* The native support of (long deprecated) flag based config files are removed.
+    * They can still be used by `xargs fastfetch < /path/to/config.conf`
+    * `--gen-config` can be used to migrate them to json based config files
+* The (long deprecated) options `--set` and `--set-keyless` are removed.
 * `Kernel` module now prints kernel name by default
 
 Features:
