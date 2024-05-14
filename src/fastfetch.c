@@ -319,18 +319,60 @@ static void listModules(bool pretty)
 
 static void parseOption(FFdata* data, const char* key, const char* value);
 
+// Temporary copy before new release of yyjson
+static bool ffyyjson_locate_pos(const char *str, size_t len, size_t pos,
+                                size_t *line, size_t *col, size_t *chr) {
+    size_t line_sum = 0, line_pos = 0, chr_sum = 0;
+    const uint8_t *cur = (const uint8_t *)str;
+    const uint8_t *end = cur + pos;
+
+    if (!str || pos > len) {
+        if (line) *line = 0;
+        if (col) *col = 0;
+        if (chr) *chr = 0;
+        return false;
+    }
+
+    while (cur < end) {
+        uint8_t c = *cur;
+        chr_sum += 1;
+        if (__builtin_expect(c < 0x80, true)) {         /* 0xxxxxxx (0x00-0x7F) ASCII */
+            if (c == '\n') {
+                line_sum += 1;
+                line_pos = chr_sum;
+            }
+            cur += 1;
+        }
+        else if (c < 0xC0) cur += 1;    /* 10xxxxxx (0x80-0xBF) Invalid */
+        else if (c < 0xE0) cur += 2;    /* 110xxxxx (0xC0-0xDF) 2-byte UTF-8 */
+        else if (c < 0xF0) cur += 3;    /* 1110xxxx (0xE0-0xEF) 3-byte UTF-8 */
+        else if (c < 0xF8) cur += 4;    /* 11110xxx (0xF0-0xF7) 4-byte UTF-8 */
+        else               cur += 1;    /* 11111xxx (0xF8-0xFF) Invalid */
+    }
+
+    if (line) *line = line_sum + 1;
+    if (col) *col = chr_sum - line_pos + 1;
+    if (chr) *chr = chr_sum;
+    return true;
+}
+
+
 static bool parseJsoncFile(const char* path)
 {
     assert(!instance.state.configDoc);
 
     {
         yyjson_read_err error;
-        instance.state.configDoc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, &error);
+        instance.state.configDoc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, &error);
         if (!instance.state.configDoc)
         {
             if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
             {
-                fprintf(stderr, "Error: failed to parse JSON config file `%s` at pos %zu: %s\n", path, error.pos, error.msg);
+                size_t row = 0, col = error.pos;
+                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+                if (ffAppendFileBuffer(path, &content))
+                    ffyyjson_locate_pos(content.chars, content.length, error.pos, &row, &col, NULL);
+                fprintf(stderr, "Error: failed to parse JSON config file `%s` at (%zu, %zu): %s\n", path, row, col, error.msg);
                 exit(477);
             }
             return false;
