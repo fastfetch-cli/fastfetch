@@ -1,10 +1,10 @@
 # 2.12.0
 
 Changes:
-* The native support of (long deprecated) flag based config files are removed.
-    * They can still be used by `xargs fastfetch < /path/to/config.conf`
+* The long deprecated flag based config files are removed.
+    * They can still be used with `xargs fastfetch < /path/to/config.conf`
     * `--gen-config` can be used to migrate them to json based config files
-* The (long deprecated) options `--set` and `--set-keyless` are removed.
+* The long deprecated options `--set` and `--set-keyless` are removed.
 * `Kernel` module now prints kernel name by default
 
 Features:
@@ -18,15 +18,15 @@ Features:
     * Requires root permission to work on Linux and FreeBSD
 * Support specifying `--logo-width` only for `--kitty-direct` and `--iterm` (Logo)
 * Add option `--localip-show-all-ips` to show all IPs assigned to the same interface (LocalIP)
-    * By default first IP will be shown only
+    * Default to `false`
+* Improve compatibility with `(*term)` (#909, Terminal, macOS)
 
 Bugfixes:
-* Rename option `--temperature-unit` to `--temp-unit` as stated in help messages
-* Fix compatibility with `(*term)` (#909, Terminal, macOS)
-* Fix alternate logo doesn't work with type builtin (Logo)
-* Fix DahliaOS detection (Logo)
+* Rename option `--temperature-unit` to `--temp-unit` as documented in help messages
+* Fix alternate logo doesn't work with `{ "type": "builtin" }` (#914, Logo)
 
 Logos:
+* Fix DahliaOS detection
 * Add openSUSE Slowroll
 * Add macOS3
 * Add Quirinux
