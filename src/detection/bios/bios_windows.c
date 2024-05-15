@@ -1,11 +1,9 @@
 #include "bios.h"
 #include "util/smbiosHelper.h"
 #include "util/windows/registry.h"
-#include "efi.h"
 
 #include <ntstatus.h>
 #include <winternl.h>
-#include <windows.h>
 
 typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
 {
@@ -54,76 +52,6 @@ typedef struct FFSmbiosBios
 static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
     "FFSmbiosBios: Wrong struct alignment");
 
-const char* enablePrivilege(const wchar_t* privilege)
-{
-    HANDLE token;
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
-        return "OpenProcessToken() failed";
-
-    TOKEN_PRIVILEGES tp = {
-        .PrivilegeCount = 1,
-        .Privileges = {
-            (LUID_AND_ATTRIBUTES) { .Attributes = SE_PRIVILEGE_ENABLED }
-        },
-    };
-    if (!LookupPrivilegeValueW(NULL, privilege, &tp.Privileges[0].Luid))
-        return "LookupPrivilegeValue() failed";
-
-    if (!AdjustTokenPrivileges(token, false, &tp, sizeof(tp), NULL, NULL))
-        return "AdjustTokenPrivileges() failed";
-
-    if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
-        return "The token does not have the specified privilege";
-
-    return NULL;
-}
-
-const char *detectBootmgr(FFstrbuf *result)
-{
-    if (enablePrivilege(L"SeSystemEnvironmentPrivilege") != NULL)
-        return "Failed to enable SeSystemEnvironmentPrivilege";
-
-    uint16_t value;
-    if (GetFirmwareEnvironmentVariableW(L"BootCurrent", L"{" FF_EFI_GLOBAL_GUID L"}", &value, sizeof(value)) != 2)
-        return "GetFirmwareEnvironmentVariableW(BootCurrent) failed";
-
-    uint8_t buffer[2048];
-    wchar_t key[16];
-    wsprintfW(key, L"Boot%04X", value);
-    uint32_t size = GetFirmwareEnvironmentVariableW(key, L"{" FF_EFI_GLOBAL_GUID L"}", buffer, sizeof(buffer));
-    if (size < sizeof(FFEfiLoadOption) || size == sizeof(buffer))
-        return "GetFirmwareEnvironmentVariableW(Boot####) failed";
-
-    FFEfiLoadOption *efiOption = (FFEfiLoadOption *)buffer;
-    uint32_t descLen = 0;
-    while (efiOption->Description[descLen]) ++descLen;
-
-    for (
-        ffEfiDevicePathProtocol* filePathList = (void*) &efiOption->Description[descLen + 1];
-        filePathList->Type != 0x7F; // End of Hardware Device Path
-        filePathList = (void*) ((uint8_t*) filePathList + filePathList->Length))
-    {
-        if (filePathList->Type == 4 && filePathList->SubType == 4)
-        {
-            // https://uefi.org/specs/UEFI/2.10/10_Protocols_Device_Path_Protocol.html#file-path-media-device-path
-            ffUcs2ToUtf8((uint16_t*) filePathList->SpecificDevicePathData, result);
-            return NULL;
-        }
-    }
-
-    if (!result->length) ffUcs2ToUtf8(efiOption->Description, result);
-    return NULL;
-}
-
-const char *detectSecureBoot(bool* result)
-{
-    DWORD uefiSecureBootEnabled = 0, bufSize = 0;
-    if (RegGetValueW(HKEY_LOCAL_MACHINE, L"SYSTEM\\ControlSet001\\Control\\SecureBoot\\State", L"UEFISecureBootEnabled", RRF_RT_REG_DWORD, NULL, &uefiSecureBootEnabled, &bufSize) != ERROR_SUCCESS)
-        return "RegGetValueW(HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Control\\SecureBoot\\State) failed";
-    *result = !!uefiSecureBootEnabled;
-    return NULL;
-}
-
 const char* ffDetectBios(FFBiosResult* bios)
 {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
@@ -156,12 +84,6 @@ const char* ffDetectBios(FFBiosResult* bios)
             case FirmwareTypeBios: ffStrbufSetStatic(&bios->type, "BIOS"); break;
             case FirmwareTypeUefi: ffStrbufSetStatic(&bios->type, "UEFI"); break;
             default: break;
-        }
-
-        if (sbei.FirmwareType == FirmwareTypeUefi)
-        {
-            detectSecureBoot(&bios->secureBoot);
-            detectBootmgr(&bios->bootmgr);
         }
     }
 

@@ -4,7 +4,7 @@
 #include "modules/bios/bios.h"
 #include "util/stringUtils.h"
 
-#define FF_BIOS_NUM_FORMAT_ARGS 7
+#define FF_BIOS_NUM_FORMAT_ARGS 5
 
 void ffPrintBios(FFBiosOptions* options)
 {
@@ -14,8 +14,6 @@ void ffPrintBios(FFBiosOptions* options)
     ffStrbufInit(&bios.vendor);
     ffStrbufInit(&bios.version);
     ffStrbufInit(&bios.type);
-    ffStrbufInit(&bios.bootmgr);
-    bios.secureBoot = false;
 
     const char* error = ffDetectBios(&bios);
 
@@ -67,8 +65,6 @@ void ffPrintBios(FFBiosOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.vendor},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.version},
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.bootmgr},
-            {FF_FORMAT_ARG_TYPE_BOOL, &bios.secureBoot},
         }));
     }
 
@@ -78,7 +74,6 @@ exit:
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
     ffStrbufDestroy(&bios.type);
-    ffStrbufDestroy(&bios.bootmgr);
 }
 
 bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const char* value)
@@ -124,8 +119,6 @@ void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut
     ffStrbufInit(&bios.vendor);
     ffStrbufInit(&bios.version);
     ffStrbufInit(&bios.type);
-    ffStrbufInit(&bios.bootmgr);
-    bios.secureBoot = false;
 
     const char* error = ffDetectBios(&bios);
 
@@ -141,8 +134,6 @@ void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &bios.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &bios.version);
     yyjson_mut_obj_add_strbuf(doc, obj, "type", &bios.type);
-    yyjson_mut_obj_add_strbuf(doc, obj, "bootmgr", &bios.bootmgr);
-    yyjson_mut_obj_add_bool(doc, obj, "secureBoot", bios.secureBoot);
 
 exit:
     ffStrbufDestroy(&bios.date);
@@ -150,7 +141,6 @@ exit:
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
     ffStrbufDestroy(&bios.type);
-    ffStrbufDestroy(&bios.bootmgr);
 }
 
 void ffPrintBiosHelpFormat(void)
@@ -161,8 +151,6 @@ void ffPrintBiosHelpFormat(void)
         "bios vendor",
         "bios version",
         "firmware type",
-        "Boot manager used to boot the system",
-        "Is secure boot enabled",
     }));
 }
 
