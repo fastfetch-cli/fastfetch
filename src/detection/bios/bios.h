@@ -9,6 +9,8 @@ typedef struct FFBiosResult
     FFstrbuf vendor;
     FFstrbuf version;
     FFstrbuf type;
+    FFstrbuf bootmgr;
+    bool secureBoot;
 } FFBiosResult;
 
 const char* ffDetectBios(FFBiosResult* bios);
