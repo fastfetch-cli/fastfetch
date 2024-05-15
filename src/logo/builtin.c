@@ -23,7 +23,7 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
-    // AerOS
+   // AerOS
     {
         .names = {"aerOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_AEROS,
@@ -3821,7 +3821,14 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
-    // Slackel
+     // SpoinkOS
+    {
+        .names = {"SpoinkOS", "spoink-os"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SPOINKOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },  
+   // Slackel
     {
         .names = {"Slackel"},
         .lines = FASTFETCH_DATATEXT_LOGO_SLACKEL,
