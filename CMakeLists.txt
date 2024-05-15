@@ -284,6 +284,7 @@ set(LIBFASTFETCH_SRC
     src/common/properties.c
     src/common/settings.c
     src/common/temps.c
+    src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
@@ -314,6 +315,7 @@ set(LIBFASTFETCH_SRC
     src/modules/bios/bios.c
     src/modules/bluetooth/bluetooth.c
     src/modules/board/board.c
+    src/modules/bootmgr/bootmgr.c
     src/modules/brightness/brightness.c
     src/modules/break/break.c
     src/modules/camera/camera.c
@@ -394,6 +396,7 @@ if(LINUX)
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
+        src/detection/bootmgr/bootmgr_linux.c
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
@@ -520,6 +523,7 @@ elseif(BSD)
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/board/board_bsd.c
+        src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
@@ -588,6 +592,7 @@ elseif(APPLE)
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
         src/detection/board/board_apple.c
+        src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
@@ -647,6 +652,7 @@ elseif(WIN32)
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
+        src/detection/bootmgr/bootmgr_windows.c
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
