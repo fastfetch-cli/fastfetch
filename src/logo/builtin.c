@@ -3821,6 +3821,13 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    // SpoinkOS
+    {
+        .names = {"SpoinkOS", "spoink-os"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SPOINKOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },  
     // Slackel
     {
         .names = {"Slackel"},
