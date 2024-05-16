@@ -1,4 +1,4 @@
-#include "fastfetch.h"
+#include "bootmgr.h"
 
 // https://uefi.org/specs/UEFI/2.10/10_Protocols_Device_Path_Protocol.html#generic-device-path-structures
 typedef struct ffEfiDevicePathProtocol
@@ -19,6 +19,6 @@ typedef struct FFEfiLoadOption
     // uint8_t OptionalData[];
 } FFEfiLoadOption;
 
-void ffEfiUcs2ToUtf8(const uint16_t *const chars, FFstrbuf* result);
+bool ffEfiFillLoadOption(const FFEfiLoadOption* efiOption, FFBootmgrResult* result);
 
 #define FF_EFI_GLOBAL_GUID "8be4df61-93ca-11d2-aa0d-00e098032b8c"

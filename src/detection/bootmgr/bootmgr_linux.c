@@ -1,6 +1,6 @@
 #include "bootmgr.h"
 #include "common/io/io.h"
-#include "efi.h"
+#include "efi_helper.h"
 
 #define FF_EFIVARS_PATH_PREFIX "/sys/firmware/efi/efivars/"
 
@@ -18,25 +18,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     if (size < 5 + (int) sizeof(FFEfiLoadOption) || size == (ssize_t) sizeof(buffer))
         return "Failed to read efivar: Boot####";
 
-    FFEfiLoadOption *efiOption = (FFEfiLoadOption *)&buffer[4];
-    uint32_t descLen = 0;
-    while (efiOption->Description[descLen]) ++descLen;
-
-    if (descLen)
-        ffEfiUcs2ToUtf8(efiOption->Description, &result->name);
-
-    for (
-        ffEfiDevicePathProtocol* filePathList = (void*) &efiOption->Description[descLen + 1];
-        filePathList->Type != 0x7F; // End of Hardware Device Path
-        filePathList = (void*) ((uint8_t*) filePathList + filePathList->Length))
-    {
-        if (filePathList->Type == 4 && filePathList->SubType == 4)
-        {
-            // https://uefi.org/specs/UEFI/2.10/10_Protocols_Device_Path_Protocol.html#file-path-media-device-path
-            ffEfiUcs2ToUtf8((uint16_t*) filePathList->SpecificDevicePathData, &result->firmware);
-            break;
-        }
-    }
+    ffEfiFillLoadOption((FFEfiLoadOption *)&buffer[4], result);
 
     if (ffReadFileData(FF_EFIVARS_PATH_PREFIX "SecureBoot-" FF_EFI_GLOBAL_GUID, sizeof(buffer), buffer) == 6)
         result->secureBoot = buffer[4] == 1;

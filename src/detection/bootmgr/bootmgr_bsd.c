@@ -1,5 +1,5 @@
 #include "bootmgr.h"
-#include "efi.h"
+#include "efi_helper.h"
 #include "common/io/io.h"
 
 #include <sys/efiio.h>
@@ -31,25 +31,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     if (ioctl(efifd, EFIIOC_VAR_GET, &ioc) < 0 || ioc.datasize == sizeof(buffer))
         return "ioctl(EFIIOC_VAR_GET, Boot####) failed";
 
-    FFEfiLoadOption *efiOption = (FFEfiLoadOption *)buffer;
-    uint32_t descLen = 0;
-    while (efiOption->Description[descLen]) ++descLen;
-
-    if (descLen)
-        ffEfiUcs2ToUtf8(efiOption->Description, &result->name);
-
-    for (
-        ffEfiDevicePathProtocol* filePathList = (void*) &efiOption->Description[descLen + 1];
-        filePathList->Type != 0x7F; // End of Hardware Device Path
-        filePathList = (void*) ((uint8_t*) filePathList + filePathList->Length))
-    {
-        if (filePathList->Type == 4 && filePathList->SubType == 4)
-        {
-            // https://uefi.org/specs/UEFI/2.10/10_Protocols_Device_Path_Protocol.html#file-path-media-device-path
-            ffEfiUcs2ToUtf8((uint16_t*) filePathList->SpecificDevicePathData, &result->firmware);
-            break;
-        }
-    }
+    ffEfiFillLoadOption((FFEfiLoadOption *)buffer, result);
 
     ioc.name = (efi_char[]){ 'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', '\0' };
     ioc.namesize = sizeof("SecureBoot") * 2;
