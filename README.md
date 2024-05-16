@@ -128,6 +128,24 @@ If you really don't like it, you can disable the `Local IP` module in `config.js
 
 Alternatively, you can refer to the presets in [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
 
+### Q: How can I customize the module output?
+
+Fastfetch uses `format` to generate output. For example to make `GPU` module show GPU name only and ignore other information, you can use
+
+```jsonc
+{
+    "modules": [
+        {
+            "type": "gpu",
+            "format": "{2}" // See `fastfetch -h gpu-format` for detail
+        }
+    ]
+}
+
+which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
+
+See `fastfetch -h format` for basic usage. For module specific formattion, see `fastfetch -h <module>-format`
+
 ### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
 
 Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
