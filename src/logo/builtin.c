@@ -2385,6 +2385,18 @@ static const FFlogo L[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Loc-OS
+    {
+        .names = {"loc-os", "Loc-OS Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LOCOS,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Lunar
     {
         .names = {"Lunar"},
