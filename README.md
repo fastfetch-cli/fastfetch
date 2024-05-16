@@ -112,7 +112,7 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 
 ### Q: Fastfetch shows my local IP address. It leaks my privacy!
 
-The local IP has nothing to do with privacy. [See discussion here](https://github.com/fastfetch-cli/fastfetch/issues/923)
+A local IP (10.x.x.x, 172.x.x.x, 192.168.x.x) has nothing to do with privacy. It only makes sense if you are on the same network, for example, if you connect to the same Wi-Fi network.
 
 Actually the `Local IP` module is the most useful module for me personally. I (@CarterLi) have several VMs installed to test fastfetch and often need to SSH into them. I have fastfetch running on shell startup and I never need to type `ip addr` manually.
 
@@ -131,6 +131,25 @@ Alternatively, you can refer to the presets in [`presets` directory](https://git
 ### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
 
 Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
+
+### Q: I want feature A / B / C. Will fastfetch support it?
+
+Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
+
+```jsonc
+// This module shows the default editor
+{
+    "modules": [
+        {
+            "type": "command",
+            "text": "$EDITOR --version | head -1",
+            "key": "Editor"
+        }
+    ]
+}
+```
+
+Otherwise, open a feature request in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues).
 
 ### Q: I have questions. Where can I get help?
 
