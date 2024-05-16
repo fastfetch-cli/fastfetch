@@ -3827,7 +3827,8 @@ static const FFlogo S[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_SPOINKOS,
         .colors = {
             FF_COLOR_FG_GREEN,
-        },  
+        },
+    },
     // Slackel
     {
         .names = {"Slackel"},
