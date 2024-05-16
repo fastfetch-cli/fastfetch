@@ -680,6 +680,7 @@
                             "bios",
                             "bluetooth",
                             "board",
+                            "bootmgr",
                             "break",
                             "brightness",
                             "camera",
@@ -713,6 +714,7 @@
                             "os",
                             "packages",
                             "physicaldisk",
+                            "physicalmemory",
                             "player",
                             "poweradapter",
                             "processes",
@@ -771,11 +773,15 @@
                                         "anyOf": [
                                             {
                                                 "const": "bios",
-                                                "description": "Print BIOS name, version, release date, etc"
+                                                "description": "Print information of 1st-stage bootloader (name, version, release date, etc)"
                                             },
                                             {
                                                 "const": "board",
                                                 "description": "Print mather board name and other info"
+                                            },
+                                            {
+                                                "const": "bootmgr",
+                                                "description": "Print information of 2nd-stage bootloader (name, firmware, etc)"
                                             },
                                             {
                                                 "const": "camera",
@@ -828,6 +834,10 @@
                                             {
                                                 "const": "os",
                                                 "description": "Print operating system name and version"
+                                            },
+                                            {
+                                                "const": "physicalmemory",
+                                                "description": "Print system physical memory devices"
                                             },
                                             {
                                                 "const": "player",
