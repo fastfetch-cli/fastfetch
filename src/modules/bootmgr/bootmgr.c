@@ -126,7 +126,7 @@ void ffInitBootmgrOptions(FFBootmgrOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BOOTMGR_MODULE_NAME,
-        "Print boot manager name, firmware, etc",
+        "Print information of 2nd-stage bootloader (name, firmware, etc)",
         ffParseBootmgrCommandOptions,
         ffParseBootmgrJsonObject,
         ffPrintBootmgr,

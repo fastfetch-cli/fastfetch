@@ -159,7 +159,7 @@ void ffInitBiosOptions(FFBiosOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BIOS_MODULE_NAME,
-        "Print BIOS name, version, release date, etc",
+        "Print information of 1st-stage bootloader (name, version, release date, etc)",
         ffParseBiosCommandOptions,
         ffParseBiosJsonObject,
         ffPrintBios,
