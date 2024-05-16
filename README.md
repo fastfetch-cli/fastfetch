@@ -120,13 +120,17 @@ If you really don't like it, you can disable the `Local IP` module in `config.js
 
 ### Q: Where is the config file? I can't find it.
 
-`Fastfetch` don't generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file is saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
+`Fastfetch` don't generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
 
 ### Q: The configuration is so complex. Where is the documentation?
 
-[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema), but too long don't read. Instead, use an IDE with JSON schema support (like VSCode) to edit it.
+Fastfetch uses JSON (with comments) for configuration. I suggest you use an IDE with JSON schema support (like VSCode) to edit it.
 
 Alternatively, you can refer to the presets in [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
+
+### Q: I WANT THE DOCUMENTATION!
+
+[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema). It is generated from [JSON schema](https://github.com/fastfetch-cli/fastfetch/blob/dev/doc/json_schema.json) but you won't like it.
 
 ### Q: How can I customize the module output?
 
@@ -141,6 +145,7 @@ Fastfetch uses `format` to generate output. For example to make `GPU` module sho
         }
     ]
 }
+```
 
 which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
 
