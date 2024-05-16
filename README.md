@@ -112,7 +112,7 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 
 ### Q: Fastfetch shows my local IP address. It leaks my privacy!
 
-The local IP has nothing to do with privacy. [See discussion here](https://github.com/fastfetch-cli/fastfetch/issues/923)
+A local IP (10.x.x.x, 172.x.x.x, 192.168.x.x) has nothing to do with privacy. It only makes sense if you are on the same network, for example, if you connect to the same Wi-Fi network.
 
 Actually the `Local IP` module is the most useful module for me personally. I (@CarterLi) have several VMs installed to test fastfetch and often need to SSH into them. I have fastfetch running on shell startup and I never need to type `ip addr` manually.
 
@@ -120,17 +120,59 @@ If you really don't like it, you can disable the `Local IP` module in `config.js
 
 ### Q: Where is the config file? I can't find it.
 
-`Fastfetch` don't generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file is saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
+`Fastfetch` don't generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
 
 ### Q: The configuration is so complex. Where is the documentation?
 
-[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema), but too long don't read. Instead, use an IDE with JSON schema support (like VSCode) to edit it.
+Fastfetch uses JSON (with comments) for configuration. I suggest you use an IDE with JSON schema support (like VSCode) to edit it.
 
 Alternatively, you can refer to the presets in [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
+
+### Q: I WANT THE DOCUMENTATION!
+
+[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema). It is generated from [JSON schema](https://github.com/fastfetch-cli/fastfetch/blob/dev/doc/json_schema.json) but you won't like it.
+
+### Q: How can I customize the module output?
+
+Fastfetch uses `format` to generate output. For example to make `GPU` module show GPU name only and ignore other information, you can use
+
+```jsonc
+{
+    "modules": [
+        {
+            "type": "gpu",
+            "format": "{2}" // See `fastfetch -h gpu-format` for detail
+        }
+    ]
+}
+```
+
+which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
+
+See `fastfetch -h format` for basic usage. For module specific formattion, see `fastfetch -h <module>-format`
 
 ### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
 
 Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
+
+### Q: I want feature A / B / C. Will fastfetch support it?
+
+Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
+
+```jsonc
+// This module shows the default editor
+{
+    "modules": [
+        {
+            "type": "command",
+            "text": "$EDITOR --version | head -1",
+            "key": "Editor"
+        }
+    ]
+}
+```
+
+Otherwise, open a feature request in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues).
 
 ### Q: I have questions. Where can I get help?
 
