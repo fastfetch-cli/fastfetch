@@ -157,12 +157,11 @@ static bool detectDebianDerived(FFOSResult* result)
         return true;
     }
     else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
-        {
-            ffStrbufSetS(&result->name, "Loc-OS Linux"); // (ffStrbufEqualS(&os->id, "MX")
-            ffStrbufSetS(&result->id, "locos");
-            ffStrbufSetS(&result->idLike, "debian");
-            return true;
-        }
+    {
+        ffStrbufSetS(&result->id, "locos");
+        ffStrbufSetS(&result->idLike, "debian");
+        return true;
+    }
     else if (ffPathExists("/usr/bin/pveversion", FF_PATHTYPE_FILE))
     {
         ffStrbufSetS(&result->id, "pve");

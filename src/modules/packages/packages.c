@@ -47,8 +47,6 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(emerge)
         FF_PRINT_PACKAGE(eopkg)
         FF_PRINT_PACKAGE(xbps)
-        FF_PRINT_PACKAGE(lpkg)
-        FF_PRINT_PACKAGE(lpkgbuild)
         FF_PRINT_PACKAGE_NAME(nixSystem, "nix-system")
         FF_PRINT_PACKAGE_NAME(nixUser, "nix-user")
         FF_PRINT_PACKAGE_NAME(nixDefault, "nix-default")
@@ -68,6 +66,8 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(opkg)
         FF_PRINT_PACKAGE(am)
         FF_PRINT_PACKAGE(sorcery)
+        FF_PRINT_PACKAGE(lpkg)
+        FF_PRINT_PACKAGE(lpkgbuild)
 
         putchar('\n');
     }
@@ -393,7 +393,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
 
 void ffPrintPackagesHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (lpkg), {15} (lpkgbuild), {16} (flatpak-system), {17} (flatpack-user), {18} (snap), {19} (brew), {20} (brew-cask), {21} (MacPorts), {22} (scoop), {23} (choco), {24} (pkgtool), {25} (paludis), {26} (winget), {27} (opkg), {28} (am), {29} (sorcery)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
         "Number of all packages",
         "Number of pacman packages",
         "Pacman branch on manjaro",
@@ -407,8 +407,6 @@ void ffPrintPackagesHelpFormat(void)
         "Number of nix-default packages",
         "Number of apk packages",
         "Number of pkg packages",
-        "Number of lpkg packages",
-        "Number of lpkgbuild packages",
         "Number of flatpak-system packages",
         "Number of flatpak-user packages",
         "Number of snap packages",
@@ -423,6 +421,8 @@ void ffPrintPackagesHelpFormat(void)
         "Number of opkg packages",
         "Number of am packages",
         "Number of sorcery packages",
+        "Number of lpkg packages",
+        "Number of lpkgbuild packages",
         "Total number of all nix packages",
         "Total number of all flatpak packages",
         "Total number of all brew packages",
