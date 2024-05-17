@@ -245,6 +245,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrEquals(name, "time")                ||
                 ffStrEquals(name, "hyfetch")             || //when hyfetch uses fastfetch as backend
                 ffStrEquals(name, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
+                ffStrEquals(name, "valgrind")            ||
                 ffStrContainsIgnCase(name, "debug")      ||
                 ffStrContainsIgnCase(name, "not-found")  ||
                 ffStrEndsWith(name, ".sh")
