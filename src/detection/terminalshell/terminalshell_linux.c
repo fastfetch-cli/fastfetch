@@ -244,6 +244,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrEquals(name, "guake-wrapped")       ||
                 ffStrEquals(name, "time")                ||
                 ffStrEquals(name, "hyfetch")             || //when hyfetch uses fastfetch as backend
+                ffStrEquals(name, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
                 ffStrContainsIgnCase(name, "debug")      ||
                 ffStrContainsIgnCase(name, "not-found")  ||
                 ffStrEndsWith(name, ".sh")
@@ -294,6 +295,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrEquals(name, "login")      ||
             ffStrEquals(name, "sshd")       ||
+            ffStrEquals(name, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
             ffStrEquals(name, "chezmoi")    || // #762
             #ifdef __linux__
             ffStrStartsWith(name, "flatpak-") || // #707
