@@ -66,6 +66,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         }
         ffStrbufClear(&buffer);
     }
+    cpu->frequencyMin /= 1000;
+    cpu->frequencyMax /= 1000;
 
     int clockRate = ffSysctlGetInt("hw.clockrate", 0);
     cpu->frequencyBase = clockRate <= 0 ? 0.0/0.0 : clockRate / 1000.0;
