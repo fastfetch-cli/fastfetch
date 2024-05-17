@@ -10,12 +10,14 @@
 
 void ffPrintCPU(FFCPUOptions* options)
 {
-    FFCPUResult cpu;
-    cpu.temperature = FF_CPU_TEMP_UNSET;
-    cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
-    cpu.frequencyMin = cpu.frequencyMax = cpu.frequencyBase = 0.0/0.0;
-    ffStrbufInit(&cpu.name);
-    ffStrbufInit(&cpu.vendor);
+    FFCPUResult cpu = {
+        .temperature = FF_CPU_TEMP_UNSET,
+        .frequencyMin = 0.0/0.0,
+        .frequencyMax = 0.0/0.0,
+        .frequencyBase = 0.0/0.0,
+        .name = ffStrbufCreate(),
+        .vendor = ffStrbufCreate()
+    };
 
     const char* error = ffDetectCPU(options, &cpu);
 
@@ -143,12 +145,14 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
 void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FFCPUResult cpu;
-    cpu.temperature = FF_CPU_TEMP_UNSET;
-    cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
-    cpu.frequencyMin = cpu.frequencyMax = cpu.frequencyBase = 0.0/0.0;
-    ffStrbufInit(&cpu.name);
-    ffStrbufInit(&cpu.vendor);
+    FFCPUResult cpu = {
+        .temperature = FF_CPU_TEMP_UNSET,
+        .frequencyMin = 0.0/0.0,
+        .frequencyMax = 0.0/0.0,
+        .frequencyBase = 0.0/0.0,
+        .name = ffStrbufCreate(),
+        .vendor = ffStrbufCreate()
+    };
 
     const char* error = ffDetectCPU(options, &cpu);
 
@@ -175,6 +179,10 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_real(doc, frequency, "base", cpu.frequencyBase);
         yyjson_mut_obj_add_real(doc, frequency, "max", cpu.frequencyMax);
         yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
+
+        yyjson_mut_val* coreCounts = yyjson_mut_obj_add_arr(doc, obj, "coreCounts");
+        for (uint32_t i = 0; i < sizeof (cpu.coreCounts) && cpu.coreCounts[i] > 0; i++)
+            yyjson_mut_arr_add_uint(doc, coreCounts, cpu.coreCounts[i]);
 
         yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
     }

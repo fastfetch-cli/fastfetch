@@ -17,6 +17,8 @@ typedef struct FFCPUResult
     double frequencyMax; // GHz
     double frequencyMin; // GHz
 
+    uint8_t coreCounts[8]; // number of P cores, E cores, etc.
+
     double temperature;
 } FFCPUResult;
 

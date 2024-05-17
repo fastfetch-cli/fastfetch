@@ -88,14 +88,14 @@ static const char* parseCpuInfo(FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer,
     return NULL;
 }
 
-static double getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, const char* scalingFileName, FFstrbuf* buffer)
+static uint32_t getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, const char* scalingFileName, FFstrbuf* buffer)
 {
     uint32_t baseLen = basePath->length;
     ffStrbufAppendS(basePath, cpuinfoFileName);
     bool ok = ffReadFileBuffer(basePath->chars, buffer);
     ffStrbufSubstrBefore(basePath, baseLen);
     if (ok)
-        return ffStrbufToDouble(buffer) / 1e6;
+        return (uint32_t) ffStrbufToUInt(buffer, 0);
 
     if (scalingFileName)
     {
@@ -103,10 +103,28 @@ static double getFrequency(FFstrbuf* basePath, const char* cpuinfoFileName, cons
         ok = ffReadFileBuffer(basePath->chars, buffer);
         ffStrbufSubstrBefore(basePath, baseLen);
         if (ok)
-            return ffStrbufToDouble(buffer) / 1e6;
+            return (uint32_t) ffStrbufToUInt(buffer, 0);
     }
 
-    return 0.0/0.0;
+    return 0;
+}
+
+static uint8_t getNumCores(FFstrbuf* basePath, FFstrbuf* buffer)
+{
+    uint32_t baseLen = basePath->length;
+    ffStrbufAppendS(basePath, "/affected_cpus");
+    bool ok = ffReadFileBuffer(basePath->chars, buffer);
+    ffStrbufSubstrBefore(basePath, baseLen);
+    if (ok)
+        return (uint8_t) ffStrbufCountC(buffer, ' ') + 1;
+
+    ffStrbufAppendS(basePath, "/related_cpus");
+    ok = ffReadFileBuffer(basePath->chars, buffer);
+    ffStrbufSubstrBefore(basePath, baseLen);
+    if (ok)
+        return (uint8_t) ffStrbufCountC(buffer, ' ') + 1;
+
+    return 0;
 }
 
 static bool detectFrequency(FFCPUResult* cpu)
@@ -118,30 +136,41 @@ static bool detectFrequency(FFCPUResult* cpu)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     uint32_t baseLen = path.length;
 
+    uint64_t freq = (uint64_t) -1;
+    uint32_t ifreq = (uint32_t) -1;
+
     struct dirent* entry;
     while((entry = readdir(dir)) != NULL)
     {
         if (ffStrStartsWith(entry->d_name, "policy") && isdigit(entry->d_name[strlen("policy")]))
         {
             ffStrbufAppendS(&path, entry->d_name);
-            double fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
-            if (fbase == fbase)
+            uint32_t fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
+            if (fbase > 0)
             {
                 if (cpu->frequencyBase == cpu->frequencyBase)
                     cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
                 else
                     cpu->frequencyBase = fbase;
             }
-            double fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
-            if (fmax == fmax)
+            uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
+            if (fmax > 0)
             {
                 if (cpu->frequencyMax == cpu->frequencyMax)
                     cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
                 else
                     cpu->frequencyMax = fmax;
+
+                if (fmax != freq)
+                {
+                    freq = fmax;
+                    ++ifreq;
+                }
+                if (__builtin_expect(ifreq < sizeof(cpu->coreCounts), true))
+                    cpu->coreCounts[ifreq] += getNumCores(&path, &buffer);
             }
-            double fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
-            if (fmin == fmin)
+            uint32_t fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
+            if (fmin > 0)
             {
                 if (cpu->frequencyMin == cpu->frequencyMin)
                     cpu->frequencyMin = cpu->frequencyMin < fmin ? cpu->frequencyMin : fmin;
@@ -151,6 +180,9 @@ static bool detectFrequency(FFCPUResult* cpu)
             ffStrbufSubstrBefore(&path, baseLen);
         }
     }
+    cpu->frequencyBase /= 1e6;
+    cpu->frequencyMax /= 1e6;
+    cpu->frequencyMin /= 1e6;
     return true;
 }
 
