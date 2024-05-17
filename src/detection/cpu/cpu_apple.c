@@ -55,6 +55,19 @@ static const char* detectFrequency(FFCPUResult* cpu)
 
     cpu->frequencyMin = (pMin < eMin ? pMin : eMin) / (1000.0 * 1000 * 1000);
 
+    int nPerfLevels = ffSysctlGetInt("hw.nperflevels", 0);
+    if (nPerfLevels > 0)
+    {
+        if (nPerfLevels > (int) sizeof(cpu->coreCounts))
+            nPerfLevels = (int) sizeof(cpu->coreCounts);
+        char sysctlKey[] = "hw.perflevelN.logicalcpu";
+        for (int i = 0; i < nPerfLevels; ++i)
+        {
+            sysctlKey[strlen("hw.perflevel")] = (char) ('0' + i);
+            cpu->coreCounts[i] = (uint8_t) ffSysctlGetInt(sysctlKey, 0);
+        }
+    }
+
     if (pCoreLength >= 8)
     {
         ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), pCoreLength - 8, 4, (uint8_t*) &aMax, NULL);
