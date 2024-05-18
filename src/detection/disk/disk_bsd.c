@@ -80,7 +80,7 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
     if(fs->f_flags & MNT_DONTBROWSE)
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-    else if(fs->f_flags & MNT_REMOVABLE || !(fs->f_flags & MNT_LOCAL))  
+    else if(fs->f_flags & MNT_REMOVABLE || !(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
