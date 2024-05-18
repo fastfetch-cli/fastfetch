@@ -4075,10 +4075,9 @@ static const FFlogo T[] = {
         .names = {"TorizonCore"},
         .lines = FASTFETCH_DATATEXT_LOGO_TORIZONCORE,
         .colors = {
+            FF_COLOR_FG_LIGHT_WHITE,
             FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_LIGHT_BLACK,
-            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE
         },
     },
     // Trisquel
