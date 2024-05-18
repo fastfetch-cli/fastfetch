@@ -11,6 +11,62 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresLogical = cpu->coresPhysical;
     cpu->coresOnline = cpu->coresPhysical;
 
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    if (ffSysctlGetString("kern.sched.topology_spec", &buffer) == NULL && buffer.length > 0)
+    {
+        // <groups>
+        // <group level="1" cache-level="3">
+        // <cpu count="4" mask="f,0,0,0">0, 1, 2, 3</cpu>
+        // <children>
+        // <group level="2" cache-level="2">
+        // <cpu count="2" mask="3,0,0,0">0, 1</cpu>
+        // <flags><flag name="THREAD">THREAD group</flag><flag name="SMT">SMT group</flag></flags>
+        // </group>
+        // <group level="2" cache-level="2">
+        // <cpu count="2" mask="c,0,0,0">2, 3</cpu>
+        // <flags><flag name="THREAD">THREAD group</flag><flag name="SMT">SMT group</flag></flags>
+        // </group>
+        // </children>
+        // </group>
+        // </groups>
+        uint32_t i = 0;
+        while (true)
+        {
+            i = ffStrbufNextIndexS(&buffer, i, "<flag name=\"THREAD\">THREAD group</flag>"); // Find physical core with hyper-threading enabled
+            if (i >= buffer.length) break;
+            cpu->coresPhysical--;
+            i += (uint32_t) strlen("<flag name=\"THREAD\">THREAD group</flag>");
+        }
+    }
+
+    uint64_t freq = (uint64_t) -1;
+    uint32_t ifreq = (uint32_t) -1;
+    for (uint16_t i = 0; i < cpu->coresLogical; ++i)
+    {
+        char key[32];
+        snprintf(key, sizeof(key), "dev.cpu.%u.freq_levels", i);
+        if (ffSysctlGetString(key, &buffer) == NULL && buffer.length > 0)
+        {
+            // MHz/Watts pairs like: 2501/32000 2187/27125 2000/24000
+            uint32_t fmax = (uint32_t) strtoul(buffer.chars, NULL, 10);
+            uint32_t fmin = fmax;
+            uint32_t i = ffStrbufLastIndexC(&buffer, ' ');
+            if (i < buffer.length)
+                fmin = (uint32_t) strtoul(buffer.chars + i + 1, NULL, 10);
+            if (!(cpu->frequencyMin <= fmin)) cpu->frequencyMin = fmin; // Counting for NaN
+            if (!(cpu->frequencyMax >= fmax)) cpu->frequencyMax = fmax;
+
+            if (freq != fmax)
+            {
+                freq = fmax;
+                ++ifreq;
+            }
+            if (__builtin_expect(ifreq < sizeof(cpu->coreCounts), true))
+                cpu->coreCounts[ifreq]++;
+        }
+        ffStrbufClear(&buffer);
+    }
+
     int clockRate = ffSysctlGetInt("hw.clockrate", 0);
     cpu->frequencyBase = clockRate <= 0 ? 0.0/0.0 : clockRate / 1000.0;
     cpu->temperature = FF_CPU_TEMP_UNSET;
