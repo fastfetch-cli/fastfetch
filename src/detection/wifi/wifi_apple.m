@@ -135,6 +135,7 @@ const char* ffDetectWifi(FFlist* result)
             case kCWSecurityEnterprise:
                 ffStrbufSetStatic(&item->conn.security, "Enterprise");
                 break;
+            #ifdef MAC_OS_X_VERSION_10_15
             case kCWSecurityWPA3Personal:
                 ffStrbufSetStatic(&item->conn.security, "WPA3 Personal");
                 break;
@@ -144,6 +145,7 @@ const char* ffDetectWifi(FFlist* result)
             case kCWSecurityWPA3Transition:
                 ffStrbufSetStatic(&item->conn.security, "WPA3 Transition");
                 break;
+            #endif
             case 14 /*kCWSecurityOWE*/:
                 ffStrbufSetStatic(&item->conn.security, "OWE");
                 break;

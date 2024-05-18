@@ -97,7 +97,7 @@ void ffDetectOSImpl(FFOSResult* os)
 {
     parseSystemVersion(os);
 
-    if(ffStrbufStartsWithIgnCaseS(&os->name, "MacOS"))
+    if(ffStrbufStartsWithIgnCaseS(&os->name, "MacOS")||ffStrbufStartsWithIgnCaseS(&os->name, "Mac OS X"))
         ffStrbufSetStatic(&os->id, "macos");
 
     if(os->version.length == 0)

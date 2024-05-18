@@ -8,6 +8,7 @@
 
 const char* ffDetectCamera(FFlist* result)
 {
+    #ifdef MAC_OS_X_VERSION_10_15
     FF_SUPPRESS_IO(); // #822
 
     AVCaptureDeviceType deviceType;
@@ -47,6 +48,6 @@ const char* ffDetectCamera(FFlist* result)
         camera->width = size.width < 0 ? 0 : (uint32_t) size.width;
         camera->height = size.height < 0 ? 0 : (uint32_t) size.height;
     }
-
+    #endif
     return NULL;
 }
