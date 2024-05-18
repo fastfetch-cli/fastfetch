@@ -167,7 +167,7 @@ static const char* detectCoreTypes(FFCPUResult* cpu)
         return "NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, size) failed";
 
     uint32_t ifreq = 0;
-    for (uint32_t i = 1; i < cpu->coresLogical && pinfo[i].MhzLimit; ++i)
+    for (uint32_t i = 0; i < cpu->coresLogical && pinfo[i].MhzLimit; ++i)
     {
         if (cpu->coreTypes[ifreq].freq != pinfo[i].MhzLimit)
         {
