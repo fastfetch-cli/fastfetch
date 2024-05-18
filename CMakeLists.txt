@@ -465,6 +465,7 @@ elseif(ANDROID)
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/board/board_android.c
+        src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
