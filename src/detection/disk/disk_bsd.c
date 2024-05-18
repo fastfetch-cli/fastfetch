@@ -132,6 +132,8 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         ffStrbufInit(&disk->name);
         disk->type = 0;
+        disk->createTime = 0;
+
         detectFsInfo(fs, disk);
 
         if(fs->f_flags & MNT_RDONLY)
