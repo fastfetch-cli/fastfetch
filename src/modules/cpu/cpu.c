@@ -73,7 +73,7 @@ void ffPrintCPU(FFCPUOptions* options)
         {
             FF_STRBUF_AUTO_DESTROY coreTypes = ffStrbufCreate();
             uint32_t typeCount = 0;
-            while (cpu.coreTypes[typeCount].count != 0) typeCount++;
+            while (cpu.coreTypes[typeCount].count != 0 && typeCount < sizeof(cpu.coreTypes) / sizeof(cpu.coreTypes[0])) typeCount++;
             if (typeCount > 0)
             {
                 qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);

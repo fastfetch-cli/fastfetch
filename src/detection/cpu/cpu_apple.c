@@ -82,17 +82,19 @@ static const char* detectFrequency(FFCPUResult* cpu)
 
 static const char* detectCoreCount(FFCPUResult* cpu)
 {
-    int nPerfLevels = ffSysctlGetInt("hw.nperflevels", 0);
+    uint32_t nPerfLevels = (uint32_t) ffSysctlGetInt("hw.nperflevels", 0);
     if (nPerfLevels <= 0) return "sysctl(hw.nperflevels) failed";
 
     char sysctlKey[] = "hw.perflevelN.logicalcpu";
-    for (int i = 0; i < nPerfLevels; ++i)
+    if (nPerfLevels > sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
+        nPerfLevels = sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]);
+    for (uint32_t i = 0; i < nPerfLevels; ++i)
     {
         sysctlKey[strlen("hw.perflevel")] = (char) ('0' + i);
-        cpu->coreTypes[i < (int) sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]) : i : (int) sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]) - 1] = {
+        cpu->coreTypes[i] = (FFCPUCore) {
             .freq = nPerfLevels - i,
-            .count = ffSysctlGetInt(sysctlKey, 0),
-        }
+            .count = (uint32_t) ffSysctlGetInt(sysctlKey, 0),
+        };
     }
     return NULL;
 }
