@@ -136,11 +136,9 @@ static bool detectFrequency(FFCPUResult* cpu)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     uint32_t baseLen = path.length;
 
-    uint64_t freq = (uint64_t) -1;
-    uint32_t ifreq = (uint32_t) -1;
-
+    uint32_t ifreq = 0;
     struct dirent* entry;
-    while((entry = readdir(dir)) != NULL)
+    while ((entry = readdir(dir)) != NULL)
     {
         if (ffStrStartsWith(entry->d_name, "policy") && isdigit(entry->d_name[strlen("policy")]))
         {
@@ -161,13 +159,13 @@ static bool detectFrequency(FFCPUResult* cpu)
                 else
                     cpu->frequencyMax = fmax;
 
-                if (fmax != freq)
+                if (cpu->coreTypes[ifreq].freq != fmax)
                 {
-                    freq = fmax;
-                    ++ifreq;
+                    if (cpu->coreTypes[ifreq].count && ifreq < sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
+                        ++ifreq;
+                    cpu->coreTypes[ifreq].freq = fmax;
                 }
-                if (__builtin_expect(ifreq < sizeof(cpu->coreCounts), true))
-                    cpu->coreCounts[ifreq] += getNumCores(&path, &buffer);
+                cpu->coreTypes[ifreq].count += getNumCores(&path, &buffer);
             }
             uint32_t fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
             if (fmin > 0)

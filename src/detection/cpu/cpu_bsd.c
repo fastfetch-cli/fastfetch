@@ -39,7 +39,6 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         }
     }
 
-    uint64_t freq = (uint64_t) -1;
     uint32_t ifreq = (uint32_t) -1;
     for (uint16_t i = 0; i < cpu->coresLogical; ++i)
     {
@@ -57,13 +56,13 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             if (!(cpu->frequencyMin <= fmin)) cpu->frequencyMin = fmin; // Counting for NaN
             if (!(cpu->frequencyMax >= fmax)) cpu->frequencyMax = fmax;
 
-            if (freq != fmax)
+            if (cpu->coreTypes[ifreq].freq != fmax)
             {
-                freq = fmax;
-                ++ifreq;
+                if (cpu->coreTypes[ifreq].count && ifreq < sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
+                    ++ifreq;
+                cpu->coreTypes[ifreq].freq = fmax;
             }
-            if (__builtin_expect(ifreq < sizeof(cpu->coreCounts), true))
-                cpu->coreCounts[ifreq]++;
+            cpu->coreTypes[ifreq].count++;
         }
     }
     cpu->frequencyMin /= 1000;
