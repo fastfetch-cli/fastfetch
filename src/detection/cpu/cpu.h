@@ -4,6 +4,12 @@
 
 #define FF_CPU_TEMP_UNSET (0/0.0)
 
+typedef struct FFCPUCore
+{
+    uint32_t freq;
+    uint32_t count;
+} FFCPUCore;
+
 typedef struct FFCPUResult
 {
     FFstrbuf name;
@@ -17,7 +23,7 @@ typedef struct FFCPUResult
     double frequencyMax; // GHz
     double frequencyMin; // GHz
 
-    uint8_t coreCounts[8]; // number of P cores, E cores, etc.
+    FFCPUCore coreTypes[8]; // number of P cores, E cores, etc.
 
     double temperature;
 } FFCPUResult;

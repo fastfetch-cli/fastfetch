@@ -41,7 +41,8 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
         {"VERSION =", &result->version},
         {"VERSION_ID =", &result->versionID},
         {"VERSION_CODENAME =", &result->codename},
-        {"BUILD_ID =", &result->buildID}
+        {"CODENAME =", &result->codename},
+        {"BUILD_ID =", &result->buildID},
     });
 }
 

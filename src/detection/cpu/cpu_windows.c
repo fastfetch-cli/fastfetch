@@ -160,23 +160,22 @@ static const char* detectByRegistry(FFCPUResult* cpu)
     return NULL;
 }
 
-static const char* detectCoreCounts(FFCPUResult* cpu)
+static const char* detectCoreTypes(FFCPUResult* cpu)
 {
     FF_AUTO_FREE PROCESSOR_POWER_INFORMATION* pinfo = calloc(cpu->coresLogical, sizeof(PROCESSOR_POWER_INFORMATION));
     if (!NT_SUCCESS(NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, (ULONG) sizeof(PROCESSOR_POWER_INFORMATION) * cpu->coresLogical)))
         return "NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, size) failed";
 
-    uint64_t freq = (uint64_t) -1;
-    uint32_t ifreq = (uint32_t) -1;
+    uint32_t ifreq = 0;
     for (uint32_t i = 0; i < cpu->coresLogical && pinfo[i].MhzLimit; ++i)
     {
-        if (freq != pinfo[i].MhzLimit)
+        if (cpu->coreTypes[ifreq].freq != pinfo[i].MhzLimit)
         {
-            freq = pinfo[i].MhzLimit;
-            ++ifreq;
+            if (cpu->coreTypes[ifreq].count && ifreq < sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
+                ++ifreq;
+            cpu->coreTypes[ifreq].freq = pinfo[i].MhzLimit;
         }
-        if (__builtin_expect(ifreq < sizeof(cpu->coreCounts), true))
-            cpu->coreCounts[ifreq]++;
+        cpu->coreTypes[ifreq].count++;
     }
 
     if (cpu->frequencyBase != cpu->frequencyBase)
@@ -193,7 +192,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         return error;
 
     detectSpeedByCpuid(cpu);
-    detectCoreCounts(cpu);
+    detectCoreTypes(cpu);
 
     if (cpu->frequencyMax != cpu->frequencyMax)
         detectMaxSpeedBySmbios(cpu);

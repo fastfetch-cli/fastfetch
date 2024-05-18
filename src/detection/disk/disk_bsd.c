@@ -136,13 +136,15 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         ffStrbufInitS(&disk->filesystem, fs->f_fstypename);
         ffStrbufInit(&disk->name);
         disk->type = 0;
+        disk->createTime = 0;
+
         detectFsInfo(fs, disk);
 
         if(fs->f_flags & MNT_RDONLY)
             disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 
         struct stat st;
-        if(stat(fs->f_mntonname, &st) == 0)
+        if(stat(fs->f_mntonname, &st) == 0 && st.st_birthtimespec.tv_sec > 0)
             disk->createTime = (uint64_t)((st.st_birthtimespec.tv_sec * 1000) + (st.st_birthtimespec.tv_nsec / 1000000));
     }
 

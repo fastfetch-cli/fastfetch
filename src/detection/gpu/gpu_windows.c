@@ -61,6 +61,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     for (DWORD i = 0; EnumDisplayDevicesW(NULL, i, &displayDevice, 0); ++i)
     {
+        if (displayDevice.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) continue;
+
         const uint32_t deviceKeyLength = (uint32_t) wcslen(displayDevice.DeviceKey);
         if (__builtin_expect(deviceKeyLength == 100, true))
         {

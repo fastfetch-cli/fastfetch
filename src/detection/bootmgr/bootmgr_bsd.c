@@ -23,8 +23,8 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     if (ioctl(efifd, EFIIOC_VAR_GET, &ioc) < 0 || ioc.datasize != 2)
         return "ioctl(EFIIOC_VAR_GET, BootCurrent) failed";
 
-    char hex[5];
-    snprintf(hex, sizeof(hex), "%04X", *(uint16_t*)buffer);
+    unsigned char hex[5];
+    snprintf((char*) hex, sizeof(hex), "%04X", *(uint16_t*)buffer);
     ioc.datasize = sizeof(buffer);
     ioc.name = (efi_char[]){ 'B', 'o', 'o', 't', hex[0], hex[1], hex[2], hex[3], '\0' };
     ioc.namesize = sizeof("Boot####") * 2;

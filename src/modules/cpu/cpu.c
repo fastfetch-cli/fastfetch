@@ -6,7 +6,12 @@
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
 
-#define FF_CPU_NUM_FORMAT_ARGS 8
+#define FF_CPU_NUM_FORMAT_ARGS 9
+
+static int sortCores(const FFCPUCore* a, const FFCPUCore* b)
+{
+    return (int)b->freq - (int)a->freq;
+}
 
 void ffPrintCPU(FFCPUOptions* options)
 {
@@ -51,9 +56,9 @@ void ffPrintCPU(FFCPUOptions* options)
                 ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
             double freq = cpu.frequencyMax;
-            if(freq != freq)
+            if(freq <= 0.0000001)
                 freq = cpu.frequencyBase;
-            if(freq == freq)
+            if(freq > 0.0000001)
                 ffStrbufAppendF(&str, " @ %.*f GHz", options->freqNdigits, freq);
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
@@ -66,6 +71,19 @@ void ffPrintCPU(FFCPUOptions* options)
         }
         else
         {
+            FF_STRBUF_AUTO_DESTROY coreTypes = ffStrbufCreate();
+            uint32_t typeCount = 0;
+            while (cpu.coreTypes[typeCount].count != 0 && typeCount < sizeof(cpu.coreTypes) / sizeof(cpu.coreTypes[0])) typeCount++;
+            if (typeCount > 0)
+            {
+                qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);
+
+                for (uint32_t i = 0; i < typeCount; i++)
+                    ffStrbufAppendF(&coreTypes, "%s%u", i == 0 ? "" : " + ", cpu.coreTypes[i].count);
+            }
+            else
+                ffStrbufAppendF(&coreTypes, "%u", cpu.coresOnline);
+
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPU_NUM_FORMAT_ARGS, ((FFformatarg[]){
@@ -76,7 +94,8 @@ void ffPrintCPU(FFCPUOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyBase},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMax},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr}
+                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &coreTypes},
             }));
         }
     }
@@ -180,9 +199,13 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_real(doc, frequency, "max", cpu.frequencyMax);
         yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
 
-        yyjson_mut_val* coreCounts = yyjson_mut_obj_add_arr(doc, obj, "coreCounts");
-        for (uint32_t i = 0; i < sizeof (cpu.coreCounts) && cpu.coreCounts[i] > 0; i++)
-            yyjson_mut_arr_add_uint(doc, coreCounts, cpu.coreCounts[i]);
+        yyjson_mut_val* coreTypes = yyjson_mut_obj_add_arr(doc, obj, "coreTypes");
+        for (uint32_t i = 0; i < sizeof (cpu.coreTypes) / sizeof (cpu.coreTypes[0]) && cpu.coreTypes[i].count > 0; i++)
+        {
+            yyjson_mut_val* core = yyjson_mut_arr_add_obj(doc, coreTypes);
+            yyjson_mut_obj_add_uint(doc, core, "count", cpu.coreTypes[i].count);
+            yyjson_mut_obj_add_uint(doc, core, "freq", cpu.coreTypes[i].freq);
+        }
 
         yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
     }
@@ -201,7 +224,8 @@ void ffPrintCPUHelpFormat(void)
         "Online core count",
         "Base frequency",
         "Max frequency",
-        "Temperature (formatted)"
+        "Temperature (formatted)",
+        "Logical core count grouped by frequency",
     }));
 }
 

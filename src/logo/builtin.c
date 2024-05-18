@@ -1678,6 +1678,17 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Furreto
+    {
+        .names = {"Furreto"},
+        .lines = FASTFETCH_DATATEXT_LOGO_FURRETO,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
     // LAST
     {},
 };
@@ -4064,10 +4075,9 @@ static const FFlogo T[] = {
         .names = {"TorizonCore"},
         .lines = FASTFETCH_DATATEXT_LOGO_TORIZONCORE,
         .colors = {
+            FF_COLOR_FG_LIGHT_WHITE,
             FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_LIGHT_BLACK,
-            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE
         },
     },
     // Trisquel
