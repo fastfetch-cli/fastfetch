@@ -43,6 +43,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     uint32_t ifreq = (uint32_t) -1;
     for (uint16_t i = 0; i < cpu->coresLogical; ++i)
     {
+        ffStrbufClear(&buffer);
         char key[32];
         snprintf(key, sizeof(key), "dev.cpu.%u.freq_levels", i);
         if (ffSysctlGetString(key, &buffer) == NULL && buffer.length > 0)
@@ -64,7 +65,6 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             if (__builtin_expect(ifreq < sizeof(cpu->coreCounts), true))
                 cpu->coreCounts[ifreq]++;
         }
-        ffStrbufClear(&buffer);
     }
     cpu->frequencyMin /= 1000;
     cpu->frequencyMax /= 1000;
