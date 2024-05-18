@@ -8,7 +8,7 @@
 
 const char* ffGpuDetectMetal(FFlist* gpus)
 {
-    if (@available(macOS 10.15, *))
+    if (@available(macOS 10.13, *))
     {
         for (id<MTLDevice> device in MTLCopyAllDevices())
         {
@@ -23,6 +23,15 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             }
             if (!gpu) continue;
 
+            #ifdef MAC_OS_X_VERSION_10_13
+            #define MTLFeatureSet_macOS_GPUFamily2_v1 ((MTLFeatureSet) 10005)
+            if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1])
+                ffStrbufSetStatic(&gpu->platformApi, "Metal Featrureset 2");
+            else if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1])
+                ffStrbufSetStatic(&gpu->platformApi, "Metal Featrureset 1");
+            #endif
+
+            #ifdef MAC_OS_X_VERSION_10_15
             if ([device supportsFamily:MTLGPUFamilyMetal3])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal 3");
             else if ([device supportsFamily:MTLGPUFamilyCommon3])
@@ -39,6 +48,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
                 gpu->shared.used = device.currentAllocatedSize;
             }
             else
+            #endif
             {
                 gpu->type = FF_GPU_TYPE_DISCRETE;
                 gpu->dedicated.total = device.recommendedMaxWorkingSetSize;
