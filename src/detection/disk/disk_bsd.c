@@ -66,6 +66,10 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 #include <sys/attr.h>
 #include <unistd.h>
 
+#ifndef MAC_OS_X_VERSION_10_15
+    #define MNT_REMOVABLE 0x00000200
+#endif
+
 struct CmnAttrBuf {
     uint32_t       length;
     attrreference_t nameRef;

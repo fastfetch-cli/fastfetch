@@ -5,10 +5,14 @@
 #ifndef MAC_OS_VERSION_13_0
     #define MTLGPUFamilyMetal3 ((MTLGPUFamily) 5001)
 #endif
+#ifndef MAC_OS_X_VERSION_10_15
+    #define MTLFeatureSet_macOS_GPUFamily1_v4 ((MTLFeatureSet) 10004)
+    #define MTLFeatureSet_macOS_GPUFamily2_v1 ((MTLFeatureSet) 10005)
+#endif
 
 const char* ffGpuDetectMetal(FFlist* gpus)
 {
-    if (@available(macOS 10.15, *))
+    if (@available(macOS 10.13, *))
     {
         for (id<MTLDevice> device in MTLCopyAllDevices())
         {
@@ -23,6 +27,12 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             }
             if (!gpu) continue;
 
+            #ifndef MAC_OS_X_VERSION_10_15
+            if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1])
+                ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 2");
+            else if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1])
+                ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 1");
+            #else // MAC_OS_X_VERSION_10_15
             if ([device supportsFamily:MTLGPUFamilyMetal3])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal 3");
             else if ([device supportsFamily:MTLGPUFamilyCommon3])
@@ -32,15 +42,16 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             else if ([device supportsFamily:MTLGPUFamilyCommon1])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
 
-            if (device.hasUnifiedMemory)
+            gpu->type = device.hasUnifiedMemory ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            #endif
+
+            if (gpu->type == FF_GPU_TYPE_INTEGRATED)
             {
-                gpu->type = FF_GPU_TYPE_INTEGRATED;
                 gpu->shared.total = device.recommendedMaxWorkingSetSize;
                 gpu->shared.used = device.currentAllocatedSize;
             }
             else
             {
-                gpu->type = FF_GPU_TYPE_DISCRETE;
                 gpu->dedicated.total = device.recommendedMaxWorkingSetSize;
                 gpu->dedicated.used = device.currentAllocatedSize;
             }
