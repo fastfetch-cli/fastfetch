@@ -136,7 +136,6 @@ static bool detectFrequency(FFCPUResult* cpu)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     uint32_t baseLen = path.length;
 
-    uint32_t ifreq = 0;
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL)
     {
@@ -158,14 +157,6 @@ static bool detectFrequency(FFCPUResult* cpu)
                     cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
                 else
                     cpu->frequencyMax = fmax;
-
-                if (cpu->coreTypes[ifreq].freq != fmax)
-                {
-                    if (cpu->coreTypes[ifreq].count && ifreq < sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
-                        ++ifreq;
-                    cpu->coreTypes[ifreq].freq = fmax;
-                }
-                cpu->coreTypes[ifreq].count += getNumCores(&path, &buffer);
             }
             uint32_t fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
             if (fmin > 0)
@@ -175,6 +166,14 @@ static bool detectFrequency(FFCPUResult* cpu)
                 else
                     cpu->frequencyMin = fmin;
             }
+
+            uint32_t freq = fbase <= 0 ? fmax : fbase; // seems base frequencies are more stable
+            uint32_t ifreq = 0;
+            while (cpu->coreTypes[ifreq].freq != freq && cpu->coreTypes[ifreq].freq > 0)
+                ++ifreq;
+            if (cpu->coreTypes[ifreq].freq == 0)
+                cpu->coreTypes[ifreq].freq = freq;
+            cpu->coreTypes[ifreq].count += getNumCores(&path, &buffer);
             ffStrbufSubstrBefore(&path, baseLen);
         }
     }

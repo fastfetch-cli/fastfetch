@@ -166,16 +166,14 @@ static const char* detectCoreTypes(FFCPUResult* cpu)
     if (!NT_SUCCESS(NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, (ULONG) sizeof(PROCESSOR_POWER_INFORMATION) * cpu->coresLogical)))
         return "NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, size) failed";
 
-    uint32_t ifreq = 0;
-    for (uint32_t i = 0; i < cpu->coresLogical && pinfo[i].MhzLimit; ++i)
+    for (uint32_t icore = 0; icore < cpu->coresLogical && pinfo[icore].MhzLimit; ++icore)
     {
-        if (cpu->coreTypes[ifreq].freq != pinfo[i].MhzLimit)
-        {
-            if (cpu->coreTypes[ifreq].count && ifreq < sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
-                ++ifreq;
-            cpu->coreTypes[ifreq].freq = pinfo[i].MhzLimit;
-        }
-        cpu->coreTypes[ifreq].count++;
+        uint32_t ifreq = 0;
+        while (cpu->coreTypes[ifreq].freq != pinfo[icore].MhzLimit && cpu->coreTypes[ifreq].freq > 0)
+            ++ifreq;
+        if (cpu->coreTypes[ifreq].freq == 0)
+            cpu->coreTypes[ifreq].freq = pinfo[icore].MhzLimit;
+        ++cpu->coreTypes[ifreq].count;
     }
 
     if (cpu->frequencyBase != cpu->frequencyBase)

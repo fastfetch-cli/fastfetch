@@ -56,12 +56,11 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             if (!(cpu->frequencyMin <= fmin)) cpu->frequencyMin = fmin; // Counting for NaN
             if (!(cpu->frequencyMax >= fmax)) cpu->frequencyMax = fmax;
 
-            if (cpu->coreTypes[ifreq].freq != fmax)
-            {
-                if (cpu->coreTypes[ifreq].count && ifreq < sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
-                    ++ifreq;
+            uint32_t ifreq = 0;
+            while (cpu->coreTypes[ifreq].freq != fmax && cpu->coreTypes[ifreq].freq > 0)
+                ++ifreq;
+            if (cpu->coreTypes[ifreq].freq == 0)
                 cpu->coreTypes[ifreq].freq = fmax;
-            }
             cpu->coreTypes[ifreq].count++;
         }
     }
