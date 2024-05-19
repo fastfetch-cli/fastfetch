@@ -15,7 +15,7 @@
 
 #include <inttypes.h>
 
-static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
     ffStrbufAppendS(pciDir, "/driver");
     char pathBuf[PATH_MAX];
@@ -35,8 +35,11 @@ static void pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
             ffStrbufTrimRightSpace(buffer);
             ffStrbufAppendC(&gpu->driver, ' ');
             ffStrbufAppend(&gpu->driver, buffer);
+            return true;
         }
     }
+
+    return false;
 }
 
 static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
@@ -145,9 +148,9 @@ static bool loadPciIds(FFstrbuf* pciids)
     return false;
 }
 
-static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir)
+static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* deviceDir, const char* drmPath)
 {
-    const uint32_t drmDirPathLength = drmDir->length;
+    const uint32_t drmDirPathLength = deviceDir->length;
     uint32_t vendorId, deviceId, subVendorId, subDeviceId;
     uint8_t classId, subclassId;
     if (sscanf(buffer->chars + strlen("pci:"), "v%8" SCNx32 "d%8" SCNx32 "sv%8" SCNx32 "sd%8" SCNx32 "bc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &subVendorId, &subDeviceId, &classId, &subclassId) != 6)
@@ -157,15 +160,23 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         return "Not a GPU device";
 
     char pciPath[PATH_MAX];
-    ssize_t pathLength = readlink(drmDir->chars, pciPath, sizeof(pciPath) - 1);
-    if (pathLength <= 0)
-        return "Unable to get PCI device path";
-    pciPath[pathLength] = '\0';
-    const char* pPciPath = strrchr(pciPath, '/');
-    if (pPciPath)
-        pPciPath++;
+    const char* pPciPath = NULL;
+    if (drmPath)
+    {
+        ssize_t pathLength = readlink(deviceDir->chars, pciPath, sizeof(pciPath) - 1);
+        if (pathLength <= 0)
+            return "Unable to get PCI device path";
+        pciPath[pathLength] = '\0';
+        pPciPath = strrchr(pciPath, '/');
+        if (__builtin_expect(pPciPath != NULL, true))
+            pPciPath++;
+        else
+            pPciPath = pciPath;
+    }
     else
-        pPciPath = pciPath;
+    {
+        pPciPath = memrchr(deviceDir->chars, '/', deviceDir->length) + 1;
+    }
 
     uint32_t pciDomain, pciBus, pciDevice, pciFunc;
     if (sscanf(pPciPath, "%" SCNx32 ":%" SCNx32 ":%" SCNx32 ".%" SCNx32, &pciDomain, &pciBus, &pciDevice, &pciFunc) != 4)
@@ -185,8 +196,8 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
     {
-        ffStrbufAppendS(drmDir, "/revision");
-        if (ffReadFileBuffer(drmDir->chars, buffer))
+        ffStrbufAppendS(deviceDir, "/revision");
+        if (ffReadFileBuffer(deviceDir->chars, buffer))
         {
             char* pend;
             uint64_t revision = strtoul(buffer->chars, &pend, 16);
@@ -201,7 +212,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 #endif
             }
         }
-        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
 
     if (gpu->name.length == 0)
@@ -215,18 +226,18 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
-    pciDetectDriver(gpu, drmDir, buffer);
-    ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+    pciDetectDriver(gpu, deviceDir, buffer);
+    ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
 
     if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
     {
-        pciDetectAmdSpecific(options, gpu, drmDir, buffer);
-        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+        pciDetectAmdSpecific(options, gpu, deviceDir, buffer);
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
     {
-        pciDetectIntelSpecific(gpu, drmDir, buffer);
-        ffStrbufSubstrBefore(drmDir, drmDirPathLength);
+        pciDetectIntelSpecific(gpu, deviceDir, buffer);
+        ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
     {
@@ -313,7 +324,7 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufSubstrBefore(&drmDir, drmDir.length - (uint32_t) strlen("/modalias"));
 
         if (ffStrbufStartsWithS(&buffer, "pci:"))
-            detectPci(options, gpus, &buffer, &drmDir);
+            detectPci(options, gpus, &buffer, &drmDir, entry->d_name);
         #ifdef __aarch64__
         else if (ffStrbufStartsWithS(&buffer, "of:"))
             detectAsahi(gpus, &buffer, &drmDir);
@@ -358,7 +369,7 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufSubstrBefore(&pciDir, pciDevDirLength);
         assert(ffStrbufStartsWithS(&buffer, "pci:"));
 
-        detectPci(options, gpus, &buffer, &pciDir);
+        detectPci(options, gpus, &buffer, &pciDir, NULL);
         ffStrbufSubstrBefore(&pciDir, pciBaseDirLength);
     }
 
