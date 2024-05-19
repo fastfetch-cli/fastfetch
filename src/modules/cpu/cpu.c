@@ -79,10 +79,14 @@ void ffPrintCPU(FFCPUOptions* options)
                 qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);
 
                 for (uint32_t i = 0; i < typeCount; i++)
-                    ffStrbufAppendF(&coreTypes, "%s%u", i == 0 ? "" : " + ", cpu.coreTypes[i].count);
+                    ffStrbufAppendF(&coreTypes, "%s%u", i == 0 ? "" : "+", cpu.coreTypes[i].count);
             }
             else
                 ffStrbufAppendF(&coreTypes, "%u", cpu.coresOnline);
+
+            char freqBase[32], freqMax[32];
+            snprintf(freqBase, sizeof(freqBase), "%.*f", options->freqNdigits, cpu.frequencyBase);
+            snprintf(freqMax, sizeof(freqMax), "%.*f", options->freqNdigits, cpu.frequencyMax);
 
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
@@ -92,8 +96,8 @@ void ffPrintCPU(FFCPUOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresLogical},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyBase},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMax},
+                {FF_FORMAT_ARG_TYPE_STRING, freqBase},
+                {FF_FORMAT_ARG_TYPE_STRING, freqMax},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &coreTypes},
             }));
