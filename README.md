@@ -155,6 +155,13 @@ See `fastfetch -h format` for basic usage. For module specific formattion, see `
 
 Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
 
+### Q: Fastfetch runs in white and black on shell startup. Why?
+
+This issue usually happens when using fastfetch with `p10k`. There are known incompatibility between fastfetch and p10k instant prompt.
+The p10k doc clearly states that you should NOT print anything to stdout after `p10k-instant-prompt` is initialized. You should either put `fastfetch` before initialization of `p10k-instant-prompt` (recommended)
+
+You can always use `fastfetch --pipe false` to force fastfetch running in colorful mode.
+
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
 Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
