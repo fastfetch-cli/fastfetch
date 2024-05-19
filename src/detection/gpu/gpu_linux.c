@@ -100,24 +100,26 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
 
 static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
-    if (!ffStrbufEndsWithS(pciDir, "/device")) // Must be in `/sys/class/drm/cardN/device`
-        return;
-
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
-    ffStrbufSetNS(buffer, pciDir->length - (uint32_t) strlen("device"), pciDir->chars);
-    ffStrbufAppendS(buffer, "gt_max_freq_mhz");
-    char str[16];
-    ssize_t len = ffReadFileData(buffer->chars, sizeof(str) - 1, str);
-    if (len > 1)
-    {
-        str[len] = '\0';
-        gpu->frequency = (double) strtoul(str, NULL, 10) / 1000.0;
-    }
 
     if (ffStrbufStartsWithS(&gpu->name, "Intel "))
         ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel "));
     gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+
+    ffStrbufAppendS(pciDir, "/drm/");
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+    if (!dirp) return;
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if (ffStrStartsWith(entry->d_name, "card")) break;
+    }
+    if (!entry) return;
+    ffStrbufAppendS(pciDir, entry->d_name);
+    ffStrbufAppendS(pciDir, "/gt_max_freq_mhz");
+    if (ffReadFileBuffer(pciDir->chars, buffer))
+        gpu->frequency = ffStrbufToDouble(buffer) / 1000.0;
 }
 
 static bool loadPciIds(FFstrbuf* pciids)
