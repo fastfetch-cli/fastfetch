@@ -18,11 +18,13 @@ static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
 {
     NSScreen* mainScreen = NSScreen.mainScreen;
     if (display->primary)
+    {
         #ifdef MAC_OS_X_VERSION_10_15 
         return mainScreen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
         #else
         return mainScreen.maximumExtendedDynamicRangeColorComponentValue > 1;
         #endif
+    }
     else
     {
         for (NSScreen* screen in NSScreen.screens)
