@@ -48,6 +48,7 @@ const char* ffDetectCamera(FFlist* result)
         camera->width = size.width < 0 ? 0 : (uint32_t) size.width;
         camera->height = size.height < 0 ? 0 : (uint32_t) size.height;
     }
+    #else
+    return "No support for old MacOS version";
     #endif
-    return NULL;
 }
