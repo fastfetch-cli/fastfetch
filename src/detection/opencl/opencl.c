@@ -1,6 +1,13 @@
 #include "detection/opencl/opencl.h"
 
-#if defined(FF_HAVE_OPENCL) || defined(__APPLE__)
+#ifdef __APPLE__
+#include <AvailabilityMacros.h>
+#if (MAC_OS_X_VERSION_MIN_REQUIRED > 1050) && !defined(__ppc__)
+#define MACOS_HAS_OPENCL
+#endif
+#endif
+
+#if defined(FF_HAVE_OPENCL) || defined(MACOS_HAS_OPENCL)
 
 #include "common/library.h"
 #include "common/parsing.h"
@@ -64,7 +71,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
     return NULL;
 }
 
-#endif // defined(FF_HAVE_OPENCL) || defined(__APPLE__)
+#endif // defined(FF_HAVE_OPENCL) || defined(MACOS_HAS_OPENCL)
 
 const char* ffDetectOpenCL(FFOpenCLResult* result)
 {
@@ -84,7 +91,7 @@ const char* ffDetectOpenCL(FFOpenCLResult* result)
 
     return openCLHandleData(&data, result);
 
-    #elif defined(__APPLE__) // FF_HAVE_OPENCL
+    #elif defined(MACOS_HAS_OPENCL) // FF_HAVE_OPENCL
 
     OpenCLData data;
     data.ffclGetPlatformIDs = clGetPlatformIDs;
