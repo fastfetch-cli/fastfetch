@@ -101,11 +101,90 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 
 ## FAQ
 
-Q: Why do you need a very performant version of neofetch?
-> I like putting neofetch in my ~/.bashrc to have a system overview whenever I use the terminal, but the slow speed annoyed me, so I created this. Also neofetch didn't output everything correctly (e.g Font is displayed as "[Plasma], Noto Sans, 10 [GTK2/3]") and writing my own tool gave me the possibility to fine tune it to run perfectly on at least my configuration.
+### Q: Neofetch is good enough. Why do I need fastfetch?
 
-Q: It does not display [*] correctly for me, what can I do?
-> This is most likely because your system is not implemented (yet). At the moment I am focusing more on making the core app better, than adding more configurations. Feel free to open a pull request if you want to add support for your configuration
+1. Fastfetch is actively maintained.
+2. Fastfetch is faster. As the name suggests.
+3. Fastfetch is more feature-rich. By default fastfetch only has a few modules enabled. Use `fastfetch -c all` to find what you want.
+4. Fastfetch is more configurable. You can find more information in the Wiki: <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration>
+5. Fastfetch is more polished. For example, neofetch prints `555MiB` in `Memory` module and `23G` in `Disk` module (notibily the difference of `MiB` and `G`), while fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
+6. Fastfetch is more accurate. For example, [neofetch never actually supports Wayland protocol](https://github.com/dylanaraps/neofetch/pull/2395).
+
+### Q: Fastfetch shows my local IP address. It leaks my privacy!
+
+A local IP (10.x.x.x, 172.x.x.x, 192.168.x.x) has nothing to do with privacy. It only makes sense if you are on the same network, for example, if you connect to the same Wi-Fi network.
+
+Actually the `Local IP` module is the most useful module for me personally. I (@CarterLi) have several VMs installed to test fastfetch and often need to SSH into them. I have fastfetch running on shell startup and I never need to type `ip addr` manually.
+
+If you really don't like it, you can disable the `Local IP` module in `config.jsonc`.
+
+### Q: Where is the config file? I can't find it.
+
+`Fastfetch` don't generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
+
+### Q: The configuration is so complex. Where is the documentation?
+
+Fastfetch uses JSON (with comments) for configuration. I suggest you use an IDE with JSON schema support (like VSCode) to edit it.
+
+Alternatively, you can refer to the presets in [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
+
+### Q: I WANT THE DOCUMENTATION!
+
+[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema). It is generated from [JSON schema](https://github.com/fastfetch-cli/fastfetch/blob/dev/doc/json_schema.json) but you won't like it.
+
+### Q: How can I customize the module output?
+
+Fastfetch uses `format` to generate output. For example to make `GPU` module show GPU name only and ignore other information, you can use
+
+```jsonc
+{
+    "modules": [
+        {
+            "type": "gpu",
+            "format": "{2}" // See `fastfetch -h gpu-format` for detail
+        }
+    ]
+}
+```
+
+which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
+
+See `fastfetch -h format` for basic usage. For module specific formattion, see `fastfetch -h <module>-format`
+
+### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
+
+Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
+
+### Q: Fastfetch runs in white and black on shell startup. Why?
+
+This issue usually happens when using fastfetch with `p10k`. There are known incompatibility between fastfetch and p10k instant prompt.
+The p10k doc clearly states that you should NOT print anything to stdout after `p10k-instant-prompt` is initialized. You should either put `fastfetch` before initialization of `p10k-instant-prompt` (recommended)
+
+You can always use `fastfetch --pipe false` to force fastfetch running in colorful mode.
+
+### Q: I want feature A / B / C. Will fastfetch support it?
+
+Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
+
+```jsonc
+// This module shows the default editor
+{
+    "modules": [
+        {
+            "type": "command",
+            "text": "$EDITOR --version | head -1",
+            "key": "Editor"
+        }
+    ]
+}
+```
+
+Otherwise, open a feature request in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues).
+
+### Q: I have questions. Where can I get help?
+
+* For usage questions, please start a discussion in [GitHub Discussions](https://github.com/fastfetch-cli/fastfetch/discussions).
+* For possible bugs, please open an issue in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues). Be sure to fill the bug-report template carefully for developers to investigate.
 
 ## Star History
 

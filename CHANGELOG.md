@@ -1,3 +1,39 @@
+# 2.13.0
+
+Changes:
+* Option `--gpu-force-vulkan <?bool>` has been changed to `--gpu-detection-method <enum>`
+    * Use `--gpu-detection-method vulkan` to get the old behavior
+    * See `fastfetch -h gpu-detection-method` for detail
+* In Linux, BIOS limited CPU frequency is printed by default to match the behavior of neofetch (CPU, Linux, #947)
+
+Features:
+* Add new module `Bootmgr` which prints information of stage 2 bootloader (grub, system-boot, etc)
+    * Requires root permission to work on Windows and FreeBSD
+    * Requires booting in UEFI mode
+* Add package manager lpkg and lpkg-build support (Packages, Linux)
+* Improve macOS 10.13 compatibility (macOS)
+* Detect core count for performance / efficiency cores (CPU)
+    * Test it with `fastfetch -s cpu --cpu-format '{9}'`
+* Support min / max frequency and physical core count detection in FreeBSD, if kernel supports it (CPU, FreeBSD)
+* Detect DRM driver version if DRM detection method is used (GPU, Linux)
+
+Bugfixes:
+* Don't detect `clifm` and `valgrind` as a terminal (Terminal, Linux)
+* Improve stability (PhysicalMemory, FreeBSD)
+* Fix bssid & status detection (Wifi, FreeBSD)
+* Ensure createTime is correctly initialized (Disk, FreeBSD / macOS)
+* Fix `--cpu-freq-ndigits` not working if `--cpu-format` is used
+* Fix `nix-user` package count detection (Packages, Linux)
+* Fix some memory leaks
+
+Logos:
+* Fix Manjaro logo not displayed
+* Add SpoinkOS
+* Add Loc-OS
+* Add Furreto Linux
+* Fix TorizonCore logo colors
+* Fix KDE neon logo not displayed
+
 # 2.12.0
 
 Changes:
@@ -20,6 +56,7 @@ Features:
 * Add option `--localip-show-all-ips` to show all IPs assigned to the same interface (LocalIP)
     * Default to `false`
 * Improve compatibility with `(*term)` (#909, Terminal, macOS)
+* Support GPU core count and frequency detection for Asahi Linux (GPU, Linux)
 
 Bugfixes:
 * Rename option `--temperature-unit` to `--temp-unit` as documented in help messages

@@ -412,6 +412,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
     if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed");
+    if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n");
     if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpak(baseDir, "/var/lib/flatpak");
@@ -421,6 +422,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
+    if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", DT_REG);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", DT_REG);
     if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT)) packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Packages");
     if (!(options->disabled & FF_PACKAGES_FLAG_SNAP_BIT)) packageCounts->snap += getSnap(baseDir);
@@ -508,30 +510,28 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
         ffStrbufAppendS(&profilePath, ".nix-profile");
         if (ffPathExists(profilePath.chars, FF_PATHTYPE_DIRECTORY))
         {
-            result->nixUser = getNixPackages(&baseDir, ".nix-profile");
+            result->nixUser += getNixPackages(&baseDir, ".nix-profile");
         }
+
         // check if $XDG_STATE_HOME/nix/profile exists
+        FF_STRBUF_AUTO_DESTROY stateDir = ffStrbufCreate();
+        const char* stateHome = getenv("XDG_STATE_HOME");
+        if(ffStrSet(stateHome))
+        {
+            ffStrbufSetS(&stateDir, stateHome);
+            ffStrbufEnsureEndsWithC(&stateDir, '/');
+        }
         else
         {
-            FF_STRBUF_AUTO_DESTROY stateDir = ffStrbufCreate();
-            const char* stateHome = getenv("XDG_STATE_HOME");
-            if(ffStrSet(stateHome))
-            {
-                ffStrbufSetS(&stateDir, stateHome);
-                ffStrbufEnsureEndsWithC(&stateDir, '/');
-            }
-            else
-            {
-                ffStrbufSet(&stateDir, &instance.state.platform.homeDir);
-                ffStrbufAppendS(&stateDir, ".local/state/");
-            }
- 
-            ffStrbufSet(&profilePath, &stateDir);
-            ffStrbufAppendS(&profilePath, "nix/profile");
-            result->nixUser = getNixPackages(&stateDir, "nix/profile");
+            ffStrbufSet(&stateDir, &instance.state.platform.homeDir);
+            ffStrbufAppendS(&stateDir, ".local/state/");
         }
+
+        ffStrbufSet(&profilePath, &stateDir);
+        ffStrbufAppendS(&profilePath, "nix/profile");
+        result->nixUser += getNixPackages(&stateDir, "nix/profile");
     }
- 
+
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))
         result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
 }

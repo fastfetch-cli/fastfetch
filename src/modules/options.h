@@ -6,6 +6,7 @@
 #include "modules/bios/option.h"
 #include "modules/bluetooth/option.h"
 #include "modules/board/option.h"
+#include "modules/bootmgr/option.h"
 #include "modules/break/option.h"
 #include "modules/brightness/option.h"
 #include "modules/camera/option.h"

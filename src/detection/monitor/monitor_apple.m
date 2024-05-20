@@ -9,11 +9,22 @@
 
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
 
+#ifndef MAC_OS_X_VERSION_10_15
+#import <IOKit/graphics/IOGraphicsLib.h>
+extern CFDictionaryRef CoreDisplay_IODisplayCreateInfoDictionary(io_service_t framebuffer, IOOptionBits options)  __attribute__((weak_import));
+#endif
+
 static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
 {
     NSScreen* mainScreen = NSScreen.mainScreen;
     if (display->primary)
+    {
+        #ifdef MAC_OS_X_VERSION_10_15 
         return mainScreen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
+        #else
+        return mainScreen.maximumExtendedDynamicRangeColorComponentValue > 1;
+        #endif
+    }
     else
     {
         for (NSScreen* screen in NSScreen.screens)
@@ -22,7 +33,11 @@ static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
             NSNumber* screenNumber = [screen.deviceDescription valueForKey:@"NSScreenNumber"];
             if (screenNumber && screenNumber.longValue == (long) display->id)
             {
+                #ifdef MAC_OS_X_VERSION_10_15
                 return screen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
+                #else
+                return screen.maximumExtendedDynamicRangeColorComponentValue > 1;
+                #endif
             }
         }
     }
@@ -31,13 +46,19 @@ static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
 
 const char* ffDetectMonitor(FFlist* results)
 {
+    #ifdef MAC_OS_X_VERSION_10_15
     if(!CoreDisplay_DisplayCreateInfoDictionary) return "CoreDisplay_DisplayCreateInfoDictionary is not available";
-
+    #endif
     const FFDisplayServerResult* displayServer = ffConnectDisplayServer();
 
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
+        #ifdef MAC_OS_X_VERSION_10_15
         CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary((CGDirectDisplayID) display->id);
+        #else
+        io_service_t servicePort = CGDisplayIOServicePort((CGDirectDisplayID) display->id);
+        CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
+        #endif
         if(!displayInfo) continue;
 
         bool isVirtual = false;

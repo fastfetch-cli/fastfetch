@@ -31,7 +31,7 @@ static bool parseLsbRelease(const char* fileName, FFOSResult* result)
 
 static bool parseOsRelease(const char* fileName, FFOSResult* result)
 {
-    return ffParsePropFileValues(fileName, 10, (FFpropquery[]) {
+    return ffParsePropFileValues(fileName, 11, (FFpropquery[]) {
         {"PRETTY_NAME =", &result->prettyName},
         {"NAME =", &result->name},
         {"ID =", &result->id},
@@ -41,7 +41,8 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
         {"VERSION =", &result->version},
         {"VERSION_ID =", &result->versionID},
         {"VERSION_CODENAME =", &result->codename},
-        {"BUILD_ID =", &result->buildID}
+        {"CODENAME =", &result->codename},
+        {"BUILD_ID =", &result->buildID},
     });
 }
 
@@ -154,6 +155,12 @@ static bool detectDebianDerived(FFOSResult* result)
         uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
         uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
         ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+        return true;
+    }
+    else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
+    {
+        ffStrbufSetS(&result->id, "locos");
+        ffStrbufSetS(&result->idLike, "debian");
         return true;
     }
     else if (ffPathExists("/usr/bin/pveversion", FF_PATHTYPE_FILE))

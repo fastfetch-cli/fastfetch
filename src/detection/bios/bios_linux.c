@@ -4,7 +4,7 @@
 
 #include <stdlib.h>
 
-const char* ffDetectBios(FFBiosResult* bios)
+const char *ffDetectBios(FFBiosResult *bios)
 {
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/bios_date", "/sys/class/dmi/id/bios_date", &bios->date);
     ffGetSmbiosValue("/sys/devices/virtual/dmi/id/bios_release", "/sys/class/dmi/id/bios_release", &bios->release);

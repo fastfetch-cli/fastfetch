@@ -3,14 +3,10 @@
 #include "util/stringUtils.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
+#include "util/windows/nt.h"
 
-#include <winternl.h>
 #include <Windows.h>
 #include <shlobj.h>
-
-NTSTATUS NTAPI RtlGetVersion(
-    _Inout_ PRTL_OSVERSIONINFOW lpVersionInformation
-);
 
 static void getExePath(FFPlatform* platform)
 {
@@ -184,8 +180,13 @@ static void getSystemReleaseAndVersion(FFPlatform* platform)
         (unsigned) ubr);
 
     ffStrbufInit(&platform->systemDisplayVersion);
-    if(!ffRegReadStrbuf(hKey, L"DisplayVersion", &platform->systemDisplayVersion, NULL) && osVersion.szCSDVersion[0])
-        ffStrbufSetWS(&platform->systemDisplayVersion, osVersion.szCSDVersion);
+    if(!ffRegReadStrbuf(hKey, L"DisplayVersion", &platform->systemDisplayVersion, NULL))
+    {
+        if (osVersion.szCSDVersion[0])
+            ffStrbufSetWS(&platform->systemDisplayVersion, osVersion.szCSDVersion);
+        else
+            ffRegReadStrbuf(hKey, L"ReleaseId", &platform->systemDisplayVersion, NULL); // For old Windows 10
+    }
 
     ffRegReadStrbuf(hKey, L"BuildLabEx", &platform->systemVersion, NULL);
 

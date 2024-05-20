@@ -56,6 +56,10 @@ static void getProcessInformation(pid_t pid, FFstrbuf* processName, FFstrbuf* ex
     int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
     if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), NULL, &len, NULL, 0) == 0)
     {
+        #ifndef MAC_OS_X_VERSION_10_15
+        //don't know why if don't let len longer, proArgs2 and len will change during the following sysctl() in old MacOS version.
+        len++;
+        #endif
         FF_AUTO_FREE char* const procArgs2 = malloc(len);
         if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), procArgs2, &len, NULL, 0) == 0)
         {
@@ -244,6 +248,8 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrEquals(name, "guake-wrapped")       ||
                 ffStrEquals(name, "time")                ||
                 ffStrEquals(name, "hyfetch")             || //when hyfetch uses fastfetch as backend
+                ffStrEquals(name, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
+                ffStrEquals(name, "valgrind")            ||
                 ffStrContainsIgnCase(name, "debug")      ||
                 ffStrContainsIgnCase(name, "not-found")  ||
                 ffStrEndsWith(name, ".sh")
@@ -294,6 +300,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrEquals(name, "login")      ||
             ffStrEquals(name, "sshd")       ||
+            ffStrEquals(name, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
             ffStrEquals(name, "chezmoi")    || // #762
             #ifdef __linux__
             ffStrStartsWith(name, "flatpak-") || // #707

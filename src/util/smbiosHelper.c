@@ -79,6 +79,26 @@ bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* 
     return false;
 }
 
+typedef struct FFSmbios20EntryPoint
+{
+    uint8_t AnchorString[4];
+    uint8_t EntryPointStructureChecksum;
+    uint8_t EntryPointLength;
+    uint8_t SmbiosMajorVersion;
+    uint8_t SmbiosMinorVersion;
+    uint16_t MaximumStructureSize;
+    uint8_t EntryPointRevision;
+    uint8_t FormattedArea[5];
+    uint8_t IntermediateAnchorString[5];
+    uint8_t IntermediateChecksum;
+    uint16_t StructureTableLength;
+    uint32_t StructureTableAddress;
+    uint16_t NumberOfSmbiosStructures;
+    uint8_t SmbiosBcdRevision;
+} __attribute__((__packed__)) FFSmbios20EntryPoint;
+static_assert(offsetof(FFSmbios20EntryPoint, SmbiosBcdRevision) == 0x1E,
+    "FFSmbios30EntryPoint: Wrong struct alignment");
+
 typedef struct FFSmbios30EntryPoint
 {
     uint8_t AnchorString[5];
@@ -94,7 +114,13 @@ typedef struct FFSmbios30EntryPoint
 } __attribute__((__packed__)) FFSmbios30EntryPoint;
 
 static_assert(offsetof(FFSmbios30EntryPoint, StructureTableAddress) == 0x10,
-    "FFSmbiosProcessorInfo: Wrong struct alignment");
+    "FFSmbios30EntryPoint: Wrong struct alignment");
+
+typedef union FFSmbiosEntryPoint
+{
+    FFSmbios20EntryPoint Smbios20;
+    FFSmbios30EntryPoint Smbios30;
+} FFSmbiosEntryPoint;
 
 const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 {
@@ -107,55 +133,73 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
         #endif
         {
-            FF_STRBUF_AUTO_DESTROY strEntry = ffStrbufCreate();
-            // Only support SMBIOS 3.x for simplification
+            FF_STRBUF_AUTO_DESTROY strEntryAddress = ffStrbufCreate();
             #ifdef __FreeBSD__
-            if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntry))
+            if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntryAddress))
                 return NULL;
             #else
-            if (!ffParsePropFile("/sys/firmware/efi/systab", "SMBIOS3=", &strEntry))
-                return NULL;
+            {
+                FF_STRBUF_AUTO_DESTROY systab = ffStrbufCreate();
+                if (!ffAppendFileBuffer("/sys/firmware/efi/systab", &systab))
+                    return NULL;
+                if (!ffParsePropLines(systab.chars, "SMBIOS3=", &strEntryAddress) &&
+                    !ffParsePropLines(systab.chars, "SMBIOS=", &strEntryAddress))
+                    return NULL;
+            }
             #endif
 
-            loff_t pEntry = (loff_t) strtol(strEntry.chars, NULL, 0);
-            if (pEntry == 0) return NULL;
+            loff_t entryAddress = (loff_t) strtol(strEntryAddress.chars, NULL, 16);
+            if (entryAddress == 0) return NULL;
 
             FF_AUTO_CLOSE_FD int fd = open("/dev/mem", O_RDONLY);
             if (fd < 0) return NULL;
 
-            FFSmbios30EntryPoint entryPoint;
-            if (pread(fd, &entryPoint, sizeof(entryPoint), pEntry) != sizeof(entryPoint))
+            FFSmbiosEntryPoint entryPoint;
+            if (pread(fd, &entryPoint, sizeof(entryPoint), entryAddress) < 0x10)
             {
                 // `pread /dev/mem` returns EFAULT in FreeBSD
                 // https://stackoverflow.com/questions/69372330/how-to-read-dev-mem-using-read
-                void* p = mmap(NULL, sizeof(entryPoint), PROT_READ, MAP_SHARED, fd, pEntry);
+                void* p = mmap(NULL, sizeof(entryPoint), PROT_READ, MAP_SHARED, fd, entryAddress);
                 if (p == MAP_FAILED) return NULL;
                 memcpy(&entryPoint, p, sizeof(entryPoint));
                 munmap(p, sizeof(entryPoint));
             }
 
-            if (memcmp(entryPoint.AnchorString, "_SM3_", sizeof(entryPoint.AnchorString)) != 0 ||
-                entryPoint.EntryPointLength != sizeof(entryPoint))
-                return NULL;
-
-            ffStrbufEnsureFixedLengthFree(&buffer, entryPoint.StructureTableMaximumSize);
-            if (pread(fd, buffer.chars, entryPoint.StructureTableMaximumSize, pEntry) == (loff_t) entryPoint.StructureTableMaximumSize)
+            uint32_t tableLength = 0;
+            loff_t tableAddress = 0;
+            if (memcmp(entryPoint.Smbios20.AnchorString, "_SM_", sizeof(entryPoint.Smbios20.AnchorString)) == 0)
             {
-                buffer.length = (uint32_t) entryPoint.StructureTableMaximumSize;
+                if (entryPoint.Smbios20.EntryPointLength != sizeof(entryPoint.Smbios20))
+                    return NULL;
+                tableLength = entryPoint.Smbios20.StructureTableLength;
+                tableAddress = (loff_t) entryPoint.Smbios20.StructureTableAddress;
+            }
+            else if (memcmp(entryPoint.Smbios30.AnchorString, "_SM3_", sizeof(entryPoint.Smbios30.AnchorString)) == 0)
+            {
+                if (entryPoint.Smbios30.EntryPointLength != sizeof(entryPoint.Smbios30))
+                    return NULL;
+                tableLength = entryPoint.Smbios30.StructureTableMaximumSize;
+                tableAddress = (loff_t) entryPoint.Smbios30.StructureTableAddress;
+            }
+
+            ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
+            if (pread(fd, buffer.chars, tableLength, tableAddress) == tableLength)
+            {
+                buffer.length = tableLength;
                 buffer.chars[buffer.length] = '\0';
             }
             else
             {
                 // entryPoint.StructureTableAddress must be page aligned.
                 // Unaligned physical memory access results in all kinds of crashes.
-                void* p = mmap(NULL, entryPoint.StructureTableMaximumSize, PROT_READ, MAP_SHARED, fd, (loff_t) entryPoint.StructureTableAddress);
+                void* p = mmap(NULL, tableLength, PROT_READ, MAP_SHARED, fd, tableAddress);
                 if (p == MAP_FAILED)
                 {
                     ffStrbufDestroy(&buffer); // free buffer and reset state
                     return NULL;
                 }
-                ffStrbufSetNS(&buffer, entryPoint.StructureTableMaximumSize, (char*) p);
-                munmap(p, entryPoint.StructureTableMaximumSize);
+                ffStrbufSetNS(&buffer, tableLength, (char*) p);
+                munmap(p, tableLength);
             }
         }
 

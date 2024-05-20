@@ -135,13 +135,13 @@ const char* ffDetectWifi(FFlist* result)
             case kCWSecurityEnterprise:
                 ffStrbufSetStatic(&item->conn.security, "Enterprise");
                 break;
-            case kCWSecurityWPA3Personal:
+            case 11 /*kCWSecurityWPA3Personal*/:
                 ffStrbufSetStatic(&item->conn.security, "WPA3 Personal");
                 break;
-            case kCWSecurityWPA3Enterprise:
+            case 12 /*kCWSecurityWPA3Enterprise*/:
                 ffStrbufSetStatic(&item->conn.security, "WPA3 Enterprise");
                 break;
-            case kCWSecurityWPA3Transition:
+            case 13 /*kCWSecurityWPA3Transition*/:
                 ffStrbufSetStatic(&item->conn.security, "WPA3 Transition");
                 break;
             case 14 /*kCWSecurityOWE*/:

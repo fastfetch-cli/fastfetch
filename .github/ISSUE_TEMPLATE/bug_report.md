@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+Be sure to read [FAQ](https://github.com/fastfetch-cli/fastfetch?tab=readme-ov-file#faq) before submitting a new issue.
+
 <!-- We will try hard to solve the issue. However since platforms and hardwares vary greatly, it can be hard to find the root cause is. Providing following information may help us greatly. Thanks in advance -->
 
 # General description of bug:
@@ -73,11 +75,6 @@ Use `time fastfetch --stat` to show time usage for each module.
 * Does it work with `--logo-width {WIDTH} --logo-height {HEIGHT}`? 
 
 ## If fastfetch behaves incorrectly on shell starting
-
-<!-- NOTE for zsh / p10k users:
-There are known incompatibility between fastfetch and p10k instant prompt.
-The p10k doc clearly states that you should NOT print anything to stdout after p10k-instant-prompt is initialized.
-You should either put `fastfetch` before initialization of p10k-instant-prompt (recommended), remove it or use `fastfetch --pipe false` -->
 
 * The bug is reproduceable with fresh / clean shell configuration (i.e. `fastfetch` is the single line of `.zshrc` or `~/.config/fish/config.fish`): 
 * Does `sleep 1` before running `fastfetch` work? 

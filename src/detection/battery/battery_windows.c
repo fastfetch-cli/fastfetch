@@ -1,6 +1,7 @@
 #include "battery.h"
 
 #include "common/io/io.h"
+#include "util/windows/nt.h"
 #include "util/windows/unicode.h"
 #include "util/mallocHelper.h"
 #include "util/smbiosHelper.h"
@@ -11,16 +12,6 @@
 #include <batclass.h>
 #include <devguid.h>
 #include <winternl.h>
-
-NTSYSCALLAPI
-NTSTATUS
-NTAPI
-NtPowerInformation(
-    IN POWER_INFORMATION_LEVEL InformationLevel,
-    IN PVOID InputBuffer OPTIONAL,
-    IN ULONG InputBufferLength,
-    OUT PVOID OutputBuffer OPTIONAL,
-    IN ULONG OutputBufferLength);
 
 static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
 {

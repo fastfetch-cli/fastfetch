@@ -1197,13 +1197,18 @@
             }
         },
         {
-            "long": "gpu-force-vulkan",
-            "desc": "Force using vulkan to detect GPUs",
-            "remark": "Vulkan supports video memory usage detection",
+            "long": "gpu-detection-method",
+            "desc": "Force using a specified method to detect GPUs",
+            "remark": "Methods are used in this order: DRM (Linux only) -> PCI (Linux, FreeBSD and other platform specific methods) -> Vulkan -> OpenGL",
             "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
+                "type": "enum",
+                "enum": {
+                    "auto": "Use DRM if available, which is most feature-rich. Requires proper DRM driver installed",
+                    "pci": "Search PCI devices, which do not requires any driver installed",
+                    "vulkan": "Use Vulkan API. Slow and requires vulkan driver installed",
+                    "opengl": "Use OpenGL API. Slow and only detects one GPU"
+                },
+                "default": "auto"
             }
         },
         {

@@ -36,9 +36,17 @@ const char* ffDetectWifi(FFlist* result)
             item->conn.txRate = 0.0/0.0;
 
             ffParsePropLines(ifconfig.chars, "ssid ", &item->conn.ssid);
-            if (item->conn.ssid.length) ffStrbufSubstrBeforeFirstC(&item->conn.ssid, ' ');
+            if (item->conn.ssid.length)
+            {
+                uint32_t ibssid = ffStrbufFirstIndexS(&item->conn.ssid, " bssid ");
+                if (ibssid < item->conn.ssid.length)
+                {
+                    ibssid += (uint32_t) strlen(" bssid ");
+                    ffStrbufSetS(&item->conn.macAddress, item->conn.ssid.chars + ibssid);
+                }
 
-            ffParsePropLines(ifconfig.chars, "ether ", &item->conn.macAddress);
+                ffStrbufSubstrBeforeFirstC(&item->conn.ssid, ' ');
+            }
 
             ffParsePropLines(ifconfig.chars, "media: ", &item->conn.protocol);
             if (item->conn.protocol.length)
@@ -53,7 +61,7 @@ const char* ffDetectWifi(FFlist* result)
                 }
             }
 
-            ffParsePropLines(ifconfig.chars, "status: ", &item->conn.macAddress);
+            ffParsePropLines(ifconfig.chars, "status: ", &item->conn.status);
         }
     }
 

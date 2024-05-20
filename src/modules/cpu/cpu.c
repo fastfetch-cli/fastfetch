@@ -6,16 +6,24 @@
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
 
-#define FF_CPU_NUM_FORMAT_ARGS 8
+#define FF_CPU_NUM_FORMAT_ARGS 10
+
+static int sortCores(const FFCPUCore* a, const FFCPUCore* b)
+{
+    return (int)b->freq - (int)a->freq;
+}
 
 void ffPrintCPU(FFCPUOptions* options)
 {
-    FFCPUResult cpu;
-    cpu.temperature = FF_CPU_TEMP_UNSET;
-    cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
-    cpu.frequencyMin = cpu.frequencyMax = cpu.frequencyBase = 0.0/0.0;
-    ffStrbufInit(&cpu.name);
-    ffStrbufInit(&cpu.vendor);
+    FFCPUResult cpu = {
+        .temperature = FF_CPU_TEMP_UNSET,
+        .frequencyMin = 0.0/0.0,
+        .frequencyMax = 0.0/0.0,
+        .frequencyBase = 0.0/0.0,
+        .frequencyBiosLimit = 0.0/0.0,
+        .name = ffStrbufCreate(),
+        .vendor = ffStrbufCreate()
+    };
 
     const char* error = ffDetectCPU(options, &cpu);
 
@@ -48,10 +56,12 @@ void ffPrintCPU(FFCPUOptions* options)
             if(cpu.coresOnline > 1)
                 ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
-            double freq = cpu.frequencyMax;
-            if(freq != freq)
+            double freq = cpu.frequencyBiosLimit;
+            if(freq <= 0.0000001)
+                freq = cpu.frequencyMax;
+            if(freq <= 0.0000001)
                 freq = cpu.frequencyBase;
-            if(freq == freq)
+            if(freq > 0.0000001)
                 ffStrbufAppendF(&str, " @ %.*f GHz", options->freqNdigits, freq);
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
@@ -64,6 +74,33 @@ void ffPrintCPU(FFCPUOptions* options)
         }
         else
         {
+            FF_STRBUF_AUTO_DESTROY coreTypes = ffStrbufCreate();
+            uint32_t typeCount = 0;
+            while (cpu.coreTypes[typeCount].count != 0 && typeCount < sizeof(cpu.coreTypes) / sizeof(cpu.coreTypes[0])) typeCount++;
+            if (typeCount > 0)
+            {
+                qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);
+
+                for (uint32_t i = 0; i < typeCount; i++)
+                    ffStrbufAppendF(&coreTypes, "%s%u", i == 0 ? "" : "+", cpu.coreTypes[i].count);
+            }
+            else
+                ffStrbufAppendF(&coreTypes, "%u", cpu.coresOnline);
+
+            char freqBase[32], freqMax[32], freqBioslimit[32];
+            if (cpu.frequencyBase > 0)
+                snprintf(freqBase, sizeof(freqBase), "%.*f", options->freqNdigits, cpu.frequencyBase);
+            else
+                freqBase[0] = 0;
+            if (cpu.frequencyMax > 0)
+                snprintf(freqMax, sizeof(freqMax), "%.*f", options->freqNdigits, cpu.frequencyMax);
+            else
+                freqMax[0] = 0;
+            if (cpu.frequencyBiosLimit > 0)
+                snprintf(freqBioslimit, sizeof(freqBioslimit), "%.*f", options->freqNdigits, cpu.frequencyBiosLimit);
+            else
+                freqBioslimit[0] = 0;
+
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPU_NUM_FORMAT_ARGS, ((FFformatarg[]){
@@ -72,9 +109,11 @@ void ffPrintCPU(FFCPUOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresLogical},
                 {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyBase},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &cpu.frequencyMax},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr}
+                {FF_FORMAT_ARG_TYPE_STRING, freqBase},
+                {FF_FORMAT_ARG_TYPE_STRING, freqMax},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &coreTypes},
+                {FF_FORMAT_ARG_TYPE_STRING, freqBioslimit},
             }));
         }
     }
@@ -143,12 +182,15 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
 void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FFCPUResult cpu;
-    cpu.temperature = FF_CPU_TEMP_UNSET;
-    cpu.coresPhysical = cpu.coresLogical = cpu.coresOnline = 0;
-    cpu.frequencyMin = cpu.frequencyMax = cpu.frequencyBase = 0.0/0.0;
-    ffStrbufInit(&cpu.name);
-    ffStrbufInit(&cpu.vendor);
+    FFCPUResult cpu = {
+        .temperature = FF_CPU_TEMP_UNSET,
+        .frequencyMin = 0.0/0.0,
+        .frequencyMax = 0.0/0.0,
+        .frequencyBase = 0.0/0.0,
+        .frequencyBiosLimit = 0.0/0.0,
+        .name = ffStrbufCreate(),
+        .vendor = ffStrbufCreate()
+    };
 
     const char* error = ffDetectCPU(options, &cpu);
 
@@ -175,6 +217,15 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_real(doc, frequency, "base", cpu.frequencyBase);
         yyjson_mut_obj_add_real(doc, frequency, "max", cpu.frequencyMax);
         yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
+        yyjson_mut_obj_add_real(doc, frequency, "biosLimit", cpu.frequencyBiosLimit);
+
+        yyjson_mut_val* coreTypes = yyjson_mut_obj_add_arr(doc, obj, "coreTypes");
+        for (uint32_t i = 0; i < sizeof (cpu.coreTypes) / sizeof (cpu.coreTypes[0]) && cpu.coreTypes[i].count > 0; i++)
+        {
+            yyjson_mut_val* core = yyjson_mut_arr_add_obj(doc, coreTypes);
+            yyjson_mut_obj_add_uint(doc, core, "count", cpu.coreTypes[i].count);
+            yyjson_mut_obj_add_uint(doc, core, "freq", cpu.coreTypes[i].freq);
+        }
 
         yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
     }
@@ -193,7 +244,9 @@ void ffPrintCPUHelpFormat(void)
         "Online core count",
         "Base frequency",
         "Max frequency",
-        "Temperature (formatted)"
+        "Temperature (formatted)",
+        "Logical core count grouped by frequency",
+        "Bios limited frequency",
     }));
 }
 

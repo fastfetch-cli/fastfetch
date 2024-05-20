@@ -7,6 +7,7 @@
 #include "modules/bluetooth/bluetooth.h"
 #include "modules/brightness/brightness.h"
 #include "modules/board/board.h"
+#include "modules/bootmgr/bootmgr.h"
 #include "modules/break/break.h"
 #include "modules/camera/camera.h"
 #include "modules/chassis/chassis.h"

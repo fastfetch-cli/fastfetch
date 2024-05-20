@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.12.0
+    VERSION 2.13.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -115,7 +115,7 @@ endif()
 
 if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
-elseif(APPLE)
+elseif(APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fobjc-arc")
 endif()
 
@@ -284,6 +284,7 @@ set(LIBFASTFETCH_SRC
     src/common/properties.c
     src/common/settings.c
     src/common/temps.c
+    src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
@@ -314,6 +315,7 @@ set(LIBFASTFETCH_SRC
     src/modules/bios/bios.c
     src/modules/bluetooth/bluetooth.c
     src/modules/board/board.c
+    src/modules/bootmgr/bootmgr.c
     src/modules/brightness/brightness.c
     src/modules/break/break.c
     src/modules/camera/camera.c
@@ -394,6 +396,7 @@ if(LINUX)
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
+        src/detection/bootmgr/bootmgr_linux.c
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
@@ -462,6 +465,7 @@ elseif(ANDROID)
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/board/board_android.c
+        src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
@@ -520,6 +524,7 @@ elseif(BSD)
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/board/board_bsd.c
+        src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
@@ -588,6 +593,7 @@ elseif(APPLE)
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
         src/detection/board/board_apple.c
+        src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
@@ -647,6 +653,7 @@ elseif(WIN32)
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
         src/detection/board/board_windows.c
+        src/detection/bootmgr/bootmgr_windows.c
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c

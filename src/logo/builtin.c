@@ -1558,18 +1558,6 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // FedoraOnyx placeholder - Currently does not have a logo
-    //{
-        //.names = {"Fedora_onyx", "fedora-onyx", "fedora-linux-onyx", "fedora-linux_onyx"},
-        //.type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        //.lines = FASTFETCH_DATATEXT_LOGO_FEDORA_ONYX,
-        //.colors = {
-            //FF_COLOR_FG_BLUE,
-            //FF_COLOR_FG_WHITE,
-        //},
-        //.colorKeys = FF_COLOR_FG_BLUE,
-        //.colorTitle = FF_COLOR_FG_BLUE,
-    //},
     // FedoraCoreOS
     {
         .names = {"Fedora_coreos", "fedora-coreos", "fedora-linux-coreos", "fedora-linux_coreos"},
@@ -1677,6 +1665,17 @@ static const FFlogo F[] = {
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // Furreto
+    {
+        .names = {"Furreto"},
+        .lines = FASTFETCH_DATATEXT_LOGO_FURRETO,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_CYAN,
     },
     // LAST
     {},
@@ -2121,13 +2120,11 @@ static const FFlogo K[] = {
     },
     // KDENeon
     {
-        .names = {"KDE", "kde-neon"},
+        .names = {"KDE", "kde-neon", "kde neon"},
         .lines = FASTFETCH_DATATEXT_LOGO_KDE,
         .colors = {
             FF_COLOR_FG_GREEN,
         },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
     },
     // Kibojoe
     {
@@ -2385,6 +2382,18 @@ static const FFlogo L[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Loc-OS
+    {
+        .names = {"loc-os", "Loc-OS Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LOCOS,
+        .colors = {
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Lunar
     {
         .names = {"Lunar"},
@@ -2542,7 +2551,7 @@ static const FFlogo M[] = {
     },
     // Manjaro
     {
-        .names = {"manjaro", "manjaro-linux"},
+        .names = {"manjaro", "manjaro-linux", "manjarolinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_MANJARO,
         .colors = {
             FF_COLOR_FG_GREEN,
@@ -3821,6 +3830,14 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
+    // SpoinkOS
+    {
+        .names = {"SpoinkOS", "spoink-os"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SPOINKOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+    },
     // Slackel
     {
         .names = {"Slackel"},
@@ -4044,10 +4061,9 @@ static const FFlogo T[] = {
         .names = {"TorizonCore"},
         .lines = FASTFETCH_DATATEXT_LOGO_TORIZONCORE,
         .colors = {
+            FF_COLOR_FG_LIGHT_WHITE,
             FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_LIGHT_BLACK,
-            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_BLUE
         },
     },
     // Trisquel

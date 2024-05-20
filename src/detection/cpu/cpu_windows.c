@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "detection/temps/temps_windows.h"
 #include "util/windows/registry.h"
+#include "util/windows/nt.h"
 #include "util/mallocHelper.h"
 #include "util/smbiosHelper.h"
 
@@ -146,13 +147,6 @@ static const char* detectByRegistry(FFCPUResult* cpu)
     if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", &hKey, NULL))
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
-    if (detectSpeedByCpuid(cpu) != NULL || cpu->frequencyBase != cpu->frequencyBase)
-    {
-        uint32_t mhz;
-        if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-            cpu->frequencyBase = mhz / 1000.0;
-    }
-
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
     ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
 
@@ -166,6 +160,27 @@ static const char* detectByRegistry(FFCPUResult* cpu)
     return NULL;
 }
 
+static const char* detectCoreTypes(FFCPUResult* cpu)
+{
+    FF_AUTO_FREE PROCESSOR_POWER_INFORMATION* pinfo = calloc(cpu->coresLogical, sizeof(PROCESSOR_POWER_INFORMATION));
+    if (!NT_SUCCESS(NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, (ULONG) sizeof(PROCESSOR_POWER_INFORMATION) * cpu->coresLogical)))
+        return "NtPowerInformation(ProcessorInformation, NULL, 0, pinfo, size) failed";
+
+    for (uint32_t icore = 0; icore < cpu->coresLogical && pinfo[icore].MhzLimit; ++icore)
+    {
+        uint32_t ifreq = 0;
+        while (cpu->coreTypes[ifreq].freq != pinfo[icore].MhzLimit && cpu->coreTypes[ifreq].freq > 0)
+            ++ifreq;
+        if (cpu->coreTypes[ifreq].freq == 0)
+            cpu->coreTypes[ifreq].freq = pinfo[icore].MhzLimit;
+        ++cpu->coreTypes[ifreq].count;
+    }
+
+    if (cpu->frequencyBase != cpu->frequencyBase)
+        cpu->frequencyBase = pinfo->MaxMhz / 1000.0;
+    return NULL;
+}
+
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     detectNCores(cpu);
@@ -173,6 +188,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     const char* error = detectByRegistry(cpu);
     if (error)
         return error;
+
+    detectSpeedByCpuid(cpu);
+    detectCoreTypes(cpu);
 
     if (cpu->frequencyMax != cpu->frequencyMax)
         detectMaxSpeedBySmbios(cpu);

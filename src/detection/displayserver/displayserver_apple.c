@@ -8,6 +8,10 @@
 #include <CoreVideo/CVDisplayLink.h>
 
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
+#ifndef MAC_OS_X_VERSION_10_15
+#import <IOKit/graphics/IOGraphicsLib.h>
+extern CFDictionaryRef CoreDisplay_IODisplayCreateInfoDictionary(io_service_t framebuffer, IOOptionBits options)  __attribute__((weak_import));
+#endif
 
 static void detectDisplays(FFDisplayServerResult* ds)
 {
@@ -38,6 +42,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             }
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+            #ifdef MAC_OS_X_VERSION_10_15
             if(CoreDisplay_DisplayCreateInfoDictionary)
             {
                 CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
@@ -48,6 +53,19 @@ static void detectDisplays(FFDisplayServerResult* ds)
                         ffCfDictGetString(productNames, CFSTR("en_US"), &name);
                 }
             }
+            #else
+            if(CoreDisplay_IODisplayCreateInfoDictionary)
+            {
+                io_service_t servicePort = CGDisplayIOServicePort(screen);
+                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName); 
+                if(displayInfo)
+                {
+                    CFDictionaryRef productNames;
+                    if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
+                        ffCfDictGetString(productNames, CFSTR("en_US"), &name);
+                }
+            }
+            #endif
 
             ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),

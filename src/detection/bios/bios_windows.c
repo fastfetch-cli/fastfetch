@@ -1,5 +1,6 @@
 #include "bios.h"
 #include "util/smbiosHelper.h"
+#include "util/windows/registry.h"
 
 #include <ntstatus.h>
 #include <winternl.h>

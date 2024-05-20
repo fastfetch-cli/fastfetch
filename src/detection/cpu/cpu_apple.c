@@ -68,19 +68,36 @@ static const char* detectFrequency(FFCPUResult* cpu)
 {
     cpu->frequencyBase = ffSysctlGetInt64("hw.cpufrequency", 0) / 1000.0 / 1000.0 / 1000.0;
     cpu->frequencyMin = ffSysctlGetInt64("hw.cpufrequency_min", 0) / 1000.0 / 1000.0 / 1000.0;
-    cpu->frequencyMax = ffSysctlGetInt64("hw.cpufrequency_max", 0);
-    if(cpu->frequencyMax > 0.0)
-        cpu->frequencyMax /= 1000.0 * 1000.0 * 1000.0;
-    else
+    cpu->frequencyMax = ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000.0 / 1000.0 / 1000.0;
+    if(cpu->frequencyBase != cpu->frequencyBase)
     {
         unsigned current = 0;
         size_t size = sizeof(current);
         if (sysctl((int[]){ CTL_HW, HW_CPU_FREQ }, 2, &current, &size, NULL, 0) == 0)
-            cpu->frequencyMax = (double) current / 1000.0 / 1000.0 / 1000.0;
+            cpu->frequencyBase = (double) current / 1000.0 / 1000.0 / 1000.0;
     }
     return NULL;
 }
 #endif
+
+static const char* detectCoreCount(FFCPUResult* cpu)
+{
+    uint32_t nPerfLevels = (uint32_t) ffSysctlGetInt("hw.nperflevels", 0);
+    if (nPerfLevels <= 0) return "sysctl(hw.nperflevels) failed";
+
+    char sysctlKey[] = "hw.perflevelN.logicalcpu";
+    if (nPerfLevels > sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
+        nPerfLevels = sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]);
+    for (uint32_t i = 0; i < nPerfLevels; ++i)
+    {
+        sysctlKey[strlen("hw.perflevel")] = (char) ('0' + i);
+        cpu->coreTypes[i] = (FFCPUCore) {
+            .freq = nPerfLevels - i,
+            .count = (uint32_t) ffSysctlGetInt(sysctlKey, 0),
+        };
+    }
+    return NULL;
+}
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
@@ -104,6 +121,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
     detectFrequency(cpu);
+    detectCoreCount(cpu);
 
     cpu->temperature = options->temp ? detectCpuTemp(&cpu->name) : FF_CPU_TEMP_UNSET;
 
