@@ -67,9 +67,9 @@ static const char* drmDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
 }
 #endif
 
-static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const char* drmKey)
+static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey)
 {
-    #if __has_include(<drm/drm.h>)
+    #if FF_HAVE_DRM_H
     if (drmKey)
     {
         drmDetectDriver(gpu, pciDir, buffer, drmKey);
