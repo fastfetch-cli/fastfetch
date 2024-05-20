@@ -1558,18 +1558,6 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // FedoraOnyx placeholder - Currently does not have a logo
-    //{
-        //.names = {"Fedora_onyx", "fedora-onyx", "fedora-linux-onyx", "fedora-linux_onyx"},
-        //.type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        //.lines = FASTFETCH_DATATEXT_LOGO_FEDORA_ONYX,
-        //.colors = {
-            //FF_COLOR_FG_BLUE,
-            //FF_COLOR_FG_WHITE,
-        //},
-        //.colorKeys = FF_COLOR_FG_BLUE,
-        //.colorTitle = FF_COLOR_FG_BLUE,
-    //},
     // FedoraCoreOS
     {
         .names = {"Fedora_coreos", "fedora-coreos", "fedora-linux-coreos", "fedora-linux_coreos"},
@@ -2132,13 +2120,11 @@ static const FFlogo K[] = {
     },
     // KDENeon
     {
-        .names = {"KDE", "kde-neon"},
+        .names = {"KDE", "kde-neon", "kde neon"},
         .lines = FASTFETCH_DATATEXT_LOGO_KDE,
         .colors = {
             FF_COLOR_FG_GREEN,
         },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
     },
     // Kibojoe
     {
