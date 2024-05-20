@@ -460,14 +460,16 @@ static const char* pciDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
-    #ifdef FF_HAVE_DIRECTX_HEADERS
-        const char* ffGPUDetectByDirectX(const FFGPUOptions* options, FFlist* gpus);
-        if (ffGPUDetectByDirectX(options, gpus) == NULL)
+    if (options->detectionMethod == FF_GPU_DETECTION_METHOD_AUTO)
+    {
+        #ifdef FF_HAVE_DIRECTX_HEADERS
+            const char* ffGPUDetectByDirectX(const FFGPUOptions* options, FFlist* gpus);
+            if (ffGPUDetectByDirectX(options, gpus) == NULL)
+                return NULL;
+        #endif
+
+        if (drmDetectGPUs(options, gpus) == NULL && gpus->length > 0)
             return NULL;
-    #endif
-
-    if (drmDetectGPUs(options, gpus) == NULL && gpus->length > 0)
-        return NULL;
-
+    }
     return pciDetectGPUs(options, gpus);
 }

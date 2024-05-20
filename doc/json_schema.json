@@ -1455,10 +1455,16 @@
                                         "type": "boolean",
                                         "default": false
                                     },
-                                    "forceVulkan": {
-                                        "description": "Force using vulkan to detect GPUs, which support video memory usage detection with `--allow-slow-operations`",
-                                        "type": "boolean",
-                                        "default": false
+                                    "detectionMethod": {
+                                        "description": "Force using a specified method to detect GPUs",
+                                        "type": "string",
+                                        "enum": [
+                                            "auto",
+                                            "pci",
+                                            "vulkan",
+                                            "opengl"
+                                        ],
+                                        "default": "auto"
                                     },
                                     "hideType": {
                                         "description": "Specify the type of GPUs should not be printed",

@@ -144,9 +144,15 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "force-vulkan"))
+    if (ffStrEqualsIgnCase(subKey, "detection-method"))
     {
-        options->forceVulkan = ffOptionParseBoolean(value);
+        options->detectionMethod = ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "auto", FF_GPU_DETECTION_METHOD_AUTO },
+            { "pci", FF_GPU_DETECTION_METHOD_PCI },
+            { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
+            { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
+            {},
+        });
         return true;
     }
 
@@ -191,9 +197,20 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "forceVulkan"))
+        if (ffStrEqualsIgnCase(key, "detectionMethod"))
         {
-            options->forceVulkan = yyjson_get_bool(val);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "auto", FF_GPU_DETECTION_METHOD_AUTO },
+                { "pci", FF_GPU_DETECTION_METHOD_PCI },
+                { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
+                { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
+                {},
+            });
+            if (error)
+                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+            else
+                options->detectionMethod = (FFGPUDetectionMethod) value;
             continue;
         }
 
@@ -230,8 +247,24 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     if (options->driverSpecific != defaultOptions.driverSpecific)
         yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
 
-    if (options->forceVulkan != defaultOptions.forceVulkan)
-        yyjson_mut_obj_add_bool(doc, module, "forceVulkan", options->forceVulkan);
+    if (options->detectionMethod != defaultOptions.detectionMethod)
+    {
+        switch (options->detectionMethod)
+        {
+            case FF_GPU_DETECTION_METHOD_AUTO:
+                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "auto");
+                break;
+            case FF_GPU_DETECTION_METHOD_PCI:
+                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "pci");
+                break;
+            case FF_GPU_DETECTION_METHOD_VULKAN:
+                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "vulkan");
+                break;
+            case FF_GPU_DETECTION_METHOD_OPENGL:
+                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opengl");
+                break;
+        }
+    }
 
     ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
 
@@ -366,7 +399,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->driverSpecific = false;
-    options->forceVulkan = false;
+    options->detectionMethod = FF_GPU_DETECTION_METHOD_AUTO;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };

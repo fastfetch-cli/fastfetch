@@ -234,10 +234,13 @@ static bool printSpecificCommandHelp(const char* command)
                     }
                 }
 
+                yyjson_doc_free(doc);
                 return true;
             }
         }
     }
+
+    yyjson_doc_free(doc);
     return false;
 }
 
