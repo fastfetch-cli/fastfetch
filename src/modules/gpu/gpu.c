@@ -146,7 +146,7 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
 
     if (ffStrEqualsIgnCase(subKey, "detection-method"))
     {
-        options->detectionMethod = ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+        options->detectionMethod = (FFGPUDetectionMethod) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "auto", FF_GPU_DETECTION_METHOD_AUTO },
             { "pci", FF_GPU_DETECTION_METHOD_PCI },
             { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
