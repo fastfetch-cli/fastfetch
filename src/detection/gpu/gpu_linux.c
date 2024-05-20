@@ -15,28 +15,44 @@
 
 #include <inttypes.h>
 
-#ifdef FF_HAVE_DRM
-#include "common/library.h"
-#include "util/mallocHelper.h"
+#if __has_include(<drm/drm.h>)
+    #include <drm/drm.h>
+    #define FF_HAVE_DRM_H 1
+#elif __has_include(<libdrm/drm.h>)
+    #include <libdrm/drm.h>
+    #define FF_HAVE_DRM_H 1
+#endif
 
-#include <xf86drm.h>
-#include <fcntl.h>
+#if FF_HAVE_DRM_H
+    #include <fcntl.h>
+    #include <sys/ioctl.h>
 
+    #if __aarch64__ && __has_include(<drm/asahi_drm.h>)
+        #include <drm/asahi_drm.h>
+        #define FF_HAVE_ASAHI_DRM_H 1
+    #endif
+#endif
+
+
+#if FF_HAVE_DRM_H
 static const char* drmDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const char* drmKey)
 {
-    FF_LIBRARY_LOAD(libdrm, &instance.config.library.libdrm, "dlopen(libdrm)" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetVersion);
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeVersion);
-
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
     if (fd < 0) return "open(/dev/dri/drm_key) failed";
 
-    drmVersionPtr version = ffdrmGetVersion(fd);
-    ffStrbufSetNS(&gpu->driver, (uint32_t) version->name_len, version->name);
-    if (version->version_major || version->version_minor || version->version_patchlevel)
-        ffStrbufAppendF(&gpu->driver, " %d.%d.%d", version->version_major, version->version_minor, version->version_patchlevel);
+    ffStrbufEnsureFixedLengthFree(&gpu->driver, 128);
+    drm_version_t version = {
+        .name = gpu->driver.chars,
+        .name_len = gpu->driver.allocated,
+    };
+    if (ioctl(fd, DRM_IOCTL_VERSION, &version) < 0) return "ioctl(DRM_IOCTL_VERSION) failed";
+    gpu->driver.length = (uint32_t) version.name_len;
+    gpu->driver.chars[gpu->driver.length] = '\0';
+
+    if (version.version_major || version.version_minor || version.version_patchlevel)
+        ffStrbufAppendF(&gpu->driver, " %d.%d.%d", version.version_major, version.version_minor, version.version_patchlevel);
     else
     {
         ffStrbufAppendS(pciDir, "/driver/module/version");
@@ -47,14 +63,13 @@ static const char* drmDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
             ffStrbufAppend(&gpu->driver, buffer);
         }
     }
-    ffdrmFreeVersion(version);
     return NULL;
 }
 #endif
 
 static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const char* drmKey)
 {
-    #ifdef FF_HAVE_DRM
+    #if __has_include(<drm/drm.h>)
     if (drmKey)
     {
         drmDetectDriver(gpu, pciDir, buffer, drmKey);
@@ -332,7 +347,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
     ffStrbufInitStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
     ffStrbufInitStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
     ffStrbufInit(&gpu->driver);
-    ffStrbufInit(&gpu->platformApi);
+    ffStrbufInitF(&gpu->platformApi, "DRM (%s)", drmKey);
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->type = FF_GPU_TYPE_INTEGRATED;
@@ -340,6 +355,26 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
     pciDetectDriver(gpu, drmDir, buffer, drmKey);
+
+    #if FF_HAVE_ASAHI_DRM_H
+    ffStrbufSetS(buffer, "/dev/dri/");
+    ffStrbufAppendS(buffer, drmKey);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
+    if (fd >= 0)
+    {
+        struct drm_asahi_params_global paramsGlobal = {};
+        if (ioctl(fd, DRM_IOCTL_ASAHI_GET_PARAMS, &(struct drm_asahi_get_params){
+            .param_group = DRM_ASAHI_GET_PARAMS,
+            .pointer = (uint64_t) &paramsGlobal,
+            .size = sizeof(paramsGlobal),
+        }) >= 0)
+        {
+            gpu->coreCount = (int) paramsGlobal.num_cores_total_active;
+            gpu->frequency = paramsGlobal.max_frequency_khz / 1e6;
+            gpu->deviceId = paramsGlobal.chip_id;
+        }
+    }
+    #endif
 
     return NULL;
 }

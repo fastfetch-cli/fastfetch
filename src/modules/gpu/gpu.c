@@ -127,6 +127,7 @@ void ffPrintGPU(FFGPUOptions* options)
         ffStrbufDestroy(&gpu->vendor);
         ffStrbufDestroy(&gpu->name);
         ffStrbufDestroy(&gpu->driver);
+        ffStrbufDestroy(&gpu->platformApi);
     }
 }
 
@@ -327,6 +328,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         ffStrbufDestroy(&gpu->vendor);
         ffStrbufDestroy(&gpu->name);
         ffStrbufDestroy(&gpu->driver);
+        ffStrbufDestroy(&gpu->platformApi);
     }
 }
 
