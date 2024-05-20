@@ -26,13 +26,14 @@ static const char* drmDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
 {
     FF_LIBRARY_LOAD(libdrm, &instance.config.library.libdrm, "dlopen(libdrm)" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetVersion);
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeVersion);
 
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
     if (fd < 0) return "open(/dev/dri/drm_key) failed";
 
-    FF_AUTO_FREE drmVersionPtr version = ffdrmGetVersion(fd);
+    drmVersionPtr version = ffdrmGetVersion(fd);
     ffStrbufSetNS(&gpu->driver, (uint32_t) version->name_len, version->name);
     if (version->version_major || version->version_minor || version->version_patchlevel)
         ffStrbufAppendF(&gpu->driver, " %d.%d.%d", version->version_major, version->version_minor, version->version_patchlevel);
@@ -46,6 +47,7 @@ static const char* drmDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
             ffStrbufAppend(&gpu->driver, buffer);
         }
     }
+    ffdrmFreeVersion(version);
     return NULL;
 }
 #endif
