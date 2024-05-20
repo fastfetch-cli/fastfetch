@@ -150,6 +150,14 @@ static bool detectFrequency(FFCPUResult* cpu)
                 else
                     cpu->frequencyBase = fbase;
             }
+            uint32_t fbioslimit = getFrequency(&path, "/bios_limit", NULL, &buffer);
+            if (fbioslimit > 0)
+            {
+                if (cpu->frequencyBiosLimit == cpu->frequencyBiosLimit)
+                    cpu->frequencyBiosLimit = cpu->frequencyBiosLimit > fbioslimit ? cpu->frequencyBiosLimit : fbioslimit;
+                else
+                    cpu->frequencyBiosLimit = fbioslimit;
+            }
             uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
             if (fmax > 0)
             {
@@ -167,7 +175,7 @@ static bool detectFrequency(FFCPUResult* cpu)
                     cpu->frequencyMin = fmin;
             }
 
-            uint32_t freq = fbase <= 0 ? fmax : fbase; // seems base frequencies are more stable
+            uint32_t freq = fbase == 0 ? fmax : fbase; // seems base frequencies are more stable
             uint32_t ifreq = 0;
             while (cpu->coreTypes[ifreq].freq != freq && cpu->coreTypes[ifreq].freq > 0)
                 ++ifreq;
@@ -180,6 +188,7 @@ static bool detectFrequency(FFCPUResult* cpu)
     cpu->frequencyBase /= 1e6;
     cpu->frequencyMax /= 1e6;
     cpu->frequencyMin /= 1e6;
+    cpu->frequencyBiosLimit /= 1e6;
     return true;
 }
 
