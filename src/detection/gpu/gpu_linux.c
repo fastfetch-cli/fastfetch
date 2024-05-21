@@ -406,7 +406,7 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufSubstrBefore(&drmDir, drmDir.length - (uint32_t) strlen("/modalias"));
 
         if (ffStrbufStartsWithS(&buffer, "pci:"))
-            detectPci(options, gpus, &buffer, &drmDir, entry->d_name);
+            detectPci(options, gpus, &buffer, &drmDir, NULL);
         #ifdef __aarch64__
         else if (ffStrbufStartsWithS(&buffer, "of:"))
             detectAsahi(gpus, &buffer, &drmDir, entry->d_name);
