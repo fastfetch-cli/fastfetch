@@ -1074,6 +1074,11 @@
                                         "maximum": 9,
                                         "default": 2
                                     },
+                                    "showPeCoreCount": {
+                                        "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

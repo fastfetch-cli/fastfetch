@@ -1153,6 +1153,15 @@
             }
         },
         {
+            "long": "cpu-show-pe-core-count",
+            "desc": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "cpuusage-separate",
             "desc": "Display CPU usage per CPU logical core, instead of an average result",
             "arg": {

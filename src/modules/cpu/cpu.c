@@ -37,6 +37,20 @@ void ffPrintCPU(FFCPUOptions* options)
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY coreTypes = ffStrbufCreate();
+        if (options->showPeCoreCount)
+        {
+            uint32_t typeCount = 0;
+            while (cpu.coreTypes[typeCount].count != 0 && typeCount < sizeof(cpu.coreTypes) / sizeof(cpu.coreTypes[0])) typeCount++;
+            if (typeCount > 0)
+            {
+                qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);
+
+                for (uint32_t i = 0; i < typeCount; i++)
+                    ffStrbufAppendF(&coreTypes, "%s%u", i == 0 ? "" : "+", cpu.coreTypes[i].count);
+            }
+        }
+
         if(options->moduleArgs.outputFormat.length == 0)
         {
             ffPrintLogoAndKey(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -53,7 +67,9 @@ void ffPrintCPU(FFCPUOptions* options)
             else
                 ffStrbufAppendS(&str, "Unknown");
 
-            if(cpu.coresOnline > 1)
+            if(coreTypes.length > 0)
+                ffStrbufAppendF(&str, " (%s)", coreTypes.chars);
+            else if(cpu.coresOnline > 1)
                 ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
             double freq = cpu.frequencyBiosLimit;
@@ -74,19 +90,6 @@ void ffPrintCPU(FFCPUOptions* options)
         }
         else
         {
-            FF_STRBUF_AUTO_DESTROY coreTypes = ffStrbufCreate();
-            uint32_t typeCount = 0;
-            while (cpu.coreTypes[typeCount].count != 0 && typeCount < sizeof(cpu.coreTypes) / sizeof(cpu.coreTypes[0])) typeCount++;
-            if (typeCount > 0)
-            {
-                qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);
-
-                for (uint32_t i = 0; i < typeCount; i++)
-                    ffStrbufAppendF(&coreTypes, "%s%u", i == 0 ? "" : "+", cpu.coreTypes[i].count);
-            }
-            else
-                ffStrbufAppendF(&coreTypes, "%u", cpu.coresOnline);
-
             char freqBase[32], freqMax[32], freqBioslimit[32];
             if (cpu.frequencyBase > 0)
                 snprintf(freqBase, sizeof(freqBase), "%.*f", options->freqNdigits, cpu.frequencyBase);
@@ -122,7 +125,7 @@ void ffPrintCPU(FFCPUOptions* options)
     ffStrbufDestroy(&cpu.vendor);
 }
 
-bool ffParseCPUCPUOptions(FFCPUOptions* options, const char* key, const char* value)
+bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value)
 {
     const char* subKey = ffOptionTestPrefix(key, FF_CPU_MODULE_NAME);
     if (!subKey) return false;
@@ -135,6 +138,12 @@ bool ffParseCPUCPUOptions(FFCPUOptions* options, const char* key, const char* va
     if (ffStrEqualsIgnCase(subKey, "freq-ndigits"))
     {
         options->freqNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "show-pe-core-count"))
+    {
+        options->showPeCoreCount = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -163,6 +172,12 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "showPeCoreCount"))
+        {
+            options->showPeCoreCount = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
@@ -178,6 +193,9 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
     if (defaultOptions.freqNdigits != options->freqNdigits)
         yyjson_mut_obj_add_uint(doc, module, "freqNdigits", options->freqNdigits);
+
+    if (defaultOptions.showPeCoreCount != options->showPeCoreCount)
+        yyjson_mut_obj_add_bool(doc, module, "showPeCoreCount", options->showPeCoreCount);
 }
 
 void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -256,7 +274,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
         &options->moduleInfo,
         FF_CPU_MODULE_NAME,
         "Print CPU name, frequency, etc",
-        ffParseCPUCPUOptions,
+        ffParseCPUCommandOptions,
         ffParseCPUJsonObject,
         ffPrintCPU,
         ffGenerateCPUJsonResult,
@@ -267,6 +285,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->freqNdigits = 2;
+    options->showPeCoreCount = false;
 }
 
 void ffDestroyCPUOptions(FFCPUOptions* options)
