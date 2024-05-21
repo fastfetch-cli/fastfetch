@@ -159,9 +159,6 @@ static bool detectDebianDerived(FFOSResult* result)
     }
     else if (ffStrbufStartsWithS(&result->name, "CuerdOS GNU/Linux"))
     {
-        ffStrbufSetS(&result->name, "CuerdOS GNU/Linux");
-        ffStrbufSetS(&result->id, "cuerdos");
-        ffStrbufSetS(&result->idLike, "debian");
         return true;
     }
     else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
