@@ -2395,7 +2395,7 @@ static const FFlogo L[] = {
     },
     // Loc-OS
     {
-        .names = {"loc-os", "Loc-OS Linux"},
+        .names = {"locos", "loc-os", "Loc-OS Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_LOCOS,
         .colors = {
             FF_COLOR_FG_BLACK,
