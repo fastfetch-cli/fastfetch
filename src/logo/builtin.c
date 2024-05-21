@@ -1066,6 +1066,17 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    // CuerdOS
+    {
+        .names = {"CuerdOS", "CuerdOS GNU/Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CUERDOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // CutefishOS
     {
         .names = {"CutefishOS"},
