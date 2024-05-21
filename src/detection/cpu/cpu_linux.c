@@ -127,7 +127,7 @@ static uint8_t getNumCores(FFstrbuf* basePath, FFstrbuf* buffer)
     return 0;
 }
 
-static bool detectFrequency(FFCPUResult* cpu)
+static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/devices/system/cpu/cpufreq/");
     FF_AUTO_CLOSE_DIR DIR* dir = opendir(path.chars);
@@ -175,13 +175,16 @@ static bool detectFrequency(FFCPUResult* cpu)
                     cpu->frequencyMin = fmin;
             }
 
-            uint32_t freq = fbase == 0 ? fmax : fbase; // seems base frequencies are more stable
-            uint32_t ifreq = 0;
-            while (cpu->coreTypes[ifreq].freq != freq && cpu->coreTypes[ifreq].freq > 0)
-                ++ifreq;
-            if (cpu->coreTypes[ifreq].freq == 0)
-                cpu->coreTypes[ifreq].freq = freq;
-            cpu->coreTypes[ifreq].count += getNumCores(&path, &buffer);
+            if (options->showPeCoreCount)
+            {
+                uint32_t freq = fbase == 0 ? fmax : fbase; // seems base frequencies are more stable
+                uint32_t ifreq = 0;
+                while (cpu->coreTypes[ifreq].freq != freq && cpu->coreTypes[ifreq].freq > 0)
+                    ++ifreq;
+                if (cpu->coreTypes[ifreq].freq == 0)
+                    cpu->coreTypes[ifreq].freq = freq;
+                cpu->coreTypes[ifreq].count += getNumCores(&path, &buffer);
+            }
             ffStrbufSubstrBefore(&path, baseLen);
         }
     }
@@ -270,7 +273,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
 
-    if (!detectFrequency(cpu) || cpu->frequencyBase != cpu->frequencyBase)
+    if (!detectFrequency(cpu, options) || cpu->frequencyBase != cpu->frequencyBase)
         cpu->frequencyBase = ffStrbufToDouble(&cpuMHz) / 1000;
 
     if(cpuUarch.length > 0)

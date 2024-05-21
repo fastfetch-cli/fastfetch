@@ -1,3 +1,13 @@
+# 2.13.1
+
+Fix a regression introduced in v2.13.0
+
+Bugfixes:
+* Fix CPU frequency not displayed if `bios_limit` is not available (CPU, Linux)
+
+Features:
+* Add `--cpu-show-pe-core-count` to detect and display core count for performance / efficiency cores (CPU, FreeBSD)
+
 # 2.13.0
 
 Changes:

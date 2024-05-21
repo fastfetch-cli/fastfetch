@@ -157,6 +157,10 @@ static const char* detectByRegistry(FFCPUResult* cpu)
             cpu->coresOnline = cpu->coresPhysical = cpu->coresLogical = (uint16_t) cores;
     }
 
+    uint32_t mhz;
+    if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
+        cpu->frequencyBase = mhz / 1000.0;
+
     return NULL;
 }
 
@@ -190,7 +194,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         return error;
 
     detectSpeedByCpuid(cpu);
-    detectCoreTypes(cpu);
+    if (options->showPeCoreCount) detectCoreTypes(cpu);
 
     if (cpu->frequencyMax != cpu->frequencyMax)
         detectMaxSpeedBySmbios(cpu);

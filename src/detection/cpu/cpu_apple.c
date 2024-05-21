@@ -121,7 +121,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
     detectFrequency(cpu);
-    detectCoreCount(cpu);
+    if (options->showPeCoreCount) detectCoreCount(cpu);
 
     cpu->temperature = options->temp ? detectCpuTemp(&cpu->name) : FF_CPU_TEMP_UNSET;
 
