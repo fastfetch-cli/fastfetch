@@ -2,7 +2,6 @@
 
 #include "common/io/io.h"
 #include "common/properties.h"
-#include "3rdparty/nvml/nvml.h"
 #include "util/mallocHelper.h"
 
 #include <dev/pci/pcireg.h>

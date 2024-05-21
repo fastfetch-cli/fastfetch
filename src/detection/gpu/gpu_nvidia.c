@@ -1,7 +1,7 @@
 #include "gpu_driver_specific.h"
 
-#include "3rdparty/nvml/nvml.h"
 #include "common/library.h"
+#include "nvml.h"
 
 struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetCount_v2)
