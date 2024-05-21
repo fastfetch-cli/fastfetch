@@ -157,10 +157,6 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
         return true;
     }
-    else if (ffStrbufStartsWithS(&result->name, "CuerdOS GNU/Linux"))
-    {
-        return true;
-    }
     else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
     {
         ffStrbufSetS(&result->id, "locos");
