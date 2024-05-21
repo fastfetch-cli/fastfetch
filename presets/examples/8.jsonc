@@ -24,24 +24,24 @@
         },
         {
             "type": "os",
-            "key": "",
+            "key": "",
             "format": "{2} {8}"
         },
         {
             "type": "kernel",
-            "key": ""
+            "key": ""
         },
         {
             "type": "memory",
-            "key": "󰻠"
+            "key": ""
         },
         {
             "type": "packages",
-            "key": ""
+            "key": "󰏖"
         },
         {
             "type": "uptime",
-            "key": ""
+            "key": "󰅐"
         },
         {
             "type": "custom",
