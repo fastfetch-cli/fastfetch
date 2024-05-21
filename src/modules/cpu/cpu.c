@@ -57,9 +57,9 @@ void ffPrintCPU(FFCPUOptions* options)
                 ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
 
             double freq = cpu.frequencyBiosLimit;
-            if(freq <= 0.0000001)
+            if(!(freq > 0.0000001))
                 freq = cpu.frequencyMax;
-            if(freq <= 0.0000001)
+            if(!(freq > 0.0000001))
                 freq = cpu.frequencyBase;
             if(freq > 0.0000001)
                 ffStrbufAppendF(&str, " @ %.*f GHz", options->freqNdigits, freq);
