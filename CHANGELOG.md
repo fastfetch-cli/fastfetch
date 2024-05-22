@@ -1,7 +1,18 @@
 # 2.13.2
 
+Another hotfix release :(
+
+Bugfixes:
+* Remove DRM driver version detection feature, which caused a performance regression for nouveau drivers (#956, Display, Linux)
+* Fix compatibility for old python versions. Regression of `2.13.0`
+* Don't use `*-unknown` as display name for Wayland protocol (Display, Linux)
+
 Features:
-* Add new module `Editor` which prints information of the default editor, i.e. $VISUAL or $EDITOR (Editor)
+* Add new module `Editor` which prints information of the default editor, i.e. $VISUAL or $EDITOR (#430, Editor)
+
+Logos:
+* Added CuerdOS
+* Remove special handling of Loc-OS
 
 # 2.13.1
 
