@@ -291,6 +291,7 @@ set(LIBFASTFETCH_SRC
     src/detection/disk/disk.c
     src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
+    src/detection/editor/editor.c
     src/detection/font/font.c
     src/detection/gpu/gpu.c
     src/detection/media/media.c
@@ -330,6 +331,7 @@ set(LIBFASTFETCH_SRC
     src/modules/de/de.c
     src/modules/disk/disk.c
     src/modules/diskio/diskio.c
+    src/modules/editor/editor.c
     src/modules/font/font.c
     src/modules/gpu/gpu.c
     src/modules/host/host.c

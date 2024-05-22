@@ -22,6 +22,7 @@
 #include "modules/diskio/diskio.h"
 #include "modules/display/display.h"
 #include "modules/de/de.h"
+#include "modules/editor/editor.h"
 #include "modules/font/font.h"
 #include "modules/gamepad/gamepad.h"
 #include "modules/gpu/gpu.h"

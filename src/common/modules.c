@@ -37,6 +37,7 @@ static FFModuleBaseInfo* D[] = {
 };
 
 static FFModuleBaseInfo* E[] = {
+    (void*) &instance.config.modules.editor,
     NULL,
 };
 

@@ -68,7 +68,7 @@ FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace);
 
 void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
-void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index);
+void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index); // Not including the index
 void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
 void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
 void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c);

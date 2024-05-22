@@ -15,6 +15,7 @@
         "processes",
         "packages",
         "shell",
+        "editor",
         "display",
         "brightness",
         "monitor",

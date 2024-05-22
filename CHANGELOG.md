@@ -1,3 +1,8 @@
+# 2.13.2
+
+Features:
+* Add new module `Editor` which prints information of the default editor, i.e. $VISUAL or $EDITOR (Editor)
+
 # 2.13.1
 
 Fix a regression introduced in v2.13.0
