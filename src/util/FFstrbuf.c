@@ -389,8 +389,8 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
     if(strbuf->allocated == 0)
     {
         //static string
-        strbuf->length -= index;
-        strbuf->chars += index;
+        strbuf->length -= index + 1;
+        strbuf->chars += index + 1;
         return;
     }
 

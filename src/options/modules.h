@@ -24,6 +24,7 @@ typedef struct FFOptionsModules
     FFDiskOptions disk;
     FFDiskIOOptions diskIo;
     FFDisplayOptions display;
+    FFEditorOptions editor;
     FFFontOptions font;
     FFGPUOptions gpu;
     FFGamepadOptions gamepad;

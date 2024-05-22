@@ -13,6 +13,7 @@
     "os",
     "host",
     "bios",
+    "bootmgr",
     "board",
     "chassis",
     "kernel",
@@ -21,6 +22,7 @@
     "processes",
     "packages",
     "shell",
+    "editor",
     "display",
     "brightness",
     "monitor",
@@ -37,7 +39,10 @@
     "terminalfont",
     "terminalsize",
     "terminaltheme",
-    "cpu",
+    {
+        "type": "cpu",
+        "showPeCoreCount": true
+    },
     "cpuusage",
     "gpu",
     "memory",
@@ -49,7 +54,11 @@
     "player",
     "media",
     "publicip",
-    "localip",
+    {
+        "type": "localip",
+        "showIpV6": true,
+        "showMac": true
+    },
     "wifi",
     "datetime",
     "locale",

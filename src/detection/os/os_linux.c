@@ -157,12 +157,6 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
         return true;
     }
-    else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
-    {
-        ffStrbufSetS(&result->id, "locos");
-        ffStrbufSetS(&result->idLike, "debian");
-        return true;
-    }
     else if (ffPathExists("/usr/bin/pveversion", FF_PATHTYPE_FILE))
     {
         ffStrbufSetS(&result->id, "pve");

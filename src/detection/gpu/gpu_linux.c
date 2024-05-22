@@ -33,50 +33,8 @@
     #endif
 #endif
 
-
-#if FF_HAVE_DRM_H
-static const char* drmDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const char* drmKey)
-{
-    ffStrbufSetS(buffer, "/dev/dri/");
-    ffStrbufAppendS(buffer, drmKey);
-    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
-    if (fd < 0) return "open(/dev/dri/drm_key) failed";
-
-    ffStrbufEnsureFixedLengthFree(&gpu->driver, 128);
-    drm_version_t version = {
-        .name = gpu->driver.chars,
-        .name_len = gpu->driver.allocated,
-    };
-    if (ioctl(fd, DRM_IOCTL_VERSION, &version) < 0) return "ioctl(DRM_IOCTL_VERSION) failed";
-    gpu->driver.length = (uint32_t) version.name_len;
-    gpu->driver.chars[gpu->driver.length] = '\0';
-
-    if (version.version_major || version.version_minor || version.version_patchlevel)
-        ffStrbufAppendF(&gpu->driver, " %d.%d.%d", version.version_major, version.version_minor, version.version_patchlevel);
-    else
-    {
-        ffStrbufAppendS(pciDir, "/driver/module/version");
-        if (ffReadFileBuffer(pciDir->chars, buffer))
-        {
-            ffStrbufTrimRightSpace(buffer);
-            ffStrbufAppendC(&gpu->driver, ' ');
-            ffStrbufAppend(&gpu->driver, buffer);
-        }
-    }
-    return NULL;
-}
-#endif
-
 static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey)
 {
-    #if FF_HAVE_DRM_H
-    if (drmKey)
-    {
-        drmDetectDriver(gpu, pciDir, buffer, drmKey);
-        if (gpu->driver.length > 0) return true;
-    }
-    #endif
-
     ffStrbufAppendS(pciDir, "/driver");
     char pathBuf[PATH_MAX];
     ssize_t resultLength = readlink(pciDir->chars, pathBuf, sizeof(pathBuf));

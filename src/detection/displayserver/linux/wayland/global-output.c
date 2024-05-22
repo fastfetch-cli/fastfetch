@@ -118,7 +118,8 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         rotation,
         display.edidName.length
             ? &display.edidName
-            : display.description.length && !ffStrbufEndsWithS(&display.description, "-unknown")
+            // Try ignoring `eDP-1-unknown`, where `unknown` is localized
+            : display.description.length && !(ffStrbufStartsWithS(&display.description, display.name.chars) && display.description.chars[display.name.length] == '-')
                 ? &display.description
                 : &display.name,
         display.type,

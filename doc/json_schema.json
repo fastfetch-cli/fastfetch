@@ -695,6 +695,7 @@
                             "disk",
                             "diskio",
                             "de",
+                            "editor",
                             "font",
                             "gamepad",
                             "gpu",
@@ -794,6 +795,10 @@
                                             {
                                                 "const": "datetime",
                                                 "description": "Print current date and time"
+                                            },
+                                            {
+                                                "const": "editor",
+                                                "description": "Print information of the default editor ($VISUAL or $EDITOR)"
                                             },
                                             {
                                                 "const": "font",

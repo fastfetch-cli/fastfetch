@@ -1208,13 +1208,13 @@
         {
             "long": "gpu-detection-method",
             "desc": "Force using a specified method to detect GPUs",
-            "remark": "Methods are used in this order: DRM (Linux only) -> PCI (Linux, FreeBSD and other platform specific methods) -> Vulkan -> OpenGL",
+            "remark": "Will fall back to next methods if the specified method fails",
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "Use DRM if available, which is most feature-rich. Requires proper DRM driver installed",
-                    "pci": "Search PCI devices, which do not requires any driver installed",
-                    "vulkan": "Use Vulkan API. Slow and requires vulkan driver installed",
+                    "auto": "Query platform specific graphic APIs. Requires proper GPU drivers installed. Not supported on FreeBSD",
+                    "pci": "Search PCI devices, which do not requires GPU driver installed. Not supported on Windows and macOS",
+                    "vulkan": "Use Vulkan API. Slow and requires vulkan driver installed. Used for Android",
                     "opengl": "Use OpenGL API. Slow and only detects one GPU"
                 },
                 "default": "auto"
