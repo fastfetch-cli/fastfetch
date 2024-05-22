@@ -13,6 +13,7 @@
     "os",
     "host",
     "bios",
+    "bootmgr",
     "board",
     "chassis",
     "kernel",
