@@ -37,7 +37,7 @@ const char* ffDetectEditor(FFEditorResult* result)
     if (result->name.chars[0] != '/')
     {
         if (ffProcessAppendStdOut(&result->path, (char* const[]){
-            "/usr/bin/which",
+            FASTFETCH_TARGET_DIR_USR "/bin/which",
             result->name.chars,
             NULL,
         }) != NULL || result->path.length == 0)
