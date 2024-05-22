@@ -93,8 +93,11 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &result.name);
-    yyjson_mut_obj_add_strcpy(doc, obj, "exe", result.exe);
     yyjson_mut_obj_add_strbuf(doc, obj, "path", &result.path);
+    if (result.exe)
+        yyjson_mut_obj_add_strcpy(doc, obj, "exe", result.exe);
+    else
+        yyjson_mut_obj_add_null(doc, obj, "exe");
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
 
     ffStrbufDestroy(&result.name);
