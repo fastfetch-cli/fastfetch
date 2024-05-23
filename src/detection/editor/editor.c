@@ -4,27 +4,6 @@
 
 #include <stdlib.h>
 
-#if defined(MAXPATH)
-#define FF_EXE_PATH_LEN MAXPATH
-#elif defined(PATH_MAX)
-#define FF_EXE_PATH_LEN PATH_MAX
-#else
-#define FF_EXE_PATH_LEN 260
-#endif
-
-#ifdef _WIN32
-static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
-{
-    char* result = _fullpath(resolved_name, file_name, _MAX_PATH);
-    if(result)
-    {
-        resolved_name[1] = resolved_name[0]; // Drive Name
-        resolved_name[0] = '/';
-    }
-    return result;
-}
-#endif
-
 const char* ffDetectEditor(FFEditorResult* result)
 {
     ffStrbufSetS(&result->name, getenv("VISUAL"));
@@ -46,7 +25,7 @@ const char* ffDetectEditor(FFEditorResult* result)
     else
         ffStrbufSet(&result->path, &result->name);
 
-    char buf[FF_EXE_PATH_LEN];
+    char buf[PATH_MAX + 1];
     if (!realpath(result->path.chars, buf))
         return NULL;
 
