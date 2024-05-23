@@ -205,6 +205,8 @@ jobs:
 
       - name: setup alpine linux
         uses: jirutka/setup-alpine@master
+        with:
+          branch: v3.19
 
       - name: install dependencies
         run: |
@@ -244,6 +246,7 @@ jobs:
       - name: setup alpine linux
         uses: jirutka/setup-alpine@master
         with:
+          branch: v3.19
           arch: aarch64
 
       - name: install dependencies
