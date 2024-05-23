@@ -194,7 +194,7 @@ static const char* drmGetNameByConnId(uint32_t connId, FFstrbuf* name)
 
 static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(libdrm, &instance.config.library.libdrm, "dlopen(libdrm)" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(libdrm, &instance.config.library.libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetResources)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetConnectorCurrent)

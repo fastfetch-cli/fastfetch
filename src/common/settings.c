@@ -6,45 +6,6 @@
 
 #include <string.h>
 
-typedef enum FFInitState
-{
-    FF_INITSTATE_UNINITIALIZED = 0,
-    FF_INITSTATE_SUCCESSFUL = 1,
-    FF_INITSTATE_FAILED = 2
-} FFInitState;
-
-#define FF_LIBRARY_DATA_LOAD_INIT(dataObject, userLibraryName, ...) \
-    static dataObject data; \
-    static FFInitState initState = FF_INITSTATE_UNINITIALIZED; \
-    if(initState != FF_INITSTATE_UNINITIALIZED) {\
-        return initState == FF_INITSTATE_SUCCESSFUL ? &data : NULL; \
-    } \
-    initState = FF_INITSTATE_SUCCESSFUL; \
-    void* libraryHandle = ffLibraryLoad(&userLibraryName, __VA_ARGS__, NULL); \
-    if(libraryHandle == NULL) { \
-        initState = FF_INITSTATE_FAILED; \
-        return NULL; \
-    } \
-
-#define FF_LIBRARY_DATA_LOAD_SYMBOL(symbolName) \
-    data.ff ## symbolName = dlsym(libraryHandle, #symbolName); \
-    if(data.ff ## symbolName == NULL) { \
-        dlclose(libraryHandle); \
-        initState = FF_INITSTATE_FAILED; \
-        return NULL; \
-    }
-
-#define FF_LIBRARY_DATA_LOAD_RETURN \
-    initState = FF_INITSTATE_SUCCESSFUL; \
-    return &data;
-
-#define FF_LIBRARY_DATA_LOAD_ERROR \
-    { \
-        dlclose(libraryHandle); \
-        initState = FF_INITSTATE_FAILED; \
-        return NULL; \
-    }
-
 #ifdef FF_HAVE_GIO
 #include <gio/gio.h>
 
@@ -88,32 +49,39 @@ typedef struct GSettingsData
     FF_LIBRARY_SYMBOL(g_settings_schema_source_get_default)
     GSettingsSchemaSource* schemaSource;
     GVariantGetters variantGetters;
+
+    bool inited;
 } GSettingsData;
 
 static const GSettingsData* getGSettingsData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(GSettingsData, instance.config.library.libGIO, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
+    static GSettingsData data;
 
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_lookup)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_has_key)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_new_full)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_get_value)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_get_user_value)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_get_default_value)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_settings_schema_source_get_default)
+    if (!data.inited)
+    {
+        data.inited = true;
+        FF_LIBRARY_LOAD(libgsettings, &instance.config.library.libGIO, NULL, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_lookup, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_has_key, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_new_full, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_value, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_user_value, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_get_default_value, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_get_default, NULL)
 
-    #define data data.variantGetters
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_dup_string)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_unref);
-    #undef data
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_dup_string, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_get_boolean, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_get_int32, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data.variantGetters, g_variant_unref, NULL);
 
-    data.schemaSource = data.ffg_settings_schema_source_get_default();
-    if(data.schemaSource == NULL)
-        FF_LIBRARY_DATA_LOAD_ERROR
+        data.schemaSource = data.ffg_settings_schema_source_get_default();
+        if (data.schemaSource)
+            libgsettings = NULL;
+    }
+    if(!data.schemaSource)
+        return NULL;
 
-    FF_LIBRARY_DATA_LOAD_RETURN
+    return &data;
 }
 
 FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const char* key, FFvarianttype type)
@@ -161,27 +129,34 @@ typedef struct DConfData
     FF_LIBRARY_SYMBOL(dconf_client_new)
     GVariantGetters variantGetters;
     DConfClient* client;
+
+    bool inited;
 } DConfData;
 
 static const DConfData* getDConfData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(DConfData, instance.config.library.libDConf, "libdconf" FF_LIBRARY_EXTENSION, 2);
+    static DConfData data;
 
-    FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_read_full)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(dconf_client_new)
+    if (!data.inited)
+    {
+        data.inited = true;
 
-    #define data data.variantGetters
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_dup_string)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_boolean)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_get_int32)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(g_variant_unref)
-    #undef data
+        FF_LIBRARY_LOAD(libdconf, &instance.config.library.libDConf, NULL, "libdconf" FF_LIBRARY_EXTENSION, 2);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_read_full, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_new, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_dup_string, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_get_boolean, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_get_int32, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_unref, NULL)
 
-    data.client = data.ffdconf_client_new();
-    if(data.client == NULL)
-        FF_LIBRARY_DATA_LOAD_ERROR
+        data.client = data.ffdconf_client_new();
+        if (data.client)
+            libdconf = NULL;
+    }
+    if(!data.client)
+        return NULL;
 
-    FF_LIBRARY_DATA_LOAD_RETURN
+    return &data;
 }
 
 FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type)
@@ -232,23 +207,35 @@ typedef struct XFConfData
     FF_LIBRARY_SYMBOL(xfconf_channel_get_bool)
     FF_LIBRARY_SYMBOL(xfconf_channel_get_int)
     FF_LIBRARY_SYMBOL(xfconf_init)
+
+    bool inited;
 } XFConfData;
 
 static const XFConfData* getXFConfData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(XFConfData, instance.config.library.libXFConf, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
+    static XFConfData data;
 
-    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_has_property)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_string)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_bool)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_channel_get_int)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(xfconf_init)
+    if (!data.inited)
+    {
+        data.inited = true;
+        FF_LIBRARY_LOAD(libxfconf, &instance.config.library.libXFConf, NULL, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
 
-    if(data.ffxfconf_init(NULL) == false)
-        FF_LIBRARY_DATA_LOAD_ERROR
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_has_property, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get_string, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get_bool, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get_int, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_init, NULL)
+        if(!data.ffxfconf_init(NULL))
+            data.ffxfconf_init = NULL;
+        else
+            libxfconf = NULL;
+    }
 
-    FF_LIBRARY_DATA_LOAD_RETURN
+    if(!data.ffxfconf_init)
+        return NULL;
+
+    return &data;
 }
 
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
@@ -294,22 +281,33 @@ typedef struct SQLiteData
     FF_LIBRARY_SYMBOL(sqlite3_column_text)
     FF_LIBRARY_SYMBOL(sqlite3_finalize)
     FF_LIBRARY_SYMBOL(sqlite3_close)
+
+    bool inited;
 } SQLiteData;
 
 static const SQLiteData* getSQLiteData(void)
 {
-    FF_LIBRARY_DATA_LOAD_INIT(SQLiteData, instance.config.library.libSQLite3, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
+    static SQLiteData data;
 
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_open_v2)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_prepare_v2)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_step)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_data_count)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_column_int)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_column_text)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_finalize)
-    FF_LIBRARY_DATA_LOAD_SYMBOL(sqlite3_close)
+    if (!data.inited)
+    {
+        data.inited = true;
+        FF_LIBRARY_LOAD(libsqlite, &instance.config.library.libSQLite3, NULL, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_open_v2, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_prepare_v2, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_step, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_data_count, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_column_int, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_column_text, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_finalize, NULL)
+        FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_close, NULL)
+        libsqlite = NULL;
+    }
 
-    FF_LIBRARY_DATA_LOAD_RETURN
+    if (!data.ffsqlite3_close)
+        return NULL;
+
+    return &data;
 }
 
 int ffSettingsGetSQLite3Int(const char* dbPath, const char* query)
