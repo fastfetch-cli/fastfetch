@@ -4,12 +4,13 @@
 #include "common/parsing.h"
 #include "common/option.h"
 
-enum
+enum FFPercentageTypeFlags
 {
     FF_PERCENTAGE_TYPE_NUM_BIT = 1 << 0,
     FF_PERCENTAGE_TYPE_BAR_BIT = 1 << 1,
     FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT = 1 << 2,
     FF_PERCENTAGE_TYPE_NUM_COLOR_BIT = 1 << 3,
+    FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT = FF_PERCENTAGE_TYPE_NUM_COLOR_BIT,
 };
 
 // if (green <= yellow)
