@@ -265,6 +265,11 @@ static void listAvailablePresets(bool pretty)
         ffStrbufAppendS(path, "fastfetch/presets/");
         ffListFilesRecursively(path->chars, pretty);
     }
+
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateCopy(&instance.state.platform.exePath);
+    ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+    ffStrbufAppendS(&absolutePath, "/presets/");
+    ffListFilesRecursively(absolutePath.chars, pretty);
 }
 
 static void listAvailableLogos(void)
