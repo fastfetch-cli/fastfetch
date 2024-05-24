@@ -870,11 +870,6 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     endforeach()
 endfunction()
 
-if(BINARY_LINK_TYPE STREQUAL "static")
-    set_target_properties(libfastfetch PROPERTIES LINK_SEARCH_START_STATIC 1)
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-endif()
-
 ff_lib_enable(VULKAN
     "vulkan"
     "Vulkan"
@@ -1058,10 +1053,6 @@ target_include_directories(libfastfetch
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
 )
-
-if(BINARY_LINK_TYPE STREQUAL "static")
-    set_target_properties(libfastfetch PROPERTIES LINK_SEARCH_END_STATIC 1)
-endif()
 
 ######################
 # Executable targets #
