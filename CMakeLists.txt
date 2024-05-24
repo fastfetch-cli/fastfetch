@@ -858,6 +858,7 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
 
     if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_directories(libfastfetch PUBLIC ${${VARNAME}_LIBRARY_DIRS})
         target_link_libraries(libfastfetch PRIVATE ${${VARNAME}_LIBRARIES})
     endif()
 
