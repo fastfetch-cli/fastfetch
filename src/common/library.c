@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "common/library.h"
 
-#ifndef FF_LIBRARY_STATIC_BUILD
+#ifndef FF_DISABLE_DLOPEN
 
 #include <stdarg.h>
 

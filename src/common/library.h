@@ -3,7 +3,7 @@
 #include "fastfetch.h"
 #include "util/FFcheckmacros.h"
 
-#ifndef FF_LIBRARY_STATIC_BUILD
+#ifndef FF_DISABLE_DLOPEN
 
 #if defined(_WIN32)
     #include <libloaderapi.h>

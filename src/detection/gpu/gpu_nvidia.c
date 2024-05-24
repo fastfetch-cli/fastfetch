@@ -19,6 +19,8 @@ struct FFNvmlData {
 
 const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName)
 {
+#ifndef FF_DISABLE_DLOPEN
+
     if (!nvmlData.inited)
     {
         nvmlData.inited = true;
@@ -127,4 +129,11 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     }
 
     return NULL;
+
+#else
+
+    FF_UNUSED(cond, result, soName);
+    return "dlopen is disabled";
+
+#endif
 }

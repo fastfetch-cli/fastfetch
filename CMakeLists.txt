@@ -77,6 +77,13 @@ option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 
+set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
+set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
+set_property(CACHE BINARY_LINK_TYPE PROPERTY STRINGS ${BINARY_LINK_TYPE_OPTIONS})
+if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
+    message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
+endif()
+
 if (LINUX)
     set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
     set(CUSTOM_AMDGPU_IDS_PATH "" CACHE STRING "Custom path to file amdgpu.ids, defaults to `/usr/share/libdrm/amdgpu.ids`")
@@ -817,6 +824,11 @@ if(NOT "${CUSTOM_OS_RELEASE_PATH}" STREQUAL "")
     target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_OS_RELEASE_PATH=${CUSTOM_OS_RELEASE_PATH})
 endif()
 
+if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+    message(STATUS "Enabling custom link type: ${BINARY_LINK_TYPE}")
+    target_compile_definitions(libfastfetch PRIVATE FF_DISABLE_DLOPEN=1)
+endif()
+
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     if(NOT ENABLE_${VARNAME})
         return()
@@ -845,6 +857,10 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
 
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_libraries(libfastfetch PRIVATE ${${VARNAME}_LIBRARIES})
+    endif()
+
     foreach(FLAG ${${VARNAME}_CFLAGS_OTHER})
         if(FLAG MATCHES "-D.*")
             string(SUBSTRING ${FLAG} 2 -1 FLAG)
@@ -852,6 +868,11 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
         endif()
     endforeach()
 endfunction()
+
+if(BINARY_LINK_TYPE STREQUAL "static")
+    set_target_properties(libfastfetch PROPERTIES LINK_SEARCH_START_STATIC 1)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif()
 
 ff_lib_enable(VULKAN
     "vulkan"
@@ -1037,6 +1058,10 @@ target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
 )
 
+if(BINARY_LINK_TYPE STREQUAL "static")
+    set_target_properties(libfastfetch PROPERTIES LINK_SEARCH_END_STATIC 1)
+endif()
+
 ######################
 # Executable targets #
 ######################
@@ -1091,6 +1116,11 @@ elseif(APPLE)
     target_link_options(flashfetch
         PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
     )
+endif()
+
+if(BINARY_LINK_TYPE STREQUAL "static")
+    target_link_options(fastfetch PRIVATE "-static")
+    target_link_options(flashfetch PRIVATE "-static")
 endif()
 
 ###################
