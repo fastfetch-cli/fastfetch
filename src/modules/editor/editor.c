@@ -12,6 +12,7 @@ void ffPrintEditor(FFEditorOptions* options)
     FFEditorResult result = {
         .name = ffStrbufCreate(),
         .path = ffStrbufCreate(),
+        .exe = ffStrbufCreate(),
         .version = ffStrbufCreate(),
     };
     const char* error = ffDetectEditor(&result);
@@ -23,9 +24,9 @@ void ffPrintEditor(FFEditorOptions* options)
     }
 
     ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-    if (result.exe)
+    if (result.exe.length)
     {
-        fputs(result.exe, stdout);
+        ffStrbufWriteTo(&result.exe, stdout);
         if (result.version.length)
             printf(" (%s)", result.version.chars);
     }
@@ -37,6 +38,7 @@ void ffPrintEditor(FFEditorOptions* options)
 
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.path);
+    ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
 }
 
@@ -94,14 +96,12 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &result.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "path", &result.path);
-    if (result.exe)
-        yyjson_mut_obj_add_strcpy(doc, obj, "exe", result.exe);
-    else
-        yyjson_mut_obj_add_null(doc, obj, "exe");
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result.exe);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
 
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.path);
+    ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
 }
 

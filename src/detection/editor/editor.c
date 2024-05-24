@@ -4,6 +4,14 @@
 
 #include <stdlib.h>
 
+#ifdef _WIN32
+#include <windows.h>
+static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
+{
+    return _fullpath(resolved_name, file_name, _MAX_PATH);
+}
+#endif
+
 const char* ffDetectEditor(FFEditorResult* result)
 {
     ffStrbufSetS(&result->name, getenv("VISUAL"));
@@ -22,6 +30,21 @@ const char* ffDetectEditor(FFEditorResult* result)
         }) != NULL || result->path.length == 0)
             return NULL;
     }
+    #else
+    if (!(result->name.length > 3 && ffCharIsEnglishAlphabet(result->name.chars[0]) && result->name.chars[1] == ':' && result->name.chars[2] == '\\'))
+    {
+        char buf[32];
+        uint32_t len = GetSystemDirectoryA(buf, sizeof(buf));
+        if (len < strlen("C:\\WINDOWS\\system32")) return NULL;
+        strncpy(buf + len, "\\where.exe", sizeof(buf) - len);
+        if (ffProcessAppendStdOut(&result->path, (char* const[]){
+            buf,
+            result->name.chars,
+            NULL,
+        }) != NULL || result->path.length == 0)
+            return NULL;
+    }
+    #endif
     else
         ffStrbufSet(&result->path, &result->name);
 
@@ -30,29 +53,45 @@ const char* ffDetectEditor(FFEditorResult* result)
         return NULL;
 
     ffStrbufSetS(&result->path, buf);
-    const char* exe = &result->path.chars[ffStrbufLastIndexC(&result->path, '/')];
-    if (!*exe) return NULL;
-    ++exe;
-    result->exe = exe;
+
+    {
+        uint32_t index = ffStrbufLastIndexC(&result->path,
+            #ifndef _WIN32
+            '/'
+            #else
+            '\\'
+            #endif
+        );
+        if (index == result->path.length)
+            return NULL;
+        ffStrbufSetS(&result->exe, &result->path.chars[index + 1]);
+        if (!result->exe.length)
+            return NULL;
+
+        #ifdef _WIN32
+        if (ffStrbufEndsWithS(&result->exe, ".exe"))
+            ffStrbufSubstrBefore(&result->exe, result->exe.length - 4);
+        #endif
+    }
 
     const char* param = NULL;
     if (
-        ffStrEquals(exe, "nano") ||
-        ffStrEquals(exe, "vim") ||
-        ffStrEquals(exe, "nvim") ||
-        ffStrEquals(exe, "micro") ||
-        ffStrEquals(exe, "emacs") ||
-        ffStrStartsWith(exe, "emacs-") || // emacs-29.3
-        ffStrEquals(exe, "hx") ||
-        ffStrEquals(exe, "code") ||
-        ffStrEquals(exe, "sublime_text")
+        ffStrbufEqualS(&result->exe, "nano") ||
+        ffStrbufEqualS(&result->exe, "vim") ||
+        ffStrbufEqualS(&result->exe, "nvim") ||
+        ffStrbufEqualS(&result->exe, "micro") ||
+        ffStrbufEqualS(&result->exe, "emacs") ||
+        ffStrbufStartsWithS(&result->exe, "emacs-") || // emacs-29.3
+        ffStrbufEqualS(&result->exe, "hx") ||
+        ffStrbufEqualS(&result->exe, "code") ||
+        ffStrbufEqualS(&result->exe, "sublime_text")
     ) param = "--version";
     else if (
-        ffStrEquals(exe, "kak") ||
-        ffStrEquals(exe, "pico")
+        ffStrbufEqualS(&result->exe, "kak") ||
+        ffStrbufEqualS(&result->exe, "pico")
     ) param = "-version";
     else if (
-        ffStrEquals(exe, "ne")
+        ffStrbufEqualS(&result->exe, "ne")
     ) param = "-h";
     else return NULL;
 
@@ -85,7 +124,6 @@ const char* ffDetectEditor(FFEditorResult* result)
             break;
         }
     }
-    #endif
 
     return NULL;
 }
