@@ -31,8 +31,13 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
     FF_LIBRARY_LOAD(libdxcore, nullptr, "dlopen libdxcore.so failed. Make sure WSLg is enabled", "/usr/lib/wsl/lib/libdxcore" FF_LIBRARY_EXTENSION, 4)
     // DXCoreCreateAdapterFactory is a reloaded function, so we can't use FF_LIBRARY_LOAD_SYMBOL_MESSAGE here
     typedef HRESULT (*DXCoreCreateAdapterFactory_t)(REFIID riid, void** ppvFactory);
+
+#ifndef FF_DISABLE_DLOPEN
     auto ffDXCoreCreateAdapterFactory = (DXCoreCreateAdapterFactory_t) dlsym(libdxcore, "DXCoreCreateAdapterFactory");
     if(ffDXCoreCreateAdapterFactory == nullptr) return "dlsym DXCoreCreateAdapterFactory failed";
+#else
+    auto ffDXCoreCreateAdapterFactory = (DXCoreCreateAdapterFactory_t) DXCoreCreateAdapterFactory;
+#endif
 
     IDXCoreAdapterFactory *factory = nullptr;
 
