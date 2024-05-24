@@ -289,6 +289,13 @@ conhost:
 
 static uint32_t getTerminalInfo(FFTerminalResult* result, uint32_t pid)
 {
+    if (getenv("MSYSTEM"))
+    {
+        // Don't try to detect terminals in MSYS shell
+        // It won't work because MSYS doesn't follow process tree of native Windows programs
+        return 0;
+    }
+
     uint32_t ppid = 0;
     bool hasGui;
 
