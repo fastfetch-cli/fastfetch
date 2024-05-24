@@ -778,7 +778,7 @@
                                             },
                                             {
                                                 "const": "board",
-                                                "description": "Print mather board name and other info"
+                                                "description": "Print motherboard name and other info"
                                             },
                                             {
                                                 "const": "bootmgr",
