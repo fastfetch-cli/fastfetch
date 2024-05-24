@@ -137,7 +137,7 @@ void ffInitBoardOptions(FFBoardOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BOARD_MODULE_NAME,
-        "Print mather board name and other info",
+        "Print motherboard name and other info",
         ffParseBoardCommandOptions,
         ffParseBoardJsonObject,
         ffPrintBoard,
