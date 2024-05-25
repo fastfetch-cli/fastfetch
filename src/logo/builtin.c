@@ -860,6 +860,20 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    // Cereus
+    {
+        .names = {"cereus", "Cereus Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CEREUS,
+        .colors = {
+            FF_COLOR_FG_256 "173",
+            FF_COLOR_FG_256 "108",
+            FF_COLOR_FG_256 "71",
+            FF_COLOR_FG_256 "151",
+            FF_COLOR_FG_256 "72"
+        },
+        .colorKeys = FF_COLOR_FG_256 "108",
+        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_WHITE,
+    },
     // Chakra
     {
         .names = {"Chakra"},
