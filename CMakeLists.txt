@@ -14,9 +14,9 @@ set(PROJECT_LICENSE "MIT license")
 ###################
 if(ANDROID)
     set(LINUX FALSE)
-elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
-elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
     set(BSD TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
