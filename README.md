@@ -47,27 +47,24 @@ If fastfetch is not packaged for your distro or an outdated version is packaged,
 
 ### macOS
 
-...via [HomeBrew](https://brew.sh):
-
-`brew install fastfetch`
-
-...via [MacPorts](https://www.macports.org):
-
-`sudo port install fastfetch`
+* [HomeBrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
+* [MacPorts](https://ports.macports.org/port/fastfetch/): `sudo port install fastfetch`
 
 ### Windows
 
-`scoop install fastfetch`
+* [scoop](https://scoop.sh/#/apps?q=fastfetch): `scoop install fastfetch`
+* [winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Fastfetch-cli/Fastfetch): `winget install fastfetch`
+* [MSYS2 MinGW](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
 
 You may also download it directly from [GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and extract the archive.
 
 ### FreeBSD
 
-`pkg install fastfetch`
+* `pkg install fastfetch`
 
 ### Android (Termux)
 
-`pkg install fastfetch`
+* `pkg install fastfetch`
 
 ## Build from source
 
