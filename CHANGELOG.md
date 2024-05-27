@@ -1,3 +1,19 @@
+# 2.13.3
+
+Features:
+* Support monochrome bar type (#960)
+* Support editor version detection on Windows (Editor, Windows)
+* Apply default color palettes in `--file` and `--data` (Logo)
+* Print all presets in `--list-presets` for better Windows support (Windows)
+
+Bugfixes:
+* Don't detect `.conf` files in `--list-config-paths`
+* Don't try to detect terminals in MSYS shell by process backtracing (Windows)
+
+Logos:
+* Add Cereus Linux
+* Readd special handling of Loc-OS
+
 # 2.13.2
 
 Another hotfix release :(
