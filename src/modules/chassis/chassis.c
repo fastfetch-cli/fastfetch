@@ -39,10 +39,10 @@ void ffPrintChassis(FFChassisOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CHASSIS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type, "type"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial, "serial"},
         }));
     }
 
@@ -126,10 +126,10 @@ exit:
 void ffPrintChassisHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CHASSIS_MODULE_NAME, "{1}", FF_CHASSIS_NUM_FORMAT_ARGS, ((const char* []) {
-        "chassis type",
-        "chassis vendor",
-        "chassis version",
-        "chassis serial number",
+        "chassis type - type",
+        "chassis vendor - vendor",
+        "chassis version - version",
+        "chassis serial number - serial",
     }));
 }
 

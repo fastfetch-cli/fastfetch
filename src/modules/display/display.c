@@ -90,9 +90,9 @@ void ffPrintDisplay(FFDisplayOptions* options)
         else
         {
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-                {FF_FORMAT_ARG_TYPE_STRING, displayType},
+                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex, "index"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
+                {FF_FORMAT_ARG_TYPE_STRING, displayType, "type"},
             }));
         }
 
@@ -126,15 +126,15 @@ void ffPrintDisplay(FFDisplayOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_UINT, &result->width},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->height},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name},
-                {FF_FORMAT_ARG_TYPE_STRING, displayType},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->rotation},
-                {FF_FORMAT_ARG_TYPE_BOOL, &result->primary},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->width, "width"},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->height, "height"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate, "refresh-rate"},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth, "scaled-width"},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight, "scaled-height"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
+                {FF_FORMAT_ARG_TYPE_STRING, displayType, "type"},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->rotation, "rotation"},
+                {FF_FORMAT_ARG_TYPE_BOOL, &result->primary, "is-primary"},
             }));
         }
     }
@@ -311,15 +311,15 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 void ffPrintDisplayHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DISPLAY_MODULE_NAME, "{1}x{2} @ {3}Hz (as {4}x{5}) [{7}]", FF_DISPLAY_NUM_FORMAT_ARGS, ((const char* []) {
-        "Screen width (in pixels)",
-        "Screen height (in pixels)",
-        "Screen refresh rate (in Hz)",
-        "Screen scaled width (in pixels)",
-        "Screen scaled height (in pixels)",
-        "Screen name",
-        "Screen type (builtin, external or unknown)",
-        "Screen rotation (in degrees)",
-        "True if being the primary screen",
+        "Screen width (in pixels) - width",
+        "Screen height (in pixels) - height",
+        "Screen refresh rate (in Hz) - refresh-rate",
+        "Screen scaled width (in pixels) - scaled-width",
+        "Screen scaled height (in pixels) - scaled-height",
+        "Screen name - name",
+        "Screen type (builtin, external or unknown) - type",
+        "Screen rotation (in degrees) - rotation",
+        "True if being the primary screen - is-primary",
     }));
 }
 

@@ -39,9 +39,9 @@ void ffPrintLM(FFLMOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LM_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.service},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.service, "service"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type, "type"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
         }));
     }
     ffStrbufDestroy(&result.service);
@@ -118,9 +118,9 @@ exit:
 void ffPrintLMHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LM_MODULE_NAME, "{1} {3} ({2})", FF_LM_NUM_FORMAT_ARGS, ((const char* []) {
-        "LM service",
-        "LM type",
-        "LM version"
+        "LM service - service",
+        "LM type - type",
+        "LM version - version"
     }));
 }
 

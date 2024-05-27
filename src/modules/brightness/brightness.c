@@ -38,8 +38,8 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->name}
+                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex, "index"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->name, "name"},
             }));
         }
 
@@ -70,11 +70,11 @@ void ffPrintBrightness(FFBrightnessOptions* options)
             FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
             ffPercentAppendNum(&valueStr, percent, options->percent, false, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->name},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->max},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->min},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->current},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr, "percentage"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->name, "name"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->max, "max"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->min, "min"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->current, "current"},
             }));
         }
 
@@ -175,11 +175,11 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
 void ffPrintBrightnessHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BRIGHTNESS_MODULE_NAME, "{1}", FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Screen brightness (percentage)",
-        "Screen name",
-        "Maximum brightness value",
-        "Minimum brightness value",
-        "Current brightness value",
+        "Screen brightness (percentage) - percentage",
+        "Screen name - name",
+        "Maximum brightness value - max",
+        "Minimum brightness value - min",
+        "Current brightness value - current",
     }));
 }
 

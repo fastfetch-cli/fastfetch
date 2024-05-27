@@ -29,10 +29,10 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENGL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer, "renderer"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv, "slv"},
         }));
     }
 
@@ -161,10 +161,10 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
 void ffPrintOpenGLHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OPENGL_MODULE_NAME, "{1}", FF_OPENGL_NUM_FORMAT_ARGS, ((const char* []) {
-        "version",
-        "renderer",
-        "vendor",
-        "shading language version"
+        "version - version",
+        "renderer - renderer",
+        "vendor - vendor",
+        "shading language version - slv"
     }));
 }
 

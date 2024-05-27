@@ -44,7 +44,7 @@ void ffPrintBios(FFBiosOptions* options)
     {
         ffStrbufClear(&key);
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 1, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type, "type"},
         }));
     }
 
@@ -60,11 +60,11 @@ void ffPrintBios(FFBiosOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BIOS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.date},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.release},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.date, "date"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.release, "release"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type, "type"},
         }));
     }
 
@@ -146,11 +146,11 @@ exit:
 void ffPrintBiosHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BIOS_MODULE_NAME, "{4} ({2})", FF_BIOS_NUM_FORMAT_ARGS, ((const char* []) {
-        "bios date",
-        "bios release",
-        "bios vendor",
-        "bios version",
-        "firmware type",
+        "bios date - date",
+        "bios release - release",
+        "bios vendor - vendor",
+        "bios version - version",
+        "firmware type - type",
     }));
 }
 

@@ -25,7 +25,7 @@ void ffPrintLocale(FFLocaleOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LOCALE_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &locale}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &locale, "result"}
         }));
     }
 }
@@ -82,7 +82,7 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
 void ffPrintLocaleHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LOCALE_MODULE_NAME, "{1}", FF_LOCALE_NUM_FORMAT_ARGS, ((const char* []) {
-        "Locale code"
+        "Locale code - result"
     }));
 }
 

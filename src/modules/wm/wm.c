@@ -46,10 +46,10 @@ void ffPrintWM(FFWMOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WM_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &pluginName},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProcessName, "process-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmPrettyName, "pretty-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->wmProtocolName, "protocol-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &pluginName, "plugin-name"},
         }));
     }
 }
@@ -128,10 +128,10 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 void ffPrintWMHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WM_MODULE_NAME, "{2} ({3})", FF_WM_NUM_FORMAT_ARGS, ((const char* []) {
-        "WM process name",
-        "WM pretty name",
-        "WM protocol name",
-        "WM plugin name"
+        "WM process name - process-name",
+        "WM pretty name - pretty-name",
+        "WM protocol name - protocol-name",
+        "WM plugin name - plugin-name",
     }));
 }
 

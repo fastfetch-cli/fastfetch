@@ -36,9 +36,9 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     else
     {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountFrom},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint, "mountpoint"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountFrom, "mount-from"},
         }));
     }
 
@@ -115,18 +115,18 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageStr},
-            {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed},
-            {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &filesPercentageStr},
-            {FF_FORMAT_ARG_TYPE_BOOL, &isExternal},
-            {FF_FORMAT_ARG_TYPE_BOOL, &isHidden},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name},
-            {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly},
-            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(disk->createTime)},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty, "size-used"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty, "size-total"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageStr, "size-percentage"},
+            {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed, "files-used"},
+            {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal, "files-total"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &filesPercentageStr, "files-percentage"},
+            {FF_FORMAT_ARG_TYPE_BOOL, &isExternal, "is-external"},
+            {FF_FORMAT_ARG_TYPE_BOOL, &isHidden, "is-hidden"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem, "filesystem"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name, "name"},
+            {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly, "is-readonly"},
+            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(disk->createTime), "create-time"},
         }));
     }
 }
@@ -428,18 +428,18 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 void ffPrintDiskHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DISK_MODULE_NAME, "{1} / {2} ({3}) - {9}", FF_DISK_NUM_FORMAT_ARGS, ((const char* []) {
-        "Size used",
-        "Size total",
-        "Size percentage",
-        "Files used",
-        "Files total",
-        "Files percentage",
-        "True if external volume",
-        "True if hidden volume",
-        "Filesystem",
-        "Label / name",
-        "True if read-only",
-        "Create time in local timezone",
+        "Size used - size-used",
+        "Size total - size-total",
+        "Size percentage - size-percentage",
+        "Files used - files-used",
+        "Files total - files-total",
+        "Files percentage - files-percentage",
+        "True if external volume - is-external",
+        "True if hidden volume - is-hidden",
+        "Filesystem - filesystem",
+        "Label / name - name",
+        "True if read-only - is-readonly",
+        "Create time in local timezone - create-time",
     }));
 }
 

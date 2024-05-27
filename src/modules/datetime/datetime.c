@@ -66,28 +66,28 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     strftime(result.timezoneName, sizeof(result.timezoneName), "%Z", tm);
 
     FF_PRINT_FORMAT_CHECKED(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DATETIME_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-        {FF_FORMAT_ARG_TYPE_UINT16, &result.year}, // 1
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.yearShort}, // 2
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.month}, // 3
-        {FF_FORMAT_ARG_TYPE_STRING, result.monthPretty}, // 4
-        {FF_FORMAT_ARG_TYPE_STRING, result.monthName}, // 5
-        {FF_FORMAT_ARG_TYPE_STRING, result.monthNameShort}, // 6
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.week}, // 7
-        {FF_FORMAT_ARG_TYPE_STRING, result.weekday}, // 8
-        {FF_FORMAT_ARG_TYPE_STRING, result.weekdayShort}, // 9
-        {FF_FORMAT_ARG_TYPE_UINT16, &result.dayInYear}, // 10
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInMonth}, // 11
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInWeek}, // 12
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour}, // 13
-        {FF_FORMAT_ARG_TYPE_STRING, result.hourPretty}, // 14
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour12}, // 15
-        {FF_FORMAT_ARG_TYPE_STRING, result.hour12Pretty}, // 16
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.minute}, // 17
-        {FF_FORMAT_ARG_TYPE_STRING, result.minutePretty}, // 18
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.second}, // 19
-        {FF_FORMAT_ARG_TYPE_STRING, result.secondPretty}, // 20
-        {FF_FORMAT_ARG_TYPE_STRING, result.offsetFromUtc}, // 21
-        {FF_FORMAT_ARG_TYPE_STRING, result.timezoneName}, // 22
+        {FF_FORMAT_ARG_TYPE_UINT16, &result.year, "year"}, // 1
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.yearShort, "year-short"}, // 2
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.month, "month"}, // 3
+        {FF_FORMAT_ARG_TYPE_STRING, result.monthPretty, "month-pretty"}, // 4
+        {FF_FORMAT_ARG_TYPE_STRING, result.monthName, "month-name"}, // 5
+        {FF_FORMAT_ARG_TYPE_STRING, result.monthNameShort, "month-name-short"}, // 6
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.week, "week"}, // 7
+        {FF_FORMAT_ARG_TYPE_STRING, result.weekday, "weekday"}, // 8
+        {FF_FORMAT_ARG_TYPE_STRING, result.weekdayShort, "weekday-short"}, // 9
+        {FF_FORMAT_ARG_TYPE_UINT16, &result.dayInYear, "day-in-year"}, // 10
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInMonth, "day-in-month"}, // 11
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInWeek, "day-in-week"}, // 12
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour, "hour"}, // 13
+        {FF_FORMAT_ARG_TYPE_STRING, result.hourPretty, "hour-pretty"}, // 14
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour12, "hour-12"}, // 15
+        {FF_FORMAT_ARG_TYPE_STRING, result.hour12Pretty, "hour-12-pretty"}, // 16
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.minute, "minute"}, // 17
+        {FF_FORMAT_ARG_TYPE_STRING, result.minutePretty, "minute-pretty"}, // 18
+        {FF_FORMAT_ARG_TYPE_UINT8, &result.second, "second"}, // 19
+        {FF_FORMAT_ARG_TYPE_STRING, result.secondPretty, "second-pretty"}, // 20
+        {FF_FORMAT_ARG_TYPE_STRING, result.offsetFromUtc, "offset-from-utc"}, // 21
+        {FF_FORMAT_ARG_TYPE_STRING, result.timezoneName, "timezone-name"}, // 22
     }));
 }
 
@@ -158,28 +158,28 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
 void ffPrintDateTimeHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DATETIME_MODULE_NAME, "{1}-{4}-{11} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, ((const char* []) {
-        "year",
-        "last two digits of year",
-        "month",
-        "month with leading zero",
-        "month name",
-        "month name short",
-        "week number on year",
-        "weekday",
-        "weekday short",
-        "day in year",
-        "day in month",
-        "day in Week",
-        "hour",
-        "hour with leading zero",
-        "hour 12h format",
-        "hour 12h format with leading zero",
-        "minute",
-        "minute with leading zero",
-        "second",
-        "second with leading zero",
-        "offset from UTC in the ISO 8601 format",
-        "locale-dependent timezone name or abbreviation",
+        "year - year",
+        "last two digits of year - year-short",
+        "month - month",
+        "month with leading zero - month-pretty",
+        "month name - month-name",
+        "month name short - month-name-short",
+        "week number on year - week",
+        "weekday - weekday",
+        "weekday short - weekday-short",
+        "day in year - day-in-year",
+        "day in month - day-in-month",
+        "day in week - day-in-week",
+        "hour - hour",
+        "hour with leading zero - hour-pretty",
+        "hour 12h format - hour-12",
+        "hour 12h format with leading zero - hour-12-pretty",
+        "minute - minute",
+        "minute with leading zero - minute-pretty",
+        "second - second",
+        "second with leading zero - second-pretty",
+        "offset from UTC in the ISO 8601 format - offset-from-utc",
+        "locale-dependent timezone name or abbreviation - timezone-name",
     }));
 }
 

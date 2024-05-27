@@ -30,14 +30,14 @@ void ffPrintTerminal(FFTerminalOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINAL_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->exeName},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->tty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName, "process-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe, "exe"},
+            {FF_FORMAT_ARG_TYPE_STRING, result->exeName, "exe-name"},
+            {FF_FORMAT_ARG_TYPE_UINT, &result->pid, "pid"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName, "pretty-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath, "exe-path"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->tty, "tty"},
         }));
     }
 }
@@ -102,14 +102,14 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
 void ffPrintTerminalHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINAL_MODULE_NAME, "{5} {6}", FF_TERMINAL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal process name",
-        "The first argument of the command line when running the terminal",
-        "Terminal base name of arg0",
-        "Terminal pid",
-        "Terminal pretty name",
-        "Terminal version",
-        "Terminal full exe path",
-        "Terminal tty / pts used",
+        "Terminal process name - process-name",
+        "The first argument of the command line when running the terminal - exe",
+        "Terminal base name of arg0 - exe-name",
+        "Terminal pid - pid",
+        "Terminal pretty name - pretty-name",
+        "Terminal version - version",
+        "Terminal full exe path - exe-path",
+        "Terminal tty / pts used - tty",
     }));
 }
 

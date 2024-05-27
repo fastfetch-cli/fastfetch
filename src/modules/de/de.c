@@ -37,9 +37,9 @@ void ffPrintDE(FFDEOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DE_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &version}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->deProcessName, "process-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->dePrettyName, "pretty-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &version, "version"}
         }));
     }
 }
@@ -116,9 +116,9 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
 void ffPrintDEHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DE_MODULE_NAME, "{2} {3}", FF_DE_NUM_FORMAT_ARGS, ((const char* []) {
-        "DE process name",
-        "DE pretty name",
-        "DE version"
+        "DE process name - process-name",
+        "DE pretty name - pretty-name",
+        "DE version - version"
     }));
 }
 

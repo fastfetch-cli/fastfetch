@@ -32,15 +32,15 @@ void ffPrintVersion(FFVersionOptions* options)
         }
 
         FF_PRINT_FORMAT_CHECKED(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_VERSION_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, result.projectName},
-            {FF_FORMAT_ARG_TYPE_STRING, result.version},
-            {FF_FORMAT_ARG_TYPE_STRING, result.versionTweak},
-            {FF_FORMAT_ARG_TYPE_STRING, result.debugMode ? "debug" : "release"},
-            {FF_FORMAT_ARG_TYPE_STRING, result.architecture},
-            {FF_FORMAT_ARG_TYPE_STRING, result.cmakeBuiltType},
-            {FF_FORMAT_ARG_TYPE_STRING, result.compileTime},
-            {FF_FORMAT_ARG_TYPE_STRING, result.compiler},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &buf},
+            {FF_FORMAT_ARG_TYPE_STRING, result.projectName, "project-name"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.versionTweak, "version-tweak"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.debugMode ? "debug" : "release", "build-type"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.architecture, "arch"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.cmakeBuiltType, "cmake-built-type"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.compileTime, "compile-time"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.compiler, "compiler"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &buf, "libc-used"},
         }));
     }
 }
@@ -115,15 +115,15 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
 void ffPrintVersionHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_VERSION_MODULE_NAME, "{1} {2}{3} ({5})", FF_VERSION_NUM_FORMAT_ARGS, ((const char* []) {
-        "Project name",
-        "Version",
-        "Version tweak",
-        "Build type (debug or release)",
-        "Architecture",
-        "CMake build type (Debug, Release, RelWithDebInfo, MinSizeRel)",
-        "Date time when compiling",
-        "Compiler used",
-        "Libc used"
+        "Project name - name",
+        "Version - version",
+        "Version tweak - version-tweak",
+        "Build type (debug or release) - build-type",
+        "Architecture - arch",
+        "CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel) - cmake-built-type",
+        "Date time when compiling - compile-time",
+        "Compiler used when compiling - compiler",
+        "Libc used when compiling - libc",
     }));
 }
 

@@ -15,10 +15,16 @@ static inline char* realpath(const char* restrict file_name, char* restrict reso
 const char* ffDetectEditor(FFEditorResult* result)
 {
     ffStrbufSetS(&result->name, getenv("VISUAL"));
-    if (result->name.length == 0)
+    if (result->name.length)
+        result->type = "Visual";
+    else
+    {
         ffStrbufSetS(&result->name, getenv("EDITOR"));
-    if (result->name.length == 0)
-        return "$VISUAL or $EDITOR not set";
+        if (result->name.length)
+            result->type = "Editor";
+        else
+            return "$VISUAL or $EDITOR not set";
+    }
 
     #ifndef _WIN32
     if (result->name.chars[0] != '/')

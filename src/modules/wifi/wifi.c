@@ -47,16 +47,16 @@ void ffPrintWifi(FFWifiOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WIFI_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.description},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.status},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.status},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.ssid},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.macAddress},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.protocol},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.signalQuality},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.security},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.description, "inf-desc"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.status, "inf-status"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.status, "status"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.ssid, "ssid"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.macAddress, "mac-address"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.protocol, "protocol"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.signalQuality, "signal-quality"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate, "rx-rate"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate, "tx-rate"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.security, "security"},
             }));
         }
 
@@ -150,16 +150,16 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
 void ffPrintWifiHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WIFI_MODULE_NAME, "{4} - {10}", FF_WIFI_NUM_FORMAT_ARGS, ((const char* []) {
-        "Interface description",
-        "Interface status",
-        "Connection status",
-        "Connection SSID",
-        "Connection BSSID",
-        "Connection protocol",
-        "Connection signal quality (percentage)",
-        "Connection RX rate",
-        "Connection TX rate",
-        "Connection Security algorithm"
+        "Interface description - inf-desc",
+        "Interface status - inf-status",
+        "Connection status - status",
+        "Connection SSID - ssid",
+        "Connection BSSID - bssid",
+        "Connection protocol - protocol",
+        "Connection signal quality (percentage) - signal-quality",
+        "Connection RX rate - rx-rate",
+        "Connection TX rate - tx-rate",
+        "Connection Security algorithm - security",
     }));
 }
 

@@ -44,10 +44,10 @@ void ffPrintVulkan(FFVulkanOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_VULKAN_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->driver},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->apiVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->conformanceVersion},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->instanceVersion},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->driver, "driver"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->apiVersion, "api-version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->conformanceVersion, "conformance-version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &vulkan->instanceVersion, "instance-version"},
         }));
     }
 }
@@ -146,10 +146,10 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
 void ffPrintVulkanHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_VULKAN_MODULE_NAME, "{2} - {1}", FF_VULKAN_NUM_FORMAT_ARGS, ((const char* []) {
-        "Driver name",
-        "API version",
-        "Conformance version",
-        "Instance version",
+        "Driver name - driver",
+        "API version - api-version",
+        "Conformance version - conformance-version",
+        "Instance version - instance-version",
     }));
 }
 

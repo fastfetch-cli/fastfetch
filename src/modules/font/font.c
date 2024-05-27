@@ -29,11 +29,11 @@ void ffPrintFont(FFFontOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_FONT_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[0]},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[1]},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[2]},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[3]},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.display},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[0], "font1"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[1], "font2"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[2], "font3"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[3], "font4"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &font.display, "combined"},
             }));
         }
     }
@@ -107,11 +107,11 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
 void ffPrintFontHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_FONT_MODULE_NAME, "{5}", FF_FONT_NUM_FORMAT_ARGS, ((const char* []) {
-        "Font 1",
-        "Font 2",
-        "Font 3",
-        "Font 4",
-        "Combined fonts"
+        "Font 1 - font1",
+        "Font 2 - font2",
+        "Font 3 - font3",
+        "Font 4 - font4",
+        "Combined fonts for display - combined"
     }));
 }
 

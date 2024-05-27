@@ -5,7 +5,7 @@
 #include "modules/editor/editor.h"
 #include "util/stringUtils.h"
 
-#define FF_EDITOR_NUM_FORMAT_ARGS 4
+#define FF_EDITOR_NUM_FORMAT_ARGS 5
 
 void ffPrintEditor(FFEditorOptions* options)
 {
@@ -23,18 +23,31 @@ void ffPrintEditor(FFEditorOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-    if (result.exe.length)
+    if (options->moduleArgs.outputFormat.length == 0)
     {
-        ffStrbufWriteTo(&result.exe, stdout);
-        if (result.version.length)
-            printf(" (%s)", result.version.chars);
+        ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        if (result.exe.length)
+        {
+            ffStrbufWriteTo(&result.exe, stdout);
+            if (result.version.length)
+                printf(" (%s)", result.version.chars);
+        }
+        else
+        {
+            ffStrbufWriteTo(&result.name, stdout);
+        }
+        putchar('\n');
     }
     else
     {
-        ffStrbufWriteTo(&result.name, stdout);
+        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_EDITOR_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRING, &result.type, "type"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.exe, "exe-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.path, "path"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+        }));
     }
-    putchar('\n');
 
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.path);
@@ -108,10 +121,11 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
 void ffPrintEditorHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_EDITOR_MODULE_NAME, "{2} ({4})", FF_EDITOR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name",
-        "Exe name",
-        "Full path",
-        "Version",
+        "Type (Visual / Editor) - type",
+        "Name - name",
+        "Exe name of real path - exe-name",
+        "Full path of real path - full-path",
+        "Version - version",
     }));
 }
 

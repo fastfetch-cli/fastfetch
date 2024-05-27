@@ -40,7 +40,7 @@ void ffPrintCommand(FFCommandOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_COMMAND_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result, "result"}
         }));
     }
 }
@@ -142,7 +142,7 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
 void ffPrintCommandHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, ((const char* []) {
-        "Command result"
+        "Command result - result"
     }));
 }
 

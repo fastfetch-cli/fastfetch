@@ -4,6 +4,7 @@
 
 typedef struct FFEditorResult
 {
+    const char* type;
     FFstrbuf name;
     FFstrbuf exe;
     FFstrbuf path;

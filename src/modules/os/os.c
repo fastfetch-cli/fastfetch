@@ -112,18 +112,18 @@ void ffPrintOS(FFOSOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OS_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->id},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->idLike},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->variant},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->variantID},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->versionID},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->codename},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->buildID},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemArchitecture}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemName, "sysname"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName, "pretty-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->id, "id"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->idLike, "id-like"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->variant, "variant"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->variantID, "variant-id"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->versionID, "version-id"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->codename, "codename"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &os->buildID, "build-id"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.systemArchitecture, "arch"}
         }));
     }
 }
@@ -189,18 +189,18 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
 void ffPrintOSHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OS_MODULE_NAME, "{3} {10} {12}", FF_OS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name of the kernel (Linux, WIN32_NT, Darwin, FreeBSD)",
-        "Name of the OS",
-        "Pretty name of the OS",
-        "ID of the OS",
-        "ID like of the OS",
-        "Variant of the OS",
-        "Variant ID of the OS",
-        "Version of the OS",
-        "Version ID of the OS",
-        "Version codename of the OS",
-        "Build ID of the OS",
-        "Architecture of the OS"
+        "Name of the kernel (Linux, WIN32_NT, Darwin, FreeBSD) - sysname",
+        "Name of the OS - name",
+        "Pretty name of the OS - pretty-name",
+        "ID of the OS - id",
+        "ID like of the OS - id-like",
+        "Variant of the OS - variant",
+        "Variant ID of the OS - variant-id",
+        "Version of the OS - version",
+        "Version ID of the OS - version-id",
+        "Version codename of the OS - codename",
+        "Build ID of the OS - build-id",
+        "Architecture of the OS - arch",
     }));
 }
 

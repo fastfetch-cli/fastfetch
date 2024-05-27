@@ -76,18 +76,18 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
-            {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount},
-            {FF_FORMAT_ARG_TYPE_STRING, type},
-            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.total},
-            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.used},
-            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.total},
-            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver, "driver"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr, "temperature"},
+            {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount, "core-count"},
+            {FF_FORMAT_ARG_TYPE_STRING, type, "type"},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.total, "dedicated-total"},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->dedicated.used, "dedicated-used"},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.total, "shared-total"},
+            {FF_FORMAT_ARG_TYPE_UINT64, &gpu->shared.used, "shared-used"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi, "platform-api"},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency, "frequency"},
         }));
     }
 }
@@ -368,18 +368,18 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 void ffPrintGPUHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_GPU_MODULE_NAME, "{1} {2}", FF_GPU_NUM_FORMAT_ARGS, ((const char* []) {
-        "GPU vendor",
-        "GPU name",
-        "GPU driver",
-        "GPU temperature",
-        "GPU core count",
-        "GPU type",
-        "GPU total dedicated memory",
-        "GPU used dedicated memory",
-        "GPU total shared memory",
-        "GPU used shared memory",
-        "The platform API that GPU supports",
-        "Current frequency in GHz",
+        "GPU vendor - vendor",
+        "GPU name - name",
+        "GPU driver - driver",
+        "GPU temperature - temperature",
+        "GPU core count - core-count",
+        "GPU type - type",
+        "GPU total dedicated memory - dedicated-total",
+        "GPU used dedicated memory - dedicated-used",
+        "GPU total shared memory - shared-total",
+        "GPU used shared memory - shared-used",
+        "The platform API used when detecting the GPU - platform-api",
+        "Current frequency in GHz - frequency",
     }));
 }
 

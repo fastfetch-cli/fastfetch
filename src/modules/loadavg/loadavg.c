@@ -25,9 +25,9 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LOADAVG_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[0]},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[1]},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[2]},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[0], "loadavg1"},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[1], "loadavg2"},
+            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[2], "loadavg3"},
         }));
     }
 }
@@ -101,9 +101,9 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
 void ffPrintLoadavgHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LOADAVG_MODULE_NAME, "{1}, {2}, {3}", FF_LOADAVG_NUM_FORMAT_ARGS, ((const char* []) {
-        "Load average over 1min",
-        "Load average over 5min",
-        "Load average over 15min",
+        "Load average over 1min - loadavg1",
+        "Load average over 5min - loadavg2",
+        "Load average over 15min - loadavg3",
     }));
 }
 
