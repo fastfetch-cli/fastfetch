@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 32
+#define FF_PACKAGES_NUM_FORMAT_ARGS 36
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -68,6 +68,9 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
+        FF_PRINT_PACKAGE_NAME(guixSystem, "guix-system")
+        FF_PRINT_PACKAGE_NAME(guixUser, "guix-user")
+        FF_PRINT_PACKAGE_NAME(guixHome, "guix-home")
 
         putchar('\n');
     }
@@ -76,6 +79,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
         uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
         uint32_t brewAll = counts.brew + counts.brewCask;
+        uint32_t guixAll = counts.guixSystem + counts.guixUser + counts.guixHome;
         FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PACKAGES_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_UINT, &counts.all},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.pacman},
@@ -106,9 +110,13 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.sorcery},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.lpkg},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.lpkgbuild},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.guixSystem},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.guixUser},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.guixHome},
             {FF_FORMAT_ARG_TYPE_UINT, &nixAll},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpakAll},
             {FF_FORMAT_ARG_TYPE_UINT, &brewAll},
+            {FF_FORMAT_ARG_TYPE_UINT, &guixAll},
         }));
     }
 
@@ -156,6 +164,9 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     break;
                 case 'F': if (false);
                     FF_TEST_PACKAGE_NAME(FLATPAK)
+                    break;
+                case 'G': if (false);
+                    FF_TEST_PACKAGE_NAME(GUIX)
                     break;
                 case 'L': if (false);
                     FF_TEST_PACKAGE_NAME(LPKG)
@@ -262,6 +273,9 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'F': if (false);
                             FF_TEST_PACKAGE_NAME(FLATPAK)
                             break;
+                       case 'G': if (false);
+                            FF_TEST_PACKAGE_NAME(GUIX)
+                            break;
                         case 'L': if (false);
                             FF_TEST_PACKAGE_NAME(LPKG)
                             FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -341,6 +355,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(XBPS)
         FF_TEST_PACKAGE_NAME(AM)
         FF_TEST_PACKAGE_NAME(SORCERY)
+        FF_TEST_PACKAGE_NAME(GUIX)
         #undef FF_TEST_PACKAGE_NAME
     }
 }
@@ -388,12 +403,15 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(opkg)
     FF_APPEND_PACKAGE_COUNT(am)
     FF_APPEND_PACKAGE_COUNT(sorcery)
+    FF_APPEND_PACKAGE_COUNT(guixSystem)
+    FF_APPEND_PACKAGE_COUNT(guixUser)
+    FF_APPEND_PACKAGE_COUNT(guixHome)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
 void ffPrintPackagesHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
         "Number of all packages",
         "Number of pacman packages",
         "Pacman branch on manjaro",
@@ -423,9 +441,13 @@ void ffPrintPackagesHelpFormat(void)
         "Number of sorcery packages",
         "Number of lpkg packages",
         "Number of lpkgbuild packages",
+        "Number of guix-system packages",
+        "Number of guix-user packages",
+        "Number of guix-home packages",
         "Total number of all nix packages",
         "Total number of all flatpak packages",
         "Total number of all brew packages",
+        "Total number of all guix packages",
     }));
 }
 

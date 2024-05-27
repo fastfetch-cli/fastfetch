@@ -14,6 +14,9 @@ typedef struct FFPackagesResult
     uint32_t eopkg;
     uint32_t flatpakSystem;
     uint32_t flatpakUser;
+    uint32_t guixHome;
+    uint32_t guixSystem;
+    uint32_t guixUser;
     uint32_t lpkg;
     uint32_t lpkgbuild;
     uint32_t nixDefault;
