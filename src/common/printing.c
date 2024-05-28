@@ -43,9 +43,15 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         }
 
         if(!instance.config.display.pipe)
+        {
             fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+            ffPrintColor(&instance.config.display.colorSeparator);
+        }
 
         ffStrbufWriteTo(&instance.config.display.keyValueSeparator, stdout);
+
+        if(!instance.config.display.pipe && instance.config.display.colorSeparator.length)
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
 
         if (!(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
         {

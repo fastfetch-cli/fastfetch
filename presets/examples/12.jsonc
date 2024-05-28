@@ -4,7 +4,10 @@
         "type": "none"
     },
     "display": {
-        "separator": "\u001b[1m->   "
+        "separator": "->   ",
+        "color": {
+            "separator": "1"
+        }
     },
     "modules": [
         {

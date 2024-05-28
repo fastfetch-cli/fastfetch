@@ -51,6 +51,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 const char* colorOutput = yyjson_get_str(yyjson_obj_get(val, "output"));
                 if (colorOutput)
                     ffOptionParseColor(colorOutput, &options->colorOutput);
+                const char* colorSeparator = yyjson_get_str(yyjson_obj_get(val, "separator"));
+                if (colorSeparator)
+                    ffOptionParseColor(colorSeparator, &options->colorSeparator);
             }
             else
                 return "display.color must be either a string or an object";
@@ -252,6 +255,11 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             optionCheckString(key, value, &options->colorOutput);
             ffOptionParseColor(value, &options->colorOutput);
         }
+        else if(ffStrEqualsIgnCase(subkey, "separator"))
+        {
+            optionCheckString(key, value, &options->colorSeparator);
+            ffOptionParseColor(value, &options->colorSeparator);
+        }
         else
             return false;
     }
@@ -355,6 +363,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInit(&options->colorKeys);
     ffStrbufInit(&options->colorTitle);
     ffStrbufInit(&options->colorOutput);
+    ffStrbufInit(&options->colorSeparator);
     options->brightColor = true;
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
@@ -399,6 +408,7 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
     ffStrbufDestroy(&options->colorKeys);
     ffStrbufDestroy(&options->colorTitle);
     ffStrbufDestroy(&options->colorOutput);
+    ffStrbufDestroy(&options->colorSeparator);
     ffStrbufDestroy(&options->keyValueSeparator);
     ffStrbufDestroy(&options->barCharElapsed);
     ffStrbufDestroy(&options->barCharTotal);
@@ -435,6 +445,10 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
             yyjson_mut_obj_add_strbuf(doc, color, "keys", &options->colorKeys);
         if (!ffStrbufEqual(&options->colorTitle, &defaultOptions.colorTitle))
             yyjson_mut_obj_add_strbuf(doc, color, "title", &options->colorTitle);
+        if (!ffStrbufEqual(&options->colorOutput, &defaultOptions.colorOutput))
+            yyjson_mut_obj_add_strbuf(doc, color, "output", &options->colorOutput);
+        if (!ffStrbufEqual(&options->colorSeparator, &defaultOptions.colorSeparator))
+            yyjson_mut_obj_add_strbuf(doc, color, "separator", &options->colorSeparator);
         if (yyjson_mut_obj_size(color) > 0)
         {
             if (yyjson_mut_obj_size(color) == 2 && ffStrbufEqual(&options->colorKeys, &options->colorTitle))

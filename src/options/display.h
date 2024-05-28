@@ -22,6 +22,7 @@ typedef struct FFOptionsDisplay
     FFstrbuf colorKeys;
     FFstrbuf colorTitle;
     FFstrbuf colorOutput;
+    FFstrbuf colorSeparator;
 
     bool brightColor;
 

@@ -387,6 +387,10 @@
                                 "output": {
                                     "description": "Set the color of the module output",
                                     "$ref": "#/$defs/colors"
+                                },
+                                "separator": {
+                                    "description": "Set the color of the key-value separator",
+                                    "$ref": "#/$defs/colors"
                                 }
                             }
                         }
