@@ -458,6 +458,14 @@
             }
         },
         {
+            "long": "color-separator",
+            "desc": "Set the color of the key-value separator",
+            "remark": "See `-h color` for the list of available colors",
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
             "long": "color",
             "desc": "Set the color of both the keys and title",
             "remark": "Shortcut of \"--color-keys <color>\" and \"--color-title <color>\"",
