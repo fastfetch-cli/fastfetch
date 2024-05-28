@@ -1,18 +1,21 @@
-# 2.13.3
+# 2.14.0
 
 Features:
 * Support monochrome bar type (#960)
 * Support editor version detection on Windows (Editor, Windows)
 * Apply default color palettes in `--file` and `--data` (Logo)
 * Print all presets in `--list-presets` for better Windows support (Windows)
+* Support for guix package manager detection (Packages, Linux)
+* Support named module output formatting placeholders (#796)
+    * Besides the meaningless `--title-format '{6}{7}{8}'`, `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is now supported
 
 Bugfixes:
 * Don't detect `.conf` files in `--list-config-paths`
-* Don't try to detect terminals in MSYS shell by process backtracing (Windows)
+* Don't try to detect terminals in MSYS shell with process backtracing (Windows)
 
 Logos:
 * Add Cereus Linux
-* Readd special handling of Loc-OS
+* Re-add special handling of Loc-OS
 
 # 2.13.2
 
