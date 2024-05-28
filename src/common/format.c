@@ -257,9 +257,8 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         {
             if (!instance.config.display.pipe)
             {
-                ffStrbufSubstrAfter(&placeholderValue, 0);
                 ffStrbufAppendS(buffer, "\e[");
-                ffOptionParseColorNoClear(placeholderValue.chars, buffer);
+                ffOptionParseColorNoClear(placeholderValue.chars + 1, buffer);
                 ffStrbufAppendC(buffer, 'm');
             }
             continue;
