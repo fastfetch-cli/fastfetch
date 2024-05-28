@@ -2,9 +2,6 @@
 #include "common/io/io.h"
 #include "util/stringUtils.h"
 
-#include <dirent.h>
-#include <ctype.h>
-
 static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path)
 {
     uint32_t baseLen = path->length;
@@ -71,7 +68,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
     {
         if (!ffStrStartsWith(entry->d_name, "js"))
             continue;
-        if (!isdigit(entry->d_name[2]))
+        if (!ffCharIsDigit(entry->d_name[2]))
             continue;
 
         ffStrbufAppendS(&path, entry->d_name);

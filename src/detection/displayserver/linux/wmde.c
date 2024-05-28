@@ -4,7 +4,6 @@
 #include "util/mallocHelper.h"
 
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -320,7 +319,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
     while((dirent = readdir(procdir)) != NULL)
     {
         //Match only folders starting with a number (the pid folders)
-        if(dirent->d_type != DT_DIR || !isdigit(dirent->d_name[0]))
+        if(dirent->d_type != DT_DIR || !ffCharIsDigit(dirent->d_name[0]))
             continue;
 
         ffStrbufAppendS(&procPath, dirent->d_name);

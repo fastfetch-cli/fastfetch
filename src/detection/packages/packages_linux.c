@@ -141,11 +141,11 @@ static bool isValidNixPkg(FFstrbuf* pkg)
         switch (state)
         {
             case START:
-                if (c >= '0' && c <= '9')
+                if (ffCharIsDigit(c))
                     state = DIGIT;
                 break;
             case DIGIT:
-                if (c >= '0' && c <= '9')
+                if (ffCharIsDigit(c))
                     continue;
                 if (c == '.')
                     state = DOT;
@@ -153,7 +153,7 @@ static bool isValidNixPkg(FFstrbuf* pkg)
                     state = START;
                 break;
             case DOT:
-                if (c >= '0' && c <= '9')
+                if (ffCharIsDigit(c))
                     state = MATCH;
                 else
                     state = START;

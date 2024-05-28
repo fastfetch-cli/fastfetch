@@ -113,7 +113,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
             ffStrbufAppendS(&result, "\e[");
             data += 2;
 
-            while(isdigit(*data) || *data == ';')
+            while(ffCharIsDigit(*data) || *data == ';')
                 ffStrbufAppendC(&result, *data++); // number
 
             //We have a valid control sequence, print it and continue with next char

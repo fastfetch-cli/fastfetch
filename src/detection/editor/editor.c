@@ -114,7 +114,7 @@ const char* ffDetectEditor(FFEditorResult* result)
     for (uint32_t iStart = 0; iStart < result->version.length; ++iStart)
     {
         char c = result->version.chars[iStart];
-        if (c >= '0' && c <= '9')
+        if (ffCharIsDigit(c))
         {
             for (uint32_t iEnd = iStart + 1; iEnd < result->version.length; ++iEnd)
             {

@@ -4,7 +4,6 @@
 #include "util/stringUtils.h"
 
 #include <dirent.h>
-#include <ctype.h>
 #include <limits.h>
 
 static const char* detectWithBacklight(FFlist* result)
@@ -58,14 +57,14 @@ static const char* detectWithBacklight(FFlist* result)
                     {
                         ffStrbufSubstrBeforeLastC(&brightness->name, '/'); // remove "/edid"
                         ffStrbufSubstrAfterLastC(&brightness->name, '/'); // try getting DRM connector name
-                        if(isdigit(brightness->name.chars[0]))
+                        if(ffCharIsDigit(brightness->name.chars[0]))
                         {
                             // PCI address or some unknown path, give up
                             ffStrbufSetS(&brightness->name, entry->d_name);
                         }
                         else
                         {
-                            if(ffStrbufStartsWithS(&brightness->name, "card") && isdigit(brightness->name.chars[4]))
+                            if(ffStrbufStartsWithS(&brightness->name, "card") && ffCharIsDigit(brightness->name.chars[4]))
                                 ffStrbufSubstrAfterFirstC(&brightness->name, '-');
                         }
                     }
