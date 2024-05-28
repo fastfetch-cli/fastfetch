@@ -3,6 +3,7 @@
 #include "common/io/io.h"
 #include "common/time.h"
 #include "util/stringUtils.h"
+#include "util/mallocHelper.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,6 +17,9 @@
     #include <sys/types.h>
     #include <sys/user.h>
     #include <sys/sysctl.h>
+#endif
+#ifdef __APPLE__
+    #include <libproc.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -119,20 +123,23 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     char filePath[64];
     snprintf(filePath, sizeof(filePath), "/proc/%d/cmdline", (int)pid);
 
-    if(ffAppendFileBuffer(filePath, exe))
+    if(ffReadFileBuffer(filePath, exe))
     {
-        ffStrbufTrimRightSpace(exe);
         ffStrbufRecalculateLength(exe); //Trim the arguments
+        ffStrbufTrimRightSpace(exe);
         ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
     }
 
-    snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
-    ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-    ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
-    if (length > 0) // doesn't contain trailing NUL
+    if (exePath)
     {
-        exePath->chars[length] = '\0';
-        exePath->length = (uint32_t) length;
+        snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
+        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
+        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        if (length > 0) // doesn't contain trailing NUL
+        {
+            exePath->chars[length] = '\0';
+            exePath->length = (uint32_t) length;
+        }
     }
 
     #elif defined(__APPLE__)
@@ -140,7 +147,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     size_t len = 0;
     int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
     if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), NULL, &len, NULL, 0) == 0)
-    {
+    {// try get arg0
         #ifndef MAC_OS_X_VERSION_10_15
         //don't know why if don't let len longer, proArgs2 and len will change during the following sysctl() in old MacOS version.
         len++;
@@ -153,13 +160,25 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             const char* realExePath = procArgs2 + sizeof(argc);
 
             const char* arg0 = memchr(realExePath, '\0', len - (size_t) (realExePath - procArgs2));
-            ffStrbufSetNS(exePath, (uint32_t) (arg0 - realExePath), realExePath);
+            if (exePath)
+                ffStrbufSetNS(exePath, (uint32_t) (arg0 - realExePath), realExePath);
 
             do arg0++; while (*arg0 == '\0');
             assert(arg0 < procArgs2 + len);
             if (*arg0 == '-') arg0++; // Login shells
 
             ffStrbufSetS(exe, arg0);
+        }
+    }
+    else
+    {
+        ffStrbufEnsureFixedLengthFree(exe, PATH_MAX);
+        int length = proc_pidpath(pid, exe->chars, exe->allocated);
+        if (length > 0)
+        {
+            exe->length = (uint32_t) length;
+            if (exePath)
+                ffStrbufSet(exePath, exe);
         }
     }
 
@@ -170,7 +189,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     static_assert(ARG_MAX > PATH_MAX, "");
 
-    if(sysctl(
+    if(exePath && sysctl(
         (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
         args, &size,
         NULL, 0
@@ -213,34 +232,46 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         *exeName = exe->chars + lastSlashIndex + 1;
 }
 
-const char* ffProcessGetBasicInfoLinux(pid_t pid, char* name, pid_t* ppid, int32_t* tty)
+const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, int32_t* tty)
 {
     if (pid <= 0)
         return "Invalid pid";
 
     #ifdef __linux__
 
-    char statFilePath[64];
-    snprintf(statFilePath, sizeof(statFilePath), "/proc/%d/stat", (int)pid);
-    char buf[PROC_FILE_BUFFSIZ];
-    ssize_t nRead = ffReadFileData(statFilePath, sizeof(buf) - 1, buf);
-    if(nRead < 0)
-        return "ffReadFileData(statFilePath, sizeof(buf)-1, buf) failed";
-    buf[nRead] = '\0';
+    char procFilePath[64];
+    if (ppid)
+    {
+        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
+        char buf[PROC_FILE_BUFFSIZ];
+        ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
+        if(nRead < 0)
+            return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
+        buf[nRead] = '\0';
 
-    *ppid = 0;
-    static_assert(sizeof(*ppid) == sizeof(int), "");
+        *ppid = 0;
+        static_assert(sizeof(*ppid) == sizeof(int), "");
 
-    int tty_;
-    if(
-        sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
-        !ffStrSet(name) ||
-        *ppid == 0
-    )
-        return "sscanf(stat) failed";
+        ffStrbufEnsureFixedLengthFree(name, 255);
+        int tty_;
+        if(
+            sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name->chars, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
+            name->chars[0] == '\0'
+        )
+            return "sscanf(stat) failed";
 
-    if (tty)
-        *tty = tty_ & 0xFF;
+        ffStrbufRecalculateLength(name);
+        if (tty)
+            *tty = tty_ & 0xFF;
+    }
+    else
+    {
+        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int)pid);
+        ssize_t nRead = ffReadFileBuffer(procFilePath, name);
+        if(nRead < 0)
+            return "ffReadFileBuffer(/proc/pid/comm, name) failed";
+        ffStrbufTrimRightSpace(name);
+    }
 
     #elif defined(__APPLE__)
 
@@ -253,8 +284,9 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, char* name, pid_t* ppid, int32
     ))
         return "sysctl(KERN_PROC_PID) failed";
 
-    *ppid = (pid_t)proc.kp_eproc.e_ppid;
-    strcpy(name, proc.kp_proc.p_comm); //trancated to 16 chars
+    ffStrbufSetS(name, proc.kp_proc.p_comm); //trancated to 16 chars
+    if (ppid)
+        *ppid = (pid_t)proc.kp_eproc.e_ppid;
     if (tty)
     {
         *tty = ((proc.kp_eproc.e_tdev >> 24) & 0xFF) == 0x10
@@ -273,8 +305,9 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, char* name, pid_t* ppid, int32
     ))
         return "sysctl(KERN_PROC_PID) failed";
 
-    *ppid = (pid_t)proc.ki_ppid;
-    strcpy(name, proc.ki_comm);
+    ffStrbufSetS(name, proc.ki_comm);
+    if (ppid)
+        *ppid = (pid_t)proc.ki_ppid;
     if (tty)
     {
         if (proc.ki_tdev != NODEV && proc.ki_flag & P_CONTROLT)

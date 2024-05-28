@@ -343,6 +343,7 @@ set(LIBFASTFETCH_SRC
     src/modules/gpu/gpu.c
     src/modules/host/host.c
     src/modules/icons/icons.c
+    src/modules/initsystem/initsystem.c
     src/modules/gamepad/gamepad.c
     src/modules/kernel/kernel.c
     src/modules/lm/lm.c
@@ -431,6 +432,7 @@ if(LINUX)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
         src/detection/loadavg/loadavg_linux.c
@@ -489,6 +491,7 @@ elseif(ANDROID)
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_linux.c
@@ -559,6 +562,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_bsd.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
@@ -618,6 +622,7 @@ elseif(APPLE)
         src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
         src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
@@ -676,6 +681,7 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
+        src/detection/initsystem/initsystem_nosupport.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c

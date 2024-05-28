@@ -30,6 +30,7 @@ typedef struct FFOptionsModules
     FFGamepadOptions gamepad;
     FFHostOptions host;
     FFIconsOptions icons;
+    FFInitSystemOptions initSystem;
     FFKernelOptions kernel;
     FFLMOptions lm;
     FFLoadavgOptions loadavg;

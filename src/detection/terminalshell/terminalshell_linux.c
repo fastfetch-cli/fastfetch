@@ -4,7 +4,6 @@
 #include "common/processing.h"
 #include "common/thread.h"
 #include "util/stringUtils.h"
-#include "util/mallocHelper.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -20,9 +19,6 @@ static void setExeName(FFstrbuf* exe, const char** exeName)
 
 static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 {
-    char name[256];
-    name[0] = '\0';
-
     pid_t ppid = 0;
     int32_t tty = -1;
 
@@ -35,35 +31,36 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
             userShellName = instance.state.platform.userShell.chars + index + 1;
     }
 
-    while (ffProcessGetBasicInfoLinux(pid, name, &ppid, &tty) == NULL)
+    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
     {
-        if (!ffStrEquals(userShellName, name))
+        if (!ffStrbufEqualS(&result->processName, userShellName))
         {
             //Common programs that are between terminal and own process, but are not the shell
             if(
                 // tty < 0                                  || //A shell should connect to a tty
-                ffStrEquals(name, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
-                ffStrEquals(name, "sudo")                ||
-                ffStrEquals(name, "su")                  ||
-                ffStrEquals(name, "strace")              ||
-                ffStrEquals(name, "sshd")                ||
-                ffStrEquals(name, "gdb")                 ||
-                ffStrEquals(name, "lldb")                ||
-                ffStrEquals(name, "lldb-mi")             ||
-                ffStrEquals(name, "login")               ||
-                ffStrEquals(name, "ltrace")              ||
-                ffStrEquals(name, "perf")                ||
-                ffStrEquals(name, "guake-wrapped")       ||
-                ffStrEquals(name, "time")                ||
-                ffStrEquals(name, "hyfetch")             || //when hyfetch uses fastfetch as backend
-                ffStrEquals(name, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
-                ffStrEquals(name, "valgrind")            ||
-                ffStrContainsIgnCase(name, "debug")      ||
-                ffStrContainsIgnCase(name, "not-found")  ||
-                ffStrEndsWith(name, ".sh")
+                ffStrbufEqualS(&result->processName, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
+                ffStrbufEqualS(&result->processName, "sudo")                ||
+                ffStrbufEqualS(&result->processName, "su")                  ||
+                ffStrbufEqualS(&result->processName, "strace")              ||
+                ffStrbufEqualS(&result->processName, "sshd")                ||
+                ffStrbufEqualS(&result->processName, "gdb")                 ||
+                ffStrbufEqualS(&result->processName, "lldb")                ||
+                ffStrbufEqualS(&result->processName, "lldb-mi")             ||
+                ffStrbufEqualS(&result->processName, "login")               ||
+                ffStrbufEqualS(&result->processName, "ltrace")              ||
+                ffStrbufEqualS(&result->processName, "perf")                ||
+                ffStrbufEqualS(&result->processName, "guake-wrapped")       ||
+                ffStrbufEqualS(&result->processName, "time")                ||
+                ffStrbufEqualS(&result->processName, "hyfetch")             || //when hyfetch uses fastfetch as backend
+                ffStrbufEqualS(&result->processName, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
+                ffStrbufEqualS(&result->processName, "valgrind")            ||
+                ffStrbufContainS(&result->processName, "debug")             ||
+                ffStrbufContainS(&result->processName, "not-found")         ||
+                ffStrbufEndsWithS(&result->processName, ".sh")
             )
             {
                 pid = ppid;
+                ffStrbufClear(&result->processName);
                 continue;
             }
         }
@@ -71,7 +68,6 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
         result->tty = tty;
-        ffStrbufSetS(&result->processName, name);
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
@@ -80,49 +76,47 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
 
 static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 {
-    char name[256];
-    name[0] = '\0';
-
     pid_t ppid = 0;
 
-    while (ffProcessGetBasicInfoLinux(pid, name, &ppid, NULL) == NULL)
+    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
     {
         //Known shells
         if (
-            ffStrEquals(name, "sh")         ||
-            ffStrEquals(name, "ash")        ||
-            ffStrEquals(name, "bash")       ||
-            ffStrEquals(name, "zsh")        ||
-            ffStrEquals(name, "ksh")        ||
-            ffStrEquals(name, "mksh")       ||
-            ffStrEquals(name, "oksh")       ||
-            ffStrEquals(name, "csh")        ||
-            ffStrEquals(name, "tcsh")       ||
-            ffStrEquals(name, "fish")       ||
-            ffStrEquals(name, "dash")       ||
-            ffStrEquals(name, "pwsh")       ||
-            ffStrEquals(name, "nu")         ||
-            ffStrEquals(name, "git-shell")  ||
-            ffStrEquals(name, "elvish")     ||
-            ffStrEquals(name, "oil.ovm")    ||
-            ffStrEquals(name, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
-            ffStrEquals(name, "login")      ||
-            ffStrEquals(name, "sshd")       ||
-            ffStrEquals(name, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
-            ffStrEquals(name, "chezmoi")    || // #762
+            ffStrbufEqualS(&result->processName, "sh")         ||
+            ffStrbufEqualS(&result->processName, "ash")        ||
+            ffStrbufEqualS(&result->processName, "bash")       ||
+            ffStrbufEqualS(&result->processName, "zsh")        ||
+            ffStrbufEqualS(&result->processName, "ksh")        ||
+            ffStrbufEqualS(&result->processName, "mksh")       ||
+            ffStrbufEqualS(&result->processName, "oksh")       ||
+            ffStrbufEqualS(&result->processName, "csh")        ||
+            ffStrbufEqualS(&result->processName, "tcsh")       ||
+            ffStrbufEqualS(&result->processName, "fish")       ||
+            ffStrbufEqualS(&result->processName, "dash")       ||
+            ffStrbufEqualS(&result->processName, "pwsh")       ||
+            ffStrbufEqualS(&result->processName, "nu")         ||
+            ffStrbufEqualS(&result->processName, "git-shell")  ||
+            ffStrbufEqualS(&result->processName, "elvish")     ||
+            ffStrbufEqualS(&result->processName, "oil.ovm")    ||
+            ffStrbufEqualS(&result->processName, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
+            ffStrbufEqualS(&result->processName, "login")      ||
+            ffStrbufEqualS(&result->processName, "sshd")       ||
+            ffStrbufEqualS(&result->processName, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
+            ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             #ifdef __linux__
-            ffStrStartsWith(name, "flatpak-") || // #707
+            ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif
-            ffStrEndsWith(name, ".sh")
+            ffStrbufEndsWithS(&result->processName, ".sh")
         )
         {
             pid = ppid;
+            ffStrbufClear(&result->processName);
             continue;
         }
 
         #ifdef __APPLE__
         // https://github.com/fastfetch-cli/fastfetch/discussions/501
-        const char* pLeft = strstr(name, " (");
+        const char* pLeft = strstr(result->processName.chars, " (");
         if (pLeft)
         {
             pLeft += 2;
@@ -132,7 +126,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
                 for (; pLeft < pRight; ++pLeft)
                     if (*pLeft < 'a' || *pLeft > 'z')
                         break;
-                if (pLeft == pRight && ffProcessGetBasicInfoLinux(ppid, name, &ppid, NULL) != NULL)
+                if (pLeft == pRight && ffProcessGetBasicInfoLinux(ppid, &result->processName, &ppid, NULL) != NULL)
                     return 0;
             }
         }
@@ -140,7 +134,6 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 
         result->pid = (uint32_t) pid;
         result->ppid = (uint32_t) ppid;
-        ffStrbufSetS(&result->processName, name);
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
@@ -155,10 +148,8 @@ static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv
 
     pid_t pid = (pid_t) strtol(envStr, NULL, 10);
     result->pid = (uint32_t) pid;
-    char name[256];
-    if (ffProcessGetBasicInfoLinux(pid, name, (pid_t*) &result->ppid, NULL) == NULL)
+    if (ffProcessGetBasicInfoLinux(pid, &result->processName, (pid_t*) &result->ppid, NULL) == NULL)
     {
-        ffStrbufSetS(&result->processName, name);
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         return true;
     }

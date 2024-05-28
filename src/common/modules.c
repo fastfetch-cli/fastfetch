@@ -59,6 +59,7 @@ static FFModuleBaseInfo* H[] = {
 
 static FFModuleBaseInfo* I[] = {
     (void*) &instance.config.modules.icons,
+    (void*) &instance.config.modules.initSystem,
     NULL,
 };
 
