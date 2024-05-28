@@ -14,6 +14,7 @@ Features:
     * Supported in `Custom` module too
     * See `fastfetch -h format` for detail
 * Add option `--color-separator` to set the color of key-value separators
+* Support Guix package manager count (#792, Packages, Linux)
 
 Bugfixes:
 * Don't detect `.conf` files in `--list-config-paths`
