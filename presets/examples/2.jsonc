@@ -15,7 +15,7 @@
     "modules": [
         {
             "type": "custom", // HardwareStart
-            "format": "┌─────────── \u001b[1mHardware Information\u001b[0m ───────────┐" // `\u001b` is `\033`, or `\e`
+            "format": "┌─────────── {#1}Hardware Information{#} ───────────┐" // {#1} is the same as `\u001b[1m`. {#} is `\u001b[m`
         },
         {
             "type": "host",
@@ -71,7 +71,7 @@
         },
         {
             "type": "custom", // SoftwareStart
-            "format": "├─────────── \u001b[1mSoftware Information\u001b[0m ───────────┤"
+            "format": "├─────────── {#1}Software Information{#} ───────────┤"
         },
         {
             "type": "title",
