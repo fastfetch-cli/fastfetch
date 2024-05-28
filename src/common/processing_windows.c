@@ -3,6 +3,8 @@
 #include "common/io/io.h"
 
 #include <Windows.h>
+#include <ntstatus.h>
+#include <winternl.h>
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
@@ -123,4 +125,47 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     } while (nRead > 0);
 
     return NULL;
+}
+
+bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath, bool* gui)
+{
+    FF_AUTO_CLOSE_FD HANDLE hProcess = pid == 0
+        ? GetCurrentProcess()
+        : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+
+    if (gui)
+        *gui = GetGuiResources(hProcess, GR_GDIOBJECTS) > 0;
+
+    if(ppid)
+    {
+        PROCESS_BASIC_INFORMATION info = {};
+        ULONG size;
+        if(NT_SUCCESS(NtQueryInformationProcess(hProcess, ProcessBasicInformation, &info, sizeof(info), &size)))
+        {
+            assert(size == sizeof(info));
+            *ppid = (uint32_t)info.InheritedFromUniqueProcessId;
+        }
+        else
+            return false;
+    }
+    if(exe)
+    {
+        DWORD bufSize = exe->allocated;
+        if(QueryFullProcessImageNameA(hProcess, 0, exe->chars, &bufSize))
+        {
+            // We use full path here
+            // Querying command line of remote processes in Windows requires either WMI or ReadProcessMemory
+            exe->length = bufSize;
+            if (exePath) ffStrbufSet(exePath, exe);
+        }
+        else
+            return false;
+    }
+    if(pname && exeName)
+    {
+        *exeName = exe->chars + ffStrbufLastIndexC(exe, '\\') + 1;
+        ffStrbufSetS(pname, *exeName);
+    }
+
+    return true;
 }
