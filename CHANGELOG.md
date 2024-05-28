@@ -6,12 +6,19 @@ Features:
 * Apply default color palettes in `--file` and `--data` (Logo)
 * Print all presets in `--list-presets` for better Windows support (Windows)
 * Support for guix package manager detection (Packages, Linux)
-* Support named module output formatting placeholders (#796)
-    * Besides the meaningless `--title-format '{6}{7}{8}'`, `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is now supported
+* Support named variable placeholders in custom module formattion string (#796)
+    * `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is equivalent to `--title-format '{6}{7}{8}'`
+* Support named color placeholders in custom module formattion string
+    * `--<module>-format '{#red}'` is equivalent to `--<module>-format '{#31}'`
+    * `'{#red}'` or `'{#31}'` is preferred over `\u001b[31m` because is more readable and `--pipe` aware (will be ignored in pipe mode)
+    * Supported in `Custom` module too
+    * See `fastfetch -h format` for detail
+* Add option `--color-separator` to set the color of key-value separators
 
 Bugfixes:
 * Don't detect `.conf` files in `--list-config-paths`
 * Don't try to detect terminals in MSYS shell with process backtracing (Windows)
+* Fix `outputColor` doesn't work if module keys are disabled
 
 Logos:
 * Add Cereus Linux
