@@ -116,7 +116,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
     uint32_t numOpenIfs = 0;
     uint32_t numOpenNotIfs = 0;
-    uint32_t numOpenColors = 0;
 
     FF_STRBUF_AUTO_DESTROY placeholderValue = ffStrbufCreate();
 
@@ -194,13 +193,8 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             // test for end of a color, if so do nothing
             if (firstChar == '#')
             {
-                if(numOpenColors == 0)
-                    appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
-                else
-                {
+                if (!instance.config.display.pipe)
                     ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
-                    --numOpenColors;
-                }
 
                 continue;
             }
@@ -261,11 +255,13 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         //test for color, if so evaluate it
         if (firstChar == '#')
         {
-            ++numOpenColors;
-            ffStrbufSubstrAfter(&placeholderValue, 0);
-            ffStrbufAppendS(buffer, "\033[");
-            ffStrbufAppend(buffer, &placeholderValue);
-            ffStrbufAppendC(buffer, 'm');
+            if (!instance.config.display.pipe)
+            {
+                ffStrbufSubstrAfter(&placeholderValue, 0);
+                ffStrbufAppendS(buffer, "\e[");
+                ffOptionParseColorNoClear(placeholderValue.chars, buffer);
+                ffStrbufAppendC(buffer, 'm');
+            }
             continue;
         }
 
@@ -281,5 +277,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
     }
 
-    ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
+    if (!instance.config.display.pipe)
+        ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }

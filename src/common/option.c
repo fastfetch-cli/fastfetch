@@ -145,9 +145,8 @@ bool ffOptionParseBoolean(const char* str)
     );
 }
 
-void ffOptionParseColor(const char* value, FFstrbuf* buffer)
+void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
 {
-    ffStrbufClear(buffer);
     ffStrbufEnsureFree(buffer, 63);
 
     while(*value != '\0')
