@@ -57,7 +57,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
             ffPrintColor(&instance.config.display.colorOutput);
     }
 
-    if (!instance.config.display.pipe && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
+    if (!(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
     {
         uint32_t keyWidth = moduleArgs && moduleArgs->keyWidth > 0 ? moduleArgs->keyWidth : instance.config.display.keyWidth;
         if (keyWidth > 0)
@@ -73,11 +73,8 @@ void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
     else
         ffStrbufAppendS(&buffer, "unknown");
 
-    if(buffer.length > 0)
-    {
-        ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
-        ffStrbufPutTo(&buffer, stdout);
-    }
+    ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
+    ffStrbufPutTo(&buffer, stdout);
 }
 
 static void printError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, va_list arguments)

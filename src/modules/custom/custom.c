@@ -6,10 +6,7 @@
 
 void ffPrintCustom(FFCustomOptions* options)
 {
-    ffPrintLogoAndKey(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-    ffStrbufWriteTo(&options->moduleArgs.outputFormat, stdout);
-    if(!instance.config.display.pipe)
-        puts(FASTFETCH_TEXT_MODIFIER_RESET);
+    ffPrintFormat(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, 0, ((FFformatarg[]) {}));
 }
 
 bool ffParseCustomCommandOptions(FFCustomOptions* options, const char* key, const char* value)
