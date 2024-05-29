@@ -4,9 +4,10 @@
 
 typedef struct FFInitSystemResult
 {
-    uint32_t pid;
     FFstrbuf name;
     FFstrbuf exe;
+    FFstrbuf version;
+    uint32_t pid;
 } FFInitSystemResult;
 
 const char* ffDetectInitSystem(FFInitSystemResult* result);
