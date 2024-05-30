@@ -20,7 +20,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
     if (ffStrbufEqualS(&result->name, "systemd"))
     {
         if (ffProcessAppendStdOut(&result->version, (char* const[]) {
-            result->exe.chars, // use exe path in case users have another systemd installed
+            ffStrbufEndsWithS(&result->exe, "/systemd") ? result->exe.chars : "systemctl", // use exe path in case users have another systemd installed
             "--version",
             NULL,
         }) == NULL && result->version.length)
