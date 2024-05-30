@@ -7,23 +7,7 @@ assignees: ''
 
 ---
 
-## Before requesting a new feature
-
-* A lot of features are not enabled by default. Please try `fastfetch --list-modules` and `fastfetch -c all.jsonc` to see if it has been supported
-* Fastfetch supports `Command` module, which can be used to grab output from a custom shell script. Please check if it fits your needs
-
-```jsonc
-// ~/.config/fastfetch/fastfetch.jsonc
-{
-    "modules": [
-        {
-            "type": "command",
-            "text": "/path/to/your/script",
-            "key": "Feature Title"
-        }
-    ]
-}
-```
+Be sure to read [FAQ](https://github.com/fastfetch-cli/fastfetch?tab=readme-ov-file#faq) before submitting a new issue.
 
 ## Wanted features:
 

@@ -32,14 +32,14 @@ void ffPrintShell(FFShellOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SHELL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe},
-            {FF_FORMAT_ARG_TYPE_STRING, result->exeName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->pid},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath},
-            {FF_FORMAT_ARG_TYPE_INT, &result->tty},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName, "process-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe, "exe"},
+            {FF_FORMAT_ARG_TYPE_STRING, result->exeName, "exe-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version, "version"},
+            {FF_FORMAT_ARG_TYPE_UINT, &result->pid, "pid"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName, "pretty-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath, "exe-path"},
+            {FF_FORMAT_ARG_TYPE_INT, &result->tty, "tty"},
         }));
     }
 }
@@ -107,14 +107,14 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
 void ffPrintShellHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SHELL_MODULE_NAME, "{3} {4}", FF_SHELL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Shell process name",
-        "The first argument of the command line when running the shell",
-        "Shell base name of arg0",
-        "Shell version",
-        "Shell pid",
-        "Shell pretty name",
-        "Shell full exe path",
-        "Shell tty used",
+        "Shell process name - process-name",
+        "The first argument of the command line when running the shell - exe",
+        "Shell base name of arg0 - exe-name",
+        "Shell version - version",
+        "Shell pid - pid",
+        "Shell pretty name - pretty-name",
+        "Shell full exe path - exe-path",
+        "Shell tty used - tty",
     }));
 }
 

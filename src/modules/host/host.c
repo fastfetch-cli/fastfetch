@@ -49,13 +49,13 @@ void ffPrintHost(FFHostOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_HOST_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.family},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sku},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.serial},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.uuid},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.family, "family"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sku, "sku"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.serial, "serial"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &host.uuid, "uuid"},
         }));
     }
 
@@ -150,13 +150,13 @@ exit:
 void ffPrintHostHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_HOST_MODULE_NAME, "{2} {3}", FF_HOST_NUM_FORMAT_ARGS, ((const char* []) {
-        "product family",
-        "product name",
-        "product version",
-        "product sku",
-        "product vendor",
-        "product serial number",
-        "product uuid",
+        "product family - family",
+        "product name - name",
+        "product version - version",
+        "product sku - sku",
+        "product vendor - vendor",
+        "product serial number - serial",
+        "product uuid - uuid",
     }));
 }
 

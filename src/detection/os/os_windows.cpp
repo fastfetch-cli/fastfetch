@@ -4,6 +4,7 @@ extern "C" {
 }
 #include "util/windows/unicode.hpp"
 #include "util/windows/wmi.hpp"
+#include "util/stringUtils.h"
 
 static const char* getOsNameByWmi(FFstrbuf* osName)
 {
@@ -73,8 +74,8 @@ void ffDetectOSImpl(FFOSResult* os)
         if(ffStrbufEndsWithC(&os->prettyName, 'r'))
         {
             if(os->variant.chars[0] == 'R' &&
-            isdigit(os->variant.chars[1]) &&
-            (os->variant.chars[2] == '\0' || os->variant.chars[2] == ' '))
+                ffCharIsDigit(os->variant.chars[1]) &&
+                (os->variant.chars[2] == '\0' || os->variant.chars[2] == ' '))
             {
                 ffStrbufAppendF(&os->version, " R%c", os->variant.chars[1]);
                 ffStrbufSubstrAfter(&os->variant, strlen("Rx ") - 1);

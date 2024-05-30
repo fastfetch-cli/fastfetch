@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.13.2
+    VERSION 2.14.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -14,9 +14,9 @@ set(PROJECT_LICENSE "MIT license")
 ###################
 if(ANDROID)
     set(LINUX FALSE)
-elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Ll]inux.*")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
-elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*[Bb][Ss][Dd].*")
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
     set(BSD TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
@@ -76,6 +76,13 @@ option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVM
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
+
+set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
+set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
+set_property(CACHE BINARY_LINK_TYPE PROPERTY STRINGS ${BINARY_LINK_TYPE_OPTIONS})
+if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
+    message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
+endif()
 
 if (LINUX)
     set(CUSTOM_PCI_IDS_PATH "" CACHE STRING "Custom path to file pci.ids, defaults to `/usr/share/hwdata/pci.ids`")
@@ -336,6 +343,7 @@ set(LIBFASTFETCH_SRC
     src/modules/gpu/gpu.c
     src/modules/host/host.c
     src/modules/icons/icons.c
+    src/modules/initsystem/initsystem.c
     src/modules/gamepad/gamepad.c
     src/modules/kernel/kernel.c
     src/modules/lm/lm.c
@@ -424,6 +432,7 @@ if(LINUX)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
         src/detection/loadavg/loadavg_linux.c
@@ -482,6 +491,7 @@ elseif(ANDROID)
         src/detection/gpu/gpu_nosupport.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_linux.c
@@ -552,6 +562,7 @@ elseif(BSD)
         src/detection/host/host_bsd.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_bsd.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
@@ -611,6 +622,7 @@ elseif(APPLE)
         src/detection/gpu/gpu_apple.m
         src/detection/host/host_apple.c
         src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
@@ -669,6 +681,7 @@ elseif(WIN32)
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
+        src/detection/initsystem/initsystem_nosupport.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
@@ -817,6 +830,11 @@ if(NOT "${CUSTOM_OS_RELEASE_PATH}" STREQUAL "")
     target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_OS_RELEASE_PATH=${CUSTOM_OS_RELEASE_PATH})
 endif()
 
+if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+    message(STATUS "Enabling custom link type: ${BINARY_LINK_TYPE}")
+    target_compile_definitions(libfastfetch PRIVATE FF_DISABLE_DLOPEN=1)
+endif()
+
 function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
     if(NOT ENABLE_${VARNAME})
         return()
@@ -844,6 +862,11 @@ function(ff_lib_enable VARNAME PKGCONFIG_NAMES CMAKE_NAME)
 
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_${VARNAME}=1)
     target_include_directories(libfastfetch PRIVATE ${${VARNAME}_INCLUDE_DIRS})
+
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_directories(libfastfetch PUBLIC ${${VARNAME}_LIBRARY_DIRS})
+        target_link_libraries(libfastfetch PRIVATE ${${VARNAME}_LIBRARIES})
+    endif()
 
     foreach(FLAG ${${VARNAME}_CFLAGS_OTHER})
         if(FLAG MATCHES "-D.*")
@@ -1091,6 +1114,11 @@ elseif(APPLE)
     target_link_options(flashfetch
         PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
     )
+endif()
+
+if(BINARY_LINK_TYPE STREQUAL "static")
+    target_link_options(fastfetch PRIVATE "-static")
+    target_link_options(flashfetch PRIVATE "-static")
 endif()
 
 ###################

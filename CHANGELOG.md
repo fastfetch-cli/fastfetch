@@ -1,3 +1,32 @@
+# 2.14.0
+
+Features:
+* Support monochrome bar type (#960)
+* Support editor version detection on Windows (Editor, Windows)
+* Apply default color palettes in `--file` and `--data` (Logo)
+* Print all presets in `--list-presets` for better Windows support (Windows)
+* Support for guix package manager detection (Packages, Linux)
+* Support named variable placeholders in custom module formattion string (#796)
+    * `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is equivalent to `--title-format '{6}{7}{8}'`
+* Support named color placeholders in custom module formattion string
+    * `--<module>-format '{#red}'` is equivalent to `--<module>-format '{#31}'`
+    * `'{#red}'` or `'{#31}'` is preferred over `\u001b[31m` because is more readable and `--pipe` aware (will be ignored in pipe mode)
+    * Supported in `Custom` module too
+    * See `fastfetch -h format` for detail
+* Add option `--color-separator` to set the color of key-value separators
+* Support Guix package manager count (#792, Packages, Linux)
+* Improve python based shell detection (#977, Shell, macOS)
+* Print error reason when vulkan init fails (Vulkan)
+
+Bugfixes:
+* Don't detect `.conf` files in `--list-config-paths`
+* Don't try to detect terminals in MSYS shell with process backtracing (Windows)
+* Fix `outputColor` doesn't work if module keys are disabled
+
+Logos:
+* Add Cereus Linux
+* Re-add special handling of Loc-OS
+
 # 2.13.2
 
 Another hotfix release :(

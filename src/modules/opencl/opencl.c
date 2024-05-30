@@ -27,9 +27,9 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENCL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.version},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.device},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.vendor},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.version, "version"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.device, "device"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.vendor, "vendor"},
             }));
         }
     }
@@ -103,9 +103,9 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
 void ffPrintOpenCLHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OPENCL_MODULE_NAME, "{1}", FF_OPENCL_NUM_FORMAT_ARGS, ((const char* []) {
-        "version",
-        "device",
-        "vendor"
+        "version - version",
+        "device - device",
+        "vendor - vendor"
     }));
 }
 

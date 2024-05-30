@@ -107,16 +107,16 @@ void ffPrintCPU(FFCPUOptions* options)
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPU_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor},
-                {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical},
-                {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresLogical},
-                {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline},
-                {FF_FORMAT_ARG_TYPE_STRING, freqBase},
-                {FF_FORMAT_ARG_TYPE_STRING, freqMax},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &coreTypes},
-                {FF_FORMAT_ARG_TYPE_STRING, freqBioslimit},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.name, "name"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &cpu.vendor, "vendor"},
+                {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresPhysical, "cores-physical"},
+                {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresLogical, "cores-logical"},
+                {FF_FORMAT_ARG_TYPE_UINT16, &cpu.coresOnline, "cores-online"},
+                {FF_FORMAT_ARG_TYPE_STRING, freqBase, "freq-base"},
+                {FF_FORMAT_ARG_TYPE_STRING, freqMax, "freq-max"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr, "temperature"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &coreTypes, "core-types"},
+                {FF_FORMAT_ARG_TYPE_STRING, freqBioslimit, "freq-bios-limit"},
             }));
         }
     }
@@ -255,16 +255,16 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 void ffPrintCPUHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CPU_MODULE_NAME, "{1} ({5}) @ {7} GHz", FF_CPU_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name",
-        "Vendor",
-        "Physical core count",
-        "Logical core count",
-        "Online core count",
-        "Base frequency",
-        "Max frequency",
-        "Temperature (formatted)",
-        "Logical core count grouped by frequency",
-        "Bios limited frequency",
+        "Name - name",
+        "Vendor - vendor",
+        "Physical core count - cores-physical",
+        "Logical core count - cores-logical",
+        "Online core count - cores-online",
+        "Base frequency - freq-base",
+        "Max frequency - freq-max",
+        "Temperature (formatted) - temperature",
+        "Logical core count grouped by frequency - core-types",
+        "Bios limited frequency - freq-bios-limit",
     }));
 }
 

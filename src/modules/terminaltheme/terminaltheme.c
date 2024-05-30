@@ -33,10 +33,10 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
             snprintf(fg, sizeof(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
             snprintf(bg, sizeof(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
             FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRING, fg},
-                {FF_FORMAT_ARG_TYPE_STRING, result.fg.dark ? "Dark" : "Light"},
-                {FF_FORMAT_ARG_TYPE_STRING, bg},
-                {FF_FORMAT_ARG_TYPE_STRING, result.bg.dark ? "Dark" : "Light"},
+                {FF_FORMAT_ARG_TYPE_STRING, fg, "fg-color"},
+                {FF_FORMAT_ARG_TYPE_STRING, result.fg.dark ? "Dark" : "Light", "fg-type"},
+                {FF_FORMAT_ARG_TYPE_STRING, bg, "bg-color"},
+                {FF_FORMAT_ARG_TYPE_STRING, result.bg.dark ? "Dark" : "Light", "bg-type"},
             }));
         }
     }
@@ -105,10 +105,10 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* option
 void ffPrintTerminalThemeHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALTHEME_MODULE_NAME, "{1} (FG) {3} (BG) [{4}]", FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal foreground color",
-        "Terminal foreground type (Dark / Light)",
-        "Terminal background color",
-        "Terminal background type (Dark / Light)",
+        "Terminal foreground color - fg-color",
+        "Terminal foreground type (Dark / Light) - fg-type",
+        "Terminal background color - bg-color",
+        "Terminal background type (Dark / Light) - bg-type",
     }));
 }
 

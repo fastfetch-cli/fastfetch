@@ -28,6 +28,7 @@
 #include "modules/gamepad/option.h"
 #include "modules/gpu/option.h"
 #include "modules/icons/option.h"
+#include "modules/initsystem/option.h"
 #include "modules/kernel/option.h"
 #include "modules/loadavg/option.h"
 #include "modules/locale/option.h"

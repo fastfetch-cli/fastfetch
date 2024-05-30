@@ -1,6 +1,8 @@
 #include "fastfetch.h"
 #include "common/library.h"
 
+#ifndef FF_DISABLE_DLOPEN
+
 #include <stdarg.h>
 
 //Clang doesn't define __SANITIZE_ADDRESS__ but defines __has_feature(address_sanitizer)
@@ -77,3 +79,5 @@ void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...)
 
     return result;
 }
+
+#endif

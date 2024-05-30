@@ -26,9 +26,9 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, 3, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &index},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
+            {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac, "mac"},
         }));
     }
 }
@@ -111,11 +111,11 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
             else
             {
                 FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_LOCALIP_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name},
-                    {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4, "ipv4"},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6, "ipv6"},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac, "mac"},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name, "ifname"},
+                    {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute, "is-default-route"},
                 }));
             }
             ++index;
@@ -387,11 +387,11 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
 void ffPrintLocalIpHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LOCALIP_MODULE_NAME, "{1}", FF_LOCALIP_NUM_FORMAT_ARGS, ((const char* []) {
-        "Local IPv4 address",
-        "Local IPv6 address",
-        "Physical (MAC) address",
-        "Interface name",
-        "Is default route"
+        "Local IPv4 address - ipv4",
+        "Local IPv6 address - ipv6",
+        "Physical (MAC) address - mac",
+        "Interface name - ifname",
+        "Is default route - is-default-route"
     }));
 }
 

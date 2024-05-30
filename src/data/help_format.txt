@@ -4,6 +4,10 @@ For example the format string "Values: {1} ({2})", with the values "First" and "
 The format string can contain placeholders in any order and have multiple occurrences.
 To include spaces when setting from the command line, surround the whole string with double quotes (").
 
+In 2.14.0 or newer, the value indices can be meaningful named tags.
+For example: "--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'" is equivalent to "--title-format '{6}{7}{8}'"
+See "fastfetch -h title-format" for all supported tags.
+
 If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.
 This means that the format string "Values: {1} ({2})" is equivalent to "Values: {} ({})".
 Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.
@@ -16,7 +20,7 @@ To only print something if a variable is set, use "{?<index>} ... {?}".
 For example, to only print a second value if it is set, use "{?2} Second value: {2}{?}".
 If a "{?}" is found without an opener, it is printed as is.
 
-To only print something if a variable is not set, do the same as with if, just replace every '?' with a '!'.
+To only print something if a variable is not set, do the same as with if, just replace every '?' with a '/'.
 For example to print a fallback for a second value if it is not set, use "{?2}{2}{?}{/2}Second value fallback{/}".
 
 To stop formatting at any point in the format string, use "{-}".
@@ -24,7 +28,7 @@ To stop formatting at any point in the format string, use "{-}".
 To print something with color, start a placeholder with a '#' and then the linux terminal color encoding.
 "\033[" at the start, and an 'm' at the end is automatically added, so don't do that.
 A "{#}" is equivalent to a "{#0}" and resets everything to normal.
-For example to print something pink and underline, use "{#4;35}...{#}".
+For example to print something pink and underline, use "{#4;35}...{#}". "{#underline_magenta}" is also supported. See `fastfetch -h color` for detail.
 Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
 Which escape codes are supported and how they look is defined by your terminal.
 

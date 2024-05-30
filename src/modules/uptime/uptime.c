@@ -79,12 +79,12 @@ void ffPrintUptime(FFUptimeOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_UPTIME_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &days},
-            {FF_FORMAT_ARG_TYPE_UINT, &hours},
-            {FF_FORMAT_ARG_TYPE_UINT, &minutes},
-            {FF_FORMAT_ARG_TYPE_UINT, &seconds},
-            {FF_FORMAT_ARG_TYPE_UINT, &milliseconds},
-            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.uptime)},
+            {FF_FORMAT_ARG_TYPE_UINT, &days, "days"},
+            {FF_FORMAT_ARG_TYPE_UINT, &hours, "hours"},
+            {FF_FORMAT_ARG_TYPE_UINT, &minutes, "minutes"},
+            {FF_FORMAT_ARG_TYPE_UINT, &seconds, "seconds"},
+            {FF_FORMAT_ARG_TYPE_UINT, &milliseconds, "milliseconds"},
+            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.uptime), "boot-time"},
         }));
     }
 }
@@ -143,12 +143,12 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
 void ffPrintUptimeHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_UPTIME_MODULE_NAME, "{1} days {2} hours {3} mins", FF_UPTIME_NUM_FORMAT_ARGS, ((const char* []) {
-        "Days",
-        "Hours",
-        "Minutes",
-        "Seconds",
-        "Milliseconds",
-        "Boot time in local timezone",
+        "Days - days",
+        "Hours - hours",
+        "Minutes - minutes",
+        "Seconds - seconds",
+        "Milliseconds - milliseconds",
+        "Boot time in local timezone - boot-time",
     }));
 }
 

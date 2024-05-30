@@ -9,7 +9,6 @@
 #include <sys/sysinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #ifdef __ANDROID__
 #include "common/settings.h"
@@ -139,7 +138,7 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (ffStrStartsWith(entry->d_name, "policy") && isdigit(entry->d_name[strlen("policy")]))
+        if (ffStrStartsWith(entry->d_name, "policy") && ffCharIsDigit(entry->d_name[strlen("policy")]))
         {
             ffStrbufAppendS(&path, entry->d_name);
             uint32_t fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);

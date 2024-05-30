@@ -5,13 +5,14 @@
 #include "modules/editor/editor.h"
 #include "util/stringUtils.h"
 
-#define FF_EDITOR_NUM_FORMAT_ARGS 4
+#define FF_EDITOR_NUM_FORMAT_ARGS 5
 
 void ffPrintEditor(FFEditorOptions* options)
 {
     FFEditorResult result = {
         .name = ffStrbufCreate(),
         .path = ffStrbufCreate(),
+        .exe = ffStrbufCreate(),
         .version = ffStrbufCreate(),
     };
     const char* error = ffDetectEditor(&result);
@@ -22,21 +23,35 @@ void ffPrintEditor(FFEditorOptions* options)
         return;
     }
 
-    ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-    if (result.exe)
+    if (options->moduleArgs.outputFormat.length == 0)
     {
-        fputs(result.exe, stdout);
-        if (result.version.length)
-            printf(" (%s)", result.version.chars);
+        ffPrintLogoAndKey(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        if (result.exe.length)
+        {
+            ffStrbufWriteTo(&result.exe, stdout);
+            if (result.version.length)
+                printf(" (%s)", result.version.chars);
+        }
+        else
+        {
+            ffStrbufWriteTo(&result.name, stdout);
+        }
+        putchar('\n');
     }
     else
     {
-        ffStrbufWriteTo(&result.name, stdout);
+        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_EDITOR_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRING, &result.type, "type"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.exe, "exe-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.path, "path"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+        }));
     }
-    putchar('\n');
 
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.path);
+    ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
 }
 
@@ -94,24 +109,23 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &result.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "path", &result.path);
-    if (result.exe)
-        yyjson_mut_obj_add_strcpy(doc, obj, "exe", result.exe);
-    else
-        yyjson_mut_obj_add_null(doc, obj, "exe");
+    yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result.exe);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
 
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.path);
+    ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
 }
 
 void ffPrintEditorHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_EDITOR_MODULE_NAME, "{2} ({4})", FF_EDITOR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name",
-        "Exe name",
-        "Full path",
-        "Version",
+        "Type (Visual / Editor) - type",
+        "Name - name",
+        "Exe name of real path - exe-name",
+        "Full path of real path - full-path",
+        "Version - version",
     }));
 }
 

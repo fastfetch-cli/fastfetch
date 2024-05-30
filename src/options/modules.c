@@ -29,6 +29,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitGamepadOptions(&options->gamepad);
     ffInitHostOptions(&options->host);
     ffInitIconsOptions(&options->icons);
+    ffInitInitSystemOptions(&options->initSystem);
     ffInitKernelOptions(&options->kernel);
     ffInitLMOptions(&options->lm);
     ffInitLoadavgOptions(&options->loadavg);
@@ -97,6 +98,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyGamepadOptions(&options->gamepad);
     ffDestroyHostOptions(&options->host);
     ffDestroyIconsOptions(&options->icons);
+    ffDestroyInitSystemOptions(&options->initSystem);
     ffDestroyKernelOptions(&options->kernel);
     ffDestroyLMOptions(&options->lm);
     ffDestroyLoadavgOptions(&options->loadavg);

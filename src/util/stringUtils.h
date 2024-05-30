@@ -74,3 +74,8 @@ static inline bool ffCharIsEnglishAlphabet(char c)
 {
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
 }
+
+static inline bool ffCharIsDigit(char c)
+{
+    return '0' <= c && c <= '9';
+}

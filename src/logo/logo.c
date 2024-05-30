@@ -113,7 +113,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
             ffStrbufAppendS(&result, "\e[");
             data += 2;
 
-            while(isdigit(*data) || *data == ';')
+            while(ffCharIsDigit(*data) || *data == ';')
                 ffStrbufAppendC(&result, *data++); // number
 
             //We have a valid control sequence, print it and continue with next char
@@ -219,13 +219,25 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &result);
 }
 
-static void logoApplyColors(const FFlogo* logo)
+static void logoApplyColors(const FFlogo* logo, bool replacement)
 {
     if(instance.config.display.colorTitle.length == 0)
         ffStrbufAppendS(&instance.config.display.colorTitle, logo->colorTitle ? logo->colorTitle : logo->colors[0]);
 
     if(instance.config.display.colorKeys.length == 0)
         ffStrbufAppendS(&instance.config.display.colorKeys, logo->colorKeys ? logo->colorKeys : logo->colors[1]);
+
+    if (replacement)
+    {
+        FFOptionsLogo* options = &instance.config.logo;
+
+        const char* const* colors = logo->colors;
+        for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
+        {
+            if(options->colors[i].length == 0)
+                ffStrbufAppendS(&options->colors[i], *colors);
+        }
+    }
 }
 
 static bool logoHasName(const FFlogo* logo, const FFstrbuf* name, bool small)
@@ -301,30 +313,16 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size)
     return &ffLogoUnknown;
 }
 
-static inline void logoApplyColorsDetected(void)
-{
-    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL));
-}
-
 static void logoPrintStruct(const FFlogo* logo)
 {
-    logoApplyColors(logo);
-
-    FFOptionsLogo* options = &instance.config.logo;
-
-    const char* const* colors = logo->colors;
-    for(int i = 0; *colors != NULL && i < FASTFETCH_LOGO_MAX_COLORS; i++, colors++)
-    {
-        if(options->colors[i].length == 0)
-            ffStrbufAppendS(&options->colors[i], *colors);
-    }
+    logoApplyColors(logo, true);
 
     ffLogoPrintChars(logo->lines, true);
 }
 
 static void logoPrintNone(void)
 {
-    logoApplyColorsDetected();
+    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     instance.state.logoHeight = 0;
     instance.state.logoWidth = 0;
 }
@@ -357,8 +355,8 @@ static bool logoPrintData(bool doColorReplacement)
     if(options->source.length == 0)
         return false;
 
+    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     ffLogoPrintChars(options->source.chars, doColorReplacement);
-    logoApplyColorsDetected();
     return true;
 }
 
@@ -407,7 +405,7 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
         return false;
     }
 
-    logoApplyColorsDetected();
+    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     if(raw)
         ffLogoPrintCharsRaw(content.chars, content.length);
     else
@@ -421,7 +419,7 @@ static bool logoPrintImageIfExists(FFLogoType logo, bool printError)
     if(!ffLogoPrintImageIfExists(logo, printError))
         return false;
 
-    logoApplyColorsDetected();
+    logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
     return true;
 }
 
@@ -431,7 +429,7 @@ static bool logoTryKnownType(void)
 
     if(options->type == FF_LOGO_TYPE_NONE)
     {
-        logoApplyColorsDetected();
+        logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
         return true;
     }
 

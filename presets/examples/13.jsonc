@@ -17,54 +17,55 @@
         },
         {
             // draw borders first to make colors of left and right border consistant
-            "key": "│           │\u001b[11D\u001b[31m user",
+            "key": "│           │\u001b[11D{#31} user",
             "type": "title",
             "format": "{1}"
         },
         {
-            "key": "│           │\u001b[11D\u001b[32m󰇅 hname",
+            "key": "│           │\u001b[11D{#32}󰇅 hname",
             "type": "title",
             "format": "{2}"
         },
         {
-            "key": "│           │\u001b[11D\u001b[33m󰅐 uptime",
+            "key": "│           │\u001b[11D{#33}󰅐 uptime",
             "type": "uptime"
         },
         {
-            "key": "│           │\u001b[11D\u001b[34m󰟾 distro",
+            "key": "│           │\u001b[11D{#34}󰟾 distro",
             "type": "os"
         },
         {
-            "key": "│           │\u001b[11D\u001b[35m kernel",
+            "key": "│           │\u001b[11D{#35} kernel",
             "type": "kernel"
         },
         {
-            "key": "│           │\u001b[11D\u001b[36m󰇄 desktop",
+            "key": "│           │\u001b[11D{#36}󰇄 desktop",
             "type": "de"
         },
         {
-            "key": "│           │\u001b[11D\u001b[31m term",
+            "key": "│           │\u001b[11D{#31} term",
             "type": "terminal"
         },
         {
-            "key": "│           │\u001b[11D\u001b[32m shell",
+            "key": "│           │\u001b[11D{#32} shell",
             "type": "shell"
         },
         {
-            "key": "│           │\u001b[11D\u001b[33m󰍛 cpu",
-            "type": "cpu"
+            "key": "│           │\u001b[11D{#33}󰍛 cpu",
+            "type": "cpu",
+            "showPeCoreCount": true
         },
         {
-            "key": "│           │\u001b[11D\u001b[34m󰉉 disk",
+            "key": "│           │\u001b[11D{#34}󰉉 disk",
             "type": "disk",
             "folders": "/"
         },
         {
-            "key": "│           │\u001b[11D\u001b[35m memory",
+            "key": "│           │\u001b[11D{#35} memory",
             "type": "memory"
         },
         {
-            "key": "│           │\u001b[11D\u001b[36m󰩟 network",
+            "key": "│           │\u001b[11D{#36}󰩟 network",
             "type": "localip",
             "format": "{1} ({4})"
         },
@@ -73,7 +74,7 @@
             "type": "custom"
         },
         {
-            "key": "│           │\u001b[11D\u001b[m colors",
+            "key": "│           │\u001b[11D{#39} colors",
             "type": "colors",
             "symbol": "circle"
         },

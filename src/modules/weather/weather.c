@@ -26,7 +26,7 @@ void ffPrintWeather(FFWeatherOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WEATHER_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result, "result"},
         }));
     }
 }
@@ -128,7 +128,7 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
 void ffPrintWeatherHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WEATHER_MODULE_NAME, "{1}", FF_WEATHER_NUM_FORMAT_ARGS, ((const char* []) {
-        "Weather result"
+        "Weather result - result",
     }));
 }
 

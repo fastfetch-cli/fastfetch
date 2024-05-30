@@ -141,11 +141,11 @@ static bool isValidNixPkg(FFstrbuf* pkg)
         switch (state)
         {
             case START:
-                if (c >= '0' && c <= '9')
+                if (ffCharIsDigit(c))
                     state = DIGIT;
                 break;
             case DIGIT:
-                if (c >= '0' && c <= '9')
+                if (ffCharIsDigit(c))
                     continue;
                 if (c == '.')
                     state = DOT;
@@ -153,7 +153,7 @@ static bool isValidNixPkg(FFstrbuf* pkg)
                     state = START;
                 break;
             case DOT:
-                if (c >= '0' && c <= '9')
+                if (ffCharIsDigit(c))
                     state = MATCH;
                 else
                     state = START;
@@ -408,6 +408,39 @@ static uint32_t getAM(FFstrbuf* baseDir)
     return result;
 }
 
+
+static uint32_t getGuixPackagesImpl(char* path)
+{
+    FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(1024);
+
+    ffProcessAppendStdOut(&output, (char* const[]) {
+        "guix",
+        "package",
+        "-p",
+        path,
+        "-I",
+        NULL
+    });
+
+
+    //Each package is a new line in the output.
+    // If at least one line is found, add 1 for the last line.
+    uint32_t count = ffStrbufCountC(&output, '\n');
+    if(count > 0)
+      count++;
+
+    return count;
+}
+
+static uint32_t getGuixPackages(FFstrbuf* baseDir, const char* dirname)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, dirname);
+    uint32_t num_elements = getGuixPackagesImpl(baseDir->chars);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return num_elements;
+}
+
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
@@ -436,6 +469,10 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
     if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->am = getAM(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:");
+    if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
+    {
+      packageCounts->guixSystem += getGuixPackages(baseDir, "/run/current-system/profile");
+    }
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
@@ -530,6 +567,12 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
         ffStrbufSet(&profilePath, &stateDir);
         ffStrbufAppendS(&profilePath, "nix/profile");
         result->nixUser += getNixPackages(&stateDir, "nix/profile");
+    }
+
+    if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
+    {
+       result->guixUser += getGuixPackages(&baseDir, ".guix-profile");
+       result->guixHome += getGuixPackages(&baseDir, ".guix-home/profile");
     }
 
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))

@@ -65,10 +65,10 @@ void ffPrintPlayer(FFPlayerOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PLAYER_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->player},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->url}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty, "player"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->player, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId, "id"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->url, "url"}
         }));
     }
 }
@@ -127,10 +127,10 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
 void ffPrintPlayerHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PLAYER_MODULE_NAME, "{1}", FF_PLAYER_NUM_FORMAT_ARGS, ((const char* []) {
-        "Pretty player name",
-        "Player name",
-        "Player Identifier",
-        "URL name"
+        "Pretty player name - player",
+        "Player name - name",
+        "Player Identifier - id",
+        "URL name - url",
     }));
 }
 

@@ -96,11 +96,11 @@ void ffPrintMedia(FFMediaOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_MEDIA_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->song},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->status}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &songPretty, "combined"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->song, "title"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->artist, "artist"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->album, "album"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &media->status, "status"},
         }));
     }
 }
@@ -160,11 +160,11 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
 void ffPrintMediaHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MEDIA_MODULE_NAME, "{3} - {1} ({5})", FF_MEDIA_NUM_FORMAT_ARGS, ((const char* []) {
-        "Pretty media name",
-        "Media name",
-        "Artist name",
-        "Album name",
-        "Status",
+        "Pretty media name - combined",
+        "Media name - title",
+        "Artist name - artist",
+        "Album name - album",
+        "Status - status",
     }));
 }
 

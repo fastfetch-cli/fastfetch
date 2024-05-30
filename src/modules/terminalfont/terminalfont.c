@@ -34,10 +34,10 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALFONT_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.pretty},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.name},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.size},
-                {FF_FORMAT_ARG_TYPE_LIST,   &terminalFont.font.styles}
+                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.pretty, "combined"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.name, "name"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.size, "size"},
+                {FF_FORMAT_ARG_TYPE_LIST, &terminalFont.font.styles, "styles"},
             }));
         }
     }
@@ -124,10 +124,10 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 void ffPrintTerminalFontHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALFONT_MODULE_NAME, "{1}", FF_TERMINALFONT_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal font combined",
-        "Terminal font name",
-        "Terminal font size",
-        "Terminal font styles"
+        "Terminal font combined - combined",
+        "Terminal font name - name",
+        "Terminal font size - size",
+        "Terminal font styles - styles",
     }));
 }
 

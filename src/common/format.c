@@ -52,14 +52,29 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
  * @param placeholderValue the string to parse
  * @return uint32_t the parsed value
  */
-static inline uint32_t getArgumentIndex(const FFstrbuf* placeholderValue)
+static uint32_t getArgumentIndex(const FFstrbuf* placeholderValue, uint32_t numArgs, const FFformatarg* arguments)
 {
-    uint32_t result = UINT32_MAX;
+    char firstChar = placeholderValue->chars[0];
 
-    if(placeholderValue->chars[0] != '-')
-        sscanf(placeholderValue->chars, "%" PRIu32, &result);
+    if(firstChar >= '1' && firstChar <= '9')
+    {
+        char* pEnd = NULL;
+        unsigned long result = strtoul(placeholderValue->chars, &pEnd, 10);
+        if (pEnd != placeholderValue->chars + placeholderValue->length || result > numArgs)
+            return UINT32_MAX;
+        return (uint32_t) result;
+    }
+    else if (ffCharIsEnglishAlphabet(firstChar))
+    {
+        for (uint32_t i = 0; i < numArgs; ++i)
+        {
+            const FFformatarg* arg = &arguments[i];
+            if(arg->name && ffStrbufIgnCaseEqualS(placeholderValue, arg->name))
+                return i + 1;
+        }
+    }
 
-    return result == 0 ? UINT32_MAX : result;
+    return UINT32_MAX;
 }
 
 static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start, const FFstrbuf* placeholderValue, uint32_t index, uint32_t formatStringLength)
@@ -101,7 +116,8 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
     uint32_t numOpenIfs = 0;
     uint32_t numOpenNotIfs = 0;
-    uint32_t numOpenColors = 0;
+
+    FF_STRBUF_AUTO_DESTROY placeholderValue = ffStrbufCreate();
 
     for(uint32_t i = 0; i < formatstr->length; ++i)
     {
@@ -136,67 +152,70 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
-        FF_STRBUF_AUTO_DESTROY placeholderValue = ffStrbufCreate();
+        ffStrbufClear(&placeholderValue);
 
-        while(i < formatstr->length && formatstr->chars[i] != '}')
-            ffStrbufAppendC(&placeholderValue, formatstr->chars[i++]);
-
-         // test if for stop, if so break the loop
-        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '-')
-            break;
-
-        // test for end of an if, if so do nothing
-        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '?')
         {
-            if(numOpenIfs == 0)
-                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
-            else
-                --numOpenIfs;
-
-            continue;
+            uint32_t iEnd = ffStrbufNextIndexC(formatstr, i, '}');
+            ffStrbufAppendNS(&placeholderValue, iEnd - i, &formatstr->chars[i]);
+            i = iEnd;
         }
 
-        // test for end of a not if, if so do nothing
-        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '/')
-        {
-            if(numOpenNotIfs == 0)
-                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
-            else
-                --numOpenNotIfs;
+        char firstChar = placeholderValue.chars[0];
 
-            continue;
-        }
-
-        // test for end of a color, if so do nothing
-        if(placeholderValue.length == 1 && placeholderValue.chars[0] == '#')
+        if (placeholderValue.length == 1)
         {
-            if(numOpenColors == 0)
-                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
-            else
+            // test if for stop, if so break the loop
+            if (firstChar == '-')
+                break;
+
+            // test for end of an if, if so do nothing
+            if (firstChar == '?')
             {
-                ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
-                --numOpenColors;
+                if(numOpenIfs == 0)
+                    appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+                else
+                    --numOpenIfs;
+
+                continue;
             }
 
-            continue;
+            // test for end of a not if, if so do nothing
+            if (firstChar == '/')
+            {
+                if(numOpenNotIfs == 0)
+                    appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+                else
+                    --numOpenNotIfs;
+
+                continue;
+            }
+
+            // test for end of a color, if so do nothing
+            if (firstChar == '#')
+            {
+                if (!instance.config.display.pipe)
+                    ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
+
+                continue;
+            }
         }
 
         // test for if, if so evaluate it
-        if(placeholderValue.chars[0] == '?')
+        if (firstChar == '?')
         {
             ffStrbufSubstrAfter(&placeholderValue, 0);
 
-            uint32_t index = getArgumentIndex(&placeholderValue);
+            uint32_t index = getArgumentIndex(&placeholderValue, numArgs, arguments);
 
             // testing for an invalid index
-            if(index > numArgs)
+            if (index > numArgs)
             {
                 appendInvalidPlaceholder(buffer, "{?", &placeholderValue, i, formatstr->length);
                 continue;
             }
 
             // continue normally if an format arg is set and the value is > 0
-            if(formatArgSet(&arguments[index - 1]))
+            if (formatArgSet(&arguments[index - 1]))
             {
                 ++numOpenIfs;
                 continue;
@@ -208,21 +227,21 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         }
 
         // test for not if, if so evaluate it
-        if(placeholderValue.chars[0] == '/')
+        if (firstChar == '/')
         {
             ffStrbufSubstrAfter(&placeholderValue, 0);
 
-            uint32_t index = getArgumentIndex(&placeholderValue);
+            uint32_t index = getArgumentIndex(&placeholderValue, numArgs, arguments);
 
             // testing for an invalid index
-            if(index > numArgs)
+            if (index > numArgs)
             {
                 appendInvalidPlaceholder(buffer, "{/", &placeholderValue, i, formatstr->length);
                 continue;
             }
 
             //continue normally if an format arg is not set or the value is 0
-            if(!formatArgSet(&arguments[index - 1]))
+            if (!formatArgSet(&arguments[index - 1]))
             {
                 ++numOpenNotIfs;
                 continue;
@@ -234,20 +253,21 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         }
 
         //test for color, if so evaluate it
-        if(placeholderValue.chars[0] == '#')
+        if (firstChar == '#')
         {
-            ++numOpenColors;
-            ffStrbufSubstrAfter(&placeholderValue, 0);
-            ffStrbufAppendS(buffer, "\033[");
-            ffStrbufAppend(buffer, &placeholderValue);
-            ffStrbufAppendC(buffer, 'm');
+            if (!instance.config.display.pipe)
+            {
+                ffStrbufAppendS(buffer, "\e[");
+                ffOptionParseColorNoClear(placeholderValue.chars + 1, buffer);
+                ffStrbufAppendC(buffer, 'm');
+            }
             continue;
         }
 
-        uint32_t index = getArgumentIndex(&placeholderValue);
+        uint32_t index = getArgumentIndex(&placeholderValue, numArgs, arguments);
 
         // test for invalid index
-        if(index > numArgs)
+        if (index > numArgs)
         {
             appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
             continue;
@@ -256,5 +276,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
     }
 
-    ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
+    if (!instance.config.display.pipe)
+        ffStrbufAppendS(buffer, FASTFETCH_TEXT_MODIFIER_RESET);
 }

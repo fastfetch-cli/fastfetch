@@ -4,7 +4,6 @@
 #include "util/stringUtils.h"
 
 #include <dirent.h>
-#include <ctype.h>
 #include <limits.h>
 
 static const char* detectWithBacklight(FFlist* result)
@@ -58,14 +57,14 @@ static const char* detectWithBacklight(FFlist* result)
                     {
                         ffStrbufSubstrBeforeLastC(&brightness->name, '/'); // remove "/edid"
                         ffStrbufSubstrAfterLastC(&brightness->name, '/'); // try getting DRM connector name
-                        if(isdigit(brightness->name.chars[0]))
+                        if(ffCharIsDigit(brightness->name.chars[0]))
                         {
                             // PCI address or some unknown path, give up
                             ffStrbufSetS(&brightness->name, entry->d_name);
                         }
                         else
                         {
-                            if(ffStrbufStartsWithS(&brightness->name, "card") && isdigit(brightness->name.chars[4]))
+                            if(ffStrbufStartsWithS(&brightness->name, "card") && ffCharIsDigit(brightness->name.chars[4]))
                                 ffStrbufSubstrAfterFirstC(&brightness->name, '-');
                         }
                     }
@@ -109,14 +108,19 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_free_any_vcp_value)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libddcutil, ddca_close_display)
 
+    #ifndef FF_DISABLE_DLOPEN
     __typeof__(&ddca_init) ffddca_init = dlsym(libddcutil, "ddca_init");
     if (ffddca_init)
+    #else
+    __typeof__(&ddca_init) ffddca_init = ddca_init;
+    #endif
     {
         FF_SUPPRESS_IO();
         // Ref: https://github.com/rockowitz/ddcutil/issues/344
         if (ffddca_init(NULL, -1 /*DDCA_SYSLOG_NOT_SET*/, 1 /*DDCA_INIT_OPTIONS_DISABLE_CONFIG_FILE*/) < 0)
             return "ddca_init() failed";
     }
+    #ifndef FF_DISABLE_DLOPEN
     else
     {
         __typeof__(&ddca_set_default_sleep_multiplier) ffddca_set_default_sleep_multiplier = dlsym(libddcutil, "ddca_set_default_sleep_multiplier");
@@ -125,6 +129,7 @@ static const char* detectWithDdcci(FFBrightnessOptions* options, FFlist* result)
 
         libddcutil = NULL; // Don't dlclose libddcutil. See https://github.com/rockowitz/ddcutil/issues/330
     }
+    #endif
 
     FF_AUTO_FREE DDCA_Display_Info_List* infoList = NULL;
     if (ffddca_get_display_info_list2(false, &infoList) < 0)

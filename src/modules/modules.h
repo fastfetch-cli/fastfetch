@@ -28,6 +28,7 @@
 #include "modules/gpu/gpu.h"
 #include "modules/host/host.h"
 #include "modules/icons/icons.h"
+#include "modules/initsystem/initsystem.h"
 #include "modules/kernel/kernel.h"
 #include "modules/lm/lm.h"
 #include "modules/loadavg/loadavg.h"

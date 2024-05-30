@@ -17,6 +17,7 @@
     "board",
     "chassis",
     "kernel",
+    "initsystem",
     "uptime",
     "loadavg",
     "processes",

@@ -40,10 +40,10 @@ void ffPrintBootmgr(FFBootmgrOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BOOTMGR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bootmgr.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bootmgr.firmware},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &firmwareName},
-            {FF_FORMAT_ARG_TYPE_BOOL, &bootmgr.secureBoot},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bootmgr.name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &bootmgr.firmware, "firmware-path"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &firmwareName, "firmware-name"},
+            {FF_FORMAT_ARG_TYPE_BOOL, &bootmgr.secureBoot, "secure-boot"},
         }));
     }
 
@@ -114,10 +114,10 @@ exit:
 void ffPrintBootmgrHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BOOTMGR_MODULE_NAME, "{4} ({2})", FF_BOOTMGR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name / description",
-        "Firmware file path",
-        "Firmware file name",
-        "Is secure boot enabled",
+        "Name / description - name",
+        "Firmware file path - firmware-path",
+        "Firmware file name - firmware-name",
+        "Is secure boot enabled - secure-boot",
     }));
 }
 

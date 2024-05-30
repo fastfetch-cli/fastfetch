@@ -11,42 +11,55 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         return;
 
     //This is used as a magic value for hiding keys
-    if(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " "))
-        return;
-
-    if(!instance.config.display.pipe)
+    if (!(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " ")))
     {
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
-        if (instance.config.display.brightColor)
-            fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
+        if(!instance.config.display.pipe)
+        {
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+            if (instance.config.display.brightColor)
+                fputs(FASTFETCH_TEXT_MODIFIER_BOLT, stdout);
 
-        if(moduleArgs && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_COLOR) && moduleArgs->keyColor.length > 0)
-            ffPrintColor(&moduleArgs->keyColor);
+            if(moduleArgs && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_COLOR) && moduleArgs->keyColor.length > 0)
+                ffPrintColor(&moduleArgs->keyColor);
+            else
+                ffPrintColor(&instance.config.display.colorKeys);
+        }
+
+        //NULL check is required for modules with custom keys, e.g. disk with the folder path
+        if((printType & FF_PRINT_TYPE_NO_CUSTOM_KEY) || !moduleArgs || moduleArgs->key.length == 0)
+        {
+            fputs(moduleName, stdout);
+
+            if(moduleIndex > 0)
+                printf(" %hhu", moduleIndex);
+        }
         else
-            ffPrintColor(&instance.config.display.colorKeys);
+        {
+            FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 1, ((FFformatarg[]){
+                {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex, "index"},
+            }));
+            ffStrbufWriteTo(&key, stdout);
+        }
+
+        if(!instance.config.display.pipe)
+        {
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+            ffPrintColor(&instance.config.display.colorSeparator);
+        }
+
+        ffStrbufWriteTo(&instance.config.display.keyValueSeparator, stdout);
+
+        if(!instance.config.display.pipe && instance.config.display.colorSeparator.length)
+            fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
+
+        if (!(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
+        {
+            uint32_t keyWidth = moduleArgs && moduleArgs->keyWidth > 0 ? moduleArgs->keyWidth : instance.config.display.keyWidth;
+            if (keyWidth > 0)
+                printf("\e[%uG", (unsigned) (keyWidth + instance.state.logoWidth));
+        }
     }
-
-    //NULL check is required for modules with custom keys, e.g. disk with the folder path
-    if((printType & FF_PRINT_TYPE_NO_CUSTOM_KEY) || !moduleArgs || moduleArgs->key.length == 0)
-    {
-        fputs(moduleName, stdout);
-
-        if(moduleIndex > 0)
-            printf(" %hhu", moduleIndex);
-    }
-    else
-    {
-        FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 1, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex}
-        }));
-        ffStrbufWriteTo(&key, stdout);
-    }
-
-    if(!instance.config.display.pipe)
-        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
-
-    ffStrbufWriteTo(&instance.config.display.keyValueSeparator, stdout);
 
     if(!instance.config.display.pipe)
     {
@@ -55,13 +68,6 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
             ffPrintColor(&moduleArgs->outputColor);
         else if (instance.config.display.colorOutput.length)
             ffPrintColor(&instance.config.display.colorOutput);
-    }
-
-    if (!instance.config.display.pipe && !(printType & FF_PRINT_TYPE_NO_CUSTOM_KEY_WIDTH))
-    {
-        uint32_t keyWidth = moduleArgs && moduleArgs->keyWidth > 0 ? moduleArgs->keyWidth : instance.config.display.keyWidth;
-        if (keyWidth > 0)
-            printf("\e[%uG", (unsigned) (keyWidth + instance.state.logoWidth));
     }
 }
 
@@ -73,11 +79,8 @@ void ffPrintFormat(const char* moduleName, uint8_t moduleIndex, const FFModuleAr
     else
         ffStrbufAppendS(&buffer, "unknown");
 
-    if(buffer.length > 0)
-    {
-        ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
-        ffStrbufPutTo(&buffer, stdout);
-    }
+    ffPrintLogoAndKey(moduleName, moduleIndex, moduleArgs, printType);
+    ffStrbufPutTo(&buffer, stdout);
 }
 
 static void printError(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType, const char* message, va_list arguments)

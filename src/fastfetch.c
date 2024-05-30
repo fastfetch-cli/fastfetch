@@ -265,6 +265,11 @@ static void listAvailablePresets(bool pretty)
         ffStrbufAppendS(path, "fastfetch/presets/");
         ffListFilesRecursively(path->chars, pretty);
     }
+
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateCopy(&instance.state.platform.exePath);
+    ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+    ffStrbufAppendS(&absolutePath, "/presets/");
+    ffListFilesRecursively(absolutePath.chars, pretty);
 }
 
 static void listAvailableLogos(void)
@@ -284,12 +289,6 @@ static void listConfigPaths(void)
         uint32_t length = folder->length + (uint32_t) strlen("fastfetch") + 1 /* trailing slash */;
         ffStrbufAppendS(folder, "fastfetch/config.jsonc");
         exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
-        if (!exists)
-        {
-            ffStrbufSubstrBefore(folder, folder->length - (uint32_t) strlen("jsonc"));
-            ffStrbufAppendS(folder, "conf");
-            exists = ffPathExists(folder->chars, FF_PATHTYPE_FILE);
-        }
         ffStrbufSubstrBefore(folder, length);
         printf("%s%s\n", folder->chars, exists ? " (*)" : "");
     }

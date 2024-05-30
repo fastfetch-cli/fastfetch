@@ -31,8 +31,8 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PUBLICIP_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.ip},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.location},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.ip, "ip"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.location, "location"},
         }));
     }
 
@@ -144,8 +144,8 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
 void ffPrintPublicIpHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PUBLICIP_MODULE_NAME, "{1} ({2})", FF_PUBLICIP_NUM_FORMAT_ARGS, ((const char* []) {
-        "Public IP address",
-        "Location"
+        "Public IP address - ip",
+        "Location - location",
     }));
 }
 

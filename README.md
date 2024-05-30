@@ -43,31 +43,28 @@ Replace sudo with doas depending on what you use.
 
 [See also if fastfetch has been packaged for your favorite Linux distro](#Packaging).
 
-If fastfetch is not packaged for your distro or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternate: `brew install fastfetch`
+If fastfetch is not packaged for your distro or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternative: `brew install fastfetch`
 
 ### macOS
 
-...via [HomeBrew](https://brew.sh):
-
-`brew install fastfetch`
-
-...via [MacPorts](https://www.macports.org):
-
-`sudo port install fastfetch`
+* [HomeBrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
+* [MacPorts](https://ports.macports.org/port/fastfetch/): `sudo port install fastfetch`
 
 ### Windows
 
-`scoop install fastfetch`
+* [scoop](https://scoop.sh/#/apps?q=fastfetch): `scoop install fastfetch`
+* [winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Fastfetch-cli/Fastfetch): `winget install fastfetch`
+* [MSYS2 MinGW](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
 
 You may also download it directly from [GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and extract the archive.
 
 ### FreeBSD
 
-`pkg install fastfetch`
+* `pkg install fastfetch`
 
 ### Android (Termux)
 
-`pkg install fastfetch`
+* `pkg install fastfetch`
 
 ## Build from source
 
@@ -154,6 +151,15 @@ See `fastfetch -h format` for basic usage. For module specific formattion, see `
 ### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
 
 Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
+
+If you just want to display distro name in [FIGlet text](https://github.com/pwaller/pyfiglet)
+
+```bash
+# install pyfiglet and jq first
+pyfiglet -s -f small_slant $(fastfetch -s os --format json | jq -r '.[0].result.name') && fastfetch -l none
+```
+
+![image](https://github.com/fastfetch-cli/fastfetch/assets/6134068/6466524e-ab8c-484f-848d-eec7ddeb7df2)
 
 ### Q: Fastfetch runs in white and black on shell startup. Why?
 

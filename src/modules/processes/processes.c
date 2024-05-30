@@ -26,7 +26,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PROCESSES_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &numProcesses}
+            {FF_FORMAT_ARG_TYPE_UINT, &numProcesses, "result"}
         }));
     }
 }
@@ -83,7 +83,7 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
 void ffPrintProcessesHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PROCESSES_MODULE_NAME, "{1}", FF_PROCESSES_NUM_FORMAT_ARGS, (const char* []) {
-        "Count"
+        "Proecess count - result"
     });
 }
 

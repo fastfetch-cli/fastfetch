@@ -76,7 +76,7 @@ static const char* detectVulkan(FFVulkanResult* result)
     );
 
     VkInstance vkInstance;
-    if(ffvkCreateInstance(&(VkInstanceCreateInfo) {
+    VkResult res = ffvkCreateInstance(&(VkInstanceCreateInfo) {
         .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         .pNext = NULL,
         .pApplicationInfo = &(VkApplicationInfo) {
@@ -95,8 +95,27 @@ static const char* detectVulkan(FFVulkanResult* result)
         .enabledExtensionCount = 0,
         .ppEnabledExtensionNames = NULL,
         .flags = 0
-    }, NULL, &vkInstance) != VK_SUCCESS)
-        return "ffvkCreateInstance() failed";
+    }, NULL, &vkInstance);
+    if(res != VK_SUCCESS)
+    {
+        switch (res)
+        {
+            case VK_ERROR_OUT_OF_HOST_MEMORY:
+                return "ffvkCreateInstance() failed: VK_ERROR_OUT_OF_HOST_MEMORY";
+            case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+                return "ffvkCreateInstance() failed: VK_ERROR_OUT_OF_DEVICE_MEMORY";
+            case VK_ERROR_INITIALIZATION_FAILED:
+                return "ffvkCreateInstance() failed: VK_ERROR_INITIALIZATION_FAILED";
+            case VK_ERROR_LAYER_NOT_PRESENT:
+                return "ffvkCreateInstance() failed: VK_ERROR_LAYER_NOT_PRESENT";
+            case VK_ERROR_EXTENSION_NOT_PRESENT:
+                return "ffvkCreateInstance() failed: VK_ERROR_EXTENSION_NOT_PRESENT";
+            case VK_ERROR_INCOMPATIBLE_DRIVER:
+                return "ffvkCreateInstance() failed: VK_ERROR_INCOMPATIBLE_DRIVER";
+            default:
+                return "ffvkCreateInstance() failed: unknown error";
+        }
+    }
 
     //if instance creation succeeded, but vkEnumerateInstanceVersion didn't, this means we are running against a vulkan 1.0 implementation
     //explicitly set this version, if no device is found, so we still have at least this info
@@ -105,10 +124,23 @@ static const char* detectVulkan(FFVulkanResult* result)
 
     VkPhysicalDevice physicalDevices[128];
     uint32_t physicalDeviceCount = (uint32_t) (sizeof(physicalDevices) / sizeof(*physicalDevices));
-    if(ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices) != VK_SUCCESS)
+    res = ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices);
+    if(res != VK_SUCCESS)
     {
         ffvkDestroyInstance(vkInstance, NULL);
-        return "ffvkEnumeratePhysicalDevices() failed";
+        switch (res)
+        {
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+            return "ffvkEnumeratePhysicalDevices() failed: VK_ERROR_OUT_OF_HOST_MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+            return "ffvkEnumeratePhysicalDevices() failed: VK_ERROR_OUT_OF_DEVICE_MEMORY";
+        case VK_ERROR_INITIALIZATION_FAILED:
+            return "ffvkEnumeratePhysicalDevices() failed: VK_ERROR_INITIALIZATION_FAILED";
+        case VK_INCOMPLETE:
+            return "ffvkEnumeratePhysicalDevices() failed: VK_INCOMPLETE";
+        default:
+            return "ffvkEnumeratePhysicalDevices() failed";
+        }
     }
 
     PFN_vkGetPhysicalDeviceProperties ffvkGetPhysicalDeviceProperties = NULL;

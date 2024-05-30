@@ -39,8 +39,8 @@ void ffPrintCursor(FFCursorOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CURSOR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &result.theme},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &result.size}
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result.theme, "theme"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &result.size, "size"},
             }));
         }
     }
@@ -113,8 +113,8 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
 void ffPrintCursorHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CURSOR_MODULE_NAME, "{1} ({2}px)", FF_CURSOR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Cursor theme",
-        "Cursor size"
+        "Cursor theme - theme",
+        "Cursor size - size"
     }));
 }
 

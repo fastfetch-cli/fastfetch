@@ -69,11 +69,11 @@ void ffPrintUsers(FFUsersOptions* options)
             FFUserResult* user = (FFUserResult*)ffListGet(&users, i);
 
             FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_USERS_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->name},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostName},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->sessionName},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->clientIp},
-                {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(user->loginTime)},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &user->name, "name"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostName, "host-name"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &user->sessionName, "session-name"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &user->clientIp, "client-ip"},
+                {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(user->loginTime), "login-time"},
             }));
         }
     }
@@ -176,11 +176,11 @@ void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_m
 void ffPrintUsersHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_USERS_MODULE_NAME, "{1}@{2} - login time {5}", FF_USERS_NUM_FORMAT_ARGS, ((const char* []) {
-        "User name",
-        "Host name",
-        "Session name",
-        "Client IP",
-        "Login Time in local timezone"
+        "User name - user-name",
+        "Host name - host-name",
+        "Session name - session",
+        "Client IP - client-ip",
+        "Login Time in local timezone - login-time",
     }));
 }
 

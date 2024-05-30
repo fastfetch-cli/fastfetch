@@ -25,7 +25,7 @@ void ffPrintColors(FFColorsOptions* options)
         // 3%d: Set the foreground color
         for(uint8_t i = options->block.range[0]; i <= min(options->block.range[1], 7); i++)
         {
-            if(!instance.config.display.pipe)
+            if (!instance.config.display.pipe)
                 ffStrbufAppendF(&result, "\e[3%dm", i);
             for (uint8_t j = 0; j < options->block.width; j++)
                 ffStrbufAppendS(&result, "█");
@@ -35,10 +35,10 @@ void ffPrintColors(FFColorsOptions* options)
             ffPrintLogoAndKey(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
             flag = true;
 
-            if(options->paddingLeft > 0)
+            if (options->paddingLeft > 0)
                 ffPrintCharTimes(' ', options->paddingLeft);
 
-            if(!instance.config.display.pipe)
+            if (!instance.config.display.pipe)
                 ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
             ffStrbufPutTo(&result, stdout);
             ffStrbufClear(&result);
@@ -59,15 +59,20 @@ void ffPrintColors(FFColorsOptions* options)
         const char* symbol;
         switch (options->symbol)
         {
-            case FF_COLORS_SYMBOL_CIRCLE: symbol = "●"; break;
-            case FF_COLORS_SYMBOL_DIAMOND: symbol = "◆"; break;
-            case FF_COLORS_SYMBOL_TRIANGLE: symbol = "▲"; break;
-            case FF_COLORS_SYMBOL_SQUARE: symbol = "■"; break;
-            case FF_COLORS_SYMBOL_STAR: symbol = "★"; break;
-            default: symbol = "███"; break;
+            case FF_COLORS_SYMBOL_CIRCLE: symbol = "● "; break;
+            case FF_COLORS_SYMBOL_DIAMOND: symbol = "◆ "; break;
+            case FF_COLORS_SYMBOL_TRIANGLE: symbol = "▲ "; break;
+            case FF_COLORS_SYMBOL_SQUARE: symbol = "■ "; break;
+            case FF_COLORS_SYMBOL_STAR: symbol = "★ "; break;
+            default: symbol = "███ "; break;
         }
         for (int i = 8; i >= 1; --i)
-            ffStrbufAppendF(&result, "\e[3%dm%s ", i, symbol);
+        {
+            if (!instance.config.display.pipe)
+                ffStrbufAppendF(&result, "\e[3%dm", i);
+            ffStrbufAppendS(&result, symbol);
+        }
+        ffStrbufTrimRight(&result, ' ');
     }
 
     if (result.length > 0)

@@ -62,15 +62,15 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &capacityStr},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->status},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer, "manufacturer"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName, "model-name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology, "technology"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &capacityStr, "capacity"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->status, "status"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr, "temperature"},
+            {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount, "cycle-count"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial, "serial"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate, "manufacture-date"},
         }));
     }
 }
@@ -222,15 +222,15 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 void ffPrintBatteryHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BATTERY_MODULE_NAME, "{4}, {5}", FF_BATTERY_NUM_FORMAT_ARGS, ((const char* []) {
-        "Battery manufactor",
-        "Battery model",
-        "Battery technology",
-        "Battery capacity (percentage)",
-        "Battery status",
-        "Battery temperature (formatted)",
-        "Battery cycle count",
-        "Battery serial number",
-        "Battery manufactor date",
+        "Battery manufacturer - manufacturer",
+        "Battery model name - model-name",
+        "Battery technology - technology",
+        "Battery capacity (percentage) - capacity",
+        "Battery status - status",
+        "Battery temperature (formatted) - temperature",
+        "Battery cycle count - cycle-count",
+        "Battery serial number - serial",
+        "Battery manufactor date - manufacture-date",
     }));
 }
 

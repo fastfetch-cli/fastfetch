@@ -38,10 +38,10 @@ void ffPrintBoard(FFBoardOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BOARD_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial, "serial"},
         }));
     }
 
@@ -125,10 +125,10 @@ exit:
 void ffPrintBoardHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BOARD_MODULE_NAME, "{1} ({3})", FF_BOARD_NUM_FORMAT_ARGS, ((const char* []) {
-        "board name",
-        "board vendor",
-        "board version",
-        "board serial number",
+        "board name - name",
+        "board vendor - vendor",
+        "board version - version",
+        "board serial number - serial",
     }));
 }
 
@@ -137,7 +137,7 @@ void ffInitBoardOptions(FFBoardOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BOARD_MODULE_NAME,
-        "Print mather board name and other info",
+        "Print motherboard name and other info",
         ffParseBoardCommandOptions,
         ffParseBoardJsonObject,
         ffPrintBoard,

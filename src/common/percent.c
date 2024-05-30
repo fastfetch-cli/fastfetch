@@ -50,14 +50,34 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
         {
             if(!options->pipe)
             {
-                uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
-                uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
-                if (i == section2Begin)
-                    ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? colorGreen : colorRed));
-                else if (i == section1Begin)
-                    ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
-                else if (i == 0)
-                    ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
+                if (options->percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT)
+                {
+                    const char* color = NULL;
+                    if (green <= yellow)
+                    {
+                        if (percent < green) color = colorGreen;
+                        else if (percent < yellow) color = colorYellow;
+                        else color = colorRed;
+                    }
+                    else
+                    {
+                        if (percent < yellow) color = colorRed;
+                        else if (percent < green) color = colorYellow;
+                        else color = colorGreen;
+                    }
+                    ffStrbufAppendF(buffer, "\e[%sm", color);
+                }
+                else
+                {
+                    uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+                    uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+                    if (i == section2Begin)
+                        ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? colorGreen : colorRed));
+                    else if (i == section1Begin)
+                        ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
+                    else if (i == 0)
+                        ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
+                }
             }
             ffStrbufAppend(buffer, &options->barCharElapsed);
         }
