@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 __fastfetch_complete_help()
 {
     local __ff_helps=(
