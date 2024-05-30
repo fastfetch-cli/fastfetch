@@ -1,5 +1,3 @@
-#!/usr/bin/env fish
-
 if not type -q fastfetch
     exit
 end

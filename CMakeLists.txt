@@ -1158,13 +1158,13 @@ install(
 )
 
 install(
-    FILES "${CMAKE_SOURCE_DIR}/completions/bash"
+    FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.bash"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions"
     RENAME "${CMAKE_PROJECT_NAME}"
 )
 
 install(
-    FILES "${CMAKE_SOURCE_DIR}/completions/fish"
+    FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.fish"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/fish/vendor_completions.d"
     RENAME "${CMAKE_PROJECT_NAME}.fish"
 )
