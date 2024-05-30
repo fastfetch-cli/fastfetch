@@ -166,15 +166,16 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             do arg0++; while (*arg0 == '\0');
             assert(arg0 < procArgs2 + len);
 
+            if (argc > 1)
             {
                 // #977
-                char* p = (char*) strrchr(arg0, '/');
+                const char* p = strrchr(arg0, '/');
                 if (p)
-                {
                     p++;
-                    if (ffStrStartsWithIgnCase(p, "python")) // /opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python /Users/carter/.local/bin/xonsh
-                        arg0 = p + strlen(p) + 1;
-                }
+                else
+                    p = arg0;
+                if (ffStrStartsWithIgnCase(p, "python")) // /opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python /Users/carter/.local/bin/xonsh
+                    arg0 = p + strlen(p) + 1;
             }
 
             if (*arg0 == '-') arg0++; // Login shells
@@ -221,12 +222,12 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         {
             char* p = (char*) memrchr(args, '/', arg0Len);
             if (p)
-            {
                 p++;
-                if (ffStrStartsWith(p, "python")) // /usr/local/bin/python3.9 /home/carter/.local/bin/xonsh
-                {
-                    arg0 += arg0Len + 1;
-                }
+            else
+                p = arg0;
+            if (ffStrStartsWith(p, "python")) // /usr/local/bin/python3.9 /home/carter/.local/bin/xonsh
+            {
+                arg0 += arg0Len + 1;
             }
         }
         if (arg0[0] == '-') arg0++;
