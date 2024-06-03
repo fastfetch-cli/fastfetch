@@ -136,6 +136,15 @@
                     "false": "Try `wayland`, then `x11`, then `drm`"
                 }
             }
+        },
+        {
+            "long": "format",
+            "desc": "Set output format",
+            "default": "default",
+            "enum": {
+                "default": "Default format",
+                "json": "JSON format"
+            }
         }
     ],
     "Logo": [
