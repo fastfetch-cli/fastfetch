@@ -2,4 +2,10 @@
 
 #include "fastfetch.h"
 
-const char* ffDetectTheme(FFstrbuf* result);
+typedef struct FFThemeResult
+{
+    FFstrbuf theme1;
+    FFstrbuf theme2;
+} FFThemeResult;
+
+const char* ffDetectTheme(FFThemeResult* result);
