@@ -3,6 +3,7 @@
 #include "common/thread.h"
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
