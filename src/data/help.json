@@ -51,6 +51,18 @@
         {
             "long": "print-structure",
             "desc": "Print the default structure"
+        },
+        {
+            "long": "format",
+            "desc": "Set output format",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "default": "Default format",
+                    "json": "JSON format"
+                },
+                "default": "default"
+            }
         }
     ],
     "Config": [
@@ -135,15 +147,6 @@
                     "sysfs-only": "Use `/sys/class/drm` only",
                     "false": "Try `wayland`, then `x11`, then `drm`"
                 }
-            }
-        },
-        {
-            "long": "format",
-            "desc": "Set output format",
-            "default": "default",
-            "enum": {
-                "default": "Default format",
-                "json": "JSON format"
             }
         }
     ],
