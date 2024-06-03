@@ -17,10 +17,7 @@
         "break",
         "packages",
         "shell",
-        {
-            "type": "display",
-            "key": "Display"
-        },
+        "display",
         "terminal",
         "break",
         "cpu",
