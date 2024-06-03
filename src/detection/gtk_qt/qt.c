@@ -43,11 +43,11 @@ static bool detectPlasmaFromFile(const char* filename, FFQtResult* result)
             char categoryName[32];
             sscanf(line, "[%31[^]]", categoryName);
 
-            if(strcasecmp(categoryName, "General") == 0)
+            if(ffStrEqualsIgnCase(categoryName, "General"))
                 category = PLASMA_CATEGORY_GENERAL;
-            else if(strcasecmp(categoryName, "KDE") == 0)
+            else if(ffStrEqualsIgnCase(categoryName, "KDE"))
                 category = PLASMA_CATEGORY_KDE;
-            else if(strcasecmp(categoryName, "Icons") == 0)
+            else if(ffStrEqualsIgnCase(categoryName, "Icons"))
                 category = PLASMA_CATEGORY_ICONS;
             else
                 category = PLASMA_CATEGORY_OTHER;

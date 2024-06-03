@@ -28,7 +28,7 @@ void ffOptionsInitLogo(FFOptionsLogo* options)
 
 bool ffOptionsParseLogoCommandLine(FFOptionsLogo* options, const char* key, const char* value)
 {
-    if (strcasecmp(key, "-l") == 0)
+    if (ffStrEqualsIgnCase(key, "-l"))
         goto logoType;
 
     const char* subKey = ffOptionTestPrefix(key, "logo");
@@ -50,7 +50,7 @@ logoType:
             else
                 ffOptionParseString(key, value, &options->source);
         }
-        else if(strcasecmp(subKey, "type") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "type"))
         {
             options->type = (FFLogoType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "auto", FF_LOGO_TYPE_AUTO },
@@ -88,29 +88,29 @@ logoType:
             }
             ffOptionParseColor(value, &options->colors[index]);
         }
-        else if(strcasecmp(subKey, "width") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "width"))
             options->width = ffOptionParseUInt32(key, value);
-        else if(strcasecmp(subKey, "height") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "height"))
             options->height = ffOptionParseUInt32(key, value);
-        else if(strcasecmp(subKey, "padding") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "padding"))
         {
             uint32_t padding = ffOptionParseUInt32(key, value);
             options->paddingLeft = padding;
             options->paddingRight = padding;
         }
-        else if(strcasecmp(subKey, "padding-top") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "padding-top"))
             options->paddingTop = ffOptionParseUInt32(key, value);
-        else if(strcasecmp(subKey, "padding-left") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "padding-left"))
             options->paddingLeft = ffOptionParseUInt32(key, value);
-        else if(strcasecmp(subKey, "padding-right") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "padding-right"))
             options->paddingRight = ffOptionParseUInt32(key, value);
-        else if(strcasecmp(subKey, "print-remaining") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "print-remaining"))
             options->printRemaining = ffOptionParseBoolean(value);
-        else if(strcasecmp(subKey, "preserve-aspect-ratio") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "preserve-aspect-ratio"))
             options->preserveAspectRatio = ffOptionParseBoolean(value);
-        else if(strcasecmp(subKey, "recache") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "recache"))
             options->recache = ffOptionParseBoolean(value);
-        else if(strcasecmp(subKey, "separate") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "separate"))
             options->separate = ffOptionParseBoolean(value);
         else
             return false;
@@ -122,7 +122,7 @@ logoType:
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_FILE;
         }
-        else if(strcasecmp(subKey, "raw") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "raw"))
         {
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_FILE_RAW;
@@ -137,7 +137,7 @@ logoType:
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_DATA;
         }
-        else if(strcasecmp(subKey, "raw") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "raw"))
         {
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_DATA_RAW;
@@ -145,27 +145,27 @@ logoType:
         else
             return false;
     }
-    else if(strcasecmp(key, "--sixel") == 0)
+    else if(ffStrEqualsIgnCase(key, "--sixel"))
     {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_SIXEL;
     }
-    else if(strcasecmp(key, "--kitty") == 0)
+    else if(ffStrEqualsIgnCase(key, "--kitty"))
     {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_KITTY;
     }
-    else if(strcasecmp(key, "--kitty-direct") == 0)
+    else if(ffStrEqualsIgnCase(key, "--kitty-direct"))
     {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_KITTY_DIRECT;
     }
-    else if(strcasecmp(key, "--iterm") == 0)
+    else if(ffStrEqualsIgnCase(key, "--iterm"))
     {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_ITERM;
     }
-    else if(strcasecmp(key, "--raw") == 0)
+    else if(ffStrEqualsIgnCase(key, "--raw"))
     {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_RAW;
@@ -177,11 +177,11 @@ logoType:
             ffOptionParseString(key, value, &options->source);
             options->type = FF_LOGO_TYPE_IMAGE_CHAFA;
         }
-        else if(strcasecmp(subKey, "fg-only") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "fg-only"))
             options->chafaFgOnly = ffOptionParseBoolean(value);
-        else if(strcasecmp(subKey, "symbols") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "symbols"))
             ffOptionParseString(key, value, &options->chafaSymbols);
-        else if(strcasecmp(subKey, "canvas-mode") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "canvas-mode"))
         {
             options->chafaCanvasMode = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "TRUECOLOR", 0 },
@@ -195,7 +195,7 @@ logoType:
                 {},
             });
         }
-        else if(strcasecmp(subKey, "color-space") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "color-space"))
         {
             options->chafaColorSpace = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "RGB", 0 },
@@ -203,7 +203,7 @@ logoType:
                 {},
             });
         }
-        else if(strcasecmp(subKey, "dither-mode") == 0)
+        else if(ffStrEqualsIgnCase(subKey, "dither-mode"))
         {
             options->chafaDitherMode = (uint32_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
                 { "NONE", 0 },
@@ -257,7 +257,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
     {
         const char* key = yyjson_get_str(key_);
 
-        if (strcasecmp(key, "type") == 0)
+        if (ffStrEqualsIgnCase(key, "type"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -282,12 +282,12 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->type = (FFLogoType) value;
             continue;
         }
-        else if (strcasecmp(key, "source") == 0)
+        else if (ffStrEqualsIgnCase(key, "source"))
         {
             ffStrbufSetS(&options->source, yyjson_get_str(val));
             continue;
         }
-        else if (strcasecmp(key, "color") == 0)
+        else if (ffStrEqualsIgnCase(key, "color"))
         {
             if (!yyjson_is_obj(val))
                 return "Property 'color' must be an object";
@@ -305,7 +305,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             continue;
         }
-        else if (strcasecmp(key, "width") == 0)
+        else if (ffStrEqualsIgnCase(key, "width"))
         {
             uint32_t value = (uint32_t) yyjson_get_uint(val);
             if (value == 0)
@@ -313,7 +313,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->width = value;
             continue;
         }
-        else if (strcasecmp(key, "height") == 0)
+        else if (ffStrEqualsIgnCase(key, "height"))
         {
             uint32_t value = (uint32_t) yyjson_get_uint(val);
             if (value == 0)
@@ -321,7 +321,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->height = value;
             continue;
         }
-        else if (strcasecmp(key, "padding") == 0)
+        else if (ffStrEqualsIgnCase(key, "padding"))
         {
             if (!yyjson_is_obj(val))
                 return "Logo padding must be an object";
@@ -340,27 +340,27 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             #undef FF_PARSE_PADDING_POSITON
             continue;
         }
-        else if (strcasecmp(key, "printRemaining") == 0)
+        else if (ffStrEqualsIgnCase(key, "printRemaining"))
         {
             options->printRemaining = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "preserveAspectRatio") == 0)
+        else if (ffStrEqualsIgnCase(key, "preserveAspectRatio"))
         {
             options->preserveAspectRatio = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "recache") == 0)
+        else if (ffStrEqualsIgnCase(key, "recache"))
         {
             options->recache = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "separate") == 0)
+        else if (ffStrEqualsIgnCase(key, "separate"))
         {
             options->separate = yyjson_get_bool(val);
             continue;
         }
-        else if (strcasecmp(key, "chafa") == 0)
+        else if (ffStrEqualsIgnCase(key, "chafa"))
         {
             if (!yyjson_is_obj(val))
                 return "Chafa config must be an object";
