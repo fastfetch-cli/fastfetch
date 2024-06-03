@@ -1,7 +1,7 @@
 #include "icons.h"
 #include "util/windows/registry.h"
 
-const char* ffDetectIcons(FFstrbuf* result)
+const char* ffDetectIcons(FFIconsResult* result)
 {
     FF_HKEY_AUTO_DESTROY hKey = NULL;
     if(!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\HideDesktopIcons\\NewStartPanel", &hKey, NULL) &&
@@ -17,18 +17,20 @@ const char* ffDetectIcons(FFstrbuf* result)
     ffRegReadUint(hKey, L"{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}", &ControlPanel, NULL);
 
     if (!ThisPC)
-        ffStrbufAppendS(result, "This PC, ");
+        ffStrbufAppendS(&result->icons1, "This PC, ");
     if (!UsersFiles)
-        ffStrbufAppendS(result, "User's Files, ");
-    if (!RemoteNetwork)
-        ffStrbufAppendS(result, "Remote Network, ");
-    if (!RecycleBin)
-        ffStrbufAppendS(result, "Recycle Bin, ");
-    if (!ControlPanel)
-        ffStrbufAppendS(result, "Control Panel");
+        ffStrbufAppendS(&result->icons1, "User's Files");
+    ffStrbufTrimRight(&result->icons1, ' ');
+    ffStrbufTrimRight(&result->icons1, ',');
 
-    ffStrbufTrimRight(result, ' ');
-    ffStrbufTrimRight(result, ',');
+    if (!RemoteNetwork)
+        ffStrbufAppendS(&result->icons2, "Remote Network, ");
+    if (!RecycleBin)
+        ffStrbufAppendS(&result->icons2, "Recycle Bin, ");
+    if (!ControlPanel)
+        ffStrbufAppendS(&result->icons2, "Control Panel");
+    ffStrbufTrimRight(&result->icons2, ' ');
+    ffStrbufTrimRight(&result->icons2, ',');
 
     return NULL;
 }

@@ -4,12 +4,15 @@
 #include "modules/icons/icons.h"
 #include "util/stringUtils.h"
 
-#define FF_ICONS_NUM_FORMAT_ARGS 1
+#define FF_ICONS_NUM_FORMAT_ARGS 2
 
 void ffPrintIcons(FFIconsOptions* options)
 {
-    FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
-    const char* error = ffDetectIcons(&icons);
+    FFIconsResult result = {
+        .icons1 = ffStrbufCreate(),
+        .icons2 = ffStrbufCreate(),
+    };
+    const char* error = ffDetectIcons(&result);
 
     if(error)
     {
@@ -20,12 +23,21 @@ void ffPrintIcons(FFIconsOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&icons, stdout);
+        if (result.icons1.length)
+            ffStrbufWriteTo(&result.icons1, stdout);
+        if (result.icons2.length)
+        {
+            if (result.icons1.length)
+                fputs(", ", stdout);
+            ffStrbufWriteTo(&result.icons2, stdout);
+        }
+        putchar('\n');
     }
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_ICONS_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &icons, "combined"}
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.icons1, "icons1"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.icons2, "icons2"},
         }));
     }
 }
@@ -67,22 +79,28 @@ void ffGenerateIconsJsonConfig(FFIconsOptions* options, yyjson_mut_doc* doc, yyj
 
 void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FF_STRBUF_AUTO_DESTROY icons = ffStrbufCreate();
-    const char* error = ffDetectIcons(&icons);
+    FFIconsResult result = {
+        .icons1 = ffStrbufCreate(),
+        .icons2 = ffStrbufCreate()
+    };
+    const char* error = ffDetectIcons(&result);
 
-    if (error)
+    if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
         return;
     }
 
-    yyjson_mut_obj_add_strbuf(doc, module, "result", &icons);
+    yyjson_mut_val* icons = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, icons, "icons1", &result.icons1);
+    yyjson_mut_obj_add_strbuf(doc, icons, "icons2", &result.icons2);
 }
 
 void ffPrintIconsHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_ICONS_MODULE_NAME, "{1}", FF_ICONS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Combined icons - combined"
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_ICONS_MODULE_NAME, "{1}, {2}", FF_ICONS_NUM_FORMAT_ARGS, ((const char* []) {
+        "Icons part 1 - icons1",
+        "Icons part 2 - icons2",
     }));
 }
 
