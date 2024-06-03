@@ -429,7 +429,7 @@ static bool logoTryKnownType(void)
 
     if(options->type == FF_LOGO_TYPE_NONE)
     {
-        logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
+        logoPrintNone();
         return true;
     }
 

@@ -43,17 +43,10 @@ logoType:
                 exit(477);
             }
             //this is usually wanted when disabling logo
-            if(strcasecmp(value, "none") == 0)
-            {
-                options->paddingTop = 0;
-                options->paddingRight = 0;
-                options->paddingLeft = 0;
+            if(ffStrEqualsIgnCase(value, "none"))
                 options->type = FF_LOGO_TYPE_NONE;
-            }
-            else if(strcasecmp(value, "small") == 0)
-            {
+            else if(ffStrEqualsIgnCase(value, "small"))
                 options->type = FF_LOGO_TYPE_SMALL;
-            }
             else
                 ffOptionParseString(key, value, &options->source);
         }
