@@ -22,7 +22,12 @@ void ffPrintCPU(FFCPUOptions* options)
         .frequencyBase = 0.0/0.0,
         .frequencyBiosLimit = 0.0/0.0,
         .name = ffStrbufCreate(),
-        .vendor = ffStrbufCreate()
+        .vendor = ffStrbufCreate(),
+        .caches = {
+            ffListCreate(sizeof (FFCPUCache)),
+            ffListCreate(sizeof (FFCPUCache)),
+            ffListCreate(sizeof (FFCPUCache)),
+        },
     };
 
     const char* error = ffDetectCPU(options, &cpu);
@@ -123,6 +128,9 @@ void ffPrintCPU(FFCPUOptions* options)
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
+    ffListDestroy(&cpu.caches[0]);
+    ffListDestroy(&cpu.caches[1]);
+    ffListDestroy(&cpu.caches[2]);
 }
 
 bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value)
@@ -207,7 +215,12 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         .frequencyBase = 0.0/0.0,
         .frequencyBiosLimit = 0.0/0.0,
         .name = ffStrbufCreate(),
-        .vendor = ffStrbufCreate()
+        .vendor = ffStrbufCreate(),
+        .caches = {
+            ffListCreate(sizeof (FFCPUCache)),
+            ffListCreate(sizeof (FFCPUCache)),
+            ffListCreate(sizeof (FFCPUCache)),
+        },
     };
 
     const char* error = ffDetectCPU(options, &cpu);
@@ -237,6 +250,27 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
         yyjson_mut_obj_add_real(doc, frequency, "biosLimit", cpu.frequencyBiosLimit);
 
+        yyjson_mut_val* caches = yyjson_mut_obj_add_obj(doc, obj, "cache");
+        for (uint32_t i = 0; i < sizeof (cpu.caches) / sizeof (cpu.caches[0]) && cpu.caches[i].length > 0; i++)
+        {
+            yyjson_mut_val* level = yyjson_mut_obj_add_arr(doc, caches, i == 0 ? "L1" : (i == 1 ? "L2" : "L3"));
+            FF_LIST_FOR_EACH(FFCPUCache, src, cpu.caches[i])
+            {
+                yyjson_mut_val* item = yyjson_mut_arr_add_obj(doc, level);
+                yyjson_mut_obj_add_uint(doc, item, "size", src->size);
+                yyjson_mut_obj_add_uint(doc, item, "num", src->num);
+                const char* typeStr = "unknown";
+                switch (src->type)
+                {
+                    case FF_CPU_CACHE_TYPE_DATA: typeStr = "data"; break;
+                    case FF_CPU_CACHE_TYPE_INSTRUCTION: typeStr = "instruction"; break;
+                    case FF_CPU_CACHE_TYPE_UNIFIED: typeStr = "unified"; break;
+                    case FF_CPU_CACHE_TYPE_TRACE: typeStr = "trace"; break;
+                }
+                yyjson_mut_obj_add_str(doc, item, "type", typeStr);
+            }
+        }
+
         yyjson_mut_val* coreTypes = yyjson_mut_obj_add_arr(doc, obj, "coreTypes");
         for (uint32_t i = 0; i < sizeof (cpu.coreTypes) / sizeof (cpu.coreTypes[0]) && cpu.coreTypes[i].count > 0; i++)
         {
@@ -250,6 +284,9 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
+    ffListDestroy(&cpu.caches[0]);
+    ffListDestroy(&cpu.caches[1]);
+    ffListDestroy(&cpu.caches[2]);
 }
 
 void ffPrintCPUHelpFormat(void)

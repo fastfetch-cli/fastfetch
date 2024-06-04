@@ -126,14 +126,50 @@ static const char* detectNCores(FFCPUResult* cpu)
         ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
     )
     {
-        if(ptr->Relationship == RelationProcessorCore)
+        if (ptr->Relationship == RelationProcessorCore)
             ++cpu->coresPhysical;
-        else if(ptr->Relationship == RelationGroup)
+        else if (ptr->Relationship == RelationGroup)
         {
             for (uint32_t index = 0; index < ptr->Group.ActiveGroupCount; ++index)
             {
                 cpu->coresOnline += ptr->Group.GroupInfo[index].ActiveProcessorCount;
                 cpu->coresLogical += ptr->Group.GroupInfo[index].MaximumProcessorCount;
+            }
+        }
+        else if(ptr->Relationship == RelationCache)
+        {
+            if (__builtin_expect(ptr->Cache.Level <= 3, true))
+            {
+                FFCPUCacheType cacheType = 0;
+                switch (ptr->Cache.Type)
+                {
+                case CacheUnified: cacheType = FF_CPU_CACHE_TYPE_UNIFIED; break;
+                case CacheInstruction: cacheType = FF_CPU_CACHE_TYPE_INSTRUCTION; break;
+                case CacheData: cacheType = FF_CPU_CACHE_TYPE_DATA; break;
+                case CacheTrace: cacheType = FF_CPU_CACHE_TYPE_TRACE; break;
+                default: __builtin_unreachable(); break;
+                }
+
+                FFlist* cacheLevel = &cpu->caches[ptr->Cache.Level - 1];
+                FFCPUCache* found = NULL;
+                FF_LIST_FOR_EACH(FFCPUCache, item, *cacheLevel)
+                {
+                    if (item->type == cacheType && item->size == ptr->Cache.CacheSize)
+                    {
+                        found = item;
+                        break;
+                    }
+                }
+                if (found)
+                    found->num++;
+                else
+                {
+                    *(FFCPUCache*) ffListAdd(cacheLevel) = (FFCPUCache) {
+                        .size = ptr->Cache.CacheSize,
+                        .num = 1,
+                        .type = cacheType,
+                    };
+                }
             }
         }
     }
