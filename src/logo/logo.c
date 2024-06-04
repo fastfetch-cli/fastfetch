@@ -335,7 +335,7 @@ static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
         return true;
     }
 
-    const FFlogo* logo = logoGetBuiltin(name, size);
+    const FFlogo* logo = ffStrbufEqualS(name, "?") ? &ffLogoUnknown : logoGetBuiltin(name, size);
     if(logo == NULL)
         return false;
 
