@@ -13,7 +13,7 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
 {
     FFTerminalThemeResult result = {};
 
-    if(!ffDetectTerminalTheme(&result))
+    if(!ffDetectTerminalTheme(&result, false))
     {
         ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal theme");
     }
@@ -81,7 +81,7 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* option
 {
     FFTerminalThemeResult result = {};
 
-    if(!ffDetectTerminalTheme(&result))
+    if(!ffDetectTerminalTheme(&result, false))
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect terminal theme");
         return;

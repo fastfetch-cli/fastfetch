@@ -364,7 +364,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInit(&options->colorTitle);
     ffStrbufInit(&options->colorOutput);
     ffStrbufInit(&options->colorSeparator);
-    options->brightColor = true;
+    options->brightColor = !instance.state.terminalLightTheme;
     ffStrbufInitStatic(&options->keyValueSeparator, ": ");
 
     options->showErrors = false;
@@ -387,8 +387,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->tempUnit = FF_TEMPERATURE_UNIT_CELSIUS;
     options->tempNdigits = 1;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->tempColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->tempColorRed, FF_COLOR_FG_LIGHT_RED);
+    ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->tempColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
     ffStrbufInitStatic(&options->barCharTotal, "-");
@@ -397,8 +397,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->percentType = 9;
     options->percentNdigits = 0;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
-    ffStrbufInitStatic(&options->percentColorYellow, FF_COLOR_FG_LIGHT_YELLOW);
-    ffStrbufInitStatic(&options->percentColorRed, FF_COLOR_FG_LIGHT_RED);
+    ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
+    ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
 
     options->tsVersion = true;
 }

@@ -2,6 +2,7 @@
 #include "common/parsing.h"
 #include "common/thread.h"
 #include "detection/displayserver/displayserver.h"
+#include "detection/terminaltheme/terminaltheme.h"
 #include "util/textModifier.h"
 #include "logo/logo.h"
 
@@ -22,10 +23,18 @@ static void initState(FFstate* state)
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
+    state->terminalLightTheme = false;
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
     state->resultDoc = NULL;
+
+    {
+        // don't enable bright color if the terminal is in light mode
+        FFTerminalThemeResult result;
+        if (ffDetectTerminalTheme(&result, true /* forceEnv for performance */) && !result.bg.dark)
+            state->terminalLightTheme = true;
+    }
 }
 
 static void defaultConfig(void)
