@@ -49,7 +49,7 @@ void ffPrintColors(FFColorsOptions* options)
         for(uint8_t i = max(options->block.range[0], 8); i <= options->block.range[1]; i++)
         {
             if(!instance.config.display.pipe)
-                ffStrbufAppendF(&result, "\e[1;9%dm", i - 8);
+                ffStrbufAppendF(&result, "\e[9%dm", i - 8);
             for (uint8_t j = 0; j < options->block.width; j++)
                 ffStrbufAppendS(&result, "█");
         }
