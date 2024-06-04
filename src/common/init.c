@@ -130,6 +130,9 @@ void ffFinish(void)
     if(instance.config.logo.printRemaining)
         ffLogoPrintRemaining();
 
+    // Newline to separate module output from terminal greeting or prompt
+    printf("\n");
+
     resetConsole();
 }
 
