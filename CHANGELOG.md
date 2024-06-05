@@ -1,3 +1,17 @@
+# 2.15.0
+
+Features:
+* Add ability to skip installing license with INSTALL_LICENSE option (CMake)
+* Make it possible to shorten the theme and icons output (Theme / Icons)
+* Support `-l '?'` to show a question mark
+* Add new module `CPUCache` to display CPU cache sizes (CPUCache)
+
+Bugfixes:
+* Remove shebangs from completions
+* Assume wm plugins are daemon processes (WM, macOS)
+* Fix while chars not visible in terminal of light theme (Logo)
+* Normalize bright colors to fix color display in Apple Terminal (Colors)
+
 # 2.14.0
 
 Features:
