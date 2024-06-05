@@ -8,4 +8,6 @@ typedef struct FFCPUCacheOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
+
+    bool compact;
 } FFCPUCacheOptions;
