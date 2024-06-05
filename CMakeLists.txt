@@ -331,6 +331,7 @@ set(LIBFASTFETCH_SRC
     src/modules/chassis/chassis.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
+    src/modules/cpucache/cpucache.c
     src/modules/cpuusage/cpuusage.c
     src/modules/cursor/cursor.c
     src/modules/custom/custom.c
@@ -411,6 +412,7 @@ if(LINUX)
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
+        src/detection/cpucache/cpucache_linux.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
@@ -481,6 +483,7 @@ elseif(ANDROID)
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
+        src/detection/cpucache/cpucache_linux.c
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
@@ -541,6 +544,7 @@ elseif(BSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
+        src/detection/cpucache/cpucache_bsd.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
@@ -611,6 +615,7 @@ elseif(APPLE)
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
+        src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
@@ -672,6 +677,7 @@ elseif(WIN32)
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
+        src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c

@@ -21,6 +21,7 @@ static FFModuleBaseInfo* C[] = {
     (void*) &instance.config.modules.command,
     (void*) &instance.config.modules.colors,
     (void*) &instance.config.modules.cpu,
+    (void*) &instance.config.modules.cpuCache,
     (void*) &instance.config.modules.cpuUsage,
     (void*) &instance.config.modules.cursor,
     (void*) &instance.config.modules.custom,
