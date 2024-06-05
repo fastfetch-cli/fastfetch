@@ -1,5 +1,10 @@
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "padding": {
+            "top": 2
+        }
+    },
     "modules": [
         "title",
         "separator",
@@ -35,10 +40,15 @@
         "terminaltheme",
         {
             "type": "cpu",
-            "showPeCoreCount": true
+            "showPeCoreCount": true,
+            "temp": true
         },
+        "cpucache",
         "cpuusage",
-        "gpu",
+        {
+            "type": "gpu",
+            "temp": true
+        },
         "memory",
         "physicalmemory",
         "swap",
@@ -50,7 +60,7 @@
         "publicip",
         {
             "type": "localip",
-            "showIpV6": true,
+            "showIpv6": true,
             "showMac": true
         },
         "wifi",
@@ -64,10 +74,16 @@
         "sound",
         "camera",
         "gamepad",
-        "weather",
+        {
+          "type": "weather",
+          "timeout": 1000
+        },
         "netio",
         "diskio",
-        "physicaldisk",
+        {
+            "type": "physicaldisk",
+            "temp": true
+        },
         "version",
         "break",
         "colors"

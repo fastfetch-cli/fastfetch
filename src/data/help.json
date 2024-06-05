@@ -1183,6 +1183,15 @@
             }
         },
         {
+            "long": "cpucache-compact",
+            "desc": "Show all CPU caches in one line",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "cpuusage-separate",
             "desc": "Display CPU usage per CPU logical core, instead of an average result",
             "arg": {

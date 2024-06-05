@@ -690,6 +690,7 @@
                             "camera",
                             "chassis",
                             "cpu",
+                            "cpucache",
                             "cpuusage",
                             "command",
                             "colors",
@@ -705,6 +706,7 @@
                             "gpu",
                             "host",
                             "icons",
+                            "initsystem",
                             "kernel",
                             "lm",
                             "loadavg",
@@ -793,6 +795,10 @@
                                                 "description": "Print available cameras"
                                             },
                                             {
+                                                "const": "cpucache",
+                                                "description": "Print CPU cache sizes"
+                                            },
+                                            {
                                                 "const": "cursor",
                                                 "description": "Print cursor style name"
                                             },
@@ -815,6 +821,10 @@
                                             {
                                                 "const": "icons",
                                                 "description": "Print icon style name"
+                                            },
+                                            {
+                                                "const": "initsystem",
+                                                "description": "Print init system (pid 1) name and version"
                                             },
                                             {
                                                 "const": "kernel",
