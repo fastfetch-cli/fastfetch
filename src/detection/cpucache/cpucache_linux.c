@@ -36,6 +36,12 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
         default: return "unknown cache type";
     }
 
+    uint32_t lineSize = 0;
+    ffStrbufSubstrBefore(path, baseLen);
+    ffStrbufAppendS(path, "/coherency_line_size");
+    if (ffReadFileBuffer(path->chars, buffer))
+        lineSize = (uint32_t) ffStrbufToUInt(buffer, 0);
+
     ffStrbufSubstrBefore(path, baseLen);
     ffStrbufAppendS(path, "/shared_cpu_list");
     if (!ffReadFileBuffer(path->chars, buffer))
@@ -43,10 +49,10 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
     ffStrbufTrimRightSpace(buffer);
 
     // deduplicate shared caches
-    ffStrbufAppendF(buffer, "_%u_%u_%u\n", level, sizeKb, cacheType);
+    ffStrbufAppendF(buffer, "_%u_%u_%u_%u\n", level, sizeKb, lineSize, cacheType);
     if (ffStrbufContain(added, buffer)) return "cache already added";
     ffStrbufAppend(added, buffer);
-    ffCPUCacheAddItem(result, level, sizeKb * 1024, cacheType);
+    ffCPUCacheAddItem(result, level, sizeKb * 1024, lineSize, cacheType);
     return NULL;
 }
 
