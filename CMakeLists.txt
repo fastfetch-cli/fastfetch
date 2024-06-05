@@ -544,7 +544,7 @@ elseif(BSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
-        src/detection/cpucache/cpucache_bsd.c
+        src/detection/cpucache/cpucache_nosupport.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
