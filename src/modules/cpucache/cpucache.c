@@ -27,10 +27,14 @@ void ffPrintCPUCache(FFCPUCacheOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_CPUCACHE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        // ffStrbufWriteTo(&result.type, stdout);
-        // if (result.version.length)
-        //     printf(" (%s)", result.version.chars);
+        for (uint32_t i = 0; i < sizeof (result.caches) / sizeof (result.caches[0]) && result.caches[i].length > 0; i++)
+        {
+            FFCPUCache* src = (FFCPUCache*) &result.caches[i];
+
+            char keys[32];
+            snprintf(keys, sizeof(keys), "FF_CPUCACHE_MODULE_NAME (L%u)", (unsigned) i);
+            ffPrintLogoAndKey(keys, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        }
         putchar('\n');
     }
     else
@@ -108,7 +112,7 @@ void ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yy
 
     for (uint32_t i = 0; i < sizeof (result.caches) / sizeof (result.caches[0]) && result.caches[i].length > 0; i++)
     {
-        yyjson_mut_val* level = yyjson_mut_obj_add_arr(doc, caches, i == 0 ? "L1" : (i == 1 ? "L2" : "L3"));
+        yyjson_mut_val* level = yyjson_mut_obj_add_arr(doc, caches, &"l1\0l2\0l3\0l4\0"[i * 3]);
         FF_LIST_FOR_EACH(FFCPUCache, src, result.caches[i])
         {
             yyjson_mut_val* item = yyjson_mut_arr_add_obj(doc, level);
