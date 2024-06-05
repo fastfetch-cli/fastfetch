@@ -115,13 +115,13 @@ static uint8_t getNumCores(FFstrbuf* basePath, FFstrbuf* buffer)
     bool ok = ffReadFileBuffer(basePath->chars, buffer);
     ffStrbufSubstrBefore(basePath, baseLen);
     if (ok)
-        return (uint8_t) ffStrbufCountC(buffer, ' ') + 1;
+        return (uint8_t) (ffStrbufCountC(buffer, ' ') + 1);
 
     ffStrbufAppendS(basePath, "/related_cpus");
     ok = ffReadFileBuffer(basePath->chars, buffer);
     ffStrbufSubstrBefore(basePath, baseLen);
     if (ok)
-        return (uint8_t) ffStrbufCountC(buffer, ' ') + 1;
+        return (uint8_t) (ffStrbufCountC(buffer, ' ') + 1);
 
     return 0;
 }

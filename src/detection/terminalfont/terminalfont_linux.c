@@ -320,7 +320,7 @@ static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult*
         uint32_t sIndex = ffStrbufNextIndexS(&font, index + 1, "size=");
         if (sIndex != font.length)
         {
-            sIndex += strlen("size=");
+            sIndex += (uint32_t) strlen("size=");
             uint32_t sIndexEnd = ffStrbufNextIndexC(&font, sIndex, ':');
             ffStrbufSetNS(&size, sIndexEnd - sIndex, font.chars + sIndex);
         }
