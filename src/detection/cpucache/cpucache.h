@@ -24,7 +24,7 @@ typedef struct FFCPUCacheResult
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result);
 
-static inline void ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t level, uint32_t size, FFCPUCacheType type)
+static inline FFCPUCache* ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t level, uint32_t size, FFCPUCacheType type)
 {
     FFlist* cacheLevel = &result->caches[level - 1];
 
@@ -33,12 +33,15 @@ static inline void ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t level, u
         if (item->type == type && item->size == size)
         {
             item->num++;
-            return;
+            return item;
         }
     }
-    *(FFCPUCache*) ffListAdd(cacheLevel) = (FFCPUCache) {
+
+    FFCPUCache* item = (FFCPUCache*)ffListAdd(cacheLevel);
+    *item = (FFCPUCache) {
         .size = size,
         .num = 1,
         .type = type,
     };
+    return item;
 }
