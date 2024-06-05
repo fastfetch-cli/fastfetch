@@ -7,6 +7,9 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
     uint32_t nPerfLevels = (uint32_t) ffSysctlGetInt("hw.nperflevels", 0);
     if (nPerfLevels <= 0) return "sysctl(hw.nperflevels) failed";
 
+    // macOS provides the global system cache line size
+    uint32_t lineSize = (uint32_t) ffSysctlGetInt("hw.cachelinesize", 0);
+
     char sysctlKey[256] = "hw.perflevelN.";
     char* pNum = sysctlKey + strlen("hw.perflevel");
     char* pSubkey = sysctlKey + strlen("hw.perflevelN.");
@@ -23,12 +26,12 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
         strncpy(pSubkey, "l1icachesize", lenLeft);
         uint32_t size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (size)
-            ffCPUCacheAddItem(result, 1, size, FF_CPU_CACHE_TYPE_INSTRUCTION)->num = ncpu;
+            ffCPUCacheAddItem(result, 1, size, lineSize, FF_CPU_CACHE_TYPE_INSTRUCTION)->num = ncpu;
 
         strncpy(pSubkey, "l1dcachesize", lenLeft);
         size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (size)
-            ffCPUCacheAddItem(result, 1, size, FF_CPU_CACHE_TYPE_DATA)->num = ncpu;
+            ffCPUCacheAddItem(result, 1, size, lineSize, FF_CPU_CACHE_TYPE_DATA)->num = ncpu;
 
         strncpy(pSubkey, "l2cachesize", lenLeft);
         size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
@@ -37,7 +40,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
             strncpy(pSubkey, "cpusperl2", lenLeft);
             uint32_t cpuSper = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
             if (cpuSper)
-                ffCPUCacheAddItem(result, 2, size, FF_CPU_CACHE_TYPE_UNIFIED)->num = ncpu / cpuSper;
+                ffCPUCacheAddItem(result, 2, size, lineSize, FF_CPU_CACHE_TYPE_UNIFIED)->num = ncpu / cpuSper;
         }
 
         strncpy(pSubkey, "l3cachesize", lenLeft);
@@ -47,7 +50,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
             strncpy(pSubkey, "cpusperl3", lenLeft);
             uint32_t cpuSper = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
             if (cpuSper)
-                ffCPUCacheAddItem(result, 3, size, FF_CPU_CACHE_TYPE_UNIFIED)->num = ncpu / cpuSper;
+                ffCPUCacheAddItem(result, 3, size, lineSize, FF_CPU_CACHE_TYPE_UNIFIED)->num = ncpu / cpuSper;
         }
     }
 
