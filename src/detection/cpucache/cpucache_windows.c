@@ -33,8 +33,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
             case CacheTrace: cacheType = FF_CPU_CACHE_TYPE_TRACE; break;
             default: __builtin_unreachable(); break;
             }
-
-            ffCPUCacheAddItem(result, ptr->Cache.Level, ptr->Cache.CacheSize, cacheType);
+            ffCPUCacheAddItem(result, ptr->Cache.Level, ptr->Cache.CacheSize, ptr->Cache.LineSize, cacheType);
         }
     }
 

@@ -14,6 +14,7 @@ typedef struct FFCPUCache
 {
     uint32_t size;
     uint32_t num;
+    uint32_t lineSize;
     FFCPUCacheType type;
 } FFCPUCache;
 
@@ -24,13 +25,13 @@ typedef struct FFCPUCacheResult
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result);
 
-static inline FFCPUCache* ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t level, uint32_t size, FFCPUCacheType type)
+static inline FFCPUCache* ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t level, uint32_t size, uint32_t lineSize, FFCPUCacheType type)
 {
     FFlist* cacheLevel = &result->caches[level - 1];
 
     FF_LIST_FOR_EACH(FFCPUCache, item, *cacheLevel)
     {
-        if (item->type == type && item->size == size)
+        if (item->type == type && item->size == size && item->lineSize == lineSize)
         {
             item->num++;
             return item;
@@ -41,6 +42,7 @@ static inline FFCPUCache* ffCPUCacheAddItem(FFCPUCacheResult* result, uint32_t l
     *item = (FFCPUCache) {
         .size = size,
         .num = 1,
+        .lineSize = lineSize,
         .type = type,
     };
     return item;

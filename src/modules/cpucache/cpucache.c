@@ -122,6 +122,7 @@ void ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yy
                 case FF_CPU_CACHE_TYPE_UNIFIED: typeStr = "unified"; break;
                 case FF_CPU_CACHE_TYPE_TRACE: typeStr = "trace"; break;
             }
+            yyjson_mut_obj_add_uint(doc, item, "lineSize", src->lineSize);
             yyjson_mut_obj_add_str(doc, item, "type", typeStr);
         }
     }
