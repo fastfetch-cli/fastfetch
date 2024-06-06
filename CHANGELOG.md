@@ -273,7 +273,7 @@ Features:
 * Improve GPU detection on Linux (GPU, Linux)
     * Support GPU memory usage detection for AMD GPUs
     * Support GPU frequency detection for Intel GPUs
-* Improve performance of Gnome version detection (DE, Linux)
+* Improve performance of GNOME version detection (DE, Linux)
 * Improve performance of kitty version detection (Terminal, Linux)
 * Detect refresh rate when using `--ds-force-drm sysfs-only` (Display, Linux)
 * Add option `--ts-version` to disable terminal and shell version detection. Mainly for benchmarking purposes
@@ -980,7 +980,7 @@ Bugfixes:
 * Fix Windows drives detection in WSL (Linux, Disk)
 * Fix CPU temp detection (FreeBSD, CPU)
 * Fix disk detection (Android, Disk)
-* Fix Gnome Terminal version and font detection (FreeBSD, TerminalFont)
+* Fix GNOME Terminal version and font detection (FreeBSD, TerminalFont)
 * Fix crash on newer wayland desktops (Linux, Display, #477)
 * Fix vendor detection for Intel GPU (macOS, GPU)
 * Fix possible crashes on Windows Server (Windows, GPU, #484)
@@ -1006,7 +1006,7 @@ Features:
 * Add mac address detection `--localip-show-mac` (LocalIP, #451)
 
 Bugfixes:
-* Fix Gnome version detection on Fedora (DE)
+* Fix GNOME version detection on Fedora (DE)
 * Fix Windows drives detection in WSL (Disk)
 
 Changes:
