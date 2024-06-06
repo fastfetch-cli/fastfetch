@@ -9,6 +9,9 @@
             "charElapsed": "=",
             "charTotal": "-",
             "width": 13
+        },
+        "percent": {
+            "type": 2
         }
     },
     "modules": [
@@ -16,11 +19,14 @@
         "separator",
         "memory",
         "swap",
-        "disk",
+        {
+            "type": "disk",
+            "folders": "/"
+        },
         "battery",
         {
             "type": "colors",
-            "paddingLeft": 11,
+            "paddingLeft": 10,
             "symbol": "circle"
         }
     ]
