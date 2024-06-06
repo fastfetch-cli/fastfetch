@@ -46,6 +46,7 @@ void ffPrintInitSystem(FFInitSystemOptions* options)
 exit:
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.exe);
+    ffStrbufDestroy(&result.version);
 }
 
 bool ffParseInitSystemCommandOptions(FFInitSystemOptions* options, const char* key, const char* value)
@@ -109,6 +110,7 @@ void ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options
 exit:
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.exe);
+    ffStrbufDestroy(&result.version);
 }
 
 void ffPrintInitSystemHelpFormat(void)
