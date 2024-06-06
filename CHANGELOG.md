@@ -5,6 +5,7 @@ Features:
 * Make it possible to shorten the theme and icons output (Theme / Icons)
 * Support `-l '?'` to show a question mark
 * Add new module `CPUCache` to display CPU cache sizes (CPUCache)
+* In `--<module>-format`, `{#keys}` and `{#title}` can be used to reference the color of keys and title
 
 Bugfixes:
 * Remove shebangs from completions

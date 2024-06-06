@@ -1,3 +1,4 @@
+#include "fastfetch.h"
 #include "common/option.h"
 #include "common/color.h"
 #include "util/stringUtils.h"
@@ -153,6 +154,8 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
     {
         #define FF_APPEND_COLOR_CODE_COND(prefix, code) \
             if(ffStrStartsWithIgnCase(value, #prefix)) { ffStrbufAppendS(buffer, code); value += strlen(#prefix); continue; }
+        #define FF_APPEND_COLOR_PROP_COND(prefix, prop) \
+            if(ffStrStartsWithIgnCase(value, #prefix)) { if (instance.config.display.prop.length) ffStrbufAppend(buffer, &instance.config.display.prop); else ffStrbufAppendS(buffer, FF_COLOR_FG_DEFAULT); value += strlen(#prefix); continue; }
 
         if (ffCharIsEnglishAlphabet(value[0]))
         {
@@ -182,11 +185,16 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
             else FF_APPEND_COLOR_CODE_COND(light_magenta, FF_COLOR_FG_LIGHT_MAGENTA)
             else FF_APPEND_COLOR_CODE_COND(light_cyan, FF_COLOR_FG_LIGHT_CYAN)
             else FF_APPEND_COLOR_CODE_COND(light_white, FF_COLOR_FG_LIGHT_WHITE)
+            else FF_APPEND_COLOR_PROP_COND(keys, colorKeys)
+            else FF_APPEND_COLOR_PROP_COND(title, colorTitle)
+            else FF_APPEND_COLOR_PROP_COND(output, colorOutput)
+            else FF_APPEND_COLOR_PROP_COND(separator, colorSeparator)
         }
         ffStrbufAppendC(buffer, *value);
         ++value;
 
         #undef FF_APPEND_COLOR_CODE_COND
+        #undef FF_APPEND_COLOR_PROP_COND
     }
 }
 
