@@ -10,12 +10,14 @@ Features:
 * Support `-l '?'` to show a question mark
 * Add new module `CPUCache` to display CPU cache sizes (CPUCache)
 * In `--<module>-format`, `{#keys}` and `{#title}` can be used to reference the color of keys and title
+* Improve speed of Guix package detection (Packages,Linux)
 
 Bugfixes:
 * Remove shebangs from completions
 * Assume wm plugins are daemon processes (WM, macOS)
 * Fix while chars not visible in terminal of light theme (Logo)
 * Normalize bright colors to fix color display in Apple Terminal (Colors)
+* Correctly capitalize GNOME (DE, Linux)
 
 # 2.14.0
 
