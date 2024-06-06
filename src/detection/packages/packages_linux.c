@@ -408,26 +408,36 @@ static uint32_t getAM(FFstrbuf* baseDir)
     return result;
 }
 
-
-static uint32_t getGuixPackagesImpl(char* path)
+static int compareHash(const void* a, const void* b)
 {
-    FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(1024);
+    return memcmp(a, b, 32);
+}
 
-    ffProcessAppendStdOut(&output, (char* const[]) {
-        "guix",
-        "package",
-        "-p",
-        path,
-        "-I",
-        NULL
-    });
+static uint32_t getGuixPackagesImpl(char* filename)
+{
+    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+    if (!ffAppendFileBuffer(filename, &content))
+        return 0;
 
+    // Count number of unique /gnu/store/ paths in PROFILE/manifest based on their hash value.
+    // Contains packages explicitly installed and their propagated inputs.
+    char* pend = content.chars;
 
-    //Each package is a new line in the output.
-    // If at least one line is found, add 1 for the last line.
-    uint32_t count = ffStrbufCountC(&output, '\n');
-    if(count > 0)
-      count++;
+    for (const char* pattern = content.chars; (pattern = strstr(pattern, "/gnu/store/")); pattern += 32)
+    {
+        pattern += strlen("/gnu/store/");
+        memmove(pend, pattern, 32);
+        pend += 32;
+    }
+
+    if (pend == content.chars)
+        return 0;
+
+    qsort(content.chars, (size_t) (pend - content.chars) / 32, 32, compareHash);
+
+    uint32_t count = 1;
+    for (const char* p = content.chars + 32; p < pend; p += 32)
+        count += compareHash(p - 32, p) != 0;
 
     return count;
 }
@@ -436,6 +446,7 @@ static uint32_t getGuixPackages(FFstrbuf* baseDir, const char* dirname)
 {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dirname);
+    ffStrbufAppendS(baseDir, "/manifest");
     uint32_t num_elements = getGuixPackagesImpl(baseDir->chars);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
     return num_elements;
