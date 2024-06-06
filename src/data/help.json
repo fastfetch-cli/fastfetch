@@ -617,20 +617,27 @@
             }
         },
         {
+            "long": "bar-border-left",
+            "desc": "Set the string to use at left border of percentage bars",
+            "arg": {
+                "type": "string",
+                "default": "[ "
+            }
+        },
+        {
+            "long": "bar-border-right",
+            "desc": "Set the string to use at right border of percentage bars",
+            "arg": {
+                "type": "string",
+                "default": " ]"
+            }
+        },
+        {
             "long": "bar-width",
             "desc": "Set the width of percentage bars, in number of characters",
             "arg": {
                 "type": "num",
                 "default": 10
-            }
-        },
-        {
-            "long": "bar-border",
-            "desc": "Whether to show a border around percentage bars",
-            "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": true
             }
         },
         {

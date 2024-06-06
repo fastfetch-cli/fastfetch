@@ -180,9 +180,13 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (charTotal)
                     ffStrbufSetS(&options->barCharTotal, charTotal);
 
-                yyjson_val* border = yyjson_obj_get(val, "border");
-                if (border)
-                    options->barBorder = yyjson_get_bool(border);
+                yyjson_val* borderLeft = yyjson_obj_get(val, "border-left");
+                if (borderLeft)
+                    ffStrbufSetS(&options->barBorderLeft, yyjson_get_str(borderLeft));
+
+                yyjson_val* borderRight = yyjson_obj_get(val, "border-right");
+                if (borderRight)
+                    ffStrbufSetS(&options->barBorderRight, yyjson_get_str(borderRight));
 
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width)
@@ -346,8 +350,10 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseString(key, value, &options->barCharTotal);
         else if(ffStrEqualsIgnCase(subkey, "width"))
             options->barWidth = (uint8_t) ffOptionParseUInt32(key, value);
-        else if(ffStrEqualsIgnCase(subkey, "border"))
-            options->barBorder = ffOptionParseBoolean(value);
+        else if(ffStrEqualsIgnCase(subkey, "border-left"))
+            ffOptionParseString(key, value, &options->barBorderLeft);
+        else if(ffStrEqualsIgnCase(subkey, "border-right"))
+            ffOptionParseString(key, value, &options->barBorderRight);
         else
             return false;
     }
@@ -392,8 +398,9 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
     ffStrbufInitStatic(&options->barCharTotal, "-");
+    ffStrbufInitStatic(&options->barBorderLeft, "[ ");
+    ffStrbufInitStatic(&options->barBorderRight, " ]");
     options->barWidth = 10;
-    options->barBorder = true;
     options->percentType = 9;
     options->percentNdigits = 0;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
@@ -561,8 +568,10 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
             yyjson_mut_obj_add_strbuf(doc, bar, "charElapsed", &options->barCharElapsed);
         if (!ffStrbufEqual(&options->barCharTotal, &defaultOptions.barCharTotal))
             yyjson_mut_obj_add_strbuf(doc, bar, "charTotal", &options->barCharTotal);
-        if (options->barBorder != defaultOptions.barBorder)
-            yyjson_mut_obj_add_bool(doc, bar, "border", options->barBorder);
+        if (!ffStrbufEqual(&options->barBorderLeft, &defaultOptions.barBorderLeft))
+            yyjson_mut_obj_add_strbuf(doc, bar, "borderLeft", &options->barBorderLeft);
+        if (!ffStrbufEqual(&options->barBorderRight, &defaultOptions.barBorderRight))
+            yyjson_mut_obj_add_strbuf(doc, bar, "borderRight", &options->barBorderRight);
         if (options->barWidth != defaultOptions.barWidth)
             yyjson_mut_obj_add_uint(doc, bar, "width", options->barWidth);
 

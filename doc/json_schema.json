@@ -499,10 +499,15 @@
                             "description": "Set the character to use in total part",
                             "default": "-"
                         },
-                        "border": {
-                            "type": "boolean",
-                            "description": "Whether to show a border around the bar",
-                            "default": true
+                        "borderLeft": {
+                            "type": "string",
+                            "description": "Set the string to use at left border",
+                            "default": "[ "
+                        },
+                        "borderRight": {
+                            "type": "string",
+                            "description": "Set the string to use at right border",
+                            "default": " ]"
                         },
                         "width": {
                             "type": "integer",

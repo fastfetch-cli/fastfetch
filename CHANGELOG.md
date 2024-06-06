@@ -1,5 +1,9 @@
 # 2.15.0
 
+Changes:
+* `--bar-border <?bool>` has been changed to `--bar-border-left <string>` and `--bar-border-right <string>`, which are used for customizing the style of bar border.
+    * `--bar-border-left '' --bar-border-right ''` can be used to disable the border
+
 Features:
 * Add ability to skip installing license with INSTALL_LICENSE option (CMake)
 * Make it possible to shorten the theme and icons output (Theme / Icons)
