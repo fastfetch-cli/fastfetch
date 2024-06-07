@@ -12,12 +12,12 @@ void ffDetectLocale(FFstrbuf* result)
     if(result->length > 0)
         return;
 
+    setlocale(LC_ALL, "");
     #ifdef LC_MESSAGES
     ffStrbufAppendS(result, setlocale(LC_MESSAGES, NULL));
 
-    if(result->length > 0)
-        return;
+    if(result->length == 0)
+        ffStrbufAppendS(result, setlocale(LC_ALL, NULL));
     #endif
-
-    ffStrbufAppendS(result, setlocale(LC_ALL, NULL));
+    setlocale(LC_ALL, "C");
 }

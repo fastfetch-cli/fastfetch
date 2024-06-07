@@ -5,6 +5,8 @@
 #include "util/mallocHelper.h"
 #include "util/wcwidth.h"
 
+#include <locale.h>
+
 static inline uint32_t max(uint32_t a, uint32_t b)
 {
     return a > b ? a : b;
@@ -31,6 +33,8 @@ static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate
 
 void ffPrintSeparator(FFSeparatorOptions* options)
 {
+    setlocale(LC_ALL, "");
+
     mbstate_t state = {};
     bool fqdn = instance.config.modules.title.fqdn;
     const FFPlatform* platform = &instance.state.platform;
@@ -86,6 +90,8 @@ void ffPrintSeparator(FFSeparatorOptions* options)
         }
     }
     putchar('\n');
+
+    setlocale(LC_ALL, "C");
 }
 
 bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value)

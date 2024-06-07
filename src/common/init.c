@@ -8,9 +8,9 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <locale.h>
 #ifdef _WIN32
     #include <windows.h>
+    #include <locale.h>
     #include "util/windows/unicode.h"
 #else
     #include <signal.h>
@@ -51,9 +51,6 @@ void ffInitInstance(void)
     #ifdef WIN32
         //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
         setlocale(LC_ALL, ".UTF8");
-    #else
-        // used for mbsrtowcs in Module `separator`
-        setlocale(LC_ALL, "");
     #endif
 
     initState(&instance.state);
