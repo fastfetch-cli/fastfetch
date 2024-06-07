@@ -33,8 +33,7 @@ static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate
 
 void ffPrintSeparator(FFSeparatorOptions* options)
 {
-    setlocale(LC_ALL, "");
-
+    setlocale(LC_CTYPE, "");
     mbstate_t state = {};
     bool fqdn = instance.config.modules.title.fqdn;
     const FFPlatform* platform = &instance.state.platform;
@@ -90,8 +89,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
         }
     }
     putchar('\n');
-
-    setlocale(LC_ALL, "C");
+    setlocale(LC_CTYPE, "C");
 }
 
 bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value)
