@@ -31,12 +31,14 @@ Features:
 * Print all presets in `--list-presets` for better Windows support (Windows)
 * Support for guix package manager detection (Packages, Linux)
 * Support named variable placeholders in custom module formattion string (#796)
-    * `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is equivalent to `--title-format '{6}{7}{8}'`
+    * `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is now equivalent to `--title-format '{6}{7}{8}'`
 * Support named color placeholders in custom module formattion string
-    * `--<module>-format '{#red}'` is equivalent to `--<module>-format '{#31}'`
+    * `--<module>-format '{#red}'` is now equivalent to `--<module>-format '{#31}'`
     * `'{#red}'` or `'{#31}'` is preferred over `\u001b[31m` because is more readable and `--pipe` aware (will be ignored in pipe mode)
     * Supported in `Custom` module too
     * See `fastfetch -h format` for detail
+* Add new module `InitSystem`, which detects the name of init system
+    * i.e. process name of pid1. `init`, `systemd`, etc
 * Add option `--color-separator` to set the color of key-value separators
 * Support Guix package manager count (#792, Packages, Linux)
 * Improve python based shell detection (#977, Shell, macOS)
