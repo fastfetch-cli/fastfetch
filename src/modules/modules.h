@@ -12,6 +12,7 @@
 #include "modules/camera/camera.h"
 #include "modules/chassis/chassis.h"
 #include "modules/cpu/cpu.h"
+#include "modules/cpucache/cpucache.h"
 #include "modules/cpuusage/cpuusage.h"
 #include "modules/command/command.h"
 #include "modules/colors/colors.h"

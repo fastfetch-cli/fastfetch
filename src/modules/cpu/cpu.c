@@ -22,7 +22,7 @@ void ffPrintCPU(FFCPUOptions* options)
         .frequencyBase = 0.0/0.0,
         .frequencyBiosLimit = 0.0/0.0,
         .name = ffStrbufCreate(),
-        .vendor = ffStrbufCreate()
+        .vendor = ffStrbufCreate(),
     };
 
     const char* error = ffDetectCPU(options, &cpu);
@@ -207,7 +207,7 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         .frequencyBase = 0.0/0.0,
         .frequencyBiosLimit = 0.0/0.0,
         .name = ffStrbufCreate(),
-        .vendor = ffStrbufCreate()
+        .vendor = ffStrbufCreate(),
     };
 
     const char* error = ffDetectCPU(options, &cpu);

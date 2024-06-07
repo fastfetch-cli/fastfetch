@@ -43,7 +43,7 @@ static const char* parseEnv(void)
         return "KDE";
 
     if(getenv("GNOME_DESKTOP_SESSION_ID") != NULL)
-        return "Gnome";
+        return "GNOME";
 
     if(getenv("MATE_DESKTOP_SESSION_ID") != NULL)
         return "Mate";
@@ -163,7 +163,7 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     }
 
     else if(
-        ffStrEqualsIgnCase(name, "Gnome") ||
+        ffStrEqualsIgnCase(name, "GNOME") ||
         ffStrEqualsIgnCase(name, "ubuntu:GNOME") ||
         ffStrEqualsIgnCase(name, "ubuntu") ||
         ffStrEqualsIgnCase(name, "gnome-shell")

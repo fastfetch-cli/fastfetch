@@ -3,7 +3,7 @@
 #include "detection/gtk_qt/gtk_qt.h"
 #include "detection/displayserver/displayserver.h"
 
-const char* ffDetectTheme(FFstrbuf* result)
+const char* ffDetectTheme(FFThemeResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
@@ -18,6 +18,8 @@ const char* ffDetectTheme(FFstrbuf* result)
     if(plasma->widgetStyle.length == 0 && plasma->colorScheme.length == 0 && gtk2->length == 0 && gtk3->length == 0 && gtk4->length == 0)
         return "No themes found";
 
+    ffParseGTK(&result->theme2, gtk2, gtk3, gtk4);
+
     FF_STRBUF_AUTO_DESTROY plasmaColorPretty = ffStrbufCreate();
     if(ffStrbufStartsWithIgnCase(&plasma->colorScheme, &plasma->widgetStyle))
         ffStrbufAppendNS(&plasmaColorPretty, plasma->colorScheme.length - plasma->widgetStyle.length, &plasma->colorScheme.chars[plasma->widgetStyle.length]);
@@ -26,42 +28,32 @@ const char* ffDetectTheme(FFstrbuf* result)
 
     ffStrbufTrim(&plasmaColorPretty, ' ');
 
-    FF_STRBUF_AUTO_DESTROY gtkPretty = ffStrbufCreate();
-    ffParseGTK(&gtkPretty, gtk2, gtk3, gtk4);
-
     if(plasma->widgetStyle.length > 0)
     {
-        ffStrbufAppend(result, &plasma->widgetStyle);
+        ffStrbufAppend(&result->theme1, &plasma->widgetStyle);
 
         if(plasma->colorScheme.length > 0)
         {
-            ffStrbufAppendS(result, " (");
+            ffStrbufAppendS(&result->theme1, " (");
 
             if(plasmaColorPretty.length > 0)
-                ffStrbufAppend(result, &plasmaColorPretty);
+                ffStrbufAppend(&result->theme1, &plasmaColorPretty);
             else
-                ffStrbufAppend(result, &plasma->colorScheme);
+                ffStrbufAppend(&result->theme1, &plasma->colorScheme);
 
-            ffStrbufAppendC(result, ')');
+            ffStrbufAppendC(&result->theme1, ')');
         }
     }
     else if(plasma->colorScheme.length > 0)
     {
         if(plasmaColorPretty.length > 0)
-            ffStrbufAppend(result, &plasmaColorPretty);
+            ffStrbufAppend(&result->theme1, &plasmaColorPretty);
         else
-            ffStrbufAppend(result, &plasma->colorScheme);
+            ffStrbufAppend(&result->theme1, &plasma->colorScheme);
     }
 
     if(plasma->widgetStyle.length > 0 || plasma->colorScheme.length > 0)
-    {
-        ffStrbufAppendS(result, " [QT]");
-
-        if(gtkPretty.length > 0)
-            ffStrbufAppendS(result, ", ");
-    }
-
-    ffStrbufAppend(result, &gtkPretty);
+        ffStrbufAppendS(&result->theme1, " [QT]");
 
     return NULL;
 }

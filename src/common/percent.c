@@ -24,12 +24,11 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
     uint32_t blocksPercent = (uint32_t) (percent / 100.0 * options->barWidth + 0.5);
     assert(blocksPercent <= options->barWidth);
 
-    if(options->barBorder)
+    if(options->barBorderLeft.length)
     {
         if(!options->pipe)
-            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m[ ");
-        else
-            ffStrbufAppendS(buffer, "[ ");
+            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
+        ffStrbufAppend(buffer, &options->barBorderLeft);
     }
 
     if (percent != percent)
@@ -91,12 +90,11 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
         }
     }
 
-    if(options->barBorder)
+    if(options->barBorderRight.length)
     {
         if(!options->pipe)
-            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m ]");\
-        else
-            ffStrbufAppendS(buffer, " ]");
+            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
+        ffStrbufAppend(buffer, &options->barBorderRight);
     }
 
     if(!options->pipe)

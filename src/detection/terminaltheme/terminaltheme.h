@@ -16,4 +16,4 @@ typedef struct FFTerminalThemeResult
     FFTerminalThemeColor bg;
 } FFTerminalThemeResult;
 
-bool ffDetectTerminalTheme(FFTerminalThemeResult* result);
+bool ffDetectTerminalTheme(FFTerminalThemeResult* result, bool forceEnv);

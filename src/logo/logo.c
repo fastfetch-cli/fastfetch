@@ -335,7 +335,7 @@ static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
         return true;
     }
 
-    const FFlogo* logo = logoGetBuiltin(name, size);
+    const FFlogo* logo = ffStrbufEqualS(name, "?") ? &ffLogoUnknown : logoGetBuiltin(name, size);
     if(logo == NULL)
         return false;
 
@@ -429,7 +429,7 @@ static bool logoTryKnownType(void)
 
     if(options->type == FF_LOGO_TYPE_NONE)
     {
-        logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), false);
+        logoPrintNone();
         return true;
     }
 

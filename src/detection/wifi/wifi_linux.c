@@ -334,7 +334,7 @@ static const char* detectWifiWithIoctls(FFlist* result)
 
 #endif
 
-const char* ffDetectWifi(FFlist* result)
+const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
 {
     #ifdef FF_HAVE_LIBNM
     detectWifiWithLibnm(result);

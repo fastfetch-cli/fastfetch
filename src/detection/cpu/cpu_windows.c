@@ -126,9 +126,9 @@ static const char* detectNCores(FFCPUResult* cpu)
         ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
     )
     {
-        if(ptr->Relationship == RelationProcessorCore)
+        if (ptr->Relationship == RelationProcessorCore)
             ++cpu->coresPhysical;
-        else if(ptr->Relationship == RelationGroup)
+        else if (ptr->Relationship == RelationGroup)
         {
             for (uint32_t index = 0; index < ptr->Group.ActiveGroupCount; ++index)
             {

@@ -43,8 +43,9 @@ typedef struct FFOptionsDisplay
     FFstrbuf tempColorRed;
     FFstrbuf barCharElapsed;
     FFstrbuf barCharTotal;
+    FFstrbuf barBorderLeft;
+    FFstrbuf barBorderRight;
     uint8_t barWidth;
-    bool barBorder;
     uint8_t percentType;
     uint8_t percentNdigits;
     FFstrbuf percentColorGreen;

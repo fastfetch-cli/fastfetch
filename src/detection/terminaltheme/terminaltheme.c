@@ -74,17 +74,17 @@ static bool detectByEnv(FFTerminalThemeResult* result)
     return true;
 }
 
-static inline bool detectColor(FFTerminalThemeResult* result)
+static inline bool detectColor(FFTerminalThemeResult* result, bool forceEnv)
 {
-    if (detectByEscapeCode(result))
+    if (!forceEnv && detectByEscapeCode(result))
         return true;
 
     return detectByEnv(result);
 }
 
-bool ffDetectTerminalTheme(FFTerminalThemeResult* result)
+bool ffDetectTerminalTheme(FFTerminalThemeResult* result, bool forceEnv)
 {
-    if (!detectColor(result)) return false;
+    if (!detectColor(result, forceEnv)) return false;
     result->fg.dark = result->fg.r * 299 + result->fg.g * 587 + result->fg.b * 114 < 128000;
     result->bg.dark = result->bg.r * 299 + result->bg.g * 587 + result->bg.b * 114 < 128000;
     return true;

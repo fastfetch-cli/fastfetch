@@ -2,6 +2,7 @@
 #include "common/parsing.h"
 #include "common/thread.h"
 #include "detection/displayserver/displayserver.h"
+#include "detection/terminaltheme/terminaltheme.h"
 #include "util/textModifier.h"
 #include "logo/logo.h"
 
@@ -22,10 +23,18 @@ static void initState(FFstate* state)
     state->logoWidth = 0;
     state->logoHeight = 0;
     state->keysHeight = 0;
+    state->terminalLightTheme = false;
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
     state->resultDoc = NULL;
+
+    {
+        // don't enable bright color if the terminal is in light mode
+        FFTerminalThemeResult result;
+        if (ffDetectTerminalTheme(&result, true /* forceEnv for performance */) && !result.bg.dark)
+            state->terminalLightTheme = true;
+    }
 }
 
 static void defaultConfig(void)
@@ -43,8 +52,12 @@ void ffInitInstance(void)
         //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
         setlocale(LC_ALL, ".UTF8");
     #else
-        // used for mbsrtowcs in Module `separator`
-        setlocale(LC_ALL, "");
+        // Never use `setlocale(LC_ALL, "")`
+        setlocale(LC_TIME, "");
+        setlocale(LC_NUMERIC, "");
+        #ifdef LC_MESSAGES
+            setlocale(LC_MESSAGES, "");
+        #endif
     #endif
 
     initState(&instance.state);

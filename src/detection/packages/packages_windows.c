@@ -17,7 +17,7 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
         do // Managed to locate and create an handle to that folder.
         {
             if(!(wfd.dwFileAttributes & type)) continue;
-            if(!flag && strcasecmp(ignore, wfd.cFileName) == 0)
+            if(!flag && ffStrEqualsIgnCase(ignore, wfd.cFileName))
             {
                 flag = true;
                 continue;

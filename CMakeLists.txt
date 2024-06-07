@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.14.0
+    VERSION 2.15.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -76,6 +76,7 @@ option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVM
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
+option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -330,6 +331,7 @@ set(LIBFASTFETCH_SRC
     src/modules/chassis/chassis.c
     src/modules/colors/colors.c
     src/modules/cpu/cpu.c
+    src/modules/cpucache/cpucache.c
     src/modules/cpuusage/cpuusage.c
     src/modules/cursor/cursor.c
     src/modules/custom/custom.c
@@ -410,6 +412,7 @@ if(LINUX)
         src/detection/brightness/brightness_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
+        src/detection/cpucache/cpucache_linux.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
@@ -480,6 +483,7 @@ elseif(ANDROID)
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
+        src/detection/cpucache/cpucache_linux.c
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
@@ -540,6 +544,7 @@ elseif(BSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
+        src/detection/cpucache/cpucache_nosupport.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
@@ -610,6 +615,7 @@ elseif(APPLE)
         src/detection/brightness/brightness_apple.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
+        src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
@@ -671,6 +677,7 @@ elseif(WIN32)
         src/detection/brightness/brightness_windows.cpp
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
+        src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
         src/detection/disk/disk_windows.c
@@ -1157,13 +1164,13 @@ install(
 )
 
 install(
-    FILES "${CMAKE_SOURCE_DIR}/completions/bash"
+    FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.bash"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions"
     RENAME "${CMAKE_PROJECT_NAME}"
 )
 
 install(
-    FILES "${CMAKE_SOURCE_DIR}/completions/fish"
+    FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.fish"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/fish/vendor_completions.d"
     RENAME "${CMAKE_PROJECT_NAME}.fish"
 )
@@ -1173,10 +1180,12 @@ install(
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/${CMAKE_PROJECT_NAME}"
 )
 
-install(
-    FILES "${CMAKE_SOURCE_DIR}/LICENSE"
-    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}"
-)
+if(INSTALL_LICENSE)
+    install(
+        FILES "${CMAKE_SOURCE_DIR}/LICENSE"
+        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/licenses/${CMAKE_PROJECT_NAME}"
+    )
+endif()
 
 install(
     FILES "${PROJECT_BINARY_DIR}/fastfetch.1"

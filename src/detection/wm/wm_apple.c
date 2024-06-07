@@ -2,6 +2,7 @@
 
 #include "common/sysctl.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <ctype.h>
 
@@ -17,15 +18,17 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
 
     for(size_t i = 0; i < length / sizeof(struct kinfo_proc); i++)
     {
+        if (processes[i].kp_eproc.e_ppid != 1) continue;
+
         const char* comm = processes[i].kp_proc.p_comm;
 
         if(
-            strcasecmp(comm, "spectacle") != 0 &&
-            strcasecmp(comm, "amethyst") != 0 &&
-            strcasecmp(comm, "kwm") != 0 &&
-            strcasecmp(comm, "chunkwm") != 0 &&
-            strcasecmp(comm, "yabai") != 0 &&
-            strcasecmp(comm, "rectangle") != 0
+            !ffStrEqualsIgnCase(comm, "spectacle") &&
+            !ffStrEqualsIgnCase(comm, "amethyst") &&
+            !ffStrEqualsIgnCase(comm, "kwm") &&
+            !ffStrEqualsIgnCase(comm, "chunkwm") &&
+            !ffStrEqualsIgnCase(comm, "yabai") &&
+            !ffStrEqualsIgnCase(comm, "rectangle")
         ) continue;
 
         ffStrbufAppendS(pluginName, comm);

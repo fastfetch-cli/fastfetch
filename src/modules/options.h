@@ -12,6 +12,7 @@
 #include "modules/camera/option.h"
 #include "modules/chassis/option.h"
 #include "modules/cpu/option.h"
+#include "modules/cpucache/option.h"
 #include "modules/cpuusage/option.h"
 #include "modules/colors/option.h"
 #include "modules/cursor/option.h"

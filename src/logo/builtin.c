@@ -1802,9 +1802,9 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // Gnome
+    // GNOME
     {
-        .names = {"Gnome"},
+        .names = {"GNOME"},
         .lines = FASTFETCH_DATATEXT_LOGO_GNOME,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -4158,7 +4158,7 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // UbuntuGnome
+    // UbuntuGNOME
     {
         .names = {"ubuntu gnome", "ubuntu-gnome"},
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_GNOME,

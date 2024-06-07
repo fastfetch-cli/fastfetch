@@ -11,6 +11,7 @@
 
 static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
 {
+    // asm ("int3");
     //Create the basic output
     if(os->name.length > 0)
         ffStrbufAppend(result, &os->name);
@@ -22,32 +23,32 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
         ffStrbufAppend(result, &instance.state.platform.systemName);
 
     //Append code name if it is missing
-    if(os->codename.length > 0 && !ffStrbufContain(result, &os->codename))
+    if(os->codename.length > 0 && !ffStrbufContainIgnCase(result, &os->codename))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->codename);
     }
 
     //Append version if it is missing
-    if(os->versionID.length > 0 && !ffStrbufContain(result, &os->versionID))
+    if(os->versionID.length > 0 && !ffStrbufContainIgnCase(result, &os->versionID))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->versionID);
     }
-    else if(os->versionID.length == 0 && os->version.length > 0 && !ffStrbufContain(result, &os->version))
+    else if(os->versionID.length == 0 && os->version.length > 0 && !ffStrbufContainIgnCase(result, &os->version))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &os->version);
     }
 
     //Append variant if it is missing
-    if(os->variant.length > 0 && ffStrbufFirstIndex(result, &os->variant) == result->length)
+    if(os->variant.length > 0 && !ffStrbufContainIgnCase(result, &os->variant))
     {
         ffStrbufAppendS(result, " (");
         ffStrbufAppend(result, &os->variant);
         ffStrbufAppendC(result, ')');
     }
-    else if(os->variant.length == 0 && os->variantID.length > 0 && ffStrbufFirstIndex(result, &os->variantID) == result->length)
+    else if(os->variant.length == 0 && os->variantID.length > 0 && !ffStrbufContainIgnCase(result, &os->variantID))
     {
         ffStrbufAppendS(result, " (");
         ffStrbufAppend(result, &os->variantID);
@@ -55,7 +56,7 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     }
 
     //Append architecture if it is missing
-    if(ffStrbufFirstIndex(result, &instance.state.platform.systemArchitecture) == result->length)
+    if(!ffStrbufContainIgnCase(result, &instance.state.platform.systemArchitecture))
     {
         ffStrbufAppendC(result, ' ');
         ffStrbufAppend(result, &instance.state.platform.systemArchitecture);

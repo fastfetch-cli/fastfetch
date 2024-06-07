@@ -45,7 +45,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
             uint32_t iStart = ffStrbufFirstIndexS(&result->version, "Version ");
             if (iStart < result->version.length)
             {
-                iStart += strlen("Version");
+                iStart += (uint32_t) strlen("Version");
                 uint32_t iEnd = ffStrbufNextIndexC(&result->version, iStart + 1, ':');
                 ffStrbufSubstrBefore(&result->version, iEnd);
                 ffStrbufSubstrAfter(&result->version, iStart);

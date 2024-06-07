@@ -7,9 +7,9 @@ assignees: ''
 
 ---
 
-Be sure to read [FAQ](https://github.com/fastfetch-cli/fastfetch?tab=readme-ov-file#faq) before submitting a new issue.
+Be sure to read the [FAQ](https://github.com/fastfetch-cli/fastfetch?tab=readme-ov-file#faq) before submitting a new issue.
 
-<!-- We will try hard to solve the issue. However since platforms and hardwares vary greatly, it can be hard to find the root cause is. Providing following information may help us greatly. Thanks in advance -->
+<!-- We will try hard to solve the issue. However since platforms and hardwares vary greatly, it can be hard to find the root cause of an issue. Providing the following information may help us greatly. Thanks in advance! -->
 
 # General description of bug:
 
@@ -17,8 +17,8 @@ Be sure to read [FAQ](https://github.com/fastfetch-cli/fastfetch?tab=readme-ov-f
 * What should happen:
 * Fastfetch version used: <!-- please use the latest version, if possible -->
 * Did it work in an older version: <!-- if yes, which version -->
-* Where did you get the binary: <!-- Github Release / Github Actions / Installed with a package manager (What package manager) / Built from source yourself -->
-* Does this issue still occurs in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)?
+* Where did you get the binary: <!-- GitHub release / GitHub Actions / installed with a package manager (please tell us which package manager you used!) / built from source yourself -->
+* Does this issue still occur in [the latest dev build](https://github.com/fastfetch-cli/fastfetch/actions/)?
 
 # Often helpful information:
 
@@ -27,7 +27,7 @@ Screenshot:
 
 The content of the configuration file you use (if any):
 ```
-//paste here
+// Paste here
 ```
 
 Output of `fastfetch -c ci.jsonc --format json`:
@@ -36,15 +36,15 @@ Note that this output will contain you public IP. If it is not relevant for the 
 -->
 
 ```
-//paste here
+// Paste here
 ```
 
 Output of `fastfetch --list-features`:
 ```
-//paste here
+// Paste here
 ```
 
-## If fastfatch crashed or freezed
+## If fastfatch crashed or froze
 
 Paste the stacktrace here. You may get it with:
 
@@ -65,16 +65,16 @@ If you cannot do the instructions above, please upload the core dump file:
 
 Use `time fastfetch --stat` to show time usage for each module.
 
-## If my image logo didn't show / work
+## If an image or logo didn't show 
 
-<!-- Please make sure the terminal does support the image protocol you used. Note Gnome terminal doesn't support any image protocols -->
+<!-- Please make sure your terminal supports the image protocol you used. Note that GNOME Terminal doesn't support any image protocols. -->
 
 * The image protocol you used: 
 * The terminal you used: 
 * Upload the image file here, or paste the image URL: 
 * Does it work with `--logo-width {WIDTH} --logo-height {HEIGHT}`? 
 
-## If fastfetch behaves incorrectly on shell starting
+## If fastfetch behaves incorrectly on shell startup
 
-* The bug is reproduceable with fresh / clean shell configuration (i.e. `fastfetch` is the single line of `.zshrc` or `~/.config/fish/config.fish`): 
+* The bug is reproducible with a clean shell configuration (i.e. `fastfetch` is the only line in `.zshrc` or `~/.config/fish/config.fish`): 
 * Does `sleep 1` before running `fastfetch` work? 

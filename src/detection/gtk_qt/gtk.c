@@ -153,7 +153,7 @@ static void detectGTKFromConfigDir(FFstrbuf* configDir, const char* version, FFG
 
 static void detectGTK(const char* version, FFGTKResult* result)
 {
-    //Mate, Cinnamon, Gnome, Unity, Budgie use dconf to save theme config
+    //Mate, Cinnamon, GNOME, Unity, Budgie use dconf to save theme config
     //On other DEs, this will do nothing
     detectGTKFromSettings(result);
     if(allPropertiesSet(result))

@@ -26,7 +26,7 @@ the exit code will be non\-zero.
 .SS "Informative Options"
 .TP
 
-.B \-h, \-\-help \fI [command]
+.B \-h, \-\-help \fI[command]
 Show help output, displaying all available options or help for given command
 .TP
 
@@ -43,7 +43,7 @@ List search paths of presets and logos
 .TP
 
 .B \-\-list\-logos
-List available logos, they can be loaded with \fI \-\-logo
+List available logos, they can be loaded with \fI\-\-logo
 .TP
 
 .B \-\-list\-modules
@@ -51,7 +51,7 @@ List available modules
 .TP
 
 .B \-\-list\-presets
-List available presets, they can be loaded with \fI \-\-config
+List available presets, they can be loaded with \fI\-\-config
 .TP
 
 .B \-\-list\-features
@@ -64,16 +64,24 @@ Print available logos
 
 .B \-\-print\-structure
 Print the default structure
+.TP
+
+.B \-\-format \fI<type>
+Set the output format. Besides the
+.I default
+format, only
+.I json
+is supported currently.
 
 
 .SS "Display Options"
 .TP
 
-.B \-l, \-\-logo \fI <logo>
+.B \-l, \-\-logo \fI<logo>
 Set the logo to display
 .TP
 
-.B \-s, \-\-structure \fI <structure>
+.B \-s, \-\-structure \fI<structure>
 Set the structure of the fetch. For details about the structure,
 see the CONFIGURATION section.
 
@@ -81,38 +89,40 @@ see the CONFIGURATION section.
 .SS "Config Options"
 .TP
 
-.B \-c, \-\-config \fI <config>
-Use the specified config file or preset. If "none", disable further config
-loading. For details about config files, see the CONFIGURATION section
+.B \-c, \-\-config \fI<config>
+Use the specified config file or preset. If
+.I none
+is specified, disable further config loading. For details about
+config files, see the CONFIGURATION section
 .TP
 
-.B \-\-gen\-config \fI [file]
+.B \-\-gen\-config \fI[file]
 Generate a config file with options specified on the command line.
-If \fI file \fR is specified, the configuration will written to the
+If \fIfile\fR is specified, the configuration will written to the
 file, otherwise it will be written to stdout.
 .TP
 
-.B \-\-gen\-config\-force \fI [file]
-Same as \fB \-\-gen\-config\fR, but overwrites existing config
+.B \-\-gen\-config\-force \fI[file]
+Same as \fB\-\-gen\-config\fR, but overwrites existing config
 .TP
 
 
-To list all options, use \fB \-\-help\fR this will also print all available module options.
+To list all options, use \fB\-\-help\fR. It will also print all available module options.
 
 .SH CONFIGURATION
 .SS "Fetch Structure"
 The structure of a fetch describes the modules that should be included in
 the output. It consists of a string of modules, separated by a colon (:).
-To list all available modules, use \fB \-\-list\-modules \fR
+To list all available modules, use \fB\-\-list\-modules\fR
 
 .SS "Config Files"
 
 Fastfetch uses JSONC based format for configuration. Fastfetch doesn't generate
-config file automatically; it should be generated manually by \fB \-\-gen\-config\fR.
+config file automatically; it should be generated manually by \fB\-\-gen\-config\fR.
 The config file will be saved in \fB~/.config/fastfetch/config.jsonc\fR by default.
 
-A JSONC config file is a JSON file that also supports comments with (//). Those
-files must have the extension '.jsonc'.
+A JSONC config file is a JSON file that also supports comments with (// and /* */).
+Those files must have the extension '.jsonc'.
 
 The specified configuration/preset files are searched in the following order:
 
@@ -128,4 +138,4 @@ Fastfetch provides some default presets. List them with \fB\-\-list\-presets\fR.
 .BR neofetch (1)
 
 .SH BUGS
-Please report bugs to:\fI https://github.com/fastfetch\-cli/fastfetch/issues \fR
+Please report bugs to: \fIhttps://github.com/fastfetch\-cli/fastfetch/issues\fR

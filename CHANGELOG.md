@@ -1,3 +1,27 @@
+# 2.15.0
+
+Changes:
+* `--bar-border <?bool>` has been changed to `--bar-border-left <string>` and `--bar-border-right <string>`, which are used for customizing the style of bar border.
+    * `--bar-border-left '' --bar-border-right ''` can be used to disable the border
+
+Features:
+* Add ability to skip installing license with INSTALL_LICENSE option (CMake)
+* Make it possible to shorten the theme and icons output (Theme / Icons)
+* Support `-l '?'` to show a question mark
+* Add new module `CPUCache` to display CPU cache sizes (CPUCache)
+* In `--<module>-format`, `{#keys}` and `{#title}` can be used to reference the color of keys and title
+* Improve speed of Guix package detection (Packages, Linux)
+* Assume wm plugins are daemon processes to improve performance (WM, macOS)
+
+Bugfixes:
+* Remove shebangs from completions (#980)
+* Fix while chars not visible in terminal of light theme (Logo)
+* Normalize bright colors to fix color display in Apple Terminal (#991, Colors)
+* Correctly capitalize GNOME (#997, DE, Linux)
+* Fix segfault on system using turkish language (#995, InitSystem, Linux)
+* Fix kubuntu detection (#1000, OS, Linux)
+* Don't display duplicate entries (OS, Linux)
+
 # 2.14.0
 
 Features:
@@ -7,12 +31,14 @@ Features:
 * Print all presets in `--list-presets` for better Windows support (Windows)
 * Support for guix package manager detection (Packages, Linux)
 * Support named variable placeholders in custom module formattion string (#796)
-    * `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is equivalent to `--title-format '{6}{7}{8}'`
+    * `--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'` is now equivalent to `--title-format '{6}{7}{8}'`
 * Support named color placeholders in custom module formattion string
-    * `--<module>-format '{#red}'` is equivalent to `--<module>-format '{#31}'`
+    * `--<module>-format '{#red}'` is now equivalent to `--<module>-format '{#31}'`
     * `'{#red}'` or `'{#31}'` is preferred over `\u001b[31m` because is more readable and `--pipe` aware (will be ignored in pipe mode)
     * Supported in `Custom` module too
     * See `fastfetch -h format` for detail
+* Add new module `InitSystem`, which detects the name of init system
+    * i.e. process name of pid1. `init`, `systemd`, etc
 * Add option `--color-separator` to set the color of key-value separators
 * Support Guix package manager count (#792, Packages, Linux)
 * Improve python based shell detection (#977, Shell, macOS)
@@ -254,7 +280,7 @@ Features:
 * Improve GPU detection on Linux (GPU, Linux)
     * Support GPU memory usage detection for AMD GPUs
     * Support GPU frequency detection for Intel GPUs
-* Improve performance of Gnome version detection (DE, Linux)
+* Improve performance of GNOME version detection (DE, Linux)
 * Improve performance of kitty version detection (Terminal, Linux)
 * Detect refresh rate when using `--ds-force-drm sysfs-only` (Display, Linux)
 * Add option `--ts-version` to disable terminal and shell version detection. Mainly for benchmarking purposes
@@ -961,7 +987,7 @@ Bugfixes:
 * Fix Windows drives detection in WSL (Linux, Disk)
 * Fix CPU temp detection (FreeBSD, CPU)
 * Fix disk detection (Android, Disk)
-* Fix Gnome Terminal version and font detection (FreeBSD, TerminalFont)
+* Fix GNOME Terminal version and font detection (FreeBSD, TerminalFont)
 * Fix crash on newer wayland desktops (Linux, Display, #477)
 * Fix vendor detection for Intel GPU (macOS, GPU)
 * Fix possible crashes on Windows Server (Windows, GPU, #484)
@@ -987,7 +1013,7 @@ Features:
 * Add mac address detection `--localip-show-mac` (LocalIP, #451)
 
 Bugfixes:
-* Fix Gnome version detection on Fedora (DE)
+* Fix GNOME version detection on Fedora (DE)
 * Fix Windows drives detection in WSL (Disk)
 
 Changes:

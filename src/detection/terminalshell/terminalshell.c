@@ -231,33 +231,33 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
     if(ffStrEqualsIgnCase(exeName, "sh")) // #849
         return false;
 
-    if(strcasecmp(exeName, "bash") == 0)
+    if(ffStrEqualsIgnCase(exeName, "bash"))
         return getShellVersionBash(exe, version);
-    if(strcasecmp(exeName, "zsh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "zsh"))
         return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
-    if(strcasecmp(exeName, "fish") == 0)
+    if(ffStrEqualsIgnCase(exeName, "fish"))
         return getShellVersionFish(exe, version);
-    if(strcasecmp(exeName, "pwsh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "pwsh"))
         return getShellVersionPwsh(exe, version);
-    if(strcasecmp(exeName, "csh") == 0 || strcasecmp(exeName, "tcsh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "csh") || ffStrEqualsIgnCase(exeName, "tcsh"))
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
-    if(strcasecmp(exeName, "nu") == 0)
+    if(ffStrEqualsIgnCase(exeName, "nu"))
         return getShellVersionNushell(exe, version);
-    if(strcasecmp(exeName, "ksh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "ksh"))
         return getShellVersionKsh(exe, version);
-    if(strcasecmp(exeName, "oksh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "oksh"))
         return getShellVersionOksh(exe, version);
-    if(strcasecmp(exeName, "oil.ovm") == 0)
+    if(ffStrEqualsIgnCase(exeName, "oil.ovm"))
         return getShellVersionOils(exe, version);
-    if(strcasecmp(exeName, "elvish") == 0)
+    if(ffStrEqualsIgnCase(exeName, "elvish"))
         return getExeVersionRaw(exe, version);
-    if(strcasecmp(exeName, "ash") == 0)
+    if(ffStrEqualsIgnCase(exeName, "ash"))
         return getShellVersionAsh(exe, version);
-    if(strcasecmp(exeName, "xonsh") == 0)
+    if(ffStrEqualsIgnCase(exeName, "xonsh"))
         return getShellVersionXonsh(exe, version);
 
     #ifdef _WIN32
-    if(strcasecmp(exeName, "powershell") == 0 || strcasecmp(exeName, "powershell_ise") == 0)
+    if(ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise"))
         return getShellVersionWinPowerShell(exe, version);
 
     return getFileVersion(exe->chars, version);
