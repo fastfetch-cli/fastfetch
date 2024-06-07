@@ -19,6 +19,7 @@ Bugfixes:
 * Normalize bright colors to fix color display in Apple Terminal (#991, Colors)
 * Correctly capitalize GNOME (#997, DE, Linux)
 * Fix segfault on system using turkish language (#995, InitSystem, Linux)
+* Fix kubuntu detection (#1000, OS, Linux)
 
 # 2.14.0
 

@@ -52,7 +52,7 @@ static void getUbuntuFlavour(FFOSResult* result)
     if(!ffStrSet(xdgConfigDirs))
         return;
 
-    if(strstr(xdgConfigDirs, "kde") != NULL || strstr(xdgConfigDirs, "plasma") != NULL)
+    if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetS(&result->name, "Kubuntu");
         ffStrbufSetS(&result->prettyName, "Kubuntu");
@@ -61,7 +61,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "xfce") != NULL || strstr(xdgConfigDirs, "xubuntu") != NULL)
+    if(ffStrContains(xdgConfigDirs, "xfce") || ffStrContains(xdgConfigDirs, "xubuntu"))
     {
         ffStrbufSetS(&result->name, "Xubuntu");
         ffStrbufSetS(&result->prettyName, "Xubuntu");
@@ -70,7 +70,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "lxde") != NULL || strstr(xdgConfigDirs, "lubuntu") != NULL)
+    if(ffStrContains(xdgConfigDirs, "lxde") || ffStrContains(xdgConfigDirs, "lubuntu"))
     {
         ffStrbufSetS(&result->name, "Lubuntu");
         ffStrbufSetS(&result->prettyName, "Lubuntu");
@@ -79,7 +79,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "budgie") != NULL)
+    if(ffStrContains(xdgConfigDirs, "budgie"))
     {
         ffStrbufSetS(&result->name, "Ubuntu Budgie");
         ffStrbufSetS(&result->prettyName, "Ubuntu Budgie");
@@ -88,7 +88,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "cinnamon") != NULL)
+    if(ffStrContains(xdgConfigDirs, "cinnamon"))
     {
         ffStrbufSetS(&result->name, "Ubuntu Cinnamon");
         ffStrbufSetS(&result->prettyName, "Ubuntu Cinnamon");
@@ -97,7 +97,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "mate") != NULL)
+    if(ffStrContains(xdgConfigDirs, "mate"))
     {
         ffStrbufSetS(&result->name, "Ubuntu MATE");
         ffStrbufSetS(&result->prettyName, "Ubuntu MATE");
@@ -106,7 +106,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "studio") != NULL)
+    if(ffStrContains(xdgConfigDirs, "studio"))
     {
         ffStrbufSetS(&result->name, "Ubuntu Studio");
         ffStrbufSetS(&result->prettyName, "Ubuntu Studio");
@@ -115,7 +115,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "sway") != NULL)
+    if(ffStrContains(xdgConfigDirs, "sway"))
     {
         ffStrbufSetS(&result->name, "Ubuntu Sway");
         ffStrbufSetS(&result->prettyName, "Ubuntu Sway");
@@ -124,7 +124,7 @@ static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(strstr(xdgConfigDirs, "touch") != NULL)
+    if(ffStrContains(xdgConfigDirs, "touch"))
     {
         ffStrbufSetS(&result->name, "Ubuntu Touch");
         ffStrbufSetS(&result->prettyName, "Ubuntu Touch");
