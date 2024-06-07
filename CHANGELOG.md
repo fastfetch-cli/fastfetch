@@ -20,6 +20,7 @@ Bugfixes:
 * Correctly capitalize GNOME (#997, DE, Linux)
 * Fix segfault on system using turkish language (#995, InitSystem, Linux)
 * Fix kubuntu detection (#1000, OS, Linux)
+* Don't display duplicate entries (OS, Linux)
 
 # 2.14.0
 
