@@ -2626,6 +2626,15 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Mauna
+    {
+        .names = {"Mauna"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MAUNA,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // Meowix
     {
         .names = {"Meowix"},
