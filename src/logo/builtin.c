@@ -4111,7 +4111,7 @@ static const FFlogo T[] = {
     },
     // TuxedoOS
     {
-        .names = {"Tuxedo OS"},
+        .names = {"Tuxedo OS", "tuxedo"},
         .lines = FASTFETCH_DATATEXT_LOGO_TUXEDO_OS,
         .colors = {
             FF_COLOR_FG_WHITE,
