@@ -695,7 +695,7 @@ elseif(WIN32)
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
-        src/detection/media/media_nosupport.c
+        src/detection/media/media_windows.c
         src/detection/memory/memory_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/monitor/monitor_windows.c
