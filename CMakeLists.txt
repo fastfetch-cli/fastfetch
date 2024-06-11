@@ -115,9 +115,14 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
+if(WIN32)
+    set(CMAKE_CXX_STANDARD 20)
+elseif(ENABLE_DIRECTX_HEADERS)
+    set(CMAKE_CXX_STANDARD 17)
+endif()
+
 if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
-    set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
 endif()
 
@@ -695,7 +700,7 @@ elseif(WIN32)
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
-        src/detection/media/media_windows.c
+        src/detection/media/media_windows.cpp
         src/detection/memory/memory_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/monitor/monitor_windows.c
@@ -1035,6 +1040,7 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
+        PRIVATE "RuntimeObject"
     )
 elseif(BSD)
     target_link_libraries(libfastfetch
@@ -1091,11 +1097,34 @@ target_link_libraries(flashfetch
     PRIVATE libfastfetch
 )
 
-# Prevent fastfetch from linking to libstdc++
-set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
-set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
-set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
+if(NOT WIN32)
+    # Prevent fastfetch from linking to libstdc++
+    set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
+    set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
+    set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
+    set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
+else()
+    include(CheckCXXSymbolExists)
+    if(cxx_std_20 IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+        set(header version)
+    else()
+        set(header ciso646)
+    endif()
+
+    check_cxx_symbol_exists(_LIBCPP_VERSION ${header} LIBCPP)
+    if(LIBCPP)
+        target_link_libraries(libfastfetch
+            PRIVATE "libc++.a"
+        )
+    endif()
+
+    check_cxx_symbol_exists(__GLIBCXX__ ${header} GLIBCXX)
+    if(GLIBCXX)
+        target_link_libraries(libfastfetch
+            PRIVATE "libstdc++.a"
+        )
+    endif()
+endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(fastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
