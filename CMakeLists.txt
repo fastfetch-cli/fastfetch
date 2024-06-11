@@ -118,7 +118,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointe
 if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
 endif()
 
 if(WIN32)
@@ -1067,37 +1067,22 @@ target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
 )
 
+target_compile_options(libfastfetch PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti>)
+
 if(WIN32)
     set(CMAKE_CXX_STANDARD 20)
     include(CheckIncludeFileCXX)
-    CHECK_INCLUDE_FILE_CXX("winrt/Windows.Media.Control.h" HAVE_WINRT)
+    CHECK_INCLUDE_FILE_CXX("winrt/Windows.Foundation.h" HAVE_WINRT)
     if(HAVE_WINRT)
         add_library(ffwinrt SHARED src/detection/media/media_windows.dll.cpp)
         target_link_libraries(ffwinrt PRIVATE "RuntimeObject")
-
-        include(CheckCXXSymbolExists)
-        if(cxx_std_20 IN_LIST CMAKE_CXX_COMPILE_FEATURES)
-            set(header version)
-        else()
-            set(header ciso646)
-        endif()
-
-        check_cxx_symbol_exists(_LIBCPP_VERSION ${header} LIBCPP)
-        if(LIBCPP)
-            target_link_libraries(ffwinrt
-                PRIVATE "libc++.a"
-            )
-        endif()
-
-        check_cxx_symbol_exists(__GLIBCXX__ ${header} GLIBCXX)
-        if(GLIBCXX)
-            target_link_libraries(ffwinrt
-                PRIVATE "libstdc++.a"
-            )
-        endif()
-    else()
-        set(CMAKE_CXX_STANDARD 17)
+        target_compile_definitions(ffwinrt PRIVATE WIN32_LEAN_AND_MEAN=1 WINRT_LEAN_AND_MEAN=1)
+        target_link_options(ffwinrt
+            PRIVATE "-static" # stdc++, winpthread, gcc_s, etc.
+        )
     endif()
+        set(CMAKE_CXX_STANDARD 17)
 endif()
 
 ######################
