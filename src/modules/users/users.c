@@ -147,6 +147,9 @@ void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
 
     if (options->compact != defaultOptions.compact)
         yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+
+    if (options->myselfOnly != defaultOptions.myselfOnly)
+        yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
 }
 
 void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
