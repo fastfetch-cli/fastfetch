@@ -1,0 +1,168 @@
+// Inspired by https://github.com/usgraphics/TR-100
+{
+    "$schema": "file://home/carterl/fastfetch/doc/json_schema.json",
+    "logo": null,
+    "display": {
+        "pipe": true,
+        "keyWidth": 16,
+        "separator": "│ ",
+        "percent": {
+            "type": 6
+        },
+        "bar": {
+            "borderLeft": "",
+            "borderRight": "",
+            "charElapsed": "█",
+            "charTotal": "░",
+            "width": 40
+        }
+    },
+    "modules": [
+        {
+            "type": "custom",
+            "format": "┌┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┬┐"
+        },
+        {
+            "type": "custom",
+            "format": "├┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┴┤"
+        },
+        {
+            "type": "version",
+            "key": " ",
+            "format": "│                    FASTFETCH {version}                   │"
+        },
+        {
+            "type": "custom",
+            "format": "│                     MACHINE REPORT                    │"
+        },
+        {
+            "type": "custom",
+            "format": "├────────────┬──────────────────────────────────────────┤"
+        },
+        {
+            "type": "os",
+            "key": "│ OS         │\u001b[42C",
+            "format": "{pretty-name}"
+        },
+        {
+            "type": "kernel",
+            "key": "│ KERNEL     │\u001b[42C"
+        },
+        {
+            "type": "custom",
+            "format": "├────────────┼──────────────────────────────────────────┤"
+        },
+        {
+            "type": "title",
+            "key": "│ HOSTNAME   │\u001b[42C",
+            "format": "{host-name}"
+        },
+        {
+            "type": "localip",
+            "key": "│ CLIENT IP  │\u001b[42C",
+            "format": "{ipv4}"
+        },
+        {
+            "type": "localip",
+            "key": "│ MAC ADDR   │\u001b[42C",
+            "format": "{mac}",
+            "showMac": true
+        },
+        {
+            "type": "title",
+            "key": "│ USER       │\u001b[42C",
+            "format": "{user-name}"
+        },
+        {
+            "type": "host",
+            "key": "│ MACHINE    │\u001b[42C",
+            "format": "{name}"
+        },
+        {
+            "type": "custom",
+            "format": "├────────────┼──────────────────────────────────────────┤"
+        },
+        {
+            "type": "cpu",
+            "key": "│ PROCESSOR  │\u001b[42C",
+            "format": "{name}"
+        },
+        {
+            "type": "cpu",
+            "key": "│ CORES      │\u001b[42C",
+            "format": "{cores-physical} PHYSICAL CORES / {cores-logical} THREADS",
+            "showPeCoreCount": false
+        },
+        {
+            "type": "cpu",
+            "key": "│ CPU FREQ   │\u001b[42C",
+            "format": "{freq-max} GHz"
+        },
+        {
+            "type": "loadavg",
+            "key": "│ LOAD 1m    │\u001b[42C",
+            "format": "{loadavg1}"
+        },
+        {
+            "type": "loadavg",
+            "key": "│ LOAD 5m    │\u001b[42C",
+            "format": "{loadavg2}"
+        },
+        {
+            "type": "loadavg",
+            "key": "│ LOAD 15m   │\u001b[42C",
+            "format": "{loadavg3}"
+        },
+        {
+            "type": "custom",
+            "format": "├────────────┼──────────────────────────────────────────┤"
+        },
+        {
+            "type": "memory",
+            "key": "│ MEMORY     │\u001b[42C",
+            "format": "{used} / {total} [{percentage}]"
+        },
+        {
+            "type": "memory",
+            "key": "│ USAGE      │\u001b[42C",
+            "format": ""
+        },
+        {
+            "type": "custom",
+            "format": "├────────────┼──────────────────────────────────────────┤"
+        },
+        {
+            "type": "disk",
+            "key": "│ VOLUME     │\u001b[42C",
+            "format": "{size-used} / {size-total} [{size-percentage}]",
+            "folders": "/"
+        },
+        {
+            "type": "disk",
+            "key": "│ DISK USAGE │\u001b[42C",
+            "format": ""
+        },
+        {
+            "type": "custom",
+            "format": "├────────────┼──────────────────────────────────────────┤"
+        },
+        {
+            "type": "users",
+            "key": "│ LAST LOGIN │\u001b[42C",
+            "format": "{login-time}"
+        },
+        {
+            "type": "users",
+            "key": "│            │\u001b[42C",
+            "format": "{client-ip}"
+        },
+        {
+            "type": "uptime",
+            "key": "│ UPTIME     │\u001b[42C"
+        },
+        {
+            "type": "custom",
+            "format": "└────────────┴──────────────────────────────────────────┘"
+        }
+    ]
+  }
