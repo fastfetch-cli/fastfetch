@@ -41,8 +41,7 @@
         },
         {
             "type": "os",
-            "key": "│ OS         │\u001b[42C",
-            "format": "{pretty-name}"
+            "key": "│ OS         │\u001b[42C"
         },
         {
             "type": "kernel",
@@ -61,6 +60,10 @@
             "type": "localip",
             "key": "│ CLIENT IP  │\u001b[42C",
             "format": "{ipv4}"
+        },
+        {
+            "type": "dns",
+            "key": "│ DNS        │\u001b[42C"
         },
         {
             "type": "localip",
@@ -154,7 +157,7 @@
         {
             "type": "users",
             "key": "│            │\u001b[42C",
-            "format": "{client-ip}"
+            "format": "{client-ip}{/client-ip}No IP info"
         },
         {
             "type": "uptime",
