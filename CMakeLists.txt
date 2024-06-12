@@ -689,7 +689,7 @@ elseif(WIN32)
         src/detection/physicaldisk/physicaldisk_windows.c
         src/detection/diskio/diskio_windows.c
         src/detection/displayserver/displayserver_windows.c
-        src/detection/dns/dns_linux.c
+        src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c

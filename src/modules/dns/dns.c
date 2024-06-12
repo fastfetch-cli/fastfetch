@@ -20,7 +20,7 @@ void ffPrintDNS(FFDNSOptions* options)
 
     if (result.length == 0)
     {
-        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "NO DNS detected");
+        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "NO DNS servers detected");
         return;
     }
 
