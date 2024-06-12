@@ -62,14 +62,15 @@
             "format": "{ipv4}"
         },
         {
-            "type": "dns",
-            "key": "│ DNS        │\u001b[42C"
-        },
-        {
             "type": "localip",
             "key": "│ MAC ADDR   │\u001b[42C",
             "format": "{mac}",
+            "showIPv4": false,
             "showMac": true
+        },
+        {
+            "type": "dns",
+            "key": "│ DNS        │\u001b[42C"
         },
         {
             "type": "title",
