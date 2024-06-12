@@ -27,6 +27,14 @@ void ffPrintDNS(FFDNSOptions* options)
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
     FF_LIST_FOR_EACH(FFstrbuf, item, result)
     {
+        if (!ffStrbufContainC(item, '.')) continue; // IPv4
+        if (buf.length)
+            ffStrbufAppendC(&buf, ' ');
+        ffStrbufAppend(&buf, item);
+    }
+    FF_LIST_FOR_EACH(FFstrbuf, item, result)
+    {
+        if (!ffStrbufContainC(item, ':')) continue; // IPv6
         if (buf.length)
             ffStrbufAppendC(&buf, ' ');
         ffStrbufAppend(&buf, item);
