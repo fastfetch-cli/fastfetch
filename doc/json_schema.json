@@ -904,10 +904,6 @@
                                                 "description": "Print how long system has been running"
                                             },
                                             {
-                                                "const": "users",
-                                                "description": "Print users currently logged in"
-                                            },
-                                            {
                                                 "const": "version",
                                                 "description": "Print Fastfetch version"
                                             },
@@ -1981,6 +1977,42 @@
                                                 "$ref": "#/$defs/colors"
                                             }
                                         }
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Users",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "users",
+                                        "description": "Print users currently logged in"
+                                    },
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Show all active users in one line",
+                                        "default": false
+                                    },
+                                    "myselfOnly": {
+                                        "type": "boolean",
+                                        "description": "Show only the current user",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

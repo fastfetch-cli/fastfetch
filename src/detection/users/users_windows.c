@@ -10,23 +10,28 @@ static inline uint64_t to_ms(uint64_t ret)
     return ret / 10000ull;
 }
 
-const char* ffDetectUsers(FFlist* users)
+const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
 {
     WTS_SESSION_INFO_1W* sessionInfo;
     DWORD sessionCount;
     DWORD level = 1;
 
-    if(!WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE, &level, 0, &sessionInfo, &sessionCount))
+    if (!WTSEnumerateSessionsExW(WTS_CURRENT_SERVER_HANDLE, &level, 0, &sessionInfo, &sessionCount))
         return "WTSEnumerateSessionsW(WTS_CURRENT_SERVER_HANDLE) failed";
 
     for (DWORD i = 0; i < sessionCount; i++)
     {
         WTS_SESSION_INFO_1W* session = &sessionInfo[i];
-        if(session->State != WTSActive)
+        if (session->State != WTSActive)
+            continue;
+
+        FF_STRBUF_AUTO_DESTROY userName = ffStrbufCreateWS(session->pUserName);
+
+        if (options->myselfOnly && !ffStrbufEqual(&instance.state.platform.userName, &userName))
             continue;
 
         FFUserResult* user = (FFUserResult*) ffListAdd(users);
-        ffStrbufInitWS(&user->name, session->pUserName);
+        ffStrbufInitMove(&user->name, &userName);
         ffStrbufInitWS(&user->hostName, session->pHostName);
         ffStrbufInitWS(&user->sessionName, session->pSessionName);
         ffStrbufInit(&user->clientIp);

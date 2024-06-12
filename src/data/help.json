@@ -1451,6 +1451,24 @@
             }
         },
         {
+            "long": "users-compact",
+            "desc": "Show all active users in one line",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "users-myself-only",
+            "desc": "Show only current user",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "player-name",
             "desc": "The name of the player to use for module Media and Player",
             "remark": "Linux only",

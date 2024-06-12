@@ -13,7 +13,7 @@ void ffPrintUsers(FFUsersOptions* options)
 {
     FF_LIST_AUTO_DESTROY users = ffListCreate(sizeof(FFUserResult));
 
-    const char* error = ffDetectUsers(&users);
+    const char* error = ffDetectUsers(options, &users);
 
     if(error)
     {
@@ -94,9 +94,15 @@ bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const 
     if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
         return true;
 
-    if(ffStrEqualsIgnCase(subKey, "compact"))
+    if (ffStrEqualsIgnCase(subKey, "compact"))
     {
         options->compact = ffOptionParseBoolean(value);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "myself-only"))
+    {
+        options->myselfOnly = ffOptionParseBoolean(value);
         return true;
     }
 
@@ -110,7 +116,7 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
     yyjson_obj_foreach(module, idx, max, key_, val)
     {
         const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
+        if (ffStrEqualsIgnCase(key, "type"))
             continue;
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
@@ -119,6 +125,12 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "compact"))
         {
             options->compact = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "myselfOnly"))
+        {
+            options->myselfOnly = yyjson_get_bool(val);
             continue;
         }
 
@@ -137,11 +149,11 @@ void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
         yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
-void ffGenerateUsersJsonResult(FF_MAYBE_UNUSED FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
 
-    const char* error = ffDetectUsers(&results);
+    const char* error = ffDetectUsers(options, &results);
 
     if(error)
     {
@@ -200,6 +212,7 @@ void ffInitUsersOptions(FFUsersOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
 
     options->compact = false;
+    options->myselfOnly = false;
 }
 
 void ffDestroyUsersOptions(FFUsersOptions* options)

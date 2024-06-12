@@ -15,15 +15,18 @@
     #include <arpa/inet.h>
 #endif
 
-const char* ffDetectUsers(FFlist* users)
+const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
 {
     struct utmpx* n = NULL;
     setutxent();
 
 next:
-    while((n = getutxent()))
+    while ((n = getutxent()))
     {
-        if(n->ut_type != USER_PROCESS)
+        if (n->ut_type != USER_PROCESS)
+            continue;
+
+        if (options->myselfOnly && !ffStrbufEqualS(&instance.state.platform.userName, n->ut_user))
             continue;
 
         FF_LIST_FOR_EACH(FFUserResult, user, *users)
