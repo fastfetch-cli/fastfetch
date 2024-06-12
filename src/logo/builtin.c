@@ -2576,7 +2576,7 @@ static const FFlogo M[] = {
     },
     // Manjaro
     {
-        .names = {"manjaro", "manjaro-linux", "manjarolinux"},
+        .names = {"manjaro", "manjaro-linux", "manjarolinux", "manjaro-arm"},
         .lines = FASTFETCH_DATATEXT_LOGO_MANJARO,
         .colors = {
             FF_COLOR_FG_GREEN,
