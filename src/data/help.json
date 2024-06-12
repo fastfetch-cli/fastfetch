@@ -1368,6 +1368,19 @@
             }
         },
         {
+            "long": "dns-show-type",
+            "desc": "Specify the type of DNS servers should be detected",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "ipv4": "Show IPv4 addresses only",
+                    "ipv6": "Show IPv6 addresses only",
+                    "both": "Show both IPv4 and IPv6 addresses"
+                },
+                "default": "both"
+            }
+        },
+        {
             "long": "netio-name-prefix",
             "desc": "Show interfaces with given name prefix only",
             "arg": {

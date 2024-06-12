@@ -2,4 +2,4 @@
 
 #include "fastfetch.h"
 
-const char* ffDetectDNS(FFlist* results /* list of FFstrbuf */);
+const char* ffDetectDNS(FFDNSOptions* options, FFlist* results /* list of FFstrbuf */);

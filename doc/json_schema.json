@@ -705,6 +705,7 @@
                             "disk",
                             "diskio",
                             "de",
+                            "dns",
                             "editor",
                             "font",
                             "gamepad",
@@ -1416,6 +1417,41 @@
                                         "type": "boolean",
                                         "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.",
                                         "default": "false"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "DNS",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "dns",
+                                        "description": "Print DNS servers"
+                                    },
+                                    "showType": {
+                                        "enum": [
+                                            "ipv4",
+                                            "ipv6",
+                                            "both"
+                                        ],
+                                        "default": "both",
+                                        "description": "Specify the type of DNS servers should be detected"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
