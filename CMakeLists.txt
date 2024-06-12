@@ -340,6 +340,7 @@ set(LIBFASTFETCH_SRC
     src/modules/de/de.c
     src/modules/disk/disk.c
     src/modules/diskio/diskio.c
+    src/modules/dns/dns.c
     src/modules/editor/editor.c
     src/modules/font/font.c
     src/modules/gpu/gpu.c
@@ -417,6 +418,7 @@ if(LINUX)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_linux.c
@@ -487,6 +489,7 @@ elseif(ANDROID)
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/dns/dns_nosupport.c
         src/detection/physicaldisk/physicaldisk_linux.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
@@ -548,6 +551,7 @@ elseif(BSD)
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_bsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_bsd.c
@@ -619,6 +623,7 @@ elseif(APPLE)
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_apple.c
         src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
@@ -684,6 +689,7 @@ elseif(WIN32)
         src/detection/physicaldisk/physicaldisk_windows.c
         src/detection/diskio/diskio_windows.c
         src/detection/displayserver/displayserver_windows.c
+        src/detection/dns/dns_linux.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
