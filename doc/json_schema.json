@@ -1668,6 +1668,14 @@
                                         "maximum": 9,
                                         "default": 2
                                     },
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Show values in one line",
+                                        "default": true
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

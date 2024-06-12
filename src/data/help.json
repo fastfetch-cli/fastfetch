@@ -1288,6 +1288,15 @@
             }
         },
         {
+            "long": "loadavg-compact",
+            "desc": "Show load average values in one line",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": true
+            }
+        },
+        {
             "long": "localip-show-ipv4",
             "desc": "Show IPv4 addresses in local ip module",
             "arg": {
