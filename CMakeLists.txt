@@ -489,7 +489,7 @@ elseif(ANDROID)
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
-        src/detection/dns/dns_nosupport.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
@@ -1007,6 +1007,7 @@ if(LINUX)
     )
 elseif(APPLE)
     target_link_libraries(libfastfetch
+        PRIVATE "resolv"
         PRIVATE "-framework AVFoundation"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"

@@ -1,32 +1,27 @@
 #include "detection/dns/dns.h"
 
-#include <arpa/inet.h>
-#include <resolv.h>
+#include "common/io/io.h"
+#include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 const char* ffDetectDNS(FFlist* results)
 {
-    if (res_init() < 0)
-        return "res_init() failed";
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(FASTFETCH_TARGET_DIR_ROOT "/etc/resolv.conf", "r");
+    if (!file)
+        return "fopen (" FASTFETCH_TARGET_DIR_ROOT "/etc/resolv.conf) failed";
 
-    for (int i = 0; i < _res.nscount; ++i)
+    FF_AUTO_FREE char* line = NULL;
+    size_t len = 0;
+
+    while (getline(&line, &len, file) != -1)
     {
-        struct sockaddr_in* addr = &_res.nsaddr_list[i];
-        char addressBuffer[INET_ADDRSTRLEN + 4];
-        inet_ntop(AF_INET, &addr->sin_addr, addressBuffer, INET_ADDRSTRLEN);
-
-        FFstrbuf* result = (FFstrbuf*) ffListAdd(results);
-        ffStrbufInitS(result, addressBuffer);
+        if (ffStrStartsWith(line, "nameserver "))
+        {
+            FFstrbuf* item = (FFstrbuf*) ffListAdd(results);
+            ffStrbufInitS(item, line + strlen("nameserver "));
+            ffStrbufTrimRightSpace(item);
+            ffStrbufTrimLeft(item, ' ');
+        }
     }
-
-    for (int i = 0; i < _res._u._ext.nscount; ++i)
-    {
-        struct sockaddr_in6* addr = _res._u._ext.nsaddrs[i];
-        char addressBuffer[INET6_ADDRSTRLEN + 4];
-        inet_ntop(AF_INET6, &addr->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
-
-        FFstrbuf* result = (FFstrbuf*) ffListAdd(results);
-        ffStrbufInitS(result, addressBuffer);
-    }
-
     return NULL;
 }
