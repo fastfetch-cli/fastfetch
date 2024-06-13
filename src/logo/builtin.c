@@ -3617,6 +3617,31 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // RedOS
+    {
+        .names = {"RedOS", "RED OS", "red-os", "redos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_REDOS,
+        .colors =
+            {
+                FF_COLOR_FG_RED,
+                FF_COLOR_FG_WHITE,
+            },
+        .colorTitle = FF_COLOR_FG_RED,
+        .colorKeys = FF_COLOR_FG_RED,
+    },
+    // RedOS small
+    {
+        .names = {"RedOS_small", "RED OS_small", "red-os_small", "redos_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_REDOS_SMALL,
+        .colors =
+            {
+                FF_COLOR_FG_RED,
+                FF_COLOR_FG_WHITE,
+            },
+        .colorTitle = FF_COLOR_FG_RED,
+        .colorKeys = FF_COLOR_FG_RED,
+    },
     // RedstarOS
     {
         .names = {"redstar", "redstar-os", "redstaros", "redstaros-linux", "redstar-os-linux"},
