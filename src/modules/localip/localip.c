@@ -373,6 +373,7 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
         yyjson_mut_obj_add_strbuf(doc, obj, "ipv6", &ip->ipv6);
         yyjson_mut_obj_add_strbuf(doc, obj, "mac", &ip->mac);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
+        yyjson_mut_obj_add_int(doc, obj, "mtu", ip->mtu);
     }
 
     FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
