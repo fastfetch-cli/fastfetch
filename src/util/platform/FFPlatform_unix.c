@@ -34,6 +34,8 @@ static void getExePath(FFPlatform* platform)
             exePathLen = 0;
         else
             exePathLen--; // remove terminating NUL
+    #else
+    int exePathLen = 0;
     #endif
     if (exePathLen > 0)
     {
@@ -181,7 +183,7 @@ void ffPlatformInitImpl(FFPlatform* platform)
     struct passwd* pwd = getpwuid(getuid());
 
     struct utsname uts;
-    if(uname(&uts) != 0)
+    if(uname(&uts) < 0)
         memset(&uts, 0, sizeof(uts));
 
     getExePath(platform);

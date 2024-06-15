@@ -22,7 +22,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "processingTimeout"))
             options->processingTimeout = (int32_t) yyjson_get_int(val);
 
-        #if defined(__linux__) || defined(__FreeBSD__)
+        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
         else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
             options->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "playerName"))

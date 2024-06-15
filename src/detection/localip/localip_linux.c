@@ -162,6 +162,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);
 
+#ifdef SIOCGIFMTU
     FF_AUTO_CLOSE_FD int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd > 0)
     {
@@ -173,6 +174,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 iface->mtu = ifr.ifr_mtu;
         }
     }
+#endif
 
     return NULL;
 }

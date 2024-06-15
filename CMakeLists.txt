@@ -18,6 +18,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
     set(BSD TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "SunOS")
+    set(SunOS TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -733,6 +735,77 @@ elseif(WIN32)
         src/util/windows/wmi.cpp
         src/util/platform/FFPlatform_windows.c
     )
+elseif(SunOS)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
+        src/common/io/io_unix.c
+        src/common/netif/netif_linux.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_nosupport.c
+        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cursor/cursor_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/disk/disk_nosupport.c
+        src/detection/dns/dns_linux.c
+        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/diskio/diskio_nosupport.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_pci.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/host/host_nosupport.c
+        src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_nosupport.c
+        src/detection/libc/libc_nosupport.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_nosupport.c
+        src/detection/locale/locale_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_nosupport.c
+        src/detection/monitor/monitor_nosupport.c
+        src/detection/netio/netio_nosupport.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_sunos.c
+        src/detection/packages/packages_nosupport.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/gtk_qt/qt.c
+        src/detection/sound/sound_nosupport.c
+        src/detection/swap/swap_nosupport.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
+        src/detection/theme/theme_linux.c
+        src/detection/uptime/uptime_sunos.c
+        src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_linux.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_nosupport.c
+        src/util/platform/FFPlatform_unix.c
+    )
 endif()
 
 if(ENABLE_DIRECTX_HEADERS)
@@ -820,6 +893,8 @@ if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 elseif(APPLE)
     target_compile_definitions(libfastfetch PUBLIC _DARWIN_C_SOURCE)
+elseif(SunOS)
+    target_compile_definitions(libfastfetch PUBLIC __EXTENSIONS__ _POSIX_C_SOURCE=1)
 endif()
 
 if(HAVE_STATX)
@@ -1048,6 +1123,11 @@ elseif(BSD)
         PRIVATE "m"
         PRIVATE "usbhid"
         PRIVATE "geom"
+    )
+elseif(SunOS)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+        PRIVATE "socket"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)

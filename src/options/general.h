@@ -15,7 +15,7 @@ typedef struct FFOptionsGeneral
     int32_t processingTimeout;
 
     // Module options that cannot be put in module option structure
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
     FFstrbuf playerName;
     bool escapeBedrock;
     FFDsForceDrmType dsForceDrm;

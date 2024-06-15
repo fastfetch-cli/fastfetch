@@ -302,7 +302,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
     }
-#else
+#elif !defined(__sun)
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if(procdir == NULL)
         return "opendir(\"/proc\") failed";

@@ -1,6 +1,7 @@
 #include "terminalsize.h"
 #include "common/io/io.h"
 
+#include <sys/termios.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
