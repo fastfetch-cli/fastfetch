@@ -48,16 +48,19 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     return (const FFSmbiosHeader*) (p + 1);
 }
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <stddef.h>
 
 #ifdef __linux__
     #include "common/properties.h"
-#else
+#elif defined(__FreeBSD__)
     #include "common/settings.h"
     #define loff_t off_t // FreeBSD doesn't have loff_t
+#elif defined(__sun)
+    #define loff_t off_t
 #endif
 
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer)
@@ -134,11 +137,12 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
         #endif
         {
+            #ifndef __sun
             FF_STRBUF_AUTO_DESTROY strEntryAddress = ffStrbufCreate();
             #ifdef __FreeBSD__
             if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntryAddress))
                 return NULL;
-            #else
+            #elif defined(__linux__)
             {
                 FF_STRBUF_AUTO_DESTROY systab = ffStrbufCreate();
                 if (!ffAppendFileBuffer("/sys/firmware/efi/systab", &systab))
@@ -165,6 +169,13 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 memcpy(&entryPoint, p, sizeof(entryPoint));
                 munmap(p, sizeof(entryPoint));
             }
+            #else
+            FF_AUTO_CLOSE_FD int fd = open("/dev/smbios", O_RDONLY);
+            if (fd < 0) return NULL;
+
+            FFSmbiosEntryPoint entryPoint;
+            if (!ffReadFDData(fd, sizeof(entryPoint), &entryPoint)) return NULL;
+            #endif
 
             uint32_t tableLength = 0;
             loff_t tableAddress = 0;

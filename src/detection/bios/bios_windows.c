@@ -1,5 +1,7 @@
 #include "bios.h"
 #include "util/smbiosHelper.h"
+
+#ifdef _WIN32
 #include "util/windows/registry.h"
 
 #include <ntstatus.h>
@@ -25,7 +27,7 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
         };
     };
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
-
+#endif
 
 typedef struct FFSmbiosBios
 {
@@ -74,6 +76,7 @@ const char* ffDetectBios(FFBiosResult* bios)
     if (data->Header.Length > offsetof(FFSmbiosBios, SystemBiosMajorRelease))
         ffStrbufSetF(&bios->release, "%u.%u", data->SystemBiosMajorRelease, data->SystemBiosMinorRelease);
 
+    #ifdef _WIN32
     // Same as GetFirmwareType, but support (?) Windows 7
     // https://ntdoc.m417z.com/system_information_class
     SYSTEM_BOOT_ENVIRONMENT_INFORMATION sbei;
@@ -86,6 +89,7 @@ const char* ffDetectBios(FFBiosResult* bios)
             default: break;
         }
     }
+    #endif
 
     return NULL;
 }
