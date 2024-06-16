@@ -1,9 +1,12 @@
 #include "terminalsize.h"
 #include "common/io/io.h"
 
-#include <sys/termios.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+
+#ifdef __sun
+    #include <sys/termios.h>
+#endif
 
 bool ffDetectTerminalSize(FFTerminalSizeResult* result)
 {
