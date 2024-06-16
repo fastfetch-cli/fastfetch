@@ -748,7 +748,7 @@ elseif(SunOS)
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_windows.c
-        src/detection/cpu/cpu_nosupport.c
+        src/detection/cpu/cpu_sunos.c
         src/detection/cpucache/cpucache_nosupport.c
         src/detection/cpuusage/cpuusage_nosupport.c
         src/detection/cursor/cursor_linux.c
@@ -786,7 +786,7 @@ elseif(SunOS)
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_sunos.c
-        src/detection/packages/packages_nosupport.c
+        src/detection/packages/packages_sunos.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
         src/detection/gtk_qt/qt.c
@@ -1128,6 +1128,7 @@ elseif(SunOS)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "socket"
+        PRIVATE "kstat"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
