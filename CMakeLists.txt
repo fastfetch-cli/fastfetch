@@ -776,7 +776,7 @@ elseif(SunOS)
         src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
-        src/detection/loadavg/loadavg_nosupport.c
+        src/detection/loadavg/loadavg_sunos.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
