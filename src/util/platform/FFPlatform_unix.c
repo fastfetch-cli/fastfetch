@@ -35,12 +35,13 @@ static void getExePath(FFPlatform* platform)
         else
             exePathLen--; // remove terminating NUL
     #else
-    int exePathLen = 0;
+        ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
+        exePath[exePathLen] = '\0';
     #endif
     if (exePathLen > 0)
     {
         ffStrbufEnsureFree(&platform->exePath, PATH_MAX);
-        if (realpath(platform->exePath.chars, exePath))
+        if (realpath(exePath, platform->exePath.chars))
             ffStrbufRecalculateLength(&platform->exePath);
         else
             ffStrbufSetNS(&platform->exePath, (uint32_t) exePathLen, exePath);
