@@ -17,6 +17,9 @@
 #else
 #include <netpacket/packet.h>
 #endif
+#ifdef __sun
+#include <sys/sockio.h>
+#endif
 
 static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, bool firstOnly)
 {
@@ -162,19 +165,26 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);
 
-#ifdef SIOCGIFMTU
     FF_AUTO_CLOSE_FD int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd > 0)
     {
         FF_LIST_FOR_EACH(FFLocalIpResult, iface, *results)
         {
-            struct ifreq ifr = {};
+            struct ifreq ifr;
             strncpy(ifr.ifr_name, iface->name.chars, IFNAMSIZ - 1);
             if (ioctl(sockfd, SIOCGIFMTU, &ifr) == 0)
-                iface->mtu = ifr.ifr_mtu;
+                iface->mtu = (int32_t) ifr.ifr_mtu;
+
+            #ifdef __sun
+            if ((options->showType & FF_LOCALIP_TYPE_MAC_BIT) && ioctl(sockfd, SIOCGIFHWADDR, &ifr) == 0)
+            {
+                const uint8_t* ptr = (uint8_t*) ifr.ifr_addr.sa_data; // NOT ifr_enaddr
+                ffStrbufSetF(&iface->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
+                             ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
+            }
+            #endif
         }
     }
-#endif
 
     return NULL;
 }
