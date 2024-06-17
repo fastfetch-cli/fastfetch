@@ -4,7 +4,7 @@
 #include "modules/opengl/opengl.h"
 #include "util/stringUtils.h"
 
-#define FF_OPENGL_NUM_FORMAT_ARGS 4
+#define FF_OPENGL_NUM_FORMAT_ARGS 5
 
 void ffPrintOpenGL(FFOpenGLOptions* options)
 {
@@ -13,6 +13,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufInit(&result.renderer);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.slv);
+    result.library = "Unknown";
 
     const char* error = ffDetectOpenGL(options, &result);
     if(error)
@@ -33,6 +34,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer, "renderer"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv, "slv"},
+            {FF_FORMAT_ARG_TYPE_STRING, result.library, "library"},
         }));
     }
 
@@ -150,6 +152,7 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
         yyjson_mut_obj_add_strbuf(doc, obj, "renderer", &result.renderer);
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result.vendor);
         yyjson_mut_obj_add_strbuf(doc, obj, "slv", &result.slv);
+        yyjson_mut_obj_add_str(doc, obj, "library", result.library);
     }
 
     ffStrbufDestroy(&result.version);
@@ -164,7 +167,8 @@ void ffPrintOpenGLHelpFormat(void)
         "version - version",
         "renderer - renderer",
         "vendor - vendor",
-        "shading language version - slv"
+        "shading language version - slv",
+        "ogl library used - library",
     }));
 }
 

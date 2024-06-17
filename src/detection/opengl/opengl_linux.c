@@ -18,12 +18,13 @@ typedef struct GLData
     FF_LIBRARY_SYMBOL(glGetString)
 } GLData;
 
-static const char* glHandleResult(FFOpenGLResult* result, const GLData* data)
+static const char* glHandleResult(FFOpenGLResult* result, const GLData* data, const char* library)
 {
     ffStrbufAppendS(&result->version, (const char*) data->ffglGetString(GL_VERSION));
     ffStrbufAppendS(&result->renderer, (const char*) data->ffglGetString(GL_RENDERER));
     ffStrbufAppendS(&result->vendor, (const char*) data->ffglGetString(GL_VENDOR));
     ffStrbufAppendS(&result->slv, (const char*) data->ffglGetString(GL_SHADING_LANGUAGE_VERSION));
+    result->library = library;
     return NULL;
 }
 
@@ -61,7 +62,7 @@ static const char* eglHandleContext(FFOpenGLResult* result, EGLData* data)
     if(data->ffeglMakeCurrent(data->display, data->surface, data->surface, data->context) != EGL_TRUE)
         return "eglMakeCurrent returned EGL_FALSE";
 
-    return glHandleResult(result, &data->glData);
+    return glHandleResult(result, &data->glData, "EGL");
 }
 
 static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data)
@@ -173,7 +174,7 @@ static const char* glxHandleContext(FFOpenGLResult* result, GLXData* data)
     if(data->ffglXMakeCurrent(data->display, data->glxPixmap, data->context) != True)
         return "glXMakeCurrent returned False";
 
-    return glHandleResult(result, &data->glData);
+    return glHandleResult(result, &data->glData, "GLX");
 }
 
 static const char* glxHandleGLXPixmap(FFOpenGLResult* result, GLXData* data)
@@ -284,7 +285,7 @@ static const char* osMesaHandleContext(FFOpenGLResult* result, OSMesaData* data)
     if(data->ffOSMesaMakeCurrent(data->context, buffer, GL_UNSIGNED_BYTE, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT) != GL_TRUE)
         return "OSMesaMakeCurrent returned GL_FALSE";
 
-    return glHandleResult(result, &data->glData);
+    return glHandleResult(result, &data->glData, "OSMesa");
 }
 
 static const char* osMesaHandleData(FFOpenGLResult* result, OSMesaData* data)

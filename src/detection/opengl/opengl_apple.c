@@ -12,6 +12,7 @@ static const char* glHandleResult(FFOpenGLResult* result)
     ffStrbufAppendS(&result->renderer, (const char*) glGetString(GL_RENDERER));
     ffStrbufAppendS(&result->vendor, (const char*) glGetString(GL_VENDOR));
     ffStrbufAppendS(&result->slv, (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
+    result->library = "CGL";
     return NULL;
 }
 

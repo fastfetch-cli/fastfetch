@@ -25,6 +25,7 @@ static const char* glHandleResult(WGLData* wglData)
     ffStrbufAppendS(&wglData->result->renderer, (const char*) wglData->ffglGetString(GL_RENDERER));
     ffStrbufAppendS(&wglData->result->vendor, (const char*) wglData->ffglGetString(GL_VENDOR));
     ffStrbufAppendS(&wglData->result->slv, (const char*) wglData->ffglGetString(GL_SHADING_LANGUAGE_VERSION));
+    wglData->result->library = "WGL";
     return NULL;
 }
 
