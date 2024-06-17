@@ -781,7 +781,7 @@ elseif(SunOS)
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
-        src/detection/memory/memory_nosupport.c
+        src/detection/memory/memory_sunos.c
         src/detection/monitor/monitor_nosupport.c
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
