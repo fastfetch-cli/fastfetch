@@ -90,6 +90,7 @@ const char* ffDetectEditor(FFEditorResult* result)
         ffStrbufStartsWithS(&result->exe, "emacs-") || // emacs-29.3
         ffStrbufEqualS(&result->exe, "hx") ||
         ffStrbufEqualS(&result->exe, "code") ||
+        ffStrbufEqualS(&result->exe, "pluma") ||
         ffStrbufEqualS(&result->exe, "sublime_text")
     ) param = "--version";
     else if (
