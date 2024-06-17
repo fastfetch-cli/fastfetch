@@ -20,8 +20,6 @@
 # define ROUNDUP(a)           ROUNDUP2((a), sizeof(int))
 #elif defined(__sun)
 # define ROUNDUP(a)           ROUNDUP2((a), _SS_ALIGNSIZE)
-#else
-# error unknown platform
 #endif
 
 static struct sockaddr *
@@ -35,6 +33,7 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
         {
             if ((1 << i) == desired)
                 return sa;
+            SA_LEN();
 #ifdef __sun
             sa = (struct sockaddr *)(ROUNDUP(sizeof(struct sockaddr)) + (char *)sa);
 #else
@@ -77,9 +76,7 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
         },
         .dst = {
             .sin_family = AF_INET,
-            #ifndef __sun
             .sin_len = sizeof(rtmsg.dst),
-            #endif
         },
     };
 
