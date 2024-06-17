@@ -1,18 +1,22 @@
 #include "cpu.h"
 #include <kstat.h>
 
+static inline void kstatFreeWrap(kstat_ctl_t** pkc)
+{
+    assert(pkc);
+    if (*pkc)
+        kstat_close(*pkc);
+}
+
 const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    kstat_ctl_t* kc = kstat_open();
+    __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
     if (!kc)
         return "kstat_open() failed";
 
     kstat_t* ks = kstat_lookup(kc, "cpu_info", -1, NULL);
     if (!ks)
         return "kstat_lookup() failed";
-
-    if (ks->ks_type != KSTAT_TYPE_NAMED)
-        return "Invalid ks_type found";
 
     if (kstat_read(kc, ks, NULL) < 0)
         return "kstat_read() failed";
@@ -27,12 +31,15 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPURe
     }
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "clock_MHz");
-        cpu->frequencyBase = kn->value.i32 / 1000.;
+        cpu->frequencyBase = kn->value.ui32 / 1000.;
     }
 
-    cpu->coresOnline = 1;
-    while ((ks = kstat_lookup(kc, "cpu_info", ks->ks_instance + 1, NULL)))
-        cpu->coresOnline++;
+    ks = kstat_lookup(kc, "unix", -1, "system_misc");
+    if (ks && kstat_read(kc, ks, NULL) >= 0)
+    {
+        kstat_named_t* kn = kstat_data_lookup(ks, "ncpus");
+        cpu->coresLogical = cpu->coresPhysical = cpu->coresOnline = (uint16_t) kn->value.ui32;
+    }
 
     return NULL;
 }
