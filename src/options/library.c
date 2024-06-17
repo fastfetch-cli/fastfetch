@@ -28,9 +28,12 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "z"))
             ffStrbufSetS(&options->libZ, yyjson_get_str(val));
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#ifdef __ANDROID__
         else if (ffStrEqualsIgnCase(key, "freetype"))
             ffStrbufSetS(&options->libfreetype, yyjson_get_str(val));
+#endif
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
         else if (ffStrEqualsIgnCase(key, "wayland"))
             ffStrbufSetS(&options->libWayland, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "xcbRandr"))
@@ -92,9 +95,12 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
         else if(ffStrEqualsIgnCase(subkey, "z"))
             ffOptionParseString(key, value, &options->libZ);
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#ifdef __ANDROID__
         else if(ffStrEqualsIgnCase(subkey, "freetype"))
             ffOptionParseString(key, value, &options->libfreetype);
+#endif
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
         else if(ffStrEqualsIgnCase(subkey, "wayland"))
             ffOptionParseString(key, value, &options->libWayland);
         else if(ffStrEqualsIgnCase(subkey, "xcbRandr"))

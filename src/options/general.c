@@ -72,7 +72,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
     else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
         options->processingTimeout = ffOptionParseInt32(key, value);
 
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
     else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
         options->escapeBedrock = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--player-name"))

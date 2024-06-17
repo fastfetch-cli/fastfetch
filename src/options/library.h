@@ -11,7 +11,11 @@ typedef struct FFOptionsLibrary
     FFstrbuf libChafa;
     FFstrbuf libZ;
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#ifdef __ANDROID__
+    FFstrbuf libfreetype;
+#endif
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
     FFstrbuf libWayland;
     FFstrbuf libXcbRandr;
     FFstrbuf libXcb;
@@ -25,7 +29,6 @@ typedef struct FFOptionsLibrary
     FFstrbuf libEGL;
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
-    FFstrbuf libfreetype;
     FFstrbuf libPulse;
     FFstrbuf libnm;
     FFstrbuf libDdcutil;
