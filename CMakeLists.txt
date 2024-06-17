@@ -750,7 +750,7 @@ elseif(SunOS)
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_sunos.c
         src/detection/cpucache/cpucache_nosupport.c
-        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cpuusage/cpuusage_sunos.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/disk/disk_sunos.c
