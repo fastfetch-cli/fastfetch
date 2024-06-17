@@ -18,7 +18,7 @@
     #include <sys/user.h>
     #include <sys/sysctl.h>
 #endif
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__sun)
     #include <libproc.h>
 #endif
 
@@ -112,6 +112,15 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
 }
+
+#ifdef __sun
+void freeProcHandle(struct ps_prochandle** phandle)
+{
+    assert(phandle);
+    if (*phandle)
+        Pfree(*phandle);
+}
+#endif
 
 void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath)
 {
@@ -334,6 +343,22 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         else
             *tty = -1;
     }
+
+    #elif defined(__sun)
+    int err;
+    __attribute__((__cleanup__(freeProcHandle))) struct ps_prochandle* handle = Pgrab(pid, PGRAB_RDONLY, &err);
+    if (!handle)
+        return "Pgrab() failed";
+
+    const psinfo_t* proc = Ppsinfo(handle);
+    if (!proc)
+        return "Ppsinfo() failed";
+
+    ffStrbufSetS(name, proc->pr_fname);
+    if (ppid)
+        *ppid = proc->pr_ppid;
+    if (tty)
+        *tty = (int) proc->pr_ttydev;
 
     #else
 

@@ -773,7 +773,7 @@ elseif(SunOS)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_linux.c
-        src/detection/initsystem/initsystem_nosupport.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
@@ -1130,6 +1130,7 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "pciaccess"
+        PRIVATE "proc"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
