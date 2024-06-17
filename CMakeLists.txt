@@ -757,7 +757,7 @@ elseif(SunOS)
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
         src/detection/physicalmemory/physicalmemory_linux.c
-        src/detection/diskio/diskio_nosupport.c
+        src/detection/diskio/diskio_sunos.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
