@@ -18,8 +18,10 @@
     #include <sys/user.h>
     #include <sys/sysctl.h>
 #endif
-#if defined(__APPLE__) || defined(__sun)
+#if defined(__APPLE__)
     #include <libproc.h>
+#elif defined(__sun)
+    #include <procfs.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -112,15 +114,6 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
 }
-
-#ifdef __sun
-void freeProcHandle(struct ps_prochandle** phandle)
-{
-    assert(phandle);
-    if (*phandle)
-        Pfree(*phandle);
-}
-#endif
 
 void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, const char** exeName, FFstrbuf* exePath)
 {
@@ -243,6 +236,26 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         ffStrbufSetS(exe, arg0);
     }
 
+    #elif defined(__sun)
+
+    char filePath[PATH_MAX];
+    snprintf(filePath, sizeof(filePath), "/proc/%d/psinfo", (int) pid);
+    psinfo_t proc;
+    if (ffReadFileData(filePath, sizeof(proc), &proc) == sizeof(proc))
+    {
+        ffStrbufSetS(exe, proc.pr_psargs);
+        ffStrbufSubstrBeforeFirstC(exe, ' ');
+    }
+
+    snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
+    ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
+    ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+    if (length > 0) // doesn't contain trailing NUL
+    {
+        exePath->chars[length] = '\0';
+        exePath->length = (uint32_t) length;
+    }
+
     #endif
 
     if(exe->length == 0)
@@ -345,20 +358,17 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     }
 
     #elif defined(__sun)
-    int err;
-    __attribute__((__cleanup__(freeProcHandle))) struct ps_prochandle* handle = Pgrab(pid, PGRAB_RDONLY, &err);
-    if (!handle)
-        return "Pgrab() failed";
+    char path[128];
+    snprintf(path, sizeof(path), "/proc/%d/psinfo", (int) pid);
+    psinfo_t proc;
+    if (ffReadFileData(path, sizeof(proc), &proc) != sizeof(proc))
+        return "ffReadFileData(psinfo) failed";
 
-    const psinfo_t* proc = Ppsinfo(handle);
-    if (!proc)
-        return "Ppsinfo() failed";
-
-    ffStrbufSetS(name, proc->pr_fname);
+    ffStrbufSetS(name, proc.pr_fname);
     if (ppid)
-        *ppid = proc->pr_ppid;
+        *ppid = proc.pr_ppid;
     if (tty)
-        *tty = (int) proc->pr_ttydev;
+        *tty = (int) proc.pr_ttydev;
 
     #else
 
