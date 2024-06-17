@@ -247,13 +247,16 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         ffStrbufSubstrBeforeFirstC(exe, ' ');
     }
 
-    snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
-    ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-    ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
-    if (length > 0) // doesn't contain trailing NUL
+    if (exePath)
     {
-        exePath->chars[length] = '\0';
-        exePath->length = (uint32_t) length;
+        snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
+        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
+        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        if (length > 0) // doesn't contain trailing NUL
+        {
+            exePath->chars[length] = '\0';
+            exePath->length = (uint32_t) length;
+        }
     }
 
     #endif
