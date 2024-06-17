@@ -259,7 +259,11 @@ static const char* glxPrint(FFOpenGLResult* result)
 #endif //FF_HAVE_GLX
 
 #ifdef FF_HAVE_OSMESA
-#include <GL/osmesa.h>
+#if __has_include(<GL/osmesa.h>)
+    #include <GL/osmesa.h>
+#else
+    #include <mesa/osmesa.h> // for sunos
+#endif
 
 typedef struct OSMesaData
 {
