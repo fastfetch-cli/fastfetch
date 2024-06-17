@@ -11,7 +11,7 @@ const char* ffDetectUptime(FFUptimeResult* result)
     {
         if (ut->ut_type == BOOT_TIME)
         {
-            result->bootTime = (uint64_t) ut->ut_tv.tv_sec * 1000 + (uint64_t) ut->ut_tv.tv_usec / 10000000;
+            result->bootTime = (uint64_t) ut->ut_tv.tv_sec * 1000 + (uint64_t) ut->ut_tv.tv_usec / 1000000;
             result->uptime = ffTimeGetNow() - result->bootTime;
             break;
         }

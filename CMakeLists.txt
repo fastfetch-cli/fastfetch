@@ -753,7 +753,7 @@ elseif(SunOS)
         src/detection/cpuusage/cpuusage_nosupport.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_nosupport.c
-        src/detection/disk/disk_nosupport.c
+        src/detection/disk/disk_sunos.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
         src/detection/physicalmemory/physicalmemory_linux.c
