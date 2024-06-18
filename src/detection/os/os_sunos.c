@@ -12,9 +12,6 @@ void ffDetectOSImpl(FFOSResult* os)
 
     // OpenIndiana Hipster 2024.04
     uint32_t idx = ffStrbufFirstIndexC(&os->prettyName, ' ');
-    ffStrbufSetNS(&os->name, idx, os->prettyName.chars);
-    uint32_t idx2 = ffStrbufNextIndexC(&os->prettyName, idx + 1, ' ');
-    ffStrbufSetNS(&os->codename, idx2 - idx - 1, os->prettyName.chars + idx + 1);
-    ffStrbufSetNS(&os->version, idx2 - idx - 1, os->prettyName.chars + idx2 + 1);
+    ffStrbufSetNS(&os->id, idx, os->prettyName.chars);
     ffStrbufSetStatic(&os->idLike, "sunos");
 }
