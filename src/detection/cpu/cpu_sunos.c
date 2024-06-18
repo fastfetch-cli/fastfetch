@@ -23,11 +23,11 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPURe
 
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "brand");
-        ffStrbufSetNS(&cpu->name, KSTAT_NAMED_STR_BUFLEN(kn), KSTAT_NAMED_STR_PTR(kn));
+        ffStrbufSetNS(&cpu->name, KSTAT_NAMED_STR_BUFLEN(kn) - 1, KSTAT_NAMED_STR_PTR(kn));
     }
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "vendor_id");
-        ffStrbufSetNS(&cpu->vendor, KSTAT_NAMED_STR_BUFLEN(kn), KSTAT_NAMED_STR_PTR(kn));
+        ffStrbufSetNS(&cpu->vendor, KSTAT_NAMED_STR_BUFLEN(kn) - 1, KSTAT_NAMED_STR_PTR(kn));
     }
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "clock_MHz");
