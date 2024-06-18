@@ -783,7 +783,7 @@ elseif(SunOS)
         src/detection/media/media_linux.c
         src/detection/memory/memory_sunos.c
         src/detection/monitor/monitor_nosupport.c
-        src/detection/netio/netio_nosupport.c
+        src/detection/netio/netio_sunos.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_sunos.c
         src/detection/packages/packages_sunos.c

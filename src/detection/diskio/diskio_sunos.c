@@ -19,7 +19,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
     {
         if (ks->ks_type != KSTAT_TYPE_IO || !ffStrEquals(ks->ks_class, "disk")) continue;
 
-        if (options->namePrefix.length && !ffStrStartsWith(ks->ks_name, options->namePrefix.chars))
+        if (options->namePrefix.length && strncmp(ks->ks_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
         kstat_io_t kio;
