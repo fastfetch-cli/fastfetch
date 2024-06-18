@@ -1,29 +1,59 @@
 #include "gpu.h"
 #include "common/properties.h"
 #include "common/io/io.h"
-
-#include <pciaccess.h>
+#include "common/processing.h"
 
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
-    {
-        // Requires root access
-        // Same behavior can be observed with `cp $(which scanpci) /tmp/ && /tmp/scanpci`
-        FF_SUPPRESS_IO();
-        if (pci_system_init() < 0)
-            return "pci_system_init() failed";
-    }
+    // SunOS requires root permission to query PCI device list, except `/usr/bin/scanpci`
+    // Same behavior can be observed with `cp $(which scanpci) /tmp/ && /tmp/scanpci`
 
-    struct pci_device_iterator* iter = pci_slot_match_iterator_create(NULL);
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) {
+        "scanpci",
+        "-v",
+        NULL,
+    });
+    if (error)
+        return error;
+
+    if (!ffStrbufStartsWithS(&buffer, "\npci domain 0x"))
+        return "Invalid scanpci result";
 
     FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
-    for (struct pci_device* dev = NULL; (dev = pci_device_next( iter )); )
+
+    // pci domain 0x354b bus 0x0000 cardnum 0x00 function 0x00: vendor 0x1414 device 0x008e
+    //  Device unknown
+    //  CardVendor 0x0000 card 0x0000 (Card unknown)
+    //   STATUS    0x0010  COMMAND 0x0007
+    //   CLASS     0x03 0x02 0x00  REVISION 0x00
+    //   BIST      0x00  HEADER 0x00  LATENCY 0x00  CACHE 0x00
+    //   MAX_LAT   0x00  MIN_GNT 0x00  INT_PIN 0x00  INT_LINE 0x00
+
+    for (
+        const char* pclass = strstr(buffer.chars, "\n  CLASS     0x03 ");
+        pclass;
+        pclass = strstr(pclass, "\n  CLASS     0x03 ")
+    )
     {
-        if (dev->device_class >> 16 != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
-            continue;
+        // find the start of device entry
+        const char* pstart = memrchr(buffer.chars, '\n', (size_t) (pclass - buffer.chars));
+        while (pstart[1] != 'p')
+            pstart = memrchr(buffer.chars, '\n', (size_t) (pstart - buffer.chars - 1));
+        ++pstart;
+
+        uint32_t pciDomain, pciBus, pciDev, pciFunc, vendorId, deviceId;
+        if (sscanf(pstart, "pci domain %x bus %x cardnum %x function %x: vendor %x device %x",
+            &pciDomain, &pciBus, &pciDev, &pciFunc, &vendorId, &deviceId) != 6)
+            return "PCI info not found, invalid scanpci result";
+
+        pclass += strlen("\n  CLASS     0x03 ");
+        uint32_t subclass = (uint32_t) strtoul(pclass, NULL, 16);
+        pclass += strlen("0x02 0x00  REVISION ");
+        uint32_t revision = (uint32_t) strtoul(pclass, NULL, 16);
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(dev->vendor_id));
+        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
         ffStrbufInit(&gpu->platformApi);
@@ -31,25 +61,23 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = ((uint64_t) dev->domain << 6) | ((uint64_t) dev->bus << 4) | (dev->dev << 2) | dev->func;
+        gpu->deviceId = ((uint64_t) pciDomain << 6) | ((uint64_t) pciBus << 4) | (pciDev << 2) | pciFunc;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
         {
             char query[32];
-            snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) dev->device_id, (unsigned) dev->revision);
+            snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
             ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
         }
 
         if (gpu->name.length == 0)
         {
             if (pciids.length == 0)
-                ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);;
-            ffGPUParsePciIds(&pciids, (dev->device_class >> 8) & 8, dev->vendor_id, dev->device_id, gpu);
+                ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
+            ffGPUParsePciIds(&pciids, (uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
     }
-
-    pci_system_cleanup();
 
     return NULL;
 }

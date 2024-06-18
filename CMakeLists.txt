@@ -1129,7 +1129,6 @@ elseif(SunOS)
         PRIVATE "m"
         PRIVATE "socket"
         PRIVATE "kstat"
-        PRIVATE "pciaccess"
         PRIVATE "proc"
     )
 elseif(ANDROID)
