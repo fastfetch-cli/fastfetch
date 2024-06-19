@@ -90,4 +90,5 @@ void ffDetectOSImpl(FFOSResult* os)
     }
 
     ffStrbufAppendF(&os->id, "%*s %*s", os->prettyName.length, os->prettyName.chars, os->version.length, os->version.chars);
+    ffStrbufSetStatic(&os->idLike, "Windows");
 }
