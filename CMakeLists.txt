@@ -1082,7 +1082,6 @@ if(LINUX)
     )
 elseif(APPLE)
     target_link_libraries(libfastfetch
-        PRIVATE "resolv"
         PRIVATE "-framework AVFoundation"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
