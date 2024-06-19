@@ -1,3 +1,36 @@
+# 2.16.0
+
+This release added basic support for SunOS (Solaris, illumos). The binaries provided in the release lack a few useful features (such as Display detection). People who use SunOS should consider building fastfetch themselves.
+
+Changes:
+* Fastfetch now prefers `/etc/os-release` over `/etc/lsb-release` when detecting distro info. 
+    * This may break some distros (notably some debian based distros). File a bug with the content of `os-release` and `lsb-release` if it breaks your distro.
+
+Features:
+* Support Media detection in Windows (Media / Player, Windows)
+    * Supported in Windows 10 and later
+* Add new option `--users-myself-only` (Users)
+* Add code name of macOS Sequoia (OS, macOS)
+* Add new module `DNS` to show active DNS servers (DNS)
+* Add new options `--loadavg-compact`. Defaults to true (Loadavg)
+    * Use `--loadavg-compact false` to display load averages in different lines
+* Detect MTU size (LocalIP)
+* Support version detection of pluma, which is the default editor of OpenIndiana (Editor)
+* Print used OGL library, eg EGL, GLX or OSMesa (OpenGL)
+
+Bugfixes:
+* Report error if cache size is unavailable (CPUCache, Android)
+* Trim white spaces in device name (Sound, Linux, #1005)
+* Fix `display.bar.border{Left,Right}` doesn't work in JSON config files (Config)
+* Fix invalid call to `realpath(3)` (Platform, Linux)
+* Fix result calulation (CPUUsage, FreeBSD)
+
+Logos:
+* Add Mauna
+* Add Tuxdeo
+* Add Manjaro ARM
+* Add RedOS
+
 # 2.15.0
 
 Changes:
