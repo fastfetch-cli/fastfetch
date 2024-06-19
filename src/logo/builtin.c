@@ -328,8 +328,6 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
     },
     // Arch2
     {
@@ -340,8 +338,16 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
+    },
+    // Arch3
+    {
+        .names = {"arch3", "archlinux3", "arch-linux3"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ARCH3,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+        },
     },
     // ArchSmall
     {
@@ -350,9 +356,8 @@ static const FFlogo A[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_ARCH_SMALL,
         .colors = {
             FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
         },
-        .colorKeys = FF_COLOR_FG_CYAN,
-        .colorTitle = FF_COLOR_FG_CYAN,
     },
     // Archlabs
     {
