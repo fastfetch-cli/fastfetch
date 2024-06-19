@@ -8,11 +8,11 @@ Changes:
 
 Features:
 * Support Media detection in Windows (Media / Player, Windows)
-    * Supported in Windows 10 and later
-* Add new option `--users-myself-only` (Users)
+    * Requires Windows 10 and later
+* Add new option `--users-myself-only` to display current login user only (Users)
 * Add code name of macOS Sequoia (OS, macOS)
 * Add new module `DNS` to show active DNS servers (DNS)
-* Add new options `--loadavg-compact`. Defaults to true (Loadavg)
+* Add new option `--loadavg-compact`. Defaults to true (Loadavg)
     * Use `--loadavg-compact false` to display load averages in different lines
 * Detect MTU size (LocalIP)
 * Support version detection of pluma, which is the default editor of OpenIndiana (Editor)
@@ -23,7 +23,7 @@ Bugfixes:
 * Trim white spaces in device name (Sound, Linux, #1005)
 * Fix `display.bar.border{Left,Right}` doesn't work in JSON config files (Config)
 * Fix invalid call to `realpath(3)` (Platform, Linux)
-* Fix result calulation (CPUUsage, FreeBSD)
+* Fix result calculation (CPUUsage, FreeBSD)
 
 Logos:
 * Add Mauna
