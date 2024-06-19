@@ -347,6 +347,7 @@ __fastfetch_completion()
         "--users-key"
         "--users-format"
         "--users-key-color"
+        "--users-myself-only"
         "--bluetooth-key"
         "--bluetooth-format"
         "--bluetooth-key-color"
