@@ -8,6 +8,7 @@ typedef struct FFOpenGLResult
     FFstrbuf renderer;
     FFstrbuf vendor;
     FFstrbuf slv;
+    const char* library;
 } FFOpenGLResult;
 
 const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result);

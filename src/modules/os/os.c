@@ -11,7 +11,6 @@
 
 static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
 {
-    // asm ("int3");
     //Create the basic output
     if(os->name.length > 0)
         ffStrbufAppend(result, &os->name);

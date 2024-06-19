@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.15.0
+    VERSION 2.16.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -18,6 +18,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
     set(BSD TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "SunOS")
+    set(SunOS TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -42,30 +44,30 @@ include(CheckIncludeFile)
 
 include(CMakeDependentOption)
 
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR BSD OR WIN32 OR ANDROID OR SunOS" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR BSD OR APPLE" OFF)
+cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR BSD OR APPLE OR SunOS" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR BSD OR APPLE OR WIN32" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR BSD OR APPLE" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR BSD OR APPLE OR WIN32 OR SunOS" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR BSD OR APPLE OR SunOS" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
-cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32" OFF)
+cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32 OR SunOS" OFF)
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
@@ -118,7 +120,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointe
 if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS} -fno-exceptions -fno-rtti")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
 endif()
 
 if(WIN32)
@@ -340,6 +342,7 @@ set(LIBFASTFETCH_SRC
     src/modules/de/de.c
     src/modules/disk/disk.c
     src/modules/diskio/diskio.c
+    src/modules/dns/dns.c
     src/modules/editor/editor.c
     src/modules/font/font.c
     src/modules/gpu/gpu.c
@@ -417,6 +420,7 @@ if(LINUX)
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_linux.c
@@ -487,6 +491,7 @@ elseif(ANDROID)
         src/detection/cursor/cursor_nosupport.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
@@ -548,6 +553,7 @@ elseif(BSD)
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_bsd.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_bsd.c
@@ -619,6 +625,7 @@ elseif(APPLE)
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
+        src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_apple.c
         src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
@@ -684,6 +691,7 @@ elseif(WIN32)
         src/detection/physicaldisk/physicaldisk_windows.c
         src/detection/diskio/diskio_windows.c
         src/detection/displayserver/displayserver_windows.c
+        src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
         src/detection/host/host_windows.c
@@ -695,7 +703,7 @@ elseif(WIN32)
         src/detection/locale/locale_windows.c
         src/detection/localip/localip_windows.c
         src/detection/gamepad/gamepad_windows.c
-        src/detection/media/media_nosupport.c
+        src/detection/media/media_windows.c
         src/detection/memory/memory_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/monitor/monitor_windows.c
@@ -726,6 +734,77 @@ elseif(WIN32)
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
         src/util/platform/FFPlatform_windows.c
+    )
+elseif(SunOS)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
+        src/common/io/io_unix.c
+        src/common/netif/netif_bsd.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_windows.c
+        src/detection/board/board_windows.c
+        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
+        src/detection/chassis/chassis_windows.c
+        src/detection/cpu/cpu_sunos.c
+        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpuusage/cpuusage_sunos.c
+        src/detection/cursor/cursor_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/disk/disk_sunos.c
+        src/detection/dns/dns_linux.c
+        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
+        src/detection/diskio/diskio_sunos.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_sunos.c
+        src/detection/gpu/gpu_pci.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/host/host_windows.c
+        src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
+        src/detection/libc/libc_nosupport.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_sunos.c
+        src/detection/locale/locale_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_sunos.c
+        src/detection/monitor/monitor_nosupport.c
+        src/detection/netio/netio_sunos.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_sunos.c
+        src/detection/packages/packages_sunos.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/gtk_qt/qt.c
+        src/detection/sound/sound_linux.c
+        src/detection/swap/swap_sunos.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
+        src/detection/theme/theme_linux.c
+        src/detection/uptime/uptime_sunos.c
+        src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_linux.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_nosupport.c
+        src/util/platform/FFPlatform_unix.c
     )
 endif()
 
@@ -814,6 +893,8 @@ if(WIN32)
     target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
 elseif(APPLE)
     target_compile_definitions(libfastfetch PUBLIC _DARWIN_C_SOURCE)
+elseif(SunOS)
+    target_compile_definitions(libfastfetch PUBLIC __EXTENSIONS__ _POSIX_C_SOURCE=1)
 endif()
 
 if(HAVE_STATX)
@@ -1001,6 +1082,7 @@ if(LINUX)
     )
 elseif(APPLE)
     target_link_libraries(libfastfetch
+        PRIVATE "resolv"
         PRIVATE "-framework AVFoundation"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
@@ -1042,6 +1124,13 @@ elseif(BSD)
         PRIVATE "usbhid"
         PRIVATE "geom"
     )
+elseif(SunOS)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+        PRIVATE "socket"
+        PRIVATE "kstat"
+        PRIVATE "proc"
+    )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
     if(HAVE_LIBANDROID_WORDEXP_STATIC)
@@ -1066,6 +1155,24 @@ target_include_directories(libfastfetch
 target_link_libraries(libfastfetch
     PRIVATE ${CMAKE_DL_LIBS}
 )
+
+target_compile_options(libfastfetch PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions -fno-rtti>)
+
+if(WIN32)
+    set(CMAKE_CXX_STANDARD 20)
+    include(CheckIncludeFileCXX)
+    CHECK_INCLUDE_FILE_CXX("winrt/Windows.Foundation.h" HAVE_WINRT)
+    if(HAVE_WINRT)
+        add_library(ffwinrt SHARED src/detection/media/media_windows.dll.cpp)
+        target_link_libraries(ffwinrt PRIVATE "RuntimeObject")
+        target_compile_definitions(ffwinrt PRIVATE WIN32_LEAN_AND_MEAN=1 WINRT_LEAN_AND_MEAN=1)
+        target_link_options(ffwinrt
+            PRIVATE "-static" # stdc++, winpthread, gcc_s, etc.
+        )
+    endif()
+        set(CMAKE_CXX_STANDARD 17)
+endif()
 
 ######################
 # Executable targets #
@@ -1105,12 +1212,9 @@ if(yyjson_FOUND)
 endif()
 
 if(WIN32)
-    set(TARGET_NAME fastfetch)
     target_sources(fastfetch
         PRIVATE src/util/windows/version.rc
     )
-
-    set(TARGET_NAME flashfetch)
     target_sources(flashfetch
         PRIVATE src/util/windows/version.rc
     )

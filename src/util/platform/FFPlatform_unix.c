@@ -34,11 +34,14 @@ static void getExePath(FFPlatform* platform)
             exePathLen = 0;
         else
             exePathLen--; // remove terminating NUL
+    #else
+        ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
+        exePath[exePathLen] = '\0';
     #endif
     if (exePathLen > 0)
     {
         ffStrbufEnsureFree(&platform->exePath, PATH_MAX);
-        if (realpath(platform->exePath.chars, exePath))
+        if (realpath(exePath, platform->exePath.chars))
             ffStrbufRecalculateLength(&platform->exePath);
         else
             ffStrbufSetNS(&platform->exePath, (uint32_t) exePathLen, exePath);
@@ -181,7 +184,7 @@ void ffPlatformInitImpl(FFPlatform* platform)
     struct passwd* pwd = getpwuid(getuid());
 
     struct utsname uts;
-    if(uname(&uts) != 0)
+    if(uname(&uts) < 0)
         memset(&uts, 0, sizeof(uts));
 
     getExePath(platform);

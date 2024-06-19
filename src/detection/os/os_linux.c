@@ -180,6 +180,28 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
         return true;
     }
+    else
+    {
+        // Hack for MX Linux. See #847
+        FF_STRBUF_AUTO_DESTROY lsbRelease = ffStrbufCreate();
+        if (ffAppendFileBuffer("/etc/lsb-release", &lsbRelease) && ffStrbufContainS(&lsbRelease, "DISTRIB_ID=MX"))
+        {
+            ffStrbufSetS(&result->id, "mx");
+            ffStrbufSetS(&result->idLike, "debian");
+            ffStrbufSetS(&result->name, "MX");
+
+            ffStrbufClear(&result->version);
+            ffParsePropLines(lsbRelease.chars, "DISTRIB_RELEASE=", &result->version);
+            ffStrbufSet(&result->versionID, &result->version);
+
+            ffStrbufClear(&result->codename);
+            ffParsePropLines(lsbRelease.chars, "DISTRIB_CODENAME=", &result->codename);
+
+            ffStrbufClear(&result->prettyName);
+            ffParsePropLines(lsbRelease.chars, "DISTRIB_DESCRIPTION=", &result->prettyName);
+            return true;
+        }
+    }
     return false;
 }
 
@@ -208,22 +230,9 @@ static void detectOS(FFOSResult* os)
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
-    // Hack for MX Linux. See #847
-    if(parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os))
-    {
-        if (ffStrbufEqualS(&os->id, "MX"))
-        {
-            ffStrbufSetStatic(&os->name, "MX");
-            ffStrbufSetStatic(&os->idLike, "debian");
-            return;
-        }
-
-        // For archlinux
-        if (ffStrbufEqualS(&os->version, "rolling"))
-            ffStrbufClear(&os->version);
-    }
-
-    if(parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
+    if((parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) ||
+        parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os)) &&
+        allRelevantValuesSet(os))
         return;
 
     parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);

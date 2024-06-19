@@ -1,0 +1,188 @@
+//   _____ _____ _____ _____ _____ _____ _____ _____ _____
+//  |   __|  _  |   __|_   _|   __|   __|_   _|     |  |  |
+//  |   __|     |__   | | | |   __|   __| | | |   --|     |
+//  |__|  |__|__|_____| |_| |__|  |_____| |_| |_____|__|__|
+//
+//  By CarterLi - https://github.com/CarterLi
+//  Homepage - https://github.com/fastfetch-cli/fastfetch
+//  config.jsonc - ニリ @niri-san
+//  pokemon-colorscripts - https://gitlab.com/phoneybadger/pokemon-colorscripts
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "source": " _____ _____ _____ _____ _____ _____ _____ _____ _____\n|   __|  _  |   __|_   _|   __|   __|_   _|     |  |  |\n|   __|     |__   | | | |   __|   __| | | |   --|     |\n|__|  |__|__|_____| |_| |__|  |_____| |_| |_____|__|__|",
+        "type": "data",
+        "separate": true,
+        "padding": {
+            "right": 2
+        }
+    },
+    "display": {
+        "separator": " - "
+    },
+    "modules": [
+        {
+            "type": "custom", // HardwareInfo
+            "format": "• {#green}SYSTEM INFORMATION"
+        },
+        {
+            "type": "host",
+            "key": "HOST",
+            "format": "{name}{?vendor} ({vendor}){?}",
+            "keyColor": "green"
+        },
+        {
+            "type": "chassis",
+            "key": "COMPUTER TYPE",
+            "keyColor": "green"
+        },
+        {
+            "type": "cpu",
+            "key": "CPU",
+            "keyColor": "green"
+        },
+        {
+            "type": "gpu",
+            "key": "GPU",
+            "keyColor": "green"
+        },
+        {
+            "type": "memory",
+            "key": "MEMORY USED",
+            "keyColor": "green"
+        },
+        {
+            "type": "swap",
+            "key": "SWAP USED",
+            "keyColor": "green"
+        },
+        {
+            "type": "disk",
+            "key": "DISK",
+            "folders": "/",
+            "keyColor": "green"
+        },
+        {
+            "type": "custom", // SoftwareInfo
+            "format": "• {#red}SOFTWARE INFORMATION"
+        },
+        {
+            "type": "os",
+            "key": "DISTRO",
+            "keyColor": "red"
+        },
+        {
+            "type": "disk",
+            "folders": "/", // Use "/System/Volumes/VM" or something else on macOS
+            "format": "{create-time}",
+            "key": "INSTALLED DATE",
+            "keyColor": "red"
+        },
+        {
+            "type": "kernel",
+            "key": "KERNEL",
+            "keyColor": "red"
+        },
+        {
+            "type": "packages",
+            "key": "PACKAGES",
+            "keyColor": "red"
+        },
+        {
+            "type": "uptime",
+            "key": "UPTIME",
+            "keyColor": "red"
+        },
+        {
+            "type": "custom", // DisplayInfo
+            "format": "• {#blue}DISPLAY INFORMATION"
+        },
+        {
+            "type": "de",
+            "key": "DESKTOP ENVIRONMENT",
+            "keyColor": "blue"
+        },
+        {
+            "type": "lm",
+            "key": "LOGIN MANAGER",
+            "format": "{type}",
+            "keyColor": "blue"
+        },
+        {
+            "type": "wm",
+            "key": "WM",
+            "keyColor": "blue"
+        },
+        {
+            "type": "wmtheme",
+            "key": "WM THEME",
+            "keyColor": "blue"
+        },
+        {
+            "type": "monitor",
+            "key": "MONITOR ({name})",
+            "keyColor": "blue"
+        },
+        {
+            "type": "custom", // DesignInfo
+            "format": "• {#yellow}DESIGN INFORMATION"
+        },
+        {
+            "type": "wallpaper",
+            "key": "WALLPAPER",
+            "keyColor": "yellow"
+        },
+        {
+            "type": "theme",
+            "key": "KDE THEME",
+            "format": "{1}",
+            "keyColor": "yellow"
+        },
+        {
+            "type": "icons",
+            "key": "ICON THEME",
+            "format": "{1}",
+            "keyColor": "yellow"
+        },
+        {
+            "type": "font",
+            "key": "FONT",
+            "format": "{?1}{1} [QT]{?}{/1}Unknown", // Remove "[QT]" if not using Qt
+            "keyColor": "yellow"
+        },
+        {
+            "type": "terminalfont",
+            "key": "TERMINAL FONT",
+            "keyColor": "yellow"
+        },
+        {
+            "type": "cursor",
+            "key": "CURSOR",
+            "keyColor": "yellow"
+        },
+        {
+            "type": "custom", // OtherInfo
+            "format": "• {#cyan}VARIOUS INFORMATION"
+        },
+        {
+            "type": "media",
+            "key": "NOW PLAYING",
+            "format": "{?artist}{artist} - {?}{title}",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "weather",
+            "key": "WEATHER",
+            "timeout": 1000,
+            "keyColor": "cyan"
+        },
+        {
+            "type": "version",
+            "key": "INFO",
+            "keyColor": "cyan"
+        },
+        "break",
+        "colors",
+        "break"
+    ]
+}

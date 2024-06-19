@@ -27,7 +27,7 @@ static const char* getMedia(FFMediaResult* result)
 
     dispatch_group_enter(group);
     MRMediaRemoteGetNowPlayingApplicationIsPlaying(queue, ^(BOOL playing) {
-        ffStrbufAppendS(&result->status, playing ? "Playing" : "Paused");
+        ffStrbufSetStatic(&result->status, playing ? "Playing" : "Paused");
         dispatch_group_leave(group);
     });
 

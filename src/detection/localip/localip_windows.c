@@ -18,10 +18,11 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
         ip->defaultRoute = defaultRoute;
+        ip->mtu = -1;
     }
     else
     {
-        ip = ffListGet(list, list->length - 1);
+        ip = FF_LIST_GET(FFLocalIpResult, *list, list->length - 1);
     }
 
     switch (type)
@@ -147,6 +148,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (typesToAdd == 0) break;
             }
         }
+
+        if (!newIp)
+            FF_LIST_GET(FFLocalIpResult, *results, results->length - 1)->mtu = (int32_t) adapter->Mtu;
     }
 
     return NULL;

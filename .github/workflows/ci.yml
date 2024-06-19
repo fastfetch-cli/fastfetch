@@ -197,6 +197,41 @@ jobs:
           name: fastfetch-linux-armv7
           path: ./fastfetch-*.*
 
+  linux-riscv64:
+    name: Linux-riscv64
+    runs-on: ubuntu-22.04
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: uraimo/run-on-arch-action@v2
+        id: runcmd
+        with:
+          arch: riscv64
+          distro: ubuntu22.04
+          githubToken: ${{ github.token }}
+          run: |
+            uname -a
+            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libnm-dev libpulse-dev libdrm-dev libddcutil-dev libchafa-dev directx-headers-dev rpm
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-linux-riscv64
+          path: ./fastfetch-*.*
+
   musl-amd64:
     name: Musl-amd64
     runs-on: ubuntu-latest
@@ -333,6 +368,40 @@ jobs:
           name: fastfetch-macos-universal
           path: ./fastfetch-*.*
 
+  sunos-amd64:
+    runs-on: ubuntu-latest
+    name: SunOS-amd64
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+      - name: run VM
+        uses: vmactions/omnios-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            uname -a
+            pkg update --accept
+            pkg install gcc13 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
+
+          run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch
+            time ./fastfetch --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+            cpack
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-sunos-amd64
+          path: ./fastfetch-*.*
+
   freebsd-amd64:
     name: FreeBSD-amd64
     runs-on: ubuntu-latest
@@ -425,7 +494,7 @@ jobs:
         with:
           msystem: CLANG64
           update: true
-          install: git mingw-w64-clang-x86_64-7zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-vulkan-headers mingw-w64-clang-x86_64-opencl-icd
+          install: git mingw-w64-clang-x86_64-7zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-vulkan-headers mingw-w64-clang-x86_64-opencl-icd mingw-w64-clang-x86_64-cppwinrt
 
       - name: print msys version
         run: uname -a
@@ -544,11 +613,13 @@ jobs:
       - linux-amd64
       - linux-aarch64
       - linux-armv7
+      - linux-riscv64
       - musl-amd64
       - musl-aarch64
       - macos-universal
       - freebsd-amd64
       - freebsd-aarch64
+      - sunos-amd64
       - windows-amd64
       - windows-i686
     permissions:

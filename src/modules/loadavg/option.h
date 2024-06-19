@@ -9,5 +9,7 @@ typedef struct FFLoadavgOptions
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
+    FFColorRangeConfig percent;
     uint8_t ndigits;
+    bool compact;
 } FFLoadavgOptions;

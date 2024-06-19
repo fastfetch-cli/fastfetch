@@ -204,7 +204,11 @@ bool ffSuppressIO(bool suppress)
 
 void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
 {
-    DIR* dir = opendir(folder->chars);
+    FF_AUTO_CLOSE_FD int dfd = open(folder->chars, O_RDONLY);
+    if (dfd < 0)
+        return;
+
+    DIR* dir = fdopendir(dfd);
     if(dir == NULL)
         return;
 
@@ -221,7 +225,21 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
     while((entry = readdir(dir)) != NULL)
     {
-        if(entry->d_type == DT_DIR)
+        bool isDir = false;
+#ifdef _DIRENT_HAVE_D_TYPE
+        if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
+            isDir = entry->d_type == DT_DIR;
+        else
+#else
+        {
+            struct stat stbuf;
+            if (fstatat(dfd, entry->d_name, &stbuf, 0) < 0)
+                isDir = false;
+            else
+                isDir = S_ISDIR(stbuf.st_mode);
+        }
+#endif
+        if (isDir)
         {
             if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
                 continue;

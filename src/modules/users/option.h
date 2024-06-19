@@ -10,4 +10,5 @@ typedef struct FFUsersOptions
     FFModuleArgs moduleArgs;
 
     bool compact;
+    bool myselfOnly;
 } FFUsersOptions;

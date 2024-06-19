@@ -1,6 +1,8 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/percent.h"
 #include "detection/loadavg/loadavg.h"
+#include "detection/cpu/cpu.h"
 #include "modules/loadavg/loadavg.h"
 #include "util/stringUtils.h"
 
@@ -19,8 +21,66 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        printf("%.*f, %.*f, %.*f\n", options->ndigits, result[0], options->ndigits, result[1], options->ndigits, result[2]);
+        if (options->compact)
+        {
+            ffPrintLogoAndKey(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            printf("%.*f, %.*f, %.*f\n", options->ndigits, result[0], options->ndigits, result[1], options->ndigits, result[2]);
+        }
+        else
+        {
+            FFCPUResult cpu = {
+                .temperature = FF_CPU_TEMP_UNSET,
+                .frequencyMin = 0.0/0.0,
+                .frequencyMax = 0.0/0.0,
+                .frequencyBase = 0.0/0.0,
+                .frequencyBiosLimit = 0.0/0.0,
+                .name = ffStrbufCreate(),
+                .vendor = ffStrbufCreate(),
+            };
+            ffDetectCPU(&(FFCPUOptions) {}, &cpu);
+
+            FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+            for (uint32_t index = 0; index < 3; index++)
+            {
+                uint32_t duration = index == 0 ? 1 : index == 1 ? 5 : 15;
+                if (options->moduleArgs.key.length == 0)
+                {
+                    ffStrbufSetF(&buffer, "%s (%d min)", FF_LOADAVG_MODULE_NAME, duration);
+                }
+                else
+                {
+                    ffStrbufClear(&buffer);
+                    FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 2, ((FFformatarg[]){
+                        {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
+                        {FF_FORMAT_ARG_TYPE_UINT, &duration, "duration"},
+                    }));
+                }
+
+                ffPrintLogoAndKey(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
+
+                ffStrbufClear(&buffer);
+                double percent = result[index] * 100 / cpu.coresOnline;
+
+                if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                    ffPercentAppendBar(&buffer, percent, options->percent, &options->moduleArgs);
+
+                if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                {
+                    if (buffer.length > 0)
+                        ffStrbufAppendC(&buffer, ' ');
+                    ffStrbufAppendF(&buffer, "%.*f", options->ndigits, result[index]);
+                }
+
+                if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                {
+                    if (buffer.length > 0)
+                        ffStrbufAppendC(&buffer, ' ');
+                    ffPercentAppendNum(&buffer, percent, options->percent, buffer.length > 0, &options->moduleArgs);
+                }
+
+                ffStrbufPutTo(&buffer, stdout);
+            }
+        }
     }
     else
     {
@@ -45,6 +105,15 @@ bool ffParseLoadavgCommandOptions(FFLoadavgOptions* options, const char* key, co
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "compact"))
+    {
+        options->compact = ffOptionParseBoolean(value);
+        return true;
+    }
+
+    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
+        return true;
+
     return false;
 }
 
@@ -67,6 +136,15 @@ void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "compact"))
+        {
+            options->compact = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffPercentParseJsonObject(key, val, &options->percent))
+            continue;
+
         ffPrintError(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
@@ -80,6 +158,11 @@ void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc,
 
     if (defaultOptions.ndigits != options->ndigits)
         yyjson_mut_obj_add_uint(doc, module, "ndigits", options->ndigits);
+
+    if (defaultOptions.compact != options->compact)
+        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+
+    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
 void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -122,7 +205,9 @@ void ffInitLoadavgOptions(FFLoadavgOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
 
+    options->percent = (FFColorRangeConfig) { 50, 80 };
     options->ndigits = 2;
+    options->compact = true;
 }
 
 void ffDestroyLoadavgOptions(FFLoadavgOptions* options)

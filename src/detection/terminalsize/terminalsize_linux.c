@@ -4,6 +4,10 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#ifdef __sun
+    #include <sys/termios.h>
+#endif
+
 bool ffDetectTerminalSize(FFTerminalSizeResult* result)
 {
     struct winsize winsize = {};

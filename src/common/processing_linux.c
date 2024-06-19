@@ -18,8 +18,10 @@
     #include <sys/user.h>
     #include <sys/sysctl.h>
 #endif
-#ifdef __APPLE__
+#if defined(__APPLE__)
     #include <libproc.h>
+#elif defined(__sun)
+    #include <procfs.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -234,6 +236,29 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         ffStrbufSetS(exe, arg0);
     }
 
+    #elif defined(__sun)
+
+    char filePath[PATH_MAX];
+    snprintf(filePath, sizeof(filePath), "/proc/%d/psinfo", (int) pid);
+    psinfo_t proc;
+    if (ffReadFileData(filePath, sizeof(proc), &proc) == sizeof(proc))
+    {
+        ffStrbufSetS(exe, proc.pr_psargs);
+        ffStrbufSubstrBeforeFirstC(exe, ' ');
+    }
+
+    if (exePath)
+    {
+        snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
+        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
+        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        if (length > 0) // doesn't contain trailing NUL
+        {
+            exePath->chars[length] = '\0';
+            exePath->length = (uint32_t) length;
+        }
+    }
+
     #endif
 
     if(exe->length == 0)
@@ -334,6 +359,19 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         else
             *tty = -1;
     }
+
+    #elif defined(__sun)
+    char path[128];
+    snprintf(path, sizeof(path), "/proc/%d/psinfo", (int) pid);
+    psinfo_t proc;
+    if (ffReadFileData(path, sizeof(proc), &proc) != sizeof(proc))
+        return "ffReadFileData(psinfo) failed";
+
+    ffStrbufSetS(name, proc.pr_fname);
+    if (ppid)
+        *ppid = proc.pr_ppid;
+    if (tty)
+        *tty = (int) proc.pr_ttydev;
 
     #else
 

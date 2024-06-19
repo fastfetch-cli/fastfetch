@@ -1,4 +1,5 @@
 #include "displayserver_linux.h"
+#include "common/io/io.h"
 #include "common/properties.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
@@ -11,8 +12,8 @@
     #include <sys/sysctl.h>
     #include <sys/types.h>
     #include <sys/user.h>
-#else
-    #include "common/io/io.h"
+#elif defined(__sun)
+    #include <procfs.h>
 #endif
 
 static const char* parseEnv(void)
@@ -301,6 +302,42 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
+    }
+#elif defined(__sun)
+    FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
+    if(procdir == NULL)
+        return "opendir(\"/proc\") failed";
+
+    FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreateA(64);
+    ffStrbufAppendS(&procPath, "/proc/");
+
+    uint32_t procPathLength = procPath.length;
+
+    struct dirent* dirent;
+    while((dirent = readdir(procdir)) != NULL)
+    {
+        if (!ffCharIsDigit(dirent->d_name[0]))
+            continue;
+
+        ffStrbufAppendS(&procPath, dirent->d_name);
+        ffStrbufAppendS(&procPath, "/psinfo");
+        psinfo_t proc;
+        if (ffReadFileData(procPath.chars, sizeof(proc), &proc) == sizeof(proc))
+        {
+            ffStrbufSubstrBefore(&procPath, procPathLength);
+
+            if (proc.pr_uid != userId)
+                continue;
+
+            if(result->dePrettyName.length == 0)
+                applyPrettyNameIfDE(result, proc.pr_fname);
+
+            if(result->wmPrettyName.length == 0)
+                applyNameIfWM(result, proc.pr_fname);
+
+            if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
+                break;
+        }
     }
 #else
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");

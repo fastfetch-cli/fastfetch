@@ -705,6 +705,7 @@
                             "disk",
                             "diskio",
                             "de",
+                            "dns",
                             "editor",
                             "font",
                             "gamepad",
@@ -902,10 +903,6 @@
                                             {
                                                 "const": "uptime",
                                                 "description": "Print how long system has been running"
-                                            },
-                                            {
-                                                "const": "users",
-                                                "description": "Print users currently logged in"
                                             },
                                             {
                                                 "const": "version",
@@ -1439,6 +1436,41 @@
                                 }
                             },
                             {
+                                "title": "DNS",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "dns",
+                                        "description": "Print DNS servers"
+                                    },
+                                    "showType": {
+                                        "enum": [
+                                            "ipv4",
+                                            "ipv6",
+                                            "both"
+                                        ],
+                                        "default": "both",
+                                        "description": "Specify the type of DNS servers should be detected"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
                                 "title": "Gamepad",
                                 "type": "object",
                                 "additionalProperties": false,
@@ -1635,6 +1667,14 @@
                                         "minimum": 0,
                                         "maximum": 9,
                                         "default": 2
+                                    },
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Show values in one line",
+                                        "default": true
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1981,6 +2021,42 @@
                                                 "$ref": "#/$defs/colors"
                                             }
                                         }
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Users",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "users",
+                                        "description": "Print users currently logged in"
+                                    },
+                                    "compact": {
+                                        "type": "boolean",
+                                        "description": "Show all active users in one line",
+                                        "default": false
+                                    },
+                                    "myselfOnly": {
+                                        "type": "boolean",
+                                        "description": "Show only the current user",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

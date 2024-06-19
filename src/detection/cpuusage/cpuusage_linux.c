@@ -36,8 +36,8 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 
             FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
             *info = (FFCpuUsageInfo) {
-                .inUseAll = (uint64_t)inUse,
-                .totalAll = (uint64_t)total,
+                .inUseAll = inUse,
+                .totalAll = total,
             };
         }
         else

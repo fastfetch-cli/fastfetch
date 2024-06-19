@@ -50,7 +50,7 @@ static const char* parseCpuCacheIndex(FFstrbuf* path, FFCPUCacheResult* result, 
 
     // deduplicate shared caches
     ffStrbufAppendF(buffer, "_%u_%u_%u_%u\n", level, sizeKb, lineSize, cacheType);
-    if (ffStrbufContain(added, buffer)) return "cache already added";
+    if (ffStrbufContain(added, buffer)) return NULL;
     ffStrbufAppend(added, buffer);
     ffCPUCacheAddItem(result, level, sizeKb * 1024, lineSize, cacheType);
     return NULL;
@@ -71,7 +71,8 @@ static const char* parseCpuCache(FFstrbuf* path, FFCPUCacheResult* result, FFstr
             || !ffCharIsDigit(pathCacheEntry->d_name[strlen("index")])) continue;
 
         ffStrbufAppendS(path, pathCacheEntry->d_name);
-        parseCpuCacheIndex(path, result, buffer, added);
+        const char* error = parseCpuCacheIndex(path, result, buffer, added);
+        if (error) return error;
         ffStrbufSubstrBefore(path, baseLen);
     }
 
@@ -97,7 +98,8 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
             !ffCharIsDigit(pathCpuEntry->d_name[strlen("cpu")])) continue;
 
         ffStrbufAppendS(&path, pathCpuEntry->d_name);
-        parseCpuCache(&path, result, &buffer, &added);
+        const char* error = parseCpuCache(&path, result, &buffer, &added);
+        if (error) return error;
         ffStrbufSubstrBefore(&path, baseLen);
     }
     return NULL;

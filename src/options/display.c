@@ -180,11 +180,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (charTotal)
                     ffStrbufSetS(&options->barCharTotal, charTotal);
 
-                yyjson_val* borderLeft = yyjson_obj_get(val, "border-left");
+                yyjson_val* borderLeft = yyjson_obj_get(val, "borderLeft");
                 if (borderLeft)
                     ffStrbufSetS(&options->barBorderLeft, yyjson_get_str(borderLeft));
 
-                yyjson_val* borderRight = yyjson_obj_get(val, "border-right");
+                yyjson_val* borderRight = yyjson_obj_get(val, "borderRight");
                 if (borderRight)
                     ffStrbufSetS(&options->barBorderRight, yyjson_get_str(borderRight));
 

@@ -14,7 +14,11 @@ const char* ffDetectProcesses(uint32_t* result)
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL)
     {
-        if (entry->d_type == DT_DIR && ffCharIsDigit(entry->d_name[0]))
+        if (
+        #ifdef _DIRENT_HAVE_D_TYPE
+                entry->d_type == DT_DIR &&
+        #endif
+                ffCharIsDigit(entry->d_name[0]))
             ++num;
     }
 

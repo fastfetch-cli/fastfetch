@@ -34,6 +34,7 @@ static FFModuleBaseInfo* D[] = {
     (void*) &instance.config.modules.display,
     (void*) &instance.config.modules.disk,
     (void*) &instance.config.modules.diskIo,
+    (void*) &instance.config.modules.dns,
     NULL,
 };
 

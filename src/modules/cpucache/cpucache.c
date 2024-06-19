@@ -26,7 +26,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
 
         ffStrbufClear(&buffer);
 
-        uint64_t sum = 0;
+        uint32_t sum = 0;
         FF_LIST_FOR_EACH(FFCPUCache, src, result->caches[i])
         {
             char typeStr = '?';
@@ -44,7 +44,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
             ffParseSize(src->size, &buffer);
             ffStrbufAppendF(&buffer, " (%c)", typeStr);
 
-            sum += (uint64_t) src->size * src->num;
+            sum += src->size * src->num;
         }
 
         if(options->moduleArgs.outputFormat.length == 0)
@@ -74,7 +74,7 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
             ffStrbufAppendS(&buffer, ", ");
         uint32_t value = 0;
         FF_LIST_FOR_EACH(FFCPUCache, src, result->caches[i])
-            value += (uint64_t) src->size * src->num;
+            value += src->size * src->num;
         ffParseSize(value, &buffer);
         ffStrbufAppendF(&buffer, " (L%u)", i + 1);
         sum += value;

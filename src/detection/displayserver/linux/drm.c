@@ -3,6 +3,7 @@
 #include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
+#ifdef __linux__
 #include <dirent.h>
 
 static const char* drmParseSysfs(FFDisplayServerResult* result)
@@ -85,6 +86,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
 
     return NULL;
 }
+#endif
 
 #ifdef FF_HAVE_DRM
 
@@ -369,5 +371,7 @@ void ffdsConnectDrm(FFDisplayServerResult* result)
     }
     #endif
 
+    #ifdef __linux__
     drmParseSysfs(result);
+    #endif
 }
