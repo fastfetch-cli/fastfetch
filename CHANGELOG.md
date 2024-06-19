@@ -30,6 +30,7 @@ Logos:
 * Add Tuxdeo
 * Add Manjaro ARM
 * Add RedOS
+* Add Arch3
 
 # 2.15.0
 
