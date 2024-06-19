@@ -343,6 +343,18 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Arch3
+    {
+        .name = {"arch3", "archlinux3", "arch-linux3"},
+        .type = FF_LOGO_LINE_TYPE_NORMAL,
+        .lines = FASTFETCH_DATATEXT_LOGO_ARCH3,
+        .colors = {
+            FF_COLOR_FG_LIGHT_RED,
+            FF_COLOR_FG_LOGHT_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_LOGHT_YELLOW,
+        .colorTitle = FF_COLOR_FG_LIGHT_RED,
+    },
     // ArchSmall
     {
         .names = {"arch_small", "archlinux_small", "arch-linux-small"},
