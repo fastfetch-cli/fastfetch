@@ -87,7 +87,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
             ffStrbufTrimRight(&gpu->platformApi, ' ');
         }
         else
-            ffStrbufSetS(&gpu->platformApi, "OpenCL");
+            ffStrbufSetStatic(&gpu->platformApi, "OpenCL");
 
         if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
             ffStrbufSetS(&gpu->vendor, buffer);
@@ -95,32 +95,47 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
         if (data->ffclGetDeviceInfo(deviceID, CL_DRIVER_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
         {
             const char* versionPretty = strchr(buffer, ' ');
-            if (versionPretty)
+            if (versionPretty && *versionPretty)
                 ffStrbufSetS(&gpu->driver, versionPretty + 1);
             else
                 ffStrbufSetS(&gpu->driver, buffer);
         }
 
-        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-            gpu->coreCount = (int32_t)*(cl_uint*) buffer;
-
-        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-            gpu->frequency = (*(cl_uint*) buffer) / 1000.;
-
-        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_HOST_UNIFIED_MEMORY, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-            gpu->type = *(cl_bool*) buffer == CL_TRUE ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-
-        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_LOCAL_MEM_TYPE, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
         {
-            if (*(cl_device_local_mem_type*) buffer == CL_LOCAL)
+            cl_uint value;
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(value), &value, NULL) == CL_SUCCESS)
+                gpu->coreCount = (int32_t) value;
+        }
+
+        {
+            cl_uint value;
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(value), &value, NULL) == CL_SUCCESS)
+                gpu->frequency = value / 1000.;
+        }
+
+        {
+            cl_bool value;
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_HOST_UNIFIED_MEMORY, sizeof(value), &value, NULL) == CL_SUCCESS)
+                gpu->type = value ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+        }
+
+        {
+            cl_device_local_mem_type memType;
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_LOCAL_MEM_TYPE, sizeof(memType), &memType, NULL) == CL_SUCCESS && memType == CL_LOCAL)
             {
-                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-                    gpu->dedicated.total = *(cl_ulong*) buffer;
+                cl_ulong value;
+                // 32 KiB is the minimum value required by OpenCL spec, don't use it
+                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(value), &value, NULL) == CL_SUCCESS && value > 32 * 1024)
+                    gpu->dedicated.total = value;
             }
         }
 
-        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
-            gpu->shared.total = *(cl_ulong*) buffer;
+        {
+            cl_ulong value;
+            if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(value), &value, NULL) == CL_SUCCESS)
+                gpu->shared.total = value;
+
+        }
     }
 
     return NULL;
