@@ -12,7 +12,7 @@
 #include "util/stringUtils.h"
 #include <string.h>
 
-#define CL_TARGET_OPENCL_VERSION 100
+#define CL_TARGET_OPENCL_VERSION 110
 #ifndef __APPLE__
     #include <CL/cl.h>
 #else
@@ -29,8 +29,21 @@ typedef struct OpenCLData
 static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
 {
     char buffer[1024] = "";
-    if (data->ffclGetPlatformInfo(NULL, CL_PLATFORM_VERSION, sizeof(buffer), buffer, NULL) != CL_SUCCESS)
-        return "clGetPlatformInfo(NULL, CL_PLATFORM_VERSION) failed";
+    cl_int res = data->ffclGetPlatformInfo(NULL, CL_PLATFORM_VERSION, sizeof(buffer), buffer, NULL);
+    if (res != CL_SUCCESS)
+    {
+        switch (res)
+        {
+            case CL_INVALID_PLATFORM:
+                return "clGetPlatformInfo(NULL, CL_PLATFORM_VERSION) failed: CL_INVALID_PLATFORM";
+            case CL_INVALID_VALUE:
+                return "clGetPlatformInfo(NULL, CL_PLATFORM_VERSION) failed: CL_INVALID_VALUE";
+            case CL_OUT_OF_HOST_MEMORY:
+                return "clGetPlatformInfo(NULL, CL_PLATFORM_VERSION) failed: CL_OUT_OF_HOST_MEMORY";
+            default:
+                return "clGetPlatformInfo(NULL, CL_PLATFORM_VERSION) failed: unknown error";
+        }
+    }
 
     {
         const char* versionPretty = buffer;
@@ -40,10 +53,10 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
         ffStrbufTrim(&result->version, ' ');
     }
 
-    if (clGetPlatformInfo(NULL, CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+    if (data->ffclGetPlatformInfo(NULL, CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
         ffStrbufSetS(&result->name, buffer);
 
-    if (clGetPlatformInfo(NULL, CL_PLATFORM_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+    if (data->ffclGetPlatformInfo(NULL, CL_PLATFORM_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
         ffStrbufSetS(&result->vendor, buffer);
 
     cl_device_id deviceIDs[32];
