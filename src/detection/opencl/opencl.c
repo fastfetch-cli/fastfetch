@@ -1,4 +1,5 @@
 #include "detection/opencl/opencl.h"
+#include "detection/gpu/gpu.h"
 
 #if !defined(FF_HAVE_OPENCL) && defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_15)
     #define FF_HAVE_OPENCL 1
@@ -8,7 +9,6 @@
 
 #include "common/library.h"
 #include "common/parsing.h"
-#include "detection/gpu/gpu.h"
 #include "util/stringUtils.h"
 #include <string.h>
 
