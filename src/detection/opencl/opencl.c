@@ -11,6 +11,7 @@
 
 #include "common/library.h"
 #include "common/parsing.h"
+#include "detection/gpu/gpu.h"
 #include "util/stringUtils.h"
 #include <string.h>
 
@@ -23,50 +24,94 @@
 
 typedef struct OpenCLData
 {
-    FF_LIBRARY_SYMBOL(clGetPlatformIDs)
-    FF_LIBRARY_SYMBOL(clGetDeviceIDs)
+    FF_LIBRARY_SYMBOL(clGetPlatformInfo)
     FF_LIBRARY_SYMBOL(clGetDeviceInfo)
+    FF_LIBRARY_SYMBOL(clGetDeviceIDs)
 } OpenCLData;
 
 static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
 {
-    cl_platform_id platformID = NULL;
-    cl_uint numPlatforms = 0;
-    data->ffclGetPlatformIDs(1, &platformID, &numPlatforms);
+    char buffer[1024] = "";
+    if (data->ffclGetPlatformInfo(NULL, CL_PLATFORM_VERSION, sizeof(buffer), buffer, NULL) != CL_SUCCESS)
+        return "clGetPlatformInfo(NULL, CL_PLATFORM_VERSION) failed";
 
-    if(numPlatforms == 0)
-        return "clGetPlatformIDs returned 0 platforms";
+    {
+        const char* versionPretty = buffer;
+        if(ffStrStartsWithIgnCase(buffer, "OpenCL "))
+            versionPretty = buffer + strlen("OpenCL ");
+        ffStrbufSetS(&result->version, versionPretty);
+        ffStrbufTrim(&result->version, ' ');
+    }
 
-    cl_device_id deviceID = NULL;
-    cl_uint numDevices = 0;
-    data->ffclGetDeviceIDs(platformID, CL_DEVICE_TYPE_GPU, 1, &deviceID, &numDevices);
+    if (clGetPlatformInfo(NULL, CL_PLATFORM_NAME, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+        ffStrbufSetS(&result->name, buffer);
 
-    if(numDevices == 0)
-        data->ffclGetDeviceIDs(platformID, CL_DEVICE_TYPE_ALL, 1, &deviceID, &numDevices);
+    if (clGetPlatformInfo(NULL, CL_PLATFORM_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+        ffStrbufSetS(&result->vendor, buffer);
 
-    if(numDevices == 0)
-        return "clGetDeviceIDs returned 0 devices";
+    cl_device_id deviceIDs[32];
+    cl_uint numDevices = (cl_uint) (sizeof(deviceIDs) / sizeof(deviceIDs[0]));
+    data->ffclGetDeviceIDs(NULL, CL_DEVICE_TYPE_GPU, numDevices, deviceIDs, &numDevices);
 
-    char version[64] = "";
-    data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(version), version, NULL);
-    if(!ffStrSet(version))
-        return "clGetDeviceInfo returned NULL or empty string";
+    for (cl_uint index = 0; index < numDevices; ++index)
+    {
+        cl_device_id deviceID = deviceIDs[index];
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_NAME, sizeof(buffer), buffer, NULL) != CL_SUCCESS)
+            continue;
 
-    const char* versionPretty = version;
-    if(ffStrStartsWithIgnCase(version, "OpenCL "))
-        versionPretty = version + strlen("OpenCL ");
-    ffStrbufSetS(&result->version, versionPretty);
-    ffStrbufTrim(&result->version, ' ');
+        FFGPUResult* gpu = ffListAdd(&result->gpus);
+        ffStrbufInitS(&gpu->name, buffer);
+        ffStrbufInit(&gpu->vendor);
+        ffStrbufInit(&gpu->driver);
+        ffStrbufInit(&gpu->platformApi);
+        gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->deviceId = index + 1;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-    ffStrbufEnsureFree(&result->device, 128);
-    data->ffclGetDeviceInfo(deviceID, CL_DEVICE_NAME, result->device.allocated, result->device.chars, NULL);
-    ffStrbufRecalculateLength(&result->device);
-    ffStrbufTrim(&result->device, ' ');
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+        {
+            ffStrbufSetS(&gpu->platformApi, buffer);
+            ffStrbufTrimRight(&gpu->platformApi, ' ');
+        }
+        else
+            ffStrbufSetS(&gpu->platformApi, "OpenCL");
 
-    ffStrbufEnsureFree(&result->vendor, 32);
-    data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, result->vendor.allocated, result->vendor.chars, NULL);
-    ffStrbufRecalculateLength(&result->vendor);
-    ffStrbufTrim(&result->vendor, ' ');
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            ffStrbufSetS(&gpu->vendor, buffer);
+
+        if (data->ffclGetDeviceInfo(deviceID, CL_DRIVER_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+        {
+            const char* versionPretty = strchr(buffer, ' ');
+            if (versionPretty)
+                ffStrbufSetS(&gpu->driver, versionPretty + 1);
+            else
+                ffStrbufSetS(&gpu->driver, buffer);
+        }
+
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            gpu->coreCount = (int32_t)*(cl_uint*) buffer;
+
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            gpu->frequency = (*(cl_uint*) buffer) / 1000.;
+
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_HOST_UNIFIED_MEMORY, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            gpu->type = *(cl_bool*) buffer == CL_TRUE ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_LOCAL_MEM_TYPE, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+        {
+            if (*(cl_device_local_mem_type*) buffer == CL_LOCAL)
+            {
+                if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_LOCAL_MEM_SIZE, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+                    gpu->dedicated.total = *(cl_ulong*) buffer;
+            }
+        }
+
+        if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
+            gpu->shared.total = *(cl_ulong*) buffer;
+    }
 
     return NULL;
 }
@@ -85,7 +130,7 @@ const char* ffDetectOpenCL(FFOpenCLResult* result)
     #endif
         "libOpenCL"FF_LIBRARY_EXTENSION, 1
     );
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformIDs);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetPlatformInfo);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceIDs);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opencl, data, clGetDeviceInfo);
 
@@ -94,7 +139,7 @@ const char* ffDetectOpenCL(FFOpenCLResult* result)
     #elif defined(MACOS_HAS_OPENCL) // FF_HAVE_OPENCL
 
     OpenCLData data;
-    data.ffclGetPlatformIDs = clGetPlatformIDs;
+    data.ffclGetPlatformInfo = clGetPlatformInfo;
     data.ffclGetDeviceIDs = clGetDeviceIDs;
     data.ffclGetDeviceInfo = clGetDeviceInfo;
 
