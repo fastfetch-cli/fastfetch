@@ -150,6 +150,7 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
             { "auto", FF_GPU_DETECTION_METHOD_AUTO },
             { "pci", FF_GPU_DETECTION_METHOD_PCI },
             { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
+            { "opencl", FF_GPU_DETECTION_METHOD_OPENCL },
             { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
             {},
         });
@@ -204,6 +205,7 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
                 { "auto", FF_GPU_DETECTION_METHOD_AUTO },
                 { "pci", FF_GPU_DETECTION_METHOD_PCI },
                 { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
+                { "opencl", FF_GPU_DETECTION_METHOD_OPENCL },
                 { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
                 {},
             });
@@ -259,6 +261,9 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
                 break;
             case FF_GPU_DETECTION_METHOD_VULKAN:
                 yyjson_mut_obj_add_str(doc, module, "detectionMethod", "vulkan");
+                break;
+            case FF_GPU_DETECTION_METHOD_OPENCL:
+                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opencl");
                 break;
             case FF_GPU_DETECTION_METHOD_OPENGL:
                 yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opengl");

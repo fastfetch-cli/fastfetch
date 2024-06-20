@@ -1,13 +1,10 @@
 #include "detection/opencl/opencl.h"
 
-#ifdef __APPLE__
-#include <AvailabilityMacros.h>
-#if (MAC_OS_X_VERSION_MIN_REQUIRED > 1050) && !defined(__ppc__)
-#define MACOS_HAS_OPENCL
-#endif
+#if !defined(FF_HAVE_OPENCL) && defined(__APPLE__) && defined(MAC_OS_X_VERSION_10_15)
+    #define FF_HAVE_OPENCL 1
 #endif
 
-#if defined(FF_HAVE_OPENCL) || defined(MACOS_HAS_OPENCL)
+#ifdef FF_HAVE_OPENCL
 
 #include "common/library.h"
 #include "common/parsing.h"
@@ -16,7 +13,7 @@
 #include <string.h>
 
 #define CL_TARGET_OPENCL_VERSION 100
-#ifdef FF_HAVE_OPENCL
+#ifndef __APPLE__
     #include <CL/cl.h>
 #else
     #include <OpenCL/cl.h>
@@ -116,15 +113,13 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
     return NULL;
 }
 
-#endif // defined(FF_HAVE_OPENCL) || defined(MACOS_HAS_OPENCL)
-
-const char* ffDetectOpenCL(FFOpenCLResult* result)
+static const char* detectOpenCL(FFOpenCLResult* result)
 {
-    #ifdef FF_HAVE_OPENCL
-
     OpenCLData data;
 
-    FF_LIBRARY_LOAD(opencl, &instance.config.library.libOpenCL, "dlopen libOpenCL"FF_LIBRARY_EXTENSION" failed",
+    #ifndef __APPLE__
+
+    FF_LIBRARY_LOAD(opencl, &instance.config.library.libOpenCL, "dlopen libOpenCL" FF_LIBRARY_EXTENSION" failed",
     #ifdef _WIN32
         "OpenCL"FF_LIBRARY_EXTENSION, -1,
     #endif
@@ -136,19 +131,36 @@ const char* ffDetectOpenCL(FFOpenCLResult* result)
 
     return openCLHandleData(&data, result);
 
-    #elif defined(MACOS_HAS_OPENCL) // FF_HAVE_OPENCL
+    #else
 
-    OpenCLData data;
     data.ffclGetPlatformInfo = clGetPlatformInfo;
     data.ffclGetDeviceIDs = clGetDeviceIDs;
     data.ffclGetDeviceInfo = clGetDeviceInfo;
 
     return openCLHandleData(&data, result);
 
-    #else
+    #endif
+}
 
-    FF_UNUSED(result);
-    return "Fastfetch was build without OpenCL support";
+#endif // defined(FF_HAVE_OPENCL)
 
-    #endif // FF_HAVE_OPENCL
+FFOpenCLResult* ffDetectOpenCL(void)
+{
+    static FFOpenCLResult result;
+
+    if (result.gpus.elementSize == 0)
+    {
+        ffStrbufInit(&result.version);
+        ffStrbufInit(&result.name);
+        ffStrbufInit(&result.vendor);
+        ffListInit(&result.gpus, sizeof(FFGPUResult));
+
+        #ifdef FF_HAVE_OPENCL
+            result.error = detectOpenCL(&result);
+        #else
+            result.error = "fastfetch was compiled without OpenCL support";
+        #endif
+    }
+
+    return &result;
 }

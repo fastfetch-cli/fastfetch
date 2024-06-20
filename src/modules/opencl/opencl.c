@@ -9,36 +9,27 @@
 
 void ffPrintOpenCL(FFOpenCLOptions* options)
 {
-    FFOpenCLResult opencl;
-    ffStrbufInit(&opencl.version);
-    ffStrbufInit(&opencl.name);
-    ffStrbufInit(&opencl.vendor);
-    ffListInit(&opencl.gpus, sizeof(FFGPUResult));
+    FFOpenCLResult* result = ffDetectOpenCL();
 
-    const char* error = ffDetectOpenCL(&opencl);
-
-    if(error != NULL)
-        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-    else
+    if(result->error != NULL)
     {
-        if(options->moduleArgs.outputFormat.length == 0)
-        {
-            ffPrintLogoAndKey(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            ffStrbufPutTo(&opencl.version, stdout);
-        }
-        else
-        {
-            FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENCL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.version, "version"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.name, "name"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &opencl.vendor, "vendor"},
-            }));
-        }
+        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result->error);
+        return;
     }
 
-    ffStrbufDestroy(&opencl.version);
-    ffStrbufDestroy(&opencl.name);
-    ffStrbufDestroy(&opencl.vendor);
+    if(options->moduleArgs.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffStrbufPutTo(&result->version, stdout);
+    }
+    else
+    {
+        FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENCL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version, "version"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->vendor, "vendor"},
+        }));
+    }
 }
 
 bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, const char* value)
@@ -78,72 +69,61 @@ void ffGenerateOpenCLJsonConfig(FFOpenCLOptions* options, yyjson_mut_doc* doc, y
 
 void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FFOpenCLResult opencl;
-    ffStrbufInit(&opencl.version);
-    ffStrbufInit(&opencl.name);
-    ffStrbufInit(&opencl.vendor);
-    ffListInit(&opencl.gpus, sizeof(FFGPUResult));
+    FFOpenCLResult* result = ffDetectOpenCL();
 
-    const char* error = ffDetectOpenCL(&opencl);
-
-    if(error != NULL)
+    if(result->error != NULL)
     {
-        yyjson_mut_obj_add_str(doc, module, "error", error);
+        yyjson_mut_obj_add_str(doc, module, "error", result->error);
+        return;
     }
-    else
-    {
-        yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-        yyjson_mut_obj_add_strbuf(doc, obj, "version", &opencl.version);
-        yyjson_mut_obj_add_strbuf(doc, obj, "name", &opencl.name);
-        yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &opencl.vendor);
 
-        yyjson_mut_val* gpus = yyjson_mut_obj_add_arr(doc, obj, "gpus");
-        FF_LIST_FOR_EACH(FFGPUResult, gpu, opencl.gpus)
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
+    yyjson_mut_obj_add_strbuf(doc, obj, "name", &result->name);
+    yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result->vendor);
+
+    yyjson_mut_val* gpus = yyjson_mut_obj_add_arr(doc, obj, "gpus");
+    FF_LIST_FOR_EACH(FFGPUResult, gpu, result->gpus)
+    {
+        yyjson_mut_val* gpuObj = yyjson_mut_arr_add_obj(doc, gpus);
+        yyjson_mut_obj_add_str(doc, gpuObj, "type", gpu->type == FF_GPU_TYPE_UNKNOWN ? "Unknown" : gpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "vendor", &gpu->vendor);
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "name", &gpu->name);
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "driver", &gpu->driver);
+        yyjson_mut_obj_add_strbuf(doc, gpuObj, "platformApi", &gpu->platformApi);
+        yyjson_mut_obj_add_int(doc, gpuObj, "coreCount", gpu->coreCount);
+        yyjson_mut_obj_add_real(doc, gpuObj, "frequency", gpu->frequency);
+
+        yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");
+
         {
-            yyjson_mut_val* gpuObj = yyjson_mut_arr_add_obj(doc, gpus);
-            yyjson_mut_obj_add_str(doc, gpuObj, "type", gpu->type == FF_GPU_TYPE_UNKNOWN ? "Unknown" : gpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
-            yyjson_mut_obj_add_strbuf(doc, gpuObj, "vendor", &gpu->vendor);
-            yyjson_mut_obj_add_strbuf(doc, gpuObj, "name", &gpu->name);
-            yyjson_mut_obj_add_strbuf(doc, gpuObj, "driver", &gpu->driver);
-            yyjson_mut_obj_add_strbuf(doc, gpuObj, "platformApi", &gpu->platformApi);
-            yyjson_mut_obj_add_int(doc, gpuObj, "coreCount", gpu->coreCount);
-            yyjson_mut_obj_add_real(doc, gpuObj, "frequency", gpu->frequency);
+            yyjson_mut_val* dedicatedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
+            if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "total", gpu->dedicated.total);
+            else
+                yyjson_mut_obj_add_null(doc, dedicatedMemory, "total");
 
-            yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");
-
-            {
-                yyjson_mut_val* dedicatedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
-                if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
-                    yyjson_mut_obj_add_uint(doc, dedicatedMemory, "total", gpu->dedicated.total);
-                else
-                    yyjson_mut_obj_add_null(doc, dedicatedMemory, "total");
-
-                if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
-                    yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", gpu->dedicated.total);
-                else
-                    yyjson_mut_obj_add_null(doc, dedicatedMemory, "used");
-            }
-
-            {
-                yyjson_mut_val* sharedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
-                if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
-                    yyjson_mut_obj_add_uint(doc, sharedMemory, "total", gpu->shared.total);
-                else
-                    yyjson_mut_obj_add_null(doc, sharedMemory, "total");
-
-                if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
-                    yyjson_mut_obj_add_uint(doc, sharedMemory, "used", gpu->shared.used);
-                else
-                    yyjson_mut_obj_add_null(doc, sharedMemory, "used");
-            }
-
-            yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", gpu->deviceId);
+            if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, dedicatedMemory, "used", gpu->dedicated.total);
+            else
+                yyjson_mut_obj_add_null(doc, dedicatedMemory, "used");
         }
-    }
 
-    ffStrbufDestroy(&opencl.version);
-    ffStrbufDestroy(&opencl.name);
-    ffStrbufDestroy(&opencl.vendor);
+        {
+            yyjson_mut_val* sharedMemory = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
+            if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, sharedMemory, "total", gpu->shared.total);
+            else
+                yyjson_mut_obj_add_null(doc, sharedMemory, "total");
+
+            if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
+                yyjson_mut_obj_add_uint(doc, sharedMemory, "used", gpu->shared.used);
+            else
+                yyjson_mut_obj_add_null(doc, sharedMemory, "used");
+        }
+
+        yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", gpu->deviceId);
+    }
 }
 
 void ffPrintOpenCLHelpFormat(void)

@@ -1523,6 +1523,7 @@
                                             "auto",
                                             "pci",
                                             "vulkan",
+                                            "opencl",
                                             "opengl"
                                         ],
                                         "default": "auto"

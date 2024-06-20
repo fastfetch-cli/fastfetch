@@ -1251,7 +1251,8 @@
                 "enum": {
                     "auto": "Query platform specific graphic APIs. Requires proper GPU drivers installed. Not supported on FreeBSD",
                     "pci": "Search PCI devices, which do not requires GPU driver installed. Not supported on Windows and macOS",
-                    "vulkan": "Use Vulkan API. Slow and requires vulkan driver installed. Used for Android",
+                    "vulkan": "Use Vulkan API. Slow and requires proper vulkan driver installed. Used for Android",
+                    "opencl": "Use OpenCL API. Slow and requires proper OpenCL driver installed",
                     "opengl": "Use OpenGL API. Slow and only detects one GPU"
                 },
                 "default": "auto"
