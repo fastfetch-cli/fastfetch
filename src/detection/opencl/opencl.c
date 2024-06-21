@@ -60,7 +60,8 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
 
         cl_device_id deviceIDs[32];
         cl_uint numDevices = (cl_uint) (sizeof(deviceIDs) / sizeof(deviceIDs[0]));
-        data->ffclGetDeviceIDs(platforms[iplat], CL_DEVICE_TYPE_GPU, numDevices, deviceIDs, &numDevices);
+        if (data->ffclGetDeviceIDs(platforms[iplat], CL_DEVICE_TYPE_GPU, numDevices, deviceIDs, &numDevices) != CL_SUCCESS)
+            continue;
 
         for (cl_uint idev = 0; idev < numDevices; ++idev)
         {
