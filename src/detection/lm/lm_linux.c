@@ -6,7 +6,7 @@
 
 #include <unistd.h>
 
-#define FF_SYSTEMD_SESSIONS_PATH "/var/run/systemd/sessions/"
+#define FF_SYSTEMD_SESSIONS_PATH "/run/systemd/sessions/"
 #define FF_SYSTEMD_USERS_PATH "/run/systemd/users/"
 
 static const char* getGdmVersion(FFstrbuf* version)
@@ -143,7 +143,7 @@ const char* ffDetectLM(FFLMResult* result)
     {
         // On some incorrectly configured systems, $XDG_SESSION_ID is not set. Try finding it ourself
         // WARNING: This is private data. Do not parse
-        ffStrbufAppendF(&path, "/run/systemd/users/%d", getuid());
+        ffStrbufSetF(&path, FF_SYSTEMD_USERS_PATH "%d", getuid());
 
         // This is actually buggy, and assumes current user is using DE
         // `sd_pid_get_session` can be a better option, but we need to find a pid to use
@@ -151,10 +151,9 @@ const char* ffDetectLM(FFLMResult* result)
             {"DISPLAY=", &sessionId},
         }))
             return "Failed to get $XDG_SESSION_ID";
-        ffStrbufClear(&path);
     }
 
-    ffStrbufAppendS(&path, "/var/run/systemd/sessions/");
+    ffStrbufSetS(&path, FF_SYSTEMD_SESSIONS_PATH);
     ffStrbufAppend(&path, &sessionId);
 
     // WARNING: This is private data. Do not parse
@@ -162,7 +161,7 @@ const char* ffDetectLM(FFLMResult* result)
         {"SERVICE=", &result->service},
         {"TYPE=", &result->type},
     }))
-        return "Failed to parse /run/systemd/sessions/$XDG_SESSION_ID";
+        return "Failed to parse " FF_SYSTEMD_SESSIONS_PATH "$XDG_SESSION_ID";
 
     if (ffStrbufStartsWithS(&result->service, "gdm"))
         getGdmVersion(&result->version);
