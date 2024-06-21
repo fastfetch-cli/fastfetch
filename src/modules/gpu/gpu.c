@@ -355,10 +355,9 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
         yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &gpu->platformApi);
 
-        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
-            yyjson_mut_obj_add_null(doc, obj, "frequency");
-        else
-            yyjson_mut_obj_add_real(doc, obj, "frequency", gpu->frequency);
+        yyjson_mut_obj_add_real(doc, obj, "frequency", gpu->frequency); // NaN will be output as "null"
+
+        yyjson_mut_obj_add_uint(doc, obj, "deviceId", gpu->deviceId);
     }
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)

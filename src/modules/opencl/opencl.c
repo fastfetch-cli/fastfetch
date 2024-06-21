@@ -91,7 +91,11 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "name", &gpu->name);
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "driver", &gpu->driver);
         yyjson_mut_obj_add_strbuf(doc, gpuObj, "platformApi", &gpu->platformApi);
-        yyjson_mut_obj_add_int(doc, gpuObj, "coreCount", gpu->coreCount);
+        if (gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
+            yyjson_mut_obj_add_int(doc, gpuObj, "coreCount", gpu->coreCount);
+        else
+            yyjson_mut_obj_add_null(doc, gpuObj, "coreCount");
+
         yyjson_mut_obj_add_real(doc, gpuObj, "frequency", gpu->frequency);
 
         yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");

@@ -78,7 +78,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
             gpu->type = FF_GPU_TYPE_UNKNOWN;
             gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-            gpu->deviceId = 0;
+            gpu->deviceId = (size_t) deviceID;
             gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
             if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VERSION, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
