@@ -172,7 +172,7 @@ typedef struct FFSmbiosPortableBattery
 static_assert(offsetof(FFSmbiosPortableBattery, OEMSpecific) == 0x16,
     "FFSmbiosPortableBattery: Wrong struct alignment");
 
-const char* detectBySmbios(FFBatteryResult* battery)
+static const char* detectBySmbios(FFBatteryResult* battery)
 {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
     if (!smbiosTable)

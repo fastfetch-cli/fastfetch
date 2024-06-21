@@ -549,7 +549,7 @@ elseif(BSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
@@ -749,7 +749,7 @@ elseif(SunOS)
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_sunos.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_sunos.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_nosupport.c
