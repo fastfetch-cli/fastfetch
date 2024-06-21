@@ -43,7 +43,8 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
         if (data->ffclGetPlatformInfo(platforms[iplat], CL_PLATFORM_VERSION, sizeof(buffer), buffer, NULL) != CL_SUCCESS)
             return "clGetPlatformInfo() failed";
 
-        if (iplat == 0)
+        // Use the newest supported OpenCL version
+        if (ffStrbufCompS(&result->version, buffer) < 0)
         {
             const char* versionPretty = buffer;
             if(ffStrStartsWithIgnCase(buffer, "OpenCL "))
