@@ -17,12 +17,12 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     if (error)
         return error;
 
-    if (!ffStrbufStartsWithS(&buffer, "\npci domain 0x"))
+    if (!ffStrbufStartsWithS(&buffer, "\npci "))
         return "Invalid scanpci result";
 
     FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
 
-    // pci domain 0x354b bus 0x0000 cardnum 0x00 function 0x00: vendor 0x1414 device 0x008e
+    // pci bus 0x0000 cardnum 0x00 function 0x00: vendor 0x1414 device 0x008e
     //  Device unknown
     //  CardVendor 0x0000 card 0x0000 (Card unknown)
     //   STATUS    0x0010  COMMAND 0x0007
@@ -42,9 +42,9 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             pstart = memrchr(buffer.chars, '\n', (size_t) (pstart - buffer.chars - 1));
         ++pstart;
 
-        uint32_t pciDomain, pciBus, pciDev, pciFunc, vendorId, deviceId;
-        if (sscanf(pstart, "pci domain %x bus %x cardnum %x function %x: vendor %x device %x",
-            &pciDomain, &pciBus, &pciDev, &pciFunc, &vendorId, &deviceId) != 6)
+        uint32_t vendorId, deviceId;
+        if (sscanf(pstart, "pci %*[^:]: vendor %x device %x",
+            &vendorId, &deviceId) != 2)
             return "PCI info not found, invalid scanpci result";
 
         pclass += strlen("\n  CLASS     0x03 ");
@@ -61,7 +61,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = ((uint64_t) pciDomain << 6) | ((uint64_t) pciBus << 4) | (pciDev << 2) | pciFunc;
+        gpu->deviceId = 0;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
