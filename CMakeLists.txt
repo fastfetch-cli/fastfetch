@@ -1266,6 +1266,13 @@ install(
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
 
+if (TARGET ffwinrt)
+    install(
+        TARGETS ffwinrt
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+endif()
+
 install(
     FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.bash"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/bash-completion/completions"
