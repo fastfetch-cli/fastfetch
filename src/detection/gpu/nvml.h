@@ -52,7 +52,8 @@ typedef struct {
     // Allocated device memory (in bytes)
     unsigned long long used;
 } nvmlMemory_v2_t;
-enum { nvmlMemory_v2 = 2 };
+// https://github.com/NVIDIA/nvidia-settings/issues/78#issuecomment-1012837988
+enum { nvmlMemory_v2 = (unsigned int)(sizeof(nvmlMemory_v2_t) | (2 << 24U)) };
 
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceEnumvs.html#group__nvmlDeviceEnumvs_1g805c0647be9996589fc5e3f6ff680c64
 // Clock types
