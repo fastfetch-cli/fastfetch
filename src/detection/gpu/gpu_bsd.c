@@ -76,7 +76,6 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }
 
-        #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
         {
             ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
@@ -98,7 +97,6 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
                 gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
         }
-        #endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
     }
 
     return NULL;

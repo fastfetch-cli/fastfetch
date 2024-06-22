@@ -1,10 +1,7 @@
 #include "gpu.h"
+#include "detection/gpu/gpu_driver_specific.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
-
-#ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
-    #include "detection/gpu/gpu_driver_specific.h"
-#endif
 
 #include <inttypes.h>
 
@@ -13,7 +10,6 @@ static int isGpuNameEqual(const FFGPUResult* gpu, const FFstrbuf* name)
     return ffStrbufEqual(&gpu->name, name);
 }
 
-#ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
 static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName)
 {
     if (vendor == FF_GPU_VENDOR_NAME_NVIDIA)
@@ -48,7 +44,6 @@ static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&
 
     return true;
 }
-#endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
 
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
@@ -144,7 +139,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             }
         }
 
-#ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
         __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
         const char* dllName;
 
@@ -174,7 +168,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 );
             }
         }
-#endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
     }
 
     return NULL;

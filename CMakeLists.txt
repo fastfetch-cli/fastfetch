@@ -74,7 +74,6 @@ cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND"
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
-option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVML, IGCL and AGS)" ON)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -813,15 +812,13 @@ if(ENABLE_DIRECTX_HEADERS)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
 endif()
 
-if(ENABLE_PROPRIETARY_GPU_DRIVER_API AND (LINUX OR BSD OR WIN32))
-    message(STATUS "Enabling proprietary GPU driver API")
-    if(LINUX OR BSD OR WIN32)
-        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
-    endif()
-    if(WIN32)
-        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_intel.c)
-        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_amd.c)
-    endif()
+# Proprietary GPU driver APIs
+if(LINUX OR BSD OR WIN32)
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
+endif()
+if(WIN32)
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_intel.c)
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_amd.c)
 endif()
 
 include(CheckFunctionExists)
@@ -849,10 +846,6 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
-
-if(ENABLE_PROPRIETARY_GPU_DRIVER_API AND (LINUX OR BSD OR WIN32))
-    target_compile_definitions(libfastfetch PRIVATE FF_USE_PROPRIETARY_GPU_DRIVER_API)
-endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)

@@ -1,3 +1,10 @@
+# 2.17.0
+
+Changes:
+* CMake option `ENABLE_PROPRIETARY_GPU_DRIVER_API` is removed. The GPU driver APIs are now enabled by default.
+    * The option was introduced to reduce the license concerns. Since all non MIT proprietary code has been rewritten manually from scratch, it is no longer necessary.
+    * See <https://github.com/fastfetch-cli/fastfetch/issues/533#issuecomment-2122830958> for detail
+
 # 2.16.0
 
 This release added basic support for SunOS (Solaris, illumos). The binaries provided in the release lack a few useful features (such as Display detection). People who use SunOS should consider building fastfetch themselves.
