@@ -480,33 +480,21 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
-    #if defined(__linux__) || defined(__FreeBSD__)
-    // kitty is written in python. `kitty --version` can be expensive
-    char buffer[1024] = {};
-    if (
-        #ifdef __linux__
-        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
-        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer)
-        #else
-        ffReadFileData(_PATH_LOCALBASE "/share/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer)
-        #endif
-    )
+    char versionHex[64] = "";
+    // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
+    if (ffGetTerminalResponse(
+        "\eP+q6b697474792d71756572792d76657273696f6e\e\\", // kitty-query-version
+        "\eP1+r%*[^=]=%64[^\e]\e\\\\", versionHex) == NULL && *versionHex)
     {
-        // Starts from version 0.17.0
-        // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
-        const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
-        if (p)
+        // decode hex string
+        for (const char* p = versionHex; p[0] && p[1]; p += 2)
         {
-            p += strlen("version: Version = Version(");
-            int major, minor, patch;
-            if (sscanf(p, "%d,%d,%d", &major, &minor, &patch) == 3)
-            {
-                ffStrbufSetF(version, "%d.%d.%d", major, minor, patch);
-                return true;
-            }
+            unsigned value;
+            if (sscanf(p, "%2x", &value))
+                ffStrbufAppendC(version, (char) value);
         }
+        return true;
     }
-    #endif
 
     //kitty 0.21.2 created by Kovid Goyal
     return getExeVersionGeneral(exe, version);

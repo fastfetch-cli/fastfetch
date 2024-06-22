@@ -1,4 +1,5 @@
 #include "terminalfont.h"
+#include "common/io/io.h"
 #include "common/properties.h"
 #include "common/processing.h"
 #include "detection/terminalshell/terminalshell.h"
@@ -256,8 +257,6 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
     }
 }
 
-
-
 #endif //defined(_WIN32) || defined(__linux__)
 
 FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResult* result)
@@ -265,32 +264,54 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
-    if(!ffProcessAppendStdOut(&buf, (char* const[]){
-        exe->chars,
-        "+kitten",
-        "query-terminal",
-        NULL,
-    }))
+    char fontHex[64] = "", sizeHex[64] = "";
+    // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
+    if (ffGetTerminalResponse(
+        "\eP+q6b697474792d71756572792d666f6e745f66616d696c79;6b697474792d71756572792d666f6e745f73697a65\e\\", // kitty-query-font_family;kitty-query-font_size
+        "\eP1+r%*[^=]=%64[^\e]\e\\\eP1+r%*[^=]=%64[^\e]\e\\", fontHex, sizeHex) == NULL && *fontHex && *sizeHex)
     {
-        ffParsePropLines(buf.chars, "font_family: ", &fontName);
-        ffParsePropLines(buf.chars, "font_size: ", &fontSize);
+        // decode hex string
+        for (const char* p = fontHex; p[0] && p[1]; p += 2)
+        {
+            unsigned value;
+            if (sscanf(p, "%2x", &value))
+                ffStrbufAppendC(&fontName, (char) value);
+        }
+        for (const char* p = sizeHex; p[0] && p[1]; p += 2)
+        {
+            unsigned value;
+            if (sscanf(p, "%2x", &value))
+                ffStrbufAppendC(&fontSize, (char) value);
+        }
     }
     else
     {
-        FFpropquery fontQuery[] = {
-            {"font_family ", &fontName},
-            {"font_size ", &fontSize},
-        };
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        if(!ffProcessAppendStdOut(&buf, (char* const[]){
+            exe->chars,
+            "+kitten",
+            "query-terminal",
+            NULL,
+        }))
+        {
+            ffParsePropLines(buf.chars, "font_family: ", &fontName);
+            ffParsePropLines(buf.chars, "font_size: ", &fontSize);
+        }
+        else
+        {
+            FFpropquery fontQuery[] = {
+                {"font_family ", &fontName},
+                {"font_size ", &fontSize},
+            };
 
-        ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
+            ffParsePropFileConfigValues("kitty/kitty.conf", 2, fontQuery);
 
-        if(fontName.length == 0)
-            ffStrbufSetS(&fontName, "monospace");
-        if(fontSize.length == 0)
-            ffStrbufSetS(&fontSize, "11.0");
+            if(fontName.length == 0)
+                ffStrbufSetS(&fontName, "monospace");
+            if(fontSize.length == 0)
+                ffStrbufSetS(&fontSize, "11.0");
+        }
     }
-
 
     ffFontInitValues(&result->font, fontName.chars, fontSize.chars);
 
