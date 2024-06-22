@@ -302,7 +302,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
     {
-        ffStrbufSetStatic(&cpu->name, NULL);
+        ffStrbufClear(&cpu->name);
         char* pstart = buffer.chars;
 
         pstart = strstr(pstart, "Vendor ID:");
