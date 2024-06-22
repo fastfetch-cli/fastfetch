@@ -298,75 +298,142 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     detectAsahi(cpu);
     #endif
 
-    if (cpu->name.length == 0)
+    #if defined(__aarch64__) || defined(__arm__) //prioritize lscpu on arm for better model name output
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
     {
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
+        ffStrbufSetStatic(&cpu->name, NULL);
+        char* pstart = buffer.chars;
+
+        pstart = strstr(pstart, "Vendor ID:");
+        if (pstart)
         {
-            char* pstart = buffer.chars;
-
-            if (cpu->vendor.length == 0)
+            pstart += strlen("Vendor ID:");
+            while (isspace(*pstart)) ++pstart;
+            if (*pstart)
             {
-                pstart = strstr(pstart, "Vendor ID:");
-                if (pstart)
-                {
-                    pstart += strlen("Vendor ID:");
-                    while (isspace(*pstart)) ++pstart;
-                    if (*pstart)
-                    {
-                        char* pend = strchr(pstart, '\n');
-                        if (pend != NULL)
-                            ffStrbufAppendNS(&cpu->vendor, (uint32_t) (pend - pstart), pstart);
-                        else
-                        {
-                            ffStrbufAppendS(&cpu->vendor, pstart);
-                        }
-                        pstart = pend + 1;
-                        if (pstart >= buffer.chars + buffer.length)
-                            return NULL;
-                    }
-                }
-                else
-                {
-                    pstart = buffer.chars;
-                }
-            }
-
-            while ((pstart = strstr(pstart, "Model name:")))
-            {
-                pstart += strlen("Model name:");
-                while (isspace(*pstart)) ++pstart;
-                if (*pstart == '\0')
-                    break;
-
-                if (cpu->name.length > 0)
-                    ffStrbufAppendS(&cpu->name, " + ");
-
-                if (*pstart == '-')
-                {
-                    if (cpu->vendor.length > 0)
-                        ffStrbufAppend(&cpu->name, &cpu->vendor);
-                    else
-                        ffStrbufAppendS(&cpu->name, "Unknown");
-                    ++pstart;
-                    continue;
-                }
-
                 char* pend = strchr(pstart, '\n');
                 if (pend != NULL)
-                    ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
+                    ffStrbufAppendNS(&cpu->vendor, (uint32_t) (pend - pstart), pstart);
                 else
                 {
-                    ffStrbufAppendS(&cpu->name, pstart);
-                    break;
+                    ffStrbufAppendS(&cpu->vendor, pstart);
                 }
-
                 pstart = pend + 1;
                 if (pstart >= buffer.chars + buffer.length)
                     return NULL;
             }
         }
+        else
+        {
+            pstart = buffer.chars;
+        }
+
+        while ((pstart = strstr(pstart, "Model name:")))
+        {
+            pstart += strlen("Model name:");
+            while (isspace(*pstart)) ++pstart;
+            if (*pstart == '\0')
+                break;
+
+            if (cpu->name.length > 0)
+                ffStrbufAppendS(&cpu->name, " + ");
+
+            if (*pstart == '-')
+            {
+                if (cpu->vendor.length > 0)
+                    ffStrbufAppend(&cpu->name, &cpu->vendor);
+                else
+                    ffStrbufAppendS(&cpu->name, "Unknown");
+                ++pstart;
+                continue;
+            }
+
+            char* pend = strchr(pstart, '\n');
+            if (pend != NULL)
+                ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
+            else
+            {
+                ffStrbufAppendS(&cpu->name, pstart);
+                break;
+            }
+
+            pstart = pend + 1;
+            if (pstart >= buffer.chars + buffer.length)
+                return NULL;
+        }
     }
+    #else
+    if (cpu->name.length == 0)
+        {
+            FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+            if (ffProcessAppendStdOut(&buffer, (char *const[]) { "lscpu", NULL }) == NULL)
+            {
+                char* pstart = buffer.chars;
+
+                if (cpu->vendor.length == 0)
+                {
+                    pstart = strstr(pstart, "Vendor ID:");
+                    if (pstart)
+                    {
+                        pstart += strlen("Vendor ID:");
+                        while (isspace(*pstart)) ++pstart;
+                        if (*pstart)
+                        {
+                            char* pend = strchr(pstart, '\n');
+                            if (pend != NULL)
+                                ffStrbufAppendNS(&cpu->vendor, (uint32_t) (pend - pstart), pstart);
+                            else
+                            {
+                                ffStrbufAppendS(&cpu->vendor, pstart);
+                            }
+                            pstart = pend + 1;
+                            if (pstart >= buffer.chars + buffer.length)
+                                return NULL;
+                        }
+                    }
+                    else
+                    {
+                        pstart = buffer.chars;
+                    }
+                }
+
+                while ((pstart = strstr(pstart, "Model name:")))
+                {
+                    pstart += strlen("Model name:");
+                    while (isspace(*pstart)) ++pstart;
+                    if (*pstart == '\0')
+                        break;
+
+                    if (cpu->name.length > 0)
+                        ffStrbufAppendS(&cpu->name, " + ");
+
+                    if (*pstart == '-')
+                    {
+                        if (cpu->vendor.length > 0)
+                            ffStrbufAppend(&cpu->name, &cpu->vendor);
+                        else
+                            ffStrbufAppendS(&cpu->name, "Unknown");
+                        ++pstart;
+                        continue;
+                    }
+
+                    char* pend = strchr(pstart, '\n');
+                    if (pend != NULL)
+                        ffStrbufAppendNS(&cpu->name, (uint32_t) (pend - pstart), pstart);
+                    else
+                    {
+                        ffStrbufAppendS(&cpu->name, pstart);
+                        break;
+                    }
+
+                    pstart = pend + 1;
+                    if (pstart >= buffer.chars + buffer.length)
+                        return NULL;
+                }
+            }
+        }
+    #endif
 
     return NULL;
 }
