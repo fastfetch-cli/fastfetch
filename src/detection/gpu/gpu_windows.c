@@ -144,7 +144,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName) && (options->temp || options->driverSpecific))
         {
-            if (vendorId && deviceId && subSystemId && revId)
+            if (vendorId && deviceId && subSystemId)
             {
                 detectFn(
                     &(FFGpuDriverCondition) {
