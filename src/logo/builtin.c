@@ -484,7 +484,7 @@ static const FFlogo A[] = {
             FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_RED,
-            "38", //cyan
+            FF_COLOR_FG_LIGHT_BLACK,
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_BLUE,
@@ -1520,7 +1520,7 @@ static const FFlogo F[] = {
             FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_RED,
-            "38", //cyan
+            FF_COLOR_FG_LIGHT_BLACK,
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_BLUE,
