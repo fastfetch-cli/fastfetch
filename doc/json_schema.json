@@ -329,6 +329,11 @@
                     "type": "integer",
                     "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
                     "default": 1000
+                },
+                "preRun": {
+                    "type": "string",
+                    "description": "Set the command to be executed before printing logos",
+                    "default": ""
                 }
             }
         },

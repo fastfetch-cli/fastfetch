@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/jsonconfig.h"
+#include "common/processing.h"
 #include "options/general.h"
 #include "util/stringUtils.h"
 
@@ -21,6 +22,20 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->multithreading = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "processingTimeout"))
             options->processingTimeout = (int32_t) yyjson_get_int(val);
+        else if (ffStrEqualsIgnCase(key, "preRun"))
+        {
+            FF_STRBUF_AUTO_DESTROY _ = ffStrbufCreate();
+            const char* error = ffProcessAppendStdOut(&_, (char* const[]) {
+                #ifdef _WIN32
+                "cmd.exe", "/C",
+                #else
+                "/bin/sh", "-c",
+                #endif
+                (char*) yyjson_get_str(val), NULL
+            });
+            if (error)
+                return "Failed to execute preRun command";
+        }
 
         #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
         else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
