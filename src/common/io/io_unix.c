@@ -142,28 +142,28 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     if (!isatty(STDIN_FILENO))
     {
         if (ftty < 0)
-            ftty = open("/dev/tty", O_RDWR | O_CLOEXEC);
+            ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
         fin = ftty;
     }
     if (!isatty(STDOUT_FILENO))
     {
         if (ftty < 0)
-            ftty = open("/dev/tty", O_RDWR | O_CLOEXEC);
+            ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
         fout = ftty;
     }
 
-    struct termios oldTerm, newTerm;
+    struct termios oldTerm;
     if(tcgetattr(fin, &oldTerm) == -1)
         return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
 
-    newTerm = oldTerm;
+    struct termios newTerm = oldTerm;
     newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
-    if(tcsetattr(fin, TCSANOW, &newTerm) == -1)
-        return "tcsetattr(STDIN_FILENO, TCSANOW, &newTerm)";
+    if(tcsetattr(fin, TCSAFLUSH, &newTerm) == -1)
+        return "tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTerm)";
 
     ffWriteFDData(fout, strlen(request), request);
 
-    //Give the terminal 35ms to respond
+    //Give the terminal some time to respond
     if(poll(&(struct pollfd) { .fd = fin, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
     {
         tcsetattr(fin, TCSANOW, &oldTerm);
