@@ -54,18 +54,18 @@ static bool detectOSCodeName(FFOSResult* os)
                 case 14: ffStrbufSetStatic(&os->codename, "Mojave"); return true;
                 case 13: ffStrbufSetStatic(&os->codename, "High Sierra"); return true;
                 case 12: ffStrbufSetStatic(&os->codename, "Sierra"); return true;
-                case 11: ffStrbufSetStatic(&os->codename, "El Capitan"); return true;
-                case 10: ffStrbufSetStatic(&os->codename, "Yosemite"); return true;
-                case 9: ffStrbufSetStatic(&os->codename, "Mavericks"); return true;
-                case 8: ffStrbufSetStatic(&os->codename, "Mountain Lion"); return true;
-                case 7: ffStrbufSetStatic(&os->codename, "Lion"); return true;
-                case 6: ffStrbufSetStatic(&os->codename, "Snow Leopard"); return true;
-                case 5: ffStrbufSetStatic(&os->codename, "Leopard"); return true;
-                case 4: ffStrbufSetStatic(&os->codename, "Tiger"); return true;
-                case 3: ffStrbufSetStatic(&os->codename, "Panther"); return true;
-                case 2: ffStrbufSetStatic(&os->codename, "Jaguar"); return true;
-                case 1: ffStrbufSetStatic(&os->codename, "Puma"); return true;
-                case 0: ffStrbufSetStatic(&os->codename, "Cheetah"); return true;
+                case 11: ffStrbufSetStatic(&os->codename, "El Capitan"); ffStrbufSetStatic(&os->prettyName, "OS X"); return true;
+                case 10: ffStrbufSetStatic(&os->codename, "Yosemite"); ffStrbufSetStatic(&os->prettyName, "OS X"); return true;
+                case 9: ffStrbufSetStatic(&os->codename, "Mavericks"); ffStrbufSetStatic(&os->prettyName, "OS X"); return true;
+                case 8: ffStrbufSetStatic(&os->codename, "Mountain Lion"); ffStrbufSetStatic(&os->prettyName, "OS X"); return true;
+                case 7: ffStrbufSetStatic(&os->codename, "Lion"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 6: ffStrbufSetStatic(&os->codename, "Snow Leopard"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 5: ffStrbufSetStatic(&os->codename, "Leopard"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 4: ffStrbufSetStatic(&os->codename, "Tiger"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 3: ffStrbufSetStatic(&os->codename, "Panther"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 2: ffStrbufSetStatic(&os->codename, "Jaguar"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 1: ffStrbufSetStatic(&os->codename, "Puma"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
+                case 0: ffStrbufSetStatic(&os->codename, "Cheetah"); ffStrbufSetStatic(&os->prettyName, "Mac OS X"); return true;
             }
         }
     }
@@ -106,7 +106,8 @@ void ffDetectOSImpl(FFOSResult* os)
     if(os->buildID.length == 0)
         ffSysctlGetString("kern.osversion", &os->buildID);
 
-    ffStrbufAppend(&os->prettyName, &os->name);
+    if(os->prettyName.length == 0)
+        ffStrbufSetStatic(&os->prettyName, "macOS");
     ffStrbufAppend(&os->versionID, &os->version);
 
     if(!detectOSCodeName(os))
