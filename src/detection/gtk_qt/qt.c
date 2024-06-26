@@ -135,6 +135,13 @@ static void detectLXQt(FFQtResult* result)
     ffParsePropFileConfig("pcmanfm-qt/lxqt/settings.conf", "Wallpaper=", &result->wallpaper);
 }
 
+static void detectKvantum(FFQtResult* result)
+{
+    ffParsePropFileConfigValues("Kvantum/kvantum.kvconfig", 1, (FFpropquery[]) {
+        {"theme=", &result->widgetStyle},
+    });
+}
+
 const FFQtResult* ffDetectQt(void)
 {
     static FFQtResult result;
@@ -156,6 +163,12 @@ const FFQtResult* ffDetectQt(void)
         detectPlasma(&result);
     else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectLXQt(&result);
+
+    if(ffStrbufEqualS(&result.widgetStyle, "kvantum") || ffStrbufEqualS(&result.widgetStyle, "kvantum-dark"))
+    {
+        ffStrbufClear(&result.widgetStyle);
+        detectKvantum(&result);
+    }
 
     return &result;
 }
