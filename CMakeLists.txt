@@ -255,7 +255,7 @@ if(APPLE)
     configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
 endif()
 
-string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y")
+string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
 configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 
 ####################
