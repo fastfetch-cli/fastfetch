@@ -5,6 +5,35 @@ Changes:
     * The option was introduced to reduce the license concerns. Since all non MIT proprietary code has been rewritten manually from scratch, it is no longer necessary.
     * See <https://github.com/fastfetch-cli/fastfetch/issues/533#issuecomment-2122830958> for detail
 
+Features:
+* Add support for `--gpu-detection-method opencl` which uses OpenCL to detect GPUs.
+* Support detecting CPU cache size by using SMBIOS as fallback (CPUCache)
+* Support GPU detection (SunOS)
+* Support GPU type detection with AMD GPU driver (GPU, Windows)
+* Add fast path of version and font detection for kitty (Terminal / TerminalFont)
+* Make sure `stdin` and `stdout` are TTYs when querying terminal (Linux)
+* Add new JSON config option `general.preRun`, which is executed before fastfetch prints output.
+    * It can be used to generate a temp logo file. For example  
+```jsonc
+{
+    "general": {
+        "preRun": "kitten icat --align=left /path/to/image > /tmp/logo.kitty"
+    },
+    "logo": {
+        "source": "/tmp/logo.kitty",
+        "type": "raw"
+    }
+}
+```
+
+Bugfixes:
+* Fix invalid path (#1031, LM, Linux)
+* Fix VMEM detection for Nvidia GPU (requires `--gpu-driver-specific`) (GPU)
+* Fix AMD `--gpu-driver-specific` for AMD cards (#1032, GPU, Windows)
+
+Logo:
+* Fix colors of Asahi Linux
+
 # 2.16.0
 
 This release added basic support for SunOS (Solaris, illumos). The binaries provided in the release lack a few useful features (such as Display detection). People who use SunOS should consider building fastfetch themselves.
