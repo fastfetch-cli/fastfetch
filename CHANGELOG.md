@@ -11,7 +11,8 @@ Features:
 * Support GPU detection (SunOS)
 * Support GPU type detection with AMD GPU driver (GPU, Windows)
 * Add fast path of version and font detection for kitty (Terminal / TerminalFont)
-* Make sure `stdin` and `stdout` are TTYs when querying terminal (Linux)
+* Make sure `stdin` and `stdout` are TTYs when querying terminal
+    * So modules like `TerminalSize` should work when `stdin` or `stdout` is redirected
 * Add new JSON config option `general.preRun`, which is executed before fastfetch prints output.
     * It can be used to generate a temp logo file. For example  
 ```jsonc
