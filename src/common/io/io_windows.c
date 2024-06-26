@@ -114,8 +114,40 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out)
 
 bool ffSuppressIO(bool suppress)
 {
-    (void) suppress; //Not implemented.
-    return false;
+    static bool init = false;
+    static HANDLE hOrigOut = INVALID_HANDLE_VALUE;
+    static HANDLE hOrigErr = INVALID_HANDLE_VALUE;
+    static HANDLE hNullFile = INVALID_HANDLE_VALUE;
+    static int fOrigOut = -1;
+    static int fOrigErr = -1;
+    static int fNullFile = -1;
+
+    if (!init)
+    {
+        if(!suppress)
+            return true;
+
+        hOrigOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        hOrigErr = GetStdHandle(STD_ERROR_HANDLE);
+        hNullFile = CreateFileW(L"NUL", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+        fOrigOut = _dup(STDOUT_FILENO);
+        fOrigErr = _dup(STDERR_FILENO);
+        fNullFile = _open_osfhandle((intptr_t) hNullFile, 0);
+
+        init = true;
+    }
+    if (hNullFile == INVALID_HANDLE_VALUE || fNullFile == -1)
+        return false;
+
+    fflush(stdout);
+    fflush(stderr);
+
+    SetStdHandle(STD_OUTPUT_HANDLE, suppress ? hNullFile : hOrigOut);
+    SetStdHandle(STD_ERROR_HANDLE, suppress ? hNullFile : hOrigErr);
+    _dup2(suppress ? fNullFile : fOrigOut, STDOUT_FILENO);
+    _dup2(suppress ? fNullFile : fOrigErr, STDERR_FILENO);
+
+    return true;
 }
 
 void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
