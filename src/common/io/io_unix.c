@@ -133,9 +133,6 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
-    if (instance.config.display.pipe)
-        return "Not supported in --pipe mode";
-
     int fin = STDIN_FILENO, fout = STDOUT_FILENO;
     FF_AUTO_CLOSE_FD int ftty = -1;
 
