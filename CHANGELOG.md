@@ -13,6 +13,8 @@ Features:
 * Add fast path of version and font detection for kitty (Terminal / TerminalFont)
 * Make sure `stdin` and `stdout` are TTYs when querying terminal
     * So modules like `TerminalSize` should work when `stdin` or `stdout` is redirected
+* Support argument truncation in `--<module>-format`
+    * See `fastfetch --help format` for detail
 * Add new JSON config option `general.preRun`, which is executed before fastfetch prints output.
     * It can be used to generate a temp logo file. For example  
 ```jsonc

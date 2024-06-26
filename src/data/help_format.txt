@@ -8,6 +8,10 @@ In 2.14.0 or newer, the value indices can be meaningful named tags.
 For example: "--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'" is equivalent to "--title-format '{6}{7}{8}'"
 See "fastfetch -h title-format" for all supported tags.
 
+In 2.17.0 or newer, a truncation length can be specified using syntax '<arg>:<trunc-length>`
+For example: "--title-format '{user-name:5}'" will truncate user name into 5-length string.
+If '<trunc-length>' is negative, an ellipsis … will be appended at the end when the original string is truncated.
+
 If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.
 This means that the format string "Values: {1} ({2})" is equivalent to "Values: {} ({})".
 Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.
