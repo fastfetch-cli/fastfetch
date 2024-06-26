@@ -23,7 +23,7 @@
             "default": 0
         },
         "format": {
-            "description": "Output format of the module. See `-h module-format` for detail",
+            "description": "Output format of the module. See `-h <module>-format` for detail. I.e: fastfetch -h disk-format",
             "type": "string"
         },
         "outputColor": {
