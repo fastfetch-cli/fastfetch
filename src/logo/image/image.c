@@ -84,6 +84,12 @@ static bool printImageIterm(bool printError)
             ffStrbufAppendNC(&buf, options->paddingTop, '\n');
             ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
         }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            if (printError)
+                fputs("Logo (iterm): Must set logo width and height\n", stderr);
+            return false;
+        }
         if (options->width)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u:%s\a", (unsigned) options->width, base64.chars);
         else
@@ -112,7 +118,10 @@ static bool printImageIterm(bool printError)
     else
     {
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
-        ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
+        if (options->position == FF_LOGO_POSITION_RIGHT)
+            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        else
+            ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
             (unsigned) options->width,
             (unsigned) options->height,
@@ -130,6 +139,11 @@ static bool printImageIterm(bool printError)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffStrbufAppendNC(&buf, options->paddingRight, '\n');
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffStrbufAppendF(&buf, "\e[1G\e[%uA", (unsigned) options->height);
         }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
@@ -165,6 +179,12 @@ static bool printImageKittyDirect(bool printError)
             ffPrintCharTimes('\n', options->paddingTop);
             ffPrintCharTimes(' ', options->paddingLeft);
         }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            if (printError)
+                fputs("Logo (iterm): Must set logo width and height\n", stderr);
+            return false;
+        }
 
         if (options->width)
             printf("\e_Ga=T,f=100,t=f,c=%u;%s\e\\", (unsigned) options->width, base64.chars);
@@ -193,7 +213,10 @@ static bool printImageKittyDirect(bool printError)
     else
     {
         ffPrintCharTimes('\n', options->paddingTop);
-        ffPrintCharTimes(' ', options->paddingLeft);
+        if (options->position == FF_LOGO_POSITION_RIGHT)
+            printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        else
+            printf("\e[%uC", (unsigned) options->paddingLeft);
 
         printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n",
             (unsigned) options->width,
@@ -210,6 +233,11 @@ static bool printImageKittyDirect(bool printError)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            printf("\e[1G\e[%uA", (unsigned) options->height);
         }
     }
 

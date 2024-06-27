@@ -373,8 +373,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             });
 
             if (error) return error;
-            options->chafaCanvasMode = (uint32_t) value;
-
+            options->position = (FFLogoPosition) value;
             continue;
         }
         else if (ffStrEqualsIgnCase(key, "chafa"))
