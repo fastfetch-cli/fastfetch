@@ -283,6 +283,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         if (buffer->length - oldLength > (uint32_t) truncLength)
         {
             ffStrbufSubstrBefore(buffer, oldLength + (uint32_t) truncLength);
+            ffStrbufTrimRightSpace(buffer);
             if (ellipsis)
                 ffStrbufAppendS(buffer, "…");
         }
