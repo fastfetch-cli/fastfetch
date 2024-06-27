@@ -53,54 +53,54 @@ static void ffLogoPrintCharsRaw(const char* data, size_t length)
     }
 }
 
-void ffLogoPrintChars(const char* data, bool doColorReplacement)
+// If result is NULL, calculate logo width
+// Returns logo height
+static uint32_t logoAppendChars(const char* data, bool doColorReplacement, FFstrbuf* result)
 {
     FFOptionsLogo* options = &instance.config.logo;
-
     uint32_t currentlineLength = 0;
+    uint32_t logoHeight = 0;
 
-    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
-
-    if (!instance.config.display.pipe && instance.config.display.brightColor)
-        ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
-
-    ffStrbufAppendNC(&result, options->paddingTop, '\n');
-    ffStrbufAppendNC(&result, options->paddingLeft, ' ');
-
-    instance.state.logoHeight = options->paddingTop;
-
-    //Use logoColor[0] as the default color
-    if(doColorReplacement && !instance.config.display.pipe)
-        ffStrbufAppendF(&result, "\e[%sm", options->colors[0].chars);
+    if (result)
+    {
+        if (options->position != FF_LOGO_POSITION_RIGHT)
+            ffStrbufAppendNC(result, options->paddingLeft, ' ');
+        else
+            ffStrbufAppendF(result, "\e[9999999C\e[%dD", options->paddingRight + instance.state.logoWidth);
+    }
 
     while(*data != '\0')
     {
         //We are at the end of a line. Print paddings and update max line length
         if(*data == '\n' || (*data == '\r' && *(data + 1) == '\n'))
         {
-            ffStrbufAppendNC(&result, options->paddingRight, ' ');
-
             //We have \r\n, skip the \r
             if(*data == '\r')
                 ++data;
 
-            ffStrbufAppendC(&result, '\n');
+            if(result) ffStrbufAppendC(result, '\n');
             ++data;
 
-            ffStrbufAppendNC(&result, options->paddingLeft, ' ');
+            if (result)
+            {
+                if (options->position != FF_LOGO_POSITION_RIGHT)
+                    ffStrbufAppendNC(result, options->paddingLeft, ' ');
+                else
+                    ffStrbufAppendF(result, "\e[9999999C\e[%dD", options->paddingRight + instance.state.logoWidth);
+            }
 
             if(currentlineLength > instance.state.logoWidth)
                 instance.state.logoWidth = currentlineLength;
 
             currentlineLength = 0;
-            ++instance.state.logoHeight;
+            ++logoHeight;
             continue;
         }
 
         //Always print tabs as 4 spaces, to have consistent spacing
         if(*data == '\t')
         {
-            ffStrbufAppendNC(&result, 4, ' ');
+            if(result) ffStrbufAppendNC(result, 4, ' ');
             ++data;
             continue;
         }
@@ -110,16 +110,20 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
         {
             const char* start = data;
 
-            ffStrbufAppendS(&result, "\e[");
+            if(result) ffStrbufAppendS(result, "\e[");
             data += 2;
 
             while(ffCharIsDigit(*data) || *data == ';')
-                ffStrbufAppendC(&result, *data++); // number
+            {
+                if(result) ffStrbufAppendC(result, *data); // number
+                ++data;
+            }
 
             //We have a valid control sequence, print it and continue with next char
             if(isascii(*data))
             {
-                ffStrbufAppendC(&result, *data++); // single letter, end of control sequence
+                if(result) ffStrbufAppendC(result, *data); // single letter, end of control sequence
+                ++data;
                 continue;
             }
 
@@ -137,7 +141,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
             //If we have $$, or $\0, print it as single $
             if(*data == '$' || *data == '\0')
             {
-                ffStrbufAppendC(&result, '$');
+                if(result) ffStrbufAppendC(result, '$');
                 ++currentlineLength;
                 ++data;
                 continue;
@@ -146,18 +150,18 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
             if(!instance.config.display.pipe)
             {
                 //Map the number to an array index, so that '1' -> 0, '2' -> 1, etc.
-                int index = ((int) *data) - 49;
+                int index = *data - '1';
 
                 //If the index is valid, print the color. Otherwise continue as normal
                 if(index < 0 || index >= FASTFETCH_LOGO_MAX_COLORS)
                 {
-                    ffStrbufAppendC(&result, '$');
+                    if(result) ffStrbufAppendC(result, '$');
                     ++currentlineLength;
                     //Don't continue here, we want to print the current char as unicode
                 }
                 else
                 {
-                    ffStrbufAppendF(&result, "\e[%sm", options->colors[index].chars);
+                    if(result) ffStrbufAppendF(result, "\e[%sm", options->colors[index].chars);
                     ++data;
                     continue;
                 }
@@ -192,20 +196,50 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
             if(*data == '\0')
                 break;
 
-            ffStrbufAppendC(&result, *data++);
+            if(result) ffStrbufAppendC(result, *data);
+            ++data;
         }
     }
+    //Happens if the last line is the longest
+    if(currentlineLength > instance.state.logoWidth)
+        instance.state.logoWidth = currentlineLength;
+
+    return logoHeight;
+}
+
+void ffLogoPrintChars(const char* data, bool doColorReplacement)
+{
+    FFOptionsLogo* options = &instance.config.logo;
+
+    if (options->position == FF_LOGO_POSITION_RIGHT)
+        logoAppendChars(data, doColorReplacement, NULL);
+
+    FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(2048);
+
+    if (!instance.config.display.pipe && instance.config.display.brightColor)
+        ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_BOLT);
+
+    ffStrbufAppendNC(&result, options->paddingTop, '\n');
+
+    //Use logoColor[0] as the default color
+    if(doColorReplacement && !instance.config.display.pipe)
+        ffStrbufAppendF(&result, "\e[%sm", options->colors[0].chars);
+
+    instance.state.logoHeight = options->paddingTop + logoAppendChars(data, doColorReplacement, &result);
 
     if(!instance.config.display.pipe)
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
 
     if(options->position == FF_LOGO_POSITION_LEFT)
     {
-        //Happens if the last line is the longest
-        if(currentlineLength > instance.state.logoWidth)
-            instance.state.logoWidth = currentlineLength;
-
         instance.state.logoWidth += options->paddingLeft + options->paddingRight;
+
+        //Go to the leftmost position and go up the height
+        ffStrbufAppendF(&result, "\e[1G\e[%uA", instance.state.logoHeight);
+    }
+    else if(options->position == FF_LOGO_POSITION_RIGHT)
+    {
+        instance.state.logoWidth = 0;
 
         //Go to the leftmost position and go up the height
         ffStrbufAppendF(&result, "\e[1G\e[%uA", instance.state.logoHeight);
