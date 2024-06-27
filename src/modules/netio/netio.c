@@ -57,7 +57,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             ffParseSize(inf->rxBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");

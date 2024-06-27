@@ -32,11 +32,7 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
 
         if (options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(
-                FF_PHYSICALMEMORY_DISPLAY_NAME,
-                result.length == 1 ? 0 : (uint8_t) i,
-                &options->moduleArgs,
-                FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(FF_PHYSICALMEMORY_DISPLAY_NAME, result.length == 1 ? 0 : (uint8_t) i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
             fputs(prettySize.chars, stdout);
             fputs(" - ", stdout);
@@ -53,7 +49,7 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
         }
         else
         {
-            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PHYSICALMEMORY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_PHYSICALMEMORY_DISPLAY_NAME, (uint8_t) i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PHYSICALMEMORY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_UINT64, &device->size, "bytes"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &prettySize, "size"},
                 {FF_FORMAT_ARG_TYPE_UINT, &device->maxSpeed, "max-speed"},

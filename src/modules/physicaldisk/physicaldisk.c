@@ -70,7 +70,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
-            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
             if (physicalType[0] || removableType[0] || readOnlyType[0])
             {
