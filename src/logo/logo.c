@@ -199,7 +199,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
     if(!instance.config.display.pipe)
         ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
 
-    if(!options->separate)
+    if(options->position == FF_LOGO_POSITION_LEFT)
     {
         //Happens if the last line is the longest
         if(currentlineLength > instance.state.logoWidth)
@@ -210,7 +210,7 @@ void ffLogoPrintChars(const char* data, bool doColorReplacement)
         //Go to the leftmost position and go up the height
         ffStrbufAppendF(&result, "\e[1G\e[%uA", instance.state.logoHeight);
     }
-    else
+    else if (options->position == FF_LOGO_POSITION_TOP)
     {
         instance.state.logoWidth = instance.state.logoHeight = 0;
         ffStrbufAppendNC(&result, options->paddingRight, '\n');

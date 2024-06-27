@@ -23,10 +23,18 @@ typedef enum FFLogoType
     FF_LOGO_TYPE_NONE,        //--logo none
 } FFLogoType;
 
+typedef enum FFLogoPosition
+{
+    FF_LOGO_POSITION_LEFT,
+    FF_LOGO_POSITION_TOP,
+    FF_LOGO_POSITION_RIGHT,
+} FFLogoPosition;
+
 typedef struct FFOptionsLogo
 {
     FFstrbuf source;
     FFLogoType type;
+    FFLogoPosition position;
     FFstrbuf colors[FASTFETCH_LOGO_MAX_COLORS];
     uint32_t width;
     uint32_t height;
@@ -36,7 +44,6 @@ typedef struct FFOptionsLogo
     bool printRemaining;
     bool preserveAspectRatio;
     bool recache;
-    bool separate;
 
     bool chafaFgOnly;
     FFstrbuf chafaSymbols;

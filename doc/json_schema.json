@@ -219,10 +219,15 @@
                             "description": "If true, regenerate image logo cache",
                             "default": false
                         },
-                        "separate": {
-                            "type": "boolean",
-                            "description": "If true, print modules at bottom of the logo",
-                            "default": false
+                        "position": {
+                            "type": "string",
+                            "description": "Set the position of the logo should be displayed",
+                            "enum": [
+                                "left",
+                                "top",
+                                "right"
+                            ],
+                            "default": "left"
                         },
                         "chafa": {
                             "type": "object",

@@ -257,12 +257,15 @@
             }
         },
         {
-            "long": "logo-separate",
-            "desc": "If true, print modules at bottom of the logo",
+            "long": "logo-position",
+            "desc": "Set the position of the logo should be displayed",
             "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": false
+                "type": "enum",
+                "enum": {
+                    "left": "Left",
+                    "top": "Top",
+                    "right": "Right"
+                }
             }
         },
         {
