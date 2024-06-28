@@ -104,7 +104,6 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
             const char* vendorStr = ffGetGPUVendorString((unsigned) hardwareId.vendorID);
             ffStrbufSetStatic(&gpu->vendor, vendorStr);
 
-            #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
             if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && (options->driverSpecific || options->temp))
             {
                 FFGpuDriverCondition cond = {
@@ -124,7 +123,6 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
                     .frequency = &gpu->frequency,
                 }, "/usr/lib/wsl/lib/libnvidia-ml.so");
             }
-            #endif
         }
     }
 

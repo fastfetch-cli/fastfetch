@@ -133,32 +133,44 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
-    if (instance.config.display.pipe)
-        return "Not supported in --pipe mode";
+    int fin = STDIN_FILENO, fout = STDOUT_FILENO;
+    FF_AUTO_CLOSE_FD int ftty = -1;
 
-    struct termios oldTerm, newTerm;
-    if(tcgetattr(STDIN_FILENO, &oldTerm) == -1)
+    if (!isatty(STDIN_FILENO))
+    {
+        if (ftty < 0)
+            ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
+        fin = ftty;
+    }
+    if (!isatty(STDOUT_FILENO))
+    {
+        if (ftty < 0)
+            ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
+        fout = ftty;
+    }
+
+    struct termios oldTerm;
+    if(tcgetattr(fin, &oldTerm) == -1)
         return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
 
-    newTerm = oldTerm;
+    struct termios newTerm = oldTerm;
     newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
-    if(tcsetattr(STDIN_FILENO, TCSANOW, &newTerm) == -1)
-        return "tcsetattr(STDIN_FILENO, TCSANOW, &newTerm)";
+    if(tcsetattr(fin, TCSAFLUSH, &newTerm) == -1)
+        return "tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTerm)";
 
-    fputs(request, stdout);
-    fflush(stdout);
+    ffWriteFDData(fout, strlen(request), request);
 
-    //Give the terminal 35ms to respond
-    if(poll(&(struct pollfd) { .fd = STDIN_FILENO, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
+    //Give the terminal some time to respond
+    if(poll(&(struct pollfd) { .fd = fin, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
     {
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
+        tcsetattr(fin, TCSANOW, &oldTerm);
         return "poll() timeout or failed";
     }
 
     char buffer[512];
-    ssize_t bytesRead = read(STDIN_FILENO, buffer, sizeof(buffer) - 1);
+    ssize_t bytesRead = read(fin, buffer, sizeof(buffer) - 1);
 
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldTerm);
+    tcsetattr(fin, TCSANOW, &oldTerm);
 
     if(bytesRead <= 0)
         return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";

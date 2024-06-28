@@ -114,8 +114,40 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out)
 
 bool ffSuppressIO(bool suppress)
 {
-    (void) suppress; //Not implemented.
-    return false;
+    static bool init = false;
+    static HANDLE hOrigOut = INVALID_HANDLE_VALUE;
+    static HANDLE hOrigErr = INVALID_HANDLE_VALUE;
+    static HANDLE hNullFile = INVALID_HANDLE_VALUE;
+    static int fOrigOut = -1;
+    static int fOrigErr = -1;
+    static int fNullFile = -1;
+
+    if (!init)
+    {
+        if(!suppress)
+            return true;
+
+        hOrigOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        hOrigErr = GetStdHandle(STD_ERROR_HANDLE);
+        hNullFile = CreateFileW(L"NUL", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+        fOrigOut = _dup(STDOUT_FILENO);
+        fOrigErr = _dup(STDERR_FILENO);
+        fNullFile = _open_osfhandle((intptr_t) hNullFile, 0);
+
+        init = true;
+    }
+    if (hNullFile == INVALID_HANDLE_VALUE || fNullFile == -1)
+        return false;
+
+    fflush(stdout);
+    fflush(stderr);
+
+    SetStdHandle(STD_OUTPUT_HANDLE, suppress ? hNullFile : hOrigOut);
+    SetStdHandle(STD_ERROR_HANDLE, suppress ? hNullFile : hOrigErr);
+    _dup2(suppress ? fNullFile : fOrigOut, STDOUT_FILENO);
+    _dup2(suppress ? fNullFile : fOrigErr, STDERR_FILENO);
+
+    return true;
 }
 
 void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
@@ -175,24 +207,37 @@ void ffListFilesRecursively(const char* path, bool pretty)
 
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
-    if (instance.config.display.pipe)
-        return "Not supported in --pipe mode";
-
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD prev_mode;
-    GetConsoleMode(hInput, &prev_mode);
+    FF_AUTO_CLOSE_FD HANDLE hConin = INVALID_HANDLE_VALUE;
+    DWORD inputMode;
+    if (!GetConsoleMode(hInput, &inputMode))
+    {
+        hConin = CreateFileW(L"CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
+        hInput = hConin;
+    }
     SetConsoleMode(hInput, 0);
 
     FlushConsoleInputBuffer(hInput);
 
-    DWORD bytes = 0;
-    WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), request, (DWORD) strlen(request), &bytes, NULL);
+    {
+        DWORD bytes = 0;
+        HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+        FF_AUTO_CLOSE_FD HANDLE hConout = INVALID_HANDLE_VALUE;
+        DWORD outputMode;
+        if (!GetConsoleMode(hOutput, &outputMode))
+        {
+            hConout = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
+            hOutput = hConout;
+        }
+        WriteFile(hOutput, "TEST\n", 5, &bytes, NULL);
+        WriteFile(hOutput, request, (DWORD) strlen(request), &bytes, NULL);
+    }
 
     while (true)
     {
         if (WaitForSingleObjectEx(hInput, FF_IO_TERM_RESP_WAIT_MS, TRUE) != WAIT_OBJECT_0)
         {
-            SetConsoleMode(hInput, prev_mode);
+            SetConsoleMode(hInput, inputMode);
             return "WaitForSingleObject() failed or timeout";
         }
 
@@ -213,10 +258,10 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     }
 
     char buffer[512];
-    bytes = 0;
+    DWORD bytes = 0;
     ReadFile(hInput, buffer, sizeof(buffer) - 1, &bytes, NULL);
 
-    SetConsoleMode(hInput, prev_mode);
+    SetConsoleMode(hInput, inputMode);
 
     if(bytes <= 0)
         return "ReadFile() failed";

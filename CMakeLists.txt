@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.16.0
+    VERSION 2.17.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -64,7 +64,7 @@ cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENAB
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR BSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR BSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR BSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32 OR SunOS" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR BSD OR WIN32 OR ANDROID OR SunOS" OFF)
 cmake_dependent_option(ENABLE_LIBNM "Enable libnm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
@@ -74,7 +74,6 @@ cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND"
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
-option(ENABLE_PROPRIETARY_GPU_DRIVER_API "Enable proprietary GPU driver API (NVML, IGCL and AGS)" ON)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -256,7 +255,7 @@ if(APPLE)
     configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
 endif()
 
-string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y")
+string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
 configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 
 ####################
@@ -549,7 +548,7 @@ elseif(BSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
@@ -749,7 +748,7 @@ elseif(SunOS)
         src/detection/brightness/brightness_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_sunos.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_sunos.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -813,15 +812,13 @@ if(ENABLE_DIRECTX_HEADERS)
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
 endif()
 
-if(ENABLE_PROPRIETARY_GPU_DRIVER_API AND (LINUX OR BSD OR WIN32))
-    message(STATUS "Enabling proprietary GPU driver API")
-    if(LINUX OR BSD OR WIN32)
-        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
-    endif()
-    if(WIN32)
-        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_intel.c)
-        list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_amd.c)
-    endif()
+# Proprietary GPU driver APIs
+if(LINUX OR BSD OR WIN32)
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_nvidia.c)
+endif()
+if(WIN32)
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_intel.c)
+    list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_amd.c)
 endif()
 
 include(CheckFunctionExists)
@@ -849,10 +846,6 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
-
-if(ENABLE_PROPRIETARY_GPU_DRIVER_API AND (LINUX OR BSD OR WIN32))
-    target_compile_definitions(libfastfetch PRIVATE FF_USE_PROPRIETARY_GPU_DRIVER_API)
-endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
@@ -1082,7 +1075,6 @@ if(LINUX)
     )
 elseif(APPLE)
     target_link_libraries(libfastfetch
-        PRIVATE "resolv"
         PRIVATE "-framework AVFoundation"
         PRIVATE "-framework Cocoa"
         PRIVATE "-framework CoreFoundation"
@@ -1266,6 +1258,13 @@ install(
     TARGETS fastfetch flashfetch
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
+
+if (TARGET ffwinrt)
+    install(
+        TARGETS ffwinrt
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+endif()
 
 install(
     FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.bash"

@@ -2,13 +2,10 @@
 #include "detection/vulkan/vulkan.h"
 #include "detection/temps/temps_linux.h"
 #include "detection/cpu/cpu.h"
+#include "detection/gpu/gpu_driver_specific.h"
 #include "common/io/io.h"
 #include "common/properties.h"
 #include "util/stringUtils.h"
-
-#ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
-    #include "detection/gpu/gpu_driver_specific.h"
-#endif
 
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
@@ -261,7 +258,6 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
     {
-        #ifdef FF_USE_PROPRIETARY_GPU_DRIVER_API
         if (options->temp || options->driverSpecific)
         {
             ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
@@ -280,7 +276,6 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 .frequency = &gpu->frequency,
             }, "libnvidia-ml.so");
         }
-        #endif // FF_USE_PROPRIETARY_GPU_DRIVER_API
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN)
         {

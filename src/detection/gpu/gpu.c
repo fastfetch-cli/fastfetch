@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "detection/vulkan/vulkan.h"
+#include "detection/opencl/opencl.h"
 #include "detection/opengl/opengl.h"
 
 const char* FF_GPU_VENDOR_NAME_APPLE = "Apple";
@@ -91,6 +92,16 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
         {
             ffListDestroy(result);
             ffListInitMove(result, &vulkan->gpus);
+            return NULL;
+        }
+    }
+    if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_OPENCL)
+    {
+        FFOpenCLResult* opencl = ffDetectOpenCL();
+        if (!opencl->error && opencl->gpus.length > 0)
+        {
+            ffListDestroy(result);
+            ffListInitMove(result, &opencl->gpus);
             return NULL;
         }
     }

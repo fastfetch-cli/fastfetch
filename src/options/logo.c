@@ -17,7 +17,7 @@ void ffOptionsInitLogo(FFOptionsLogo* options)
     options->printRemaining = true;
     options->preserveAspectRatio = false;
     options->recache = false;
-    options->separate = false;
+    options->position = FF_LOGO_POSITION_LEFT;
 
     options->chafaFgOnly = false;
     ffStrbufInitStatic(&options->chafaSymbols, "block+border+space-wide-inverted"); // Chafa default
@@ -111,7 +111,19 @@ logoType:
         else if(ffStrEqualsIgnCase(subKey, "recache"))
             options->recache = ffOptionParseBoolean(value);
         else if(ffStrEqualsIgnCase(subKey, "separate"))
-            options->separate = ffOptionParseBoolean(value);
+        {
+            fputs("--logo-separate has been renamed to --logo-position\n", stderr);
+            exit(477);
+        }
+        else if(ffStrEqualsIgnCase(subKey, "position"))
+        {
+            options->position = (FFLogoPosition) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "left", FF_LOGO_POSITION_LEFT },
+                { "right", FF_LOGO_POSITION_RIGHT },
+                { "top", FF_LOGO_POSITION_TOP },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -355,9 +367,20 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->recache = yyjson_get_bool(val);
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "separate"))
+        else if(ffStrEqualsIgnCase(key, "separate"))
+            return "logo.separate has been renamed to logo.position\n";
+        else if (ffStrEqualsIgnCase(key, "position"))
         {
-            options->separate = yyjson_get_bool(val);
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "left", FF_LOGO_POSITION_LEFT },
+                { "top", FF_LOGO_POSITION_TOP },
+                { "right", FF_LOGO_POSITION_RIGHT },
+                {},
+            });
+
+            if (error) return error;
+            options->position = (FFLogoPosition) value;
             continue;
         }
         else if (ffStrEqualsIgnCase(key, "chafa"))
@@ -528,8 +551,14 @@ void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc
     if (options->recache != defaultOptions.recache)
         yyjson_mut_obj_add_bool(doc, obj, "recache", options->recache);
 
-    if (options->separate != defaultOptions.separate)
-        yyjson_mut_obj_add_bool(doc, obj, "separate", options->separate);
+    if (options->position != defaultOptions.position)
+    {
+        yyjson_mut_obj_add_str(doc, obj, "position", ((const char* []) {
+            "left",
+            "top",
+            "right",
+        })[options->position]);
+    }
 
     {
         yyjson_mut_val* chafa = yyjson_mut_obj(doc);

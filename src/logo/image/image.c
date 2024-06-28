@@ -10,6 +10,8 @@
     #include <sys/syslimits.h>
 #elif _WIN32
     #include <windows.h>
+#elif __linux__
+    #include <sys/sendfile.h>
 #endif
 
 // https://github.com/kostya/benchmarks/blob/master/base64/test-nolib.c#L145
@@ -72,17 +74,23 @@ static bool printImageIterm(bool printError)
 
     if (!options->width || !options->height)
     {
-        if (!options->separate)
+        if (options->position == FF_LOGO_POSITION_LEFT)
         {
             ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
                 (unsigned) options->paddingTop,
                 (unsigned) options->paddingLeft
             );
         }
-        else
+        else if (options->position == FF_LOGO_POSITION_TOP)
         {
             ffStrbufAppendNC(&buf, options->paddingTop, '\n');
             ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            if (printError)
+                fputs("Logo (iterm): Must set logo width and height\n", stderr);
+            return false;
         }
         if (options->width)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u:%s\a", (unsigned) options->width, base64.chars);
@@ -90,7 +98,7 @@ static bool printImageIterm(bool printError)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a", base64.chars);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
-        if (!options->separate)
+        if (options->position == FF_LOGO_POSITION_LEFT)
         {
             uint16_t X = 0, Y = 0;
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
@@ -103,7 +111,7 @@ static bool printImageIterm(bool printError)
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
-        else
+        else if (options->position == FF_LOGO_POSITION_TOP)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
@@ -112,7 +120,10 @@ static bool printImageIterm(bool printError)
     else
     {
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
-        ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
+        if (options->position == FF_LOGO_POSITION_RIGHT)
+            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        else
+            ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
             (unsigned) options->width,
             (unsigned) options->height,
@@ -120,16 +131,21 @@ static bool printImageIterm(bool printError)
             base64.chars
         );
 
-        if (!options->separate)
+        if (options->position == FF_LOGO_POSITION_LEFT)
         {
             instance.state.logoWidth = options->width + options->paddingLeft + options->paddingRight;
             instance.state.logoHeight = options->paddingTop + options->height;
             ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
         }
-        else
+        else if (options->position == FF_LOGO_POSITION_TOP)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffStrbufAppendNC(&buf, options->paddingRight, '\n');
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffStrbufAppendF(&buf, "\e[1G\e[%uA", (unsigned) options->height);
         }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
@@ -152,7 +168,7 @@ static bool printImageKittyDirect(bool printError)
 
     if (!options->width || !options->height)
     {
-        if (!options->separate)
+        if (options->position == FF_LOGO_POSITION_LEFT)
         {
             // We must clear the entre screen to make sure that terminal buffer won't scroll up
             printf("\e[2J\e[3J\e[%u;%uH",
@@ -160,10 +176,16 @@ static bool printImageKittyDirect(bool printError)
                 (unsigned) options->paddingLeft
             );
         }
-        else
+        else if (options->position == FF_LOGO_POSITION_TOP)
         {
             ffPrintCharTimes('\n', options->paddingTop);
             ffPrintCharTimes(' ', options->paddingLeft);
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            if (printError)
+                fputs("Logo (iterm): Must set logo width and height\n", stderr);
+            return false;
         }
 
         if (options->width)
@@ -171,7 +193,7 @@ static bool printImageKittyDirect(bool printError)
         else
             printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
         fflush(stdout);
-        if (!options->separate)
+        if (options->position == FF_LOGO_POSITION_LEFT)
         {
             uint16_t X = 0, Y = 0;
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
@@ -184,7 +206,7 @@ static bool printImageKittyDirect(bool printError)
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
-        else
+        else if (options->position == FF_LOGO_POSITION_TOP)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
@@ -193,23 +215,31 @@ static bool printImageKittyDirect(bool printError)
     else
     {
         ffPrintCharTimes('\n', options->paddingTop);
-        ffPrintCharTimes(' ', options->paddingLeft);
+        if (options->position == FF_LOGO_POSITION_RIGHT)
+            printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        else
+            printf("\e[%uC", (unsigned) options->paddingLeft);
 
         printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n",
             (unsigned) options->width,
             (unsigned) options->height,
             base64.chars
         );
-        if (!options->separate)
+        if (options->position == FF_LOGO_POSITION_LEFT)
         {
             instance.state.logoWidth = options->width + options->paddingLeft + options->paddingRight;
             instance.state.logoHeight = options->paddingTop + options->height;
             printf("\e[%uA", (unsigned) instance.state.logoHeight);
         }
-        else
+        else if (options->position == FF_LOGO_POSITION_TOP)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
             ffPrintCharTimes('\n', options->paddingRight);
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            printf("\e[1G\e[%uA", (unsigned) options->height);
         }
     }
 
@@ -345,12 +375,21 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
 
     //Write result to stdout
     ffPrintCharTimes('\n', options->paddingTop);
-    ffPrintCharTimes(' ', options->paddingLeft);
+    if (options->position == FF_LOGO_POSITION_RIGHT)
+        printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
+    else
+        printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), result);
 
-    //Go to upper left corner
-    printf("\e[1G\e[%uA", instance.state.logoHeight);
+    if (options->position != FF_LOGO_POSITION_TOP)
+    {
+        //Go to upper left corner
+        printf("\e[1G\e[%uA", instance.state.logoHeight);
+    }
+
+    if (options->position != FF_LOGO_POSITION_LEFT)
+        instance.state.logoWidth = instance.state.logoHeight = 0;
 }
 
 static bool printImageSixel(FFLogoRequestData* requestData, const ImageData* imageData)
@@ -683,7 +722,9 @@ static bool printCachedChars(FFLogoRequestData* requestData)
 
 static bool printCachedPixel(FFLogoRequestData* requestData)
 {
-    requestData->logoCharacterWidth = instance.config.logo.width;
+    FFOptionsLogo* options = &instance.config.logo;
+
+    requestData->logoCharacterWidth = options->width;
     if(requestData->logoCharacterWidth == 0)
     {
         requestData->logoCharacterWidth = readCachedUint32(requestData, FF_CACHE_FILE_WIDTH);
@@ -691,7 +732,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
             return false;
     }
 
-    requestData->logoCharacterHeight = instance.config.logo.height;
+    requestData->logoCharacterHeight = options->height;
     if(requestData->logoCharacterHeight == 0)
     {
         requestData->logoCharacterHeight = readCachedUint32(requestData, FF_CACHE_FILE_HEIGHT);
@@ -699,7 +740,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
             return false;
     }
 
-    int fd = -1;
+    FF_AUTO_CLOSE_FD int fd = -1;
     if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
@@ -712,22 +753,51 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     if(fd == -1)
         return false;
 
-    ffPrintCharTimes('\n', instance.config.logo.paddingTop);
-    ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
+    ffPrintCharTimes('\n', options->paddingTop);
+    if (options->position == FF_LOGO_POSITION_RIGHT)
+        printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
+    else
+        printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
 
-    char buffer[32768];
-    ssize_t readBytes;
-    while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
-        ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
+    bool sent = false;
+    #ifdef __linux__
+    struct stat st;
+    if (fstat(fd, &st) >= 0)
+    {
+        while (st.st_size > 0)
+        {
+            ssize_t bytes = sendfile(STDOUT_FILENO, fd, NULL, (size_t) st.st_size);
+            if (bytes > 0)
+            {
+                sent = true;
+                st.st_size -= bytes;
+            }
+            else
+                break;
+        }
+    }
+    #endif
 
-    close(fd);
+    if (!sent)
+    {
+        char buffer[32768];
+        ssize_t readBytes;
+        while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
+            ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
+    }
 
-    instance.state.logoWidth = requestData->logoCharacterWidth + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-    instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop;
+    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
 
-    //Go to upper left corner
-    printf("\e[1G\e[%uA", instance.state.logoHeight);
+    if (options->position != FF_LOGO_POSITION_TOP)
+    {
+        //Go to upper left corner
+        printf("\e[1G\e[%uA", instance.state.logoHeight);
+    }
+
+    if (options->position != FF_LOGO_POSITION_LEFT)
+        instance.state.logoWidth = instance.state.logoHeight = 0;
     return true;
 }
 

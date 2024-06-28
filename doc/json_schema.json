@@ -23,7 +23,7 @@
             "default": 0
         },
         "format": {
-            "description": "Output format of the module. See `-h &lt;module&gt;-format` for detail",
+            "description": "Output format of the module. See `-h <module>-format` for detail. I.e: fastfetch -h disk-format",
             "type": "string"
         },
         "outputColor": {
@@ -89,10 +89,12 @@
             "default": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json"
         },
         "logo": {
+            "description": "Fastfetch logo configurations\nSee also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "oneOf": [
                 {
                     "description": "Disable logo",
-                    "type": "null"
+                    "type": "null",
+                    "const": null
                 },
                 {
                     "description": "Set the source file of the logo",
@@ -217,10 +219,15 @@
                             "description": "If true, regenerate image logo cache",
                             "default": false
                         },
-                        "separate": {
-                            "type": "boolean",
-                            "description": "If true, print modules at bottom of the logo",
-                            "default": false
+                        "position": {
+                            "type": "string",
+                            "description": "Set the position of the logo should be displayed",
+                            "enum": [
+                                "left",
+                                "top",
+                                "right"
+                            ],
+                            "default": "left"
                         },
                         "chafa": {
                             "type": "object",
@@ -327,6 +334,11 @@
                     "type": "integer",
                     "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
                     "default": 1000
+                },
+                "preRun": {
+                    "type": "string",
+                    "description": "Set the command to be executed before printing logos",
+                    "default": ""
                 }
             }
         },
@@ -1523,6 +1535,7 @@
                                             "auto",
                                             "pci",
                                             "vulkan",
+                                            "opencl",
                                             "opengl"
                                         ],
                                         "default": "auto"

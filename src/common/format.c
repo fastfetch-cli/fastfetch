@@ -52,24 +52,28 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
  * @param placeholderValue the string to parse
  * @return uint32_t the parsed value
  */
-static uint32_t getArgumentIndex(const FFstrbuf* placeholderValue, uint32_t numArgs, const FFformatarg* arguments)
+static uint32_t getArgumentIndex(const char* placeholderValue, uint32_t numArgs, const FFformatarg* arguments)
 {
-    char firstChar = placeholderValue->chars[0];
+    char firstChar = placeholderValue[0];
+    if (firstChar == '\0')
+        return 0; // use arg counter
 
-    if(firstChar >= '1' && firstChar <= '9')
+    if (firstChar >= '0' && firstChar <= '9')
     {
         char* pEnd = NULL;
-        unsigned long result = strtoul(placeholderValue->chars, &pEnd, 10);
-        if (pEnd != placeholderValue->chars + placeholderValue->length || result > numArgs)
+        uint32_t result = (uint32_t) strtoul(placeholderValue, &pEnd, 10);
+        if (result > numArgs)
             return UINT32_MAX;
-        return (uint32_t) result;
+        if (*pEnd != '\0')
+            return UINT32_MAX;
+        return result;
     }
     else if (ffCharIsEnglishAlphabet(firstChar))
     {
         for (uint32_t i = 0; i < numArgs; ++i)
         {
             const FFformatarg* arg = &arguments[i];
-            if(arg->name && ffStrbufIgnCaseEqualS(placeholderValue, arg->name))
+            if (arg->name && strcasecmp(placeholderValue, arg->name) == 0)
                 return i + 1;
         }
     }
@@ -84,16 +88,6 @@ static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start,
 
     if(index < formatStringLength)
         ffStrbufAppendC(buffer, '}');
-}
-
-static inline void appendEmptyPlaceholder(FFstrbuf* buffer, const char* placeholder, uint32_t* argCounter, uint32_t numArgs, const FFformatarg* arguments)
-{
-    if(*argCounter >= numArgs)
-        ffStrbufAppendS(buffer, placeholder);
-    else
-        ffFormatAppendFormatArg(buffer, arguments + *argCounter);
-
-    (*argCounter)++;
 }
 
 static inline bool formatArgSet(const FFformatarg* arg)
@@ -128,13 +122,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
-        // if we have an { at the end handle it as {}
-        if(i == formatstr->length - 1)
-        {
-            appendEmptyPlaceholder(buffer, "{", &argCounter, numArgs, arguments);
-            continue;
-        }
-
         // jump to next char, the start of the placeholder value
         ++i;
 
@@ -142,13 +129,6 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         if(formatstr->chars[i] == '{')
         {
             ffStrbufAppendC(buffer, '{');
-            continue;
-        }
-
-        // placeholder is {}
-        if(formatstr->chars[i] == '}')
-        {
-            appendEmptyPlaceholder(buffer, "{}", &argCounter, numArgs, arguments);
             continue;
         }
 
@@ -205,7 +185,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         {
             ffStrbufSubstrAfter(&placeholderValue, 0);
 
-            uint32_t index = getArgumentIndex(&placeholderValue, numArgs, arguments);
+            uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
             // testing for an invalid index
             if (index > numArgs)
@@ -231,7 +211,7 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
         {
             ffStrbufSubstrAfter(&placeholderValue, 0);
 
-            uint32_t index = getArgumentIndex(&placeholderValue, numArgs, arguments);
+            uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
             // testing for an invalid index
             if (index > numArgs)
@@ -264,16 +244,49 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
-        uint32_t index = getArgumentIndex(&placeholderValue, numArgs, arguments);
+        int32_t truncLength = INT32_MAX;
+        char* pColon = memchr(placeholderValue.chars, ':', placeholderValue.length);
+        if (pColon != NULL)
+        {
+            char* pEnd = NULL;
+            truncLength = (int32_t) strtol(pColon + 1, &pEnd, 10);
+            if (*pEnd != '\0')
+            {
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+                continue;
+            }
+            *pColon = '\0';
+        }
+
+        uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
 
         // test for invalid index
+        if (index == 0)
+            index = ++argCounter;
+
         if (index > numArgs)
         {
+            if (pColon) *pColon = ':';
             appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
             continue;
         }
 
+        bool ellipsis = false;
+        if (truncLength < 0)
+        {
+            ellipsis = true;
+            truncLength = -truncLength;
+        }
+
+        uint32_t oldLength = buffer->length;
         ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
+        if (buffer->length - oldLength > (uint32_t) truncLength)
+        {
+            ffStrbufSubstrBefore(buffer, oldLength + (uint32_t) truncLength);
+            ffStrbufTrimRightSpace(buffer);
+            if (ellipsis)
+                ffStrbufAppendS(buffer, "…");
+        }
     }
 
     if (!instance.config.display.pipe)
