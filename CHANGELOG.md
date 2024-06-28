@@ -4,6 +4,8 @@ Changes:
 * CMake option `ENABLE_PROPRIETARY_GPU_DRIVER_API` is removed. The GPU driver APIs are now enabled by default.
     * The option was introduced to reduce the license concerns. Since all non MIT proprietary code has been rewritten manually from scratch, it is no longer necessary.
     * See <https://github.com/fastfetch-cli/fastfetch/issues/533#issuecomment-2122830958> for detail
+* Option `--logo-separate true` is changed to `--logo-position top` for better readability
+    * Builtin ascii logos can be positioned on the right side now with`--logo-position right`
 
 Features:
 * Add support for `--gpu-detection-method opencl` which uses OpenCL to detect GPUs.
@@ -13,8 +15,9 @@ Features:
 * Add fast path of version and font detection for kitty (Terminal / TerminalFont)
 * Make sure `stdin` and `stdout` are TTYs when querying terminal
     * So modules like `TerminalSize` should work when `stdin` or `stdout` is redirected
-* Support argument truncation in `--<module>-format`
+* Support argument truncation in `--<module>-format` (#1043)
     * See `fastfetch --help format` for detail
+* Improve Qt theme detection (#1047, Theme, Linux)
 * Add new JSON config option `general.preRun`, which is executed before fastfetch prints output.
     * It can be used to generate a temp logo file. For example  
 ```jsonc
@@ -33,6 +36,7 @@ Bugfixes:
 * Fix invalid path (#1031, LM, Linux)
 * Fix VMEM detection for Nvidia GPU (requires `--gpu-driver-specific`) (GPU)
 * Fix AMD `--gpu-driver-specific` for AMD cards (#1032, GPU, Windows)
+* Use Coordinated Universal Time rather than timezone-varying local date (#1046)
 
 Logo:
 * Fix colors of Asahi Linux
