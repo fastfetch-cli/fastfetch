@@ -144,11 +144,17 @@ static void detectQtCt(char qver, FFQtResult* result)
     ffParsePropFileConfigValues(file, 3, (FFpropquery[]) {
         {"style=", &result->widgetStyle},
         {"icon_theme=", &result->icons},
-        // FIXME: on older versions this was hex-encoded binary format
-        // (See QVariant notes on https://doc.qt.io/qt-5/qsettings.html)
-        // Thankfully, newer versions use the more common font encoding.
         {"general=", &result->font}
     });
+
+    if(ffStrbufStartsWithS(&result->font, "@"))
+    {
+        // FIXME: decode QVariant::Type::Font
+        // See QVariant notes on https://doc.qt.io/qt-5/qsettings.html and
+        // https://github.com/fastfetch-cli/fastfetch/issues/1053#issuecomment-2197254769
+        // Thankfully, newer versions use the more common font encoding.
+        ffStrbufSetNS(&result->font, 5, file);
+    }
 }
 
 static void detectKvantum(FFQtResult* result)
