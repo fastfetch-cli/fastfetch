@@ -147,9 +147,8 @@ static void detectQtCt(char qver, FFQtResult* result)
         {"general=", &result->font}
     });
 
-    if(ffStrbufStartsWithS(&result->font, "@"))
+    if (ffStrbufStartsWithC(&result->font, '@'))
     {
-        // FIXME: decode QVariant::Type::Font
         // See QVariant notes on https://doc.qt.io/qt-5/qsettings.html and
         // https://github.com/fastfetch-cli/fastfetch/issues/1053#issuecomment-2197254769
         // Thankfully, newer versions use the more common font encoding.
