@@ -10,6 +10,8 @@
     #include <sys/syslimits.h>
 #elif _WIN32
     #include <windows.h>
+#elif __linux__
+    #include <sys/sendfile.h>
 #endif
 
 // https://github.com/kostya/benchmarks/blob/master/base64/test-nolib.c#L145
@@ -758,10 +760,32 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
         printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
 
-    char buffer[32768];
-    ssize_t readBytes;
-    while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
-        ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
+    bool sent = false;
+    #ifdef __linux__
+    struct stat st;
+    if (fstat(fd, &st) >= 0)
+    {
+        while (st.st_size > 0)
+        {
+            ssize_t bytes = sendfile(STDOUT_FILENO, fd, NULL, (size_t) st.st_size);
+            if (bytes > 0)
+            {
+                sent = true;
+                st.st_size -= bytes;
+            }
+            else
+                break;
+        }
+    }
+    #endif
+
+    if (!sent)
+    {
+        char buffer[32768];
+        ssize_t readBytes;
+        while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
+            ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
+    }
 
     instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
     instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
