@@ -373,12 +373,21 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
 
     //Write result to stdout
     ffPrintCharTimes('\n', options->paddingTop);
-    ffPrintCharTimes(' ', options->paddingLeft);
+    if (options->position == FF_LOGO_POSITION_RIGHT)
+        printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
+    else
+        printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), result);
 
-    //Go to upper left corner
-    printf("\e[1G\e[%uA", instance.state.logoHeight);
+    if (options->position != FF_LOGO_POSITION_TOP)
+    {
+        //Go to upper left corner
+        printf("\e[1G\e[%uA", instance.state.logoHeight);
+    }
+
+    if (options->position != FF_LOGO_POSITION_LEFT)
+        instance.state.logoWidth = instance.state.logoHeight = 0;
 }
 
 static bool printImageSixel(FFLogoRequestData* requestData, const ImageData* imageData)
@@ -711,7 +720,9 @@ static bool printCachedChars(FFLogoRequestData* requestData)
 
 static bool printCachedPixel(FFLogoRequestData* requestData)
 {
-    requestData->logoCharacterWidth = instance.config.logo.width;
+    FFOptionsLogo* options = &instance.config.logo;
+
+    requestData->logoCharacterWidth = options->width;
     if(requestData->logoCharacterWidth == 0)
     {
         requestData->logoCharacterWidth = readCachedUint32(requestData, FF_CACHE_FILE_WIDTH);
@@ -719,7 +730,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
             return false;
     }
 
-    requestData->logoCharacterHeight = instance.config.logo.height;
+    requestData->logoCharacterHeight = options->height;
     if(requestData->logoCharacterHeight == 0)
     {
         requestData->logoCharacterHeight = readCachedUint32(requestData, FF_CACHE_FILE_HEIGHT);
@@ -727,7 +738,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
             return false;
     }
 
-    int fd = -1;
+    FF_AUTO_CLOSE_FD int fd = -1;
     if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
@@ -740,8 +751,11 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     if(fd == -1)
         return false;
 
-    ffPrintCharTimes('\n', instance.config.logo.paddingTop);
-    ffPrintCharTimes(' ', instance.config.logo.paddingLeft);
+    ffPrintCharTimes('\n', options->paddingTop);
+    if (options->position == FF_LOGO_POSITION_RIGHT)
+        printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
+    else
+        printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
 
     char buffer[32768];
@@ -749,13 +763,17 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
         ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
 
-    close(fd);
+    instance.state.logoWidth = requestData->logoCharacterWidth + options->paddingLeft + options->paddingRight;
+    instance.state.logoHeight = requestData->logoCharacterHeight + options->paddingTop;
 
-    instance.state.logoWidth = requestData->logoCharacterWidth + instance.config.logo.paddingLeft + instance.config.logo.paddingRight;
-    instance.state.logoHeight = requestData->logoCharacterHeight + instance.config.logo.paddingTop;
+    if (options->position != FF_LOGO_POSITION_TOP)
+    {
+        //Go to upper left corner
+        printf("\e[1G\e[%uA", instance.state.logoHeight);
+    }
 
-    //Go to upper left corner
-    printf("\e[1G\e[%uA", instance.state.logoHeight);
+    if (options->position != FF_LOGO_POSITION_LEFT)
+        instance.state.logoWidth = instance.state.logoHeight = 0;
     return true;
 }
 
