@@ -1,3 +1,16 @@
+# 2.17.1
+
+Hotfix for a regression that breaks Qt font detection
+
+Bugfixes:
+* Don't generate and install `libffwinrt.dll.a` on MinGW (Windows)
+* Fix building on Windows when imagemagick support is enabled (Logo, Windows)
+* Don't print GPU frequency with `--gpu-temp` for Nvidia cards (#1052, GPU)
+    * `--gpu-driver-specific` needs to be specified
+* Print formatted size when `--gpu-format` is used (#1052, GPU)
+* Ignore QVariant format; fix unreadable Qt font (#1053, Theme, Linux)
+* Fix segfaults with `--show-errors` and an invalid module (#1055)
+
 # 2.17.0
 
 Changes:
