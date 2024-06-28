@@ -1156,7 +1156,7 @@ if(WIN32)
     include(CheckIncludeFileCXX)
     CHECK_INCLUDE_FILE_CXX("winrt/Windows.Foundation.h" HAVE_WINRT)
     if(HAVE_WINRT)
-        add_library(ffwinrt SHARED src/detection/media/media_windows.dll.cpp)
+        add_library(ffwinrt MODULE src/detection/media/media_windows.dll.cpp)
         target_link_libraries(ffwinrt PRIVATE "RuntimeObject")
         target_compile_definitions(ffwinrt PRIVATE WIN32_LEAN_AND_MEAN=1 WINRT_LEAN_AND_MEAN=1)
         target_link_options(ffwinrt
