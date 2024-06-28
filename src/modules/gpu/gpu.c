@@ -79,10 +79,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY dUsed = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY sTotal = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY sUsed = ffStrbufCreate();
-        ffParseSize(gpu->dedicated.total, &dTotal);
-        ffParseSize(gpu->dedicated.used, &dUsed);
-        ffParseSize(gpu->shared.total, &sTotal);
-        ffParseSize(gpu->shared.used, &sUsed);
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.total, &dTotal);
+        if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.used, &dUsed);
+        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.total, &sTotal);
+        if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.used, &sUsed);
 
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor, "vendor"},
