@@ -64,7 +64,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     if(!instance.config.display.pipe)
     {
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
-        if (moduleArgs->outputColor.length)
+        if (moduleArgs && moduleArgs->outputColor.length)
             ffPrintColor(&moduleArgs->outputColor);
         else if (instance.config.display.colorOutput.length)
             ffPrintColor(&instance.config.display.colorOutput);
