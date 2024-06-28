@@ -271,7 +271,7 @@ static bool queryKittyTerm(const char* query, FFstrbuf* res)
         for (const char* p = buffer; p[0] && p[1]; p += 2)
         {
             unsigned value;
-            if (sscanf(p, "%2x", &value))
+            if (sscanf(p, "%2x", &value) == 1)
                 ffStrbufAppendC(res, (char) value);
         }
         return true;

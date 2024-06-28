@@ -490,7 +490,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
         for (const char* p = versionHex; p[0] && p[1]; p += 2)
         {
             unsigned value;
-            if (sscanf(p, "%2x", &value))
+            if (sscanf(p, "%2x", &value) == 1)
                 ffStrbufAppendC(version, (char) value);
         }
         return true;
