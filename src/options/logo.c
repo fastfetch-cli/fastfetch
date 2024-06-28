@@ -110,6 +110,11 @@ logoType:
             options->preserveAspectRatio = ffOptionParseBoolean(value);
         else if(ffStrEqualsIgnCase(subKey, "recache"))
             options->recache = ffOptionParseBoolean(value);
+        else if(ffStrEqualsIgnCase(subKey, "separate"))
+        {
+            fputs("--logo-separate has been renamed to --logo-position\n", stderr);
+            exit(477);
+        }
         else if(ffStrEqualsIgnCase(subKey, "position"))
         {
             options->position = (FFLogoPosition) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
@@ -362,6 +367,8 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->recache = yyjson_get_bool(val);
             continue;
         }
+        else if(ffStrEqualsIgnCase(key, "separate"))
+            return "logo.separate has been renamed to logo.position\n";
         else if (ffStrEqualsIgnCase(key, "position"))
         {
             int value;
