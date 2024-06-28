@@ -670,15 +670,20 @@ FFLogoImageResult ffLogoPrintImageImpl(FFLogoRequestData* requestData, const FFI
     return printSuccessful ? FF_LOGO_IMAGE_RESULT_SUCCESS : FF_LOGO_IMAGE_RESULT_RUN_ERROR;
 }
 
-static int getCacheFD(FFLogoRequestData* requestData, const char* fileName)
+static FFNativeFD getCacheFD(FFLogoRequestData* requestData, const char* fileName)
 {
     uint32_t cacheDirLength = requestData->cacheDir.length;
     ffStrbufAppendS(&requestData->cacheDir, fileName);
+    #ifndef _WIN32
     int fd = open(requestData->cacheDir.chars, O_RDONLY
         #ifdef O_CLOEXEC
             | O_CLOEXEC
         #endif
     );
+    #else
+    HANDLE fd = CreateFileA(requestData->cacheDir.chars, GENERIC_READ,
+        FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    #endif
     ffStrbufSubstrBefore(&requestData->cacheDir, cacheDirLength);
     return fd;
 }
@@ -740,17 +745,17 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
             return false;
     }
 
-    FF_AUTO_CLOSE_FD int fd = -1;
+    FF_AUTO_CLOSE_FD FFNativeFD fd = FF_INVALID_FD;
     if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
-        if(fd == -1)
+        if(fd == FF_INVALID_FD)
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
     }
     else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
 
-    if(fd == -1)
+    if(fd == FF_INVALID_FD)
         return false;
 
     ffPrintCharTimes('\n', options->paddingTop);
@@ -783,7 +788,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     {
         char buffer[32768];
         ssize_t readBytes;
-        while((readBytes = ffReadFDData(FFUnixFD2NativeFD(fd), sizeof(buffer), buffer)) > 0)
+        while((readBytes = ffReadFDData(fd, sizeof(buffer), buffer)) > 0)
             ffWriteFDData(FFUnixFD2NativeFD(STDOUT_FILENO), (size_t) readBytes, buffer);
     }
 
