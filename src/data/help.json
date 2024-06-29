@@ -154,7 +154,7 @@
         {
             "short": "l",
             "long": "logo",
-            "desc": "Set the logo source",
+            "desc": "Set the logo source. Use \"none\" to disable the logo",
             "remark": "Should be the name of a builtin logo, or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "logo"
