@@ -441,7 +441,7 @@
         },
         {
             "long": "pipe",
-            "desc": "Disable logo and all escape sequences",
+            "desc": "Disable colors",
             "remark": "Auto detection based on isatty(1)",
             "arg": {
                 "type": "bool",
