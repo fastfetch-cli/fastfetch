@@ -8,11 +8,13 @@
     #include <handleapi.h>
     #include <io.h>
     typedef HANDLE FFNativeFD;
+    #define FF_INVALID_FD INVALID_HANDLE_VALUE
 #else
     #include <unistd.h>
     #include <dirent.h>
     #include <sys/stat.h>
     typedef int FFNativeFD;
+    #define FF_INVALID_FD (-1)
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
     // one safe way to read correct data is reading the whole file in a single read syscall
     // 8192 comes from procps-ng: https://gitlab.com/procps-ng/procps/-/blob/master/library/meminfo.c?ref_type=heads#L39

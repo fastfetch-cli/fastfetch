@@ -162,7 +162,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                         .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                         .type = &gpu->type,
-                        .frequency = &gpu->frequency,
+                        .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                     },
                     dllName
                 );
