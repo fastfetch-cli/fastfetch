@@ -100,11 +100,11 @@ const char* ffDetectPhysicalMemory(FFlist* result)
         if (data->Size != 0xFFFF)
         {
             if (data->Size == 0x7FFF)
-                device->size = (data->ExtendedSize & ~(1 << 31)) * 1024 * 1024;
+                device->size = (data->ExtendedSize & ~(1ULL << 31)) * 1024ULL * 1024ULL;
             else if (data->Size & (1 << 15))
             {
                 // in kB
-                device->size = (data->Size & ~(1u << 15)) * 1024ULL;
+                device->size = (data->Size & ~(1ULL << 15)) * 1024ULL;
             }
             else
             {
