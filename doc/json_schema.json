@@ -1145,6 +1145,9 @@
                                         "type": "boolean",
                                         "description": "Display CPU usage per CPU logical core, instead of an average result",
                                         "default": false
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 }
                             },
