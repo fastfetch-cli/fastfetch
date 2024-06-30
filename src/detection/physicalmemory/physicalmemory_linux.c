@@ -113,6 +113,12 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             }
         }
 
+        if (data->Header.Length > offsetof(FFSmbiosMemoryDevice, ExtendedSize)) // 2.7+
+        {
+            if (data->ExtendedSize != 0 && data->Size == 0x7FFF)
+                device->size = data->ExtendedSize * 1024ULL * 1024ULL;
+        }
+
         ffStrbufSetF(&device->locator, "%s/%s", ffSmbiosLocateString(strings, data->BankLocator), ffSmbiosLocateString(strings, data->DeviceLocator));
 
         switch (data->FormFactor)
