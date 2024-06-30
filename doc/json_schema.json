@@ -1145,6 +1145,21 @@
                                         "type": "boolean",
                                         "description": "Display CPU usage per CPU logical core, instead of an average result",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 }
                             },
