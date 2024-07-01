@@ -134,7 +134,7 @@ static bool detectOpenbox(const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
 {
     FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(64);
     const char *configFileSubpath = "openbox/rc.xml"; 
-    if (ffStrbufIgnCaseCompS(dePrettyName, "LXQT") == 0)
+    if (ffStrbufIgnCaseCompS(dePrettyName, "LXQt") == 0)
         configFileSubpath = "openbox/lxqt-rc.xml";
     else if (ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
         configFileSubpath = "openbox/lxde-rc.xml";

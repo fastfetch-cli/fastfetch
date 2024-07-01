@@ -1061,7 +1061,7 @@ Bugfixes:
 This release backports some changes from dev branch, and fixes 2 crashing issues
 
 Features:
-* Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
+* Support KDE / LXQt / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
 * Set `--pipe true` automatically if stdout is not a tty
