@@ -207,7 +207,7 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 
     else if(
         ffStrEqualsIgnCase(name, "LXQt") ||
-        ffStrEqualsIgnCase(name, "X-LXQT") ||
+        ffStrEqualsIgnCase(name, "X-LXQt") ||
         ffStrEqualsIgnCase(name, "lxqt-session")
     ) {
         ffStrbufSetS(&result->deProcessName, "lxqt-session");
