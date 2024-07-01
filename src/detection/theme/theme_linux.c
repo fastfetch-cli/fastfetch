@@ -53,7 +53,7 @@ const char* ffDetectTheme(FFThemeResult* result)
     }
 
     if(plasma->widgetStyle.length > 0 || plasma->colorScheme.length > 0)
-        ffStrbufAppendS(&result->theme1, " [QT]");
+        ffStrbufAppendS(&result->theme1, " [Qt]");
 
     return NULL;
 }

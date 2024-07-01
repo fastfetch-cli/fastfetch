@@ -147,7 +147,7 @@
         {
             "type": "font",
             "key": "FONT",
-            "format": "{?1}{1} [QT]{?}{/1}Unknown", // Remove "[QT]" if not using Qt
+            "format": "{?1}{1} [Qt]{?}{/1}Unknown", // Remove "[Qt]" if not using Qt
             "keyColor": "yellow"
         },
         {

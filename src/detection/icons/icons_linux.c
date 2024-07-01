@@ -23,7 +23,7 @@ const char* ffDetectIcons(FFIconsResult* result)
     if(plasma->length > 0)
     {
         ffStrbufAppend(&result->icons1, plasma);
-        ffStrbufAppendS(&result->icons1, " [QT]");
+        ffStrbufAppendS(&result->icons1, " [Qt]");
     }
 
     return NULL;
