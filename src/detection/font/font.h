@@ -7,7 +7,7 @@
 typedef struct FFFontResult
 {
     /**
-     * Linux / BSD: QT,      GTK2,  GTK3,        GTK4
+     * Linux / BSD: Qt,      GTK2,  GTK3,        GTK4
      * MacOS:       System,  User,  System Mono, User Mono
      * Windows:     Caption, Menu,  Message,     Status
      * Other:       Unset,   Unset, Unset,       Unset
