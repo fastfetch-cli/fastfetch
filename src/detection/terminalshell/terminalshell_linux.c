@@ -331,6 +331,8 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufEqualS(&result->processName, "rxvt")
     )
         ffStrbufInitStatic(&result->prettyName, "rxvt-unicode");
+    else if(ffStrbufStartsWithS(&result->processName, "ptyxis-agent"))
+        ffStrbufInitStatic(&result->prettyName, "Ptyxis");
 
     #elif defined(__APPLE__)
 
