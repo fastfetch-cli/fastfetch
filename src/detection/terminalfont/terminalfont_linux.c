@@ -50,6 +50,26 @@ static void detectKgx(FFTerminalFontResult* terminalFont)
     }
 }
 
+static void detectPtyxis(FFTerminalFontResult* terminalFont)
+{
+    if(!ffSettingsGet("/org/gnome/Ptyxis/use-system-font", "org.gnome.Ptyxis", NULL, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
+    {
+        FF_AUTO_FREE const char* fontName = ffSettingsGet("/org/gnome/Ptyxis/font-name", "org.gnome.Ptyxis", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
+        if(ffStrSet(fontName))
+            ffFontInitPango(&terminalFont->font, fontName);
+        else
+            ffStrbufAppendF(&terminalFont->error, "Couldn't get terminal font from GSettings (org.gnome.Ptyxis::font-name)");
+    }
+    else
+    {
+        FF_AUTO_FREE const char* fontName = getSystemMonospaceFont();
+        if(ffStrSet(fontName))
+            ffFontInitPango(&terminalFont->font, fontName);
+        else
+            ffStrbufAppendS(&terminalFont->error, "Couldn't get system monospace font name from GSettings / DConf");
+    }
+}
+
 static void detectFromGSettings(const char* profilePath, const char* profileList, const char* profile, const char* defaultProfileKey, FFTerminalFontResult* terminalFont)
 {
     FF_AUTO_FREE const char* defaultProfile = ffSettingsGetGSettings(profileList, NULL, defaultProfileKey, FF_VARIANT_TYPE_STRING).strValue;
@@ -386,6 +406,8 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectFromGSettings("/com/gexperts/Tilix/profiles/", "com.gexperts.Tilix.ProfilesList", "com.gexperts.Tilix.Profile", "default", terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "gnome-terminal"))
         detectFromGSettings("/org/gnome/terminal/legacy/profiles:/:", "org.gnome.Terminal.ProfilesList", "org.gnome.Terminal.Legacy.Profile", "default", terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ptyxis-agent"))
+        detectPtyxis(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "kgx"))
         detectKgx(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "mate-terminal"))
