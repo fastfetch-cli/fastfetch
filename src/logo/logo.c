@@ -340,7 +340,7 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size)
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(&instance.state.platform.systemName, size);
+    logo = logoGetBuiltin(&instance.state.platform.sysinfo.name, size);
     if(logo != NULL)
         return logo;
 

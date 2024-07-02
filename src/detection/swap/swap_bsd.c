@@ -25,8 +25,8 @@ const char* ffDetectSwap(FFSwapResult* swap)
         swap->bytesTotal += (uint64_t) xsw.xsw_nblks;
     }
 
-    swap->bytesUsed *= instance.state.platform.pageSize;
-    swap->bytesTotal *= instance.state.platform.pageSize;
+    swap->bytesUsed *= instance.state.platform.sysinfo.pageSize;
+    swap->bytesTotal *= instance.state.platform.sysinfo.pageSize;
 
     return NULL;
 }

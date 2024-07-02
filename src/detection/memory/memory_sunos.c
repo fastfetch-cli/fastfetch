@@ -23,11 +23,11 @@ const char* ffDetectMemory(FFMemoryResult* ram)
 
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "pagestotal");
-        ram->bytesTotal = kn->value.ui64 * instance.state.platform.pageSize;
+        ram->bytesTotal = kn->value.ui64 * instance.state.platform.sysinfo.pageSize;
     }
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "pagesfree");
-        ram->bytesUsed = ram->bytesTotal - kn->value.ui64 * instance.state.platform.pageSize;
+        ram->bytesUsed = ram->bytesTotal - kn->value.ui64 * instance.state.platform.sysinfo.pageSize;
     }
 
     return NULL;

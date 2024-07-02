@@ -25,7 +25,7 @@ const char* ffDetectMemory(FFMemoryResult* ram)
         + vmstat.compressor_page_count
         - vmstat.purgeable_count
         - vmstat.external_page_count
-    ) * instance.state.platform.pageSize;
+    ) * instance.state.platform.sysinfo.pageSize;
 
     return NULL;
 }

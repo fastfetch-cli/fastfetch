@@ -3,7 +3,18 @@
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 
-typedef struct FFPlatform {
+typedef struct FFPlatformSysinfo
+{
+    FFstrbuf name;
+    FFstrbuf release;
+    FFstrbuf version;
+    FFstrbuf architecture;
+    FFstrbuf displayVersion;
+    uint32_t pageSize;
+} FFPlatformSysinfo;
+
+typedef struct FFPlatform
+{
     FFstrbuf homeDir;  // Trailing slash included
     FFstrbuf cacheDir; // Trailing slash included
     FFlist configDirs; // List of FFstrbuf, trailing slash included
@@ -14,13 +25,7 @@ typedef struct FFPlatform {
     FFstrbuf hostName;
     FFstrbuf userShell;
 
-    FFstrbuf systemName;
-    FFstrbuf systemRelease;
-    FFstrbuf systemVersion;
-    FFstrbuf systemArchitecture;
-    FFstrbuf systemDisplayVersion;
-
-    uint32_t pageSize;
+    FFPlatformSysinfo sysinfo;
 } FFPlatform;
 
 void ffPlatformInit(FFPlatform* platform);

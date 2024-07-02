@@ -1,6 +1,7 @@
 #include "FFPlatform_private.h"
 #include "util/stringUtils.h"
 #include "common/io/io.h"
+#include "detection/version/version.h"
 
 void ffPlatformInit(FFPlatform* platform)
 {
@@ -14,30 +15,20 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->hostName);
     ffStrbufInit(&platform->userShell);
 
-    ffStrbufInit(&platform->systemName);
-    ffStrbufInit(&platform->systemRelease);
-    ffStrbufInit(&platform->systemVersion);
-    ffStrbufInit(&platform->systemArchitecture);
+    FFPlatformSysinfo* info = &platform->sysinfo;
+
+    ffStrbufInit(&info->name);
+    ffStrbufInit(&info->release);
+    ffStrbufInit(&info->version);
+    ffStrbufInit(&info->architecture);
 
     ffPlatformInitImpl(platform);
 
-    if(platform->systemName.length == 0)
-    {
-        #if defined(__linux__)
-            ffStrbufAppendS(&platform->systemName, "Linux");
-        #elif defined(__FreeBSD__)
-            ffStrbufAppendS(&platform->systemName, "FreeBSD");
-        #elif defined(__APPLE__)
-            ffStrbufAppendS(&platform->systemName, "Darwin");
-        #elif defined(_WIN32)
-            ffStrbufAppendS(&platform->systemName, "Windows_NT");
-        #else
-            ffStrbufAppendS(&platform->systemName, "Unknown");
-        #endif
-    }
+    if(info->name.length == 0)
+        ffStrbufSetStatic(&info->name, ffVersionResult.sysName);
 
-    if(platform->systemArchitecture.length == 0)
-        ffStrbufAppendS(&platform->systemArchitecture, "Unknown");
+    if(info->architecture.length == 0)
+        ffStrbufSetStatic(&info->architecture, ffVersionResult.architecture);
 }
 
 void ffPlatformDestroy(FFPlatform* platform)
@@ -58,11 +49,12 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&platform->hostName);
     ffStrbufDestroy(&platform->userShell);
 
-    ffStrbufDestroy(&platform->systemArchitecture);
-    ffStrbufDestroy(&platform->systemName);
-    ffStrbufDestroy(&platform->systemRelease);
-    ffStrbufDestroy(&platform->systemVersion);
-    ffStrbufDestroy(&platform->systemDisplayVersion);
+    FFPlatformSysinfo* info = &platform->sysinfo;
+    ffStrbufDestroy(&info->architecture);
+    ffStrbufDestroy(&info->name);
+    ffStrbufDestroy(&info->release);
+    ffStrbufDestroy(&info->version);
+    ffStrbufDestroy(&info->displayVersion);
 }
 
 void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path)

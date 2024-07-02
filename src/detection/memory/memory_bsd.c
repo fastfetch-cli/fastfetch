@@ -12,7 +12,7 @@ const char* ffDetectMemory(FFMemoryResult* ram)
         + ffSysctlGetInt("vm.stats.vm.v_inactive_count", 0)
         + ffSysctlGetInt("vm.stats.vm.v_cache_count", 0);
 
-    ram->bytesUsed = ram->bytesTotal - (uint64_t) pagesFree * instance.state.platform.pageSize;
+    ram->bytesUsed = ram->bytesTotal - (uint64_t) pagesFree * instance.state.platform.sysinfo.pageSize;
 
     return NULL;
 }

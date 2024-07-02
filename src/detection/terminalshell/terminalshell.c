@@ -500,7 +500,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
     return getExeVersionGeneral(exe, version);
 }
 
-static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
+FF_MAYBE_UNUSED static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* exe, FFstrbuf* version)
 {
     if(ffProcessAppendStdOut(version, (char* const[]) {
         "ptyxis",
