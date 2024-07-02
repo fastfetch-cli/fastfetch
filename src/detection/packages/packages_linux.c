@@ -313,19 +313,6 @@ static uint32_t getSnap(FFstrbuf* baseDir)
     return result > 0 ? result - 1 : 0;
 }
 
-static uint32_t getFlatpak(FFstrbuf* baseDir, const char* dirname)
-{
-    uint32_t baseDirLength = baseDir->length;
-    ffStrbufAppendS(baseDir, dirname);
-
-    uint32_t result =
-        getNumElements(baseDir, "/app", DT_DIR) +
-        getNumElements(baseDir, "/runtime", DT_DIR);
-
-    ffStrbufSubstrBefore(baseDir, baseDirLength);
-    return result;
-}
-
 #ifdef FF_HAVE_RPM
 #include "common/library.h"
 #include <rpm/rpmlib.h>
@@ -459,7 +446,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n");
     if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
-    if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpak(baseDir, "/var/lib/flatpak");
+    if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
         packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
@@ -587,5 +574,5 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
     }
 
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))
-        result->flatpakUser = getFlatpak(&baseDir, "/.local/share/flatpak");
+        result->flatpakUser = getNumElements(&baseDir, "/.local/share/flatpak/app", DT_DIR);
 }

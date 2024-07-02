@@ -1,5 +1,8 @@
 # 2.17.2
 
+Changes:
+* Flatpak package count no longer takes runtime packages into account (Packages, Linux)
+
 Bugfixes:
 * Fix formattion with multiple batteries (Battery)
 * Fix incorrect size value for large memory sticks (PhysicalMemory)
