@@ -375,7 +375,6 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-      - uses: actions/checkout@v4
       - name: run VM
         uses: vmactions/omnios-vm@v1
         with:
