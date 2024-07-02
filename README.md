@@ -11,7 +11,7 @@
 [![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 [![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying them in a pretty way. It is written mainly in C, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, macOS, SunOS and Windows 7+ are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it prettily. It is written mainly in C, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, macOS, SunOS and Windows 7+ are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -21,13 +21,13 @@ Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for 
 <img src="screenshots/example3.png" width="48%" align="top" />
 <img src="screenshots/example5.png" height="15%" align="top" />
 
-There are [screenshots on different platforms](https://github.com/fastfetch-cli/fastfetch/wiki)
+There are [screenshots on different platforms](https://github.com/fastfetch-cli/fastfetch/wiki).
 
 ## Installation
 
 ### Linux
 
-Some distros packaged an outdated fastfetch version. Older version is not supported, please always ensure that the latest version is used.
+Some distros packaged an outdated fastfetch version. Older version receive no support, so please try always to use the latest version.
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
 * Debian: `sudo apt install fastfetch` (for Debian 13 or newer)
@@ -57,7 +57,7 @@ If fastfetch is not packaged for your distro or an outdated version is packaged,
 * [winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Fastfetch-cli/Fastfetch): `winget install fastfetch`
 * [MSYS2 MinGW](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
 
-You may also download it directly from [GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and extract the archive.
+You may also download the program directly from [the GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) in the form of an archive file.
 
 ### FreeBSD
 
@@ -81,7 +81,7 @@ See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 
 ## Customization
 
-Fastfetch uses the JSONC (or JSON with comments) for configuration. [See Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `-c <filename>`. They may also serve as a good example for format arguments.
+Fastfetch uses the JSONC (or JSON with comments) for configuration. [See Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `-c <filename>`. Those files can serve as examples of the configuration syntax.
 
 Logos can be heavily customized too; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
 
@@ -103,10 +103,10 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 
 1. Fastfetch is actively maintained.
 2. Fastfetch is faster. As the name suggests.
-3. Fastfetch is more feature-rich. By default fastfetch only has a few modules enabled. Use `fastfetch -c all` to find what you want.
-4. Fastfetch is more configurable. You can find more information in the Wiki: <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration>
-5. Fastfetch is more polished. For example, neofetch prints `555MiB` in `Memory` module and `23G` in `Disk` module (notibily the difference of `MiB` and `G`), while fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
-6. Fastfetch is more accurate. For example, [neofetch never actually supports Wayland protocol](https://github.com/dylanaraps/neofetch/pull/2395).
+3. Fastfetch has a greater number of features, though by default fastfetch only has a few modules enabled; use `fastfetch -c all` to find what you want.
+4. Fastfetch is more configurable. You can find more information in the Wiki: <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration>.
+5. Fastfetch is more polished. For example, neofetch prints `555MiB` in `Memory` module and `23G` in `Disk` module, whereas fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
+6. Fastfetch is more accurate. For example, [neofetch never actually supports the Wayland protocol](https://github.com/dylanaraps/neofetch/pull/2395).
 
 ### Q: Fastfetch shows my local IP address. It leaks my privacy!
 
@@ -118,7 +118,7 @@ If you really don't like it, you can disable the `Local IP` module in `config.js
 
 ### Q: Where is the config file? I can't find it.
 
-`Fastfetch` don't generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
+`Fastfetch` does not generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
 
 ### Q: The configuration is so complex. Where is the documentation?
 
@@ -132,7 +132,7 @@ Alternatively, you can refer to the presets in [`presets` directory](https://git
 
 ### Q: How can I customize the module output?
 
-Fastfetch uses `format` to generate output. For example to make `GPU` module show GPU name only and ignore other information, you can use
+Fastfetch uses `format` to generate output. For example, to make the `GPU` module show only the GPU name (leaving other information undisplayed), you can use
 
 ```jsonc
 {
@@ -145,15 +145,15 @@ Fastfetch uses `format` to generate output. For example to make `GPU` module sho
 }
 ```
 
-which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
+. . which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
 
-See `fastfetch -h format` for basic usage. For module specific formattion, see `fastfetch -h <module>-format`
+See `fastfetch -h format` for information on basic usage. For module specific formattion, see `fastfetch -h <module>-format`
 
 ### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
 
 Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
 
-If you just want to display distro name in [FIGlet text](https://github.com/pwaller/pyfiglet)
+If you just want to display distro name in [FIGlet text](https://github.com/pwaller/pyfiglet):
 
 ```bash
 # install pyfiglet and jq first
