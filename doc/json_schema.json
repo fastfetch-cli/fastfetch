@@ -576,7 +576,7 @@
                 },
                 "tsVersion": {
                     "type": "boolean",
-                    "description": "Whether to detect and display the version of terminal and shell. Mainly for benchmarking",
+                    "description": "Whether to detect and display the version of terminal, shell and editor. Mainly for benchmarking",
                     "default": true
                 }
             }

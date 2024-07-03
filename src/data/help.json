@@ -728,7 +728,7 @@
         },
         {
             "long": "ts-version",
-            "desc": "Whether to detect and display the version of terminal and shell",
+            "desc": "Whether to detect and display the version of terminal, shell and editor",
             "remark": "Mainly for benchmarking",
             "arg": {
                 "type": "bool",
