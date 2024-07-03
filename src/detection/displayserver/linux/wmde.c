@@ -71,11 +71,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         return;
 
     if(
-        ffStrEqualsIgnCase(name, "kwin_wayland") ||
-        ffStrEqualsIgnCase(name, "kwin_wayland_wrapper") ||
-        ffStrEqualsIgnCase(name, "kwin_x11") ||
-        ffStrEqualsIgnCase(name, "kwin_x11_wrapper") ||
         ffStrEqualsIgnCase(name, "kwin") ||
+        ffStrStartsWithIgnCase(name, "kwin_") ||
         ffStrEndsWithIgnCase(name, "-kwin_wayland") ||
         ffStrEndsWithIgnCase(name, "-kwin_x11")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
