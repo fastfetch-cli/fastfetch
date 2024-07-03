@@ -79,7 +79,7 @@ static void getCinnamon(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
     if (result->length == 0)
         ffParsePropFileData("applications/cinnamon.desktop", "X-GNOME-Bugzilla-Version =", result);
 
-    if (!result->length == 0 && options->slowVersionDetection)
+    if (result->length == 0 && options->slowVersionDetection)
     {
         if (ffProcessAppendStdOut(result, (char* const[]){
             "cinnamon",
