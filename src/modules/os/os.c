@@ -12,10 +12,10 @@
 static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
 {
     //Create the basic output
-    if(os->prettyName.length > 0)
-        ffStrbufAppend(result, &os->prettyName);
-    else if(os->name.length > 0)
+    if(os->name.length > 0)
         ffStrbufAppend(result, &os->name);
+    else if(os->prettyName.length > 0)
+        ffStrbufAppend(result, &os->prettyName);
     else if(os->id.length > 0)
         ffStrbufAppend(result, &os->id);
     else
