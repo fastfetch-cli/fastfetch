@@ -8,6 +8,7 @@ Bugfixes:
 * Fix incorrect size value for large memory sticks (PhysicalMemory)
 * Fix spelling of `Qt` and `LXQt`
 * Fix building on SunOS if imagemagick support is enabled (Logo, SunOS)
+* Fix typos
 
 Features:
 * Support Ptyxis terminal version and font detection (Terminal / TerminalFont, Linux)
