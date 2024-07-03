@@ -1,3 +1,17 @@
+# 2.17.2
+
+Bugfixes:
+* Fix formattion with multiple batteries (Battery)
+* Fix incorrect size value for large memory sticks (PhysicalMemory)
+* Fix spelling of `Qt` and `LXQt`
+* Fix building on SunOS if imagemagick support is enabled (Logo, SunOS)
+
+Features:
+* Support Ptyxis terminal version and font detection (Terminal / TerminalFont, Linux)
+* Improve Cinnamon version detection (DE)
+* Support `cinnamon-wayland` (WMTheme)
+* `--ts-version false` will disable editor version detection (Editor)
+
 # 2.17.1
 
 Hotfix for a regression that breaks Qt font detection
