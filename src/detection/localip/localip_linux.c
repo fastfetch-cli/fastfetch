@@ -95,7 +95,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in* ipv4 = (struct sockaddr_in*) ifa->ifa_addr;
-            char addressBuffer[INET_ADDRSTRLEN + 4];
+            char addressBuffer[INET_ADDRSTRLEN + 16];
             inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
             if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
@@ -105,7 +105,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (cidr != 0)
                 {
                     size_t len = strlen(addressBuffer);
-                    snprintf(addressBuffer + len, 4, "/%d", cidr);
+                    snprintf(addressBuffer + len, 16, "/%d", cidr);
                 }
             }
 
@@ -117,7 +117,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
-            char addressBuffer[INET6_ADDRSTRLEN + 4];
+            char addressBuffer[INET6_ADDRSTRLEN + 16];
             inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 
             if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
@@ -130,7 +130,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (cidr != 0)
                 {
                     size_t len = strlen(addressBuffer);
-                    snprintf(addressBuffer + len, 4, "/%d", cidr);
+                    snprintf(addressBuffer + len, 16, "/%d", cidr);
                 }
             }
 
