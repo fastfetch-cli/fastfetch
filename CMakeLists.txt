@@ -74,6 +74,7 @@ cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND"
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
+option(ENABLE_LTO "Enable link-time optimization in release mode if supported" ON)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -139,7 +140,7 @@ if(NOT WIN32)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -rdynamic")
 endif()
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Enabling LTO")
     include(CheckIPOSupported)
     check_ipo_supported(RESULT IPO_SUPPORTED)
