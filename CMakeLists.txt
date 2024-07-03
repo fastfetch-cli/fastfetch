@@ -1322,12 +1322,17 @@ if(LINUX)
         set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
         if(NOT IS_MUSL)
-            EXECUTE_PROCESS (
+            EXECUTE_PROCESS(
                 COMMAND getconf GNU_LIBC_VERSION
                 OUTPUT_VARIABLE GLIBC_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
-            STRING (REPLACE "glibc " "" GLIBC_VERSION ${GLIBC_VERSION})
-            set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= ${GLIBC_VERSION})")
+            if(GLIBC_VERSION)
+                STRING(REPLACE "glibc " "" GLIBC_VERSION ${GLIBC_VERSION})
+                set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= ${GLIBC_VERSION})")
+                message(STATUS "found glibc ${GLIBC_VERSION}")
+            else()
+                message(WARNING "Could not determine glibc version. If `musl` is used, `-DIS_MUSL=ON` should be set")
+            endif()
         endif()
     endif()
 
