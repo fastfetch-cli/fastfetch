@@ -12,6 +12,8 @@
     #include <windows.h>
 #elif __linux__
     #include <sys/sendfile.h>
+#elif __sun
+    #include <sys/termios.h>
 #endif
 
 // https://github.com/kostya/benchmarks/blob/master/base64/test-nolib.c#L145
