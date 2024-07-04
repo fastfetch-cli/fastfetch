@@ -2957,6 +2957,12 @@ static const FFlogo O[] = {
             FF_COLOR_FG_LIGHT_BLACK,
         }
     },
+    // Opak
+    {
+        .names = {"Opak"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPAK,
+        .colors = {}, // #1070
+    },
     // OpenKylin
     {
         .names = {"openkylin", "open-kylin"},
