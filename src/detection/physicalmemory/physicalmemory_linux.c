@@ -113,7 +113,15 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             }
         }
 
-        ffStrbufSetF(&device->locator, "%s/%s", ffSmbiosLocateString(strings, data->BankLocator), ffSmbiosLocateString(strings, data->DeviceLocator));
+        // https://github.com/fastfetch-cli/fastfetch/issues/1051#issuecomment-2206687345
+        const char* lbank = ffSmbiosLocateString(strings, data->BankLocator);
+        const char* ldevice = ffSmbiosLocateString(strings, data->DeviceLocator);
+        if (lbank && ldevice)
+            ffStrbufSetF(&device->locator, "%s/%s", lbank, ldevice);
+        else if (lbank)
+            ffStrbufSetS(&device->locator, lbank);
+        else if (ldevice)
+            ffStrbufSetS(&device->locator, ldevice);
 
         switch (data->FormFactor)
         {
