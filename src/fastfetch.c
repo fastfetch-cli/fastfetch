@@ -501,9 +501,8 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
 static void printVersion()
 {
-    FFVersionResult result = {};
-    ffDetectVersion(&result);
-    printf("%s %s%s%s (%s)\n", result.projectName, result.version, result.versionTweak, result.debugMode ? "-debug" : "", result.architecture);
+    FFVersionResult* result = &ffVersionResult;
+    printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
 }
 
 static void parseCommand(FFdata* data, char* key, char* value)

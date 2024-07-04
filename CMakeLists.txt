@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.17.1
+    VERSION 2.17.2
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -74,6 +74,7 @@ cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND"
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
+option(ENABLE_LTO "Enable link-time optimization in release mode if supported" ON)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -139,7 +140,7 @@ if(NOT WIN32)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -rdynamic")
 endif()
 
-if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Enabling LTO")
     include(CheckIPOSupported)
     check_ipo_supported(RESULT IPO_SUPPORTED)
@@ -1322,12 +1323,17 @@ if(LINUX)
         set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
         if(NOT IS_MUSL)
-            EXECUTE_PROCESS (
+            EXECUTE_PROCESS(
                 COMMAND getconf GNU_LIBC_VERSION
                 OUTPUT_VARIABLE GLIBC_VERSION
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
-            STRING (REPLACE "glibc " "" GLIBC_VERSION ${GLIBC_VERSION})
-            set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= ${GLIBC_VERSION})")
+            if(GLIBC_VERSION)
+                STRING(REPLACE "glibc " "" GLIBC_VERSION ${GLIBC_VERSION})
+                set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= ${GLIBC_VERSION})")
+                message(STATUS "found glibc ${GLIBC_VERSION}")
+            else()
+                message(WARNING "Could not determine glibc version. If `musl` is used, `-DIS_MUSL=ON` should be set")
+            endif()
         endif()
     endif()
 

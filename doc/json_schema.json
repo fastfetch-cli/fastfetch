@@ -576,7 +576,7 @@
                 },
                 "tsVersion": {
                     "type": "boolean",
-                    "description": "Whether to detect and display the version of terminal and shell. Mainly for benchmarking",
+                    "description": "Whether to detect and display the version of terminal, shell and editor. Mainly for benchmarking",
                     "default": true
                 }
             }
@@ -1145,6 +1145,21 @@
                                         "type": "boolean",
                                         "description": "Display CPU usage per CPU logical core, instead of an average result",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
                                     }
                                 }
                             },

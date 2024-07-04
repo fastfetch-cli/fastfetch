@@ -1,3 +1,21 @@
+# 2.17.2
+
+Changes:
+* Flatpak package count no longer takes runtime packages into account (Packages, Linux)
+
+Bugfixes:
+* Fix formattion with multiple batteries (Battery)
+* Fix incorrect size value for large memory sticks (PhysicalMemory)
+* Fix spelling of `Qt` and `LXQt`
+* Fix building on SunOS if imagemagick support is enabled (Logo, SunOS)
+* Fix typos
+
+Features:
+* Support Ptyxis terminal version and font detection (Terminal / TerminalFont, Linux)
+* Improve Cinnamon version detection (DE)
+* Support `cinnamon-wayland` (WMTheme)
+* `--ts-version false` will disable editor version detection (Editor)
+
 # 2.17.1
 
 Hotfix for a regression that breaks Qt font detection
@@ -1061,7 +1079,7 @@ Bugfixes:
 This release backports some changes from dev branch, and fixes 2 crashing issues
 
 Features:
-* Support KDE / LXQT / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
+* Support KDE / LXQt / MATE / Cinnamon wallpaper detection (Wallpaper, Linux)
 * Support QTerminal version & terminal font detection
 * Support MATE Terminal version & terminal font detection
 * Set `--pipe true` automatically if stdout is not a tty
@@ -1107,7 +1125,7 @@ Bugfixes:
 * Fix Windows drives detection in WSL (Disk)
 
 Changes:
-* In order to make Icons module consistent between different platforms, `--icons-format` no longer supports individual GTK / QT icon params.
+* In order to make Icons module consistent between different platforms, `--icons-format` no longer supports individual GTK / Qt icon params.
 * `--theme-format` no longer supports individual GTK / plasma theme params.
 * `--local-ip-*` and `--public-ip-*` have been changed to `--localip-*` and `--publicip-*`
 * `--localip-compact-type` is no longer supported. Fastfetch now display IPs as `--localip-compat-type multiline` by default, with `--local-compact true` can be set as an alias of `--localip-compact-type oneline`
@@ -1481,7 +1499,7 @@ Fixes build on android (#205)
 # 1.6.0
 
 Features:
-* Detect QT on more DEs than just KDE Plasma. The [Plasma] category was therefore renamed to [QT]
+* Detect Qt on more DEs than just KDE Plasma. The [Plasma] category was therefore renamed to [Qt]
 * Alacritty font detection
 * Load `/etc/fastfetch/config.conf` before user config
 * Disk: print one decimal point if size < 100GB

@@ -154,7 +154,7 @@
         {
             "short": "l",
             "long": "logo",
-            "desc": "Set the logo source",
+            "desc": "Set the logo source. Use \"none\" to disable the logo",
             "remark": "Should be the name of a builtin logo, or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "logo"
@@ -441,7 +441,7 @@
         },
         {
             "long": "pipe",
-            "desc": "Disable logo and all escape sequences",
+            "desc": "Disable colors",
             "remark": "Auto detection based on isatty(1)",
             "arg": {
                 "type": "bool",
@@ -728,7 +728,7 @@
         },
         {
             "long": "ts-version",
-            "desc": "Whether to detect and display the version of terminal and shell",
+            "desc": "Whether to detect and display the version of terminal, shell and editor",
             "remark": "Mainly for benchmarking",
             "arg": {
                 "type": "bool",

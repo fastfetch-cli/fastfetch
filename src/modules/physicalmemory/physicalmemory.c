@@ -21,7 +21,6 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
     }
 
     FF_STRBUF_AUTO_DESTROY prettySize = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     uint32_t i = 0;
     FF_LIST_FOR_EACH(FFPhysicalMemoryResult, device, result)

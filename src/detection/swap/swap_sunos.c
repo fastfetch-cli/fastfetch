@@ -26,8 +26,8 @@ const char* ffDetectSwap(FFSwapResult* swap)
         swap->bytesUsed += (uint64_t) table->swt_ent[i].ste_free;
     }
     swap->bytesUsed = swap->bytesTotal - swap->bytesUsed;
-    swap->bytesTotal *= instance.state.platform.pageSize;
-    swap->bytesUsed *= instance.state.platform.pageSize;
+    swap->bytesTotal *= instance.state.platform.sysinfo.pageSize;
+    swap->bytesUsed *= instance.state.platform.sysinfo.pageSize;
 
     return NULL;
 }

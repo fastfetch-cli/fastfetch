@@ -71,11 +71,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         return;
 
     if(
-        ffStrEqualsIgnCase(name, "kwin_wayland") ||
-        ffStrEqualsIgnCase(name, "kwin_wayland_wrapper") ||
-        ffStrEqualsIgnCase(name, "kwin_x11") ||
-        ffStrEqualsIgnCase(name, "kwin_x11_wrapper") ||
         ffStrEqualsIgnCase(name, "kwin") ||
+        ffStrStartsWithIgnCase(name, "kwin_") ||
         ffStrEndsWithIgnCase(name, "-kwin_wayland") ||
         ffStrEndsWithIgnCase(name, "-kwin_x11")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_KWIN);
@@ -86,7 +83,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrEqualsIgnCase(name, "Mutter")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUTTER);
     else if(
-        ffStrEqualsIgnCase(name, "cinnamon-session") ||
+        ffStrEqualsIgnCase(name, "cinnamon") ||
+        ffStrStartsWithIgnCase(name, "cinnamon-") ||
         ffStrEqualsIgnCase(name, "Muffin") ||
         ffStrEqualsIgnCase(name, "Mutter (Muffin)")
     ) ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_MUFFIN);
@@ -207,7 +205,7 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
 
     else if(
         ffStrEqualsIgnCase(name, "LXQt") ||
-        ffStrEqualsIgnCase(name, "X-LXQT") ||
+        ffStrEqualsIgnCase(name, "X-LXQt") ||
         ffStrEqualsIgnCase(name, "lxqt-session")
     ) {
         ffStrbufSetS(&result->deProcessName, "lxqt-session");

@@ -94,8 +94,8 @@ void ffPrintBattery(FFBatteryOptions* options)
 
     for(uint32_t i = 0; i < results.length; i++)
     {
-        FFBatteryResult* result = ffListGet(&results, i);
-        printBattery(options, result, (uint8_t) i);
+        FFBatteryResult* result = FF_LIST_GET(FFBatteryResult, results, i);
+        printBattery(options, result, results.length == 1 ? 0 : (uint8_t) (i + 1));
     }
 
     FF_LIST_FOR_EACH(FFBatteryResult, result, results)

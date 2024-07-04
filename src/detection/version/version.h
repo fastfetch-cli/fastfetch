@@ -5,6 +5,7 @@
 typedef struct FFVersionResult
 {
     const char* projectName;
+    const char* sysName;
     const char* architecture;
     const char* version;
     const char* versionTweak;
@@ -14,4 +15,4 @@ typedef struct FFVersionResult
     bool debugMode;
 } FFVersionResult;
 
-void ffDetectVersion(FFVersionResult* version);
+extern FFVersionResult ffVersionResult;

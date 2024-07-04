@@ -9,7 +9,7 @@
 #define FF_DE_PRETTY_CINNAMON "Cinnamon"
 #define FF_DE_PRETTY_MATE "Mate"
 #define FF_DE_PRETTY_LXDE "LXDE"
-#define FF_DE_PRETTY_LXQT "LXQT"
+#define FF_DE_PRETTY_LXQT "LXQt"
 #define FF_DE_PRETTY_BUDGIE "Budgie"
 #define FF_DE_PRETTY_CDE "CDE"
 #define FF_DE_PRETTY_UNITY "Unity"

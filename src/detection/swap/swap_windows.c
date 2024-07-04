@@ -13,7 +13,7 @@ const char* ffDetectSwap(FFSwapResult* swap)
     if(!NT_SUCCESS(NtQuerySystemInformation(SystemPagefileInformation, pstart, size, &size)))
         return "NtQuerySystemInformation(SystemPagefileInformation, size) failed";
 
-    uint32_t pageSize = instance.state.platform.pageSize;
+    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
     swap->bytesUsed = (uint64_t)pstart->TotalUsed * pageSize;
     swap->bytesTotal = (uint64_t)pstart->CurrentSize * pageSize;
 

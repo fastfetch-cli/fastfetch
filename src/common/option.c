@@ -148,6 +148,14 @@ bool ffOptionParseBoolean(const char* str)
 
 void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
 {
+    // If value is already an ANSI escape code, use it
+    if (value[0] == '\e' && value[1] == '[')
+    {
+        ffStrbufAppendS(buffer, value + 2);
+        ffStrbufTrimRight(buffer, 'm');
+        return;
+    }
+
     ffStrbufEnsureFree(buffer, 63);
 
     while(*value != '\0')

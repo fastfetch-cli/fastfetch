@@ -169,13 +169,19 @@ static void getUserShell(FFPlatform* platform, const struct passwd* pwd)
     ffStrbufAppendS(&platform->userShell, shell);
 }
 
-static void getPageSize(FFPlatform* platform)
+static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
 {
+    ffStrbufAppendS(&info->name, uts->sysname);
+    ffStrbufAppendS(&info->release, uts->release);
+    ffStrbufAppendS(&info->version, uts->version);
+    ffStrbufAppendS(&info->architecture, uts->machine);
+    ffStrbufInit(&info->displayVersion);
+
     #if defined(__FreeBSD__) || defined(__APPLE__)
-    size_t length = sizeof(platform->pageSize);
-    sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &platform->pageSize, &length, NULL, 0);
+    size_t length = sizeof(info->pageSize);
+    sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, NULL, 0);
     #else
-    platform->pageSize = (uint32_t) sysconf(_SC_PAGESIZE);
+    info->pageSize = (uint32_t) sysconf(_SC_PAGESIZE);
     #endif
 }
 
@@ -197,11 +203,5 @@ void ffPlatformInitImpl(FFPlatform* platform)
     getHostName(platform, &uts);
     getUserShell(platform, pwd);
 
-    ffStrbufAppendS(&platform->systemName, uts.sysname);
-    ffStrbufAppendS(&platform->systemRelease, uts.release);
-    ffStrbufAppendS(&platform->systemVersion, uts.version);
-    ffStrbufAppendS(&platform->systemArchitecture, uts.machine);
-    ffStrbufInit(&platform->systemDisplayVersion);
-
-    getPageSize(platform);
+    getSysinfo(&platform->sysinfo, &uts);
 }
