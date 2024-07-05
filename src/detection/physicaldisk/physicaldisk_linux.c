@@ -149,6 +149,12 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/firmware_rev", devName);
             if (ffReadFileBuffer(pathSysBlock, &device->revision))
                 ffStrbufTrimRightSpace(&device->revision);
+            else
+            {
+                snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/rev", devName);
+                if (ffReadFileBuffer(pathSysBlock, &device->revision))
+                    ffStrbufTrimRightSpace(&device->revision);
+            }
         }
 
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
