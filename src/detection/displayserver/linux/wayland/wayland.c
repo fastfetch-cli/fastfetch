@@ -11,6 +11,7 @@
 
 #include "wayland.h"
 #include "wlr-output-management-unstable-v1-client-protocol.h"
+#include "kde-output-device-v2-client-protocol.h"
 
 #ifndef __FreeBSD__
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
@@ -46,6 +47,11 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_ZWLR;
         ffWaylandHandleZwlrOutput(wldata, registry, name, version);
+    }
+    else if((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE) && ffStrEquals(interface, kde_output_device_v2_interface.name))
+    {
+        wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE;
+        ffWaylandHandleKdeOutput(wldata, registry, name, version);
     }
 }
 
@@ -107,7 +113,8 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
         display->type = FF_DISPLAY_TYPE_BUILTIN;
     else if(ffStrStartsWith(name, "HDMI-"))
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
-    ffdsMatchDrmConnector(name, &display->edidName);
+    if (!display->edidName.length)
+        ffdsMatchDrmConnector(name, &display->edidName);
     ffStrbufAppendS(&display->name, name);
 }
 

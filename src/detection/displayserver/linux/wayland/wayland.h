@@ -14,6 +14,7 @@ typedef enum WaylandProtocolType
     FF_WAYLAND_PROTOCOL_TYPE_NONE,
     FF_WAYLAND_PROTOCOL_TYPE_GLOBAL,
     FF_WAYLAND_PROTOCOL_TYPE_ZWLR,
+    FF_WAYLAND_PROTOCOL_TYPE_KDE,
 } WaylandProtocolType;
 
 typedef struct WaylandData
@@ -53,5 +54,6 @@ void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output
 
 void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
+void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 
 #endif
