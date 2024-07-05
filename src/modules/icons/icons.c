@@ -40,6 +40,9 @@ void ffPrintIcons(FFIconsOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.icons2, "icons2"},
         }));
     }
+
+    ffStrbufDestroy(&result.icons1);
+    ffStrbufDestroy(&result.icons2);
 }
 
 bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const char* value)
@@ -94,6 +97,9 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
     yyjson_mut_val* icons = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, icons, "icons1", &result.icons1);
     yyjson_mut_obj_add_strbuf(doc, icons, "icons2", &result.icons2);
+
+    ffStrbufDestroy(&result.icons1);
+    ffStrbufDestroy(&result.icons2);
 }
 
 void ffPrintIconsHelpFormat(void)

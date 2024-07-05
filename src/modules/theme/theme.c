@@ -40,6 +40,9 @@ void ffPrintTheme(FFThemeOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.theme2, "theme2"},
         }));
     }
+
+    ffStrbufDestroy(&result.theme1);
+    ffStrbufDestroy(&result.theme2);
 }
 
 bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value)
@@ -94,6 +97,9 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
     yyjson_mut_val* theme = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, theme, "theme1", &result.theme1);
     yyjson_mut_obj_add_strbuf(doc, theme, "theme2", &result.theme2);
+
+    ffStrbufDestroy(&result.theme1);
+    ffStrbufDestroy(&result.theme2);
 }
 
 void ffPrintThemeHelpFormat(void)
