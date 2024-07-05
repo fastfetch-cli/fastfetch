@@ -160,7 +160,7 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
                 : &display.name,
         display.type,
         false,
-        0
+        display.id
     );
 
     ffStrbufDestroy(&display.description);

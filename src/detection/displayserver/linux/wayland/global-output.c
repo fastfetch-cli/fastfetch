@@ -124,7 +124,7 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
                 : &display.name,
         display.type,
         false,
-        0
+        display.id
     );
 
     ffStrbufDestroy(&display.description);

@@ -2,6 +2,7 @@
 
 #include "wayland.h"
 #include "kde-output-device-v2-client-protocol.h"
+#include "kde-output-order-v1-client-protocol.h"
 #include "util/edidHelper.h"
 #include "util/base64.h"
 
@@ -214,12 +215,36 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
             : &display.name,
         display.type,
         false,
-        0
+        display.id
     );
 
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.name);
     ffStrbufDestroy(&display.edidName);
+}
+
+
+static void waylandKdeOutputOrderListener(void *data, FF_MAYBE_UNUSED struct kde_output_order_v1 *_, const char *output_name)
+{
+    uint64_t* id = (uint64_t*) data;
+    if (*id == 0)
+        strncpy((char*) id, output_name, sizeof(*id));
+}
+
+void ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+{
+    struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &kde_output_order_v1_interface, version, name, kde_output_order_v1_interface.name, version, NULL);
+    if(output == NULL)
+        return;
+
+    struct kde_output_order_v1_listener orderListener = {
+        .output = waylandKdeOutputOrderListener,
+        .done = (void*) stubListener,
+    };
+
+    wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &orderListener, &wldata->primaryDisplayId);
+    wldata->ffwl_display_roundtrip(wldata->display);
+    wldata->ffwl_proxy_destroy(output);
 }
 
 #endif
