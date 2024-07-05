@@ -114,6 +114,34 @@ void waylandOutputNameListener(void* data, FF_MAYBE_UNUSED struct kde_output_dev
     ffStrbufAppendS(&display->name, name);
 }
 
+static struct kde_output_device_v2_listener outputListener = {
+    .geometry = waylandKdeGeometryListener,
+    .current_mode = waylandKdeCurrentModeListener,
+    .mode = waylandKdeModeListener,
+    .done = (void*) stubListener,
+    .scale = waylandKdeScaleListener,
+    .edid = waylandKdeEdidListener,
+    .enabled = waylandKdeEnabledListener,
+    .uuid = (void*) stubListener,
+    .serial_number = (void*) stubListener,
+    .eisa_id = (void*) stubListener,
+    .capabilities = (void*) stubListener,
+    .overscan = (void*) stubListener,
+    .vrr_policy = (void*) stubListener,
+    .rgb_range = (void*) stubListener,
+    .name = waylandOutputNameListener,
+    .high_dynamic_range = (void*) stubListener,
+    .sdr_brightness = (void*) stubListener,
+    .wide_color_gamut = (void*) stubListener,
+    .auto_rotate_policy = (void*) stubListener,
+    .icc_profile_path = (void*) stubListener,
+    .brightness_metadata = (void*) stubListener,
+    .brightness_overrides = (void*) stubListener,
+    .sdr_gamut_wideness = (void*) stubListener,
+    .color_profile_source = (void*) stubListener,
+    .brightness = (void*) stubListener,
+};
+
 void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &kde_output_device_v2_interface, version, name, kde_output_device_v2_interface.name, version, NULL);
@@ -133,34 +161,6 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
         .description = ffStrbufCreate(),
         .edidName = ffStrbufCreate(),
         .internal = &modes,
-    };
-
-    struct kde_output_device_v2_listener outputListener = {
-        .geometry = waylandKdeGeometryListener,
-        .current_mode = waylandKdeCurrentModeListener,
-        .mode = waylandKdeModeListener,
-        .done = (void*) stubListener,
-        .scale = waylandKdeScaleListener,
-        .edid = waylandKdeEdidListener,
-        .enabled = waylandKdeEnabledListener,
-        .uuid = (void*) stubListener,
-        .serial_number = (void*) stubListener,
-        .eisa_id = (void*) stubListener,
-        .capabilities = (void*) stubListener,
-        .overscan = (void*) stubListener,
-        .vrr_policy = (void*) stubListener,
-        .rgb_range = (void*) stubListener,
-        .name = waylandOutputNameListener,
-        .high_dynamic_range = (void*) stubListener,
-        .sdr_brightness = (void*) stubListener,
-        .wide_color_gamut = (void*) stubListener,
-        .auto_rotate_policy = (void*) stubListener,
-        .icc_profile_path = (void*) stubListener,
-        .brightness_metadata = (void*) stubListener,
-        .brightness_overrides = (void*) stubListener,
-        .sdr_gamut_wideness = (void*) stubListener,
-        .color_profile_source = (void*) stubListener,
-        .brightness = (void*) stubListener,
     };
 
     wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display);

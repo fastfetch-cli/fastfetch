@@ -71,26 +71,26 @@ static void waylandZwlrCurrentModeListener(void* data, FF_MAYBE_UNUSED struct zw
     wldata->refreshRate = current->refreshRate;
 }
 
+static const struct zwlr_output_head_v1_listener headListener = {
+    .name = (void*) ffWaylandOutputNameListener,
+    .description = (void*) ffWaylandOutputDescriptionListener,
+    .physical_size = (void*) stubListener,
+    .mode = waylandZwlrModeListener,
+    .enabled = (void*) stubListener,
+    .current_mode = waylandZwlrCurrentModeListener,
+    .position = (void*) stubListener,
+    .transform = waylandZwlrTransformListener,
+    .scale = waylandZwlrScaleListener,
+    .finished = (void*) stubListener,
+    .make = (void*) stubListener,
+    .model = (void*) stubListener,
+    .serial_number = (void*) stubListener,
+    .adaptive_sync = (void*) stubListener,
+};
+
 static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output_manager_v1 *zwlr_output_manager_v1, struct zwlr_output_head_v1 *head)
 {
     WaylandData* wldata = data;
-
-    const struct zwlr_output_head_v1_listener headListener = {
-        .name = (void*) ffWaylandOutputNameListener,
-        .description = (void*) ffWaylandOutputDescriptionListener,
-        .physical_size = (void*) stubListener,
-        .mode = waylandZwlrModeListener,
-        .enabled = (void*) stubListener,
-        .current_mode = waylandZwlrCurrentModeListener,
-        .position = (void*) stubListener,
-        .transform = waylandZwlrTransformListener,
-        .scale = waylandZwlrScaleListener,
-        .finished = (void*) stubListener,
-        .make = (void*) stubListener,
-        .model = (void*) stubListener,
-        .serial_number = (void*) stubListener,
-        .adaptive_sync = (void*) stubListener,
-    };
 
     FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandZwlrMode));
     WaylandDisplay display = {
