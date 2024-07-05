@@ -59,6 +59,6 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
 void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
-void ffWaylandHandleXdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
+void ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 
 #endif

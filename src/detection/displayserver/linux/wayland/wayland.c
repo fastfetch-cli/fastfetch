@@ -59,9 +59,9 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     {
         ffWaylandHandleKdeOutputOrder(wldata, registry, name, version);
     }
-    else if(wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL && ffStrEquals(interface, zxdg_output_manager_v1_interface.name))
+    else if((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, zxdg_output_manager_v1_interface.name))
     {
-        ffWaylandHandleXdgOutput(wldata, registry, name, version);
+        ffWaylandHandleZxdgOutput(wldata, registry, name, version);
     }
 }
 

@@ -164,7 +164,7 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
     ffStrbufDestroy(&display.edidName);
 }
 
-void ffWaylandHandleXdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+void ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, version, name, zxdg_output_manager_v1_interface.name, version, NULL);
     if(manager == NULL)
