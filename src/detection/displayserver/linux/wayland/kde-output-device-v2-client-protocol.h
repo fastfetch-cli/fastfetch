@@ -708,32 +708,32 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2 *kde_output_device
 #define KDE_OUTPUT_DEVICE_V2_BRIGHTNESS_SINCE_VERSION 8
 
 
-/** @ingroup iface_kde_output_device_v2 */
-static inline void
-kde_output_device_v2_set_user_data(struct kde_output_device_v2 *kde_output_device_v2, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) kde_output_device_v2, user_data);
-}
+// /** @ingroup iface_kde_output_device_v2 */
+// static inline void
+// kde_output_device_v2_set_user_data(struct kde_output_device_v2 *kde_output_device_v2, void *user_data)
+// {
+// 	wl_proxy_set_user_data((struct wl_proxy *) kde_output_device_v2, user_data);
+// }
 
-/** @ingroup iface_kde_output_device_v2 */
-static inline void *
-kde_output_device_v2_get_user_data(struct kde_output_device_v2 *kde_output_device_v2)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_device_v2);
-}
+// /** @ingroup iface_kde_output_device_v2 */
+// static inline void *
+// kde_output_device_v2_get_user_data(struct kde_output_device_v2 *kde_output_device_v2)
+// {
+// 	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_device_v2);
+// }
 
-static inline uint32_t
-kde_output_device_v2_get_version(struct kde_output_device_v2 *kde_output_device_v2)
-{
-	return wl_proxy_get_version((struct wl_proxy *) kde_output_device_v2);
-}
+// static inline uint32_t
+// kde_output_device_v2_get_version(struct kde_output_device_v2 *kde_output_device_v2)
+// {
+// 	return wl_proxy_get_version((struct wl_proxy *) kde_output_device_v2);
+// }
 
-/** @ingroup iface_kde_output_device_v2 */
-static inline void
-kde_output_device_v2_destroy(struct kde_output_device_v2 *kde_output_device_v2)
-{
-	wl_proxy_destroy((struct wl_proxy *) kde_output_device_v2);
-}
+// /** @ingroup iface_kde_output_device_v2 */
+// static inline void
+// kde_output_device_v2_destroy(struct kde_output_device_v2 *kde_output_device_v2)
+// {
+// 	wl_proxy_destroy((struct wl_proxy *) kde_output_device_v2);
+// }
 
 /**
  * @ingroup iface_kde_output_device_mode_v2
@@ -811,32 +811,32 @@ kde_output_device_mode_v2_add_listener(struct kde_output_device_mode_v2 *kde_out
 #define KDE_OUTPUT_DEVICE_MODE_V2_REMOVED_SINCE_VERSION 1
 
 
-/** @ingroup iface_kde_output_device_mode_v2 */
-static inline void
-kde_output_device_mode_v2_set_user_data(struct kde_output_device_mode_v2 *kde_output_device_mode_v2, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) kde_output_device_mode_v2, user_data);
-}
+// /** @ingroup iface_kde_output_device_mode_v2 */
+// static inline void
+// kde_output_device_mode_v2_set_user_data(struct kde_output_device_mode_v2 *kde_output_device_mode_v2, void *user_data)
+// {
+// 	wl_proxy_set_user_data((struct wl_proxy *) kde_output_device_mode_v2, user_data);
+// }
 
-/** @ingroup iface_kde_output_device_mode_v2 */
-static inline void *
-kde_output_device_mode_v2_get_user_data(struct kde_output_device_mode_v2 *kde_output_device_mode_v2)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_device_mode_v2);
-}
+// /** @ingroup iface_kde_output_device_mode_v2 */
+// static inline void *
+// kde_output_device_mode_v2_get_user_data(struct kde_output_device_mode_v2 *kde_output_device_mode_v2)
+// {
+// 	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_device_mode_v2);
+// }
 
-static inline uint32_t
-kde_output_device_mode_v2_get_version(struct kde_output_device_mode_v2 *kde_output_device_mode_v2)
-{
-	return wl_proxy_get_version((struct wl_proxy *) kde_output_device_mode_v2);
-}
+// static inline uint32_t
+// kde_output_device_mode_v2_get_version(struct kde_output_device_mode_v2 *kde_output_device_mode_v2)
+// {
+// 	return wl_proxy_get_version((struct wl_proxy *) kde_output_device_mode_v2);
+// }
 
-/** @ingroup iface_kde_output_device_mode_v2 */
-static inline void
-kde_output_device_mode_v2_destroy(struct kde_output_device_mode_v2 *kde_output_device_mode_v2)
-{
-	wl_proxy_destroy((struct wl_proxy *) kde_output_device_mode_v2);
-}
+// /** @ingroup iface_kde_output_device_mode_v2 */
+// static inline void
+// kde_output_device_mode_v2_destroy(struct kde_output_device_mode_v2 *kde_output_device_mode_v2)
+// {
+// 	wl_proxy_destroy((struct wl_proxy *) kde_output_device_mode_v2);
+// }
 
 #ifdef  __cplusplus
 }

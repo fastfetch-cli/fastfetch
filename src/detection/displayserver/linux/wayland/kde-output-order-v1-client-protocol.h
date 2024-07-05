@@ -96,35 +96,35 @@ kde_output_order_v1_add_listener(struct kde_output_order_v1 *kde_output_order_v1
  */
 #define KDE_OUTPUT_ORDER_V1_DESTROY_SINCE_VERSION 1
 
-/** @ingroup iface_kde_output_order_v1 */
-static inline void
-kde_output_order_v1_set_user_data(struct kde_output_order_v1 *kde_output_order_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) kde_output_order_v1, user_data);
-}
+// /** @ingroup iface_kde_output_order_v1 */
+// static inline void
+// kde_output_order_v1_set_user_data(struct kde_output_order_v1 *kde_output_order_v1, void *user_data)
+// {
+// 	wl_proxy_set_user_data((struct wl_proxy *) kde_output_order_v1, user_data);
+// }
 
-/** @ingroup iface_kde_output_order_v1 */
-static inline void *
-kde_output_order_v1_get_user_data(struct kde_output_order_v1 *kde_output_order_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_order_v1);
-}
+// /** @ingroup iface_kde_output_order_v1 */
+// static inline void *
+// kde_output_order_v1_get_user_data(struct kde_output_order_v1 *kde_output_order_v1)
+// {
+// 	return wl_proxy_get_user_data((struct wl_proxy *) kde_output_order_v1);
+// }
 
-static inline uint32_t
-kde_output_order_v1_get_version(struct kde_output_order_v1 *kde_output_order_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) kde_output_order_v1);
-}
+// static inline uint32_t
+// kde_output_order_v1_get_version(struct kde_output_order_v1 *kde_output_order_v1)
+// {
+// 	return wl_proxy_get_version((struct wl_proxy *) kde_output_order_v1);
+// }
 
-/**
- * @ingroup iface_kde_output_order_v1
- */
-static inline void
-kde_output_order_v1_destroy(struct kde_output_order_v1 *kde_output_order_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_order_v1,
-			 KDE_OUTPUT_ORDER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_order_v1), WL_MARSHAL_FLAG_DESTROY);
-}
+// /**
+//  * @ingroup iface_kde_output_order_v1
+//  */
+// static inline void
+// kde_output_order_v1_destroy(struct kde_output_order_v1 *kde_output_order_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) kde_output_order_v1,
+// 			 KDE_OUTPUT_ORDER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) kde_output_order_v1), WL_MARSHAL_FLAG_DESTROY);
+// }
 
 #ifdef  __cplusplus
 }

@@ -141,56 +141,56 @@ extern const struct wl_interface zxdg_output_v1_interface;
  */
 #define ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT_SINCE_VERSION 1
 
-/** @ingroup iface_zxdg_output_manager_v1 */
-static inline void
-zxdg_output_manager_v1_set_user_data(struct zxdg_output_manager_v1 *zxdg_output_manager_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zxdg_output_manager_v1, user_data);
-}
+// /** @ingroup iface_zxdg_output_manager_v1 */
+// static inline void
+// zxdg_output_manager_v1_set_user_data(struct zxdg_output_manager_v1 *zxdg_output_manager_v1, void *user_data)
+// {
+// 	wl_proxy_set_user_data((struct wl_proxy *) zxdg_output_manager_v1, user_data);
+// }
 
-/** @ingroup iface_zxdg_output_manager_v1 */
-static inline void *
-zxdg_output_manager_v1_get_user_data(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zxdg_output_manager_v1);
-}
+// /** @ingroup iface_zxdg_output_manager_v1 */
+// static inline void *
+// zxdg_output_manager_v1_get_user_data(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
+// {
+// 	return wl_proxy_get_user_data((struct wl_proxy *) zxdg_output_manager_v1);
+// }
 
-static inline uint32_t
-zxdg_output_manager_v1_get_version(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1);
-}
+// static inline uint32_t
+// zxdg_output_manager_v1_get_version(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
+// {
+// 	return wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1);
+// }
 
-/**
- * @ingroup iface_zxdg_output_manager_v1
- *
- * Using this request a client can tell the server that it is not
- * going to use the xdg_output_manager object anymore.
- *
- * Any objects already created through this instance are not affected.
- */
-static inline void
-zxdg_output_manager_v1_destroy(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_manager_v1,
-			 ZXDG_OUTPUT_MANAGER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), WL_MARSHAL_FLAG_DESTROY);
-}
+// /**
+//  * @ingroup iface_zxdg_output_manager_v1
+//  *
+//  * Using this request a client can tell the server that it is not
+//  * going to use the xdg_output_manager object anymore.
+//  *
+//  * Any objects already created through this instance are not affected.
+//  */
+// static inline void
+// zxdg_output_manager_v1_destroy(struct zxdg_output_manager_v1 *zxdg_output_manager_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_manager_v1,
+// 			 ZXDG_OUTPUT_MANAGER_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), WL_MARSHAL_FLAG_DESTROY);
+// }
 
-/**
- * @ingroup iface_zxdg_output_manager_v1
- *
- * This creates a new xdg_output object for the given wl_output.
- */
-static inline struct zxdg_output_v1 *
-zxdg_output_manager_v1_get_xdg_output(struct zxdg_output_manager_v1 *zxdg_output_manager_v1, struct wl_output *output)
-{
-	struct wl_proxy *id;
+// /**
+//  * @ingroup iface_zxdg_output_manager_v1
+//  *
+//  * This creates a new xdg_output object for the given wl_output.
+//  */
+// static inline struct zxdg_output_v1 *
+// zxdg_output_manager_v1_get_xdg_output(struct zxdg_output_manager_v1 *zxdg_output_manager_v1, struct wl_output *output)
+// {
+// 	struct wl_proxy *id;
 
-	id = wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_manager_v1,
-			 ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), 0, NULL, output);
+// 	id = wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_manager_v1,
+// 			 ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, wl_proxy_get_version((struct wl_proxy *) zxdg_output_manager_v1), 0, NULL, output);
 
-	return (struct zxdg_output_v1 *) id;
-}
+// 	return (struct zxdg_output_v1 *) id;
+// }
 
 /**
  * @ingroup iface_zxdg_output_v1
@@ -374,38 +374,38 @@ zxdg_output_v1_add_listener(struct zxdg_output_v1 *zxdg_output_v1,
  */
 #define ZXDG_OUTPUT_V1_DESTROY_SINCE_VERSION 1
 
-/** @ingroup iface_zxdg_output_v1 */
-static inline void
-zxdg_output_v1_set_user_data(struct zxdg_output_v1 *zxdg_output_v1, void *user_data)
-{
-	wl_proxy_set_user_data((struct wl_proxy *) zxdg_output_v1, user_data);
-}
+// /** @ingroup iface_zxdg_output_v1 */
+// static inline void
+// zxdg_output_v1_set_user_data(struct zxdg_output_v1 *zxdg_output_v1, void *user_data)
+// {
+// 	wl_proxy_set_user_data((struct wl_proxy *) zxdg_output_v1, user_data);
+// }
 
-/** @ingroup iface_zxdg_output_v1 */
-static inline void *
-zxdg_output_v1_get_user_data(struct zxdg_output_v1 *zxdg_output_v1)
-{
-	return wl_proxy_get_user_data((struct wl_proxy *) zxdg_output_v1);
-}
+// /** @ingroup iface_zxdg_output_v1 */
+// static inline void *
+// zxdg_output_v1_get_user_data(struct zxdg_output_v1 *zxdg_output_v1)
+// {
+// 	return wl_proxy_get_user_data((struct wl_proxy *) zxdg_output_v1);
+// }
 
-static inline uint32_t
-zxdg_output_v1_get_version(struct zxdg_output_v1 *zxdg_output_v1)
-{
-	return wl_proxy_get_version((struct wl_proxy *) zxdg_output_v1);
-}
+// static inline uint32_t
+// zxdg_output_v1_get_version(struct zxdg_output_v1 *zxdg_output_v1)
+// {
+// 	return wl_proxy_get_version((struct wl_proxy *) zxdg_output_v1);
+// }
 
-/**
- * @ingroup iface_zxdg_output_v1
- *
- * Using this request a client can tell the server that it is not
- * going to use the xdg_output object anymore.
- */
-static inline void
-zxdg_output_v1_destroy(struct zxdg_output_v1 *zxdg_output_v1)
-{
-	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_v1,
-			 ZXDG_OUTPUT_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_output_v1), WL_MARSHAL_FLAG_DESTROY);
-}
+// /**
+//  * @ingroup iface_zxdg_output_v1
+//  *
+//  * Using this request a client can tell the server that it is not
+//  * going to use the xdg_output object anymore.
+//  */
+// static inline void
+// zxdg_output_v1_destroy(struct zxdg_output_v1 *zxdg_output_v1)
+// {
+// 	wl_proxy_marshal_flags((struct wl_proxy *) zxdg_output_v1,
+// 			 ZXDG_OUTPUT_V1_DESTROY, NULL, wl_proxy_get_version((struct wl_proxy *) zxdg_output_v1), WL_MARSHAL_FLAG_DESTROY);
+// }
 
 #ifdef  __cplusplus
 }
