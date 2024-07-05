@@ -2,6 +2,7 @@
 
 #include "wayland.h"
 #include "util/stringUtils.h"
+#include "xdg-output-unstable-v1-client-protocol.h"
 
 static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
@@ -35,6 +36,39 @@ static void waylandOutputGeometryListener(void *data,
     display->transform = (enum wl_output_transform) transform;
 }
 
+static void handleXdgLogicalSize(void *data, FF_MAYBE_UNUSED struct zxdg_output_v1 *_, int32_t width, FF_MAYBE_UNUSED int32_t height)
+{
+    WaylandDisplay* display = data;
+    // Seems the values are only useful when ractional scale is enabled
+    if (width < display->width)
+    {
+        display->scale = (double) display->width / width;
+    }
+}
+
+// Dirty hack for #477
+// The order of these callbacks MUST follow `struct wl_output_listener`
+static void* outputListener[] = {
+    waylandOutputGeometryListener, // geometry
+    waylandOutputModeListener, // mode
+    stubListener, // done
+    waylandOutputScaleListener, // scale
+    ffWaylandOutputNameListener, // name
+    ffWaylandOutputDescriptionListener, // description
+};
+static_assert(
+    sizeof(outputListener) >= sizeof(struct wl_output_listener),
+    "sizeof(outputListener) is too small. Please report it to fastfetch github issue"
+);
+
+static struct zxdg_output_v1_listener zxdgOutputListener = {
+    .logical_position = (void*) stubListener,
+    .logical_size = handleXdgLogicalSize,
+    .done = (void*) stubListener,
+    .name = (void*) stubListener,
+    .description = (void*) stubListener,
+};
+
 void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
@@ -54,23 +88,21 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         .edidName = ffStrbufCreate(),
     };
 
-    // Dirty hack for #477
-    // The order of these callbacks MUST follow `struct wl_output_listener`
-    void* outputListener[] = {
-        waylandOutputGeometryListener, // geometry
-        waylandOutputModeListener, // mode
-        stubListener, // done
-        waylandOutputScaleListener, // scale
-        ffWaylandOutputNameListener, // name
-        ffWaylandOutputDescriptionListener, // description
-    };
-    static_assert(
-        sizeof(outputListener) >= sizeof(struct wl_output_listener),
-        "sizeof(outputListener) is too small. Please report it to fastfetch github issue"
-    );
-
     wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display);
     wldata->ffwl_display_roundtrip(wldata->display);
+
+    if (wldata->zxdgOutputManager)
+    {
+        struct wl_proxy* zxdgOutput = wldata->ffwl_proxy_marshal_constructor_versioned(wldata->zxdgOutputManager, ZXDG_OUTPUT_MANAGER_V1_GET_XDG_OUTPUT, &zxdg_output_v1_interface, version, NULL, output);
+
+        if (zxdgOutput)
+        {
+            wldata->ffwl_proxy_add_listener(zxdgOutput, (void(**)(void)) &zxdgOutputListener, &display);
+            wldata->ffwl_display_roundtrip(wldata->display);
+            wldata->ffwl_proxy_destroy(zxdgOutput);
+        }
+    }
+
     wldata->ffwl_proxy_destroy(output);
 
     if(display.width <= 0 || display.height <= 0)
@@ -130,6 +162,15 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.name);
     ffStrbufDestroy(&display.edidName);
+}
+
+void ffWaylandHandleXdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+{
+    struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, version, name, zxdg_output_manager_v1_interface.name, version, NULL);
+    if(manager == NULL)
+        return;
+
+    wldata->zxdgOutputManager = manager;
 }
 
 #endif

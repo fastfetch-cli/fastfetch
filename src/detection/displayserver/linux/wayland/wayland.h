@@ -28,6 +28,7 @@ typedef struct WaylandData
     const struct wl_interface* ffwl_output_interface;
     WaylandProtocolType protocolType;
     uint64_t primaryDisplayId;
+    struct wl_proxy* zxdgOutputManager;
 } WaylandData;
 
 typedef struct WaylandDisplay
@@ -58,5 +59,6 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
 void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
+void ffWaylandHandleXdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 
 #endif

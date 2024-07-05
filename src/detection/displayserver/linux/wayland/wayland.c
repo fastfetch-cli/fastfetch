@@ -13,6 +13,7 @@
 #include "wlr-output-management-unstable-v1-client-protocol.h"
 #include "kde-output-device-v2-client-protocol.h"
 #include "kde-output-order-v1-client-protocol.h"
+#include "xdg-output-unstable-v1-client-protocol.h"
 
 #ifndef __FreeBSD__
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
@@ -58,6 +59,10 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     {
         ffWaylandHandleKdeOutputOrder(wldata, registry, name, version);
     }
+    else if(wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL && ffStrEquals(interface, zxdg_output_manager_v1_interface.name))
+    {
+        ffWaylandHandleXdgOutput(wldata, registry, name, version);
+    }
 }
 
 bool detectWayland(FFDisplayServerResult* result)
@@ -100,6 +105,9 @@ bool detectWayland(FFDisplayServerResult* result)
 
     data.ffwl_proxy_add_listener(registry, (void(**)(void)) &registry_listener, &data);
     data.ffwl_display_roundtrip(data.display);
+
+    if (data.zxdgOutputManager)
+        data.ffwl_proxy_destroy(data.zxdgOutputManager);
 
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
