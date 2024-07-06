@@ -37,7 +37,7 @@ void ffBase64EncodeRaw(uint32_t size, const char *str, uint32_t *out_size, char 
     *out_size = (uint32_t)(out - output);
 }
 
-static char decode_table[256];
+static uint8_t decode_table[256];
 
 void init_decode_table()
 {
@@ -59,10 +59,7 @@ void init_decode_table()
     } while (ch++ < 0xFF);
 }
 
-#define next_char(x)                              \
-    char x = decode_table[(unsigned char)*str++]; \
-    if (x < 0)                                    \
-        return false;
+#define next_char(x) uint8_t x = decode_table[(uint8_t) *str++];
 
 bool ffBase64DecodeRaw(uint32_t size, const char *str, uint32_t *out_size, char *output)
 {
