@@ -54,51 +54,48 @@ function __fastfetch_complete_structure
     end
 end
 
-string match -r -a -g "^###> ?(.*)" < (status -f) | string collect | python3 | source
+echo '
+import json, subprocess, sys
 
-###> #!/usr/bin/env python3
-###>
-###> import json, subprocess, sys
-###>
-###> def main():
-###>     data: dict[str, list[dict]] = json.loads(subprocess.check_output(['fastfetch', '--help-raw']))
-###>
-###>     for key in data:
-###>         for flag in data[key]:
-###>             if flag.get('pseudo', False):
-###>                 continue
-###>
-###>             command_prefix: str = f'complete -c fastfetch -d "{flag["desc"]}" -l "{flag["long"]}"';
-###>             if 'short' in flag:
-###>                 command_prefix += f' -o "{flag["short"]}"'
-###>
-###>             if 'arg' in flag:
-###>                 type: str = flag['arg']['type'];
-###>                 if type == 'bool':
-###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_bool)"')
-###>                 elif type == 'color':
-###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_color)"')
-###>                 elif type == 'command':
-###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_command)"')
-###>                 elif type == 'config':
-###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_config)"')
-###>                 elif type == 'enum':
-###>                     temp: str = ' '.join(flag["arg"]["enum"])
-###>                     print(f'{command_prefix} -x -a "{temp}"')
-###>                 elif type == 'logo':
-###>                     print(f'{command_prefix} -x -a "(__fastfetch_complete_logo)"')
-###>                 elif type == 'structure':
-###>                     print(f'{command_prefix} -x -a "(__fish_complete_list : __fastfetch_complete_structure)"')
-###>                 elif type == 'path':
-###>                     print(f'{command_prefix} -r -F')
-###>                 else:
-###>                     print(f'{command_prefix} -x')
-###>             else:
-###>                 print(f'{command_prefix} -f')
-###>
-###> if __name__ == "__main__":
-###>     try:
-###>         main()
-###>     except:
-###>         sys.exit(1)
-###>
+def main():
+    data: dict[str, list[dict]] = json.loads(subprocess.check_output(["fastfetch", "--help-raw"]))
+
+    for key in data:
+        for flag in data[key]:
+            if flag.get("pseudo", False):
+                continue
+
+            command_prefix = f"""complete -c fastfetch -d "{flag["desc"]}" -l "{flag["long"]}\""""
+            if "short" in flag:
+                command_prefix += f""" -o {flag["short"]}"""
+
+            if "arg" in flag:
+                type: str = flag["arg"]["type"];
+                if type == "bool":
+                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_bool)\"")
+                elif type == "color":
+                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_color)\"")
+                elif type == "command":
+                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_command)\"")
+                elif type == "config":
+                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_config)\"")
+                elif type == "enum":
+                    temp: str = " ".join(flag["arg"]["enum"])
+                    print(f"{command_prefix} -x -a \"{temp}\"")
+                elif type == "logo":
+                    print(f"{command_prefix} -x -a \"(__fastfetch_complete_logo)\"")
+                elif type == "structure":
+                    print(f"{command_prefix} -x -a \"(__fish_complete_list : __fastfetch_complete_structure)\"")
+                elif type == "path":
+                    print(f"{command_prefix} -r -F")
+                else:
+                    print(f"{command_prefix} -x")
+            else:
+                print(f"{command_prefix} -f")
+
+if __name__ == "__main__":
+    try:
+        main()
+    except:
+        sys.exit(1)
+' | python3 | source
