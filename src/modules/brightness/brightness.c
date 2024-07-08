@@ -5,7 +5,7 @@
 #include "modules/brightness/brightness.h"
 #include "util/stringUtils.h"
 
-#define FF_BRIGHTNESS_NUM_FORMAT_ARGS 5
+#define FF_BRIGHTNESS_NUM_FORMAT_ARGS 6
 
 void ffPrintBrightness(FFBrightnessOptions* options)
 {
@@ -67,14 +67,17 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         }
         else
         {
-            FF_STRBUF_AUTO_DESTROY valueStr = ffStrbufCreate();
-            ffPercentAppendNum(&valueStr, percent, options->percent, false, &options->moduleArgs);
+            FF_STRBUF_AUTO_DESTROY valueNum = ffStrbufCreate();
+            ffPercentAppendNum(&valueNum, percent, options->percent, false, &options->moduleArgs);
+            FF_STRBUF_AUTO_DESTROY valueBar = ffStrbufCreate();
+            ffPercentAppendBar(&valueBar, percent, options->percent, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &valueStr, "percentage"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &valueNum, "percentage"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->name, "name"},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->max, "max"},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->min, "min"},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->current, "current"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &item->current, "percentage-bar"},
             }));
         }
 
@@ -175,11 +178,12 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
 void ffPrintBrightnessHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BRIGHTNESS_MODULE_NAME, "{1}", FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Screen brightness (percentage) - percentage",
+        "Screen brightness (percentage num) - percentage",
         "Screen name - name",
         "Maximum brightness value - max",
         "Minimum brightness value - min",
         "Current brightness value - current",
+        "Screen brightness (percentage bar) - percentage-bar",
     }));
 }
 

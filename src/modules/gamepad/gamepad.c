@@ -5,7 +5,7 @@
 #include "modules/gamepad/gamepad.h"
 #include "util/stringUtils.h"
 
-#define FF_GAMEPAD_NUM_FORMAT_ARGS 3
+#define FF_GAMEPAD_NUM_FORMAT_ARGS 4
 
 static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device, uint8_t index)
 {
@@ -25,13 +25,16 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
     }
     else
     {
-        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&percentageStr, device->battery, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
+        ffPercentAppendNum(&percentageNum, device->battery, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
+        ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GAMEPAD_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->name, "name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &device->serial, "serial"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr, "battery-percentage"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageNum, "battery-percentage"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageBar, "battery-percentage-bar"},
         }));
     }
 }
@@ -138,7 +141,8 @@ void ffPrintGamepadHelpFormat(void)
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_GAMEPAD_MODULE_NAME, "{1} ({3})", FF_GAMEPAD_NUM_FORMAT_ARGS, ((const char* []) {
         "Name - name",
         "Serial number - serial",
-        "Battery percentage - battery-percentage",
+        "Battery percentage num - battery-percentage",
+        "Battery percentage bar - battery-percentage-bar",
     }));
 }
 
