@@ -9,6 +9,8 @@
 
 #include <sys/socket.h>
 
+#include "common/properties.h"
+
 #include "wayland.h"
 #include "wlr-output-management-unstable-v1-client-protocol.h"
 #include "kde-output-device-v2-client-protocol.h"
@@ -16,23 +18,26 @@
 #include "xdg-output-unstable-v1-client-protocol.h"
 
 #ifndef __FreeBSD__
-static void waylandDetectWM(int fd, FFDisplayServerResult* result)
+static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     struct ucred ucred;
     socklen_t len = sizeof(struct ucred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
-        return;
+        return false;
 
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreate();
     ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
     ffReadFileBuffer(procPath.chars, &result->wmProcessName);
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
+    puts(result->wmProcessName.chars);
+    return true;
 }
 #else
 static void waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     FF_UNUSED(fd, result);
+    return false;
 }
 #endif
 
@@ -112,6 +117,67 @@ bool detectWayland(FFDisplayServerResult* result)
     data.ffwl_proxy_destroy(registry);
     ffwl_display_disconnect(data.display);
 
+    if(data.primaryDisplayId == 0 && result->wmProcessName.length > 0)
+    {
+        const char* fileName = ffStrbufEqualS(&result->wmProcessName, "gnome-shell")
+            ? "monitors.xml"
+            : ffStrbufEqualS(&result->wmProcessName, "cinnamon")
+                ? "cinnamon-monitors.xml"
+                : NULL;
+        if (fileName)
+        {
+            FF_STRBUF_AUTO_DESTROY monitorsXml = ffStrbufCreate();
+            FF_LIST_FOR_EACH(FFstrbuf, basePath, instance.state.platform.configDirs)
+            {
+                char path[1024];
+                snprintf(path, sizeof(path) - 1, "%s%s", basePath->chars, fileName);
+                if (ffReadFileBuffer(path, &monitorsXml))
+                    break;
+            }
+            if (monitorsXml.length)
+            {
+                // <monitors version="2">
+                // <configuration>
+                //     <logicalmonitor>
+                //     <x>0</x>
+                //     <y>0</y>
+                //     <scale>1.7489879131317139</scale>
+                //     <primary>yes</primary>
+                //     <monitor>
+                //         <monitorspec>
+                //         <connector>Virtual-1</connector>
+                //         <vendor>unknown</vendor>
+                //         <product>unknown</product>
+                //         <serial>unknown</serial>
+                //         </monitorspec>
+                //         <mode>
+                //         <width>3456</width>
+                //         <height>2160</height>
+                //         <rate>60.000068664550781</rate>
+                //         </mode>
+                //     </monitor>
+                //     </logicalmonitor>
+                // </configuration>
+                // </monitors>
+                uint32_t start = ffStrbufFirstIndexS(&monitorsXml, "<primary>yes</primary>");
+                if (start < monitorsXml.length)
+                {
+                    start = ffStrbufNextIndexS(&monitorsXml, start, "<connector>");
+                    if (start < monitorsXml.length)
+                    {
+                        uint32_t end = ffStrbufNextIndexS(&monitorsXml, start, "</connector>");
+                        if (end < monitorsXml.length)
+                        {
+                            ffStrbufSubstrBefore(&monitorsXml, end);
+                            const char* name = monitorsXml.chars + start + strlen("<connector>");
+                            data.primaryDisplayId = ffWaylandGenerateIdFromName(name);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     if(data.primaryDisplayId)
     {
         FF_LIST_FOR_EACH(FFDisplayResult, d, data.result->displays)
@@ -134,6 +200,8 @@ bool detectWayland(FFDisplayServerResult* result)
 void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name)
 {
     WaylandDisplay* display = data;
+    if (display->id) return;
+
     if(ffStrStartsWith(name, "eDP-"))
         display->type = FF_DISPLAY_TYPE_BUILTIN;
     else if(ffStrStartsWith(name, "HDMI-"))
@@ -147,6 +215,8 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
 void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description)
 {
     WaylandDisplay* display = data;
+    if (display->description.length) return;
+
     while (*description == ' ') ++description;
     if (!ffStrEquals(description, "Unknown Display") && !ffStrContains(description, "(null)"))
         ffStrbufAppendS(&display->description, description);

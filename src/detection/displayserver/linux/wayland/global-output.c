@@ -65,8 +65,8 @@ static struct zxdg_output_v1_listener zxdgOutputListener = {
     .logical_position = (void*) stubListener,
     .logical_size = handleXdgLogicalSize,
     .done = (void*) stubListener,
-    .name = (void*) stubListener,
-    .description = (void*) stubListener,
+    .name = (void*) ffWaylandOutputNameListener,
+    .description = (void*) ffWaylandOutputDescriptionListener,
 };
 
 void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
