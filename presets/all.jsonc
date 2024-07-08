@@ -47,6 +47,7 @@
         "cpuusage",
         {
             "type": "gpu",
+            "driverSpecific": true,
             "temp": true
         },
         "memory",
@@ -63,6 +64,7 @@
             "showIpv6": true,
             "showMac": true
         },
+        "dns",
         "wifi",
         "datetime",
         "locale",
