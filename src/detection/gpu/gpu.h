@@ -32,7 +32,7 @@ typedef struct FFGPUResult
     FFstrbuf platformApi;
     double temperature;
     int32_t coreCount;
-    double frequency; // Real time clock frequency in GHz
+    double frequency; // Maximum time clock frequency in GHz
     FFGPUMemory dedicated;
     FFGPUMemory shared;
     uint64_t deviceId; // Used internally, may be uninitialized

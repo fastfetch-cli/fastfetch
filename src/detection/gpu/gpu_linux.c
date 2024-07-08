@@ -92,11 +92,6 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
             gpu->temperature = (double) value / 1000;
     }
 
-    ffStrbufSubstrBefore(pciDir, hwmonLen);
-    ffStrbufAppendS(pciDir, "freq1_input"); // The gfx/compute clock in hertz
-    if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-        gpu->frequency = (double) value / (1000 * 1000 * 1000);
-
     if (options->driverSpecific)
     {
         ffStrbufSubstrBefore(pciDir, pciDirLen);
