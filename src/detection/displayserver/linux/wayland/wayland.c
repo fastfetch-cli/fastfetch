@@ -140,7 +140,7 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
         display->type = FF_DISPLAY_TYPE_EXTERNAL;
     if (!display->edidName.length)
         ffdsMatchDrmConnector(name, &display->edidName);
-    strncpy((char*) &display->id, name, sizeof(display->id));
+    display->id = ffWaylandGenerateIdFromName(name);
     ffStrbufAppendS(&display->name, name);
 }
 

@@ -52,6 +52,17 @@ inline static void stubListener(void* data, ...)
     (void) data;
 }
 
+inline static uint64_t ffWaylandGenerateIdFromName(const char* name)
+{
+    uint64_t id = 0;
+    size_t len = strlen(name);
+    if (len > sizeof(id))
+        memcpy(&id, name + (len - sizeof(id)), sizeof(id)); // copy the last 8 bytes
+    else if (len > 0)
+        memcpy(&id, name, len);
+    return id;
+}
+
 void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name);
 void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description);
 

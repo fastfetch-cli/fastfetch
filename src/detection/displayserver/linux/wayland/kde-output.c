@@ -228,7 +228,7 @@ static void waylandKdeOutputOrderListener(void *data, FF_MAYBE_UNUSED struct kde
 {
     uint64_t* id = (uint64_t*) data;
     if (*id == 0)
-        strncpy((char*) id, output_name, sizeof(*id));
+        *id = ffWaylandGenerateIdFromName(output_name);
 }
 
 void ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
