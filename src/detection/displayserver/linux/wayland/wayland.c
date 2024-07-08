@@ -17,7 +17,7 @@
 #include "kde-output-order-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
-#ifndef __FreeBSD__
+#ifdef __linux__
 static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     struct ucred ucred;
@@ -34,7 +34,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
     return true;
 }
 #else
-static void waylandDetectWM(int fd, FFDisplayServerResult* result)
+static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     FF_UNUSED(fd, result);
     return false;
