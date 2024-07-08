@@ -30,7 +30,7 @@ void ffPrintEditor(FFEditorOptions* options)
         {
             ffStrbufWriteTo(&result.exe, stdout);
             if (result.version.length)
-                printf(" (%s)", result.version.chars);
+                printf(" %s", result.version.chars);
         }
         else
         {
