@@ -4,6 +4,7 @@
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 #include "util/wcwidth.h"
+#include "util/textModifier.h"
 
 #include <locale.h>
 
@@ -46,7 +47,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
         + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
     ffLogoPrintLine();
 
-    if(options->outputColor.length)
+    if(options->outputColor.length && !instance.config.display.pipe)
         ffPrintColor(&options->outputColor);
     if(__builtin_expect(options->string.length == 1, 1))
     {
@@ -88,6 +89,8 @@ void ffPrintSeparator(FFSeparatorOptions* options)
             }
         }
     }
+    if(options->outputColor.length && !instance.config.display.pipe)
+        fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
     putchar('\n');
     setlocale(LC_CTYPE, "C");
 }
