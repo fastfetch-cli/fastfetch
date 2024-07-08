@@ -30,7 +30,6 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
     ffReadFileBuffer(procPath.chars, &result->wmProcessName);
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
-    puts(result->wmProcessName.chars);
     return true;
 }
 #else
