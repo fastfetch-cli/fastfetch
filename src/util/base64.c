@@ -55,7 +55,7 @@ void init_decode_table()
             code = 0x3E;
         if (ch == '/' || ch == '_')
             code = 0x3F;
-        decode_table[ch] = (char) code;
+        decode_table[ch] = (uint8_t) code;
     } while (ch++ < 0xFF);
 }
 
