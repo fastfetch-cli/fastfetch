@@ -78,7 +78,7 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
 
     const uint32_t hwmonLen = pciDir->length;
     ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
-    if (ffPathExists(pciDir->chars, FF_PATHTYPE_FILE))
+    if (ffPathExists(pciDir->chars, FF_PATHTYPE_ANY))
         gpu->type = FF_GPU_TYPE_INTEGRATED;
     else
         gpu->type = FF_GPU_TYPE_DISCRETE;

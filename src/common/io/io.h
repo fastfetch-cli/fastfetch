@@ -101,17 +101,25 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
 
     #else
 
-    struct stat fileStat;
-    if(stat(path, &fileStat) != 0)
-        return false;
+    if (pathType == FF_PATHTYPE_ANY)
+    {
+        // Zero overhead
+        return access(path, F_OK) == 0;
+    }
+    else
+    {
+        struct stat fileStat;
+        if(stat(path, &fileStat) != 0)
+            return false;
 
-    unsigned int mode = fileStat.st_mode & S_IFMT;
+        unsigned int mode = fileStat.st_mode & S_IFMT;
 
-    if(pathType & FF_PATHTYPE_FILE && mode != S_IFDIR)
-        return true;
+        if(pathType & FF_PATHTYPE_FILE && mode != S_IFDIR)
+            return true;
 
-    if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
-        return true;
+        if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
+            return true;
+    }
 
     #endif
 
