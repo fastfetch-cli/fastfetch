@@ -52,7 +52,7 @@ bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, cons
         return true;
 
     #if defined(__linux__) || defined(__FreeBSD__)
-    if (ffStrEqualsIgnCase(key, "library"))
+    if (ffStrEqualsIgnCase(subKey, "library"))
     {
         options->library = (FFOpenGLLibrary) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "auto", FF_OPENGL_LIBRARY_AUTO },
@@ -61,6 +61,7 @@ bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, cons
             { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
             {}
         });
+        return true;
     }
     #endif
 
