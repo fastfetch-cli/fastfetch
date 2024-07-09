@@ -18,14 +18,12 @@ typedef struct GLData
     FF_LIBRARY_SYMBOL(glGetString)
 } GLData;
 
-static const char* glHandleResult(FFOpenGLResult* result, const GLData* data, const char* library)
+static void glHandleResult(FFOpenGLResult* result, const GLData* data)
 {
     ffStrbufAppendS(&result->version, (const char*) data->ffglGetString(GL_VERSION));
     ffStrbufAppendS(&result->renderer, (const char*) data->ffglGetString(GL_RENDERER));
     ffStrbufAppendS(&result->vendor, (const char*) data->ffglGetString(GL_VENDOR));
     ffStrbufAppendS(&result->slv, (const char*) data->ffglGetString(GL_SHADING_LANGUAGE_VERSION));
-    result->library = library;
-    return NULL;
 }
 
 #endif // FF_HAVE_GL
@@ -41,6 +39,7 @@ typedef struct EGLData
 
     FF_LIBRARY_SYMBOL(eglGetProcAddress)
     FF_LIBRARY_SYMBOL(eglGetDisplay)
+    FF_LIBRARY_SYMBOL(eglQueryString)
     FF_LIBRARY_SYMBOL(eglInitialize)
     FF_LIBRARY_SYMBOL(eglBindAPI)
     FF_LIBRARY_SYMBOL(eglGetConfigs)
@@ -62,7 +61,9 @@ static const char* eglHandleContext(FFOpenGLResult* result, EGLData* data)
     if(data->ffeglMakeCurrent(data->display, data->surface, data->surface, data->context) != EGL_TRUE)
         return "eglMakeCurrent returned EGL_FALSE";
 
-    return glHandleResult(result, &data->glData, "EGL");
+    glHandleResult(result, &data->glData);
+    ffStrbufSetF(&result->library, "EGL %s", data->ffeglQueryString(data->display, EGL_VERSION));
+    return NULL;
 }
 
 static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data)
@@ -126,6 +127,7 @@ static const char* eglPrint(FFOpenGLResult* result)
     FF_LIBRARY_LOAD(egl, &instance.config.library.libEGL, "dlopen egl failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglQueryString);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglInitialize);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglBindAPI);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetConfigs);
@@ -150,6 +152,7 @@ typedef struct GLXData
     GLData glData;
 
     FF_LIBRARY_SYMBOL(glXGetProcAddress)
+    FF_LIBRARY_SYMBOL(glXQueryVersion)
     FF_LIBRARY_SYMBOL(XOpenDisplay)
     FF_LIBRARY_SYMBOL(glXChooseVisual)
     FF_LIBRARY_SYMBOL(XCreatePixmap);
@@ -173,8 +176,15 @@ static const char* glxHandleContext(FFOpenGLResult* result, GLXData* data)
 {
     if(data->ffglXMakeCurrent(data->display, data->glxPixmap, data->context) != True)
         return "glXMakeCurrent returned False";
+    glHandleResult(result, &data->glData);
 
-    return glHandleResult(result, &data->glData, "GLX");
+    int major, minor;
+    if (data->ffglXQueryVersion(data->display, &major, &minor))
+        ffStrbufSetF(&result->library, "GLX %d.%d", major, minor);
+    else
+        ffStrbufSetStatic(&result->library, "GLX");
+
+    return NULL;
 }
 
 static const char* glxHandleGLXPixmap(FFOpenGLResult* result, GLXData* data)
@@ -242,6 +252,7 @@ static const char* glxPrint(FFOpenGLResult* result)
 
     FF_LIBRARY_LOAD(glx, &instance.config.library.libGLX, "dlopen glx failed", "libGLX" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXQueryVersion);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XOpenDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXChooseVisual);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XCreatePixmap);
@@ -285,7 +296,9 @@ static const char* osMesaHandleContext(FFOpenGLResult* result, OSMesaData* data)
     if(data->ffOSMesaMakeCurrent(data->context, buffer, GL_UNSIGNED_BYTE, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT) != GL_TRUE)
         return "OSMesaMakeCurrent returned GL_FALSE";
 
-    return glHandleResult(result, &data->glData, "OSMesa");
+    glHandleResult(result, &data->glData);
+    ffStrbufSetF(&result->library, "OSMesa %d.%d.%d", OSMESA_MAJOR_VERSION, OSMESA_MINOR_VERSION, OSMESA_PATCH_VERSION);
+    return NULL;
 }
 
 static const char* osMesaHandleData(FFOpenGLResult* result, OSMesaData* data)

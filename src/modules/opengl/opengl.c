@@ -13,7 +13,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufInit(&result.renderer);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.slv);
-    result.library = "Unknown";
+    ffStrbufInit(&result.library);
 
     const char* error = ffDetectOpenGL(options, &result);
     if(error)
@@ -34,7 +34,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer, "renderer"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv, "slv"},
-            {FF_FORMAT_ARG_TYPE_STRING, result.library, "library"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result.library, "library"},
         }));
     }
 
@@ -42,6 +42,7 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufDestroy(&result.renderer);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.slv);
+    ffStrbufDestroy(&result.library);
 }
 
 bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, const char* value)
@@ -140,6 +141,7 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
     ffStrbufInit(&result.renderer);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.slv);
+    ffStrbufInit(&result.library);
 
     const char* error = ffDetectOpenGL(options, &result);
     if(error != NULL)
@@ -153,13 +155,14 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
         yyjson_mut_obj_add_strbuf(doc, obj, "renderer", &result.renderer);
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result.vendor);
         yyjson_mut_obj_add_strbuf(doc, obj, "slv", &result.slv);
-        yyjson_mut_obj_add_str(doc, obj, "library", result.library);
+        yyjson_mut_obj_add_strbuf(doc, obj, "library", &result.library);
     }
 
     ffStrbufDestroy(&result.version);
     ffStrbufDestroy(&result.renderer);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.slv);
+    ffStrbufDestroy(&result.library);
 }
 
 void ffPrintOpenGLHelpFormat(void)

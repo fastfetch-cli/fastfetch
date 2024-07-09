@@ -19,21 +19,21 @@ typedef struct WGLData
     FF_LIBRARY_SYMBOL(wglDeleteContext)
 } WGLData;
 
-static const char* glHandleResult(WGLData* wglData)
+static void glHandleResult(WGLData* wglData)
 {
     ffStrbufAppendS(&wglData->result->version, (const char*) wglData->ffglGetString(GL_VERSION));
     ffStrbufAppendS(&wglData->result->renderer, (const char*) wglData->ffglGetString(GL_RENDERER));
     ffStrbufAppendS(&wglData->result->vendor, (const char*) wglData->ffglGetString(GL_VENDOR));
     ffStrbufAppendS(&wglData->result->slv, (const char*) wglData->ffglGetString(GL_SHADING_LANGUAGE_VERSION));
-    wglData->result->library = "WGL";
-    return NULL;
+    ffStrbufSetStatic(&wglData->result->library, "WGL 1.0");
 }
 
 static const char* wglHandleContext(WGLData* wglData, HDC hdc, HGLRC context)
 {
     if(wglData->ffwglMakeCurrent(hdc, context) == FALSE)
         return "wglMakeCurrent() failed";
-    return glHandleResult(wglData);
+    glHandleResult(wglData);
+    return NULL;
 }
 
 static const char* wglHandlePixelFormat(WGLData* wglData, HWND hWnd)
