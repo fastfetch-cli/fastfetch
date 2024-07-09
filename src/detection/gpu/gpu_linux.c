@@ -192,6 +192,13 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     if (sscanf(pPciPath, "%" SCNx32 ":%" SCNx32 ":%" SCNx32 ".%" SCNx32, &pciDomain, &pciBus, &pciDevice, &pciFunc) != 4)
         return "Invalid PCI device path";
 
+    ffStrbufAppendS(deviceDir, "/enable");
+    if (ffReadFileBuffer(deviceDir->chars, buffer))
+    {
+        if (!ffStrbufStartsWithC(buffer, '1'))
+            return "GPU disabled";
+    }
+
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString((uint16_t) vendorId));
     ffStrbufInit(&gpu->name);
