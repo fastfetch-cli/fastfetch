@@ -1,3 +1,25 @@
+# 2.17.3
+
+Bugfixes:
+* Don't print `*` if `defaultRouteOnly` is set (LocalIP)
+* Fix some memory leaks
+* Fix compatibility with old Python versions
+* Don't detect frequency for AMD cards (GPU, Linux)
+    * Fix possible hang with discrete AMD cards (#1077)
+* Don't print colors in `--pipe` mode (Separator)
+
+Features:
+* Detect revision of USB drives (#1048, Disk)
+* Don't print `(null)` in property `locator` (PhysicalMemory)
+* Support fractional scale factor detection (Display, Linux)
+* Support primary display detection for KDE and GNOME (Display, Linux)
+* Support percent bar in custom formatting
+* Print signal quality by default (Wifi)
+
+Logos:
+* Add Arkane Linux
+* Add Opak
+
 # 2.17.2
 
 Changes:
