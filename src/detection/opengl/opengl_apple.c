@@ -6,24 +6,18 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/OpenGL.h> // This brings in CGL, not GL
 
-static void glHandleResult(FFOpenGLResult* result)
-{
-    ffStrbufAppendS(&result->version, (const char*) glGetString(GL_VERSION));
-    ffStrbufAppendS(&result->renderer, (const char*) glGetString(GL_RENDERER));
-    ffStrbufAppendS(&result->vendor, (const char*) glGetString(GL_VENDOR));
-    ffStrbufAppendS(&result->slv, (const char*) glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-    GLint major, minor;
-    CGLGetVersion(&major, &minor);
-    ffStrbufAppendF(&result->library, "CGL %d.%d", major, minor);
-}
+void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
 
 static const char* cglHandleContext(FFOpenGLResult* result, CGLContextObj context)
 {
     if(CGLSetCurrentContext(context) != kCGLNoError)
         return "CGLSetCurrentContext() failed";
 
-    glHandleResult(result);
+    ffOpenGLHandleResult(result, &glGetString);
+
+    GLint major, minor;
+    CGLGetVersion(&major, &minor);
+    ffStrbufSetF(&result->library, "CGL %d.%d", major, minor);
 
     return NULL;
 }

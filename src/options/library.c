@@ -27,6 +27,8 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
             ffStrbufSetS(&options->libChafa, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "z"))
             ffStrbufSetS(&options->libZ, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "egl"))
+            ffStrbufSetS(&options->libEGL, yyjson_get_str(val));
 
 #ifdef __ANDROID__
         else if (ffStrEqualsIgnCase(key, "freetype"))
@@ -54,8 +56,6 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
             ffStrbufSetS(&options->libXFConf, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "rpm"))
             ffStrbufSetS(&options->librpm, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "egl"))
-            ffStrbufSetS(&options->libEGL, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "glx"))
             ffStrbufSetS(&options->libGLX, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "osmesa"))
@@ -94,6 +94,8 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libChafa);
         else if(ffStrEqualsIgnCase(subkey, "z"))
             ffOptionParseString(key, value, &options->libZ);
+        else if(ffStrEqualsIgnCase(subkey, "egl"))
+            ffOptionParseString(key, value, &options->libEGL);
 
 #ifdef __ANDROID__
         else if(ffStrEqualsIgnCase(subkey, "freetype"))
@@ -121,8 +123,6 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libXFConf);
         else if(ffStrEqualsIgnCase(subkey, "rpm"))
             ffOptionParseString(key, value, &options->librpm);
-        else if(ffStrEqualsIgnCase(subkey, "egl"))
-            ffOptionParseString(key, value, &options->libEGL);
         else if(ffStrEqualsIgnCase(subkey, "glx"))
             ffOptionParseString(key, value, &options->libGLX);
         else if(ffStrEqualsIgnCase(subkey, "osmesa"))
@@ -184,7 +184,10 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
     if (!ffStrbufEqual(&options->libZ, &defaultOptions.libZ))
         yyjson_mut_obj_add_strbuf(doc, obj, "z", &options->libZ);
 
-#if defined(__linux__) || defined(__FreeBSD__)
+    if (!ffStrbufEqual(&options->libEGL, &defaultOptions.libEGL))
+        yyjson_mut_obj_add_strbuf(doc, obj, "egl", &options->libEGL);
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
     if (!ffStrbufEqual(&options->libWayland, &defaultOptions.libWayland))
         yyjson_mut_obj_add_strbuf(doc, obj, "wayland", &options->libWayland);
 
@@ -214,9 +217,6 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
 
     if (!ffStrbufEqual(&options->librpm, &defaultOptions.librpm))
         yyjson_mut_obj_add_strbuf(doc, obj, "rpm", &options->librpm);
-
-    if (!ffStrbufEqual(&options->libEGL, &defaultOptions.libEGL))
-        yyjson_mut_obj_add_strbuf(doc, obj, "egl", &options->libEGL);
 
     if (!ffStrbufEqual(&options->libGLX, &defaultOptions.libGLX))
         yyjson_mut_obj_add_strbuf(doc, obj, "glx", &options->libGLX);

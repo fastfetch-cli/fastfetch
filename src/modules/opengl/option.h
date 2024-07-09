@@ -4,7 +4,6 @@
 
 #include "common/option.h"
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
 typedef enum FFOpenGLLibrary
 {
     FF_OPENGL_LIBRARY_AUTO,
@@ -12,14 +11,11 @@ typedef enum FFOpenGLLibrary
     FF_OPENGL_LIBRARY_GLX,
     FF_OPENGL_LIBRARY_OSMESA
 } FFOpenGLLibrary;
-#endif
 
 typedef struct FFOpenGLOptions
 {
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
     FFOpenGLLibrary library;
-    #endif
 } FFOpenGLOptions;
