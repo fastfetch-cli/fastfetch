@@ -586,10 +586,6 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "pci": {
-                    "type": "string",
-                    "description": "GPU output (Linux and FreeBSD)"
-                },
                 "vulkan": {
                     "type": "string",
                     "description": "Vulkan module & fallback for GPU output"
@@ -604,39 +600,39 @@
                 },
                 "xcbRandr": {
                     "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
                 },
                 "xcb": {
                     "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
                 },
                 "xrandr": {
                     "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
                 },
                 "x11": {
                     "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD)"
+                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
                 },
                 "drm": {
                     "type": "string",
-                    "description": "Used for fast resolution and refresh rate detection (Linux)"
+                    "description": "Used for fast resolution and refresh rate detection (Linux, FreeBSD)"
                 },
                 "gio": {
                     "type": "string",
-                    "description": "Needed for values that are only stored GSettings (Linux, FreeBSD)"
+                    "description": "Needed for values that are only stored GSettings (Linux, FreeBSD, SunOS)"
                 },
                 "dconf": {
                     "type": "string",
-                    "description": "Needed for values that are only stored in DConf + Fallback for GSettings (Linux, FreeBSD)"
+                    "description": "Needed for values that are only stored in DConf + Fallback for GSettings (Linux, FreeBSD, SunOS)"
                 },
                 "dbus": {
                     "type": "string",
-                    "description": "Bluetooth, Player & Media detection (Linux, FreeBSD)"
+                    "description": "Bluetooth, Player & Media detection (Linux, FreeBSD, SunOS)"
                 },
                 "xfconf": {
                     "type": "string",
-                    "description": "Needed for XFWM theme and XFCE Terminal font (Linux, FreeBSD)"
+                    "description": "Needed for XFWM theme and XFCE Terminal font (Linux, FreeBSD, SunOS)"
                 },
                 "sqlite3": {
                     "type": "string",
@@ -648,34 +644,34 @@
                 },
                 "imagemagick": {
                     "type": "string",
-                    "description": "Images in terminal using sixel or kitty graphics protocol (Linux, FreeBSD, macOS)"
+                    "description": "Images in terminal using sixel or kitty graphics protocol (Linux, FreeBSD, SunOS, macOS)"
                 },
                 "z": {
-                    "description": "Libz. Faster image output when using kitty graphics protocol (Linux, FreeBSD, macOS)",
+                    "description": "Libz. Faster image output when using kitty graphics protocol (Linux, FreeBSD, SunOS, macOS)",
                     "type": "string"
                 },
                 "chafa": {
                     "type": "string",
-                    "description": "Image output as ascii art (Linux, FreeBSD, macOS)"
+                    "description": "Image output as ascii art (Linux, FreeBSD, SunOS, macOS)"
                 },
                 "egl": {
                     "type": "string",
-                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
+                    "description": "Library used by the OpenGL module for gl context creation (Linux, FreeBSD, SunOS, Windows)"
                 },
                 "glx": {
                     "type": "string",
-                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
+                    "description": "Library used by the OpenGL module for gl context creation (Linux, FreeBSD, SunOS)"
                 },
                 "osmesa": {
                     "type": "string",
-                    "description": "Needed by the OpenGL module for gl context creation (Linux, FreeBSD)"
+                    "description": "Library used by the OpenGL module for gl context creation (Linux, FreeBSD, SunOS)"
                 },
                 "opencl": {
                     "type": "string",
-                    "description": "OpenCL module (Linux, FreeBSD, Windows)"
+                    "description": "OpenCL module (Linux, FreeBSD, SunOS, Windows)"
                 },
                 "pulse": {
-                    "description": "Pulseaudio. Used for Sound detection (Linux, FreeBSD)",
+                    "description": "Pulseaudio. Used for Sound detection (Linux, FreeBSD, SunOS)",
                     "type": "string"
                 },
                 "nm": {
@@ -1771,7 +1767,7 @@
                                         "const": "opengl"
                                     },
                                     "library": {
-                                        "description": "Set the OpenGL context creation library to use. Linux only",
+                                        "description": "Set the OpenGL context creation library to use",
                                         "enum": [
                                             "auto",
                                             "egl",
@@ -1820,6 +1816,9 @@
                                                 "emerge",
                                                 "eopkg",
                                                 "flatpak",
+                                                "guix",
+                                                "lpkg",
+                                                "lpkgbuild",
                                                 "macports",
                                                 "nix",
                                                 "opkg",
@@ -1830,6 +1829,7 @@
                                                 "rpm",
                                                 "scoop",
                                                 "snap",
+                                                "sorcery",
                                                 "winget",
                                                 "xbps"
                                             ],

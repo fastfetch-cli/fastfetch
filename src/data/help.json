@@ -739,13 +739,6 @@
     ],
     "Library path": [
         {
-            "long": "lib-pci",
-            "desc": "Pciutils. Used for GPU output",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
             "long": "lib-vulkan",
             "desc": "Vulkan module & fallback for GPU output",
             "arg": {
