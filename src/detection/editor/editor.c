@@ -26,7 +26,7 @@ const char* ffDetectEditor(FFEditorResult* result)
             return "$VISUAL or $EDITOR not set";
     }
 
-    if (!instance.config.display.tsVersion) return NULL;
+    if (!instance.config.general.detectVersion) return NULL;
 
     #ifndef _WIN32
     if (result->name.chars[0] != '/')

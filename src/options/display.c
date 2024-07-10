@@ -200,7 +200,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
             options->keyWidth = (uint32_t) yyjson_get_uint(val);
         else if (ffStrEqualsIgnCase(key, "tsVersion"))
-            options->tsVersion = yyjson_get_bool(val);
+            return "display.tsVersion has been renamed to general.detectVersion";
         else
             return "Unknown display property";
     }
@@ -357,8 +357,6 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         else
             return false;
     }
-    else if(ffStrEqualsIgnCase(key, "--ts-version"))
-        options->tsVersion = ffOptionParseBoolean(value);
     else
         return false;
     return true;
@@ -406,8 +404,6 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
-
-    options->tsVersion = true;
 }
 
 void ffOptionsDestroyDisplay(FFOptionsDisplay* options)

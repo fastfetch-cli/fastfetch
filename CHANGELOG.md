@@ -1,3 +1,9 @@
+# 2.18.1
+
+Changes:
+* `--ts-version` has been renamed to `--detect-version`
+    * `general.detectVersion` in JSON config file
+
 # 2.18.0
 
 Changes:
