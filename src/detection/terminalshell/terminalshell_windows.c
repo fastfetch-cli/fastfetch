@@ -99,21 +99,24 @@ static void setShellInfoDetails(FFShellResult* result)
     {
         ffStrbufSetS(&result->prettyName, "CMD");
 
-        FF_AUTO_CLOSE_FD HANDLE snapshot = NULL;
-        while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, result->pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
-
-        if(snapshot)
+        if (instance.config.general.detectVersion)
         {
-            MODULEENTRY32W module;
-            module.dwSize = sizeof(module);
-            for(BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module))
+            FF_AUTO_CLOSE_FD HANDLE snapshot = NULL;
+            while(!(snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, result->pid)) && GetLastError() == ERROR_BAD_LENGTH) {}
+
+            if(snapshot)
             {
-                if(wcsncmp(module.szModule, L"clink_dll_", strlen("clink_dll_")) == 0)
+                MODULEENTRY32W module;
+                module.dwSize = sizeof(module);
+                for(BOOL success = Module32FirstW(snapshot, &module); success; success = Module32NextW(snapshot, &module))
                 {
-                    ffStrbufAppendS(&result->prettyName, " (with Clink ");
-                    getProductVersion(module.szExePath, &result->prettyName);
-                    ffStrbufAppendC(&result->prettyName, ')');
-                    break;
+                    if(wcsncmp(module.szModule, L"clink_dll_", strlen("clink_dll_")) == 0)
+                    {
+                        ffStrbufAppendS(&result->prettyName, " (with Clink ");
+                        getProductVersion(module.szExePath, &result->prettyName);
+                        ffStrbufAppendC(&result->prettyName, ')');
+                        break;
+                    }
                 }
             }
         }
