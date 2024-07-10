@@ -1831,6 +1831,42 @@ bool unsafe_yyjson_mut_equals(yyjson_mut_val *lhs, yyjson_mut_val *rhs) {
     }
 }
 
+bool yyjson_locate_pos(const char *str, size_t len, size_t pos,
+                       size_t *line, size_t *col, size_t *chr) {
+    usize line_sum = 0, line_pos = 0, chr_sum = 0;
+    const u8 *cur = (const u8 *)str;
+    const u8 *end = cur + pos;
+    
+    if (!str || pos > len) {
+        if (line) *line = 0;
+        if (col) *col = 0;
+        if (chr) *chr = 0;
+        return false;
+    }
+    
+    while (cur < end) {
+        u8 c = *cur;
+        chr_sum += 1;
+        if (likely(c < 0x80)) {         /* 0xxxxxxx (0x00-0x7F) ASCII */
+            if (c == '\n') {
+                line_sum += 1;
+                line_pos = chr_sum;
+            }
+            cur += 1;
+        }
+        else if (c < 0xC0) cur += 1;    /* 10xxxxxx (0x80-0xBF) Invalid */
+        else if (c < 0xE0) cur += 2;    /* 110xxxxx (0xC0-0xDF) 2-byte UTF-8 */
+        else if (c < 0xF0) cur += 3;    /* 1110xxxx (0xE0-0xEF) 3-byte UTF-8 */
+        else if (c < 0xF8) cur += 4;    /* 11110xxx (0xF0-0xF7) 4-byte UTF-8 */
+        else               cur += 1;    /* 11111xxx (0xF8-0xFF) Invalid */
+    }
+    
+    if (line) *line = line_sum + 1;
+    if (col) *col = chr_sum - line_pos + 1;
+    if (chr) *chr = chr_sum;
+    return true;
+}
+
 
 
 #if !YYJSON_DISABLE_UTILS
@@ -4434,7 +4470,7 @@ static_inline bool read_number(u8 **ptr,
     bool sign;
     
     /* read number as raw string if has `YYJSON_READ_NUMBER_AS_RAW` flag */
-    if (unlikely(pre && !has_read_flag(BIGNUM_AS_RAW))) {
+    if (has_read_flag(NUMBER_AS_RAW)) {
         return read_number_raw(ptr, pre, flg, val, msg);
     }
     
@@ -5036,7 +5072,7 @@ static_inline bool read_number(u8 **ptr,
     bool sign;
     
     /* read number as raw string if has `YYJSON_READ_NUMBER_AS_RAW` flag */
-    if (unlikely(pre && !has_read_flag(BIGNUM_AS_RAW))) {
+    if (has_read_flag(NUMBER_AS_RAW)) {
         return read_number_raw(ptr, pre, flg, val, msg);
     }
     
@@ -5744,18 +5780,18 @@ static_noinline yyjson_doc *read_root_single(u8 *hdr,
     }
     if (*cur == 't') {
         if (likely(read_true(&cur, val))) goto doc_end;
-        goto fail_literal;
+        goto fail_literal_true;
     }
     if (*cur == 'f') {
         if (likely(read_false(&cur, val))) goto doc_end;
-        goto fail_literal;
+        goto fail_literal_false;
     }
     if (*cur == 'n') {
         if (likely(read_null(&cur, val))) goto doc_end;
         if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto doc_end;
         }
-        goto fail_literal;
+        goto fail_literal_null;
     }
     if (has_read_flag(ALLOW_INF_AND_NAN)) {
         if (read_inf_or_nan(false, &cur, pre, val)) goto doc_end;
@@ -5789,15 +5825,26 @@ fail_string:
 fail_number:
     return_err(cur, INVALID_NUMBER, msg);
 fail_alloc:
-    return_err(cur, MEMORY_ALLOCATION, "memory allocation failed");
-fail_literal:
-    return_err(cur, LITERAL, "invalid literal");
-fail_comment:
-    return_err(cur, INVALID_COMMENT, "unclosed multiline comment");
+    return_err(cur, MEMORY_ALLOCATION, 
+               "memory allocation failed");
+fail_literal_true:
+    return_err(cur, LITERAL, 
+               "invalid literal, expected a valid literal such as 'true'");
+fail_literal_false:
+    return_err(cur, LITERAL, 
+               "invalid literal, expected a valid literal such as 'false'");
+fail_literal_null:
+    return_err(cur, LITERAL, 
+               "invalid literal, expected a valid literal such as 'null'");
 fail_character:
-    return_err(cur, UNEXPECTED_CHARACTER, "unexpected character");
+    return_err(cur, UNEXPECTED_CHARACTER, 
+               "unexpected character, expected a valid root value");
+fail_comment:
+    return_err(cur, INVALID_COMMENT,
+               "unclosed multiline comment");
 fail_garbage:
-    return_err(cur, UNEXPECTED_CONTENT, "unexpected content after document");
+    return_err(cur, UNEXPECTED_CONTENT, 
+               "unexpected content after document");
     
 #undef return_err
 }
@@ -5927,13 +5974,13 @@ arr_val_begin:
         val_incr();
         ctn_len++;
         if (likely(read_true(&cur, val))) goto arr_val_end;
-        goto fail_literal;
+        goto fail_literal_true;
     }
     if (*cur == 'f') {
         val_incr();
         ctn_len++;
         if (likely(read_false(&cur, val))) goto arr_val_end;
-        goto fail_literal;
+        goto fail_literal_false;
     }
     if (*cur == 'n') {
         val_incr();
@@ -5942,7 +5989,7 @@ arr_val_begin:
         if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto arr_val_end;
         }
-        goto fail_literal;
+        goto fail_literal_null;
     }
     if (*cur == ']') {
         cur++;
@@ -5960,13 +6007,13 @@ arr_val_begin:
         val_incr();
         ctn_len++;
         if (read_inf_or_nan(false, &cur, pre, val)) goto arr_val_end;
-        goto fail_character;
+        goto fail_character_val;
     }
     if (has_read_flag(ALLOW_COMMENTS)) {
         if (skip_spaces_and_comments(&cur)) goto arr_val_begin;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_val;
     
 arr_val_end:
     if (*cur == ',') {
@@ -5985,7 +6032,7 @@ arr_val_end:
         if (skip_spaces_and_comments(&cur)) goto arr_val_end;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_arr_end;
     
 arr_end:
     /* get parent container */
@@ -6038,7 +6085,7 @@ obj_key_begin:
         if (skip_spaces_and_comments(&cur)) goto obj_key_begin;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_obj_key;
     
 obj_key_end:
     if (*cur == ':') {
@@ -6053,7 +6100,7 @@ obj_key_end:
         if (skip_spaces_and_comments(&cur)) goto obj_key_end;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_obj_sep;
     
 obj_val_begin:
     if (*cur == '"') {
@@ -6080,13 +6127,13 @@ obj_val_begin:
         val++;
         ctn_len++;
         if (likely(read_true(&cur, val))) goto obj_val_end;
-        goto fail_literal;
+        goto fail_literal_true;
     }
     if (*cur == 'f') {
         val++;
         ctn_len++;
         if (likely(read_false(&cur, val))) goto obj_val_end;
-        goto fail_literal;
+        goto fail_literal_false;
     }
     if (*cur == 'n') {
         val++;
@@ -6095,7 +6142,7 @@ obj_val_begin:
         if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto obj_val_end;
         }
-        goto fail_literal;
+        goto fail_literal_null;
     }
     if (char_is_space(*cur)) {
         while (char_is_space(*++cur));
@@ -6106,13 +6153,13 @@ obj_val_begin:
         val++;
         ctn_len++;
         if (read_inf_or_nan(false, &cur, pre, val)) goto obj_val_end;
-        goto fail_character;
+        goto fail_character_val;
     }
     if (has_read_flag(ALLOW_COMMENTS)) {
         if (skip_spaces_and_comments(&cur)) goto obj_val_begin;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_val;
     
 obj_val_end:
     if (likely(*cur == ',')) {
@@ -6131,7 +6178,7 @@ obj_val_end:
         if (skip_spaces_and_comments(&cur)) goto obj_val_end;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_obj_end;
     
 obj_end:
     /* pop container */
@@ -6174,17 +6221,41 @@ fail_string:
 fail_number:
     return_err(cur, INVALID_NUMBER, msg);
 fail_alloc:
-    return_err(cur, MEMORY_ALLOCATION, "memory allocation failed");
+    return_err(cur, MEMORY_ALLOCATION, 
+               "memory allocation failed");
 fail_trailing_comma:
-    return_err(cur, JSON_STRUCTURE, "trailing comma is not allowed");
-fail_literal:
-    return_err(cur, LITERAL, "invalid literal");
+    return_err(cur, JSON_STRUCTURE, 
+               "trailing comma is not allowed");
+fail_literal_true:
+    return_err(cur, LITERAL,
+               "invalid literal, expected a valid literal such as 'true'");
+fail_literal_false:
+    return_err(cur, LITERAL,
+               "invalid literal, expected a valid literal such as 'false'");
+fail_literal_null:
+    return_err(cur, LITERAL,
+               "invalid literal, expected a valid literal such as 'null'");
+fail_character_val:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a valid JSON value");
+fail_character_arr_end:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a comma or a closing bracket");
+fail_character_obj_key:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a string for object key");
+fail_character_obj_sep:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a colon after object key");
+fail_character_obj_end:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a comma or a closing brace");
 fail_comment:
-    return_err(cur, INVALID_COMMENT, "unclosed multiline comment");
-fail_character:
-    return_err(cur, UNEXPECTED_CHARACTER, "unexpected character");
+    return_err(cur, INVALID_COMMENT,
+               "unclosed multiline comment");
 fail_garbage:
-    return_err(cur, UNEXPECTED_CONTENT, "unexpected content after document");
+    return_err(cur, UNEXPECTED_CONTENT, 
+               "unexpected content after document");
     
 #undef val_incr
 #undef return_err
@@ -6330,13 +6401,13 @@ arr_val_begin:
         val_incr();
         ctn_len++;
         if (likely(read_true(&cur, val))) goto arr_val_end;
-        goto fail_literal;
+        goto fail_literal_true;
     }
     if (*cur == 'f') {
         val_incr();
         ctn_len++;
         if (likely(read_false(&cur, val))) goto arr_val_end;
-        goto fail_literal;
+        goto fail_literal_false;
     }
     if (*cur == 'n') {
         val_incr();
@@ -6345,7 +6416,7 @@ arr_val_begin:
         if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto arr_val_end;
         }
-        goto fail_literal;
+        goto fail_literal_null;
     }
     if (*cur == ']') {
         cur++;
@@ -6363,13 +6434,13 @@ arr_val_begin:
         val_incr();
         ctn_len++;
         if (read_inf_or_nan(false, &cur, pre, val)) goto arr_val_end;
-        goto fail_character;
+        goto fail_character_val;
     }
     if (has_read_flag(ALLOW_COMMENTS)) {
         if (skip_spaces_and_comments(&cur)) goto arr_val_begin;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_val;
     
 arr_val_end:
     if (byte_match_2(cur, ",\n")) {
@@ -6392,7 +6463,7 @@ arr_val_end:
         if (skip_spaces_and_comments(&cur)) goto arr_val_end;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_arr_end;
     
 arr_end:
     /* get parent container */
@@ -6458,7 +6529,7 @@ obj_key_begin:
         if (skip_spaces_and_comments(&cur)) goto obj_key_begin;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_obj_key;
     
 obj_key_end:
     if (byte_match_2(cur, ": ")) {
@@ -6477,7 +6548,7 @@ obj_key_end:
         if (skip_spaces_and_comments(&cur)) goto obj_key_end;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_obj_sep;
     
 obj_val_begin:
     if (*cur == '"') {
@@ -6504,13 +6575,13 @@ obj_val_begin:
         val++;
         ctn_len++;
         if (likely(read_true(&cur, val))) goto obj_val_end;
-        goto fail_literal;
+        goto fail_literal_true;
     }
     if (*cur == 'f') {
         val++;
         ctn_len++;
         if (likely(read_false(&cur, val))) goto obj_val_end;
-        goto fail_literal;
+        goto fail_literal_false;
     }
     if (*cur == 'n') {
         val++;
@@ -6519,7 +6590,7 @@ obj_val_begin:
         if (has_read_flag(ALLOW_INF_AND_NAN)) {
             if (read_nan(false, &cur, pre, val)) goto obj_val_end;
         }
-        goto fail_literal;
+        goto fail_literal_null;
     }
     if (char_is_space(*cur)) {
         while (char_is_space(*++cur));
@@ -6530,13 +6601,13 @@ obj_val_begin:
         val++;
         ctn_len++;
         if (read_inf_or_nan(false, &cur, pre, val)) goto obj_val_end;
-        goto fail_character;
+        goto fail_character_val;
     }
     if (has_read_flag(ALLOW_COMMENTS)) {
         if (skip_spaces_and_comments(&cur)) goto obj_val_begin;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_val;
     
 obj_val_end:
     if (byte_match_2(cur, ",\n")) {
@@ -6559,7 +6630,7 @@ obj_val_end:
         if (skip_spaces_and_comments(&cur)) goto obj_val_end;
         if (byte_match_2(cur, "/*")) goto fail_comment;
     }
-    goto fail_character;
+    goto fail_character_obj_end;
     
 obj_end:
     /* pop container */
@@ -6603,17 +6674,41 @@ fail_string:
 fail_number:
     return_err(cur, INVALID_NUMBER, msg);
 fail_alloc:
-    return_err(cur, MEMORY_ALLOCATION, "memory allocation failed");
+    return_err(cur, MEMORY_ALLOCATION,
+               "memory allocation failed");
 fail_trailing_comma:
-    return_err(cur, JSON_STRUCTURE, "trailing comma is not allowed");
-fail_literal:
-    return_err(cur, LITERAL, "invalid literal");
+    return_err(cur, JSON_STRUCTURE,
+               "trailing comma is not allowed");
+fail_literal_true:
+    return_err(cur, LITERAL,
+               "invalid literal, expected a valid literal such as 'true'");
+fail_literal_false:
+    return_err(cur, LITERAL,
+               "invalid literal, expected a valid literal such as 'false'");
+fail_literal_null:
+    return_err(cur, LITERAL,
+               "invalid literal, expected a valid literal such as 'null'");
+fail_character_val:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a valid JSON value");
+fail_character_arr_end:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a comma or a closing bracket");
+fail_character_obj_key:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a string for object key");
+fail_character_obj_sep:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a colon after object key");
+fail_character_obj_end:
+    return_err(cur, UNEXPECTED_CHARACTER,
+               "unexpected character, expected a comma or a closing brace");
 fail_comment:
-    return_err(cur, INVALID_COMMENT, "unclosed multiline comment");
-fail_character:
-    return_err(cur, UNEXPECTED_CHARACTER, "unexpected character");
+    return_err(cur, INVALID_COMMENT,
+               "unclosed multiline comment");
 fail_garbage:
-    return_err(cur, UNEXPECTED_CONTENT, "unexpected content after document");
+    return_err(cur, UNEXPECTED_CONTENT,
+               "unexpected content after document");
     
 #undef val_incr
 #undef return_err
@@ -7835,7 +7930,7 @@ static const u8 esc_single_char_table[512] = {
 
 /** Returns the encode table with options. */
 static_inline const char_enc_type *get_enc_table_with_flag(
-    yyjson_read_flag flg) {
+    yyjson_write_flag flg) {
     if (has_write_flag(ESCAPE_UNICODE)) {
         if (has_write_flag(ESCAPE_SLASHES)) {
             return enc_table_esc_slash;

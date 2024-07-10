@@ -356,7 +356,6 @@ __fastfetch_completion()
     local FF_OPTIONS_PATH=(
         "-c"
         "--config"
-        "--lib-pci"
         "--lib-vulkan"
         "--lib-wayland"
         "--lib-xcb-randr"

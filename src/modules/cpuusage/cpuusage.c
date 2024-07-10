@@ -6,7 +6,7 @@
 #include "util/stringUtils.h"
 
 #define FF_CPUUSAGE_DISPLAY_NAME "CPU Usage"
-#define FF_CPUUSAGE_NUM_FORMAT_ARGS 5
+#define FF_CPUUSAGE_NUM_FORMAT_ARGS 8
 
 void ffPrintCPUUsage(FFCPUUsageOptions* options)
 {
@@ -73,18 +73,27 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
     else
     {
-        FF_STRBUF_AUTO_DESTROY avgStr = ffStrbufCreate();
-        ffPercentAppendNum(&avgStr, avgValue, options->percent, false, &options->moduleArgs);
-        FF_STRBUF_AUTO_DESTROY minStr = ffStrbufCreate();
-        ffPercentAppendNum(&minStr, minValue, options->percent, false, &options->moduleArgs);
-        FF_STRBUF_AUTO_DESTROY maxStr = ffStrbufCreate();
-        ffPercentAppendNum(&maxStr, maxValue, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY avgNum = ffStrbufCreate();
+        ffPercentAppendNum(&avgNum, avgValue, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY avgBar = ffStrbufCreate();
+        ffPercentAppendBar(&avgBar, avgValue, options->percent, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY minNum = ffStrbufCreate();
+        ffPercentAppendNum(&minNum, minValue, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY minBar = ffStrbufCreate();
+        ffPercentAppendBar(&minBar, minValue, options->percent, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY maxNum = ffStrbufCreate();
+        ffPercentAppendNum(&maxNum, maxValue, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY maxBar = ffStrbufCreate();
+        ffPercentAppendBar(&maxBar, maxValue, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPUUSAGE_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &avgStr, "avg"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &maxStr, "max"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &avgNum, "avg"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &maxNum, "max"},
             {FF_FORMAT_ARG_TYPE_UINT, &maxIndex, "max-index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &minStr, "min"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &minNum, "min"},
             {FF_FORMAT_ARG_TYPE_UINT, &minIndex, "min-index"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &avgBar, "avg-bar"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &maxBar, "max-bar"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &minBar, "min-bar"},
         }));
     }
 }
@@ -167,11 +176,14 @@ void ffGenerateCPUUsageJsonResult(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yy
 void ffPrintCPUUsageHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CPUUSAGE_MODULE_NAME, "{1}", FF_CPUUSAGE_NUM_FORMAT_ARGS, ((const char* []) {
-        "CPU usage (percentage, average) - avg",
-        "CPU usage (percentage, maximum) - max",
+        "CPU usage (percentage num, average) - avg",
+        "CPU usage (percentage num, maximum) - max",
         "CPU core index of maximum usage - max-index",
-        "CPU usage (percentage, minimum) - min",
+        "CPU usage (percentage num, minimum) - min",
         "CPU core index of minimum usage - min-index",
+        "CPU usage (percentage bar, average) - avg-bar",
+        "CPU usage (percentage bar, maximum) - max-bar",
+        "CPU usage (percentage bar, minimum) - min-bar",
     }));
 }
 

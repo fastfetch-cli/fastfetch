@@ -6,7 +6,7 @@
 #include "modules/memory/memory.h"
 #include "util/stringUtils.h"
 
-#define FF_MEMORY_NUM_FORMAT_ARGS 3
+#define FF_MEMORY_NUM_FORMAT_ARGS 4
 
 void ffPrintMemory(FFMemoryOptions* options)
 {
@@ -56,12 +56,15 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
     else
     {
-        FF_STRBUF_AUTO_DESTROY percentageStr = ffStrbufCreate();
-        ffPercentAppendNum(&percentageStr, percentage, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
+        ffPercentAppendNum(&percentageNum, percentage, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
+        ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_MEMORY_NUM_FORMAT_ARGS, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty, "used"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty, "total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageStr, "percentage"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageNum, "percentage"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageBar, "percentage-bar"},
         }));
     }
 }
@@ -130,7 +133,8 @@ void ffPrintMemoryHelpFormat(void)
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MEMORY_MODULE_NAME, "{1} / {2} ({3})", FF_MEMORY_NUM_FORMAT_ARGS, ((const char* []) {
         "Used size - used",
         "Total size - total",
-        "Percentage used - percentage",
+        "Percentage used (num) - percentage",
+        "Percentage used (bar) - percentage-bar",
     }));
 }
 

@@ -33,7 +33,7 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
 
     //capacity must exist and be not empty
     ffStrbufAppendS(dir, "/capacity");
-    bool available = ffReadFileBuffer(dir->chars, &tmpBuffer);
+    bool available = ffReadFileBuffer(dir->chars, &tmpBuffer); // This is expensive in my laptop
     ffStrbufSubstrBefore(dir, dirLength);
 
     if (!available)

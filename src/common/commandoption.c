@@ -130,10 +130,7 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
             {
                 char str[32];
                 int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
-                if(instance.config.display.pipe)
-                    puts(str);
-                else
-                    printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
             }
         }
 

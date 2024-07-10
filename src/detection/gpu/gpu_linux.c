@@ -78,7 +78,7 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
 
     const uint32_t hwmonLen = pciDir->length;
     ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
-    if (ffPathExists(pciDir->chars, FF_PATHTYPE_FILE))
+    if (ffPathExists(pciDir->chars, FF_PATHTYPE_ANY))
         gpu->type = FF_GPU_TYPE_INTEGRATED;
     else
         gpu->type = FF_GPU_TYPE_DISCRETE;
@@ -91,11 +91,6 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
         if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
             gpu->temperature = (double) value / 1000;
     }
-
-    ffStrbufSubstrBefore(pciDir, hwmonLen);
-    ffStrbufAppendS(pciDir, "freq1_input"); // The gfx/compute clock in hertz
-    if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-        gpu->frequency = (double) value / (1000 * 1000 * 1000);
 
     if (options->driverSpecific)
     {
@@ -196,6 +191,13 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     uint32_t pciDomain, pciBus, pciDevice, pciFunc;
     if (sscanf(pPciPath, "%" SCNx32 ":%" SCNx32 ":%" SCNx32 ".%" SCNx32, &pciDomain, &pciBus, &pciDevice, &pciFunc) != 4)
         return "Invalid PCI device path";
+
+    ffStrbufAppendS(deviceDir, "/enable");
+    if (ffReadFileBuffer(deviceDir->chars, buffer))
+    {
+        if (!ffStrbufStartsWithC(buffer, '1'))
+            return "GPU disabled";
+    }
 
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString((uint16_t) vendorId));

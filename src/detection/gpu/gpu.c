@@ -42,6 +42,8 @@ const char* detectByOpenGL(FFlist* gpus)
     ffStrbufInit(&result.renderer);
     ffStrbufInit(&result.vendor);
     ffStrbufInit(&result.slv);
+    ffStrbufInit(&result.library);
+
     const char* error = ffDetectOpenGL(&instance.config.modules.openGL, &result);
     if (!error)
     {
@@ -75,6 +77,7 @@ const char* detectByOpenGL(FFlist* gpus)
     ffStrbufDestroy(&result.renderer);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.slv);
+    ffStrbufDestroy(&result.library);
     return error;
 }
 

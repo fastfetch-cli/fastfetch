@@ -381,6 +381,18 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // Arkane
+    {
+        .names = {"Arkane", "Arkane Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ARKANE,
+        .colors = {
+            FF_COLOR_FG_256 "237",
+            FF_COLOR_FG_256 "130",
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_256 "130",
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Armbian
     {
         .names = {"Armbian"},
@@ -2944,6 +2956,12 @@ static const FFlogo O[] = {
             FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_LIGHT_BLACK,
         }
+    },
+    // Opak
+    {
+        .names = {"Opak"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPAK,
+        .colors = {}, // #1070
     },
     // OpenKylin
     {

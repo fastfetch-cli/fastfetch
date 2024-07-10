@@ -1,3 +1,32 @@
+# 2.18.0
+
+Changes:
+* `yyjson 0.10.0` is required
+* Fastfetch no longer prints `*` (which means it's the default route) if `defaultRouteOnly` is set (LocalIP)
+
+Bugfixes:
+* Fix some memory leaks
+* Fix compatibility with old Python versions
+* Don't detect frequency for AMD cards (GPU, Linux)
+    * Fix possible hang with discrete AMD cards (#1077)
+* Don't print colors in `--pipe` mode (Separator)
+* Don't print `(null)` in property `locator` (PhysicalMemory)
+* Ignore disabled PCI devices (GPU)
+* Fix flag `--opengl-library` doesn't work (OpenGL)
+
+Features:
+* Detect revision of USB drives (#1048, Disk)
+* Support fractional scale factor detection (Display, Linux)
+* Support primary display detection for KDE and GNOME (Display, Linux)
+* Support percent bar in custom formatting
+* Print signal quality by default (Wifi)
+* Detect used OpenGL library version (OpenGL)
+* Support detecting OpenGL version by `EGL` (ANGLE) on Windows (OpenGL)
+
+Logos:
+* Add Arkane Linux
+* Add Opak
+
 # 2.17.2
 
 Changes:

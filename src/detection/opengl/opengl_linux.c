@@ -10,146 +10,19 @@
 
 #include <GL/gl.h>
 
-#define FF_OPENGL_BUFFER_WIDTH 1
-#define FF_OPENGL_BUFFER_HEIGHT 1
-
-typedef struct GLData
-{
-    FF_LIBRARY_SYMBOL(glGetString)
-} GLData;
-
-static const char* glHandleResult(FFOpenGLResult* result, const GLData* data, const char* library)
-{
-    ffStrbufAppendS(&result->version, (const char*) data->ffglGetString(GL_VERSION));
-    ffStrbufAppendS(&result->renderer, (const char*) data->ffglGetString(GL_RENDERER));
-    ffStrbufAppendS(&result->vendor, (const char*) data->ffglGetString(GL_VENDOR));
-    ffStrbufAppendS(&result->slv, (const char*) data->ffglGetString(GL_SHADING_LANGUAGE_VERSION));
-    result->library = library;
-    return NULL;
-}
+void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
 
 #endif // FF_HAVE_GL
 
-#ifdef FF_HAVE_EGL
-#include "common/io/io.h"
-
-#include <EGL/egl.h>
-
-typedef struct EGLData
-{
-    GLData glData;
-
-    FF_LIBRARY_SYMBOL(eglGetProcAddress)
-    FF_LIBRARY_SYMBOL(eglGetDisplay)
-    FF_LIBRARY_SYMBOL(eglInitialize)
-    FF_LIBRARY_SYMBOL(eglBindAPI)
-    FF_LIBRARY_SYMBOL(eglGetConfigs)
-    FF_LIBRARY_SYMBOL(eglCreatePbufferSurface)
-    FF_LIBRARY_SYMBOL(eglCreateContext)
-    FF_LIBRARY_SYMBOL(eglMakeCurrent)
-    FF_LIBRARY_SYMBOL(eglDestroyContext)
-    FF_LIBRARY_SYMBOL(eglDestroySurface)
-    FF_LIBRARY_SYMBOL(eglTerminate)
-
-    EGLDisplay display;
-    EGLConfig config;
-    EGLSurface surface;
-    EGLContext context;
-} EGLData;
-
-static const char* eglHandleContext(FFOpenGLResult* result, EGLData* data)
-{
-    if(data->ffeglMakeCurrent(data->display, data->surface, data->surface, data->context) != EGL_TRUE)
-        return "eglMakeCurrent returned EGL_FALSE";
-
-    return glHandleResult(result, &data->glData, "EGL");
-}
-
-static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data)
-{
-    data->context = data->ffeglCreateContext(data->display, data->config, EGL_NO_CONTEXT, (EGLint[]){EGL_NONE});
-    if(data->context == EGL_NO_CONTEXT)
-        return "eglCreateContext returned EGL_NO_CONTEXT";
-
-    const char* error = eglHandleContext(result, data);
-    data->ffeglDestroyContext(data->display, data->context);
-    return error;
-}
-
-static const char* eglHandleDisplay(FFOpenGLResult* result, EGLData* data)
-{
-    if(data->ffeglBindAPI(EGL_OPENGL_API) != EGL_TRUE)
-        return "eglBindAPI returned EGL_FALSE";
-
-    EGLint eglConfigCount;
-    data->ffeglGetConfigs(data->display, &data->config, 1, &eglConfigCount);
-    if(eglConfigCount == 0)
-        return "eglGetConfigs returned 0 configs";
-
-    data->surface = data->ffeglCreatePbufferSurface(data->display, data->config, (EGLint[]){
-        EGL_WIDTH, FF_OPENGL_BUFFER_WIDTH,
-        EGL_HEIGHT, FF_OPENGL_BUFFER_HEIGHT,
-        EGL_NONE
-    });
-
-    if(data->surface == EGL_NO_SURFACE)
-        return "eglCreatePbufferSurface returned EGL_NO_SURFACE";
-
-    const char* error = eglHandleSurface(result, data);
-    data->ffeglDestroySurface(data->display, data->surface);
-    return error;
-}
-
-static const char* eglHandleData(FFOpenGLResult* result, EGLData* data)
-{
-    data->glData.ffglGetString = (__typeof__(data->glData.ffglGetString)) data->ffeglGetProcAddress("glGetString");
-    if(!data->glData.ffglGetString)
-        return "eglGetProcAddress(glGetString) returned NULL";
-
-    data->display = data->ffeglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if(data->display == EGL_NO_DISPLAY)
-        return "eglGetDisplay returned EGL_NO_DISPLAY";
-
-    EGLint major, minor;
-    if(data->ffeglInitialize(data->display, &major, &minor) == EGL_FALSE)
-        return "eglInitialize returned EGL_FALSE";
-
-    const char* error = eglHandleDisplay(result, data);
-    data->ffeglTerminate(data->display);
-    return error;
-}
-
-static const char* eglPrint(FFOpenGLResult* result)
-{
-    EGLData eglData;
-
-    FF_LIBRARY_LOAD(egl, &instance.config.library.libEGL, "dlopen egl failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglInitialize);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglBindAPI);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetConfigs);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglCreatePbufferSurface);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglCreateContext);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglMakeCurrent);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroyContext);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroySurface);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
-
-    FF_SUPPRESS_IO();
-    return eglHandleData(result, &eglData);
-}
-
-#endif //FF_HAVE_EGL
 
 #ifdef FF_HAVE_GLX
 #include <GL/glx.h>
 
 typedef struct GLXData
 {
-    GLData glData;
-
+    FF_LIBRARY_SYMBOL(glGetString)
     FF_LIBRARY_SYMBOL(glXGetProcAddress)
+    FF_LIBRARY_SYMBOL(glXQueryVersion)
     FF_LIBRARY_SYMBOL(XOpenDisplay)
     FF_LIBRARY_SYMBOL(glXChooseVisual)
     FF_LIBRARY_SYMBOL(XCreatePixmap);
@@ -173,8 +46,15 @@ static const char* glxHandleContext(FFOpenGLResult* result, GLXData* data)
 {
     if(data->ffglXMakeCurrent(data->display, data->glxPixmap, data->context) != True)
         return "glXMakeCurrent returned False";
+    ffOpenGLHandleResult(result, data->ffglGetString);
 
-    return glHandleResult(result, &data->glData, "GLX");
+    int major, minor;
+    if (data->ffglXQueryVersion(data->display, &major, &minor))
+        ffStrbufSetF(&result->library, "GLX %d.%d", major, minor);
+    else
+        ffStrbufSetStatic(&result->library, "GLX");
+
+    return NULL;
 }
 
 static const char* glxHandleGLXPixmap(FFOpenGLResult* result, GLXData* data)
@@ -223,8 +103,8 @@ static const char* glxHandleDisplay(FFOpenGLResult* result, GLXData* data)
 
 static const char* glxHandleData(FFOpenGLResult* result, GLXData* data)
 {
-    data->glData.ffglGetString = (__typeof__(data->glData.ffglGetString)) data->ffglXGetProcAddress((const GLubyte*) "glGetString");
-    if(data->glData.ffglGetString == NULL)
+    data->ffglGetString = (__typeof__(data->ffglGetString)) data->ffglXGetProcAddress((const GLubyte*) "glGetString");
+    if(data->ffglGetString == NULL)
         return "glXGetProcAddress(glGetString) returned NULL";
 
     data->display = data->ffXOpenDisplay(NULL);
@@ -236,12 +116,13 @@ static const char* glxHandleData(FFOpenGLResult* result, GLXData* data)
     return error;
 }
 
-static const char* glxPrint(FFOpenGLResult* result)
+static const char* detectByGlx(FFOpenGLResult* result)
 {
     GLXData data;
 
     FF_LIBRARY_LOAD(glx, &instance.config.library.libGLX, "dlopen glx failed", "libGLX" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXQueryVersion);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XOpenDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXChooseVisual);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XCreatePixmap);
@@ -268,8 +149,7 @@ static const char* glxPrint(FFOpenGLResult* result)
 
 typedef struct OSMesaData
 {
-    GLData glData;
-
+    FF_LIBRARY_SYMBOL(glGetString)
     FF_LIBRARY_SYMBOL(OSMesaGetProcAddress)
     FF_LIBRARY_SYMBOL(OSMesaCreateContext)
     FF_LIBRARY_SYMBOL(OSMesaMakeCurrent)
@@ -285,14 +165,15 @@ static const char* osMesaHandleContext(FFOpenGLResult* result, OSMesaData* data)
     if(data->ffOSMesaMakeCurrent(data->context, buffer, GL_UNSIGNED_BYTE, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT) != GL_TRUE)
         return "OSMesaMakeCurrent returned GL_FALSE";
 
-    return glHandleResult(result, &data->glData, "OSMesa");
+    ffOpenGLHandleResult(result, data->ffglGetString);
+    ffStrbufSetF(&result->library, "OSMesa %d.%d.%d", OSMESA_MAJOR_VERSION, OSMESA_MINOR_VERSION, OSMESA_PATCH_VERSION);
+    return NULL;
 }
 
 static const char* osMesaHandleData(FFOpenGLResult* result, OSMesaData* data)
 {
-    //The case to void* is required here, because OSMESAproc can't be cast to (__typeof__(data->glData.ffglGetString)) without a warning, even though it is the actual type.
-    data->glData.ffglGetString = (__typeof__(data->glData.ffglGetString)) (void*) data->ffOSMesaGetProcAddress("glGetString");
-    if(data->glData.ffglGetString == NULL)
+    data->ffglGetString = (void*) data->ffOSMesaGetProcAddress("glGetString");
+    if(data->ffglGetString == NULL)
         return "OSMesaGetProcAddress(glGetString) returned NULL";
 
     data->context = data->ffOSMesaCreateContext(OSMESA_RGBA, NULL);
@@ -304,7 +185,7 @@ static const char* osMesaHandleData(FFOpenGLResult* result, OSMesaData* data)
     return error;
 }
 
-static const char* osMesaPrint(FFOpenGLResult* result)
+static const char* detectByOsMesa(FFOpenGLResult* result)
 {
     OSMesaData data;
 
@@ -326,7 +207,7 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
     if(options->library == FF_OPENGL_LIBRARY_GLX)
     {
         #ifdef FF_HAVE_GLX
-            return glxPrint(result);
+            return detectByGlx(result);
         #else
             return "fastfetch was compiled without glx support";
         #endif
@@ -335,7 +216,8 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
     if(options->library == FF_OPENGL_LIBRARY_EGL)
     {
         #ifdef FF_HAVE_EGL
-            return eglPrint(result);
+            const char* ffOpenGLDetectByEGL(FFOpenGLResult* result);
+            return ffOpenGLDetectByEGL(result);
         #else
             return "fastfetch was compiled without egl support";
         #endif
@@ -344,7 +226,7 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
     if(options->library == FF_OPENGL_LIBRARY_OSMESA)
     {
         #ifdef FF_HAVE_OSMESA
-            return osMesaPrint(result);
+            return detectByOsMesa(result);
         #else
             return "fastfetch was compiled without osmesa support";
         #endif
@@ -353,12 +235,13 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
     const char* error = ""; // not NULL dummy value
 
     #ifdef FF_HAVE_EGL
-        error = eglPrint(result);
+        const char* ffOpenGLDetectByEGL(FFOpenGLResult* result);
+        error = ffOpenGLDetectByEGL(result);
     #endif
 
     #ifdef FF_HAVE_GLX
         if(error != NULL)
-            error = glxPrint(result);
+            error = detectByGlx(result);
     #endif
 
     //We don't use osmesa in auto mode here, because it is a software implementation,

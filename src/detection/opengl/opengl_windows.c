@@ -4,9 +4,6 @@
 
 #include <Windows.h>
 #include <GL/gl.h>
-#ifndef GL_SHADING_LANGUAGE_VERSION // For WGL
-    #define GL_SHADING_LANGUAGE_VERSION 0x8B8C
-#endif
 
 typedef struct WGLData
 {
@@ -19,21 +16,15 @@ typedef struct WGLData
     FF_LIBRARY_SYMBOL(wglDeleteContext)
 } WGLData;
 
-static const char* glHandleResult(WGLData* wglData)
-{
-    ffStrbufAppendS(&wglData->result->version, (const char*) wglData->ffglGetString(GL_VERSION));
-    ffStrbufAppendS(&wglData->result->renderer, (const char*) wglData->ffglGetString(GL_RENDERER));
-    ffStrbufAppendS(&wglData->result->vendor, (const char*) wglData->ffglGetString(GL_VENDOR));
-    ffStrbufAppendS(&wglData->result->slv, (const char*) wglData->ffglGetString(GL_SHADING_LANGUAGE_VERSION));
-    wglData->result->library = "WGL";
-    return NULL;
-}
+void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
 
 static const char* wglHandleContext(WGLData* wglData, HDC hdc, HGLRC context)
 {
     if(wglData->ffwglMakeCurrent(hdc, context) == FALSE)
         return "wglMakeCurrent() failed";
-    return glHandleResult(wglData);
+    ffOpenGLHandleResult(wglData->result, wglData->ffglGetString);
+    ffStrbufSetStatic(&wglData->result->library, "WGL 1.0");
+    return NULL;
 }
 
 static const char* wglHandlePixelFormat(WGLData* wglData, HWND hWnd)
@@ -88,16 +79,16 @@ static LRESULT CALLBACK wglHandleWndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
 }
 
-const char* ffDetectOpenGL(FF_MAYBE_UNUSED FFOpenGLOptions* options, FFOpenGLResult* result)
+static const char* wglDetectOpenGL(FFOpenGLResult* result)
 {
     FF_LIBRARY_LOAD(opengl32, NULL, "dlopen opengl32" FF_LIBRARY_EXTENSION " failed", "opengl32" FF_LIBRARY_EXTENSION, 1);
 
     WGLData data = { .result = result };
 
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, glGetString);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglMakeCurrent);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglCreateContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglDeleteContext);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, glGetString);
 
     MSG msg = {0};
     WNDCLASSW wc = {
@@ -110,10 +101,28 @@ const char* ffDetectOpenGL(FF_MAYBE_UNUSED FFOpenGLOptions* options, FFOpenGLRes
     if(!RegisterClassW(&wc))
         return "RegisterClassW() failed";
 
-    HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, 1, 1, NULL, NULL, NULL, &data);
+    HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, NULL, NULL, NULL, &data);
 
     while(GetMessageW(&msg, hWnd, 0, 0) > 0)
         DispatchMessage(&msg);
 
     return data.error;
+}
+
+
+const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
+{
+    if (options->library == FF_OPENGL_LIBRARY_AUTO)
+        return wglDetectOpenGL(result);
+    else if (options->library == FF_OPENGL_LIBRARY_EGL)
+    {
+        #if __has_include(<EGL/egl.h>)
+        const char* ffOpenGLDetectByEGL(FFOpenGLResult* result);
+        return ffOpenGLDetectByEGL(result);
+        #else
+        return "fastfetch was compiled without egl support";
+        #endif
+    }
+    else
+        return "Unsupported OpenGL library";
 }

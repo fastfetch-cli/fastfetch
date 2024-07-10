@@ -527,16 +527,16 @@ extern "C" {
 #define YYJSON_VERSION_MAJOR  0
 
 /** The minor version of yyjson. */
-#define YYJSON_VERSION_MINOR  9
+#define YYJSON_VERSION_MINOR  10
 
 /** The patch version of yyjson. */
 #define YYJSON_VERSION_PATCH  0
 
 /** The version of yyjson in hex: `(major << 16) | (minor << 8) | (patch)`. */
-#define YYJSON_VERSION_HEX    0x000900
+#define YYJSON_VERSION_HEX    0x000A00
 
 /** The version string of yyjson. */
-#define YYJSON_VERSION_STRING "0.9.0"
+#define YYJSON_VERSION_STRING "0.10.0"
 
 /** The version of yyjson in hex, same as `YYJSON_VERSION_HEX`. */
 yyjson_api uint32_t yyjson_version(void);
@@ -840,6 +840,24 @@ typedef struct yyjson_read_err {
     /** Error byte position for input data (0 if success). */
     size_t pos;
 } yyjson_read_err;
+
+/**
+ Locate the line and column number for a byte position in a string.
+ This can be used to get better description for error position.
+ 
+ @param str The input string.
+ @param len The byte length of the input string.
+ @param pos The byte position within the input string.
+ @param line A pointer to receive the line number, starting from 1.
+ @param col  A pointer to receive the column number, starting from 1.
+ @param chr  A pointer to receive the character index, starting from 0.
+ @return true on success, false if `str` is NULL or `pos` is out of bounds.
+ @note Line/column/character are calculated based on Unicode characters for
+    compatibility with text editors. For multi-byte UTF-8 characters,
+    the returned value may not directly correspond to the byte position.
+ */
+yyjson_api bool yyjson_locate_pos(const char *str, size_t len, size_t pos,
+                                  size_t *line, size_t *col, size_t *chr);
 
 
 

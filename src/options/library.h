@@ -10,6 +10,7 @@ typedef struct FFOptionsLibrary
     FFstrbuf libImageMagick;
     FFstrbuf libChafa;
     FFstrbuf libZ;
+    FFstrbuf libEGL;
 
 #ifdef __ANDROID__
     FFstrbuf libfreetype;
@@ -26,7 +27,6 @@ typedef struct FFOptionsLibrary
     FFstrbuf libDBus;
     FFstrbuf libXFConf;
     FFstrbuf librpm;
-    FFstrbuf libEGL;
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
     FFstrbuf libPulse;

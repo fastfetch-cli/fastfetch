@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/printing.h"
 #include "util/stringUtils.h"
+#include "util/base64.h"
 
 #include <limits.h>
 #include <math.h>
@@ -16,48 +17,6 @@
     #include <sys/termios.h>
 #endif
 
-// https://github.com/kostya/benchmarks/blob/master/base64/test-nolib.c#L145
-static void base64EncodeRaw(uint32_t size, const char *str, uint32_t *out_size, char *output)
-{
-    static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    char *out = output;
-    const char *ends = str + (size - size % 3);
-    while (str != ends) {
-        uint32_t n = __builtin_bswap32(*(uint32_t*) str);
-        *out++ = chars[(n >> 26) & 63];
-        *out++ = chars[(n >> 20) & 63];
-        *out++ = chars[(n >> 14) & 63];
-        *out++ = chars[(n >> 8) & 63];
-        str += 3;
-    }
-
-    if (size % 3 == 1) {
-        uint64_t n = (uint64_t)*str << 16;
-        *out++ = chars[(n >> 18) & 63];
-        *out++ = chars[(n >> 12) & 63];
-        *out++ = '=';
-        *out++ = '=';
-    } else if (size % 3 == 2) {
-        uint64_t n = (uint64_t)*str++ << 16;
-        n |= (uint64_t)*str << 8;
-        *out++ = chars[(n >> 18) & 63];
-        *out++ = chars[(n >> 12) & 63];
-        *out++ = chars[(n >> 6) & 63];
-        *out++ = '=';
-    }
-    *out = '\0';
-    *out_size = (uint32_t) (out - output);
-}
-
-static FFstrbuf base64Encode(const FFstrbuf* in)
-{
-    FFstrbuf out = ffStrbufCreateA(10 + in->length * 4 / 3);
-    base64EncodeRaw(in->length, in->chars, &out.length, out.chars);
-    assert(out.length < out.allocated);
-
-    return out;
-}
-
 static bool printImageIterm(bool printError)
 {
     const FFOptionsLogo* options = &instance.config.logo;
@@ -71,7 +30,7 @@ static bool printImageIterm(bool printError)
 
     fflush(stdout);
 
-    FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&buf);
+    FF_STRBUF_AUTO_DESTROY base64 = ffBase64EncodeStrbuf(&buf);
     ffStrbufClear(&buf);
 
     if (!options->width || !options->height)
@@ -166,7 +125,7 @@ static bool printImageKittyDirect(bool printError)
         return false;
     }
 
-    FF_STRBUF_AUTO_DESTROY base64 = base64Encode(&options->source);
+    FF_STRBUF_AUTO_DESTROY base64 = ffBase64EncodeStrbuf(&options->source);
 
     if (!options->width || !options->height)
     {
