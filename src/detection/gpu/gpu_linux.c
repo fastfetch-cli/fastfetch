@@ -32,29 +32,42 @@
 
 static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey)
 {
+    uint32_t pciDirLength = pciDir->length;
     ffStrbufAppendS(pciDir, "/driver");
     char pathBuf[PATH_MAX];
     ssize_t resultLength = readlink(pciDir->chars, pathBuf, sizeof(pathBuf));
-    if(resultLength > 0)
-    {
-        const char* slash = memrchr(pathBuf, '/', (size_t) resultLength);
-        if (slash)
-        {
-            slash++;
-            ffStrbufSetNS(&gpu->driver, (uint32_t) (resultLength - (slash - pathBuf)), slash);
-        }
+    if(resultLength <= 0) return false;
 
+    const char* slash = memrchr(pathBuf, '/', (size_t) resultLength);
+    if (slash)
+    {
+        slash++;
+        ffStrbufSetNS(&gpu->driver, (uint32_t) (resultLength - (slash - pathBuf)), slash);
+    }
+
+    if (instance.config.general.detectVersion)
+    {
         ffStrbufAppendS(pciDir, "/module/version");
         if (ffReadFileBuffer(pciDir->chars, buffer))
         {
             ffStrbufTrimRightSpace(buffer);
             ffStrbufAppendC(&gpu->driver, ' ');
             ffStrbufAppend(&gpu->driver, buffer);
-            return true;
+        }
+        else if (ffStrbufEqualS(&gpu->driver, "zx"))
+        {
+            ffStrbufSubstrBefore(pciDir, pciDirLength);
+            ffStrbufAppendS(pciDir, "/zx_info/driver_version");
+            if (ffReadFileBuffer(pciDir->chars, buffer))
+            {
+                ffStrbufTrimRightSpace(buffer);
+                ffStrbufAppendC(&gpu->driver, ' ');
+                ffStrbufAppend(&gpu->driver, buffer);
+            }
         }
     }
 
-    return false;
+    return true;
 }
 
 static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
