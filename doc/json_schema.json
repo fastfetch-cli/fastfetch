@@ -339,6 +339,11 @@
                     "type": "string",
                     "description": "Set the command to be executed before printing logos",
                     "default": ""
+                },
+                "showVersion": {
+                    "type": "boolean",
+                    "description": "Whether to detect and display component versions. Mainly for benchmarking",
+                    "default": true
                 }
             }
         },
@@ -573,11 +578,6 @@
                     "type": "boolean",
                     "description": "Whether to disable the stdout application buffer",
                     "default": false
-                },
-                "tsVersion": {
-                    "type": "boolean",
-                    "description": "Whether to detect and display the version of terminal, shell and editor. Mainly for benchmarking",
-                    "default": true
                 }
             }
         },

@@ -78,12 +78,15 @@ const char* ffDetectHost(FFHostResult* host)
                 ffStrbufAppendF(&host->name, " - %s", wslDistroName);
             ffStrbufAppendS(&host->family, "WSL");
 
-            ffProcessAppendStdOut(&host->version, (char* const[]){
-                "wslinfo",
-                "--wsl-version",
-                "-n",
-                NULL,
-            }); // supported in 2.2.3 and later
+            if (instance.config.general.detectVersion)
+            {
+                ffProcessAppendStdOut(&host->version, (char* const[]){
+                    "wslinfo",
+                    "--wsl-version",
+                    "-n",
+                    NULL,
+                }); // supported in 2.2.3 and later
+            }
         }
     }
 

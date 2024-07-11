@@ -36,6 +36,8 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             if (error)
                 return "Failed to execute preRun command";
         }
+        else if (ffStrEqualsIgnCase(key, "detectVersion"))
+            options->detectVersion = yyjson_get_bool(val);
 
         #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
         else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
@@ -66,13 +68,6 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->wmiTimeout = (int32_t) yyjson_get_int(val);
         #endif
 
-        else if (ffStrEqualsIgnCase(key, "stat"))
-            return "Property `general.stat` has been changed to `display.stat`";
-        else if (ffStrEqualsIgnCase(key, "pipe"))
-            return "Property `general.pipe` has been changed to `display.pipe`";
-        else if (ffStrEqualsIgnCase(key, "allowSlowOperations"))
-            return "Property `general.allowSlowOperations` has been obsoleted. See CHANGELOG for detail";
-
         else
             return "Unknown general property";
     }
@@ -86,6 +81,8 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
         options->multithreading = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--processing-timeout"))
         options->processingTimeout = ffOptionParseInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--detect-version"))
+        options->detectVersion = ffOptionParseBoolean(value);
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
     else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
@@ -116,6 +113,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
 {
     options->processingTimeout = 1000;
     options->multithreading = true;
+    options->detectVersion = true;
 
     #if defined(__linux__) || defined(__FreeBSD__)
     options->escapeBedrock = true;

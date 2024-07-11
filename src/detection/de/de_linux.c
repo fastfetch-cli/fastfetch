@@ -180,6 +180,8 @@ static void getBudgie(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
 
 const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOptions* options)
 {
+    if (!instance.config.general.detectVersion) return "Disabled by config";
+
     if (ffStrbufEqualS(deName, FF_DE_PRETTY_PLASMA))
         getKDE(result, options);
     else if (ffStrbufEqualS(deName, FF_DE_PRETTY_GNOME))
