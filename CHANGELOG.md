@@ -1,8 +1,13 @@
 # 2.18.1
 
+Fix a regression introduced in v2.18.0
+
 Changes:
 * `--ts-version` has been renamed to `--detect-version`
     * `general.detectVersion` in JSON config file
+
+Bugfixes:
+* Fix and improve GPU driver detection (#1084, GPU, Linux)
 
 # 2.18.0
 
