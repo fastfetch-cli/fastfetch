@@ -198,6 +198,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         if (!ffStrbufStartsWithC(buffer, '1'))
             return "GPU disabled";
     }
+    ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
 
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString((uint16_t) vendorId));
