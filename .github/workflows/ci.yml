@@ -416,9 +416,9 @@ jobs:
         with:
           operating_system: freebsd
           architecture: x86-64
-          cpu_count: 3
+          cpu_count: 4
           shell: bash
-          version: '13.2'
+          version: '14.1'
           run: |
             uname -a
             sudo pkg update
