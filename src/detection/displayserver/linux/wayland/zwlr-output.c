@@ -71,10 +71,17 @@ static void waylandZwlrCurrentModeListener(void* data, FF_MAYBE_UNUSED struct zw
     wldata->refreshRate = current->refreshRate;
 }
 
+static void waylandZwlrPhysicalSizeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, int32_t width, int32_t height)
+{
+    WaylandDisplay* wldata = (WaylandDisplay*) data;
+    wldata->physicalWidth = width;
+    wldata->physicalHeight = height;
+}
+
 static const struct zwlr_output_head_v1_listener headListener = {
     .name = (void*) ffWaylandOutputNameListener,
     .description = (void*) ffWaylandOutputDescriptionListener,
-    .physical_size = (void*) stubListener,
+    .physical_size = waylandZwlrPhysicalSizeListener,
     .mode = waylandZwlrModeListener,
     .enabled = (void*) stubListener,
     .current_mode = waylandZwlrCurrentModeListener,
@@ -160,7 +167,9 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
                 : &display.name,
         display.type,
         false,
-        display.id
+        display.id,
+        (uint32_t) display.physicalWidth,
+        (uint32_t) display.physicalHeight
     );
 
     ffStrbufDestroy(&display.description);

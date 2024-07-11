@@ -60,6 +60,8 @@ typedef struct FFDisplayResult
     uint32_t rotation;
     bool primary;
     uint64_t id; // platform dependent
+    uint32_t physicalWidth;
+    uint32_t physicalHeight;
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult
@@ -85,4 +87,6 @@ bool ffdsAppendDisplay(
     FFstrbuf* name,
     FFDisplayType type,
     bool primary,
-    uint64_t id);
+    uint64_t id,
+    uint32_t physicalWidth,
+    uint32_t physicalHeight);

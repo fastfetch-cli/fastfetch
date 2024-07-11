@@ -92,14 +92,16 @@ static void waylandKdeGeometryListener(void *data,
     FF_MAYBE_UNUSED struct kde_output_device_v2 *kde_output_device_v2,
     FF_MAYBE_UNUSED int32_t x,
     FF_MAYBE_UNUSED int32_t y,
-    FF_MAYBE_UNUSED int32_t physical_width,
-    FF_MAYBE_UNUSED int32_t physical_height,
+    int32_t physical_width,
+    int32_t physical_height,
     FF_MAYBE_UNUSED int32_t subpixel,
     FF_MAYBE_UNUSED const char *make,
     FF_MAYBE_UNUSED const char *model,
     int32_t transform)
 {
     WaylandDisplay* display = data;
+    display->physicalWidth = physical_width;
+    display->physicalHeight = physical_height;
     display->transform = (enum wl_output_transform) transform;
 }
 
@@ -215,7 +217,9 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
             : &display.name,
         display.type,
         false,
-        display.id
+        display.id,
+        (uint32_t) display.physicalWidth,
+        (uint32_t) display.physicalHeight
     );
 
     ffStrbufDestroy(&display.description);

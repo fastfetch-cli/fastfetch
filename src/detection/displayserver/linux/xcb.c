@@ -41,31 +41,24 @@ static bool xcbInitPropertyData(void* libraryHandle, XcbPropertyData* propertyDa
 static void* xcbGetProperty(XcbPropertyData* data, xcb_connection_t* connection, xcb_window_t window, const char* request)
 {
     xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(connection, true, (uint16_t) strlen(request), request);
-    xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(connection, requestAtomCookie, NULL);
+    FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(connection, requestAtomCookie, NULL);
     if(requestAtomReply == NULL)
         return NULL;
 
     xcb_get_property_cookie_t propertyCookie = data->ffxcb_get_property(connection, false, window, requestAtomReply->atom, XCB_ATOM_ANY, 0, 64);
 
-    free(requestAtomReply);
-
-    xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(connection, propertyCookie, NULL);
+    FF_AUTO_FREE xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(connection, propertyCookie, NULL);
     if(propertyReply == NULL)
         return NULL;
 
     int length = data->ffxcb_get_property_value_length(propertyReply);
     if(length <= 0)
-    {
-        free(propertyReply);
         return NULL;
-    }
 
     //Why are xcb property strings not null terminated???
     void* replyValue = malloc((size_t)length + 1);
     memcpy(replyValue, data->ffxcb_get_property_value(propertyReply), (size_t) length);
     ((char*) replyValue)[length] = '\0';
-
-    free(propertyReply);
 
     return replyValue;
 }
@@ -75,28 +68,18 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
     if(result->wmProcessName.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
         return;
 
-    xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, connection, rootWindow, "_NET_SUPPORTING_WM_CHECK");
+    FF_AUTO_FREE xcb_window_t* wmWindow = (xcb_window_t*) xcbGetProperty(data, connection, rootWindow, "_NET_SUPPORTING_WM_CHECK");
     if(wmWindow == NULL)
         return;
 
-    char* wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "_NET_WM_NAME");
+    FF_AUTO_FREE char* wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "_NET_WM_NAME");
     if(wmName == NULL)
         wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "WM_NAME");
 
-    free(wmWindow);
-
-    if(wmName == NULL)
+    if(wmName == NULL || *wmName == '\0')
         return;
-
-    if(*wmName == '\0')
-    {
-        free(wmName);
-        return;
-    }
 
     ffStrbufSetS(&result->wmProcessName, wmName);
-
-    free(wmName);
 }
 
 void ffdsConnectXcb(FFDisplayServerResult* result)
@@ -122,17 +105,20 @@ void ffdsConnectXcb(FFDisplayServerResult* result)
 
     while(iterator.rem > 0)
     {
+        xcb_screen_t* screen = iterator.data;
         ffdsAppendDisplay(result,
-            (uint32_t) iterator.data->width_in_pixels,
-            (uint32_t) iterator.data->height_in_pixels,
+            (uint32_t) screen->width_in_pixels,
+            (uint32_t) screen->height_in_pixels,
             0,
-            (uint32_t) iterator.data->width_in_pixels,
-            (uint32_t) iterator.data->height_in_pixels,
+            (uint32_t) screen->width_in_pixels,
+            (uint32_t) screen->height_in_pixels,
             0,
             NULL,
             FF_DISPLAY_TYPE_UNKNOWN,
             false,
-            0
+            0,
+            (uint32_t) screen->width_in_millimeters,
+            (uint32_t) screen->height_in_millimeters
         );
         ffxcb_screen_next(&iterator);
     }
@@ -191,7 +177,7 @@ typedef struct XcbRandrData
     xcb_randr_get_screen_resources_current_reply_t* screenResources;
 } XcbRandrData;
 
-static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation, bool primary)
+static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output)
 {
     double refreshRate = (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
 
@@ -206,11 +192,13 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         name,
         FF_DISPLAY_TYPE_UNKNOWN,
         primary,
-        0
+        0,
+        (uint32_t) output->mm_width,
+        (uint32_t) output->mm_height
     );
 }
 
-static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrbuf* name, uint32_t rotation, bool primary)
+static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -221,7 +209,7 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrb
     while(modesIterator.rem > 0)
     {
         if(modesIterator.data->id == mode)
-            return xcbRandrHandleModeInfo(data, modesIterator.data, name, rotation, primary);
+            return xcbRandrHandleModeInfo(data, modesIterator.data, name, rotation, primary, output);
 
         data->ffxcb_randr_mode_info_next(&modesIterator);
     }
@@ -229,10 +217,10 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrb
     return false;
 }
 
-static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary)
+static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output)
 {
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, crtc, XCB_CURRENT_TIME);
-    xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
+    FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
     if(crtcInfoReply == NULL)
         return false;
 
@@ -252,7 +240,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
             rotation = 0;
             break;
     }
-    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation, primary);
+    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation, primary, output);
     res = res ? true : ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
@@ -264,10 +252,11 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
         name,
         FF_DISPLAY_TYPE_UNKNOWN,
         primary,
-        0
+        0,
+        (uint32_t) output->mm_width,
+        (uint32_t) output->mm_height
     );
 
-    free(crtcInfoReply);
     return res;
 }
 
@@ -294,7 +283,7 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         }
     }
 
-    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary);
+    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary, outputInfoReply);
 
     return res;
 }
@@ -338,14 +327,16 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         &name,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitor->primary,
-        0
+        0,
+        (uint32_t) monitor->width_in_millimeters,
+        (uint32_t) monitor->height_in_millimeters
     );
 }
 
 static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
 {
     xcb_randr_get_monitors_cookie_t monitorsCookie = data->ffxcb_randr_get_monitors(data->connection, screen->root, true);
-    xcb_randr_get_monitors_reply_t* monitorsReply = data->ffxcb_randr_get_monitors_reply(data->connection, monitorsCookie, NULL);
+    FF_AUTO_FREE xcb_randr_get_monitors_reply_t* monitorsReply = data->ffxcb_randr_get_monitors_reply(data->connection, monitorsCookie, NULL);
     if(monitorsReply == NULL)
         return false;
 
@@ -359,8 +350,6 @@ static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
             foundMonitor = true;
         data->ffxcb_randr_monitor_info_next(&monitorInfoIterator);
     }
-
-    free(monitorsReply);
 
     return foundMonitor;
 }
@@ -392,7 +381,9 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
-        0
+        0,
+        (uint32_t) screen->width_in_millimeters,
+        (uint32_t) screen->height_in_millimeters
     );
 }
 

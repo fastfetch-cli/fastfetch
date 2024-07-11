@@ -37,7 +37,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             continue;
         }
 
-        unsigned width = 0, height = 0;
+        unsigned width = 0, height = 0, physicalWidth = 0, physicalHeight = 0;
         double refreshRate = 0;
         FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
@@ -49,6 +49,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
         {
             ffEdidGetName(edidData, &name);
             ffEdidGetPreferredResolutionAndRefreshRate(edidData, &width, &height, &refreshRate);
+            ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
         }
         else
         {
@@ -78,7 +79,9 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             &name,
             FF_DISPLAY_TYPE_UNKNOWN,
             false,
-            0
+            0,
+            physicalWidth,
+            physicalHeight
         );
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
@@ -344,7 +347,9 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                         : conn->connector_type == DRM_MODE_CONNECTOR_HDMIA || conn->connector_type == DRM_MODE_CONNECTOR_HDMIB
                             ? FF_DISPLAY_TYPE_EXTERNAL : FF_DISPLAY_TYPE_UNKNOWN,
                     false,
-                    conn->connector_id
+                    conn->connector_id,
+                    conn->mmWidth,
+                    conn->mmHeight
                 );
             }
 

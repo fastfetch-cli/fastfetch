@@ -87,7 +87,9 @@ void ffdsConnectXlib(FFDisplayServerResult* result)
             NULL,
             FF_DISPLAY_TYPE_UNKNOWN,
             false,
-            0
+            0,
+            (uint32_t) WidthMMOfScreen(screen),
+            (uint32_t) HeightMMOfScreen(screen)
         );
     }
 
@@ -149,7 +151,7 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
     return 0;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary)
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary, XRROutputInfo* output)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -187,7 +189,9 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool
         name,
         FF_DISPLAY_TYPE_UNKNOWN,
         primary,
-        0
+        0,
+        (uint32_t) output->mm_width,
+        (uint32_t) output->mm_height
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
@@ -218,7 +222,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
         if (edidData)
             data->ffXFree(edidData);
     }
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary);
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary, outputInfo);
 
     data->ffXRRFreeOutputInfo(outputInfo);
 
@@ -248,7 +252,9 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         &name,
         FF_DISPLAY_TYPE_UNKNOWN,
         !!monitorInfo->primary,
-        0
+        0,
+        (uint32_t) monitorInfo->mwidth,
+        (uint32_t) monitorInfo->mheight
     );
 }
 
@@ -296,7 +302,9 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
-        0
+        0,
+        (uint32_t) WidthMMOfScreen(screen),
+        (uint32_t) HeightMMOfScreen(screen)
     );
 }
 

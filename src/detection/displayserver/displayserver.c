@@ -11,7 +11,9 @@ bool ffdsAppendDisplay(
     FFstrbuf* name,
     FFDisplayType type,
     bool primary,
-    uint64_t id)
+    uint64_t id,
+    uint32_t physicalWidth,
+    uint32_t physicalHeight)
 {
     if(width == 0 || height == 0)
         return false;
@@ -27,6 +29,8 @@ bool ffdsAppendDisplay(
     display->type = type;
     display->primary = primary;
     display->id = id;
+    display->physicalWidth = physicalWidth;
+    display->physicalHeight = physicalHeight;
 
     return true;
 }

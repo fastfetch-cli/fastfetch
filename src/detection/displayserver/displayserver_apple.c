@@ -57,7 +57,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             if(CoreDisplay_IODisplayCreateInfoDictionary)
             {
                 io_service_t servicePort = CGDisplayIOServicePort(screen);
-                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName); 
+                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
                 if(displayInfo)
                 {
                     CFDictionaryRef productNames;
@@ -66,6 +66,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
             }
             #endif
+
+            CGSize size = CGDisplayScreenSize(screen);
 
             ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
@@ -77,7 +79,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 &name,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 CGDisplayIsMain(screen),
-                (uint64_t)screen
+                (uint64_t)screen,
+                (uint32_t) (size.width + 0.5),
+                (uint32_t) (size.height + 0.5)
             );
             CGDisplayModeRelease(mode);
         }

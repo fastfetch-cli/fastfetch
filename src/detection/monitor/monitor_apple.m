@@ -19,7 +19,7 @@ static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
     NSScreen* mainScreen = NSScreen.mainScreen;
     if (display->primary)
     {
-        #ifdef MAC_OS_X_VERSION_10_15 
+        #ifdef MAC_OS_X_VERSION_10_15
         return mainScreen.maximumPotentialExtendedDynamicRangeColorComponentValue > 1;
         #else
         return mainScreen.maximumExtendedDynamicRangeColorComponentValue > 1;
@@ -100,10 +100,9 @@ const char* ffDetectMonitor(FFlist* results)
         monitor->physicalHeight = (uint32_t) (size.height + 0.5);
         monitor->hdrCompatible = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance")) ||
             detectHdrSupportWithNSScreen(display);
+        monitor->serial = CGDisplaySerialNumber((CGDirectDisplayID) display->id);
 
-        int64_t serial, year, week;
-        if (ffCfDictGetInt64(displayInfo, CFSTR("DisplaySerialNumber"), &serial) == NULL)
-            monitor->serial = (uint32_t) (uint64_t) serial;
+        int64_t year, week;
         if (ffCfDictGetInt64(displayInfo, CFSTR("DisplayYearManufacture"), &year) == NULL)
             monitor->manufactureYear = (uint16_t) year;
         if (ffCfDictGetInt64(displayInfo, CFSTR("DisplayWeekManufacture"), &week) == NULL)

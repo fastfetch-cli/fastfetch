@@ -4,7 +4,7 @@
 #include "modules/display/display.h"
 #include "util/stringUtils.h"
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 9
+#define FF_DISPLAY_NUM_FORMAT_ARGS 11
 
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
@@ -135,6 +135,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRING, displayType, "type"},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->rotation, "rotation"},
                 {FF_FORMAT_ARG_TYPE_BOOL, &result->primary, "is-primary"},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->physicalWidth, "physical-width"},
+                {FF_FORMAT_ARG_TYPE_UINT, &result->physicalHeight, "physical-height"},
             }));
         }
     }
@@ -291,8 +293,11 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_bool(doc, obj, "primary", item->primary);
         yyjson_mut_obj_add_real(doc, obj, "refreshRate", item->refreshRate);
         yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
-        yyjson_mut_obj_add_uint(doc, obj, "scaledHeight", item->scaledHeight);
         yyjson_mut_obj_add_uint(doc, obj, "scaledWidth", item->scaledWidth);
+        yyjson_mut_obj_add_uint(doc, obj, "scaledHeight", item->scaledHeight);
+        yyjson_mut_obj_add_uint(doc, obj, "physicalWidth", item->physicalWidth);
+        yyjson_mut_obj_add_uint(doc, obj, "physicalHeight", item->physicalHeight);
+
         switch (item->type)
         {
             case FF_DISPLAY_TYPE_BUILTIN:
@@ -320,6 +325,8 @@ void ffPrintDisplayHelpFormat(void)
         "Screen type (builtin, external or unknown) - type",
         "Screen rotation (in degrees) - rotation",
         "True if being the primary screen - is-primary",
+        "Screen physical width (in millimeters) - physical-width",
+        "Screen physical height (in millimeters) - physical-height",
     }));
 }
 

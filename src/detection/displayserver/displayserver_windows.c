@@ -1,6 +1,9 @@
 #include "displayserver.h"
 #include "detection/os/os.h"
 #include "util/windows/unicode.h"
+#include "util/windows/registry.h"
+#include "util/mallocHelper.h"
+#include "util/edidHelper.h"
 
 #include <dwmapi.h>
 #include <WinUser.h>
@@ -73,6 +76,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             if (!monitorInfo) continue;
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+            uint32_t physicalWidth = 0, physicalHeight = 0;
 
             DISPLAYCONFIG_TARGET_DEVICE_NAME targetName = {
                 .header = {
@@ -84,13 +88,39 @@ static void detectDisplays(FFDisplayServerResult* ds)
             };
             if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
             {
-                if (targetName.flags.friendlyNameFromEdid)
-                    ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
+                wchar_t regPath[256] = L"SYSTEM\\CurrentControlSet\\Enum";
+                wchar_t* pRegPath = regPath + strlen("SYSTEM\\CurrentControlSet\\Enum");
+                wchar_t* pDevPath = targetName.monitorDevicePath + strlen("\\\\?");
+                while (*pDevPath && *pDevPath != L'{')
+                {
+                    if (*pDevPath == L'#')
+                        *pRegPath = L'\\';
+                    else
+                        *pRegPath = *pDevPath;
+                    ++pRegPath;
+                    ++pDevPath;
+                    assert(pRegPath < regPath + sizeof(regPath) / sizeof(wchar_t) + strlen("Device Parameters"));
+                }
+                wcscpy(pRegPath, L"Device Parameters");
+
+                uint8_t edidData[1024];
+                DWORD edidLength = sizeof(edidData);
+                if (RegGetValueW(HKEY_LOCAL_MACHINE, regPath, L"EDID", RRF_RT_REG_BINARY, NULL, edidData, &edidLength) == ERROR_SUCCESS &&
+                    edidLength > 0 && edidLength % 128 == 0)
+                {
+                    ffEdidGetName(edidData, &name);
+                    ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+                }
                 else
                 {
-                    ffStrbufSetWS(&name, targetName.monitorDevicePath);
-                    ffStrbufSubstrAfterFirstC(&name, '#');
-                    ffStrbufSubstrBeforeFirstC(&name, '#');
+                    if (targetName.flags.friendlyNameFromEdid)
+                        ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
+                    else
+                    {
+                        ffStrbufSetWS(&name, targetName.monitorDevicePath);
+                        ffStrbufSubstrAfterFirstC(&name, '#');
+                        ffStrbufSubstrBeforeFirstC(&name, '#');
+                    }
                 }
             }
 
@@ -107,18 +137,10 @@ static void detectDisplays(FFDisplayServerResult* ds)
             uint32_t rotation;
             switch (path->targetInfo.rotation)
             {
-                case DISPLAYCONFIG_ROTATION_ROTATE90:
-                    rotation = 90;
-                    break;
-                case DISPLAYCONFIG_ROTATION_ROTATE180:
-                    rotation = 180;
-                    break;
-                case DISPLAYCONFIG_ROTATION_ROTATE270:
-                    rotation = 270;
-                    break;
-                default:
-                    rotation = 0;
-                    break;
+                case DISPLAYCONFIG_ROTATION_ROTATE90: rotation = 90; break;
+                case DISPLAYCONFIG_ROTATION_ROTATE180: rotation = 180; break;
+                case DISPLAYCONFIG_ROTATION_ROTATE270: rotation = 270; break;
+                default: rotation = 0; break;
             }
 
             ffdsAppendDisplay(ds,
@@ -135,7 +157,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_UDI_EMBEDDED
                     ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 !!(monitorInfo->info.dwFlags & MONITORINFOF_PRIMARY),
-                (uint64_t)(uintptr_t) monitorInfo->handle
+                (uint64_t)(uintptr_t) monitorInfo->handle,
+                physicalWidth,
+                physicalHeight
             );
         }
     }

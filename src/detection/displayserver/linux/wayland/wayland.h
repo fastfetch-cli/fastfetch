@@ -36,6 +36,8 @@ typedef struct WaylandDisplay
     WaylandData* parent;
     int32_t width;
     int32_t height;
+    int32_t physicalWidth;
+    int32_t physicalHeight;
     int32_t refreshRate;
     double scale;
     enum wl_output_transform transform;

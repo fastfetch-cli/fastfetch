@@ -1,7 +1,8 @@
 #include "displayserver.h"
 #include "common/settings.h"
-
 #include "common/processing.h"
+
+#include <math.h>
 
 static void detectWithDumpsys(FFDisplayServerResult* ds)
 {
@@ -63,6 +64,8 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
                 &name,
                 FF_DISPLAY_TYPE_UNKNOWN,
                 false,
+                0,
+                0,
                 0
             );
         }
@@ -83,6 +86,8 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
         uint32_t width = (uint32_t) ffStrbufToUInt(&buffer, 0);
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         uint32_t height = (uint32_t) ffStrbufToUInt(&buffer, 0);
+        ffStrbufSubstrAfterFirstC(&buffer, ',');
+        uint32_t ppi = (uint32_t) ffStrbufToUInt(&buffer, 0);
         return ffdsAppendDisplay(ds,
             width,
             height,
@@ -93,7 +98,9 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
             0,
             FF_DISPLAY_TYPE_BUILTIN,
             false,
-            0
+            0,
+            (uint32_t) (width / ppi * 25.4),
+            (uint32_t) (height / ppi * 25.4)
         );
     }
 
