@@ -133,17 +133,24 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
         ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel "));
     gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
 
-    ffStrbufAppendS(pciDir, "/drm/");
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
-    if (!dirp) return;
-    struct dirent* entry;
-    while ((entry = readdir(dirp)) != NULL)
+    if (ffStrbufEqualS(&gpu->driver, "xe"))
     {
-        if (ffStrStartsWith(entry->d_name, "card")) break;
+        ffStrbufAppendS(pciDir, "/tile0/gt0/freq0/max_freq");
     }
-    if (!entry) return;
-    ffStrbufAppendS(pciDir, entry->d_name);
-    ffStrbufAppendS(pciDir, "/gt_max_freq_mhz");
+    else
+    {
+        ffStrbufAppendS(pciDir, "/drm/");
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+        if (!dirp) return;
+        struct dirent* entry;
+        while ((entry = readdir(dirp)) != NULL)
+        {
+            if (ffStrStartsWith(entry->d_name, "card")) break;
+        }
+        if (!entry) return;
+        ffStrbufAppendS(pciDir, entry->d_name);
+        ffStrbufAppendS(pciDir, "/gt_max_freq_mhz");
+    }
     if (ffReadFileBuffer(pciDir->chars, buffer))
         gpu->frequency = ffStrbufToDouble(buffer) / 1000.0;
 }
