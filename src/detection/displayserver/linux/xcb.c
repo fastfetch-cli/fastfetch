@@ -177,7 +177,7 @@ typedef struct XcbRandrData
     xcb_randr_get_screen_resources_current_reply_t* screenResources;
 } XcbRandrData;
 
-static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output)
+static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType)
 {
     double refreshRate = (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
 
@@ -190,7 +190,7 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
         (uint32_t) modeInfo->height,
         rotation,
         name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         primary,
         0,
         (uint32_t) output->mm_width,
@@ -198,7 +198,7 @@ static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* mo
     );
 }
 
-static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output)
+static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -209,7 +209,7 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrb
     while(modesIterator.rem > 0)
     {
         if(modesIterator.data->id == mode)
-            return xcbRandrHandleModeInfo(data, modesIterator.data, name, rotation, primary, output);
+            return xcbRandrHandleModeInfo(data, modesIterator.data, name, rotation, primary, output, displayType);
 
         data->ffxcb_randr_mode_info_next(&modesIterator);
     }
@@ -217,7 +217,7 @@ static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrb
     return false;
 }
 
-static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output)
+static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType)
 {
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, crtc, XCB_CURRENT_TIME);
     FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
@@ -240,7 +240,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
             rotation = 0;
             break;
     }
-    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation, primary, output);
+    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation, primary, output, displayType);
     res = res ? true : ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
@@ -250,7 +250,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
         (uint32_t) crtcInfoReply->height,
         rotation,
         name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         primary,
         0,
         (uint32_t) output->mm_width,
@@ -260,7 +260,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
     return res;
 }
 
-static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary)
+static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary, FFDisplayType displayType)
 {
     xcb_randr_get_output_info_cookie_t outputInfoCookie = data->ffxcb_randr_get_output_info(data->connection, output, XCB_CURRENT_TIME);
     FF_AUTO_FREE xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, NULL);
@@ -283,7 +283,7 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         }
     }
 
-    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary, outputInfoReply);
+    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary, outputInfoReply, displayType);
 
     return res;
 }
@@ -306,12 +306,13 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         (uint32_t) data->propData.ffxcb_get_atom_name_name_length(nameReply),
         data->propData.ffxcb_get_atom_name_name(nameReply)
     );
+    const FFDisplayType displayType = ffdsGetDisplayType(name.chars);
 
     bool foundOutput = false;
 
     while(outputIterator.rem > 0)
     {
-        if(xcbRandrHandleOutput(data, *outputIterator.data, &name, monitor->primary))
+        if(xcbRandrHandleOutput(data, *outputIterator.data, &name, monitor->primary, displayType))
             foundOutput = true;
         data->ffxcb_randr_output_next(&outputIterator);
     };
@@ -325,7 +326,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         (uint32_t) monitor->height,
         0,
         &name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         !!monitor->primary,
         0,
         (uint32_t) monitor->width_in_millimeters,

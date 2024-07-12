@@ -201,10 +201,7 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
     WaylandDisplay* display = data;
     if (display->id) return;
 
-    if(ffStrStartsWith(name, "eDP-"))
-        display->type = FF_DISPLAY_TYPE_BUILTIN;
-    else if(ffStrStartsWith(name, "HDMI-"))
-        display->type = FF_DISPLAY_TYPE_EXTERNAL;
+    display->type = ffdsGetDisplayType(name);
     if (!display->edidName.length)
         ffdsMatchDrmConnector(name, &display->edidName);
     display->id = ffWaylandGenerateIdFromName(name);

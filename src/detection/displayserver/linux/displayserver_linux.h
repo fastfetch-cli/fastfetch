@@ -20,4 +20,6 @@ void ffdsConnectDrm(FFDisplayServerResult* result);
 
 void ffdsDetectWMDE(FFDisplayServerResult* result);
 
+FFDisplayType ffdsGetDisplayType(const char* drmConnectorName);
+
 #endif

@@ -151,7 +151,7 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
     return 0;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary, XRROutputInfo* output)
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary, XRROutputInfo* output, FFDisplayType displayType)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -187,7 +187,7 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool
         (uint32_t) crtcInfo->height,
         rotation,
         name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         primary,
         0,
         (uint32_t) output->mm_width,
@@ -198,7 +198,7 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool
     return res;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType)
 {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
     if(outputInfo == NULL)
@@ -222,7 +222,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
         if (edidData)
             data->ffXFree(edidData);
     }
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary, outputInfo);
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary, outputInfo, displayType);
 
     data->ffXRRFreeOutputInfo(outputInfo);
 
@@ -235,9 +235,10 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
     char* xname = data->ffXGetAtomName(data->display, monitorInfo->name);
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(xname);
     data->ffXFree(xname);
+    FFDisplayType displayType = ffdsGetDisplayType(name.chars);
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary, displayType))
             foundOutput = true;
     }
 
@@ -250,7 +251,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->height,
         0,
         &name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         !!monitorInfo->primary,
         0,
         (uint32_t) monitorInfo->mwidth,

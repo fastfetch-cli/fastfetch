@@ -342,9 +342,9 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     0,
                     0,
                     &name,
-                    conn->connector_type == DRM_MODE_CONNECTOR_eDP
+                    conn->connector_type == DRM_MODE_CONNECTOR_eDP || conn->connector_type == DRM_MODE_CONNECTOR_LVDS
                         ? FF_DISPLAY_TYPE_BUILTIN
-                        : conn->connector_type == DRM_MODE_CONNECTOR_HDMIA || conn->connector_type == DRM_MODE_CONNECTOR_HDMIB
+                        : conn->connector_type == DRM_MODE_CONNECTOR_HDMIA || conn->connector_type == DRM_MODE_CONNECTOR_HDMIB || conn->connector_type == DRM_MODE_CONNECTOR_DisplayPort
                             ? FF_DISPLAY_TYPE_EXTERNAL : FF_DISPLAY_TYPE_UNKNOWN,
                     false,
                     conn->connector_id,

@@ -68,7 +68,7 @@ bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName)
     // However I can't find a better method to get the edid data
     const char* drmDirPath = "/sys/class/drm/";
 
-    DIR* dirp = opendir(drmDirPath);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
     if(dirp == NULL)
         return false;
 
@@ -90,13 +90,25 @@ bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName)
             {
                 ffStrbufClear(edidName);
                 ffEdidGetName(edidData, edidName);
-                closedir(dirp);
                 return true;
             }
             break;
         }
     }
     ffStrbufClear(edidName);
-    closedir(dirp);
     return false;
+}
+
+FFDisplayType ffdsGetDisplayType(const char* name)
+{
+    if(ffStrStartsWith(name, "eDP-") || ffStrStartsWith(name, "LVDS-"))
+        return FF_DISPLAY_TYPE_BUILTIN;
+    else if(ffStrStartsWith(name, "HDMI-") ||
+            ffStrStartsWith(name, "DP-") ||
+            ffStrStartsWith(name, "DisplayPort-") ||
+            ffStrStartsWith(name, "DVI-") ||
+            ffStrStartsWith(name, "VGA-"))
+        return FF_DISPLAY_TYPE_EXTERNAL;
+
+    return FF_DISPLAY_TYPE_UNKNOWN;
 }

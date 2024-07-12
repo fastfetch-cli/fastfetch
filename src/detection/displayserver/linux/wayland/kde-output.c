@@ -108,10 +108,7 @@ static void waylandKdeGeometryListener(void *data,
 void waylandOutputNameListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_v2* output, const char *name)
 {
     WaylandDisplay* display = data;
-    if(ffStrStartsWith(name, "eDP-"))
-        display->type = FF_DISPLAY_TYPE_BUILTIN;
-    else if(ffStrStartsWith(name, "HDMI-"))
-        display->type = FF_DISPLAY_TYPE_EXTERNAL;
+    display->type = ffdsGetDisplayType(name);
     strncpy((char*) &display->id, name, sizeof(display->id));
     ffStrbufAppendS(&display->name, name);
 }
