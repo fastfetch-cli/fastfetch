@@ -59,7 +59,7 @@ bool ffParsePropLinePointer(const char** line, const char* start, FFstrbuf* buff
     }
 
     //Copy the value to the buffer
-    while(tolower(**line) != tolower(valueEnd) && **line != '\n' && **line != '\0')
+    while(**line != valueEnd && **line != '\n' && **line != '\0')
     {
         ffStrbufAppendC(buffer, **line);
         ++(*line);
