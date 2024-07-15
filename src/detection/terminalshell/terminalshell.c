@@ -352,11 +352,15 @@ FF_MAYBE_UNUSED static bool getTerminalVersionCockpit(FFstrbuf* exe, FFstrbuf* v
 
 FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* version)
 {
-    if(ffProcessAppendStdOut(version, (char* const[]){
-        exe->chars,
-        "-v",
-        NULL
-    })) return false;
+    ffStrbufSetS(version, getenv("XTERM_VERSION"));
+    if (!version->length)
+    {
+        if(ffProcessAppendStdOut(version, (char* const[]){
+            exe->chars,
+            "-v",
+            NULL
+        })) return false;
+    }
 
     //xterm(273)
     ffStrbufTrimRight(version, ')');
