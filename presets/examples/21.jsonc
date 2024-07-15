@@ -3,39 +3,44 @@
     "logo": {
         "type": "small"
     },
+    "display": {
+        "constants": [
+            "██ "
+        ]
+    },
     "modules": [
         {
-            "key": "██ Distro",
+            "key": "{$1}Distro",
             "keyColor": "38;5;210",
             "type": "os"
         },
         {
-            "key": "██ Kernel",
+            "key": "{$1}Kernel",
             "keyColor": "38;5;84",
             "type": "kernel"
         },
         {
-            "key": "██ Shell",
+            "key": "{$1}Shell",
             "keyColor": "38;5;147",
             "type": "shell"
         },
         {
-            "key": "██ Packages",
+            "key": "{$1}Packages",
             "keyColor": "38;5;200",
             "type": "packages"
         },
         {
-            "key": "██ WM",
+            "key": "{$1}WM",
             "keyColor": "38;5;44",
             "type": "wm"
         },
         {
-            "key": "██ CPU",
+            "key": "{$1}CPU",
             "keyColor": "38;5;75",
             "type": "cpu"
         },
         {
-            "key": "██ Memory",
+            "key": "{$1}Memory",
             "keyColor": "38;5;123",
             "type": "memory"
         }

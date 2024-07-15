@@ -15,7 +15,10 @@
             "charElapsed": "█",
             "charTotal": "░",
             "width": 40
-        }
+        },
+        "constants": [
+            "\u001b[42C"
+        ]
     },
     "modules": [
         {
@@ -41,11 +44,11 @@
         },
         {
             "type": "os",
-            "key": "│ OS         │\u001b[42C"
+            "key": "│ OS         │{$1}"
         },
         {
             "type": "kernel",
-            "key": "│ KERNEL     │\u001b[42C"
+            "key": "│ KERNEL     │{$1}"
         },
         {
             "type": "custom",
@@ -53,34 +56,34 @@
         },
         {
             "type": "title",
-            "key": "│ HOSTNAME   │\u001b[42C",
+            "key": "│ HOSTNAME   │{$1}",
             "format": "{host-name}"
         },
         {
             "type": "localip",
-            "key": "│ CLIENT IP  │\u001b[42C",
+            "key": "│ CLIENT IP  │{$1}",
             "format": "{ipv4}"
         },
         {
             "type": "localip",
-            "key": "│ MAC ADDR   │\u001b[42C",
+            "key": "│ MAC ADDR   │{$1}",
             "format": "{mac} ({ifname})",
             "showIPv4": false,
             "showMac": true
         },
         {
             "type": "dns",
-            "key": "│ DNS        │\u001b[42C",
+            "key": "│ DNS        │{$1}",
             "showType": "ipv4"
         },
         {
             "type": "title",
-            "key": "│ USER       │\u001b[42C",
+            "key": "│ USER       │{$1}",
             "format": "{user-name}"
         },
         {
             "type": "host",
-            "key": "│ MACHINE    │\u001b[42C",
+            "key": "│ MACHINE    │{$1}",
             "format": "{name}"
         },
         {
@@ -89,25 +92,25 @@
         },
         {
             "type": "cpu",
-            "key": "│ PROCESSOR  │\u001b[42C",
+            "key": "│ PROCESSOR  │{$1}",
             "format": "{name}"
         },
         {
             "type": "cpu",
-            "key": "│ CORES      │\u001b[42C",
+            "key": "│ CORES      │{$1}",
             "format": "{cores-physical} PHYSICAL CORES / {cores-logical} THREADS",
             "showPeCoreCount": false
         },
         {
             "type": "cpu",
-            "key": "│ CPU FREQ   │\u001b[42C",
+            "key": "│ CPU FREQ   │{$1}",
             "format": "{freq-max}{/freq-max}{freq-base}{/} GHz"
         },
         {
             "type": "loadavg",
             "compact": false,
             // {duration} is not fixed length, hack it
-            "key": "│ LOAD \u001b[s{duration}m\u001b[u\u001b[6C│\u001b[42C"
+            "key": "│ LOAD \u001b[s{duration}m\u001b[u\u001b[6C│{$1}"
         },
         {
             "type": "custom",
@@ -115,12 +118,12 @@
         },
         {
             "type": "memory",
-            "key": "│ MEMORY     │\u001b[42C",
+            "key": "│ MEMORY     │{$1}",
             "format": "{used} / {total} [{percentage}]"
         },
         {
             "type": "memory",
-            "key": "│ USAGE      │\u001b[42C",
+            "key": "│ USAGE      │{$1}",
             "format": ""
         },
         {
@@ -129,13 +132,13 @@
         },
         {
             "type": "disk",
-            "key": "│ VOLUME     │\u001b[42C",
+            "key": "│ VOLUME     │{$1}",
             "format": "{size-used} / {size-total} [{size-percentage}]",
             "folders": "/"
         },
         {
             "type": "disk",
-            "key": "│ DISK USAGE │\u001b[42C",
+            "key": "│ DISK USAGE │{$1}",
             "format": ""
         },
         {
@@ -144,13 +147,13 @@
         },
         {
             "type": "users",
-            "key": "│ LAST LOGIN │\u001b[42C",
+            "key": "│ LAST LOGIN │{$1}",
             "format": "{login-time}{?client-ip} ({client-ip})",
             "myselfOnly": true
         },
         {
             "type": "uptime",
-            "key": "│ UPTIME     │\u001b[42C"
+            "key": "│ UPTIME     │{$1}"
         },
         {
             "type": "custom",

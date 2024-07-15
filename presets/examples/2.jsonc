@@ -10,13 +10,16 @@
     //     "height": 12
     // },
     "display": {
-        "separator": "  "
+        "separator": "  ",
+        "constants": [
+            "───────────────"
+        ]
     },
     "modules": [
         {
             "type": "custom", // HardwareStart
             // {#1} is equivalent to `\u001b[1m`. {#} is equivalent to `\u001b[m`
-            "format": "┌─────────── {#1}Hardware Information{#} ───────────┐"
+            "format": "┌{$1} {#1}Hardware Information{#} {$1}┐"
         },
         {
             "type": "host",
@@ -72,12 +75,12 @@
         },
         {
             "type": "custom", // SoftwareStart
-            "format": "├─────────── {#1}Software Information{#} ───────────┤"
+            "format": "├{$1} {#1}Software Information{#} {$1}┤"
         },
         {
             "type": "title",
             "key": "  ",
-            "format": "{1}@{2}"
+            "format": "{1}${2}"
         },
         {
             "type": "os",
@@ -156,7 +159,7 @@
         },
         {
             "type": "custom", // InformationEnd
-            "format": "└────────────────────────────────────────────┘"
+            "format": "└{$1}──────────────────────{$1}┘"
         },
         {
             "type": "colors",
