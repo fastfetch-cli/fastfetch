@@ -177,6 +177,7 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
             { "discrete", FF_GPU_TYPE_DISCRETE },
             {},
         });
+        return true;
     }
 
     if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
