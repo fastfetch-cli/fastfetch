@@ -199,6 +199,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             options->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
             options->keyWidth = (uint32_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "constants"))
+        {
+            if (!yyjson_is_arr(val))
+                return "display.constants must be an array";
+            yyjson_val* item;
+            size_t idx, max;
+            yyjson_arr_foreach(val, idx, max, item)
+                ffStrbufInitS(ffListAdd(&options->constants), yyjson_get_str(item));
+        }
         else if (ffStrEqualsIgnCase(key, "tsVersion"))
             return "display.tsVersion has been renamed to general.detectVersion";
         else
@@ -404,6 +413,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+
+    ffListInit(&options->constants, sizeof(FFstrbuf));
 }
 
 void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
@@ -415,6 +426,9 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
     ffStrbufDestroy(&options->keyValueSeparator);
     ffStrbufDestroy(&options->barCharElapsed);
     ffStrbufDestroy(&options->barCharTotal);
+    FF_LIST_FOR_EACH(FFstrbuf, item, options->constants)
+        ffStrbufDestroy(item);
+    ffListDestroy(&options->constants);
 }
 
 void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_doc* doc)
