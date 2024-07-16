@@ -34,8 +34,7 @@ void ffPrintColors(FFColorsOptions* options)
             }
             else
             {
-                if (!instance.config.display.pipe)
-                    ffStrbufAppendF(&result, "\e[4%dm", i);
+                ffStrbufAppendF(&result, "\e[4%dm", i);
                 ffStrbufAppendNC(&result, options->block.width, ' ');
             }
         }
@@ -65,8 +64,7 @@ void ffPrintColors(FFColorsOptions* options)
             }
             else
             {
-                if (!instance.config.display.pipe)
-                    ffStrbufAppendF(&result, "\e[10%dm", i - 8);
+                ffStrbufAppendF(&result, "\e[10%dm", i - 8);
                 ffStrbufAppendNC(&result, options->block.width, ' ');
             }
         }
