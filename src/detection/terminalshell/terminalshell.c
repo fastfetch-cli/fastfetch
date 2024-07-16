@@ -481,6 +481,29 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY cli = ffStrbufCreateCopy(exe);
+    ffStrbufSubstrBeforeLastC(&cli, '/');
+    ffStrbufAppendS(&cli, "/cli"
+        #ifdef _WIN32
+            ".exe"
+        #endif
+    );
+
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        cli.chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    // Zed 0.142.6 – /Applications/Zed.app
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -649,6 +672,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "zellij"))
         return getTerminalVersionZellij(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "zed"))
+        return getTerminalVersionZed(exe, version);
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)
