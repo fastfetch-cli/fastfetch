@@ -169,6 +169,10 @@ The p10k doc clearly states that you should NOT print anything to stdout after `
 
 You can always use `fastfetch --pipe false` to force fastfetch running in colorful mode.
 
+### Q: Why do fastfetch and neofetch show different memory usage result?
+
+See #1096
+
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
 Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
