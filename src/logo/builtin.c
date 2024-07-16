@@ -4480,6 +4480,17 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // Void2Small
+    {
+        .names = {"void2_small", "void-linux2-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_VOID2_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // LAST
     {},
 };
