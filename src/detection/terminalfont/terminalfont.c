@@ -350,12 +350,19 @@ static void detectTerminator(FFTerminalFontResult* result)
         ffFontInitPango(&result->font, fontName.chars);
 }
 
-static bool detectWezterm(FFTerminalFontResult* result)
+static bool detectWezterm(const FFstrbuf* exe, FFTerminalFontResult* result)
 {
+    FF_STRBUF_AUTO_DESTROY cli = ffStrbufCreateCopy(exe);
+    ffStrbufSubstrBeforeLastC(&cli, '-');
+
+    #ifdef _WIN32
+    ffStrbufAppendS(&cli, ".exe");
+    #endif
+
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){
-        "wezterm",
+        cli.chars,
         "ls-fonts",
         "--text",
         "a",
@@ -438,7 +445,7 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "terminator"))
         detectTerminator(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "wezterm-gui"))
-        detectWezterm(terminalFont);
+        detectWezterm(&terminal->exe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "tabby"))
         detectTabby(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour"))
