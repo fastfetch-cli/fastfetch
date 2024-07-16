@@ -132,6 +132,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 uint32_t temp = width;
                 width = height;
                 height = temp;
+                temp = physicalWidth;
+                physicalWidth = physicalHeight;
+                physicalHeight = temp;
             }
 
             uint32_t rotation;

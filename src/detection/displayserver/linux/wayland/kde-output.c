@@ -169,38 +169,7 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
     if(display.width <= 0 || display.height <= 0 || !display.internal)
         return;
 
-    uint32_t rotation;
-    switch(display.transform)
-    {
-        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-        case WL_OUTPUT_TRANSFORM_90:
-            rotation = 90;
-            break;
-        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-        case WL_OUTPUT_TRANSFORM_180:
-            rotation = 180;
-            break;
-        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-        case WL_OUTPUT_TRANSFORM_270:
-            rotation = 270;
-            break;
-        default:
-            rotation = 0;
-            break;
-    }
-
-    switch(rotation)
-    {
-        case 90:
-        case 270: {
-            int32_t temp = display.width;
-            display.width = display.height;
-            display.height = temp;
-            break;
-        }
-        default:
-            break;
-    }
+    uint32_t rotation = ffWaylandHandleRotation(&display);
 
     ffdsAppendDisplay(wldata->result,
         (uint32_t) display.width,
