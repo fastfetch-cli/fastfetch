@@ -292,21 +292,22 @@ void ffStrbufTrimRightSpace(FFstrbuf* strbuf)
     strbuf->chars[strbuf->length] = '\0';
 }
 
-void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex)
+bool ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex)
 {
     if(startIndex > strbuf->length || startIndex >= endIndex)
-        return;
+        return false;
 
     if(endIndex > strbuf->length)
     {
         ffStrbufSubstrBefore(strbuf, startIndex);
-        return;
+        return true;
     }
 
     ffStrbufEnsureFree(strbuf, 0);
     memmove(strbuf->chars + startIndex, strbuf->chars + endIndex, strbuf->length - endIndex);
     strbuf->length -= (endIndex - startIndex);
     strbuf->chars[strbuf->length] = '\0';
+    return true;
 }
 
 void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str)
@@ -362,28 +363,29 @@ void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace)
         *current_pos = replace;
 }
 
-void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
+bool ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
 {
     if(strbuf->length <= index)
-        return;
+        return false;
 
     if(strbuf->allocated == 0)
     {
         //static string
         ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
-        return;
+        return true;
     }
 
     strbuf->length = index;
     strbuf->chars[strbuf->length] = '\0';
+    return true;
 }
 
-void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
+bool ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
 {
     if(index >= strbuf->length)
     {
         ffStrbufClear(strbuf);
-        return;
+        return true;
     }
 
     if(strbuf->allocated == 0)
@@ -391,36 +393,45 @@ void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index)
         //static string
         strbuf->length -= index + 1;
         strbuf->chars += index + 1;
-        return;
+        return true;
     }
 
     memmove(strbuf->chars, strbuf->chars + index + 1, strbuf->length - index - 1);
     strbuf->length -= (index + 1);
     strbuf->chars[strbuf->length] = '\0';
+    return true;
 }
 
-void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c)
+bool ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c)
 {
     uint32_t index = ffStrbufFirstIndexC(strbuf, c);
-    if(index < strbuf->length)
-        ffStrbufSubstrAfter(strbuf, index);
+    if(index >= strbuf->length)
+        return false;
+    ffStrbufSubstrAfter(strbuf, index);
+    return true;
 }
 
-void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str)
+bool ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str)
 {
     if(*str == '\0')
-        return;
+        return false;
 
     uint32_t index = ffStrbufFirstIndexS(strbuf, str) + (uint32_t) strlen(str) - 1; // -1, because firstIndexS is already pointing to str[0], we want to add only the remaining length
-    if(index < strbuf->length)
-        ffStrbufSubstrAfter(strbuf, index);
+    if(index >= strbuf->length)
+        return false;
+
+    ffStrbufSubstrAfter(strbuf, index);
+    return true;
 }
 
-void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
+bool ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
 {
     uint32_t index = ffStrbufLastIndexC(strbuf, c);
-    if(index < strbuf->length)
-        ffStrbufSubstrAfter(strbuf, index);
+    if(index >= strbuf->length)
+        return false;
+
+    ffStrbufSubstrAfter(strbuf, index);
+    return true;
 }
 
 uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
@@ -448,10 +459,13 @@ bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end)
     return false;
 }
 
-void ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c)
+bool ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c)
 {
-    if(!ffStrbufEndsWithC(strbuf, c))
-        ffStrbufAppendC(strbuf, c);
+    if(ffStrbufEndsWithC(strbuf, c))
+        return false;
+
+    ffStrbufAppendC(strbuf, c);
+    return true;
 }
 
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file)

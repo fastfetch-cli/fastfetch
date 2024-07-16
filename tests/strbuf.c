@@ -93,11 +93,25 @@ int main(void)
 
     //substr
 
-    ffStrbufSubstrBefore(&strbuf, 9);
+    VERIFY(ffStrbufSubstrBefore(&strbuf, 9));
     VERIFY(strbuf.length == 9);
     VERIFY(strbuf.allocated >= 110);
     VERIFY(strbuf.chars[strbuf.length] == 0);
     VERIFY(ffStrbufEqualS(&strbuf, "123456789"));
+
+    VERIFY(!ffStrbufSubstrBeforeFirstC(&strbuf, '0'));
+    VERIFY(!ffStrbufSubstrBeforeLastC(&strbuf, '0'));
+    VERIFY(!ffStrbufSubstrAfterFirstC(&strbuf, '0'));
+    VERIFY(!ffStrbufSubstrAfterLastC(&strbuf, '0'));
+    VERIFY(ffStrbufEqualS(&strbuf, "123456789"));
+
+    VERIFY(ffStrbufSubstrBeforeFirstC(&strbuf, '9'));
+    VERIFY(ffStrbufSubstrBeforeLastC(&strbuf, '8'));
+    VERIFY(ffStrbufSubstrAfterFirstC(&strbuf, '1'));
+    VERIFY(ffStrbufSubstrAfterLastC(&strbuf, '2'));
+    VERIFY(ffStrbufEqualS(&strbuf, "34567"));
+
+    ffStrbufSetS(&strbuf, "123456789");
 
     //startsWithC
 
@@ -313,7 +327,7 @@ int main(void)
 
     //ffStrbufCreateStatic / Substr
     ffStrbufInitStatic(&strbuf, "__TEST__");
-    ffStrbufRemoveSubstr(&strbuf, 0, 6);
+    VERIFY(ffStrbufRemoveSubstr(&strbuf, 0, 6));
     VERIFY(ffStrbufEqualS(&strbuf, "__"));
     VERIFY(strbuf.length == 2);
     VERIFY(strbuf.allocated > 0);
@@ -321,7 +335,7 @@ int main(void)
 
     //ffStrbufCreateStatic / Substr
     ffStrbufInitStatic(&strbuf, "__TEST__");
-    ffStrbufRemoveSubstr(&strbuf, 2, 8);
+    VERIFY(ffStrbufRemoveSubstr(&strbuf, 2, 8));
     VERIFY(ffStrbufEqualS(&strbuf, "__"));
     VERIFY(strbuf.length == 2);
     VERIFY(strbuf.allocated > 0);
@@ -329,13 +343,13 @@ int main(void)
 
     //ffStrbufCreateStatic / Substr
     ffStrbufInitStatic(&strbuf, "__TEST__");
-    ffStrbufRemoveSubstr(&strbuf, 2, 6);
+    VERIFY(ffStrbufRemoveSubstr(&strbuf, 2, 6));
     VERIFY(ffStrbufEqualS(&strbuf, "____"));
     VERIFY(strbuf.length == 4);
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
-    //ffStrbufCreateStatic / Substr
+    //ffStrbufCreateStatic / ReplaceAllC
     ffStrbufInitStatic(&strbuf, "__TEST__");
     ffStrbufReplaceAllC(&strbuf, '_', '-');
     VERIFY(ffStrbufEqualS(&strbuf, "--TEST--"));
@@ -403,5 +417,5 @@ int main(void)
     ffStrbufDestroy(&strbuf);
 
     //Success
-    puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
+    puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }
