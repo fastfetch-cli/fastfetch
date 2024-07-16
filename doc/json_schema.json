@@ -1180,13 +1180,14 @@
                                         "type": "string",
                                         "enum": [
                                             "block",
+                                            "background",
                                             "circle",
                                             "diamond",
                                             "triangle",
                                             "square",
                                             "star"
                                         ],
-                                        "default": "block"
+                                        "default": "background"
                                     },
                                     "paddingLeft": {
                                         "description": "Set the number of white spaces to print before the symbol",
