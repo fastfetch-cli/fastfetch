@@ -99,6 +99,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -109,9 +110,9 @@ void ffPrintDisplay(FFDisplayOptions* options)
             if(result->refreshRate > 0)
             {
                 if(options->preciseRefreshRate)
-                    ffStrbufAppendF(&buffer, " @ %gHz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
+                    ffStrbufAppendF(&buffer, " @ %g Hz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
                 else
-                    ffStrbufAppendF(&buffer, " @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+                    ffStrbufAppendF(&buffer, " @ %i Hz", (uint32_t) (result->refreshRate + 0.5));
             }
 
             if(
@@ -119,8 +120,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
                 ffStrbufAppendF(&buffer, " (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
-            if (result->physicalWidth > 0 && result->physicalHeight > 0)
-                ffStrbufAppendF(&buffer, " in %ix%i mm", result->physicalWidth, result->physicalHeight);
+            if (inch > 0)
+                ffStrbufAppendF(&buffer, " in %i″", (uint32_t) (inch + 0.5));
 
             if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
                 ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");
@@ -133,7 +134,6 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
         else
         {
-            double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
             double ppi = sqrt(result->width * result->width + result->height * result->height) / inch;
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
