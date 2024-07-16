@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/FFstrbuf.h"
+
 typedef enum FFformatargtype
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
