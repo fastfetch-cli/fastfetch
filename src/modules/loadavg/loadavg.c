@@ -30,7 +30,6 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
         {
             FFCPUResult cpu = {
                 .temperature = FF_CPU_TEMP_UNSET,
-                .frequencyMin = 0.0/0.0,
                 .frequencyMax = 0.0/0.0,
                 .frequencyBase = 0.0/0.0,
                 .frequencyBiosLimit = 0.0/0.0,

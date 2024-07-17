@@ -48,11 +48,6 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         {
             // MHz/Watts pairs like: 2501/32000 2187/27125 2000/24000
             uint32_t fmax = (uint32_t) strtoul(buffer.chars, NULL, 10);
-            uint32_t fmin = fmax;
-            uint32_t i = ffStrbufLastIndexC(&buffer, ' ');
-            if (i < buffer.length)
-                fmin = (uint32_t) strtoul(buffer.chars + i + 1, NULL, 10);
-            if (!(cpu->frequencyMin <= fmin)) cpu->frequencyMin = fmin; // Counting for NaN
             if (!(cpu->frequencyMax >= fmax)) cpu->frequencyMax = fmax;
 
             if (options->showPeCoreCount)
@@ -66,7 +61,6 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             }
         }
     }
-    cpu->frequencyMin /= 1000;
     cpu->frequencyMax /= 1000;
 
     int clockRate = ffSysctlGetInt("hw.clockrate", 0);

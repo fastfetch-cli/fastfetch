@@ -21,7 +21,6 @@ typedef struct FFCPUResult
 
     double frequencyBase; // GHz
     double frequencyMax; // GHz
-    double frequencyMin; // GHz
     double frequencyBiosLimit; // GHz
 
     FFCPUCore coreTypes[16]; // number of P cores, E cores, etc.

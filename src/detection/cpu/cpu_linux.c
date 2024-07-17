@@ -165,14 +165,6 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
                 else
                     cpu->frequencyMax = fmax;
             }
-            uint32_t fmin = getFrequency(&path, "/cpuinfo_min_freq", "/scaling_min_freq", &buffer);
-            if (fmin > 0)
-            {
-                if (cpu->frequencyMin == cpu->frequencyMin)
-                    cpu->frequencyMin = cpu->frequencyMin < fmin ? cpu->frequencyMin : fmin;
-                else
-                    cpu->frequencyMin = fmin;
-            }
 
             if (options->showPeCoreCount)
             {
@@ -189,7 +181,6 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
     }
     cpu->frequencyBase /= 1e6;
     cpu->frequencyMax /= 1e6;
-    cpu->frequencyMin /= 1e6;
     cpu->frequencyBiosLimit /= 1e6;
     return true;
 }

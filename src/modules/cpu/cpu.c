@@ -17,7 +17,6 @@ void ffPrintCPU(FFCPUOptions* options)
 {
     FFCPUResult cpu = {
         .temperature = FF_CPU_TEMP_UNSET,
-        .frequencyMin = 0.0/0.0,
         .frequencyMax = 0.0/0.0,
         .frequencyBase = 0.0/0.0,
         .frequencyBiosLimit = 0.0/0.0,
@@ -202,7 +201,6 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 {
     FFCPUResult cpu = {
         .temperature = FF_CPU_TEMP_UNSET,
-        .frequencyMin = 0.0/0.0,
         .frequencyMax = 0.0/0.0,
         .frequencyBase = 0.0/0.0,
         .frequencyBiosLimit = 0.0/0.0,
@@ -234,7 +232,6 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_val* frequency = yyjson_mut_obj_add_obj(doc, obj, "frequency");
         yyjson_mut_obj_add_real(doc, frequency, "base", cpu.frequencyBase);
         yyjson_mut_obj_add_real(doc, frequency, "max", cpu.frequencyMax);
-        yyjson_mut_obj_add_real(doc, frequency, "min", cpu.frequencyMin);
         yyjson_mut_obj_add_real(doc, frequency, "biosLimit", cpu.frequencyBiosLimit);
 
         yyjson_mut_val* coreTypes = yyjson_mut_obj_add_arr(doc, obj, "coreTypes");
