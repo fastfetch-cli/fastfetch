@@ -44,7 +44,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
         run: time ./fastfetch -c presets/ci.jsonc --format json
@@ -99,7 +99,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
         run: time ./fastfetch -c presets/ci.jsonc --format json
@@ -146,7 +146,7 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
@@ -185,7 +185,7 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
@@ -220,7 +220,7 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
@@ -259,7 +259,7 @@ jobs:
       - name: run
         run: |
             ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
@@ -300,7 +300,7 @@ jobs:
       - name: run
         run: |
             ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc
+            time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
@@ -348,7 +348,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
         run: time ./fastfetch -c presets/ci.jsonc --format json
@@ -477,7 +477,7 @@ jobs:
         run: ./fastfetch --list-features
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
         run: time ./fastfetch -c presets/ci.jsonc --format json
@@ -547,7 +547,7 @@ jobs:
         run: curl -LO https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK/raw/master/ags_lib/lib/amd_ags_x86.dll
 
       - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
 
       - name: run fastfetch --format json
         run: time ./fastfetch -c presets/ci.jsonc --format json
