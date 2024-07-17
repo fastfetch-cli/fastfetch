@@ -31,7 +31,7 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPURe
     }
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "clock_MHz");
-        cpu->frequencyBase = kn->value.ui32 / 1000.;
+        cpu->frequencyBase = kn->value.ui32;
     }
 
     ks = kstat_lookup(kc, "unix", -1, "system_misc");

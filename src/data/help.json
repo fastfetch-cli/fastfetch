@@ -1179,7 +1179,7 @@
         },
         {
             "long": "cpu-freq-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing CPU frequency",
+            "desc": "Set the number of digits to keep after the decimal point when printing CPU frequency in GHz",
             "arg": {
                 "type": "num",
                 "default": 2

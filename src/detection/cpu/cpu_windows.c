@@ -65,8 +65,8 @@ inline static const char* detectSpeedByCpuid(FFCPUResult* cpu)
         return "Unsupported instruction";
 
     // cpuid returns 0 MHz when hyper-v is enabled
-    if (base) cpu->frequencyBase = base / 1000.0;
-    if (max) cpu->frequencyMax = max / 1000.0;
+    if (base) cpu->frequencyBase = base;
+    if (max) cpu->frequencyMax = max;
     return NULL;
 }
 
@@ -97,7 +97,7 @@ static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
             return "No active CPU is found in SMBIOS data";
     }
 
-    double speed = data->MaxSpeed / 1000.0;
+    uint32_t speed = data->MaxSpeed;
     // Sometimes SMBIOS reports invalid value. We assume that max speed is small than 2x of base
     if (speed < cpu->frequencyBase || speed > cpu->frequencyBase * 2)
         return "Possible invalid CPU max speed in SMBIOS data. See #800";
@@ -159,7 +159,7 @@ static const char* detectByRegistry(FFCPUResult* cpu)
 
     uint32_t mhz;
     if(ffRegReadUint(hKey, L"~MHz", &mhz, NULL))
-        cpu->frequencyBase = mhz / 1000.0;
+        cpu->frequencyBase = mhz;
 
     return NULL;
 }
@@ -180,8 +180,8 @@ static const char* detectCoreTypes(FFCPUResult* cpu)
         ++cpu->coreTypes[ifreq].count;
     }
 
-    if (cpu->frequencyBase != cpu->frequencyBase)
-        cpu->frequencyBase = pinfo->MaxMhz / 1000.0;
+    if (cpu->frequencyBase == 0)
+        cpu->frequencyBase = pinfo->MaxMhz;
     return NULL;
 }
 
@@ -196,7 +196,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     detectSpeedByCpuid(cpu);
     if (options->showPeCoreCount) detectCoreTypes(cpu);
 
-    if (cpu->frequencyMax != cpu->frequencyMax)
+    if (cpu->frequencyMax == 0)
         detectMaxSpeedBySmbios(cpu);
 
     if(options->temp)

@@ -1104,9 +1104,9 @@
                                         "$ref": "#/$defs/temperature"
                                     },
                                     "freqNdigits": {
-                                        "description": "Set the number of digits to keep after the decimal point when printing CPU frequency",
+                                        "description": "Set the number of digits to keep after the decimal point when printing frequency in GHz, or MHz if set to -1",
                                         "type": "integer",
-                                        "minimum": 0,
+                                        "minimum": -1,
                                         "maximum": 9,
                                         "default": 2
                                     },

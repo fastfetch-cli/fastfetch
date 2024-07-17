@@ -19,9 +19,9 @@ typedef struct FFCPUResult
     uint16_t coresLogical;
     uint16_t coresOnline;
 
-    double frequencyBase; // GHz
-    double frequencyMax; // GHz
-    double frequencyBiosLimit; // GHz
+    uint32_t frequencyBase; // GHz
+    uint32_t frequencyMax; // GHz
+    uint32_t frequencyBiosLimit; // GHz
 
     FFCPUCore coreTypes[16]; // number of P cores, E cores, etc.
 
