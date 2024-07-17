@@ -11,6 +11,5 @@ typedef struct FFCPUOptions
 
     bool temp;
     FFColorRangeConfig tempConfig;
-    int8_t freqNdigits;
     bool showPeCoreCount;
 } FFCPUOptions;

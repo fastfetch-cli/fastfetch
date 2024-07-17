@@ -79,7 +79,7 @@ void ffPrintCPU(FFCPUOptions* options)
             if(freq > 0)
             {
                 ffStrbufAppendS(&str, " @ ");
-                ffParseFrequency(freq, &str, options->freqNdigits);
+                ffParseFrequency(freq, &str);
             }
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
@@ -93,11 +93,11 @@ void ffPrintCPU(FFCPUOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY freqBase = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyBase, &freqBase, options->freqNdigits);
+            ffParseFrequency(cpu.frequencyBase, &freqBase);
             FF_STRBUF_AUTO_DESTROY freqMax = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyBase, &freqBase, options->freqNdigits);
+            ffParseFrequency(cpu.frequencyBase, &freqBase);
             FF_STRBUF_AUTO_DESTROY freqBioslimit = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyBiosLimit, &freqBioslimit, options->freqNdigits);
+            ffParseFrequency(cpu.frequencyBiosLimit, &freqBioslimit);
 
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
@@ -130,12 +130,6 @@ bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char
     if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
         return true;
 
-    if (ffStrEqualsIgnCase(subKey, "freq-ndigits"))
-    {
-        options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
-        return true;
-    }
-
     if (ffStrEqualsIgnCase(subKey, "show-pe-core-count"))
     {
         options->showPeCoreCount = ffOptionParseBoolean(value);
@@ -163,7 +157,7 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 
         if (ffStrEqualsIgnCase(key, "freqNdigits"))
         {
-            options->freqNdigits = (int8_t) yyjson_get_int(val);
+            ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "modules.CPU.freqNdigits has been moved to display.freq.ndigits");
             continue;
         }
 
@@ -185,9 +179,6 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 
     ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
-
-    if (defaultOptions.freqNdigits != options->freqNdigits)
-        yyjson_mut_obj_add_int(doc, module, "freqNdigits", options->freqNdigits);
 
     if (defaultOptions.showPeCoreCount != options->showPeCoreCount)
         yyjson_mut_obj_add_bool(doc, module, "showPeCoreCount", options->showPeCoreCount);
@@ -277,7 +268,6 @@ void ffInitCPUOptions(FFCPUOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs);
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->freqNdigits = 2;
     options->showPeCoreCount = false;
 }
 

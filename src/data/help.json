@@ -689,6 +689,14 @@
             }
         },
         {
+            "long": "freq-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing CPU / GPU frequency in GHz",
+            "arg": {
+                "type": "num",
+                "default": 2
+            }
+        },
+        {
             "long": "temp-unit",
             "desc": "Set the unit of the temperature",
             "arg": {
@@ -1175,14 +1183,6 @@
                 "type": "bool",
                 "optional": true,
                 "default": false
-            }
-        },
-        {
-            "long": "cpu-freq-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing CPU frequency in GHz",
-            "arg": {
-                "type": "num",
-                "default": 2
             }
         },
         {

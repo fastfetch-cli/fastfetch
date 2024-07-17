@@ -574,6 +574,20 @@
                         }
                     }
                 },
+                "freq": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Set how frequency values should be displayed",
+                    "properties": {
+                        "ndigits": {
+                            "type": "integer",
+                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA possitive value will show the frequency in GHz of decimal\n-1 will show the frequency in MHz",
+                            "minimum": -1,
+                            "maximum": 9,
+                            "default": 2
+                        }
+                    }
+                },
                 "noBuffer": {
                     "type": "boolean",
                     "description": "Whether to disable the stdout application buffer",
@@ -1102,13 +1116,6 @@
                                     },
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
-                                    },
-                                    "freqNdigits": {
-                                        "description": "Set the number of digits to keep after the decimal point when printing frequency in GHz, or MHz if set to -1",
-                                        "type": "integer",
-                                        "minimum": -1,
-                                        "maximum": 9,
-                                        "default": 2
                                     },
                                     "showPeCoreCount": {
                                         "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",

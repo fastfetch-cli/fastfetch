@@ -96,13 +96,15 @@ void ffParseSize(uint64_t bytes, FFstrbuf* result)
     }
 }
 
-bool ffParseFrequency(uint32_t mhz, FFstrbuf* result, int8_t freqNdigits)
+bool ffParseFrequency(uint32_t mhz, FFstrbuf* result)
 {
     if (mhz == 0)
         return false;
 
-    if (freqNdigits >= 0)
-        ffStrbufAppendF(result, "%.*f GHz", freqNdigits, mhz / 1000.);
+    int8_t ndigits = instance.config.display.freqNdigits;
+
+    if (ndigits >= 0)
+        ffStrbufAppendF(result, "%.*f GHz", ndigits, mhz / 1000.);
     else
         ffStrbufAppendF(result, "%u MHz", (unsigned) mhz);
     return true;

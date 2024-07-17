@@ -208,8 +208,14 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_arr_foreach(val, idx, max, item)
                 ffStrbufInitS(ffListAdd(&options->constants), yyjson_get_str(item));
         }
-        else if (ffStrEqualsIgnCase(key, "tsVersion"))
-            return "display.tsVersion has been renamed to general.detectVersion";
+        else if (ffStrEqualsIgnCase(key, "freq"))
+        {
+            if (!yyjson_is_obj(val))
+                return "display.freq must be an object";
+
+            yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+            if (ndigits) options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
+        }
         else
             return "Unknown display property";
     }
@@ -366,6 +372,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         else
             return false;
     }
+    else if(ffStrStartsWithIgnCase(key, "--freq-"))
+    {
+        const char* subkey = key + strlen("--freq-");
+        if(ffStrEqualsIgnCase(subkey, "ndigits"))
+            options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
+    }
     else
         return false;
     return true;
@@ -413,6 +425,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    options->freqNdigits = 2;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));
 }
@@ -594,6 +607,14 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
 
     if (options->keyWidth != defaultOptions.keyWidth)
         yyjson_mut_obj_add_uint(doc, obj, "keyWidth", options->keyWidth);
+
+    {
+        yyjson_mut_val* freq = yyjson_mut_obj(doc);
+        if (options->freqNdigits != defaultOptions.freqNdigits)
+            yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
+        if (yyjson_mut_obj_size(freq) > 0)
+            yyjson_mut_obj_add_val(doc, obj, "freq", freq);
+    }
 
     if (yyjson_mut_obj_size(obj) > 0)
         yyjson_mut_obj_add_val(doc, doc->root, "display", obj);
