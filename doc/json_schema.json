@@ -581,7 +581,7 @@
                     "properties": {
                         "ndigits": {
                             "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA possitive value will show the frequency in GHz of decimal\n-1 will show the frequency in MHz",
+                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz of decimal\n-1 will show the frequency in MHz",
                             "minimum": -1,
                             "maximum": 9,
                             "default": 2
