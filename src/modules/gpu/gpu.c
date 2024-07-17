@@ -39,8 +39,11 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if(gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
             ffStrbufAppendF(&output, " (%d)", gpu->coreCount);
 
-        if(gpu->frequency == gpu->frequency && gpu->frequency > 0 /* Inactive? */)
-            ffStrbufAppendF(&output, " @ %.2f GHz", gpu->frequency);
+        if(gpu->frequency > 0)
+        {
+            ffStrbufAppendS(&output, " @ ");
+            ffParseFrequency(gpu->frequency, &output);
+        }
 
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
         {

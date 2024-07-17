@@ -5,7 +5,7 @@
 #define FF_GPU_TEMP_UNSET (0/0.0)
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
-#define FF_GPU_FREQUENCY_UNSET (0/0.0)
+#define FF_GPU_FREQUENCY_UNSET 0
 
 extern const char* FF_GPU_VENDOR_NAME_APPLE;
 extern const char* FF_GPU_VENDOR_NAME_AMD;
@@ -32,7 +32,7 @@ typedef struct FFGPUResult
     FFstrbuf platformApi;
     double temperature;
     int32_t coreCount;
-    double frequency; // Maximum time clock frequency in GHz
+    uint32_t frequency; // Maximum time clock frequency in MHz
     FFGPUMemory dedicated;
     FFGPUMemory shared;
     uint64_t deviceId; // Used internally, may be uninitialized

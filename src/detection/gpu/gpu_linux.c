@@ -152,7 +152,7 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
         ffStrbufAppendS(pciDir, "/gt_max_freq_mhz");
     }
     if (ffReadFileBuffer(pciDir->chars, buffer))
-        gpu->frequency = ffStrbufToDouble(buffer) / 1000.0;
+        gpu->frequency = (uint32_t) ffStrbufToUInt(buffer, 0);
 }
 
 static bool loadPciIds(FFstrbuf* pciids)
@@ -346,7 +346,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
         }) >= 0)
         {
             gpu->coreCount = (int) paramsGlobal.num_cores_total_active;
-            gpu->frequency = paramsGlobal.max_frequency_khz / 1e6;
+            gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
             gpu->deviceId = paramsGlobal.chip_id;
         }
     }

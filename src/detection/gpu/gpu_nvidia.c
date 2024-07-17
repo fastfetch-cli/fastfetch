@@ -122,11 +122,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         nvmlData.ffnvmlDeviceGetNumGpuCores(device, result.coreCount);
 
     if (result.frequency)
-    {
-        uint32_t clockMHz;
-        if (nvmlData.ffnvmlDeviceGetMaxClockInfo(device, NVML_CLOCK_GRAPHICS, &clockMHz) == NVML_SUCCESS)
-            *result.frequency = clockMHz / 1000.;
-    }
+        nvmlData.ffnvmlDeviceGetMaxClockInfo(device, NVML_CLOCK_GRAPHICS, result.frequency);
 
     return NULL;
 
