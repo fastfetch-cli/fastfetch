@@ -36,6 +36,43 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
     return result;
 }
 
+#ifdef __aarch64__
+#include "util/apple/cf_helpers.h"
+
+#include <IOKit/IOKitLib.h>
+
+static const char* detectFrequency(FFGPUResult* gpu)
+{
+    // https://github.com/giampaolo/psutil/pull/2222/files
+
+    FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("pmgr"));
+    if (!entryDevice)
+        return "IOServiceGetMatchingServices() failed";
+
+    if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice"))
+        return "\"pmgr\" should conform to \"AppleARMIODevice\"";
+
+    FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states9-sram"), kCFAllocatorDefault, kNilOptions);
+    if (CFGetTypeID(freqProperty) != CFDataGetTypeID())
+        return "\"voltage-states9-sram\" in \"pmgr\" is not found";
+
+    // voltage-states5-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
+    CFIndex propLength = CFDataGetLength(freqProperty);
+    if (propLength == 0 || propLength % (CFIndex) sizeof(uint32_t) * 2 != 0)
+        return "Invalid \"voltage-states9-sram\" length";
+
+    uint32_t* pStart = (uint32_t*) CFDataGetBytePtr(freqProperty);
+    uint32_t pMax = *pStart;
+    for (CFIndex i = 2; i < propLength / (CFIndex) sizeof(uint32_t) && pStart[i] > 0; i += 2 /* skip voltage */)
+        pMax = pMax > pStart[i] ? pMax : pStart[i];
+
+    if (pMax > 0)
+        gpu->frequency = pMax / 1000 / 1000;
+
+    return NULL;
+}
+#endif
+
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
@@ -94,6 +131,11 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 gpu->type = FF_GPU_TYPE_INTEGRATED;
             else if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA || vendorStr == FF_GPU_VENDOR_NAME_AMD)
                 gpu->type = FF_GPU_TYPE_DISCRETE;
+
+            #ifdef __aarch64__
+            if (vendorStr == FF_GPU_VENDOR_NAME_APPLE)
+                detectFrequency(gpu);
+            #endif
         }
 
         gpu->temperature = options->temp ? detectGpuTemp(&gpu->name) : FF_GPU_TEMP_UNSET;

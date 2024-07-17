@@ -2,7 +2,6 @@
 #include "common/sysctl.h"
 #include "detection/temps/temps_apple.h"
 #include "util/stringUtils.h"
-#include "util/apple/cf_helpers.h"
 
 static double detectCpuTemp(const FFstrbuf* cpuName)
 {
@@ -44,15 +43,19 @@ static const char* detectFrequency(FFCPUResult* cpu)
     if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice"))
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
 
-    FF_CFTYPE_AUTO_RELEASE CFDataRef pFreqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states5-sram"), kCFAllocatorDefault, kNilOptions);
-    if (CFGetTypeID(pFreqProperty) != CFDataGetTypeID())
+    FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states5-sram"), kCFAllocatorDefault, kNilOptions);
+    if (CFGetTypeID(freqProperty) != CFDataGetTypeID())
         return "\"voltage-states5-sram\" in \"pmgr\" is not found";
 
-    // voltage-states5-sram stores supported frequencies of pcores from the lowest to the highest
-    CFIndex pCoreFreqLength = CFDataGetLength(pFreqProperty);
-    uint32_t* pStart = (uint32_t*) CFDataGetBytePtr(pFreqProperty);
-    uint32_t pMax = 0;
-    for (CFIndex i = 0; i < pCoreFreqLength && pStart[i] > 0; i += 4)
+    // voltage-states5-sram stores supported <frequency / voltage> pairs of pcores from the lowest to the highest
+    // voltage-states1-sram stores ecores'
+    CFIndex propLength = CFDataGetLength(freqProperty);
+    if (propLength == 0 || propLength % (CFIndex) sizeof(uint32_t) * 2 != 0)
+        return "Invalid \"voltage-states5-sram\" length";
+
+    uint32_t* pStart = (uint32_t*) CFDataGetBytePtr(freqProperty);
+    uint32_t pMax = *pStart;
+    for (CFIndex i = 2; i < propLength / (CFIndex) sizeof(uint32_t) && pStart[i] > 0; i += 2 /* skip voltage */)
         pMax = pMax > pStart[i] ? pMax : pStart[i];
 
     if (pMax > 0)
