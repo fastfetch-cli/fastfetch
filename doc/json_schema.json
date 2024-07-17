@@ -1948,12 +1948,19 @@
                                         "const": "separator"
                                     },
                                     "string": {
-                                        "description": "Set the string to be printed",
+                                        "description": "Set the string to be printed by the separator line",
                                         "type": "string",
                                         "default": "-"
                                     },
                                     "outputColor": {
+                                        "description": "Set the color of the separator line",
                                         "$ref": "#/$defs/outputColor"
+                                    },
+                                    "length": {
+                                        "description": "Set the length of the separator line, or 0 to auto-detect",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "default": 0
                                     }
                                 }
                             },

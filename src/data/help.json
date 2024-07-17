@@ -947,7 +947,7 @@
         },
         {
             "long": "separator-string",
-            "desc": "Set the string printed by the separator module",
+            "desc": "Set the string to be printed by the separator line",
             "arg": {
                 "type": "str",
                 "default": "-"
@@ -955,10 +955,19 @@
         },
         {
             "long": "separator-output-color",
-            "desc": "Set the color of the separator module",
+            "desc": "Set the color of the separator line",
             "arg": {
                 "type": "color",
                 "default": "default"
+            }
+        },
+        {
+            "long": "separator-length",
+            "desc": "Set the length of the separator line",
+            "remark": "Set to 0 to automatically calculate it with the title length",
+            "arg": {
+                "type": "num",
+                "default": "0"
             }
         },
         {
