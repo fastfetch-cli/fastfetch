@@ -1,5 +1,6 @@
 #include "displayserver.h"
 #include "util/apple/cf_helpers.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -69,7 +70,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             CGSize size = CGDisplayScreenSize(screen);
 
-            ffdsAppendDisplay(ds,
+            FFDisplayResult* display = ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
                 (uint32_t)CGDisplayModeGetPixelHeight(mode),
                 refreshRate,
@@ -83,6 +84,24 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 (uint32_t) (size.width + 0.5),
                 (uint32_t) (size.height + 0.5)
             );
+            if (display)
+            {
+                // Shitty code
+                uint8_t bitDepth = 0;
+                FF_CFTYPE_AUTO_RELEASE CFStringRef desc = CFCopyDescription(mode);
+                CFRange start = CFStringFind(desc, CFSTR("BitsPerSample = "), 0);
+                if (start.location != kCFNotFound)
+                {
+                    for (CFIndex idx = start.location + start.length; idx < CFStringGetLength(desc); ++idx)
+                    {
+                        UniChar ch = CFStringGetCharacterAtIndex(desc, idx);
+                        if (!ffCharIsDigit((char) ch))
+                            break;
+                        bitDepth = (uint8_t) (bitDepth * 10 + (ch - '0'));
+                    }
+                }
+                display->bitDepth = bitDepth;
+            }
             CGDisplayModeRelease(mode);
         }
         CGDisplayRelease(screen);
