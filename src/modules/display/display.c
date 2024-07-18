@@ -310,6 +310,8 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_uint(doc, obj, "scaledHeight", item->scaledHeight);
         yyjson_mut_obj_add_uint(doc, obj, "physicalWidth", item->physicalWidth);
         yyjson_mut_obj_add_uint(doc, obj, "physicalHeight", item->physicalHeight);
+        yyjson_mut_obj_add_uint(doc, obj, "bitDepth", item->bitDepth);
+        yyjson_mut_obj_add_bool(doc, obj, "hdrEnabled", item->hdrEnabled);
 
         switch (item->type)
         {
