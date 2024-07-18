@@ -146,7 +146,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 default: rotation = 0; break;
             }
 
-            ffdsAppendDisplay(ds,
+            FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
@@ -164,6 +164,23 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 physicalWidth,
                 physicalHeight
             );
+
+            if (display)
+            {
+                DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO advColorInfo = {
+                    .header = {
+                        .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO,
+                        .size = sizeof(advColorInfo),
+                        .adapterId = path->targetInfo.adapterId,
+                        .id = path->targetInfo.id,
+                    }
+                };
+                if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS)
+                {
+                    display->hdrEnabled = !!advColorInfo.advancedColorEnabled;
+                    display->bitDepth = (uint8_t) advColorInfo.bitsPerColorChannel;
+                }
+            }
         }
     }
 }
