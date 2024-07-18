@@ -299,17 +299,24 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
     FF_LIST_FOR_EACH(FFDisplayResult, item, dsResult->displays)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_uint(doc, obj, "width", item->width);
-        yyjson_mut_obj_add_uint(doc, obj, "height", item->height);
         yyjson_mut_obj_add_uint(doc, obj, "id", item->id);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_bool(doc, obj, "primary", item->primary);
+
+        yyjson_mut_val* output = yyjson_mut_obj_add_obj(doc, obj, "output");
+        yyjson_mut_obj_add_uint(doc, output, "width", item->width);
+        yyjson_mut_obj_add_uint(doc, output, "height", item->height);
+
+        yyjson_mut_val* scaled = yyjson_mut_obj_add_obj(doc, obj, "scaled");
+        yyjson_mut_obj_add_uint(doc, scaled, "width", item->scaledWidth);
+        yyjson_mut_obj_add_uint(doc, scaled, "height", item->scaledHeight);
+
+        yyjson_mut_val* physical = yyjson_mut_obj_add_obj(doc, obj, "physical");
+        yyjson_mut_obj_add_uint(doc, physical, "width", item->physicalWidth);
+        yyjson_mut_obj_add_uint(doc, physical, "height", item->physicalHeight);
+
         yyjson_mut_obj_add_real(doc, obj, "refreshRate", item->refreshRate);
         yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
-        yyjson_mut_obj_add_uint(doc, obj, "scaledWidth", item->scaledWidth);
-        yyjson_mut_obj_add_uint(doc, obj, "scaledHeight", item->scaledHeight);
-        yyjson_mut_obj_add_uint(doc, obj, "physicalWidth", item->physicalWidth);
-        yyjson_mut_obj_add_uint(doc, obj, "physicalHeight", item->physicalHeight);
         yyjson_mut_obj_add_uint(doc, obj, "bitDepth", item->bitDepth);
         yyjson_mut_obj_add_bool(doc, obj, "hdrEnabled", item->hdrEnabled);
 

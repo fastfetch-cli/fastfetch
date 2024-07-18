@@ -53,7 +53,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
 
             printf("%ux%u px", display->width, display->height);
             if (display->refreshRate > 0)
-                printf(" @ %.2f Hz", display->refreshRate);
+                printf(" @ %.3f Hz", display->refreshRate);
             if (inch > 0)
                 printf(" - %ux%u mm (%.2f inches, %.2f ppi)\n", display->physicalWidth, display->physicalHeight, inch, ppi);
             else
