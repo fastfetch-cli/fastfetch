@@ -49,6 +49,7 @@ const char* ffDetectMonitor(FFlist* results)
         ffStrbufInit(&display->name);
         ffEdidGetName(edidData, &display->name);
         ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
+        display->refreshRate = 0;
     }
     return NULL;
 }

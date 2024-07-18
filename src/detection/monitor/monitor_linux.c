@@ -61,6 +61,7 @@ const char* ffDetectMonitor(FFlist* results)
             ffEdidGetPhysicalSize(edidData, &display->physicalWidth, &display->physicalHeight);
             ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
             display->hdrCompatible = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
+            display->refreshRate = 0;
         }
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
