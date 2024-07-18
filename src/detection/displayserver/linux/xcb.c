@@ -241,7 +241,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
             break;
     }
     bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation, primary, output, displayType);
-    res = res ? true : ffdsAppendDisplay(
+    res = res ? true : !!ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
@@ -317,7 +317,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         data->ffxcb_randr_output_next(&outputIterator);
     };
 
-    return foundOutput ? true : ffdsAppendDisplay(
+    return foundOutput ? true : !!ffdsAppendDisplay(
         data->result,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,

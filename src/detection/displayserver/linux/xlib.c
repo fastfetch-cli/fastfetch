@@ -242,7 +242,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
             foundOutput = true;
     }
 
-    return foundOutput ? true : ffdsAppendDisplay(
+    return foundOutput ? true : !!ffdsAppendDisplay(
         data->result,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,

@@ -46,6 +46,7 @@ typedef struct WaylandDisplay
     FFstrbuf description;
     FFstrbuf edidName;
     uint64_t id;
+    bool hdrEnabled;
     void* internal;
 } WaylandDisplay;
 
