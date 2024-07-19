@@ -50,7 +50,7 @@ Bugfixes:
 * Fix some presets
 * Better detection for XTerm terminal fonts (#1095, TerminalFont, Linux)
 * Remove debug output (#1097, Windows)
-* Fix command line option `--gpu-hide-type` doesnt work (#1098, GPU)
+* Fix command line option `--gpu-hide-type` doesn't work (#1098, GPU)
 * Fix some typos
 
 Logos:
