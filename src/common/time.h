@@ -20,7 +20,7 @@ static inline uint64_t ffTimeGetTick() //In msec
     #else
         struct timespec timeNow;
         clock_gettime(CLOCK_MONOTONIC, &timeNow);
-        return (uint64_t)((timeNow.tv_sec * 1000ull) + (timeNow.tv_nsec / 1000000ull));
+        return (uint64_t)(((uint64_t) timeNow.tv_sec * 1000u) + ((uint64_t) timeNow.tv_nsec / 1000000u));
     #endif
 }
 
@@ -33,7 +33,7 @@ static inline uint64_t ffTimeGetNow()
     #else
         struct timespec timeNow;
         clock_gettime(CLOCK_REALTIME, &timeNow);
-        return (uint64_t)((timeNow.tv_sec * 1000ull) + (timeNow.tv_nsec / 1000000ull));
+        return (uint64_t)(((uint64_t) timeNow.tv_sec * 1000u) + ((uint64_t) timeNow.tv_nsec / 1000000u));
     #endif
 }
 
