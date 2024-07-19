@@ -171,7 +171,7 @@ You can always use `fastfetch --pipe false` to force fastfetch running in colorf
 
 ### Q: Why do fastfetch and neofetch show different memory usage result?
 
-See #1096
+See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
 
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
