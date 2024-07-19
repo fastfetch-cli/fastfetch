@@ -64,6 +64,7 @@ typedef struct FFDisplayResult
     bool primary;
     uint8_t bitDepth;
     bool hdrEnabled;
+    bool wcgEnabled;
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult

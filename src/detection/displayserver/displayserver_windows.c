@@ -178,6 +178,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS)
                 {
                     display->hdrEnabled = !!advColorInfo.advancedColorEnabled;
+                    display->wcgEnabled = !!advColorInfo.wideColorEnforced;
                     display->bitDepth = (uint8_t) advColorInfo.bitsPerColorChannel;
                 }
             }

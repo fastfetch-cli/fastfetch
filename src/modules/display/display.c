@@ -319,6 +319,7 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
         yyjson_mut_obj_add_uint(doc, obj, "bitDepth", item->bitDepth);
         yyjson_mut_obj_add_bool(doc, obj, "hdrEnabled", item->hdrEnabled);
+        yyjson_mut_obj_add_bool(doc, obj, "wcgEnabled", item->wcgEnabled);
 
         switch (item->type)
         {
