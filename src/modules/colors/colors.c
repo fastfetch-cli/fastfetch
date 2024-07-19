@@ -46,7 +46,7 @@ void ffPrintColors(FFColorsOptions* options)
             if (options->paddingLeft > 0)
                 ffPrintCharTimes(' ', options->paddingLeft);
 
-            if (!instance.config.display.pipe)
+            if (!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
                 ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
             ffStrbufPutTo(&result, stdout);
             ffStrbufClear(&result);
@@ -102,7 +102,7 @@ void ffPrintColors(FFColorsOptions* options)
 
         if(options->paddingLeft > 0)
             ffPrintCharTimes(' ', options->paddingLeft);
-        if(!instance.config.display.pipe)
+        if(!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
             ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
         ffStrbufPutTo(&result, stdout);
     }
