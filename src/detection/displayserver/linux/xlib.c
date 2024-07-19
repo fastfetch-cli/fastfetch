@@ -119,7 +119,6 @@ typedef struct XrandrData
     FF_LIBRARY_SYMBOL(XInternAtom)
     FF_LIBRARY_SYMBOL(XGetAtomName);
     FF_LIBRARY_SYMBOL(XFree);
-    FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
     FF_LIBRARY_SYMBOL(XRRGetMonitors)
     FF_LIBRARY_SYMBOL(XRRGetScreenResourcesCurrent)
     FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
@@ -321,7 +320,6 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XInternAtom,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XGetAtomName,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XFree,);
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResourcesCurrent,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);
