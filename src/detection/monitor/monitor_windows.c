@@ -103,6 +103,13 @@ const char* ffDetectMonitor(FFlist* results)
                     display->refreshRate = freq.Numerator / (double) freq.Denominator;
                 }
             }
+
+            DISPLAYCONFIG_VIDEO_SIGNAL_INFO current = modes[path->targetInfo.modeInfoIdx].targetMode.targetVideoSignalInfo;
+            if (current.activeSize.cx == width && current.activeSize.cy == height)
+            {
+                double refreshRate = current.vSyncFreq.Numerator / (double) current.vSyncFreq.Denominator;
+                if (refreshRate > display->refreshRate) display->refreshRate = refreshRate;
+            }
         }
     }
     return NULL;
