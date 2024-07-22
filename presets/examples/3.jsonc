@@ -6,7 +6,9 @@
         "type": "small"
     },
     "display": {
-        "binaryPrefix": "si"
+        "size": {
+            "binaryPrefix": "si"
+        }
     },
     "modules": [
         "vulkan",

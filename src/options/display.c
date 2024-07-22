@@ -61,17 +61,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "brightColor"))
             options->brightColor = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
-        {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-                { "si", FF_BINARY_PREFIX_TYPE_SI },
-                { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
-                {},
-            });
-            if (error) return error;
-            options->binaryPrefixType = (FFBinaryPrefixType) value;
-        }
+            return "`display.binaryPrefix` has been renamed to `display.size.binaryPrefix`. Sorry for another break change.";
         else if (ffStrEqualsIgnCase(key, "size"))
         {
             if (!yyjson_is_obj(val))
@@ -95,6 +85,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 });
                 if (error) return error;
                 options->sizeMaxPrefix = (uint8_t) value;
+            }
+
+            yyjson_val* binaryPrefix = yyjson_obj_get(val, "binaryPrefix");
+            if (binaryPrefix)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(binaryPrefix, &value, (FFKeyValuePair[]) {
+                    { "iec", FF_BINARY_PREFIX_TYPE_IEC },
+                    { "si", FF_BINARY_PREFIX_TYPE_SI },
+                    { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
+                    {},
+                });
+                if (error) return error;
+                options->binaryPrefixType = (FFBinaryPrefixType) value;
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
@@ -288,29 +292,40 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         options->brightColor = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--binary-prefix"))
     {
-        options->binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-            { "si", FF_BINARY_PREFIX_TYPE_SI },
-            { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
-            {}
-        });
+        fprintf(stderr, "--binary-prefix has been renamed to --size-binary-prefix\n");
+        exit(477);
     }
-    else if(ffStrEqualsIgnCase(key, "--size-ndigits"))
-        options->sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--size-max-prefix"))
+    else if(ffStrStartsWithIgnCase(key, "--size-"))
     {
-        options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "B", 0 },
-            { "kB", 1 },
-            { "MB", 2 },
-            { "GB", 3 },
-            { "TB", 4 },
-            { "PB", 5 },
-            { "EB", 6 },
-            { "ZB", 7 },
-            { "YB", 8 },
-            {}
-        });
+        const char* subkey = key + strlen("--size-");
+        if (ffStrEqualsIgnCase(subkey, "binary-prefix"))
+        {
+            options->binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "iec", FF_BINARY_PREFIX_TYPE_IEC },
+                { "si", FF_BINARY_PREFIX_TYPE_SI },
+                { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
+                {}
+            });
+        }
+        else if (ffStrEqualsIgnCase(subkey, "ndigits"))
+            options->sizeNdigits = (uint8_t) ffOptionParseUInt32(key, value);
+        else if (ffStrEqualsIgnCase(subkey, "max-prefix"))
+        {
+            options->sizeMaxPrefix = (uint8_t) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "B", 0 },
+                { "kB", 1 },
+                { "MB", 2 },
+                { "GB", 3 },
+                { "TB", 4 },
+                { "PB", 5 },
+                { "EB", 6 },
+                { "ZB", 7 },
+                { "YB", 8 },
+                {}
+            });
+        }
+        else
+            return false;
     }
     else if(ffStrStartsWithIgnCase(key, "--temp-"))
     {

@@ -550,19 +550,6 @@
             }
         },
         {
-            "long": "binary-prefix",
-            "desc": "Set the binary prefix to used",
-            "arg": {
-                "type": "enum",
-                "enum": {
-                    "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
-                    "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
-                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
-                },
-                "default": "IEC"
-            }
-        },
-        {
             "long": "percent-type",
             "desc": "Set the percentage output type",
             "remark": [
@@ -667,6 +654,19 @@
             "desc": "Set the number of digits to keep after the decimal point when formatting sizes",
             "arg": {
                 "type": "num"
+            }
+        },
+        {
+            "long": "size-binary-prefix",
+            "desc": "Set the binary prefix to used when formatting sizes",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
+                    "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
+                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
+                },
+                "default": "IEC"
             }
         },
         {

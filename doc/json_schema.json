@@ -424,29 +424,29 @@
                     "minimum": 0,
                     "default": 0
                 },
-                "binaryPrefix": {
-                    "type": "string",
-                    "description": "Set the binary prefix to used when printing bytes",
-                    "oneOf": [
-                        {
-                            "const": "iec",
-                            "description": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)"
-                        },
-                        {
-                            "const": "si",
-                            "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
-                        },
-                        {
-                            "const": "jedec",
-                            "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
-                        }
-                    ]
-                },
                 "size": {
                     "type": "object",
                     "additionalProperties": false,
                     "description": "Set how a size value should be displayed",
                     "properties": {
+                        "binaryPrefix": {
+                            "type": "string",
+                            "description": "Set the binary prefix to used when formatting sizes",
+                            "oneOf": [
+                                {
+                                    "const": "iec",
+                                    "description": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)"
+                                },
+                                {
+                                    "const": "si",
+                                    "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
+                                },
+                                {
+                                    "const": "jedec",
+                                    "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
+                                }
+                            ]
+                        },
                         "maxPrefix": {
                             "type": "string",
                             "description": "Set the largest binary prefix to use when formatting sizes",

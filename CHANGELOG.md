@@ -6,6 +6,9 @@ Changes:
     * Now: `{ "display": { "freq": { "ndigits": 2 } } }`
     * This option now affects GPU frequency too
     * By default, frequencies are displayed in *GHz*. Set `display.freq.ndigits` to `-1` to display them in *MHz*
+* JSON option `display.binaryPrefix` has been moved to `display.size.binaryPrefix`
+    * Previously: `{ "display": { "binaryPrefix": "IEC" } }`
+    * Now: `{ "display": { "size": { "binaryPrefix": "IEC" } } }`
 
 Features:
 * Print physical diagonal length if supported (Display)

@@ -83,12 +83,12 @@ __fastfetch_complete_logo_type()
 
 __fastfetch_complete_binary_prefix()
 {
-    local __ff_binary_prefixes=(
+    local __ff_size_binary_prefixes=(
         "iec"
         "si"
         "jedec"
     )
-    COMPREPLY=($(compgen -W "${__ff_binary_prefixes[*]}" -- "$CURRENT_WORD"))
+    COMPREPLY=($(compgen -W "${__ff_size_binary_prefixes[*]}" -- "$CURRENT_WORD"))
 }
 
 __fastfetch_complete_gl()
