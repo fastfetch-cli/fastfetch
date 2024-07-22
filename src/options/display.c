@@ -92,13 +92,13 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(binaryPrefix, &value, (FFKeyValuePair[]) {
-                    { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-                    { "si", FF_BINARY_PREFIX_TYPE_SI },
-                    { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
+                    { "iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC },
+                    { "si", FF_SIZE_BINARY_PREFIX_TYPE_SI },
+                    { "jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC },
                     {},
                 });
                 if (error) return error;
-                options->binaryPrefixType = (FFBinaryPrefixType) value;
+                options->sizeBinaryPrefix = (FFSizeBinaryPrefixType) value;
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
@@ -300,10 +300,10 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         const char* subkey = key + strlen("--size-");
         if (ffStrEqualsIgnCase(subkey, "binary-prefix"))
         {
-            options->binaryPrefixType = (FFBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-                { "iec", FF_BINARY_PREFIX_TYPE_IEC },
-                { "si", FF_BINARY_PREFIX_TYPE_SI },
-                { "jedec", FF_BINARY_PREFIX_TYPE_JEDEC },
+            options->sizeBinaryPrefix = (FFSizeBinaryPrefixType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "iec", FF_SIZE_BINARY_PREFIX_TYPE_IEC },
+                { "si", FF_SIZE_BINARY_PREFIX_TYPE_SI },
+                { "jedec", FF_SIZE_BINARY_PREFIX_TYPE_JEDEC },
                 {}
             });
         }
@@ -417,7 +417,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     #endif
 
     options->hideCursor = false;
-    options->binaryPrefixType = FF_BINARY_PREFIX_TYPE_IEC;
+    options->sizeBinaryPrefix = FF_SIZE_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
     options->sizeMaxPrefix = UINT8_MAX;
     options->stat = false;
@@ -506,23 +506,6 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
     if (options->brightColor != defaultOptions.brightColor)
         yyjson_mut_obj_add_bool(doc, obj, "brightColor", options->brightColor);
 
-    if (options->binaryPrefixType != defaultOptions.binaryPrefixType)
-    {
-        switch (options->binaryPrefixType)
-        {
-            case FF_BINARY_PREFIX_TYPE_IEC:
-                yyjson_mut_obj_add_str(doc, obj, "binaryPrefix", "iec");
-                break;
-            case FF_BINARY_PREFIX_TYPE_SI:
-                yyjson_mut_obj_add_str(doc, obj, "binaryPrefix", "si");
-                break;
-            case FF_BINARY_PREFIX_TYPE_JEDEC:
-                yyjson_mut_obj_add_str(doc, obj, "binaryPrefix", "jedec");
-                break;
-
-        }
-    }
-
     {
         yyjson_mut_val* size = yyjson_mut_obj(doc);
         if (options->sizeNdigits != defaultOptions.sizeNdigits)
@@ -540,6 +523,21 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
                 "ZB",
                 "YB",
             })[options->sizeMaxPrefix]);
+        }
+        if (options->sizeBinaryPrefix != defaultOptions.sizeBinaryPrefix)
+        {
+            switch (options->sizeBinaryPrefix)
+            {
+                case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
+                    yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "iec");
+                    break;
+                case FF_SIZE_BINARY_PREFIX_TYPE_SI:
+                    yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "si");
+                    break;
+                case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
+                    yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "jedec");
+                    break;
+            }
         }
         if (yyjson_mut_obj_size(size) > 0)
             yyjson_mut_obj_add_val(doc, obj, "size", size);

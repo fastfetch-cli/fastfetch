@@ -79,15 +79,15 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
 
 void ffParseSize(uint64_t bytes, FFstrbuf* result)
 {
-    switch (instance.config.display.binaryPrefixType)
+    switch (instance.config.display.sizeBinaryPrefix)
     {
-        case FF_BINARY_PREFIX_TYPE_IEC:
+        case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
             parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
             break;
-        case FF_BINARY_PREFIX_TYPE_SI:
+        case FF_SIZE_BINARY_PREFIX_TYPE_SI:
             parseSize(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
             break;
-        case FF_BINARY_PREFIX_TYPE_JEDEC:
+        case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
             parseSize(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
             break;
         default:
