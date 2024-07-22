@@ -12,19 +12,18 @@ Features:
 * Detect display type in X11 mode (Display)
 * Assume displays connected via DisplayPort are external monitors (Display, Linux)
 * Support GPU frequency detection for Intel XE driver (GPU, Linux)
-* Report init system on Android (InitSystem, Android)
+* Detect init system on Android (InitSystem, Android)
 * Use background to display color blocks (Colors)
-    * To fix weird vertical black lines in some terminals (#1094)
-    * And match the behavior of neofetch
+    * To fix weird vertical black lines in some terminals and match the behavior of neofetch (#1094)
     * Can be reverted to old behavior with `--colors-symbol block`
 * Support Zed terminal version detection (Terminal)
 * Improve wezterm font detection (TerminalFont)
 * Add option `--separator-length`
 * Support GPU frequency detection for Apple Silicon (GPU, macOS)
 * Detect maximum refresh rate (#1101, Monitor)
-* Detect if HDR mode is enabled (Display)
+* Detect if HDR mode is supported and enabled (Windows, Display / Monitor)
 * Support physical monitor info detection for FreeBSD and SunOS (Monitor)
-* Support defining constant strings in JSON config file
+* Support defining constant strings in JSON config file, which can be used to dedupe formattion strings
 ```jsonc
 {
     "display": {
@@ -51,6 +50,10 @@ Bugfixes:
 * Better detection for XTerm terminal fonts (#1095, TerminalFont, Linux)
 * Remove debug output (#1097, Windows)
 * Fix command line option `--gpu-hide-type` doesn't work (#1098, GPU)
+* Fix wrong date on Raspbian 10 (#1108, DateTime, Linux)
+* Use `brightness` instead of `actuall_brightness` when detecting current brightness level (Brightness, Linux)
+    * Ref: https://bugzilla.kernel.org/show_bug.cgi?id=203905
+* Fix buffer overflow with long font family names when detecting kitty term font (TerminalFont)
 * Fix some typos
 
 Logos:
