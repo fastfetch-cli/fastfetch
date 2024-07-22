@@ -22,10 +22,10 @@ static const char* getProductNameWithHwModel(const FFstrbuf* hwModel)
         if(ffStrEquals(version, "18,1") ||
            ffStrEquals(version, "18,2"))        return "MacBook Pro (16-inch, 2021)";
         if(ffStrEquals(version, "17,1"))        return "MacBook Pro (13-inch, M1, 2020)";
-        if(ffStrEquals(version, "16,4"))        return "MacBook Pro (16-inch, 2019)";
         if(ffStrEquals(version, "16,3"))        return "MacBook Pro (13-inch, 2020, Two Thunderbolt 3 ports)";
         if(ffStrEquals(version, "16,2"))        return "MacBook Pro (13-inch, 2020, Four Thunderbolt 3 ports)";
-        if(ffStrEquals(version, "16,1"))        return "MacBook Pro (16-inch, 2019)";
+        if(ffStrEquals(version, "16,4") ||
+           ffStrEquals(version, "16,1"))        return "MacBook Pro (16-inch, 2019)";
         if(ffStrEquals(version, "15,4"))        return "MacBook Pro (13-inch, 2019, Two Thunderbolt 3 ports)";
         if(ffStrEquals(version, "15,3"))        return "MacBook Pro (15-inch, 2019)";
         if(ffStrEquals(version, "15,2"))        return "MacBook Pro (13-inch, 2018/2019, Four Thunderbolt 3 ports)";
