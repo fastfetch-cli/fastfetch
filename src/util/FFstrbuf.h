@@ -56,7 +56,7 @@ void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRightSpace(FFstrbuf* strbuf);
 
-void ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
+bool ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
 void ffStrbufRemoveS(FFstrbuf* strbuf, const char* str);
 void ffStrbufRemoveStrings(FFstrbuf* strbuf, uint32_t numStrings, const char* strings[]);
 
@@ -67,17 +67,18 @@ FF_C_NODISCARD uint32_t ffStrbufPreviousIndexC(const FFstrbuf* strbuf, uint32_t 
 
 void ffStrbufReplaceAllC(FFstrbuf* strbuf, char find, char replace);
 
-void ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
-void ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index); // Not including the index
-void ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
-void ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
-void ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c);
+// Returns true if the strbuf is modified
+bool ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index);
+bool ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index); // Not including the index
+bool ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
+bool ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
+bool ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c);
 
 FF_C_NODISCARD uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
 
 bool ffStrbufRemoveIgnCaseEndS(FFstrbuf* strbuf, const char* end);
 
-void ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
+bool ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
 
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
@@ -383,14 +384,14 @@ static inline FF_C_NODISCARD uint32_t ffStrbufLastIndexC(const FFstrbuf* strbuf,
     return ffStrbufPreviousIndexC(strbuf, strbuf->length - 1, c);
 }
 
-static inline void ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c)
+static inline bool ffStrbufSubstrBeforeFirstC(FFstrbuf* strbuf, char c)
 {
-    ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
+    return ffStrbufSubstrBefore(strbuf, ffStrbufFirstIndexC(strbuf, c));
 }
 
-static inline void ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c)
+static inline bool ffStrbufSubstrBeforeLastC(FFstrbuf* strbuf, char c)
 {
-    ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
+    return ffStrbufSubstrBefore(strbuf, ffStrbufLastIndexC(strbuf, c));
 }
 
 static inline FF_C_NODISCARD bool ffStrbufStartsWithC(const FFstrbuf* strbuf, char c)

@@ -4,11 +4,12 @@
 #include "util/mallocHelper.h"
 
 #include <stdlib.h>
+#include <ctype.h>
 #ifdef _WIN32
     #include "util/windows/getline.h"
 #endif
 
-static bool parsePropLinePointer(const char** line, const char* start, FFstrbuf* buffer)
+bool ffParsePropLinePointer(const char** line, const char* start, FFstrbuf* buffer)
 {
     if(**line == '\0')
         return false;
@@ -32,7 +33,7 @@ static bool parsePropLinePointer(const char** line, const char* start, FFstrbuf*
         }
 
         //Line doesn't match start, skip it
-        if(**line != *start || **line == '\0')
+        if(tolower(**line) != tolower(*start) || **line == '\0')
             return false;
 
         //Line and start match, continue testing
@@ -69,14 +70,9 @@ static bool parsePropLinePointer(const char** line, const char* start, FFstrbuf*
     return true;
 }
 
-bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer)
-{
-    return parsePropLinePointer(&line, start, buffer);
-}
-
 bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer)
 {
-    while(!parsePropLinePointer(&lines, start, buffer))
+    while(!ffParsePropLinePointer(&lines, start, buffer))
     {
         while(*lines != '\0' && *lines != '\n')
             ++lines;

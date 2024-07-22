@@ -8,11 +8,17 @@ typedef struct FFpropquery
     FFstrbuf* buffer;
 } FFpropquery;
 
-bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer);
 bool ffParsePropLines(const char* lines, const char* start, FFstrbuf* buffer);
 bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFileHomeValues(const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
 bool ffParsePropFileListValues(const FFlist* list, const char* relativeFile, uint32_t numQueries, FFpropquery* queries);
+
+bool ffParsePropLinePointer(const char** line, const char* start, FFstrbuf* buffer);
+
+static inline bool ffParsePropLine(const char* line, const char* start, FFstrbuf* buffer)
+{
+    return ffParsePropLinePointer(&line, start, buffer);
+}
 
 static inline bool ffParsePropFile(const char* filename, const char* start, FFstrbuf* buffer)
 {

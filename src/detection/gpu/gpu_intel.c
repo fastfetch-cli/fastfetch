@@ -191,7 +191,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
                         maxValue = props.max;
                 }
             }
-            *result.frequency = maxValue / 1000;
+            *result.frequency = (uint32_t) (maxValue + 0.5);
         }
     }
 

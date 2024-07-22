@@ -29,7 +29,7 @@ static const char* detectWithBacklight(FFlist* result)
             continue;
 
         ffStrbufAppendS(&backlightDir, entry->d_name);
-        ffStrbufAppendS(&backlightDir, "/actual_brightness");
+        ffStrbufAppendS(&backlightDir, "/brightness");
         if(ffReadFileBuffer(backlightDir.chars, &buffer))
         {
             double actualBrightness = ffStrbufToDouble(&buffer);

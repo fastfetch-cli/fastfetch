@@ -36,6 +36,8 @@ typedef struct WaylandDisplay
     WaylandData* parent;
     int32_t width;
     int32_t height;
+    int32_t physicalWidth;
+    int32_t physicalHeight;
     int32_t refreshRate;
     double scale;
     enum wl_output_transform transform;
@@ -44,6 +46,8 @@ typedef struct WaylandDisplay
     FFstrbuf description;
     FFstrbuf edidName;
     uint64_t id;
+    bool hdrEnabled;
+    bool wcgEnabled;
     void* internal;
 } WaylandDisplay;
 
@@ -65,6 +69,8 @@ inline static uint64_t ffWaylandGenerateIdFromName(const char* name)
 
 void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name);
 void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description);
+// Modifies content of display. Don't call this function when calling ffdsAppendDisplay
+uint32_t ffWaylandHandleRotation(WaylandDisplay* display);
 
 void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);

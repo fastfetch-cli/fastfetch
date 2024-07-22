@@ -1,6 +1,6 @@
 #include "displayserver.h"
 
-bool ffdsAppendDisplay(
+FFDisplayResult* ffdsAppendDisplay(
     FFDisplayServerResult* result,
     uint32_t width,
     uint32_t height,
@@ -11,10 +11,12 @@ bool ffdsAppendDisplay(
     FFstrbuf* name,
     FFDisplayType type,
     bool primary,
-    uint64_t id)
+    uint64_t id,
+    uint32_t physicalWidth,
+    uint32_t physicalHeight)
 {
     if(width == 0 || height == 0)
-        return false;
+        return NULL;
 
     FFDisplayResult* display = ffListAdd(&result->displays);
     display->width = width;
@@ -25,10 +27,16 @@ bool ffdsAppendDisplay(
     display->rotation = rotation;
     ffStrbufInitMove(&display->name, name);
     display->type = type;
-    display->primary = primary;
     display->id = id;
+    display->physicalWidth = physicalWidth;
+    display->physicalHeight = physicalHeight;
+    display->primary = primary;
 
-    return true;
+    display->bitDepth = 0;
+    display->hdrEnabled = false;
+    display->wcgEnabled = false;
+
+    return display;
 }
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds);

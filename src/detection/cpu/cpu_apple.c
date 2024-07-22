@@ -43,38 +43,37 @@ static const char* detectFrequency(FFCPUResult* cpu)
     if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice"))
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
 
-    FF_CFTYPE_AUTO_RELEASE CFMutableDictionaryRef properties = NULL;
-    if (IORegistryEntryCreateCFProperties(entryDevice, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
-        return "IORegistryEntryCreateCFProperties() failed";
-
-    uint32_t pMin, eMin, aMax, pCoreLength;
-    if (ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), 0, 4, (uint8_t*) &pMin, &pCoreLength) != NULL) // pCore
+    FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states5-sram"), kCFAllocatorDefault, kNilOptions);
+    if (CFGetTypeID(freqProperty) != CFDataGetTypeID())
         return "\"voltage-states5-sram\" in \"pmgr\" is not found";
-    if (ffCfDictGetData(properties, CFSTR("voltage-states1-sram"), 0, 4, (uint8_t*) &eMin, NULL) != NULL) // eCore
-        return "\"voltage-states1-sram\" in \"pmgr\" is not found";
 
-    cpu->frequencyMin = (pMin < eMin ? pMin : eMin) / (1000.0 * 1000 * 1000);
+    // voltage-states5-sram stores supported <frequency / voltage> pairs of pcores from the lowest to the highest
+    // voltage-states1-sram stores ecores'
+    CFIndex propLength = CFDataGetLength(freqProperty);
+    if (propLength == 0 || propLength % (CFIndex) sizeof(uint32_t) * 2 != 0)
+        return "Invalid \"voltage-states5-sram\" length";
 
-    if (pCoreLength >= 8)
-    {
-        ffCfDictGetData(properties, CFSTR("voltage-states5-sram"), pCoreLength - 8, 4, (uint8_t*) &aMax, NULL);
-        cpu->frequencyMax = aMax / (1000.0 * 1000 * 1000);
-    }
+    uint32_t* pStart = (uint32_t*) CFDataGetBytePtr(freqProperty);
+    uint32_t pMax = *pStart;
+    for (CFIndex i = 2; i < propLength / (CFIndex) sizeof(uint32_t) && pStart[i] > 0; i += 2 /* skip voltage */)
+        pMax = pMax > pStart[i] ? pMax : pStart[i];
+
+    if (pMax > 0)
+        cpu->frequencyMax = pMax / 1000 / 1000;
 
     return NULL;
 }
 #else
 static const char* detectFrequency(FFCPUResult* cpu)
 {
-    cpu->frequencyBase = ffSysctlGetInt64("hw.cpufrequency", 0) / 1000.0 / 1000.0 / 1000.0;
-    cpu->frequencyMin = ffSysctlGetInt64("hw.cpufrequency_min", 0) / 1000.0 / 1000.0 / 1000.0;
-    cpu->frequencyMax = ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000.0 / 1000.0 / 1000.0;
-    if(cpu->frequencyBase != cpu->frequencyBase)
+    cpu->frequencyBase = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency", 0) / 1000 / 1000);
+    cpu->frequencyMax = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000 / 1000);
+    if(cpu->frequencyBase == 0)
     {
         unsigned current = 0;
         size_t size = sizeof(current);
         if (sysctl((int[]){ CTL_HW, HW_CPU_FREQ }, 2, &current, &size, NULL, 0) == 0)
-            cpu->frequencyBase = (double) current / 1000.0 / 1000.0 / 1000.0;
+            cpu->frequencyBase = (uint32_t) (current / 1000 / 1000);
     }
     return NULL;
 }

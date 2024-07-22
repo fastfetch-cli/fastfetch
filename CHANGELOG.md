@@ -1,3 +1,68 @@
+# 2.19.0
+
+Changes:
+* JSON option `modules.cpu.freqNdigits` has been renamed and moved to `display.freq.ndigits`
+    * Previously: `{ "modules": { "type": "cpu", "freqNdigits": 2 } }`
+    * Now: `{ "display": { "freq": { "ndigits": 2 } } }`
+    * This option now affects GPU frequency too
+    * By default, frequencies are displayed in *GHz*. Set `display.freq.ndigits` to `-1` to display them in *MHz*
+* JSON option `display.binaryPrefix` has been moved to `display.size.binaryPrefix`
+    * Previously: `{ "display": { "binaryPrefix": "IEC" } }`
+    * Now: `{ "display": { "size": { "binaryPrefix": "IEC" } } }`
+
+Features:
+* Print physical diagonal length if supported (Display)
+* Detect display type in X11 mode (Display)
+* Assume displays connected via DisplayPort are external monitors (Display, Linux)
+* Support GPU frequency detection for Intel XE driver (GPU, Linux)
+* Detect init system on Android (InitSystem, Android)
+* Use background to display color blocks (Colors)
+    * To fix weird vertical black lines in some terminals and match the behavior of neofetch (#1094)
+    * Can be reverted to old behavior with `--colors-symbol block`
+* Support Zed terminal version detection (Terminal)
+* Improve wezterm font detection (TerminalFont)
+* Add option `--separator-length`
+* Support GPU frequency detection for Apple Silicon (GPU, macOS)
+* Detect maximum refresh rate (#1101, Monitor)
+* Detect if HDR mode is supported and enabled (Windows, Display / Monitor)
+* Support physical monitor info detection for FreeBSD and SunOS (Monitor)
+* Support defining constant strings in JSON config file, which can be used to dedupe formattion strings
+```jsonc
+{
+    "display": {
+        "constants": [
+            "Hello", // {$1}
+            "world"  // {$2}
+        ]
+    },
+    "modules": [
+        {
+            "type": "custom",
+            "format": "{$1} {$2}!" // print "Hello world!"
+        },
+        {
+            "type": "custom",
+            "format": "{$2} {$1}" // print "world Hello"
+        }
+    ]
+}
+```
+
+Bugfixes:
+* Fix some presets
+* Better detection for XTerm terminal fonts (#1095, TerminalFont, Linux)
+* Remove debug output (#1097, Windows)
+* Fix command line option `--gpu-hide-type` doesn't work (#1098, GPU)
+* Fix wrong date on Raspbian 10 (#1108, DateTime, Linux)
+* Use `brightness` instead of `actuall_brightness` when detecting current brightness level (Brightness, Linux)
+    * Ref: https://bugzilla.kernel.org/show_bug.cgi?id=203905
+* Fix buffer overflow with long font family names when detecting kitty term font (TerminalFont)
+* Fix some typos
+
+Logos:
+* Update void_small
+* Add ALT Linux
+
 # 2.18.1
 
 Fix a regression introduced in v2.18.0

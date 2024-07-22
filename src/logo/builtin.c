@@ -112,6 +112,18 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // ALTLinux
+    {
+        .names = {"ALTLinux", "Sisyphus"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ALTLINUX,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // Amazon
     {
         .names = {"Amazon"},
@@ -4474,6 +4486,17 @@ static const FFlogo V[] = {
         .names = {"void_small", "void-linux-small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_VOID_SMALL,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // Void2Small
+    {
+        .names = {"void2_small", "void-linux2-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_VOID2_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
         },

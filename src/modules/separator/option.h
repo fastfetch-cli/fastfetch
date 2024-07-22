@@ -10,4 +10,5 @@ typedef struct FFSeparatorOptions
 
     FFstrbuf string;
     FFstrbuf outputColor;
+    uint32_t length;
 } FFSeparatorOptions;

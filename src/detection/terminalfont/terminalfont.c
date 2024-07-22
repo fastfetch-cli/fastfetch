@@ -262,10 +262,10 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
 static bool queryKittyTerm(const char* query, FFstrbuf* res)
 {
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
-    char buffer[64] = "";
+    char buffer[256] = "";
     if (ffGetTerminalResponse(
         query, // kitty-query-font_family;kitty-query-font_size
-        "\eP1+r%*[^=]=%64[^\e]\e\\", buffer) == NULL && *buffer)
+        "\eP1+r%*[^=]=%255[^\e]\e\\", buffer) == NULL)
     {
         // decode hex string
         for (const char* p = buffer; p[0] && p[1]; p += 2)
@@ -350,12 +350,19 @@ static void detectTerminator(FFTerminalFontResult* result)
         ffFontInitPango(&result->font, fontName.chars);
 }
 
-static bool detectWezterm(FFTerminalFontResult* result)
+static bool detectWezterm(const FFstrbuf* exe, FFTerminalFontResult* result)
 {
+    FF_STRBUF_AUTO_DESTROY cli = ffStrbufCreateCopy(exe);
+    ffStrbufSubstrBeforeLastC(&cli, '-');
+
+    #ifdef _WIN32
+    ffStrbufAppendS(&cli, ".exe");
+    #endif
+
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
 
     ffStrbufSetS(&result->error, ffProcessAppendStdOut(&fontName, (char* const[]){
-        "wezterm",
+        cli.chars,
         "ls-fonts",
         "--text",
         "a",
@@ -438,7 +445,7 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "terminator"))
         detectTerminator(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "wezterm-gui"))
-        detectWezterm(terminalFont);
+        detectWezterm(&terminal->exe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "tabby"))
         detectTabby(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour"))

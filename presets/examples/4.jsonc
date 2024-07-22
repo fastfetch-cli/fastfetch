@@ -3,13 +3,15 @@
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
-        "source": "arch_small",
+        "type": "small",
         "padding": {
             "right": 1
         }
     },
     "display": {
-        "binaryPrefix": "si",
+        "size": {
+            "binaryPrefix": "si"
+        },
         "color": "blue",
         "separator": "  "
     },

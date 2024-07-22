@@ -1,5 +1,6 @@
 #include "displayserver.h"
 #include "util/apple/cf_helpers.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -57,7 +58,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             if(CoreDisplay_IODisplayCreateInfoDictionary)
             {
                 io_service_t servicePort = CGDisplayIOServicePort(screen);
-                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName); 
+                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
                 if(displayInfo)
                 {
                     CFDictionaryRef productNames;
@@ -67,7 +68,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
             }
             #endif
 
-            ffdsAppendDisplay(ds,
+            CGSize size = CGDisplayScreenSize(screen);
+
+            FFDisplayResult* display = ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
                 (uint32_t)CGDisplayModeGetPixelHeight(mode),
                 refreshRate,
@@ -77,8 +80,28 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 &name,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 CGDisplayIsMain(screen),
-                (uint64_t)screen
+                (uint64_t)screen,
+                (uint32_t) (size.width + 0.5),
+                (uint32_t) (size.height + 0.5)
             );
+            if (display)
+            {
+                // Shitty code
+                uint8_t bitDepth = 0;
+                FF_CFTYPE_AUTO_RELEASE CFStringRef desc = CFCopyDescription(mode);
+                CFRange start = CFStringFind(desc, CFSTR("BitsPerSample = "), 0);
+                if (start.location != kCFNotFound)
+                {
+                    for (CFIndex idx = start.location + start.length; idx < CFStringGetLength(desc); ++idx)
+                    {
+                        UniChar ch = CFStringGetCharacterAtIndex(desc, idx);
+                        if (!ffCharIsDigit((char) ch))
+                            break;
+                        bitDepth = (uint8_t) (bitDepth * 10 + (ch - '0'));
+                    }
+                }
+                display->bitDepth = bitDepth;
+            }
             CGDisplayModeRelease(mode);
         }
         CGDisplayRelease(screen);

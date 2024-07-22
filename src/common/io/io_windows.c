@@ -229,7 +229,6 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
             hConout = CreateFileW(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
             hOutput = hConout;
         }
-        WriteFile(hOutput, "TEST\n", 5, &bytes, NULL);
         WriteFile(hOutput, request, (DWORD) strlen(request), &bytes, NULL);
     }
 

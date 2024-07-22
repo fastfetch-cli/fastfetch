@@ -79,21 +79,35 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
 
 void ffParseSize(uint64_t bytes, FFstrbuf* result)
 {
-    switch (instance.config.display.binaryPrefixType)
+    switch (instance.config.display.sizeBinaryPrefix)
     {
-        case FF_BINARY_PREFIX_TYPE_IEC:
+        case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
             parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
             break;
-        case FF_BINARY_PREFIX_TYPE_SI:
+        case FF_SIZE_BINARY_PREFIX_TYPE_SI:
             parseSize(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
             break;
-        case FF_BINARY_PREFIX_TYPE_JEDEC:
+        case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
             parseSize(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
             break;
         default:
             parseSize(result, bytes, 1024, (const char*[]) {"B", NULL});
             break;
     }
+}
+
+bool ffParseFrequency(uint32_t mhz, FFstrbuf* result)
+{
+    if (mhz == 0)
+        return false;
+
+    int8_t ndigits = instance.config.display.freqNdigits;
+
+    if (ndigits >= 0)
+        ffStrbufAppendF(result, "%.*f GHz", ndigits, mhz / 1000.);
+    else
+        ffStrbufAppendF(result, "%u MHz", (unsigned) mhz);
+    return true;
 }
 
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)

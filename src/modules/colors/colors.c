@@ -20,15 +20,23 @@ void ffPrintColors(FFColorsOptions* options)
 
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreateA(128);
 
-    if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+    if (options->symbol == FF_COLORS_SYMBOL_BLOCK || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
     {
         // 3%d: Set the foreground color
         for(uint8_t i = options->block.range[0]; i <= min(options->block.range[1], 7); i++)
         {
-            if (!instance.config.display.pipe)
-                ffStrbufAppendF(&result, "\e[3%dm", i);
-            for (uint8_t j = 0; j < options->block.width; j++)
-                ffStrbufAppendS(&result, "█");
+            if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+            {
+                if (!instance.config.display.pipe)
+                    ffStrbufAppendF(&result, "\e[3%dm", i);
+                for (uint8_t j = 0; j < options->block.width; j++)
+                    ffStrbufAppendS(&result, "█");
+            }
+            else
+            {
+                ffStrbufAppendF(&result, "\e[4%dm", i);
+                ffStrbufAppendNC(&result, options->block.width, ' ');
+            }
         }
         if (result.length > 0)
         {
@@ -38,20 +46,27 @@ void ffPrintColors(FFColorsOptions* options)
             if (options->paddingLeft > 0)
                 ffPrintCharTimes(' ', options->paddingLeft);
 
-            if (!instance.config.display.pipe)
+            if (!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
                 ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
             ffStrbufPutTo(&result, stdout);
             ffStrbufClear(&result);
         }
 
-        // 1: Set everything to bolt. This causes normal colors on some systems to be bright.
         // 9%d: Set the foreground to the bright color
         for(uint8_t i = max(options->block.range[0], 8); i <= options->block.range[1]; i++)
         {
-            if(!instance.config.display.pipe)
-                ffStrbufAppendF(&result, "\e[9%dm", i - 8);
-            for (uint8_t j = 0; j < options->block.width; j++)
-                ffStrbufAppendS(&result, "█");
+            if (options->symbol == FF_COLORS_SYMBOL_BLOCK)
+            {
+                if(!instance.config.display.pipe)
+                    ffStrbufAppendF(&result, "\e[9%dm", i - 8);
+                for (uint8_t j = 0; j < options->block.width; j++)
+                    ffStrbufAppendS(&result, "█");
+            }
+            else
+            {
+                ffStrbufAppendF(&result, "\e[10%dm", i - 8);
+                ffStrbufAppendNC(&result, options->block.width, ' ');
+            }
         }
     }
     else
@@ -87,7 +102,7 @@ void ffPrintColors(FFColorsOptions* options)
 
         if(options->paddingLeft > 0)
             ffPrintCharTimes(' ', options->paddingLeft);
-        if(!instance.config.display.pipe)
+        if(!instance.config.display.pipe || options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
             ffStrbufAppendS(&result, FASTFETCH_TEXT_MODIFIER_RESET);
         ffStrbufPutTo(&result, stdout);
     }
@@ -109,6 +124,7 @@ bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, cons
     {
         options->symbol = (FFColorsSymbol) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "block", FF_COLORS_SYMBOL_BLOCK },
+            { "background", FF_COLORS_SYMBOL_BACKGROUND },
             { "circle", FF_COLORS_SYMBOL_CIRCLE },
             { "diamond", FF_COLORS_SYMBOL_DIAMOND },
             { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
@@ -164,6 +180,7 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
                 { "block", FF_COLORS_SYMBOL_BLOCK },
+                { "background", FF_COLORS_SYMBOL_BACKGROUND },
                 { "circle", FF_COLORS_SYMBOL_CIRCLE },
                 { "diamond", FF_COLORS_SYMBOL_DIAMOND },
                 { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
@@ -278,7 +295,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs);
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
-    options->symbol = FF_COLORS_SYMBOL_BLOCK;
+    options->symbol = FF_COLORS_SYMBOL_BACKGROUND;
     options->paddingLeft = 0;
     options->block = (FFBlockConfig) {
         .width = 3,

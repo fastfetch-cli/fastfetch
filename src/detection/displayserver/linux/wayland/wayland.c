@@ -201,10 +201,7 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
     WaylandDisplay* display = data;
     if (display->id) return;
 
-    if(ffStrStartsWith(name, "eDP-"))
-        display->type = FF_DISPLAY_TYPE_BUILTIN;
-    else if(ffStrStartsWith(name, "HDMI-"))
-        display->type = FF_DISPLAY_TYPE_EXTERNAL;
+    display->type = ffdsGetDisplayType(name);
     if (!display->edidName.length)
         ffdsMatchDrmConnector(name, &display->edidName);
     display->id = ffWaylandGenerateIdFromName(name);
@@ -219,6 +216,47 @@ void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output
     while (*description == ' ') ++description;
     if (!ffStrEquals(description, "Unknown Display") && !ffStrContains(description, "(null)"))
         ffStrbufAppendS(&display->description, description);
+}
+
+uint32_t ffWaylandHandleRotation(WaylandDisplay* display)
+{
+    uint32_t rotation;
+    switch(display->transform)
+    {
+        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        case WL_OUTPUT_TRANSFORM_90:
+            rotation = 90;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        case WL_OUTPUT_TRANSFORM_180:
+            rotation = 180;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        case WL_OUTPUT_TRANSFORM_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
+    switch(rotation)
+    {
+        case 90:
+        case 270: {
+            int32_t temp = display->width;
+            display->width = display->height;
+            display->height = temp;
+
+            temp = display->physicalWidth;
+            display->physicalWidth = display->physicalHeight;
+            display->physicalHeight = temp;
+            break;
+        }
+        default:
+            break;
+    }
+    return rotation;
 }
 #endif
 

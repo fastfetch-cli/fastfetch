@@ -87,7 +87,9 @@ void ffdsConnectXlib(FFDisplayServerResult* result)
             NULL,
             FF_DISPLAY_TYPE_UNKNOWN,
             false,
-            0
+            0,
+            (uint32_t) WidthMMOfScreen(screen),
+            (uint32_t) HeightMMOfScreen(screen)
         );
     }
 
@@ -117,7 +119,6 @@ typedef struct XrandrData
     FF_LIBRARY_SYMBOL(XInternAtom)
     FF_LIBRARY_SYMBOL(XGetAtomName);
     FF_LIBRARY_SYMBOL(XFree);
-    FF_LIBRARY_SYMBOL(XRRConfigCurrentRate)
     FF_LIBRARY_SYMBOL(XRRGetMonitors)
     FF_LIBRARY_SYMBOL(XRRGetScreenResourcesCurrent)
     FF_LIBRARY_SYMBOL(XRRGetOutputInfo)
@@ -149,7 +150,7 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
     return 0;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary)
+static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary, XRROutputInfo* output, FFDisplayType displayType)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
@@ -185,16 +186,18 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool
         (uint32_t) crtcInfo->height,
         rotation,
         name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         primary,
-        0
+        0,
+        (uint32_t) output->mm_width,
+        (uint32_t) output->mm_height
     );
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
     return res;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType)
 {
     XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
     if(outputInfo == NULL)
@@ -218,7 +221,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
         if (edidData)
             data->ffXFree(edidData);
     }
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary);
+    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary, outputInfo, displayType);
 
     data->ffXRRFreeOutputInfo(outputInfo);
 
@@ -231,13 +234,14 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
     char* xname = data->ffXGetAtomName(data->display, monitorInfo->name);
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreateS(xname);
     data->ffXFree(xname);
+    FFDisplayType displayType = ffdsGetDisplayType(name.chars);
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary, displayType))
             foundOutput = true;
     }
 
-    return foundOutput ? true : ffdsAppendDisplay(
+    return foundOutput ? true : !!ffdsAppendDisplay(
         data->result,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
@@ -246,9 +250,11 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->height,
         0,
         &name,
-        FF_DISPLAY_TYPE_UNKNOWN,
+        displayType,
         !!monitorInfo->primary,
-        0
+        0,
+        (uint32_t) monitorInfo->mwidth,
+        (uint32_t) monitorInfo->mheight
     );
 }
 
@@ -296,7 +302,9 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
-        0
+        0,
+        (uint32_t) WidthMMOfScreen(screen),
+        (uint32_t) HeightMMOfScreen(screen)
     );
 }
 
@@ -312,7 +320,6 @@ void ffdsConnectXrandr(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XInternAtom,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XGetAtomName,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XFree,);
-    FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRConfigCurrentRate,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetMonitors,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetScreenResourcesCurrent,);
     FF_LIBRARY_LOAD_SYMBOL_VAR(xrandr, data, XRRGetOutputInfo,);

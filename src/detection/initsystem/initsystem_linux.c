@@ -1,10 +1,22 @@
 #include "initsystem.h"
 #include "common/processing.h"
+#include <unistd.h>
 
 const char* ffDetectInitSystem(FFInitSystemResult* result)
 {
     const char* error = ffProcessGetBasicInfoLinux((int) result->pid, &result->name, NULL, NULL);
-    if (error) return error;
+    if (error)
+    {
+        #ifdef __ANDROID__
+        if (access("/system/bin/init", F_OK) == 0)
+        {
+            ffStrbufSetStatic(&result->exe, "/system/bin/init");
+            ffStrbufSetStatic(&result->name, "init");
+            return NULL;
+        }
+        #endif
+        return error;
+    }
 
     const char* _;
     // In linux /proc/1/exe is not readable

@@ -60,7 +60,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
     }
 
     if (result.frequency)
-        *result.frequency = device->coreClock / 1000.; // Maximum frequency
+        *result.frequency = (uint32_t) device->coreClock; // Maximum frequency
 
     if (result.type)
         *result.type = device->isAPU ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;

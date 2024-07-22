@@ -98,7 +98,7 @@ config files, see the CONFIGURATION section
 
 .B \-\-gen\-config \fI[file]
 Generate a config file with options specified on the command line.
-If \fIfile\fR is specified, the configuration will written to the
+If \fIfile\fR is specified, the configuration will be written to the
 file, otherwise it will be written to stdout.
 .TP
 

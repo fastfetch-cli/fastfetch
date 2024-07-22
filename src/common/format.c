@@ -244,6 +244,27 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
+        //test for constant, if so evaluate it
+        if (firstChar == '$')
+        {
+            char* pend = NULL;
+            int32_t indexSigned = (int32_t) strtol(placeholderValue.chars + 1, &pend, 10);
+            uint32_t index = (uint32_t) indexSigned;
+            bool backward = indexSigned < 0;
+
+            if (indexSigned == 0 || *pend != '\0' || instance.config.display.constants.length < index)
+            {
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+                continue;
+            }
+
+            FFstrbuf* item = FF_LIST_GET(FFstrbuf, instance.config.display.constants, backward
+                ? instance.config.display.constants.length - index
+                : index - 1);
+            ffStrbufAppend(buffer, item);
+            continue;
+        }
+
         int32_t truncLength = INT32_MAX;
         char* pColon = memchr(placeholderValue.chars, ':', placeholderValue.length);
         if (pColon != NULL)

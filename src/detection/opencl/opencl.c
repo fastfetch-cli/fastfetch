@@ -116,7 +116,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
             {
                 cl_uint value;
                 if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(value), &value, NULL) == CL_SUCCESS)
-                    gpu->frequency = value / 1000.;
+                    gpu->frequency = value;
             }
 
             {

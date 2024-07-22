@@ -352,11 +352,15 @@ FF_MAYBE_UNUSED static bool getTerminalVersionCockpit(FFstrbuf* exe, FFstrbuf* v
 
 FF_MAYBE_UNUSED static bool getTerminalVersionXterm(FFstrbuf* exe, FFstrbuf* version)
 {
-    if(ffProcessAppendStdOut(version, (char* const[]){
-        exe->chars,
-        "-v",
-        NULL
-    })) return false;
+    ffStrbufSetS(version, getenv("XTERM_VERSION"));
+    if (!version->length)
+    {
+        if(ffProcessAppendStdOut(version, (char* const[]){
+            exe->chars,
+            "-v",
+            NULL
+        })) return false;
+    }
 
     //xterm(273)
     ffStrbufTrimRight(version, ')');
@@ -477,14 +481,37 @@ static bool getTerminalVersionZellij(FFstrbuf* exe, FFstrbuf* version)
     return version->length > 0;
 }
 
+static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY cli = ffStrbufCreateCopy(exe);
+    ffStrbufSubstrBeforeLastC(&cli, '/');
+    ffStrbufAppendS(&cli, "/cli"
+        #ifdef _WIN32
+            ".exe"
+        #endif
+    );
+
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        cli.chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    // Zed 0.142.6 – /Applications/Zed.app
+    ffStrbufSubstrAfterFirstC(version, ' ');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+    return true;
+}
+
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
-    char versionHex[64] = "";
+    char versionHex[64];
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
     if (ffGetTerminalResponse(
         "\eP+q6b697474792d71756572792d76657273696f6e\e\\", // kitty-query-version
-        "\eP1+r%*[^=]=%64[^\e]\e\\\\", versionHex) == NULL && *versionHex)
+        "\eP1+r%*[^=]=%63[^\e]\e\\\\", versionHex) == NULL)
     {
         // decode hex string
         for (const char* p = versionHex; p[0] && p[1]; p += 2)
@@ -645,6 +672,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "zellij"))
         return getTerminalVersionZellij(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "zed"))
+        return getTerminalVersionZed(exe, version);
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)

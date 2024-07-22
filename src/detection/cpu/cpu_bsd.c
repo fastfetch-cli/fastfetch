@@ -44,16 +44,13 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         ffStrbufClear(&buffer);
         char key[32];
         snprintf(key, sizeof(key), "dev.cpu.%u.freq_levels", i);
-        if (ffSysctlGetString(key, &buffer) == NULL && buffer.length > 0)
+        if (ffSysctlGetString(key, &buffer) == NULL)
         {
+            if (buffer.length == 0) continue;
+
             // MHz/Watts pairs like: 2501/32000 2187/27125 2000/24000
             uint32_t fmax = (uint32_t) strtoul(buffer.chars, NULL, 10);
-            uint32_t fmin = fmax;
-            uint32_t i = ffStrbufLastIndexC(&buffer, ' ');
-            if (i < buffer.length)
-                fmin = (uint32_t) strtoul(buffer.chars + i + 1, NULL, 10);
-            if (!(cpu->frequencyMin <= fmin)) cpu->frequencyMin = fmin; // Counting for NaN
-            if (!(cpu->frequencyMax >= fmax)) cpu->frequencyMax = fmax;
+            if (cpu->frequencyMax < fmax) cpu->frequencyMax = fmax;
 
             if (options->showPeCoreCount)
             {
@@ -65,12 +62,11 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                 cpu->coreTypes[ifreq].count++;
             }
         }
+        else
+            break;
     }
-    cpu->frequencyMin /= 1000;
-    cpu->frequencyMax /= 1000;
 
-    int clockRate = ffSysctlGetInt("hw.clockrate", 0);
-    cpu->frequencyBase = clockRate <= 0 ? 0.0/0.0 : clockRate / 1000.0;
+    cpu->frequencyBase = (uint32_t) ffSysctlGetInt("hw.clockrate", 0);
     cpu->temperature = FF_CPU_TEMP_UNSET;
 
     if (options->temp)

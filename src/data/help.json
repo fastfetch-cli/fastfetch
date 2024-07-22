@@ -550,19 +550,6 @@
             }
         },
         {
-            "long": "binary-prefix",
-            "desc": "Set the binary prefix to used",
-            "arg": {
-                "type": "enum",
-                "enum": {
-                    "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
-                    "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
-                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
-                },
-                "default": "IEC"
-            }
-        },
-        {
             "long": "percent-type",
             "desc": "Set the percentage output type",
             "remark": [
@@ -670,6 +657,19 @@
             }
         },
         {
+            "long": "size-binary-prefix",
+            "desc": "Set the binary prefix to used when formatting sizes",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
+                    "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
+                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
+                },
+                "default": "IEC"
+            }
+        },
+        {
             "long": "size-max-prefix",
             "desc": "Set the largest binary prefix to use when formatting sizes",
             "arg": {
@@ -686,6 +686,14 @@
                     "YB": "YiB"
                 },
                 "default": "YB"
+            }
+        },
+        {
+            "long": "freq-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing CPU / GPU frequency in GHz",
+            "arg": {
+                "type": "num",
+                "default": 2
             }
         },
         {
@@ -947,7 +955,7 @@
         },
         {
             "long": "separator-string",
-            "desc": "Set the string printed by the separator module",
+            "desc": "Set the string to be printed by the separator line",
             "arg": {
                 "type": "str",
                 "default": "-"
@@ -955,10 +963,19 @@
         },
         {
             "long": "separator-output-color",
-            "desc": "Set the color of the separator module",
+            "desc": "Set the color of the separator line",
             "arg": {
                 "type": "color",
                 "default": "default"
+            }
+        },
+        {
+            "long": "separator-length",
+            "desc": "Set the length of the separator line",
+            "remark": "Set to 0 to automatically calculate it with the title length",
+            "arg": {
+                "type": "num",
+                "default": "0"
             }
         },
         {
@@ -1166,14 +1183,6 @@
                 "type": "bool",
                 "optional": true,
                 "default": false
-            }
-        },
-        {
-            "long": "cpu-freq-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing CPU frequency",
-            "arg": {
-                "type": "num",
-                "default": 2
             }
         },
         {
@@ -1538,13 +1547,14 @@
                 "type": "enum",
                 "enum": {
                     "block": "\u2588\u2588\u2588",
+                    "background": "(whitespaces with background)",
                     "circle": "\u25cf",
                     "diamond": "\u25c6",
                     "triangle": "\u25b2",
                     "square": "\u25a0",
                     "star": "\u2605"
                 },
-                "default": "block"
+                "default": "background"
             }
         },
         {

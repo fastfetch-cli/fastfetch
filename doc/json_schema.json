@@ -424,29 +424,29 @@
                     "minimum": 0,
                     "default": 0
                 },
-                "binaryPrefix": {
-                    "type": "string",
-                    "description": "Set the binary prefix to used when printing bytes",
-                    "oneOf": [
-                        {
-                            "const": "iec",
-                            "description": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)"
-                        },
-                        {
-                            "const": "si",
-                            "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
-                        },
-                        {
-                            "const": "jedec",
-                            "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
-                        }
-                    ]
-                },
                 "size": {
                     "type": "object",
                     "additionalProperties": false,
                     "description": "Set how a size value should be displayed",
                     "properties": {
+                        "binaryPrefix": {
+                            "type": "string",
+                            "description": "Set the binary prefix to used when formatting sizes",
+                            "oneOf": [
+                                {
+                                    "const": "iec",
+                                    "description": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)"
+                                },
+                                {
+                                    "const": "si",
+                                    "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
+                                },
+                                {
+                                    "const": "jedec",
+                                    "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
+                                }
+                            ]
+                        },
                         "maxPrefix": {
                             "type": "string",
                             "description": "Set the largest binary prefix to use when formatting sizes",
@@ -574,10 +574,31 @@
                         }
                     }
                 },
+                "freq": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Set how frequency values should be displayed",
+                    "properties": {
+                        "ndigits": {
+                            "type": "integer",
+                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz of decimal\n-1 will show the frequency in MHz",
+                            "minimum": -1,
+                            "maximum": 9,
+                            "default": 2
+                        }
+                    }
+                },
                 "noBuffer": {
                     "type": "boolean",
                     "description": "Whether to disable the stdout application buffer",
                     "default": false
+                },
+                "constants": {
+                    "type": "array",
+                    "description": "List of strings to be used in custom format of modules",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -1096,13 +1117,6 @@
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
                                     },
-                                    "freqNdigits": {
-                                        "description": "Set the number of digits to keep after the decimal point when printing CPU frequency",
-                                        "type": "integer",
-                                        "minimum": 0,
-                                        "maximum": 9,
-                                        "default": 2
-                                    },
                                     "showPeCoreCount": {
                                         "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
                                         "type": "boolean",
@@ -1173,13 +1187,14 @@
                                         "type": "string",
                                         "enum": [
                                             "block",
+                                            "background",
                                             "circle",
                                             "diamond",
                                             "triangle",
                                             "square",
                                             "star"
                                         ],
-                                        "default": "block"
+                                        "default": "background"
                                     },
                                     "paddingLeft": {
                                         "description": "Set the number of white spaces to print before the symbol",
@@ -1940,12 +1955,19 @@
                                         "const": "separator"
                                     },
                                     "string": {
-                                        "description": "Set the string to be printed",
+                                        "description": "Set the string to be printed by the separator line",
                                         "type": "string",
                                         "default": "-"
                                     },
                                     "outputColor": {
+                                        "description": "Set the color of the separator line",
                                         "$ref": "#/$defs/outputColor"
+                                    },
+                                    "length": {
+                                        "description": "Set the length of the separator line, or 0 to auto-detect",
+                                        "type": "integer",
+                                        "minimum": 0,
+                                        "default": 0
                                     }
                                 }
                             },
