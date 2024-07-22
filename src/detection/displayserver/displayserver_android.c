@@ -82,25 +82,25 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
     if (ffSettingsGetAndroidProperty("persist.sys.miui_resolution", &buffer) &&
         ffStrbufContainC(&buffer, ','))
     {
-        // 1440,3200,560 => width,height,ppi
+        // 1440,3200,560 => width,height,densityDpi
         uint32_t width = (uint32_t) ffStrbufToUInt(&buffer, 0);
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         uint32_t height = (uint32_t) ffStrbufToUInt(&buffer, 0);
         ffStrbufSubstrAfterFirstC(&buffer, ',');
-        uint32_t ppi = (uint32_t) ffStrbufToUInt(&buffer, 0);
+        double scaleFactor = (double) ffStrbufToUInt(&buffer, 0) / 160.;
         return ffdsAppendDisplay(ds,
             width,
             height,
             0,
-            0,
-            0,
+            (uint32_t) (width / scaleFactor + .5),
+            (uint32_t) (height / scaleFactor + .5),
             0,
             0,
             FF_DISPLAY_TYPE_BUILTIN,
             false,
             0,
-            (uint32_t) (width / ppi * 25.4),
-            (uint32_t) (height / ppi * 25.4)
+            0,
+            0
         );
     }
 
