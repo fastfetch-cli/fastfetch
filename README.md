@@ -126,6 +126,10 @@ Fastfetch uses JSON (with comments) for configuration. I suggest you use an IDE 
 
 Alternatively, you can refer to the presets in [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
 
+The **correct** way to edit the configuration:
+
+[![asciicast](https://asciinema.org/a/1uF6sTPGKrHKI1MVaFcikINSQ.svg)](https://asciinema.org/a/1uF6sTPGKrHKI1MVaFcikINSQ)
+
 ### Q: I WANT THE DOCUMENTATION!
 
 [Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema). It is generated from [JSON schema](https://github.com/fastfetch-cli/fastfetch/blob/dev/doc/json_schema.json) but you won't like it.
