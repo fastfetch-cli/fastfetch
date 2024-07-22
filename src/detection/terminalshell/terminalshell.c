@@ -507,11 +507,11 @@ static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
-    char versionHex[64] = "";
+    char versionHex[64];
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
     if (ffGetTerminalResponse(
         "\eP+q6b697474792d71756572792d76657273696f6e\e\\", // kitty-query-version
-        "\eP1+r%*[^=]=%64[^\e]\e\\\\", versionHex) == NULL && *versionHex)
+        "\eP1+r%*[^=]=%63[^\e]\e\\\\", versionHex) == NULL)
     {
         // decode hex string
         for (const char* p = versionHex; p[0] && p[1]; p += 2)

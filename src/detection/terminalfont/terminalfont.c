@@ -262,10 +262,10 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
 static bool queryKittyTerm(const char* query, FFstrbuf* res)
 {
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
-    char buffer[64] = "";
+    char buffer[256] = "";
     if (ffGetTerminalResponse(
         query, // kitty-query-font_family;kitty-query-font_size
-        "\eP1+r%*[^=]=%64[^\e]\e\\", buffer) == NULL && *buffer)
+        "\eP1+r%*[^=]=%255[^\e]\e\\", buffer) == NULL)
     {
         // decode hex string
         for (const char* p = buffer; p[0] && p[1]; p += 2)
