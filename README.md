@@ -128,6 +128,8 @@ Alternatively, you can refer to the presets in [`presets` directory](https://git
 
 The **correct** way to edit the configuration:
 
+This is an example that [changes size prefix from MiB / GiB to MB / GB](https://github.com/fastfetch-cli/fastfetch/discussions/1014). Editor used: [helix](https://github.com/helix-editor/helix)
+
 [![asciicast](https://asciinema.org/a/1uF6sTPGKrHKI1MVaFcikINSQ.svg)](https://asciinema.org/a/1uF6sTPGKrHKI1MVaFcikINSQ)
 
 ### Q: I WANT THE DOCUMENTATION!
