@@ -87,6 +87,9 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.total, &sTotal);
         if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.used, &sUsed);
 
+        FF_STRBUF_AUTO_DESTROY frequency = ffStrbufCreate();
+        ffParseFrequency(gpu->frequency, &frequency);
+
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor, "vendor"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name, "name"},
@@ -99,7 +102,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {FF_FORMAT_ARG_TYPE_STRBUF, &sTotal, "shared-total"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &sUsed, "shared-used"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi, "platform-api"},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &gpu->frequency, "frequency"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &frequency, "frequency"},
         }));
     }
 }
