@@ -392,6 +392,8 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         const char* subkey = key + strlen("--freq-");
         if(ffStrEqualsIgnCase(subkey, "ndigits"))
             options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
+        else
+            return false;
     }
     else
         return false;
