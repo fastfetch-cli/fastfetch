@@ -123,7 +123,7 @@ void ffInitIconsOptions(FFIconsOptions* options)
         ffPrintIconsHelpFormat,
         ffGenerateIconsJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyIconsOptions(FFIconsOptions* options)

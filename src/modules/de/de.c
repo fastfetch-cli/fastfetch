@@ -135,7 +135,7 @@ void ffInitDEOptions(FFDEOptions* options)
         ffPrintDEHelpFormat,
         ffGenerateDEJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->slowVersionDetection = false;
 }

@@ -145,7 +145,7 @@ void ffInitBoardOptions(FFBoardOptions* options)
         ffPrintBoardHelpFormat,
         ffGenerateBoardJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyBoardOptions(FFBoardOptions* options)

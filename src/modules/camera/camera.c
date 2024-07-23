@@ -161,7 +161,7 @@ void ffInitCameraOptions(FFCameraOptions* options)
         ffPrintCameraHelpFormat,
         ffGenerateCameraJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
 }
 
 void ffDestroyCameraOptions(FFCameraOptions* options)

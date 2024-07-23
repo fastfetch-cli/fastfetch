@@ -160,7 +160,7 @@ void ffInitSwapOptions(FFSwapOptions* options)
         ffPrintSwapHelpFormat,
         ffGenerateSwapJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
     options->percent = (FFColorRangeConfig) { 50, 80 };
 }
 

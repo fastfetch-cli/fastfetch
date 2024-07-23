@@ -183,7 +183,7 @@ void ffInitOpenGLOptions(FFOpenGLOptions* options)
         ffPrintOpenGLHelpFormat,
         ffGenerateOpenGLJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->library = FF_OPENGL_LIBRARY_AUTO;
 }

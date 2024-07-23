@@ -151,7 +151,7 @@ void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
         ffPrintPowerAdapterHelpFormat,
         ffGeneratePowerAdapterJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
 }
 
 void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)

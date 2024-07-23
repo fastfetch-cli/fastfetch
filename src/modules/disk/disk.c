@@ -465,7 +465,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
         ffPrintDiskHelpFormat,
         ffGenerateDiskJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInit(&options->folders);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;

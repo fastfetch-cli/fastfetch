@@ -205,20 +205,3 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
         #undef FF_APPEND_COLOR_PROP_COND
     }
 }
-
-void ffOptionInitModuleArg(FFModuleArgs* args)
-{
-    ffStrbufInit(&args->key);
-    ffStrbufInit(&args->keyColor);
-    ffStrbufInit(&args->outputFormat);
-    ffStrbufInit(&args->outputColor);
-    args->keyWidth = 0;
-}
-
-void ffOptionDestroyModuleArg(FFModuleArgs* args)
-{
-    ffStrbufDestroy(&args->key);
-    ffStrbufDestroy(&args->keyColor);
-    ffStrbufDestroy(&args->outputFormat);
-    ffStrbufDestroy(&args->outputColor);
-}

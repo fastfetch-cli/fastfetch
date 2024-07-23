@@ -183,7 +183,7 @@ void ffInitDNSOptions(FFDNSOptions* options)
         ffPrintDNSHelpFormat,
         ffGenerateDNSJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰇖");
 
     options->showType = FF_DNS_TYPE_BOTH;
 }

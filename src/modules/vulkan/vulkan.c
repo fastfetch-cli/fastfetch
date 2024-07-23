@@ -167,7 +167,7 @@ void ffInitVulkanOptions(FFVulkanOptions* options)
         ffPrintVulkanHelpFormat,
         ffGenerateVulkanJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyVulkanOptions(FFVulkanOptions* options)

@@ -131,7 +131,7 @@ void ffInitShellOptions(FFShellOptions* options)
         ffPrintShellHelpFormat,
         ffGenerateShellJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyShellOptions(FFShellOptions* options)

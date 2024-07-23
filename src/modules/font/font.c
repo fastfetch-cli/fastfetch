@@ -128,7 +128,7 @@ void ffInitFontOptions(FFFontOptions* options)
         ffPrintFontHelpFormat,
         ffGenerateFontJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyFontOptions(FFFontOptions* options)

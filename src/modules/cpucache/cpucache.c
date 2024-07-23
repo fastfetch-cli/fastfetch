@@ -248,7 +248,7 @@ void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
         ffPrintCPUCacheHelpFormat,
         ffGenerateCPUCacheJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;
 }

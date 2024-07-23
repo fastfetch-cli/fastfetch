@@ -293,7 +293,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
         NULL,
         ffGenerateColorsJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
     options->symbol = FF_COLORS_SYMBOL_BACKGROUND;
     options->paddingLeft = 0;

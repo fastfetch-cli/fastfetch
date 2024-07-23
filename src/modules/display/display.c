@@ -377,7 +377,7 @@ void ffInitDisplayOptions(FFDisplayOptions* options)
         ffPrintDisplayHelpFormat,
         ffGenerateDisplayJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
 }

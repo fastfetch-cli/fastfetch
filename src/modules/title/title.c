@@ -205,7 +205,7 @@ void ffInitTitleOptions(FFTitleOptions* options)
         ffPrintTitleHelpFormat,
         ffGenerateTitleJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰗴");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 
     options->fqdn = false;

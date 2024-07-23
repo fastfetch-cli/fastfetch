@@ -464,7 +464,7 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
         ffPrintPackagesHelpFormat,
         ffGeneratePackagesJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
     options->disabled = FF_PACKAGES_FLAG_WINGET_BIT;
 }

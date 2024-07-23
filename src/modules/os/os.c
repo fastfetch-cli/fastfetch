@@ -217,7 +217,23 @@ void ffInitOSOptions(FFOSOptions* options)
         ffPrintOSHelpFormat,
         ffGenerateOSJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs,
+        #ifdef _WIN32
+            ""
+        #elif __APPLE__
+            ""
+        #elif __FreeBSD__
+            "󰣠"
+        #elif __linux__
+            ""
+        #elif __ANDROID__
+            ""
+        #elif __sun
+            ""
+        #else
+            "?"
+        #endif
+    );
 }
 
 void ffDestroyOSOptions(FFOSOptions* options)

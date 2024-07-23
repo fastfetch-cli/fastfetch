@@ -416,7 +416,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
         ffPrintGPUHelpFormat,
         ffGenerateGPUJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
 
     options->driverSpecific = false;
     options->detectionMethod = FF_GPU_DETECTION_METHOD_AUTO;

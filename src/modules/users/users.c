@@ -212,7 +212,7 @@ void ffInitUsersOptions(FFUsersOptions* options)
         ffPrintUsersHelpFormat,
         ffGenerateUsersJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;
     options->myselfOnly = false;

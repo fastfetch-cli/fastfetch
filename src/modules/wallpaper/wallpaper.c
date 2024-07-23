@@ -110,7 +110,7 @@ void ffInitWallpaperOptions(FFWallpaperOptions* options)
         ffPrintWallpaperHelpFormat,
         ffGenerateWallpaperJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
 }
 
 void ffDestroyWallpaperOptions(FFWallpaperOptions* options)

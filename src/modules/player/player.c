@@ -156,7 +156,7 @@ void ffInitPlayerOptions(FFPlayerOptions* options)
         ffPrintPlayerHelpFormat,
         ffGeneratePlayerJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰥠");
 }
 
 void ffDestroyPlayerOptions(FFPlayerOptions* options)

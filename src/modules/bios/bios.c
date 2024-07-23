@@ -167,7 +167,7 @@ void ffInitBiosOptions(FFBiosOptions* options)
         ffPrintBiosHelpFormat,
         ffGenerateBiosJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyBiosOptions(FFBiosOptions* options)

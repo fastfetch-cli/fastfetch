@@ -200,7 +200,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
         ffPrintBrightnessHelpFormat,
         ffGenerateBrightnessJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
 
     options->ddcciSleep = 10;
     options->percent = (FFColorRangeConfig) { 100, 100 };

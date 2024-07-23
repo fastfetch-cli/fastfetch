@@ -278,7 +278,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
         ffPrintPhysicalDiskHelpFormat,
         ffGeneratePhysicalDiskJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰋊");
 
     ffStrbufInit(&options->namePrefix);
     options->temp = false;

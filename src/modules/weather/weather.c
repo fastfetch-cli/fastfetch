@@ -145,7 +145,7 @@ void ffInitWeatherOptions(FFWeatherOptions* options)
         ffPrintWeatherHelpFormat,
         ffGenerateWeatherJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰖙");
 
     ffStrbufInit(&options->location);
     ffStrbufInitStatic(&options->outputFormat, "%t+-+%C+(%l)");

@@ -217,7 +217,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options)
         ffPrintDiskIOHelpFormat,
         ffGenerateDiskIOJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
 
     ffStrbufInit(&options->namePrefix);
     options->detectTotal = false;

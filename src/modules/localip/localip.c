@@ -411,7 +411,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
         ffPrintLocalIpHelpFormat,
         ffGenerateLocalIpJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰩟");
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT
         #ifndef __ANDROID__

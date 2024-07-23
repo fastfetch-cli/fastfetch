@@ -247,7 +247,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
         ffPrintNetIOHelpFormat,
         ffGenerateNetIOJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
 
     ffStrbufInit(&options->namePrefix);
     options->defaultRouteOnly =

@@ -173,7 +173,7 @@ void ffInitHostOptions(FFHostOptions* options)
         ffPrintHostHelpFormat,
         ffGenerateHostJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
 }
 
 void ffDestroyHostOptions(FFHostOptions* options)

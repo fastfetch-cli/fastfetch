@@ -144,7 +144,7 @@ void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
         ffPrintTerminalFontHelpFormat,
         ffGenerateTerminalFontJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)

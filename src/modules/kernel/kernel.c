@@ -106,7 +106,7 @@ void ffInitKernelOptions(FFKernelOptions* options)
         ffPrintKernelHelpFormat,
         ffGenerateKernelJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰧑");
 }
 
 void ffDestroyKernelOptions(FFKernelOptions* options)

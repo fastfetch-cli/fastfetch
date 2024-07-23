@@ -131,7 +131,7 @@ void ffInitCursorOptions(FFCursorOptions* options)
         ffPrintCursorHelpFormat,
         ffGenerateCursorJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
 }
 
 void ffDestroyCursorOptions(FFCursorOptions* options)

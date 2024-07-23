@@ -165,7 +165,7 @@ void ffInitUptimeOptions(FFUptimeOptions* options)
         ffPrintUptimeHelpFormat,
         ffGenerateUptimeJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyUptimeOptions(FFUptimeOptions* options)

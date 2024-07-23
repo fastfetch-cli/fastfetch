@@ -126,7 +126,7 @@ void ffInitTerminalOptions(FFTerminalOptions* options)
         ffPrintTerminalHelpFormat,
         ffGenerateTerminalJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyTerminalOptions(FFTerminalOptions* options)

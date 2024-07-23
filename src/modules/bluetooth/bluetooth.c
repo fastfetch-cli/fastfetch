@@ -200,7 +200,7 @@ void ffInitBluetoothOptions(FFBluetoothOptions* options)
         ffPrintBluetoothHelpFormat,
         ffGenerateBluetoothJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
     options->showDisconnected = false;
     options->percent = (FFColorRangeConfig) { 50, 20 };
 }

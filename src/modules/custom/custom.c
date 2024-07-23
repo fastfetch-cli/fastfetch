@@ -57,8 +57,8 @@ void ffInitCustomOptions(FFCustomOptions* options)
         NULL,
         ffGenerateCustomJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    ffStrbufSetStatic(&options->moduleArgs.key, "");
 }
 
 void ffDestroyCustomOptions(FFCustomOptions* options)

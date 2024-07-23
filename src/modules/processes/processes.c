@@ -100,7 +100,7 @@ void ffInitProcessesOptions(FFProcessesOptions* options)
         ffPrintProcessesHelpFormat,
         ffGenerateProcessesJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyProcessesOptions(FFProcessesOptions* options)

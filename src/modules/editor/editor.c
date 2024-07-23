@@ -142,7 +142,7 @@ void ffInitEditorOptions(FFEditorOptions* options)
         ffPrintEditorHelpFormat,
         ffGenerateEditorJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
 }
 
 void ffDestroyEditorOptions(FFEditorOptions* options)

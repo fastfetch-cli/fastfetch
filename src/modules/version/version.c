@@ -141,7 +141,7 @@ void ffInitVersionOptions(FFVersionOptions* options)
         ffPrintVersionHelpFormat,
         ffGenerateVersionJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyVersionOptions(FFVersionOptions* options)

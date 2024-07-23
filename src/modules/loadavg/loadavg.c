@@ -202,7 +202,7 @@ void ffInitLoadavgOptions(FFLoadavgOptions* options)
         ffPrintLoadavgHelpFormat,
         ffGenerateLoadavgJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFColorRangeConfig) { 50, 80 };
     options->ndigits = 2;

@@ -200,7 +200,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
         ffPrintCPUUsageHelpFormat,
         ffGenerateCPUUsageJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
     options->separate = false;
     options->percent = (FFColorRangeConfig) { 50, 80 };
 }

@@ -212,7 +212,7 @@ void ffInitMonitorOptions(FFMonitorOptions* options)
         ffPrintMonitorHelpFormat,
         ffGenerateMonitorJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰹑");
 }
 
 void ffDestroyMonitorOptions(FFMonitorOptions* options)
