@@ -506,6 +506,13 @@
             }
         },
         {
+            "long": "key-padding-left",
+            "desc": "Set the left padding of keys to <num> characters",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
             "long": "key-type",
             "desc": "Set the type of keys to display",
             "arg": {

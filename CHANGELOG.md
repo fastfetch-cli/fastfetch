@@ -1,3 +1,19 @@
+# 2.20.0
+
+Changes:
+* JSON option `display.keyWidth` has been renamed to `display.key.width`
+    * Previously: `{ "display": { "keyWidth": 3 } }`
+    * Now: `{ "display": { "key": { "width": 3 } } }`
+
+Features
+* Add option `display.key.type: <enum>` to print icons in keys
+    * Supported value `string`, `icon` and `both`. Default to `string` (don't display icons)
+    * Example: `{ "display": { "key": { "type": "icon" } } }`
+* Add option `display.key.paddingLeft: <num>` to print left padding (whitespaces) in keys
+    * Example: `{ "display": { "key": { "paddingLeft": 2 } } }`
+* Add option `modules.keyIcon` to set icon for specified module
+    * Example: `{ "modules": { "type": "command", "keyIcon": "🔑" } }`
+
 # 2.19.1
 
 Bugfixes

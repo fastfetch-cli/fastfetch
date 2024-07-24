@@ -202,19 +202,36 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "noBuffer"))
             options->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
-            options->keyWidth = (uint32_t) yyjson_get_uint(val);
-        else if (ffStrEqualsIgnCase(key, "keyType"))
+            return "display.keyWidth has been renamed to display.key.width";
+        else if (ffStrEqualsIgnCase(key, "key"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "none", FF_MODULE_KEY_TYPE_NONE },
-                { "string", FF_MODULE_KEY_TYPE_STRING },
-                { "icon", FF_MODULE_KEY_TYPE_ICON },
-                { "both", FF_MODULE_KEY_TYPE_BOTH },
-                {}
-            });
-            if (error) return error;
-            options->keyType = (uint8_t) value;
+            if (yyjson_is_obj(val))
+            {
+                yyjson_val* width = yyjson_obj_get(val, "width");
+                if (width)
+                    options->keyWidth = (uint16_t) yyjson_get_uint(width);
+
+                yyjson_val* type = yyjson_obj_get(val, "type");
+                if (type)
+                {
+                    int value;
+                    const char* error = ffJsonConfigParseEnum(type, &value, (FFKeyValuePair[]) {
+                        { "none", FF_MODULE_KEY_TYPE_NONE },
+                        { "string", FF_MODULE_KEY_TYPE_STRING },
+                        { "icon", FF_MODULE_KEY_TYPE_ICON },
+                        { "both", FF_MODULE_KEY_TYPE_BOTH },
+                        {}
+                    });
+                    if (error) return error;
+                    options->keyType = (uint8_t) value;
+                }
+
+                yyjson_val* paddingLeft = yyjson_obj_get(val, "paddingLeft");
+                if (paddingLeft)
+                    options->keyPaddingLeft = (uint16_t) yyjson_get_uint(paddingLeft);
+            }
+            else
+                return "display.key must be an object";
         }
         else if (ffStrEqualsIgnCase(key, "constants"))
         {
@@ -299,17 +316,25 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         else
             return false;
     }
-    else if(ffStrEqualsIgnCase(key, "--key-width"))
-        options->keyWidth = ffOptionParseUInt32(key, value);
-    else if(ffStrEqualsIgnCase(key, "--key-type"))
+    else if(ffStrStartsWithIgnCase(key, "--key-"))
     {
-        options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "none", FF_MODULE_KEY_TYPE_NONE },
-            { "string", FF_MODULE_KEY_TYPE_STRING },
-            { "icon", FF_MODULE_KEY_TYPE_ICON },
-            { "both", FF_MODULE_KEY_TYPE_BOTH },
-            {}
-        });
+        const char* subkey = key + strlen("--key-");
+        if(ffStrEqualsIgnCase(subkey, "width"))
+            options->keyWidth = (uint16_t) ffOptionParseUInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "type"))
+        {
+            options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "none", FF_MODULE_KEY_TYPE_NONE },
+                { "string", FF_MODULE_KEY_TYPE_STRING },
+                { "icon", FF_MODULE_KEY_TYPE_ICON },
+                { "both", FF_MODULE_KEY_TYPE_BOTH },
+                {}
+            });
+        }
+        else if(ffStrEqualsIgnCase(subkey, "padding-left"))
+            options->keyPaddingLeft = (uint16_t) ffOptionParseUInt32(key, value);
+        else
+            return false;
     }
     else if(ffStrEqualsIgnCase(key, "--bright-color"))
         options->brightColor = ffOptionParseBoolean(value);
@@ -448,6 +473,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->stat = false;
     options->noBuffer = false;
     options->keyWidth = 0;
+    options->keyPaddingLeft = 0;
     options->keyType = FF_MODULE_KEY_TYPE_STRING;
 
     options->tempUnit = FF_TEMPERATURE_UNIT_CELSIUS;
@@ -649,6 +675,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
 
     if (options->keyType != defaultOptions.keyType)
         yyjson_mut_obj_add_uint(doc, obj, "keyType", options->keyType);
+
+    if (options->keyPaddingLeft != defaultOptions.keyPaddingLeft)
+        yyjson_mut_obj_add_uint(doc, obj, "keyPaddingLeft", options->keyPaddingLeft);
 
     {
         yyjson_mut_val* freq = yyjson_mut_obj(doc);

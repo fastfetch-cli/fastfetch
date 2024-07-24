@@ -422,22 +422,35 @@
                     "type": "boolean",
                     "default": true
                 },
-                "keyWidth": {
-                    "description": "Align the width of keys to number of characters, 0 to disable",
-                    "type": "integer",
-                    "minimum": 0,
-                    "default": 0
-                },
-                "keyType": {
-                    "type": "string",
-                    "description": "Set the type of keys to display",
-                    "enum": [
-                        "none",
-                        "string",
-                        "icon",
-                        "botn"
-                    ],
-                    "default": "string"
+                "key": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Set how module keys should be displayed",
+                    "properties": {
+                        "width": {
+                            "description": "Align the width of keys to number of characters, 0 to disable",
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Set the type of keys to display",
+                            "enum": [
+                                "none",
+                                "string",
+                                "icon",
+                                "both"
+                            ],
+                            "default": "string"
+                        },
+                        "paddingLeft": {
+                            "type": "integer",
+                            "description": "Set the left padding of keys",
+                            "minimum": 0,
+                            "default": 0
+                        }
+                    }
                 },
                 "size": {
                     "type": "object",

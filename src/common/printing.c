@@ -13,6 +13,8 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
     //This is used as a magic value for hiding keys
     if (!(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " ")) && instance.config.display.keyType != FF_MODULE_KEY_TYPE_NONE)
     {
+        ffPrintCharTimes(' ', instance.config.display.keyPaddingLeft);
+
         if(!instance.config.display.pipe)
         {
             fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
