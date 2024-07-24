@@ -19,7 +19,7 @@
     },
     "modules": [
         {
-            "format": "{#1}{#keys}╔{$1}╗\u001b[76D {6}{7}{8} 💻 ",
+            "format": "{#1}{#keys}╔{$1}╗\u001b[76D {user-name-colored}{at-symbol-colored}{host-name-colored} 💻 ",
             "type": "title"
         },
         {
@@ -31,7 +31,7 @@
             "type": "uptime"
         },
         {
-            "key": "{$2}{#33}󰟾 distro   ",
+            "key": "{$2}{#33}{icon} distro   ",
             "type": "os"
         },
         {
@@ -68,7 +68,7 @@
         {
             "key": "{$2}{#31}󰩟 network  ",
             "type": "localip",
-            "format": "{1} ({4})"
+            "format": "{ipv4} ({ifname})"
         },
         {
             "format": "{#1}{#keys}╠{$1}╣",

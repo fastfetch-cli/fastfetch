@@ -4,7 +4,9 @@
     "logo": null,
     "display": {
         "pipe": true,
-        "keyWidth": 16,
+        "key": {
+            "width": 16
+        },
         "separator": "│ ",
         "percent": {
             "type": 6

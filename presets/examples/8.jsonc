@@ -11,6 +11,9 @@
         "size": {
             "ndigits": 0,
             "maxPrefix": "MB"
+        },
+        "key": {
+            "type": "icon"
         }
     },
     "modules": [
@@ -22,31 +25,17 @@
                 "host": "blue"
             }
         },
+        "os",
+        "kernel",
+        "memory",
+        "packages",
+        "uptime",
         {
-            "type": "os",
-            "key": "",
-            "format": "{2} {8}"
-        },
-        {
-            "type": "kernel",
-            "key": ""
-        },
-        {
-            "type": "memory",
-            "key": ""
-        },
-        {
-            "type": "packages",
-            "key": "󰏖"
-        },
-        {
-            "type": "uptime",
-            "key": "󰅐"
-        },
-        {
-            "type": "custom",
-            "key": "",
-            "format": "{#31}███{#32}███{#33}███{#34}███{#35}███{#36}███"
+            "type": "colors",
+            "key": "Colors", // For printing icon
+            "block": {
+                "range": [1, 6]
+            }
         }
     ]
 }

@@ -8,8 +8,7 @@
         }
     },
     "display": {
-        "separator": "",
-        "keyWidth": 15
+        "separator": " "
     },
     "modules": [
         {
@@ -19,19 +18,19 @@
         {
             "key": "• {#31} user    {#keys}•",
             "type": "title",
-            "format": "{1}"
+            "format": "{user-name}"
         },
         {
             "key": "• {#32}󰇅 hname   {#keys}•",
             "type": "title",
-            "format": "{2}"
+            "format": "{host-name}"
         },
         {
             "key": "• {#33}󰅐 uptime  {#keys}•",
             "type": "uptime"
         },
         {
-            "key": "• {#34}󰟾 distro  {#keys}•",
+            "key": "• {#34}{icon} distro  {#keys}•",
             "type": "os"
         },
         {
@@ -67,7 +66,7 @@
         {
             "key": "• {#36}󰩟 network {#keys}•",
             "type": "localip",
-            "format": "{1} ({4})"
+            "format": "{ipv4} ({ifname})"
         },
         {
             "key": "•••••••••••••",
