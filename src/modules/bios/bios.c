@@ -43,8 +43,9 @@ void ffPrintBios(FFBiosOptions* options)
     else
     {
         ffStrbufClear(&key);
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 1, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &bios.type, "type"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
         }));
     }
 

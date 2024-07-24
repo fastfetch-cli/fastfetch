@@ -91,10 +91,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
         else
         {
-            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 4, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex, "index"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
                 {FF_FORMAT_ARG_TYPE_STRING, displayType, "type"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
             }));
         }
 

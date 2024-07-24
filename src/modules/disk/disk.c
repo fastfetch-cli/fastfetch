@@ -35,10 +35,11 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
     else
     {
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 4, ((FFformatarg[]){
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint, "mountpoint"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name, "name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountFrom, "mount-from"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
         }));
     }
 
