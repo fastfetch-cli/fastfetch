@@ -137,7 +137,7 @@ void ffInitLMOptions(FFLMOptions* options)
         ffPrintLMHelpFormat,
         ffGenerateLMJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs, "󰍂");
+    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
 }
 
 void ffDestroyLMOptions(FFLMOptions* options)
