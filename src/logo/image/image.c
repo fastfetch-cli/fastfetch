@@ -49,9 +49,13 @@ static bool printImageIterm(bool printError)
         }
         else if (options->position == FF_LOGO_POSITION_RIGHT)
         {
-            if (printError)
-                fputs("Logo (iterm): Must set logo width and height\n", stderr);
-            return false;
+            if (!options->width)
+            {
+                if (printError)
+                    fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
+                return false;
+            }
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[H\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
         }
         if (options->width)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u:%s\a", (unsigned) options->width, base64.chars);
@@ -59,7 +63,7 @@ static bool printImageIterm(bool printError)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a", base64.chars);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
-        if (options->position == FF_LOGO_POSITION_LEFT)
+        if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
         {
             uint16_t X = 0, Y = 0;
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
@@ -68,7 +72,8 @@ static bool printImageIterm(bool printError)
                 fprintf(stderr, "\nLogo (iterm): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
-            instance.state.logoWidth = X + options->paddingRight;
+            if (options->position == FF_LOGO_POSITION_LEFT)
+                instance.state.logoWidth = X + options->paddingRight;
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
@@ -144,9 +149,13 @@ static bool printImageKittyDirect(bool printError)
         }
         else if (options->position == FF_LOGO_POSITION_RIGHT)
         {
-            if (printError)
-                fputs("Logo (iterm): Must set logo width and height\n", stderr);
-            return false;
+            if (!options->width)
+            {
+                if (printError)
+                    fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
+                return false;
+            }
+            printf("\e[2J\e[3J\e[H\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
         }
 
         if (options->width)
@@ -154,7 +163,7 @@ static bool printImageKittyDirect(bool printError)
         else
             printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
         fflush(stdout);
-        if (options->position == FF_LOGO_POSITION_LEFT)
+        if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
         {
             uint16_t X = 0, Y = 0;
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
@@ -163,7 +172,8 @@ static bool printImageKittyDirect(bool printError)
                 fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
-            instance.state.logoWidth = X + options->paddingRight;
+            if (options->position == FF_LOGO_POSITION_LEFT)
+                instance.state.logoWidth = X + options->paddingRight;
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
