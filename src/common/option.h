@@ -97,7 +97,7 @@ static inline void ffOptionDestroyModuleArg(FFModuleArgs* args)
 {
     ffStrbufDestroy(&args->key);
     ffStrbufDestroy(&args->keyColor);
+    ffStrbufDestroy(&args->keyIcon);
     ffStrbufDestroy(&args->outputFormat);
     ffStrbufDestroy(&args->outputColor);
-    ffStrbufDestroy(&args->keyIcon);
 }
