@@ -203,6 +203,19 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             options->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
             options->keyWidth = (uint32_t) yyjson_get_uint(val);
+        else if (ffStrEqualsIgnCase(key, "keyType"))
+        {
+            int value;
+            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                { "none", FF_MODULE_KEY_TYPE_NONE },
+                { "string", FF_MODULE_KEY_TYPE_STRING },
+                { "icon", FF_MODULE_KEY_TYPE_ICON },
+                { "both", FF_MODULE_KEY_TYPE_BOTH },
+                {}
+            });
+            if (error) return error;
+            options->keyType = (uint8_t) value;
+        }
         else if (ffStrEqualsIgnCase(key, "constants"))
         {
             if (!yyjson_is_arr(val))
@@ -288,6 +301,16 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     }
     else if(ffStrEqualsIgnCase(key, "--key-width"))
         options->keyWidth = ffOptionParseUInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--key-type"))
+    {
+        options->keyType = (FFModuleKeyType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "none", FF_MODULE_KEY_TYPE_NONE },
+            { "string", FF_MODULE_KEY_TYPE_STRING },
+            { "icon", FF_MODULE_KEY_TYPE_ICON },
+            { "both", FF_MODULE_KEY_TYPE_BOTH },
+            {}
+        });
+    }
     else if(ffStrEqualsIgnCase(key, "--bright-color"))
         options->brightColor = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--binary-prefix"))
@@ -425,6 +448,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->stat = false;
     options->noBuffer = false;
     options->keyWidth = 0;
+    options->keyType = FF_MODULE_KEY_TYPE_STRING;
 
     options->tempUnit = FF_TEMPERATURE_UNIT_CELSIUS;
     options->tempNdigits = 1;
@@ -622,6 +646,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
 
     if (options->keyWidth != defaultOptions.keyWidth)
         yyjson_mut_obj_add_uint(doc, obj, "keyWidth", options->keyWidth);
+
+    if (options->keyType != defaultOptions.keyType)
+        yyjson_mut_obj_add_uint(doc, obj, "keyType", options->keyType);
 
     {
         yyjson_mut_val* freq = yyjson_mut_obj(doc);

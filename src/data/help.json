@@ -506,6 +506,20 @@
             }
         },
         {
+            "long": "key-type",
+            "desc": "Set the type of keys to display",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "none": "Disable keys",
+                    "string": "Show string",
+                    "icon": "Show icon",
+                    "both": "Show both icon and string"
+                },
+                "default": "string"
+            }
+        },
+        {
             "long": "bright-color",
             "desc": "Set if the keys, title and ASCII logo should be printed in bright color",
             "arg": {

@@ -48,9 +48,9 @@ static inline void ffOptionInitModuleBaseInfo(
 typedef enum FFModuleKeyType
 {
     FF_MODULE_KEY_TYPE_NONE = 0,
-    FF_MODULE_KEY_TYPE_STRING = 0 << 1,
-    FF_MODULE_KEY_TYPE_KEY = 1 << 1,
-    FF_MODULE_KEY_TYPE_BOTH = FF_MODULE_KEY_TYPE_STRING | FF_MODULE_KEY_TYPE_KEY,
+    FF_MODULE_KEY_TYPE_STRING = 1 << 0,
+    FF_MODULE_KEY_TYPE_ICON = 1 << 1,
+    FF_MODULE_KEY_TYPE_BOTH = FF_MODULE_KEY_TYPE_STRING | FF_MODULE_KEY_TYPE_ICON,
 } FFModuleKeyType;
 
 typedef struct FFModuleArgs

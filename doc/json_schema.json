@@ -424,6 +424,17 @@
                     "minimum": 0,
                     "default": 0
                 },
+                "keyType": {
+                    "type": "string",
+                    "description": "Set the type of keys to display",
+                    "enum": [
+                        "none",
+                        "string",
+                        "icon",
+                        "botn"
+                    ],
+                    "default": "string"
+                },
                 "size": {
                     "type": "object",
                     "additionalProperties": false,

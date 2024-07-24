@@ -53,6 +53,7 @@ typedef struct FFOptionsDisplay
     FFstrbuf percentColorRed;
     bool noBuffer;
     uint32_t keyWidth;
+    FFModuleKeyType keyType;
     int8_t freqNdigits;
     FFlist constants; // list of FFstrbuf
 } FFOptionsDisplay;
