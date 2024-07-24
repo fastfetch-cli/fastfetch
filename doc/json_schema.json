@@ -435,7 +435,7 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set the type of keys to display",
+                            "description": "Set whether to show icon before string keys",
                             "enum": [
                                 "none",
                                 "string",

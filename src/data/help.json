@@ -514,7 +514,7 @@
         },
         {
             "long": "key-type",
-            "desc": "Set the type of keys to display",
+            "desc": "Set whether to show icon before string keys",
             "arg": {
                 "type": "enum",
                 "enum": {
