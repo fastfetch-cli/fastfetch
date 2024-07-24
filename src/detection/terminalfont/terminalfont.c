@@ -322,34 +322,6 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
     return true;
 }
 
-static void detectTerminator(FFTerminalFontResult* result)
-{
-    FF_STRBUF_AUTO_DESTROY useSystemFont = ffStrbufCreate();
-    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
-
-    FFpropquery fontQuery[] = {
-        {"use_system_font =", &useSystemFont},
-        {"font =", &fontName},
-    };
-
-    if(!ffParsePropFileConfigValues("terminator/config", 2, fontQuery))
-    {
-        ffStrbufAppendS(&result->error, "Couldn't read Terminator config file");
-        return;
-    }
-
-    if(ffStrbufIgnCaseEqualS(&useSystemFont, "True"))
-    {
-        ffFontInitCopy(&result->font, "System");
-        return;
-    }
-
-    if(fontName.length == 0)
-        ffFontInitValues(&result->font, "mono", "8");
-    else
-        ffFontInitPango(&result->font, fontName.chars);
-}
-
 static bool detectWezterm(const FFstrbuf* exe, FFTerminalFontResult* result)
 {
     FF_STRBUF_AUTO_DESTROY cli = ffStrbufCreateCopy(exe);
@@ -442,8 +414,6 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
 {
     if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "alacritty"))
         detectAlacritty(terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "terminator"))
-        detectTerminator(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "wezterm-gui"))
         detectWezterm(&terminal->exe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "tabby"))
