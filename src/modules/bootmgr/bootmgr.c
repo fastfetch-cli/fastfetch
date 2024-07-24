@@ -134,7 +134,7 @@ void ffInitBootmgrOptions(FFBootmgrOptions* options)
         ffPrintBootmgrHelpFormat,
         ffGenerateBootmgrJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs, "");
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
