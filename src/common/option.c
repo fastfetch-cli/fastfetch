@@ -50,20 +50,29 @@ bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const 
         ffOptionParseColor(value, &result->outputColor);
         return true;
     }
-    else if(ffStrEqualsIgnCase(subKey, "key-color"))
+    else if(ffStrStartsWithIgnCase(subKey, "key-"))
     {
-        if(value == NULL)
+        const char* subKey2 = subKey + strlen("key-");
+        if(ffStrEqualsIgnCase(subKey2, "color"))
         {
-            fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
-            exit(477);
+            if(value == NULL)
+            {
+                fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
+                exit(477);
+            }
+            ffOptionParseColor(value, &result->keyColor);
+            return true;
         }
-        ffOptionParseColor(value, &result->keyColor);
-        return true;
-    }
-    else if(ffStrEqualsIgnCase(subKey, "key-width"))
-    {
-        result->keyWidth = ffOptionParseUInt32(argumentKey, value);
-        return true;
+        else if(ffStrEqualsIgnCase(subKey2, "width"))
+        {
+            result->keyWidth = ffOptionParseUInt32(argumentKey, value);
+            return true;
+        }
+        else if(ffStrEqualsIgnCase(subKey2, "icon"))
+        {
+            ffOptionParseString(argumentKey, value, &result->keyIcon);
+            return true;
+        }
     }
     return false;
 }

@@ -57,9 +57,9 @@ typedef struct FFModuleArgs
 {
     FFstrbuf key;
     FFstrbuf keyColor;
+    FFstrbuf keyIcon;
     FFstrbuf outputFormat;
     FFstrbuf outputColor;
-    FFstrbuf icon;
     uint32_t keyWidth;
 } FFModuleArgs;
 
@@ -87,9 +87,9 @@ static inline void ffOptionInitModuleArg(FFModuleArgs* args, const char* icon)
 {
     ffStrbufInit(&args->key);
     ffStrbufInit(&args->keyColor);
+    ffStrbufInitStatic(&args->keyIcon, icon);
     ffStrbufInit(&args->outputFormat);
     ffStrbufInit(&args->outputColor);
-    ffStrbufInitStatic(&args->icon, icon);
     args->keyWidth = 0;
 }
 
@@ -99,5 +99,5 @@ static inline void ffOptionDestroyModuleArg(FFModuleArgs* args)
     ffStrbufDestroy(&args->keyColor);
     ffStrbufDestroy(&args->outputFormat);
     ffStrbufDestroy(&args->outputColor);
-    ffStrbufDestroy(&args->icon);
+    ffStrbufDestroy(&args->keyIcon);
 }

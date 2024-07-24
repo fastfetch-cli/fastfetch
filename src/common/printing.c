@@ -26,9 +26,9 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         }
 
         bool hasIcon = false;
-        if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_ICON && moduleArgs && moduleArgs->icon.length > 0)
+        if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_ICON && moduleArgs && moduleArgs->keyIcon.length > 0)
         {
-            ffStrbufWriteTo(&moduleArgs->icon, stdout);
+            ffStrbufWriteTo(&moduleArgs->keyIcon, stdout);
             hasIcon = true;
         }
 
@@ -50,7 +50,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
                 FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
                 FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 2, ((FFformatarg[]){
                     {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex, "index"},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &moduleArgs->icon, "icon"},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &moduleArgs->keyIcon, "icon"},
                 }));
                 ffStrbufWriteTo(&key, stdout);
             }

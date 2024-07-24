@@ -1652,6 +1652,14 @@
             "pseudo": true
         },
         {
+            "long": "<module>-key-icon",
+            "desc": "Set the icon to be displayed by \"--key-type icon\"",
+            "arg": {
+                "type": "string"
+            },
+            "pseudo": true
+        },
+        {
             "long": "<module>-output-color",
             "desc": "Override the global \"--color-output\" option for each specific module",
             "arg": {
