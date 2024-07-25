@@ -55,7 +55,7 @@ static bool printImageIterm(bool printError)
                     fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
                 return false;
             }
-            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[H\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
         }
         if (options->width)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u:%s\a", (unsigned) options->width, base64.chars);
@@ -155,7 +155,7 @@ static bool printImageKittyDirect(bool printError)
                     fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
                 return false;
             }
-            printf("\e[2J\e[3J\e[H\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+            printf("\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
         }
 
         if (options->width)

@@ -43,7 +43,7 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
                     fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
                 return false;
             }
-            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[H\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
         }
         ffStrbufAppendNS(&buf, (uint32_t) length, data);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
