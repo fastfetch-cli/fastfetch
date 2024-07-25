@@ -16,41 +16,91 @@ typedef enum FFLogoSize
     FF_LOGO_SIZE_SMALL,
 } FFLogoSize;
 
-static void ffLogoPrintCharsRaw(const char* data, size_t length)
+static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError)
 {
     FFOptionsLogo* options = &instance.config.logo;
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
     if (!options->width || !options->height)
     {
-        ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
-            (unsigned) options->paddingTop,
-            (unsigned) options->paddingLeft
-        );
+        if (options->position == FF_LOGO_POSITION_LEFT)
+        {
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
+                (unsigned) options->paddingTop + 1,
+                (unsigned) options->paddingLeft + 1
+            );
+        }
+        else if (options->position == FF_LOGO_POSITION_TOP)
+        {
+            ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+            ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            if (!options->width)
+            {
+                if (printError)
+                    fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
+                return false;
+            }
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[H\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        }
         ffStrbufAppendNS(&buf, (uint32_t) length, data);
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
-        uint16_t X = 0, Y = 0;
-        const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
-        if (error)
+        if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
         {
-            fprintf(stderr, "\nLogo (image-raw): fail to query cursor position: %s\n", error);
-            return;
+            uint16_t X = 0, Y = 0;
+            const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
+            if (error)
+            {
+                if (printError)
+                    fprintf(stderr, "\nLogo (image-raw): fail to query cursor position: %s\n", error);
+                return true;
+            }
+            if (options->position == FF_LOGO_POSITION_LEFT)
+                instance.state.logoWidth = X + instance.config.logo.paddingRight - 1;
+            instance.state.logoHeight = Y;
+            fputs("\e[H", stdout);
         }
-        instance.state.logoWidth = X + instance.config.logo.paddingRight;
-        instance.state.logoHeight = Y;
-        fputs("\e[H", stdout);
+        else if (options->position == FF_LOGO_POSITION_TOP)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffPrintCharTimes('\n', options->paddingRight);
+        }
     }
     else
     {
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
-        ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
+
+        if (options->position == FF_LOGO_POSITION_RIGHT)
+            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        else if (options->paddingLeft)
+            ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
+
         ffStrbufAppendNS(&buf, (uint32_t) length, data);
-        instance.state.logoHeight = options->paddingTop + options->height;
-        instance.state.logoWidth = options->paddingLeft + options->width + options->paddingRight;
-        ffStrbufAppendF(&buf, "\n\e[%uA", instance.state.logoHeight);
+        ffStrbufAppendC(&buf, '\n');
+
+        if (options->position == FF_LOGO_POSITION_LEFT)
+        {
+            instance.state.logoWidth = options->width + options->paddingLeft + options->paddingRight;
+            instance.state.logoHeight = options->paddingTop + options->height;
+            ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
+        }
+        else if (options->position == FF_LOGO_POSITION_TOP)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffStrbufAppendNC(&buf, options->paddingRight, '\n');
+        }
+        else if (options->position == FF_LOGO_POSITION_RIGHT)
+        {
+            instance.state.logoWidth = instance.state.logoHeight = 0;
+            ffStrbufAppendF(&buf, "\e[%uA", (unsigned) options->height);
+        }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
+
+    return true;
 }
 
 // If result is NULL, calculate logo width
@@ -441,10 +491,9 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
 
     logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
     if(raw)
-        ffLogoPrintCharsRaw(content.chars, content.length);
-    else
-        ffLogoPrintChars(content.chars, doColorReplacement);
+        return ffLogoPrintCharsRaw(content.chars, content.length, instance.config.display.showErrors);
 
+    ffLogoPrintChars(content.chars, doColorReplacement);
     return true;
 }
 

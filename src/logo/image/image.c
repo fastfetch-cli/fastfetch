@@ -38,8 +38,8 @@ static bool printImageIterm(bool printError)
         if (options->position == FF_LOGO_POSITION_LEFT)
         {
             ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
-                (unsigned) options->paddingTop,
-                (unsigned) options->paddingLeft
+                (unsigned) options->paddingTop + 1,
+                (unsigned) options->paddingLeft + 1
             );
         }
         else if (options->position == FF_LOGO_POSITION_TOP)
@@ -73,7 +73,7 @@ static bool printImageIterm(bool printError)
                 return true; // We already printed image logo, don't print ascii logo then
             }
             if (options->position == FF_LOGO_POSITION_LEFT)
-                instance.state.logoWidth = X + options->paddingRight;
+                instance.state.logoWidth = X + options->paddingRight - 1;
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
@@ -88,7 +88,7 @@ static bool printImageIterm(bool printError)
         ffStrbufAppendNC(&buf, options->paddingTop, '\n');
         if (options->position == FF_LOGO_POSITION_RIGHT)
             ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
-        else
+        else if (options->paddingLeft)
             ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
         ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
             (unsigned) options->width,
@@ -138,8 +138,8 @@ static bool printImageKittyDirect(bool printError)
         {
             // We must clear the entre screen to make sure that terminal buffer won't scroll up
             printf("\e[2J\e[3J\e[%u;%uH",
-                (unsigned) options->paddingTop,
-                (unsigned) options->paddingLeft
+                (unsigned) options->paddingTop + 1,
+                (unsigned) options->paddingLeft + 1
             );
         }
         else if (options->position == FF_LOGO_POSITION_TOP)
@@ -169,11 +169,12 @@ static bool printImageKittyDirect(bool printError)
             const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
             if (error)
             {
-                fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
+                if (printError)
+                    fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
             if (options->position == FF_LOGO_POSITION_LEFT)
-                instance.state.logoWidth = X + options->paddingRight;
+                instance.state.logoWidth = X + options->paddingRight - 1;
             instance.state.logoHeight = Y;
             fputs("\e[H", stdout);
         }
@@ -188,7 +189,7 @@ static bool printImageKittyDirect(bool printError)
         ffPrintCharTimes('\n', options->paddingTop);
         if (options->position == FF_LOGO_POSITION_RIGHT)
             printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
-        else
+        else if (options->paddingLeft)
             printf("\e[%uC", (unsigned) options->paddingLeft);
 
         printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n",
@@ -348,7 +349,7 @@ static void printImagePixels(FFLogoRequestData* requestData, const FFstrbuf* res
     ffPrintCharTimes('\n', options->paddingTop);
     if (options->position == FF_LOGO_POSITION_RIGHT)
         printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
-    else
+    else if (options->paddingLeft)
         printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
     ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), result);
@@ -732,7 +733,7 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     ffPrintCharTimes('\n', options->paddingTop);
     if (options->position == FF_LOGO_POSITION_RIGHT)
         printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + requestData->logoCharacterWidth);
-    else
+    else if (options->paddingLeft)
         printf("\e[%uC", (unsigned) options->paddingLeft);
     fflush(stdout);
 
