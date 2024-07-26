@@ -53,7 +53,7 @@ static const char* detectFrequency(FFGPUResult* gpu)
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
 
     FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states9-sram"), kCFAllocatorDefault, kNilOptions);
-    if (CFGetTypeID(freqProperty) != CFDataGetTypeID())
+    if (!freqProperty || CFGetTypeID(freqProperty) != CFDataGetTypeID())
         return "\"voltage-states9-sram\" in \"pmgr\" is not found";
 
     // voltage-states5-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
