@@ -6,20 +6,22 @@
     },
     "display": {
         "separator": "",
-        "keyWidth": 12
+        "key": {
+            "width": 15
+        }
     },
     "modules": [
         {
             // draw borders first to make colors of left and right border consistant
             "key": " user",
             "type": "title",
-            "format": "{1}",
+            "format": "{user-name}",
             "keyColor": "31"
         },
         {
             "key": "󰇅 hname",
             "type": "title",
-            "format": "{2}",
+            "format": "{host-name}",
             "keyColor": "32"
 
         },
@@ -29,7 +31,7 @@
             "keyColor": "33"
         },
         {
-            "key": "󰟾 distro",
+            "key": "{icon} distro",
             "type": "os",
             "keyColor": "34"
         },
@@ -73,7 +75,7 @@
         {
             "key": "󰩟 network",
             "type": "localip",
-            "format": "{1} ({4})",
+            "format": "{ipv4} ({ifname})",
             "keyColor": "36"
         },
         {

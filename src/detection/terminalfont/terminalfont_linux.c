@@ -379,6 +379,30 @@ static void detectWarp(FFTerminalFontResult* terminalFont)
     }
 }
 
+static void detectTerminator(FFTerminalFontResult* result)
+{
+    FF_STRBUF_AUTO_DESTROY useSystemFont = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+
+    if(!ffParsePropFileConfigValues("terminator/config", 2, (FFpropquery[]) {
+        {"use_system_font =", &useSystemFont},
+        {"font =", &fontName},
+    }) || ffStrbufIgnCaseEqualS(&useSystemFont, "True"))
+    {
+        FF_AUTO_FREE const char* fontName = getSystemMonospaceFont();
+        if(ffStrSet(fontName))
+            ffFontInitPango(&result->font, fontName);
+        else
+            ffStrbufAppendS(&result->error, "Couldn't get system monospace font name from GSettings / DConf");
+        return;
+    }
+
+    if(fontName.length == 0)
+        ffFontInitValues(&result->font, "Mono", "10");
+    else
+        ffFontInitPango(&result->font, fontName.chars);
+}
+
 static void detectWestonTerminal(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
@@ -426,4 +450,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectWarp(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "weston-terminal"))
         detectWestonTerminal(terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "terminator"))
+        detectTerminator(terminalFont);
 }

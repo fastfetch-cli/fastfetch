@@ -178,7 +178,7 @@ void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
         ffPrintPhysicalMemoryHelpFormat,
         ffGeneratePhysicalMemoryJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰑭");
 }
 
 void ffDestroyPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)

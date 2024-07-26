@@ -22,9 +22,10 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
         else
         {
             uint32_t index = i + 1;
-            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
                 {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
                 {FF_FORMAT_ARG_TYPE_STRING, levelStr, "level"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
             }));
         }
 
@@ -248,7 +249,7 @@ void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
         ffPrintCPUCacheHelpFormat,
         ffGenerateCPUCacheJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;
 }

@@ -10,6 +10,7 @@
 void ffPrintEditor(FFEditorOptions* options)
 {
     FFEditorResult result = {
+        .type = "Unknown",
         .name = ffStrbufCreate(),
         .path = ffStrbufCreate(),
         .exe = ffStrbufCreate(),
@@ -40,8 +41,8 @@ void ffPrintEditor(FFEditorOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_EDITOR_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, &result.type, "type"},
+        FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_EDITOR_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_STRING, result.type, "type"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.name, "name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.exe, "exe-name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result.path, "path"},
@@ -107,6 +108,7 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
+    yyjson_mut_obj_add_str(doc, obj, "type", result.type);
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &result.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "path", &result.path);
     yyjson_mut_obj_add_strbuf(doc, obj, "exe", &result.exe);
@@ -142,7 +144,7 @@ void ffInitEditorOptions(FFEditorOptions* options)
         ffPrintEditorHelpFormat,
         ffGenerateEditorJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
 }
 
 void ffDestroyEditorOptions(FFEditorOptions* options)

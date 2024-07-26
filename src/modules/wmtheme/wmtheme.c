@@ -97,7 +97,7 @@ void ffInitWMThemeOptions(FFWMThemeOptions* options)
         ffPrintWMthemeHelpFormat,
         ffGenerateWMThemeJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓸");
 }
 
 void ffDestroyWMThemeOptions(FFWMThemeOptions* options)

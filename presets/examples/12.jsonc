@@ -6,16 +6,20 @@
     "display": {
         "separator": "->   ",
         "color": {
-            "separator": "1"
+            "separator": "1" // Bold
         },
         "constants": [
-            "─────────────────────────────"
-        ]
+            "───────────────────────────"
+        ],
+        "key": {
+            "type": "both",
+            "paddingLeft": 4
+        }
     },
     "modules": [
         {
             "type": "title",
-            "format": "                                {6}{7}{8}"
+            "format": "                             {user-name-colored}{at-symbol-colored}{host-name-colored}"
         },
         "break",
         {
@@ -24,74 +28,74 @@
         },
         "break",
         {
-            "key": "     OS           ",
+            "key": "OS           ",
             "keyColor": "red",
             "type": "os"
         },
         {
-            "key": "    󰌢 Machine      ",
+            "key": "Machine      ",
             "keyColor": "green",
             "type": "host"
         },
         {
-            "key": "     Kernel       ",
+            "key": "Kernel       ",
             "keyColor": "magenta",
             "type": "kernel"
         },
         {
-            "key": "    󰅐 Uptime       ",
+            "key": "Uptime       ",
             "keyColor": "red",
             "type": "uptime"
         },
         {
-            "key": "    󰍹 Resolution   ",
+            "key": "Resolution   ",
             "keyColor": "yellow",
             "type": "display",
             "compactType": "original-with-refresh-rate"
         },
         {
-            "key": "     WM           ",
+            "key": "WM           ",
             "keyColor": "blue",
             "type": "wm"
         },
         {
-            "key": "     DE           ",
+            "key": "DE           ",
             "keyColor": "green",
             "type": "de"
         },
         {
-            "key": "     Shell        ",
+            "key": "Shell        ",
             "keyColor": "cyan",
             "type": "shell"
         },
         {
-            "key": "     Terminal     ",
+            "key": "Terminal     ",
             "keyColor": "red",
             "type": "terminal"
         },
         {
-            "key": "    󰻠 CPU          ",
+            "key": "CPU          ",
             "keyColor": "yellow",
             "type": "cpu"
         },
         {
-            "key": "    󰍛 GPU          ",
+            "key": "GPU          ",
             "keyColor": "blue",
             "type": "gpu"
         },
         {
-            "key": "    󰑭 Memory       ",
+            "key": "Memory       ",
             "keyColor": "magenta",
             "type": "memory"
         },
         {
-            "key": "    󰩟 Local IP     ",
+            "key": "Local IP     ",
             "keyColor": "red",
             "type": "localip",
             "compact": true
         },
         {
-            "key": "    󰩠 Public IP    ",
+            "key": "Public IP    ",
             "keyColor": "cyan",
             "type": "publicip"
         },

@@ -11,8 +11,10 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
         return;
 
     //This is used as a magic value for hiding keys
-    if (!(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " ")))
+    if (!(moduleArgs && ffStrbufEqualS(&moduleArgs->key, " ")) && instance.config.display.keyType != FF_MODULE_KEY_TYPE_NONE)
     {
+        ffPrintCharTimes(' ', instance.config.display.keyPaddingLeft);
+
         if(!instance.config.display.pipe)
         {
             fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
@@ -25,21 +27,35 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
                 ffPrintColor(&instance.config.display.colorKeys);
         }
 
-        //NULL check is required for modules with custom keys, e.g. disk with the folder path
-        if((printType & FF_PRINT_TYPE_NO_CUSTOM_KEY) || !moduleArgs || moduleArgs->key.length == 0)
+        bool hasIcon = false;
+        if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_ICON && moduleArgs && moduleArgs->keyIcon.length > 0)
         {
-            fputs(moduleName, stdout);
-
-            if(moduleIndex > 0)
-                printf(" %hhu", moduleIndex);
+            ffStrbufWriteTo(&moduleArgs->keyIcon, stdout);
+            hasIcon = true;
         }
-        else
+
+        if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_STRING)
         {
-            FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
-            FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 1, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex, "index"},
-            }));
-            ffStrbufWriteTo(&key, stdout);
+            if(hasIcon)
+                putchar(' ');
+
+            //NULL check is required for modules with custom keys, e.g. disk with the folder path
+            if((printType & FF_PRINT_TYPE_NO_CUSTOM_KEY) || !moduleArgs || moduleArgs->key.length == 0)
+            {
+                fputs(moduleName, stdout);
+
+                if(moduleIndex > 0)
+                    printf(" %hhu", moduleIndex);
+            }
+            else
+            {
+                FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+                FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 2, ((FFformatarg[]){
+                    {FF_FORMAT_ARG_TYPE_UINT8, &moduleIndex, "index"},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &moduleArgs->keyIcon, "icon"},
+                }));
+                ffStrbufWriteTo(&key, stdout);
+            }
         }
 
         if(!instance.config.display.pipe)

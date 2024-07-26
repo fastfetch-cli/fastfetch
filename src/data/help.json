@@ -506,6 +506,27 @@
             }
         },
         {
+            "long": "key-padding-left",
+            "desc": "Set the left padding of keys to <num> characters",
+            "arg": {
+                "type": "num"
+            }
+        },
+        {
+            "long": "key-type",
+            "desc": "Set whether to show icon before string keys",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "none": "Disable keys",
+                    "string": "Show string",
+                    "icon": "Show icon (requires newest nerd font)",
+                    "both": "Show both icon and string"
+                },
+                "default": "string"
+            }
+        },
+        {
             "long": "bright-color",
             "desc": "Set if the keys, title and ASCII logo should be printed in bright color",
             "arg": {
@@ -1634,6 +1655,14 @@
             "desc": "Override the global \"--color-keys\" option for each specific module",
             "arg": {
                 "type": "color"
+            },
+            "pseudo": true
+        },
+        {
+            "long": "<module>-key-icon",
+            "desc": "Set the icon to be displayed by \"--key-type icon\"",
+            "arg": {
+                "type": "string"
             },
             "pseudo": true
         },

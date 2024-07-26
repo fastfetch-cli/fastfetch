@@ -123,7 +123,7 @@ void ffInitThemeOptions(FFThemeOptions* options)
         ffPrintThemeHelpFormat,
         ffGenerateThemeJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰉼");
 }
 
 void ffDestroyThemeOptions(FFThemeOptions* options)

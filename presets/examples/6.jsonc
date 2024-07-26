@@ -124,18 +124,17 @@
         {
             "type": "title",
             "key": "╭─",
-            "format": "{1}@{2}",
+            "format": "{user-name}@{host-name}",
             "keyColor": "blue"
         },
         {
             "type": "os",
-            "key": "├─", // Just get your distro's logo off nerdfonts.com
+            "key": "├─{icon}", // Just get your distro's logo off nerdfonts.com
             "keyColor": "blue"
         },
         {
             "type": "kernel",
             "key": "├─",
-            "format": "{1} {2}",
             "keyColor": "blue"
         },
         {
@@ -167,7 +166,7 @@
         {
             "type": "wifi",
             "key": "├─",
-            "format": "{4}", // ssid
+            "format": "{ssid}",
             "keyColor": "blue"
         },
         {

@@ -114,7 +114,7 @@ void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
         ffPrintTerminalSizeHelpFormat,
         ffGenerateTerminalSizeJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰲎");
 }
 
 void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)

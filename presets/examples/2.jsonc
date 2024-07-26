@@ -12,8 +12,12 @@
     "display": {
         "separator": "  ",
         "constants": [
-            "───────────────"
-        ]
+            "─────────────────" // {$1}, used in Custom module
+        ],
+        "key": {
+            "type": "icon",
+            "paddingLeft": 2
+        }
     },
     "modules": [
         {
@@ -21,142 +25,53 @@
             // {#1} is equivalent to `\u001b[1m`. {#} is equivalent to `\u001b[m`
             "format": "┌{$1} {#1}Hardware Information{#} {$1}┐"
         },
-        {
-            "type": "host",
-            "key": "  󰌢"
-        },
-        {
-            "type": "cpu",
-            "key": "  󰻠"
-        },
-        {
-            "type": "gpu",
-            "key": "  󰍛"
-        },
-        {
-            "type": "disk",
-            "key": "  "
-        },
-        {
-            "type": "memory",
-            "key": "  󰑭"
-        },
-        {
-            "type": "swap",
-            "key": "  󰓡"
-        },
-        {
-            "type": "display",
-            "key": "  󰍹"
-        },
-        {
-            "type": "brightness",
-            "key": "  󰃞"
-        },
-        {
-            "type": "battery",
-            "key": "  "
-        },
-        {
-            "type": "poweradapter",
-            "key": "  "
-        },
-        {
-            "type": "bluetooth",
-            "key": "  "
-        },
-        {
-            "type": "sound",
-            "key": "  "
-        },
-        {
-            "type": "gamepad",
-            "key": "  "
-        },
+        "host",
+        "cpu",
+        "gpu",
+        "disk",
+        "memory",
+        "swap",
+        "display",
+        "brightness",
+        "battery",
+        "poweradapter",
+        "bluetooth",
+        "sound",
+        "gamepad",
         {
             "type": "custom", // SoftwareStart
             "format": "├{$1} {#1}Software Information{#} {$1}┤"
         },
         {
             "type": "title",
-            "key": "  ",
-            "format": "{1}${2}"
+            "keyIcon": "",
+            "key": "Title", // Title module has no key by default, so that icon is not displayed
+            "format": "{user-name}@{host-name}"
         },
-        {
-            "type": "os",
-            "key": "  " // Just get your distro's logo off nerdfonts.com
-        },
-        {
-            "type": "kernel",
-            "key": "  ",
-            "format": "{1} {2}"
-        },
-        {
-            "type": "lm",
-            "key": "  󰧨"
-        },
-        {
-            "type": "de",
-            "key": "  "
-        },
-        {
-            "type": "wm",
-            "key": "  "
-        },
-        {
-            "type": "shell",
-            "key": "  "
-        },
-        {
-            "type": "terminal",
-            "key": "  "
-        },
-        {
-            "type": "terminalfont",
-            "key": "  "
-        },
-        {
-            "type": "theme",
-            "key": "  󰉼"
-        },
-        {
-            "type": "icons",
-            "key": "  󰀻"
-        },
-        {
-            "type": "wallpaper",
-            "key": "  󰸉"
-        },
-        {
-            "type": "packages",
-            "key": "  󰏖"
-        },
-        {
-            "type": "uptime",
-            "key": "  󰅐"
-        },
-        {
-            "type": "media",
-            "key": "  󰝚"
-        },
+        "os",
+        "kernel",
+        "lm",
+        "de",
+        "wm",
+        "shell",
+        "terminal",
+        "terminalfont",
+        "theme",
+        "icons",
+        "wallpaper",
+        "packages",
+        "uptime",
+        "media",
         {
             "type": "localip",
-            "key": "  󰩟",
             "compact": true
         },
-        {
-            "type": "publicip",
-            "key": "  󰩠"
-        },
+        "publicip",
         {
             "type": "wifi",
-            "key": "  ",
-            "format": "{4}" // ssid
+            "format": "{ssid}"
         },
-        {
-            "type": "locale",
-            "key": "  "
-        },
+        "locale",
         {
             "type": "custom", // InformationEnd
             "format": "└{$1}──────────────────────{$1}┘"

@@ -35,13 +35,12 @@ static const char* getSshdVersion(FFstrbuf* version)
 {
     const char* error = ffProcessAppendStdErr(version, (char* const[]) {
         "sshd",
-        "-qv",
+        "-V",
         NULL
     });
     if (error)
         return error;
 
-    // unknown option -- v
     // OpenSSH_9.0p1, OpenSSL 3.0.9 30 May 2023...
     ffStrbufSubstrBeforeFirstC(version, ',');
     ffStrbufSubstrAfterFirstC(version, '_');

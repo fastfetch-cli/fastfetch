@@ -148,7 +148,7 @@ void ffInitWMOptions(FFWMOptions* options)
         ffPrintWMHelpFormat,
         ffGenerateWMJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
     options->detectPlugin = false;
 }
 

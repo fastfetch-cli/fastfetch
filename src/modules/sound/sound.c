@@ -250,7 +250,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
         ffPrintSoundHelpFormat,
         ffGenerateSoundJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->soundType = FF_SOUND_TYPE_MAIN;
     options->percent = (FFColorRangeConfig) { 80, 90 };

@@ -13,18 +13,62 @@
 #ifdef __ANDROID__
 #include "common/settings.h"
 
+static void detectQualcomm(FFCPUResult* cpu)
+{
+    if (ffStrbufEqualS(&cpu->name, "SM8635"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8s Gen 3 [SM8635]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8650-AC"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 3 for Galaxy [SM8650-AC]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8650"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 3 [SM8650]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8550-AC"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 2 for Galaxy [SM8550-AC]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8550"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 2 [SM8550]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8475"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8+ Gen 1 [SM8475]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8450"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 1 [SM8450]");
+
+    else if (ffStrbufEqualS(&cpu->name, "SM7675"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 3 [SM7675]");
+    else if (ffStrbufEqualS(&cpu->name, "SM7550"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 3 [SM7550]");
+    else if (ffStrbufEqualS(&cpu->name, "SM7475"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 2 [SM7550]");
+    else if (ffStrbufEqualS(&cpu->name, "SM7435"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7s Gen 2 [SM7435]");
+    else if (ffStrbufEqualS(&cpu->name, "SM7450"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 1 [SM7450]");
+
+    else if (ffStrbufEqualS(&cpu->name, "SM6375-AC"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6s Gen 3 [SM6375-AC]");
+    else if (ffStrbufEqualS(&cpu->name, "SM6450"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 1 [SM6450]");
+
+    else if (ffStrbufEqualS(&cpu->name, "SM4450"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 2 [SM4450]");
+    else if (ffStrbufEqualS(&cpu->name, "SM4375"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 1 [SM4375]");
+}
+
 static void detectAndroid(FFCPUResult* cpu)
 {
     if (cpu->name.length == 0)
     {
-        ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name);
-        ffStrbufClear(&cpu->vendor); // We usually detect the vendor of CPU core as ARM, but instead we want the vendor of SOC
+        if (ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name))
+            ffStrbufClear(&cpu->vendor); // We usually detect the vendor of CPU core as ARM, but instead we want the vendor of SOC
+        else if(ffSettingsGetAndroidProperty("ro.mediatek.platform", &cpu->name))
+            ffStrbufSetStatic(&cpu->vendor, "MTK");
     }
     if (cpu->vendor.length == 0)
     {
         if (!ffSettingsGetAndroidProperty("ro.soc.manufacturer", &cpu->vendor))
             ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor);
     }
+
+    if (ffStrbufEqualS(&cpu->vendor, "QTI") && ffStrbufStartsWithS(&cpu->name, "SM"))
+        detectQualcomm(cpu);
 }
 #endif
 

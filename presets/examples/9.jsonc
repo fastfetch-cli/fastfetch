@@ -4,7 +4,9 @@
         "type": "small"
     },
     "display": {
-        "keyWidth": 11,
+        "key": {
+            "width": 11
+        },
         "bar": {
             "charElapsed": "=",
             "charTotal": "-",

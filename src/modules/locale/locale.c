@@ -99,7 +99,7 @@ void ffInitLocaleOptions(FFLocaleOptions* options)
         ffPrintLocaleHelpFormat,
         ffGenerateLocaleJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyLocaleOptions(FFLocaleOptions* options)

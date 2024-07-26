@@ -37,6 +37,11 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
         moduleArgs->keyWidth = (uint32_t) yyjson_get_uint(val);
         return true;
     }
+    else if(ffStrEqualsIgnCase(key, "keyIcon"))
+    {
+        ffStrbufSetS(&moduleArgs->keyIcon, yyjson_get_str(val));
+        return true;
+    }
     return false;
 }
 
@@ -50,6 +55,8 @@ void ffJsonConfigGenerateModuleArgsConfig(yyjson_mut_doc* doc, yyjson_mut_val* m
         yyjson_mut_obj_add_strbuf(doc, module, "keyColor", &moduleArgs->keyColor);
     if (moduleArgs->keyWidth != defaultModuleArgs->keyWidth)
         yyjson_mut_obj_add_uint(doc, module, "keyWidth", moduleArgs->keyWidth);
+    if (!ffStrbufEqual(&defaultModuleArgs->keyIcon, &moduleArgs->keyIcon))
+        yyjson_mut_obj_add_strbuf(doc, module, "keyIcon", &moduleArgs->keyIcon);
 }
 
 const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair pairs[])

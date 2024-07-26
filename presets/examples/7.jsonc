@@ -22,9 +22,8 @@
         },
         {
             "type": "os",
-            "key": "├", // Just get your distro's logo off nerdfonts.com
-            "keyColor": "yellow",
-            "format": "{6}{?6} {?}{10}{?10} {?}{8}{?8} {?}{11}"
+            "key": "├{icon}", // Just get your distro's logo off nerdfonts.com
+            "keyColor": "yellow"
         },
         {
             "type": "kernel",
@@ -106,13 +105,13 @@
             "keyColor": "green"
         },
         {
-            "type": "uptime",
-            "key": "├󰅐",
+            "type": "display",
+            "key": "├󰍹",
             "keyColor": "green"
         },
         {
-            "type": "display",
-            "key": "└󰍹",
+            "type": "uptime",
+            "key": "└󰅐",
             "keyColor": "green"
         },
 

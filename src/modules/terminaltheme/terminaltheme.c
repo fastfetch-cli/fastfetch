@@ -125,7 +125,7 @@ void ffInitTerminalThemeOptions(FFTerminalThemeOptions* options)
         ffPrintTerminalThemeHelpFormat,
         ffGenerateTerminalThemeJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰔎");
 }
 
 void ffDestroyTerminalThemeOptions(FFTerminalThemeOptions* options)

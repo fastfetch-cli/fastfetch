@@ -136,7 +136,7 @@ void ffInitInitSystemOptions(FFInitSystemOptions* options)
         ffPrintInitSystemHelpFormat,
         ffGenerateInitSystemJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
 }
 
 void ffDestroyInitSystemOptions(FFInitSystemOptions* options)

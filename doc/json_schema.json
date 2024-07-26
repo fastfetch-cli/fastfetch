@@ -22,6 +22,10 @@
             "minimum": 0,
             "default": 0
         },
+        "keyIcon": {
+            "description": "Set the icon to be displayed by `display.keyType: \"icon\"`",
+            "type": "string"
+        },
         "format": {
             "description": "Output format of the module. See `-h <module>-format` for detail. I.e: fastfetch -h disk-format",
             "type": "string"
@@ -418,11 +422,35 @@
                     "type": "boolean",
                     "default": true
                 },
-                "keyWidth": {
-                    "description": "Align the width of keys to number of characters, 0 to disable",
-                    "type": "integer",
-                    "minimum": 0,
-                    "default": 0
+                "key": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Set how module keys should be displayed",
+                    "properties": {
+                        "width": {
+                            "description": "Align the width of keys to number of characters, 0 to disable",
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "type": {
+                            "type": "string",
+                            "description": "Set whether to show icon before string keys",
+                            "enum": [
+                                "none",
+                                "string",
+                                "icon",
+                                "both"
+                            ],
+                            "default": "string"
+                        },
+                        "paddingLeft": {
+                            "type": "integer",
+                            "description": "Set the left padding of keys",
+                            "minimum": 0,
+                            "default": 0
+                        }
+                    }
                 },
                 "size": {
                     "type": "object",
@@ -961,11 +989,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -998,11 +1029,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1032,11 +1066,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1068,11 +1105,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1094,11 +1134,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1128,11 +1171,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1162,11 +1208,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1228,6 +1277,9 @@
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     }
                                 }
                             },
@@ -1254,11 +1306,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1281,11 +1336,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "description": "Text to print",
@@ -1333,11 +1391,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1396,11 +1457,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1431,11 +1495,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1462,11 +1529,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1497,11 +1567,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1526,11 +1599,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1581,11 +1657,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1651,11 +1730,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1680,11 +1762,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1721,11 +1806,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1761,11 +1849,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1797,11 +1888,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1858,11 +1952,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1891,11 +1988,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1934,11 +2034,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -1999,11 +2102,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -2028,11 +2134,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -2078,11 +2187,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -2114,11 +2226,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -2155,11 +2270,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"
@@ -2186,11 +2304,14 @@
                                     "keyColor": {
                                         "$ref": "#/$defs/keyColor"
                                     },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
                                     },
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
                                         "$ref": "#/$defs/format"

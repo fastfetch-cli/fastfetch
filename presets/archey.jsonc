@@ -4,12 +4,12 @@
         {
             "type": "title",
             "key": "User",
-            "format": "{1}"
+            "format": "{user-name}"
         },
         {
             "type": "title",
             "key": "Hostname",
-            "format": "{2}"
+            "format": "{host-name}"
         },
         {
             "type": "host",
@@ -17,7 +17,7 @@
         },
         {
             "type": "os",
-            "format": "{3} {9} {12}"
+            "format": "{pretty-name} {version-id} {arch}"
         },
         "kernel",
         "uptime",
@@ -34,32 +34,29 @@
             "type": "de",
             "key": "Desktop Environment"
         },
-        {
-            "type": "shell",
-            "format": "{7}"
-        },
+        "shell",
         {
             "type": "terminal",
-            "format": "{5} {6} {#37}█{#97}█ {#36}█{#96}█ {#35}█{#95}█ {#34}█{#94}█ {#33}█{#93}█ {#32}█{#92}█ {#31}█{#91}█ {#30}█{#90}█"
+            "format": "{pretty-name} {version} {#37}█{#97}█ {#36}█{#96}█ {#35}█{#95}█ {#34}█{#94}█ {#33}█{#93}█ {#32}█{#92}█ {#31}█{#91}█ {#30}█{#90}█"
         },
         {
             "type": "packages",
-            "format": "{1}"
+            "format": "{all}"
         },
         {
             "type": "cpu",
             "key": "Temperature",
             "temp": true,
-            "format": "{8}"
+            "format": "{temperature}"
         },
         {
             "type": "cpu",
             "key": "CPU",
-            "format": "{4} x {1}"
+            "format": "{cores-logical} x {name}"
         },
         {
             "type": "gpu",
-            "format": "{2}"
+            "format": "{name}"
         },
         {
             "type": "memory",

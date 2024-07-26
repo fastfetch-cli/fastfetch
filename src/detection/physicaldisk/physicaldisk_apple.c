@@ -18,7 +18,7 @@ static inline void wrapIoDestroyPlugInInterface(IOCFPlugInInterface*** pluginInf
     if (*pluginInf)
         IODestroyPlugInInterface(*pluginInf);
 }
-#endif 
+#endif
 
 static const char* detectSsdTemp(io_service_t entryPhysical, double* temp)
 {
@@ -82,10 +82,12 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
 
         FF_CFTYPE_AUTO_RELEASE CFBooleanRef removable = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOMediaRemovableKey), kCFAllocatorDefault, kNilOptions);
-        device->type |= CFBooleanGetValue(removable) ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
+        if (removable)
+            device->type |= CFBooleanGetValue(removable) ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED;
 
         FF_CFTYPE_AUTO_RELEASE CFBooleanRef writable = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOMediaWritableKey), kCFAllocatorDefault, kNilOptions);
-        device->type |= CFBooleanGetValue(writable) ? FF_PHYSICALDISK_TYPE_READWRITE : FF_PHYSICALDISK_TYPE_READONLY;
+        if (writable)
+            device->type |= CFBooleanGetValue(writable) ? FF_PHYSICALDISK_TYPE_READWRITE : FF_PHYSICALDISK_TYPE_READONLY;
 
         FF_CFTYPE_AUTO_RELEASE CFStringRef bsdName = IORegistryEntryCreateCFProperty(entryPartition, CFSTR(kIOBSDNameKey), kCFAllocatorDefault, kNilOptions);
         if (bsdName)
@@ -125,7 +127,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
                 }
             }
 
-            #ifdef MAC_OS_X_VERSION_10_15 
+            #ifdef MAC_OS_X_VERSION_10_15
             if (options->temp)
             {
                 FF_CFTYPE_AUTO_RELEASE CFBooleanRef nvmeSMARTCapable = IORegistryEntryCreateCFProperty(entryPhysical, CFSTR(kIOPropertyNVMeSMARTCapableKey), kCFAllocatorDefault, kNilOptions);

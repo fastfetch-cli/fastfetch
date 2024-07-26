@@ -196,7 +196,7 @@ void ffInitDateTimeOptions(FFDateTimeOptions* options)
         ffPrintDateTimeHelpFormat,
         ffGenerateDateTimeJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyDateTimeOptions(FFDateTimeOptions* options)

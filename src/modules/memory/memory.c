@@ -151,7 +151,7 @@ void ffInitMemoryOptions(FFMemoryOptions* options)
         ffPrintMemoryHelpFormat,
         ffGenerateMemoryJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
     options->percent = (FFColorRangeConfig) { 50, 80 };
 }
 

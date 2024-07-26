@@ -44,7 +44,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
 
     FF_CFTYPE_AUTO_RELEASE CFDataRef freqProperty = (CFDataRef) IORegistryEntryCreateCFProperty(entryDevice, CFSTR("voltage-states5-sram"), kCFAllocatorDefault, kNilOptions);
-    if (CFGetTypeID(freqProperty) != CFDataGetTypeID())
+    if (!freqProperty || CFGetTypeID(freqProperty) != CFDataGetTypeID())
         return "\"voltage-states5-sram\" in \"pmgr\" is not found";
 
     // voltage-states5-sram stores supported <frequency / voltage> pairs of pcores from the lowest to the highest

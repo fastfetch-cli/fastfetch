@@ -40,7 +40,7 @@
         },
         {
             "type": "os",
-            "key": " OS",
+            "key": "{icon} OS",
             "keyColor": "yellow"
         },
         {

@@ -159,7 +159,7 @@ void ffInitCommandOptions(FFCommandOptions* options)
         ffPrintCommandHelpFormat,
         ffGenerateCommandJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInitStatic(&options->shell,
         #ifdef _WIN32

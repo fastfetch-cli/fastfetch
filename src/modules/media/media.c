@@ -181,7 +181,7 @@ void ffInitMediaOptions(FFMediaOptions* options)
         ffPrintMediaHelpFormat,
         ffGenerateMediaJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyMediaOptions(FFMediaOptions* options)

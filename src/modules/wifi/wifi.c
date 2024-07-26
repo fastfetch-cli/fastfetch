@@ -220,7 +220,7 @@ void ffInitWifiOptions(FFWifiOptions* options)
         ffPrintWifiHelpFormat,
         ffGenerateWifiJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFColorRangeConfig) { 50, 20 };
 }

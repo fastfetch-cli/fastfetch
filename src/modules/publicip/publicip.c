@@ -162,7 +162,7 @@ void ffInitPublicIpOptions(FFPublicIpOptions* options)
         ffPrintPublicIpHelpFormat,
         ffGeneratePublicIpJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "󰩠");
 
     ffStrbufInit(&options->url);
     options->timeout = 0;

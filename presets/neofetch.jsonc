@@ -11,7 +11,10 @@
         "separator",
         "os",
         "host",
-        "kernel",
+        {
+            "type": "kernel",
+            "format": "{release}"
+        },
         "uptime",
         "packages",
         "shell",
@@ -28,7 +31,7 @@
         "terminal",
         {
             "type": "terminalfont",
-            "format": "{/2}{-}{/}{2}{?3} {3}{?}"
+            "format": "{/name}{-}{/}{name}{?size} {size}{?}"
         },
         "cpu",
         {
@@ -37,7 +40,7 @@
         },
         {
             "type": "memory",
-            "format": "{/1}{-}{/}{/2}{-}{/}{} / {}"
+            "format": "{} / {}"
         },
         "break",
         "colors"

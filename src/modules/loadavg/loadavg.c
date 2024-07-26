@@ -49,9 +49,10 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
                 else
                 {
                     ffStrbufClear(&buffer);
-                    FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 2, ((FFformatarg[]){
+                    FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 3, ((FFformatarg[]){
                         {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
                         {FF_FORMAT_ARG_TYPE_UINT, &duration, "duration"},
+                        {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
                     }));
                 }
 
@@ -202,7 +203,7 @@ void ffInitLoadavgOptions(FFLoadavgOptions* options)
         ffPrintLoadavgHelpFormat,
         ffGenerateLoadavgJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFColorRangeConfig) { 50, 80 };
     options->ndigits = 2;

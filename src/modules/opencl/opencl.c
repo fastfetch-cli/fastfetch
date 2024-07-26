@@ -152,7 +152,7 @@ void ffInitOpenCLOptions(FFOpenCLOptions* options)
         ffPrintOpenCLHelpFormat,
         ffGenerateOpenCLJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyOpenCLOptions(FFOpenCLOptions* options)

@@ -146,7 +146,7 @@ void ffInitChassisOptions(FFChassisOptions* options)
         ffPrintChassisHelpFormat,
         ffGenerateChassisJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyChassisOptions(FFChassisOptions* options)

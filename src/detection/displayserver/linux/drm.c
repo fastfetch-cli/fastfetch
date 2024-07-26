@@ -220,6 +220,8 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
     if (nDevices < 0)
         return "drmGetDevices() failed";
 
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+
     for (int iDev = 0; iDev < nDevices; ++iDev)
     {
         drmDevice* dev = devices[iDev];
@@ -228,6 +230,13 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
             continue;
 
         const char* path = dev->nodes[DRM_NODE_PRIMARY];
+
+        ffStrbufSetF(&name, "/sys/class/drm/%s/device/power/runtime_status", strrchr(path, '/') + 1);
+
+        char buffer[8] = "";
+        if (ffReadFileData(name.chars, strlen("suspend"), buffer) > 0 && ffStrStartsWith(buffer, "suspend"))
+            continue;
+
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0)
             continue;
@@ -292,7 +301,8 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     }
                 }
 
-                FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+
+                ffStrbufClear(&name);
 
                 for (int iProp = 0; iProp < conn->count_props; ++iProp)
                 {

@@ -265,7 +265,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
         ffPrintCPUHelpFormat,
         ffGenerateCPUJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs);
+    ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->showPeCoreCount = false;
