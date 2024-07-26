@@ -53,7 +53,6 @@ static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
         if(
             ffStrbufIgnCaseEqualS(&result->prettyName, "sudo")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "su")            ||
-            ffStrbufIgnCaseEqualS(&result->prettyName, "sshd")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "gdb")           ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "lldb")          ||
             ffStrbufIgnCaseEqualS(&result->prettyName, "python")        || // python on windows generates shim executables
@@ -155,7 +154,7 @@ static bool getTerminalFromEnv(FFTerminalResult* result)
     }
 
     //SSH
-    if(getenv("SSH_CONNECTION") != NULL)
+    if(getenv("SSH_TTY") != NULL)
         term = getenv("SSH_TTY");
 
     //Windows Terminal
@@ -315,6 +314,11 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufSetStatic(&result->prettyName, "Windows Explorer");
     else if(ffStrbufEqualS(&result->prettyName, "wezterm-gui"))
         ffStrbufSetStatic(&result->prettyName, "WezTerm");
+    else if(ffStrbufIgnCaseEqualS(&result->prettyName, "sshd") || ffStrbufStartsWithIgnCaseS(&result->prettyName, "sshd-"))
+    {
+        const char* tty = getenv("SSH_TTY");
+        if (tty) ffStrbufSetS(tty);
+    }
 }
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);

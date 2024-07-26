@@ -42,7 +42,6 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "sudo")                ||
                 ffStrbufEqualS(&result->processName, "su")                  ||
                 ffStrbufEqualS(&result->processName, "strace")              ||
-                ffStrbufEqualS(&result->processName, "sshd")                ||
                 ffStrbufEqualS(&result->processName, "gdb")                 ||
                 ffStrbufEqualS(&result->processName, "lldb")                ||
                 ffStrbufEqualS(&result->processName, "lldb-mi")             ||
@@ -102,7 +101,6 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "oil.ovm")    ||
             ffStrbufEqualS(&result->processName, "xonsh")      || // works in Linux but not in macOS because kernel returns `Python` in this case
             ffStrbufEqualS(&result->processName, "login")      ||
-            ffStrbufEqualS(&result->processName, "sshd")       ||
             ffStrbufEqualS(&result->processName, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             #ifdef __linux__
@@ -314,6 +312,8 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufInitStatic(&result->prettyName, "tmux");
     else if(ffStrbufStartsWithS(&result->processName, "screen-"))
         ffStrbufInitStatic(&result->prettyName, "screen");
+    else if(ffStrbufEqualS(&result->processName, "sshd") || ffStrbufStartsWithS(&result->processName, "sshd-"))
+        ffStrbufInitCopy(&result->prettyName, &result->tty);
 
     #if defined(__ANDROID__)
 
