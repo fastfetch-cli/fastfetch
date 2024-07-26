@@ -520,7 +520,7 @@
                 "enum": {
                     "none": "Disable keys",
                     "string": "Show string",
-                    "icon": "Show icon",
+                    "icon": "Show icon (requires newest nerd font)",
                     "both": "Show both icon and string"
                 },
                 "default": "string"
