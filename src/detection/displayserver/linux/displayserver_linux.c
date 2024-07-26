@@ -7,9 +7,48 @@
     #include "common/settings.h"
 #endif
 
+static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
+{
+    const char* env = getenv("XDG_SESSION_TYPE");
+    if(env)
+    {
+        if(ffStrEqualsIgnCase(env, "wayland"))
+            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
+        else if(ffStrEqualsIgnCase(env, "x11") || ffStrEqualsIgnCase(env, "xorg"))
+            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
+        else if(ffStrEqualsIgnCase(env, "tty"))
+            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
+        else
+            ffStrbufSetS(&result->wmProtocolName, env);
+
+        return;
+    }
+
+    if(getenv("WAYLAND_DISPLAY") != NULL || getenv("WAYLAND_SOCKET") != NULL)
+    {
+        ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
+        return;
+    }
+
+    if(getenv("DISPLAY") != NULL) // XWayland also set this
+    {
+        ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
+        return;
+    }
+
+    env = getenv("TERM");
+    if(ffStrSet(env) && ffStrEqualsIgnCase(env, "linux"))
+    {
+        ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
+        return;
+    }
+}
+
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    if (instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE)
+    getWMProtocolNameFromEnv(ds);
+
+    if (!ffStrbufEqualS(&ds->wmProtocolName, FF_WM_PROTOCOL_TTY) &&instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE)
     {
         //We try wayland as our preferred display server, as it supports the most features.
         //This method can't detect the name of our WM / DE
@@ -57,8 +96,11 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     }
     #endif
 
-    //This fills in missing information about WM / DE by using env vars and iterating processes
-    ffdsDetectWMDE(ds);
+    if(!ffStrbufEqualS(&ds->wmProtocolName, FF_WM_PROTOCOL_TTY))
+    {
+        //This fills in missing information about WM / DE by using env vars and iterating processes
+        ffdsDetectWMDE(ds);
+    }
 }
 
 bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName)

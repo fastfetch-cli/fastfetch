@@ -22,12 +22,14 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     struct ucred ucred;
     socklen_t len = sizeof(struct ucred);
-    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1)
+    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1 || ucred.pid <= 0)
         return false;
 
     FF_STRBUF_AUTO_DESTROY procPath = ffStrbufCreate();
     ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
-    ffReadFileBuffer(procPath.chars, &result->wmProcessName);
+    if (!ffReadFileBuffer(procPath.chars, &result->wmProcessName))
+        return false;
+
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
     return true;
@@ -69,27 +71,91 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     }
 }
 
-bool detectWayland(FFDisplayServerResult* result)
+void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name)
+{
+    WaylandDisplay* display = data;
+    if (display->id) return;
+
+    display->type = ffdsGetDisplayType(name);
+    if (!display->edidName.length)
+        ffdsMatchDrmConnector(name, &display->edidName);
+    display->id = ffWaylandGenerateIdFromName(name);
+    ffStrbufAppendS(&display->name, name);
+}
+
+void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description)
+{
+    WaylandDisplay* display = data;
+    if (display->description.length) return;
+
+    while (*description == ' ') ++description;
+    if (!ffStrEquals(description, "Unknown Display") && !ffStrContains(description, "(null)"))
+        ffStrbufAppendS(&display->description, description);
+}
+
+uint32_t ffWaylandHandleRotation(WaylandDisplay* display)
+{
+    uint32_t rotation;
+    switch(display->transform)
+    {
+        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        case WL_OUTPUT_TRANSFORM_90:
+            rotation = 90;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        case WL_OUTPUT_TRANSFORM_180:
+            rotation = 180;
+            break;
+        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        case WL_OUTPUT_TRANSFORM_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
+    switch(rotation)
+    {
+        case 90:
+        case 270: {
+            int32_t temp = display->width;
+            display->width = display->height;
+            display->height = temp;
+
+            temp = display->physicalWidth;
+            display->physicalWidth = display->physicalHeight;
+            display->physicalHeight = temp;
+            break;
+        }
+        default:
+            break;
+    }
+    return rotation;
+}
+#endif
+
+const char* ffdsConnectWayland(FFDisplayServerResult* result)
 {
     FF_LIBRARY_LOAD(wayland, &instance.config.library.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_connect, false)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_get_fd, false)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_proxy_marshal_constructor, false)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_display_disconnect, false)
-    FF_LIBRARY_LOAD_SYMBOL(wayland, wl_registry_interface, false)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_connect)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_get_fd)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_proxy_marshal_constructor)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_disconnect)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_registry_interface)
 
     WaylandData data = {};
 
-    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_marshal_constructor_versioned, false)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_add_listener, false)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_proxy_destroy, false)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_display_roundtrip, false)
-    FF_LIBRARY_LOAD_SYMBOL_VAR(wayland, data, wl_output_interface, false)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_marshal_constructor_versioned)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_add_listener)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_proxy_destroy)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_display_roundtrip)
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(wayland, data, wl_output_interface)
 
     data.display = ffwl_display_connect(NULL);
     if(data.display == NULL)
-        return false;
+        return "wl_display_connect returned NULL";
 
     waylandDetectWM(ffwl_display_get_fd(data.display), result);
 
@@ -97,7 +163,7 @@ bool detectWayland(FFDisplayServerResult* result)
     if(registry == NULL)
     {
         ffwl_display_disconnect(data.display);
-        return false;
+        return "wl_display_get_registry returned NULL";
     }
 
     data.result = result;
@@ -192,97 +258,6 @@ bool detectWayland(FFDisplayServerResult* result)
     //We successfully connected to wayland and detected the display.
     //So we can set set the session type to wayland.
     //This is used as an indicator that we are running wayland by the x11 backends.
-    ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
-    return true;
-}
-
-void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name)
-{
-    WaylandDisplay* display = data;
-    if (display->id) return;
-
-    display->type = ffdsGetDisplayType(name);
-    if (!display->edidName.length)
-        ffdsMatchDrmConnector(name, &display->edidName);
-    display->id = ffWaylandGenerateIdFromName(name);
-    ffStrbufAppendS(&display->name, name);
-}
-
-void ffWaylandOutputDescriptionListener(void* data, FF_MAYBE_UNUSED void* output, const char* description)
-{
-    WaylandDisplay* display = data;
-    if (display->description.length) return;
-
-    while (*description == ' ') ++description;
-    if (!ffStrEquals(description, "Unknown Display") && !ffStrContains(description, "(null)"))
-        ffStrbufAppendS(&display->description, description);
-}
-
-uint32_t ffWaylandHandleRotation(WaylandDisplay* display)
-{
-    uint32_t rotation;
-    switch(display->transform)
-    {
-        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-        case WL_OUTPUT_TRANSFORM_90:
-            rotation = 90;
-            break;
-        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-        case WL_OUTPUT_TRANSFORM_180:
-            rotation = 180;
-            break;
-        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-        case WL_OUTPUT_TRANSFORM_270:
-            rotation = 270;
-            break;
-        default:
-            rotation = 0;
-            break;
-    }
-
-    switch(rotation)
-    {
-        case 90:
-        case 270: {
-            int32_t temp = display->width;
-            display->width = display->height;
-            display->height = temp;
-
-            temp = display->physicalWidth;
-            display->physicalWidth = display->physicalHeight;
-            display->physicalHeight = temp;
-            break;
-        }
-        default:
-            break;
-    }
-    return rotation;
-}
-#endif
-
-void ffdsConnectWayland(FFDisplayServerResult* result)
-{
-    //Wayland requires this to be set
-    if(getenv("XDG_RUNTIME_DIR") == NULL)
-        return;
-
-    #ifdef FF_HAVE_WAYLAND
-        if(detectWayland(result))
-            return;
-    #endif
-
-    const char* xdgSessionType = getenv("XDG_SESSION_TYPE");
-
-    //If XDG_SESSION_TYPE is set, and doesn't contain "wayland", we are probably not running in a wayland session.
-    if(xdgSessionType != NULL && !ffStrEqualsIgnCase(xdgSessionType, "wayland"))
-        return;
-
-    //If XDG_SESSION_TYPE is not set, check if WAYLAND_DISPLAY or WAYLAND_SOCKET is set.
-    //If not, there is no indicator for a wayland session
-    if(xdgSessionType == NULL && getenv("WAYLAND_DISPLAY") == NULL && getenv("WAYLAND_SOCKET") == NULL)
-        return;
-
-    //We are probably running a wayland compositor at this point,
-    //but fastfetch was compiled without the required library, or loading the library failed.
-    ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
+    ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
+    return NULL;
 }
