@@ -6,7 +6,7 @@ Changes:
 * JSON option `display.keyWidth` has been renamed to `display.key.width`
     * Previously: `{ "display": { "keyWidth": 3 } }`
     * Now: `{ "display": { "key": { "width": 3 } } }`
-* Windows Terminal font detection **in WSL** has been removed due to [issue #1113](https://github.com/fastfetch/fastfetch/issues/1113)
+* Windows Terminal font detection **in WSL** has been removed due to [issue #1113](https://github.com/fastfetch-cli/fastfetch/issues/1113)
 
 Features:
 * Add option `display.key.type: <enum>` to print icons in keys
