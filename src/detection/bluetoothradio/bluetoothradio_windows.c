@@ -32,7 +32,7 @@ typedef struct _BTH_RADIO_INFO
 
 typedef struct _BTH_LOCAL_RADIO_INFO
 {
-    // Local BTH_ADDR, class of defice, and radio name
+    // Local BTH_ADDR, class of device, and radio name
     BTH_DEVICE_INFO         localInfo;
 
     // Combo of LOCAL_RADIO_XXX values
