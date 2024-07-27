@@ -133,7 +133,6 @@ uint32_t ffWaylandHandleRotation(WaylandDisplay* display)
     }
     return rotation;
 }
-#endif
 
 const char* ffdsConnectWayland(FFDisplayServerResult* result)
 {
@@ -261,3 +260,12 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result)
     ffStrbufSetStatic(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND);
     return NULL;
 }
+
+#else
+
+const char* ffdsConnectWayland(FF_MAYBE_UNUSED FFDisplayServerResult* result)
+{
+    return "Fastfetch was compiled without Wayland support";
+}
+
+#endif
