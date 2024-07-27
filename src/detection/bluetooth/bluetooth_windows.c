@@ -15,18 +15,16 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindDeviceClose)
 
-    BLUETOOTH_DEVICE_SEARCH_PARAMS btsp = {
+    BLUETOOTH_DEVICE_INFO btdi = {
+        .dwSize = sizeof(btdi)
+    };
+    HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstDevice(&(BLUETOOTH_DEVICE_SEARCH_PARAMS) {
         .fReturnConnected = TRUE,
         .fReturnRemembered = TRUE,
         .fReturnAuthenticated = TRUE,
         .fReturnUnknown = TRUE,
-        .dwSize = sizeof(btsp)
-    };
-
-    BLUETOOTH_DEVICE_INFO btdi = {
-        .dwSize = sizeof(btdi)
-    };
-    HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstDevice(&btsp, &btdi);
+        .dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS)
+    }, &btdi);
     if(!hFind)
     {
         if (GetLastError() == ERROR_NO_MORE_ITEMS)
@@ -37,21 +35,18 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 
     do {
         FFBluetoothResult* device = ffListAdd(devices);
-        ffStrbufInit(&device->name);
-        ffStrbufInit(&device->address);
-        ffStrbufInit(&device->type);
-        device->battery = 0;
-        device->connected = !!btdi.fConnected;
-
-        ffStrbufSetWS(&device->name, btdi.szName);
-
-        ffStrbufAppendF(&device->address, "%02x:%02x:%02x:%02x:%02x:%02x",
+        ffStrbufInitWS(&device->name, btdi.szName);
+        ffStrbufInitF(&device->address, "%02x:%02x:%02x:%02x:%02x:%02x",
             btdi.Address.rgBytes[0],
             btdi.Address.rgBytes[1],
             btdi.Address.rgBytes[2],
             btdi.Address.rgBytes[3],
             btdi.Address.rgBytes[4],
             btdi.Address.rgBytes[5]);
+        ffStrbufInit(&device->type);
+        device->battery = 0;
+        device->connected = !!btdi.fConnected;
+
         //https://btprodspecificationrefs.blob.core.windows.net/assigned-numbers/Assigned%20Number%20Types/Assigned%20Numbers.pdf
 
         if(BitTest(&btdi.ulClassofDevice, 13))
