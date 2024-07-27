@@ -7,6 +7,7 @@ typedef struct FFOptionsModules
     FFBatteryOptions battery;
     FFBiosOptions bios;
     FFBluetoothOptions bluetooth;
+    FFBluetoothRadioOptions bluetoothRadio;
     FFBoardOptions board;
     FFBootmgrOptions bootmgr;
     FFBreakOptions break_;

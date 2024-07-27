@@ -6,6 +6,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitBatteryOptions(&options->battery);
     ffInitBiosOptions(&options->bios);
     ffInitBluetoothOptions(&options->bluetooth);
+    ffInitBluetoothRadioOptions(&options->bluetoothRadio);
     ffInitBoardOptions(&options->board);
     ffInitBootmgrOptions(&options->bootmgr);
     ffInitBreakOptions(&options->break_);
@@ -77,6 +78,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyBatteryOptions(&options->battery);
     ffDestroyBiosOptions(&options->bios);
     ffDestroyBluetoothOptions(&options->bluetooth);
+    ffDestroyBluetoothRadioOptions(&options->bluetoothRadio);
     ffDestroyBoardOptions(&options->board);
     ffDestroyBootmgrOptions(&options->bootmgr);
     ffDestroyBreakOptions(&options->break_);
