@@ -317,7 +317,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufIgnCaseEqualS(&result->prettyName, "sshd") || ffStrbufStartsWithIgnCaseS(&result->prettyName, "sshd-"))
     {
         const char* tty = getenv("SSH_TTY");
-        if (tty) ffStrbufSetS(tty);
+        if (tty) ffStrbufSetS(&result->prettyName, tty);
     }
 }
 
