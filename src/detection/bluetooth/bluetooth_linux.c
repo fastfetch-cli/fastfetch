@@ -86,8 +86,8 @@ static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFB
     const char* propertyType;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &propertyType);
 
-    if(strstr(propertyType, "Device") == NULL && strstr(propertyType, "Battery") == NULL)
-        return; //We don't care about other properties
+    if(!ffStrContains(propertyType, ".Device") && !ffStrContains(propertyType, ".Battery"))
+        return; // We don't care about other properties
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
@@ -118,8 +118,8 @@ static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessage
     const char* objectPath;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &objectPath);
 
-    //We don't want adapter objects
-    if(strstr(objectPath, "dev_") == NULL)
+    // We don't want adapter objects
+    if(!ffStrContains(objectPath, "/dev_"))
         return;
 
     dbus->lib->ffdbus_message_iter_next(&dictIter);
