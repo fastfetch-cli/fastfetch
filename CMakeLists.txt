@@ -631,7 +631,7 @@ elseif(APPLE)
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
-        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_apple.m
         src/detection/board/board_apple.c
         src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
