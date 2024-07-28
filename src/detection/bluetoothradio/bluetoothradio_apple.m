@@ -11,10 +11,11 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothResult */)
     FFBluetoothRadioResult* device = ffListAdd(devices);
     ffStrbufInitS(&device->name, ctrl.nameAsString.UTF8String);
     ffStrbufInitS(&device->address, ctrl.addressAsString.UTF8String);
-    device->lmpVersion = 0;
-    device->hciVersion = 0;
-    device->lmpSubversion = 0;
-    device->hciRevision = 0;
+    device->lmpVersion = -1;
+    device->lmpSubversion = -1;
+    device->enabled = ctrl.powerState == kBluetoothHCIPowerStateON;
+    device->discoverable = false;
+    device->connectable = true;
 
     #ifdef __aarch64__
     device->vendor = "Apple";

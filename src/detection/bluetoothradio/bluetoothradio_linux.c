@@ -51,8 +51,8 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
-    // if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING)
-    //     return;
+    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING)
+        return;
 
     const char* deviceProperty;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &deviceProperty);
@@ -61,7 +61,7 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
 
     if(ffStrEquals(deviceProperty, "Address"))
         ffDBusGetString(dbus, &dictIter, &device->address);
-    else if(ffStrEquals(deviceProperty, "Name"))
+    else if(ffStrEquals(deviceProperty, "Alias"))
         ffDBusGetString(dbus, &dictIter, &device->name);
     else if(ffStrEquals(deviceProperty, "Manufacturer"))
     {
@@ -70,7 +70,17 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
             device->vendor = ffBluetoothRadioGetVendor(detection);
     }
     else if(ffStrEquals(deviceProperty, "Version"))
-        ffDBusGetByte(dbus, &dictIter, &device->lmpVersion);
+    {
+        uint8_t byte;
+        if (ffDBusGetByte(dbus, &dictIter, &byte))
+            device->lmpVersion = byte;
+    }
+    else if(ffStrEquals(deviceProperty, "Powered"))
+        ffDBusGetBool(dbus, &dictIter, &device->enabled);
+    else if(ffStrEquals(deviceProperty, "Discoverable"))
+        ffDBusGetBool(dbus, &dictIter, &device->discoverable);
+    else if(ffStrEquals(deviceProperty, "Pairable"))
+        ffDBusGetBool(dbus, &dictIter, &device->connectable);
 }
 
 static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothRadioResult* device)
@@ -134,11 +144,10 @@ static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessage
     FFBluetoothRadioResult* device = ffListAdd(devices);
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->address);
-    device->lmpVersion = 0;
-    device->hciVersion = 0;
-    device->lmpSubversion = 0;
-    device->hciRevision = 0;
+    device->lmpVersion = -1;
+    device->lmpSubversion = -1;
     device->vendor = "Unknown";
+    device->enabled = false;
 
     while(true)
     {

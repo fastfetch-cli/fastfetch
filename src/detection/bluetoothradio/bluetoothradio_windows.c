@@ -58,6 +58,8 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstRadio)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextRadio)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindRadioClose)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothIsConnectable)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothIsDiscoverable)
 
     HANDLE hRadio = NULL;
     HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstRadio(&(BLUETOOTH_FIND_RADIO_PARAMS) {
@@ -66,7 +68,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
     if(!hFind)
     {
         if (GetLastError() == ERROR_NO_MORE_ITEMS)
-            return "No Bluetooth radios found";
+            return "No Bluetooth radios found or service disabled";
         else
             return "BluetoothFindFirstRadio() failed";
     }
@@ -91,9 +93,10 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 
         device->lmpVersion = blri.radioInfo.lmpVersion;
         device->lmpSubversion = blri.radioInfo.lmpSubversion;
-        device->hciVersion = blri.hciVersion;
-        device->hciRevision = blri.hciRevision;
         device->vendor = ffBluetoothRadioGetVendor(blri.radioInfo.mfg);
+        device->enabled = true;
+        device->connectable = ffBluetoothIsConnectable(hRadio);
+        device->discoverable = ffBluetoothIsDiscoverable(hRadio);
     } while (ffBluetoothFindNextRadio(hFind, &hRadio));
 
     ffBluetoothFindRadioClose(hFind);

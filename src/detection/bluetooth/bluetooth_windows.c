@@ -27,10 +27,7 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
     }, &btdi);
     if(!hFind)
     {
-        if (GetLastError() == ERROR_NO_MORE_ITEMS)
-            return "No Bluetooth devices found";
-        else
-            return "BluetoothFindFirstDevice() failed";
+        return "BluetoothFindFirstDevice() failed";
     }
 
     do {

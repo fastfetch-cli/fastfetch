@@ -5,7 +5,7 @@
 #include "modules/bluetoothradio/bluetoothradio.h"
 #include "util/stringUtils.h"
 
-#define FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS 6
+#define FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS 8
 #define FF_BLUETOOTHRADIO_DISPLAY_NAME "Bluetooth Radio"
 
 static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadioResult* radio, uint8_t index)
@@ -55,16 +55,15 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
     }
     else
     {
-        FF_STRBUF_AUTO_DESTROY lmpVersion = ffStrbufCreateF("%u.%u", radio->lmpVersion, radio->lmpSubversion);
-        FF_STRBUF_AUTO_DESTROY hciVersion = ffStrbufCreateF("%u.%u", radio->hciVersion, radio->hciRevision);
-
         FF_PRINT_FORMAT_CHECKED(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &radio->name, "name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &radio->address, "address"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &lmpVersion, "lmp-version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &hciVersion, "hci-version"},
+            {FF_FORMAT_ARG_TYPE_INT, &radio->lmpVersion, "lmp-version"},
+            {FF_FORMAT_ARG_TYPE_INT, &radio->lmpSubversion, "lmp-subversion"},
             {FF_FORMAT_ARG_TYPE_STRING, version, "version"},
             {FF_FORMAT_ARG_TYPE_STRING, radio->vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_BOOL, &radio->discoverable, "discoverable"},
+            {FF_FORMAT_ARG_TYPE_BOOL, &radio->connectable, "connectable"},
         }));
     }
 }
@@ -80,10 +79,22 @@ void ffPrintBluetoothRadio(FFBluetoothRadioOptions* options)
     }
     else
     {
-        for(uint32_t i = 0; i < radios.length; i++)
+        uint8_t index = 0;
+        FF_LIST_FOR_EACH(FFBluetoothRadioResult, radio, radios)
         {
-            uint8_t index = (uint8_t) (radios.length == 1 ? 0 : i + 1);
-            printDevice(options, FF_LIST_GET(FFBluetoothRadioResult, radios, i), index);
+            if (!radio->enabled)
+                continue;
+
+            index++;
+            printDevice(options, radio, index);
+        }
+
+        if (index == 0)
+        {
+            if (radios.length > 0)
+                ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Bluetooth radios found but none enabled");
+            else
+                ffPrintError(FF_BLUETOOTHRADIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
         }
     }
 
@@ -147,11 +158,18 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "address", &item->address);
-        yyjson_mut_obj_add_uint(doc, obj, "lmpVersion", item->lmpVersion);
-        yyjson_mut_obj_add_uint(doc, obj, "lmpSubversion", item->lmpSubversion);
-        yyjson_mut_obj_add_uint(doc, obj, "hciVersion", item->hciVersion);
-        yyjson_mut_obj_add_uint(doc, obj, "hciRevision", item->hciRevision);
+        if (item->lmpVersion < 0)
+            yyjson_mut_obj_add_null(doc, obj, "lmpVersion");
+        else
+            yyjson_mut_obj_add_int(doc, obj, "lmpVersion", item->lmpVersion);
+        if (item->lmpSubversion < 0)
+            yyjson_mut_obj_add_null(doc, obj, "lmpSubversion");
+        else
+            yyjson_mut_obj_add_int(doc, obj, "lmpSubversion", item->lmpSubversion);
         yyjson_mut_obj_add_str(doc, obj, "vendor", item->vendor);
+        yyjson_mut_obj_add_bool(doc, obj, "enabled", item->enabled);
+        yyjson_mut_obj_add_bool(doc, obj, "discoverable", item->discoverable);
+        yyjson_mut_obj_add_bool(doc, obj, "connectable", item->connectable);
     }
 
     FF_LIST_FOR_EACH(FFBluetoothRadioResult, radio, results)
@@ -167,9 +185,11 @@ void ffPrintBluetoothRadioHelpFormat(void)
         "Radio name for discovering - name",
         "Address - local radio address",
         "LMP version - lmp-version",
-        "HCI version - hci-version",
+        "LMP subversion - lmp-subversion",
         "Bluetooth version - version",
         "Vendor - vendor",
+        "Discoverable - discoverable",
+        "Connectable / Pairable - connectable",
     }));
 }
 
