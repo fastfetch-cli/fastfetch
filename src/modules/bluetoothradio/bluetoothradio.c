@@ -5,7 +5,7 @@
 #include "modules/bluetoothradio/bluetoothradio.h"
 #include "util/stringUtils.h"
 
-#define FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS 7
+#define FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS 6
 #define FF_BLUETOOTHRADIO_DISPLAY_NAME "Bluetooth Radio"
 
 static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadioResult* radio, uint8_t index)
@@ -65,7 +65,6 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
             {FF_FORMAT_ARG_TYPE_STRBUF, &hciVersion, "hci-version"},
             {FF_FORMAT_ARG_TYPE_STRING, version, "version"},
             {FF_FORMAT_ARG_TYPE_STRING, radio->vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_BOOL, &radio->leSupported, "le-supported"},
         }));
     }
 }
@@ -153,7 +152,6 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
         yyjson_mut_obj_add_uint(doc, obj, "hciVersion", item->hciVersion);
         yyjson_mut_obj_add_uint(doc, obj, "hciRevision", item->hciRevision);
         yyjson_mut_obj_add_str(doc, obj, "vendor", item->vendor);
-        yyjson_mut_obj_add_bool(doc, obj, "leSupported", item->leSupported);
     }
 
     FF_LIST_FOR_EACH(FFBluetoothRadioResult, radio, results)
@@ -165,14 +163,13 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
 
 void ffPrintBluetoothRadioHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BLUETOOTHRADIO_MODULE_NAME, "{1} ({4})", FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BLUETOOTHRADIO_MODULE_NAME, "Bluetooth {5} ({6})", FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((const char* []) {
         "Radio name for discovering - name",
         "Address - local radio address",
         "LMP version - lmp-version",
         "HCI version - hci-version",
         "Bluetooth version - version",
         "Vendor - vendor",
-        "Is Bluetooth Low Energy (LE) supported - le-supported"
     }));
 }
 

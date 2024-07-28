@@ -294,6 +294,7 @@ set(LIBFASTFETCH_SRC
     src/common/properties.c
     src/common/settings.c
     src/common/temps.c
+    src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
@@ -422,7 +423,7 @@ if(LINUX)
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/cursor/cursor_linux.c
         src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/disk/disk_linux.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_linux.c
@@ -553,7 +554,7 @@ elseif(BSD)
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/board/board_bsd.c
         src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_bsd.c

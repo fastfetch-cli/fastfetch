@@ -11,7 +11,7 @@ typedef struct FFBluetoothRadioResult
     uint16_t lmpSubversion;
     uint16_t hciRevision;
     const char* vendor;
-    bool leSupported;
 } FFBluetoothRadioResult;
 
 const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */);
+const char* ffBluetoothRadioGetVendor(uint32_t manufacturerId);
