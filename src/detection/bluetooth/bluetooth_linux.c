@@ -61,11 +61,11 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
     dbus->lib->ffdbus_message_iter_next(&dictIter);
 
     if(ffStrEquals(deviceProperty, "Address"))
-        ffDBusGetValue(dbus, &dictIter, &device->address);
+        ffDBusGetString(dbus, &dictIter, &device->address);
     else if(ffStrEquals(deviceProperty, "Name"))
-        ffDBusGetValue(dbus, &dictIter, &device->name);
+        ffDBusGetString(dbus, &dictIter, &device->name);
     else if(ffStrEquals(deviceProperty, "Icon"))
-        ffDBusGetValue(dbus, &dictIter, &device->type);
+        ffDBusGetString(dbus, &dictIter, &device->type);
     else if(ffStrEquals(deviceProperty, "Percentage"))
         ffDBusGetByte(dbus, &dictIter, &device->battery);
     else if(ffStrEquals(deviceProperty, "Connected"))

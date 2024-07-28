@@ -56,7 +56,7 @@ const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data)
     return NULL;
 }
 
-bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
+bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
 {
     int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
 
@@ -79,7 +79,7 @@ bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
     dbus->lib->ffdbus_message_iter_recurse(iter, &subIter);
 
     if(argType == DBUS_TYPE_VARIANT)
-        return ffDBusGetValue(dbus, &subIter, result);
+        return ffDBusGetString(dbus, &subIter, result);
 
     //At this point we have an array
 
@@ -87,7 +87,7 @@ bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
 
     while(true)
     {
-        if(ffDBusGetValue(dbus, &subIter, result))
+        if(ffDBusGetString(dbus, &subIter, result))
         {
             foundAValue = true;
             ffStrbufAppendS(result, ", ");
@@ -138,6 +138,24 @@ bool ffDBusGetByte(FFDBusData* dbus, DBusMessageIter* iter, uint8_t* result)
     DBusMessageIter subIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &subIter);
     return ffDBusGetByte(dbus, &subIter, result);
+}
+
+bool ffDBusGetUint16(FFDBusData* dbus, DBusMessageIter* iter, uint16_t* result)
+{
+    int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
+
+    if(argType == DBUS_TYPE_UINT16)
+    {
+        dbus->lib->ffdbus_message_iter_get_basic(iter, result);
+        return true;
+    }
+
+    if(argType != DBUS_TYPE_VARIANT)
+        return false;
+
+    DBusMessageIter subIter;
+    dbus->lib->ffdbus_message_iter_recurse(iter, &subIter);
+    return ffDBusGetUint16(dbus, &subIter, result);
 }
 
 DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method)
@@ -194,7 +212,7 @@ bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* 
         return false;
     }
 
-    bool ret = ffDBusGetValue(dbus, &rootIterator, result);
+    bool ret = ffDBusGetString(dbus, &rootIterator, result);
 
     dbus->lib->ffdbus_message_unref(reply);
 

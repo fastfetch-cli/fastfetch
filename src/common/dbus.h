@@ -43,9 +43,10 @@ typedef struct FFDBusData
 } FFDBusData;
 
 const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data); //Returns an error message or NULL on success
-bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result);
+bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result);
 bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result);
 bool ffDBusGetByte(FFDBusData* dbus, DBusMessageIter* iter, uint8_t* result);
+bool ffDBusGetUint16(FFDBusData* dbus, DBusMessageIter* iter, uint16_t* result);
 DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method);
 DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property);
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);

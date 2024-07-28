@@ -61,13 +61,13 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
         data->lib->ffdbus_message_iter_next(&dictIterator);
 
         if(ffStrEquals(key, "xesam:title"))
-            ffDBusGetValue(data, &dictIterator, &result->song);
+            ffDBusGetString(data, &dictIterator, &result->song);
         else if(ffStrEquals(key, "xesam:album"))
-            ffDBusGetValue(data, &dictIterator, &result->album);
+            ffDBusGetString(data, &dictIterator, &result->album);
         else if(ffStrEquals(key, "xesam:artist"))
-            ffDBusGetValue(data, &dictIterator, &result->artist);
+            ffDBusGetString(data, &dictIterator, &result->artist);
         else if(ffStrEquals(key, "xesam:url"))
-            ffDBusGetValue(data, &dictIterator, &result->url);
+            ffDBusGetString(data, &dictIterator, &result->url);
 
         if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0 && result->url.length > 0)
             break;
