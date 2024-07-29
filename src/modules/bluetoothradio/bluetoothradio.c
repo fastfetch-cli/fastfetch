@@ -26,14 +26,14 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
 
     const char* version = NULL;
 
-    switch (radio->lmpVersion)
+    switch (radio->lmpVersion < 0 ? -radio->lmpVersion : radio->lmpVersion)
     {
         case 0: version = "1.0b"; break;
         case 1: version = "1.1"; break;
         case 2: version = "1.2"; break;
-        case 3: version = "2.0 + EDR"; break;
-        case 4: version = "2.1 + EDR"; break;
-        case 5: version = "3.0 + HS"; break;
+        case 3: version = "2.0"; break;
+        case 4: version = "2.1"; break;
+        case 5: version = "3.0"; break;
         case 6: version = "4.0"; break;
         case 7: version = "4.1"; break;
         case 8: version = "4.2"; break;
@@ -49,9 +49,9 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
         ffPrintLogoAndKey(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         if (version)
-            printf("Bluetooth %s (%s)\n", version, radio->vendor);
+            printf("Bluetooth %s%s (%s)\n", version, (radio->lmpVersion < 0 ? "+" : ""), radio->vendor.chars);
         else
-            fputs(radio->vendor, stdout);
+            ffStrbufPutTo(&radio->vendor, stdout);
     }
     else
     {
@@ -61,7 +61,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
             {FF_FORMAT_ARG_TYPE_INT, &radio->lmpVersion, "lmp-version"},
             {FF_FORMAT_ARG_TYPE_INT, &radio->lmpSubversion, "lmp-subversion"},
             {FF_FORMAT_ARG_TYPE_STRING, version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRING, radio->vendor, "vendor"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &radio->vendor, "vendor"},
             {FF_FORMAT_ARG_TYPE_BOOL, &radio->discoverable, "discoverable"},
             {FF_FORMAT_ARG_TYPE_BOOL, &radio->connectable, "connectable"},
         }));
@@ -102,6 +102,7 @@ void ffPrintBluetoothRadio(FFBluetoothRadioOptions* options)
     {
         ffStrbufDestroy(&radio->name);
         ffStrbufDestroy(&radio->address);
+        ffStrbufDestroy(&radio->vendor);
     }
 }
 
@@ -158,15 +159,15 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "address", &item->address);
-        if (item->lmpVersion < 0)
+        if (item->lmpVersion == INT_MIN)
             yyjson_mut_obj_add_null(doc, obj, "lmpVersion");
         else
             yyjson_mut_obj_add_int(doc, obj, "lmpVersion", item->lmpVersion);
-        if (item->lmpSubversion < 0)
+        if (item->lmpSubversion == INT_MIN)
             yyjson_mut_obj_add_null(doc, obj, "lmpSubversion");
         else
             yyjson_mut_obj_add_int(doc, obj, "lmpSubversion", item->lmpSubversion);
-        yyjson_mut_obj_add_str(doc, obj, "vendor", item->vendor);
+        yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &item->vendor);
         yyjson_mut_obj_add_bool(doc, obj, "enabled", item->enabled);
         yyjson_mut_obj_add_bool(doc, obj, "discoverable", item->discoverable);
         yyjson_mut_obj_add_bool(doc, obj, "connectable", item->connectable);
@@ -176,6 +177,7 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
     {
         ffStrbufDestroy(&radio->name);
         ffStrbufDestroy(&radio->address);
+        ffStrbufDestroy(&radio->vendor);
     }
 }
 

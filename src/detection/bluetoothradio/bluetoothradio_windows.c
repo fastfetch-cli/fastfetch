@@ -93,7 +93,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 
         device->lmpVersion = blri.radioInfo.lmpVersion;
         device->lmpSubversion = blri.radioInfo.lmpSubversion;
-        device->vendor = ffBluetoothRadioGetVendor(blri.radioInfo.mfg);
+        ffStrbufSetStatic(&device->vendor, ffBluetoothRadioGetVendor(blri.radioInfo.mfg));
         device->enabled = true;
         device->connectable = ffBluetoothIsConnectable(hRadio);
         device->discoverable = ffBluetoothIsDiscoverable(hRadio);

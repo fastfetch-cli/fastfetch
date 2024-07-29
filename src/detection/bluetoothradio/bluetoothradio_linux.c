@@ -65,9 +65,9 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
         ffDBusGetString(dbus, &dictIter, &device->name);
     else if(ffStrEquals(deviceProperty, "Manufacturer"))
     {
-        uint16_t detection;
-        if (ffDBusGetUint16(dbus, &dictIter, &detection))
-            device->vendor = ffBluetoothRadioGetVendor(detection);
+        uint16_t vendorId;
+        if (ffDBusGetUint16(dbus, &dictIter, &vendorId))
+            ffStrbufSetStatic(&device->vendor, ffBluetoothRadioGetVendor(vendorId));
     }
     else if(ffStrEquals(deviceProperty, "Version"))
     {
@@ -144,9 +144,9 @@ static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessage
     FFBluetoothRadioResult* device = ffListAdd(devices);
     ffStrbufInit(&device->name);
     ffStrbufInit(&device->address);
-    device->lmpVersion = -1;
-    device->lmpSubversion = -1;
-    device->vendor = "Unknown";
+    ffStrbufInitStatic(&device->vendor, "Unknown");
+    device->lmpVersion = INT_MIN;
+    device->lmpSubversion = INT_MIN;
     device->enabled = false;
 
     while(true)

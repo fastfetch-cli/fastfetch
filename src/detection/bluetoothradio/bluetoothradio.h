@@ -6,9 +6,9 @@ typedef struct FFBluetoothRadioResult
 {
     FFstrbuf name;
     FFstrbuf address;
+    FFstrbuf vendor;
     int32_t lmpVersion;
     int32_t lmpSubversion;
-    const char* vendor;
     bool enabled;
     bool discoverable;
     bool connectable;
