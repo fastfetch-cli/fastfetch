@@ -95,7 +95,7 @@ void ffPrintCPU(FFCPUOptions* options)
             FF_STRBUF_AUTO_DESTROY freqBase = ffStrbufCreate();
             ffParseFrequency(cpu.frequencyBase, &freqBase);
             FF_STRBUF_AUTO_DESTROY freqMax = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyBase, &freqMax);
+            ffParseFrequency(cpu.frequencyMax, &freqMax);
             FF_STRBUF_AUTO_DESTROY freqBioslimit = ffStrbufCreate();
             ffParseFrequency(cpu.frequencyBiosLimit, &freqBioslimit);
 
