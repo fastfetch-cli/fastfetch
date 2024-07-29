@@ -46,7 +46,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
+        ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         if (version)
             printf("Bluetooth %s%s (%s)\n", version, (radio->lmpVersion < 0 ? "+" : ""), radio->vendor.chars);
@@ -55,7 +55,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &radio->name, "name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &radio->address, "address"},
             {FF_FORMAT_ARG_TYPE_INT, &radio->lmpVersion, "lmp-version"},
