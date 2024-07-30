@@ -212,7 +212,7 @@ static const char* detectWifiWithLibnm(FFlist* result)
 
 #endif
 
-#if __has_include(<linux/wireless.h>)
+#if FF_HAVE_LINUX_WIRELESS
 #define FF_DETECT_WIFI_WITH_IOCTLS
 
 #include "common/io/io.h"

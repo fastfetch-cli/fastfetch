@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "users.h"
 
-#if __has_include(<utmpx.h>)
+#if FF_HAVE_UTMPX
     #include <utmpx.h>
 #else
     //for Android compatibility

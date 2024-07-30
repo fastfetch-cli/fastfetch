@@ -8,8 +8,10 @@
 #include <dirent.h>
 #include <errno.h>
 
-#if __has_include(<wordexp.h>)
-#include <wordexp.h>
+#if FF_HAVE_WORDEXP
+    #include <wordexp.h>
+#else
+    #warning "<wordexp.h> not available"
 #endif
 
 static void createSubfolders(const char* fileName)
@@ -112,7 +114,7 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
 {
     bool result = false;
 
-    #if __has_include(<wordexp.h>) // https://github.com/termux/termux-packages/pull/7056
+    #if FF_HAVE_WORDEXP // https://github.com/termux/termux-packages/pull/7056
 
     wordexp_t exp;
     if(wordexp(in, &exp, 0) != 0)

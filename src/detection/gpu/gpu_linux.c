@@ -7,28 +7,22 @@
 #include "common/properties.h"
 #include "util/stringUtils.h"
 
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
-
 #include <inttypes.h>
 
-#if __has_include(<drm/drm.h>)
-    #include <drm/drm.h>
-    #define FF_HAVE_DRM_H 1
-#elif __has_include(<libdrm/drm.h>)
-    #include <libdrm/drm.h>
-    #define FF_HAVE_DRM_H 1
-#endif
-
-#if FF_HAVE_DRM_H
-    #include <fcntl.h>
-    #include <sys/ioctl.h>
-
-    #if __aarch64__ && __has_include(<drm/asahi_drm.h>)
-        #include <drm/asahi_drm.h>
+#if __aarch64__
+    #if __has_include(<asahi_drm.h>)
+        #include <asahi_drm.h>
+        #include <drm.h>
+        #include <fcntl.h>
+        #include <sys/ioctl.h>
         #define FF_HAVE_ASAHI_DRM_H 1
+    #else
+        #warning "<asahi_drm.h> not available"
     #endif
 #endif
+
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
 
 static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey)
 {

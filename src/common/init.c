@@ -173,94 +173,94 @@ void ffDestroyInstance(void)
 void ffListFeatures(void)
 {
     fputs(
-        #ifdef FF_HAVE_THREADS
+        #if FF_HAVE_THREADS
             "threads\n"
         #endif
-        #ifdef FF_HAVE_VULKAN
+        #if FF_HAVE_VULKAN
             "vulkan\n"
         #endif
-        #ifdef FF_HAVE_WAYLAND
+        #if FF_HAVE_WAYLAND
             "wayland\n"
         #endif
-        #ifdef FF_HAVE_XCB_RANDR
+        #if FF_HAVE_XCB_RANDR
             "xcb-randr\n"
         #endif
-        #ifdef FF_HAVE_XCB
+        #if FF_HAVE_XCB
             "xcb\n"
         #endif
-        #ifdef FF_HAVE_XRANDR
+        #if FF_HAVE_XRANDR
             "xrandr\n"
         #endif
-        #ifdef FF_HAVE_X11
+        #if FF_HAVE_X11
             "x11\n"
         #endif
-        #ifdef FF_HAVE_DRM
+        #if FF_HAVE_DRM
             "drm\n"
         #endif
-        #ifdef FF_HAVE_GIO
+        #if FF_HAVE_GIO
             "gio\n"
         #endif
-        #ifdef FF_HAVE_DCONF
+        #if FF_HAVE_DCONF
             "dconf\n"
         #endif
-        #ifdef FF_HAVE_DBUS
+        #if FF_HAVE_DBUS
             "dbus\n"
         #endif
-        #ifdef FF_HAVE_IMAGEMAGICK7
+        #if FF_HAVE_IMAGEMAGICK7
             "imagemagick7\n"
         #endif
-        #ifdef FF_HAVE_IMAGEMAGICK6
+        #if FF_HAVE_IMAGEMAGICK6
             "imagemagick6\n"
         #endif
-        #ifdef FF_HAVE_CHAFA
+        #if FF_HAVE_CHAFA
             "chafa\n"
         #endif
-        #ifdef FF_HAVE_ZLIB
+        #if FF_HAVE_ZLIB
             "zlib\n"
         #endif
-        #ifdef FF_HAVE_XFCONF
+        #if FF_HAVE_XFCONF
             "xfconf\n"
         #endif
-        #ifdef FF_HAVE_SQLITE3
+        #if FF_HAVE_SQLITE3
             "sqlite3\n"
         #endif
-        #ifdef FF_HAVE_RPM
+        #if FF_HAVE_RPM
             "rpm\n"
         #endif
-        #ifdef FF_HAVE_EGL
+        #if FF_HAVE_EGL
             "egl\n"
         #endif
-        #ifdef FF_HAVE_GLX
+        #if FF_HAVE_GLX
             "glx\n"
         #endif
-        #ifdef FF_HAVE_OSMESA
+        #if FF_HAVE_OSMESA
             "osmesa\n"
         #endif
-        #ifdef FF_HAVE_OPENCL
+        #if FF_HAVE_OPENCL
             "opencl\n"
         #endif
-        #ifdef FF_HAVE_FREETYPE
+        #if FF_HAVE_FREETYPE
             "freetype\n"
         #endif
-        #ifdef FF_HAVE_PULSE
+        #if FF_HAVE_PULSE
             "libpulse\n"
         #endif
-        #ifdef FF_HAVE_LIBNM
+        #if FF_HAVE_LIBNM
             "libnm\n"
         #endif
-        #ifdef FF_HAVE_DDCUTIL
+        #if FF_HAVE_DDCUTIL
             "libddcutil\n"
         #endif
-        #ifdef FF_HAVE_DIRECTX_HEADERS
+        #if FF_HAVE_DIRECTX_HEADERS
             "Directx Headers\n"
         #endif
-        #ifdef FF_USE_SYSTEM_YYJSON
+        #if FF_USE_SYSTEM_YYJSON
             "System yyjson\n"
         #endif
-        #if __has_include(<linux/videodev2.h>)
+        #if FF_HAVE_LINUX_VIDEODEV2
             "linux/videodev2\n"
         #endif
-        #if __has_include(<linux/wireless.h>)
+        #if FF_HAVE_LINUX_WIRELESS
             "linux/wireless\n"
         #endif
         ""
