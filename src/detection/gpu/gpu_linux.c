@@ -10,8 +10,8 @@
 #include <inttypes.h>
 
 #if __aarch64__
-    #if __has_include(<asahi_drm.h>)
-        #include <asahi_drm.h>
+    #if __has_include(<drm/asahi_drm.h>) && FF_HAVE_DRM
+        #include <drm/asahi_drm.h>
         #include <drm.h>
         #include <fcntl.h>
         #include <sys/ioctl.h>
