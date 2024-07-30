@@ -136,6 +136,9 @@ uint32_t ffWaylandHandleRotation(WaylandDisplay* display)
 
 const char* ffdsConnectWayland(FFDisplayServerResult* result)
 {
+    if (getenv("XDG_RUNTIME_DIR") == NULL)
+        return "Wayland requires $XDG_RUNTIME_DIR being set";
+
     FF_LIBRARY_LOAD(wayland, &instance.config.library.libWayland, false, "libwayland-client" FF_LIBRARY_EXTENSION, 1)
 
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wayland, wl_display_connect)
