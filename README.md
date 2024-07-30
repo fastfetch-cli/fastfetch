@@ -1,3 +1,4 @@
+git@gist.github.com:a01f577ac0cc8e163cee00d549df0242.git
 # Fastfetch
 
 [![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fastfetch-cli/fastfetch/ci.yml)](https://github.com/fastfetch-cli/fastfetch/actions)
