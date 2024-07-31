@@ -94,6 +94,16 @@ typedef enum {
     NVML_BRAND_COUNT,
 } nvmlBrandType_t;
 
+// https://docs.nvidia.com/deploy/nvml-api/structnvmlUtilization__t.html#structnvmlUtilization__t
+// Utilization information for a device.
+typedef struct
+{
+    // Percent of time over the past second during which one or more kernels was executing on the GPU
+    unsigned int gpu;
+    // Percent of time over the past second during which global (device) memory was being read or written
+    unsigned int memory;
+} nvmlUtilization_t;
+
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlInitializationAndCleanup.html#group__nvmlInitializationAndCleanup
 // Initialize NVML, but don't initialize any GPUs yet
 nvmlReturn_t nvmlInit_v2(void);
@@ -119,3 +129,5 @@ extern nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* 
 extern nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType_t type, unsigned int* clock);
 // Retrieves the brand of this device
 extern nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type);
+// Retrieves the current utilization rates for the device
+extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t *utilization);
