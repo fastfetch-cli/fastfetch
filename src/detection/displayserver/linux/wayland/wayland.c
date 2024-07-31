@@ -30,8 +30,19 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
     if (!ffReadFileBuffer(procPath.chars, &result->wmProcessName))
         return false;
 
+    // #1135: wl-restart is a special case
+    const char* filename = strrchr(result->wmProcessName.chars, '/');
+    if (filename)
+        filename++;
+    else
+        filename = result->wmProcessName.chars;
+
+    if (ffStrEquals(filename, "wl-restart"))
+        ffStrbufSubstrAfterFirstC(&result->wmProcessName, '\0');
+
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
+
     return true;
 }
 #else
