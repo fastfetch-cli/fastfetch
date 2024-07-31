@@ -131,7 +131,7 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
         rotation,
         display.edidName.length
             ? &display.edidName
-            : display.description.length
+            : display.description.length && !ffStrbufContain(&display.description, &display.name)
                 ? &display.description
                 : &display.name,
         display.type,
