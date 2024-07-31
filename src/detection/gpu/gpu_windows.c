@@ -53,6 +53,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     wchar_t regControlVideoKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Control\\Video\\{";
     const uint32_t regControlVideoKeyPrefixLength = (uint32_t) wcslen(regControlVideoKey);
     const uint32_t deviceKeyPrefixLength = strlen("\\Registry\\Machine\\") + regControlVideoKeyPrefixLength;
+    wchar_t regPciKey[MAX_PATH] = L"SYSTEM\\CurrentControlSet\\Enum\\";
+    const uint32_t regPciKeyPrefixLength = (uint32_t) wcslen(regPciKey);
 
     for (DWORD i = 0; EnumDisplayDevicesW(NULL, i, &displayDevice, 0); ++i)
     {
@@ -144,16 +146,54 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName) && (options->temp || options->driverSpecific))
         {
-            if (vendorId && deviceId && subSystemId)
+            if (vendorId && deviceId)
             {
+                int bus = -1, dev = -1, func = -1;
+                if (detectFn == ffDetectNvidiaGpuInfo)
+                {
+                    // Find PCI id from video id
+                    // HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\PCI\DEVICE_ID\INSTANCE_ID\Device Parameters\VideoID
+                    wcscpy(regPciKey + regPciKeyPrefixLength, displayDevice.DeviceID);
+                    FF_HKEY_AUTO_DESTROY hKey = NULL;
+                    if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regPciKey, &hKey, NULL)) continue;
+                    for (uint32_t idx = 0; ; ++idx)
+                    {
+                        wchar_t instanceKey[256];
+                        DWORD bufSizeInstanceKey = sizeof(instanceKey) / sizeof(*instanceKey);
+                        if (RegEnumKeyExW(hKey, idx, instanceKey, &bufSizeInstanceKey, NULL, NULL, NULL, NULL) != ERROR_SUCCESS) break;
+                        wcscpy(instanceKey + bufSizeInstanceKey, L"\\Device Parameters");
+
+                        wchar_t videoId[256];
+                        DWORD bufSizeVideoId = sizeof(videoId) / sizeof(*videoId);
+                        if (RegGetValueW(hKey, instanceKey, L"VideoID", RRF_RT_REG_SZ, NULL, videoId, &bufSizeVideoId) != ERROR_SUCCESS) continue;
+                        if (videoId[0] != L'{') continue;
+                        if (wmemcmp(videoId + 1 /* Ignore {} */, displayDevice.DeviceKey + deviceKeyPrefixLength, strlen("00000000-0000-0000-0000-000000000000")) != 0) continue;
+
+                        // We finally find it
+                        instanceKey[bufSizeInstanceKey] = L'\0';
+                        bufSizeVideoId = sizeof(videoId) / sizeof(*videoId);
+                        if (RegGetValueW(hKey, instanceKey, L"LocationInformation", RRF_RT_REG_SZ, NULL, videoId, &bufSizeVideoId) != ERROR_SUCCESS) break;
+                        swscanf(videoId, L"%*[^(](%d,%d,%d)", &bus, &dev, &func);
+                        break;
+                    }
+                }
+
                 detectFn(
                     &(FFGpuDriverCondition) {
-                        .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID | FF_GPU_DRIVER_CONDITION_TYPE_LUID,
+                        .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID
+                              | FF_GPU_DRIVER_CONDITION_TYPE_LUID
+                              | (bus > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
                         .pciDeviceId = {
                             .deviceId = deviceId,
                             .vendorId = vendorId,
                             .subSystemId = subSystemId,
                             .revId = revId,
+                        },
+                        .pciBusId = {
+                            .domain = 0,
+                            .bus = (uint32_t) bus,
+                            .device = (uint32_t) dev,
+                            .func = (uint32_t) func,
                         },
                         .luid = gpu->deviceId,
                     },
