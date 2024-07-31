@@ -39,6 +39,17 @@ static bool pciDetectDriver(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer
         ffStrbufSetNS(&gpu->driver, (uint32_t) (resultLength - (slash - pathBuf)), slash);
     }
 
+    if (ffStrbufEqualS(&gpu->driver, "nvidia"))
+    {
+        if (ffReadFileBuffer("/proc/driver/nvidia/version", buffer))
+        {
+            if (ffStrbufContainS(buffer, " Open "))
+                ffStrbufAppendS(&gpu->driver, " (open source)");
+            else
+                ffStrbufAppendS(&gpu->driver, " (proprietary)");
+        }
+    }
+
     if (instance.config.general.detectVersion)
     {
         ffStrbufAppendS(pciDir, "/module/version");
