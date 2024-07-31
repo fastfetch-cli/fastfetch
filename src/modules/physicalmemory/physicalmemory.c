@@ -20,6 +20,12 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
         return;
     }
 
+    if (result.length == 0)
+    {
+        ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical memory detected");
+        return;
+    }
+
     FF_STRBUF_AUTO_DESTROY prettySize = ffStrbufCreate();
 
     uint32_t i = 0;
