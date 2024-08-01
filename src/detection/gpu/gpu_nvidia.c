@@ -126,11 +126,11 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     if (result.frequency)
         nvmlData.ffnvmlDeviceGetMaxClockInfo(device, NVML_CLOCK_GRAPHICS, result.frequency);
 
-    if (result.usage)
+    if (result.coreUsage)
     {
-        nvmlUtilization_t rates;
-        if (nvmlData.ffnvmlDeviceGetUtilizationRates(device, &rates) == NVML_SUCCESS)
-            *result.usage = (uint8_t) rates.gpu;
+        nvmlUtilization_t utilization;
+        if (nvmlData.ffnvmlDeviceGetUtilizationRates(device, &utilization) == NVML_SUCCESS)
+            *result.coreUsage = utilization.gpu;
     }
 
     return NULL;

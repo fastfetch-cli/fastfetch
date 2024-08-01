@@ -331,6 +331,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
     ffStrbufInitF(&gpu->platformApi, "DRM (%s)", drmKey);
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+    gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
     gpu->type = FF_GPU_TYPE_INTEGRATED;
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;

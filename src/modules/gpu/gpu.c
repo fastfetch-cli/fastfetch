@@ -327,6 +327,8 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, obj, "coreCount");
 
+        yyjson_mut_obj_add_real(doc, obj, "coreUsage", gpu->coreUsage);
+
         yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, obj, "memory");
 
         yyjson_mut_val* dedicatedObj = yyjson_mut_obj_add_obj(doc, memoryObj, "dedicated");
@@ -371,7 +373,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 
         yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &gpu->platformApi);
 
-        yyjson_mut_obj_add_real(doc, obj, "frequency", gpu->frequency); // NaN will be output as "null"
+        yyjson_mut_obj_add_uint(doc, obj, "frequency", gpu->frequency);
 
         yyjson_mut_obj_add_uint(doc, obj, "deviceId", gpu->deviceId);
     }

@@ -107,6 +107,31 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount)) // For Apple
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
+        gpu->coreUsage = 0.0/0.0;
+        CFDictionaryRef perfStatistics = NULL;
+        uint64_t vramUsed = 0, vramTotal = 0;
+        if (ffCfDictGetDict(properties, CFSTR("PerformanceStatistics"), &perfStatistics) == NULL)
+        {
+            int64_t utilization;
+            if (ffCfDictGetInt64(perfStatistics, CFSTR("Device Utilization %"), &utilization) == NULL)
+                gpu->coreUsage = (double) utilization;
+            else if (ffCfDictGetInt64(perfStatistics, CFSTR("GPU Core Utilization"), &utilization) == NULL)
+                gpu->coreUsage = (double) utilization / 10000000.; // Nvidia?
+
+            if (ffCfDictGetInt64(perfStatistics, CFSTR("Alloc system memory"), (int64_t*) &vramTotal) == NULL)
+            {
+                if (ffCfDictGetInt64(perfStatistics, CFSTR("In use system memory"), (int64_t*) &vramUsed) != NULL)
+                    vramTotal = 0;
+            }
+            else if (ffCfDictGetInt64(perfStatistics, CFSTR("vramUsedBytes"), (int64_t*) &vramTotal) == NULL)
+            {
+                if (ffCfDictGetInt64(perfStatistics, CFSTR("vramFreeBytes"), (int64_t*) &vramUsed) == NULL)
+                    vramTotal += vramUsed;
+                else
+                    vramTotal = 0;
+            }
+        }
+
         ffStrbufInit(&gpu->name);
         //IOAccelerator returns model / vendor-id properties for Apple Silicon, but not for Intel Iris GPUs.
         //Still needs testing for AMD's
@@ -127,7 +152,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 
         ffStrbufInit(&gpu->vendor);
         int vendorId;
-        if(!ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId))
+        if(ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId) == NULL)
         {
             const char* vendorStr = ffGetGPUVendorString((unsigned) vendorId);
             ffStrbufAppendS(&gpu->vendor, vendorStr);
@@ -140,6 +165,17 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             if (vendorStr == FF_GPU_VENDOR_NAME_APPLE)
                 detectFrequency(gpu);
             #endif
+
+            if (gpu->type == FF_GPU_TYPE_INTEGRATED)
+            {
+                gpu->shared.total = vramTotal;
+                gpu->shared.used = vramUsed;
+            }
+            else
+            {
+                gpu->dedicated.total = vramTotal;
+                gpu->dedicated.used = vramUsed;
+            }
         }
 
         gpu->temperature = options->temp ? detectGpuTemp(&gpu->name) : FF_GPU_TEMP_UNSET;

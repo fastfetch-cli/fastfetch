@@ -96,7 +96,7 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
         else
             yyjson_mut_obj_add_null(doc, gpuObj, "coreCount");
 
-        yyjson_mut_obj_add_real(doc, gpuObj, "frequency", gpu->frequency);
+        yyjson_mut_obj_add_uint(doc, gpuObj, "frequency", gpu->frequency);
 
         yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, gpuObj, "memory");
 

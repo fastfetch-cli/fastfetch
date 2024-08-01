@@ -71,8 +71,10 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
         ffStrbufInitS(&gpu->name, desc);
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->deviceId = 0;
         ffStrbufInitStatic(&gpu->platformApi, "DXCore");
 
         ffStrbufInit(&gpu->driver);
@@ -119,6 +121,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
                     .temp = options->temp ? &gpu->temperature : NULL,
                     .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                    .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,
                     .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 }, "/usr/lib/wsl/lib/libnvidia-ml.so");

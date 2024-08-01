@@ -56,6 +56,7 @@ const char* detectByOpenGL(FFlist* gpus)
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->dedicated = gpu->shared = (FFGPUMemory){0, 0};
         gpu->deviceId = 0;
 
