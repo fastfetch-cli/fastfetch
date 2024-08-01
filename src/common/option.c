@@ -206,6 +206,11 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
             else FF_APPEND_COLOR_PROP_COND(title, colorTitle)
             else FF_APPEND_COLOR_PROP_COND(output, colorOutput)
             else FF_APPEND_COLOR_PROP_COND(separator, colorSeparator)
+            else
+            {
+                fprintf(stderr, "Error: invalid color code found: %s\n", value);
+                exit(479);
+            }
         }
         ffStrbufAppendC(buffer, *value);
         ++value;
