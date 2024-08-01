@@ -76,8 +76,12 @@ static const char* detectFrequency(FFGPUResult* gpu)
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
     FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
-    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceMatching(kIOAcceleratorClassName), &iterator) != kIOReturnSuccess)
-        return "IOServiceGetMatchingServices() failed";
+    {
+        CFMutableDictionaryRef matches = IOServiceMatching(kIOAcceleratorClassName);
+        CFDictionaryAddValue(matches, CFSTR("IOMatchCategory"), CFSTR(kIOAcceleratorClassName));
+        if (IOServiceGetMatchingServices(MACH_PORT_NULL, matches, &iterator) != kIOReturnSuccess)
+            return "IOServiceGetMatchingServices() failed";
+    }
 
     io_registry_entry_t registryEntry;
     while ((registryEntry = IOIteratorNext(iterator)) != IO_OBJECT_NULL)
