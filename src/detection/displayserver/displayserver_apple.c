@@ -86,21 +86,15 @@ static void detectDisplays(FFDisplayServerResult* ds)
             );
             if (display)
             {
-                // Shitty code
-                uint8_t bitDepth = 0;
-                FF_CFTYPE_AUTO_RELEASE CFStringRef desc = CFCopyDescription(mode);
-                CFRange start = CFStringFind(desc, CFSTR("BitsPerSample = "), 0);
-                if (start.location != kCFNotFound)
+                // https://stackoverflow.com/a/33519316/9976392
+                // Also shitty, but better than parsing `CFCopyDescription(mode)`
+                CFDictionaryRef dict = (CFDictionaryRef) *((int64_t *)mode + 2);
+                if (CFGetTypeID(dict) == CFDictionaryGetTypeID())
                 {
-                    for (CFIndex idx = start.location + start.length; idx < CFStringGetLength(desc); ++idx)
-                    {
-                        UniChar ch = CFStringGetCharacterAtIndex(desc, idx);
-                        if (!ffCharIsDigit((char) ch))
-                            break;
-                        bitDepth = (uint8_t) (bitDepth * 10 + (ch - '0'));
-                    }
+                    int32_t bitDepth;
+                    ffCfDictGetInt(dict, kCGDisplayBitsPerSample, &bitDepth);
+                    display->bitDepth = (uint8_t) bitDepth;
                 }
-                display->bitDepth = bitDepth;
             }
             CGDisplayModeRelease(mode);
         }
