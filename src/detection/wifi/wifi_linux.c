@@ -75,7 +75,7 @@ static const char* detectWifiWithLibnm(FFlist* result)
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
-        ffStrbufInit(&item->conn.macAddress);
+        ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
         item->conn.signalQuality = 0.0/0.0;
@@ -143,7 +143,7 @@ static const char* detectWifiWithLibnm(FFlist* result)
             ffg_free(ssid);
         }
 
-        ffStrbufAppendS(&item->conn.macAddress, ffnm_access_point_get_bssid(ap));
+        ffStrbufAppendS(&item->conn.bssid, ffnm_access_point_get_bssid(ap));
         item->conn.signalQuality = ffnm_access_point_get_strength(ap);
         item->conn.rxRate = ffnm_access_point_get_max_bitrate(ap);
 
@@ -242,7 +242,7 @@ static const char* detectWifiWithIoctls(FFlist* result)
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
-        ffStrbufInit(&item->conn.macAddress);
+        ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
         item->conn.signalQuality = 0.0/0.0;
@@ -281,8 +281,8 @@ static const char* detectWifiWithIoctls(FFlist* result)
         if(ioctl(sock, SIOCGIWAP, &iwr) >= 0)
         {
             for(int i = 0; i < 6; ++i)
-                ffStrbufAppendF(&item->conn.macAddress, "%.2X-", (uint8_t) iwr.u.ap_addr.sa_data[i]);
-            ffStrbufTrimRight(&item->conn.macAddress, '-');
+                ffStrbufAppendF(&item->conn.bssid, "%.2X-", (uint8_t) iwr.u.ap_addr.sa_data[i]);
+            ffStrbufTrimRight(&item->conn.bssid, '-');
         }
 
         struct iw_statistics stats;

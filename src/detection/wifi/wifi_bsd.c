@@ -28,7 +28,7 @@ const char* ffDetectWifi(FFlist* result)
             ffStrbufInit(&item->inf.status);
             ffStrbufInit(&item->conn.status);
             ffStrbufInit(&item->conn.ssid);
-            ffStrbufInit(&item->conn.macAddress);
+            ffStrbufInit(&item->conn.bssid);
             ffStrbufInit(&item->conn.protocol);
             ffStrbufInit(&item->conn.security);
             item->conn.signalQuality = 0.0/0.0;
@@ -42,7 +42,7 @@ const char* ffDetectWifi(FFlist* result)
                 if (ibssid < item->conn.ssid.length)
                 {
                     ibssid += (uint32_t) strlen(" bssid ");
-                    ffStrbufSetS(&item->conn.macAddress, item->conn.ssid.chars + ibssid);
+                    ffStrbufSetS(&item->conn.bssid, item->conn.ssid.chars + ibssid);
                 }
 
                 ffStrbufSubstrBeforeFirstC(&item->conn.ssid, ' ');

@@ -37,7 +37,7 @@ const char* ffDetectWifi(FFlist* result)
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
-        ffStrbufInit(&item->conn.macAddress);
+        ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
         item->conn.signalQuality = 0.0/0.0;
@@ -63,9 +63,9 @@ const char* ffDetectWifi(FFlist* result)
             ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
 
         if (inf.bssid)
-            ffStrbufAppendS(&item->conn.macAddress, inf.bssid.UTF8String);
+            ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
         else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
-            ffStrbufAppendS(&item->conn.macAddress, [[apple valueForKey:@"BSSID"] UTF8String]);
+            ffStrbufAppendS(&item->conn.bssid, [[apple valueForKey:@"BSSID"] UTF8String]);
 
         switch(inf.activePHYMode)
         {
