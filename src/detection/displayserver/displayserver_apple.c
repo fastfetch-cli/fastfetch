@@ -37,7 +37,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 {
                     const CVTime time = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
                     if (!(time.flags & kCVTimeIsIndefinite))
-                        refreshRate = time.timeScale / (double) time.timeValue + 0.5; //59.97...
+                        refreshRate = time.timeScale / (double) time.timeValue; //59.97...
                     CVDisplayLinkRelease(link);
                 }
             }
