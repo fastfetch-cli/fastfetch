@@ -66,7 +66,7 @@ MtmlReturn MTML_API mtmlDeviceGetName(const MtmlDevice *dev, char *name, unsigne
 MtmlReturn MTML_API mtmlDeviceGetPciInfo(const MtmlDevice *dev, MtmlPciInfo *pci);
 /**
  * Retrieves the UUID of a specified device. The UUID is a hexadecimal string in the
- * form of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx, where each 'x' is an ASCII character that represents a hexidecimal
+ * form of xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx, where each 'x' is an ASCII character that represents a hexadecimal
  * digit. The UUID is globally unique for every single device thus can be used to identify different devices
  * physically.
  */
