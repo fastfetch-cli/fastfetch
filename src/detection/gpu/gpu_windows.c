@@ -183,7 +183,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     &(FFGpuDriverCondition) {
                         .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID
                               | FF_GPU_DRIVER_CONDITION_TYPE_LUID
-                              | (bus > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
+                              | (bus >= 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
                         .pciDeviceId = {
                             .deviceId = deviceId,
                             .vendorId = vendorId,
