@@ -22,11 +22,17 @@ struct FFMtmlData
     FF_LIBRARY_SYMBOL(mtmlMemoryGetTotal)
     FF_LIBRARY_SYMBOL(mtmlMemoryGetUsed)
     FF_LIBRARY_SYMBOL(mtmlMemoryGetUtilization)
+    FF_LIBRARY_SYMBOL(mtmlLibraryShutDown)
 
     bool inited;
     MtmlLibrary *lib;
     MtmlSystem *sys;
 } mtmlData;
+
+static void shutdownMtml()
+{
+    mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
+}
 
 const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDriverResult result, const char *soName)
 {
@@ -37,7 +43,6 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         mtmlData.inited = true;
         FF_LIBRARY_LOAD(libmtml, NULL, "dlopen mtml failed", soName, 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libmtml, mtmlLibraryInit)
-        FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libmtml, mtmlLibraryShutDown)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlDeviceGetBrand)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlDeviceGetIndex)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlDeviceGetName)
@@ -55,6 +60,7 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlMemoryGetTotal)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlMemoryGetUsed)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlMemoryGetUtilization)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlLibraryShutDown)
 
         if (ffmtmlLibraryInit(&mtmlData.lib) != MTML_SUCCESS)
         {
@@ -63,10 +69,11 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         }
         if (mtmlData.ffmtmlLibraryInitSystem(mtmlData.lib, &mtmlData.sys) != MTML_SUCCESS)
         {
+            mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
             mtmlData.ffmtmlLibraryInitSystem = NULL;
             return "mtmlLibraryInitSystem failed";
         }
-        atexit((void *)ffmtmlLibraryShutDown);
+        atexit(shutdownMtml);
         libmtml = NULL; // don't close mtml
     }
 
