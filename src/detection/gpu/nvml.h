@@ -7,6 +7,7 @@
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceStructs.html
 #define NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE 32
 #define NVML_DEVICE_PCI_BUS_ID_BUFFER_V2_SIZE 16
+#define NVML_DEVICE_NAME_V2_BUFFER_SIZE 96
 
 typedef enum { NVML_SUCCESS = 0 } nvmlReturn_t;
 typedef struct nvmlDevice_t* nvmlDevice_t;
@@ -131,3 +132,5 @@ extern nvmlReturn_t nvmlDeviceGetMaxClockInfo(nvmlDevice_t device, nvmlClockType
 extern nvmlReturn_t nvmlDeviceGetBrand(nvmlDevice_t device, nvmlBrandType_t* type);
 // Retrieves the current utilization rates for the device
 extern nvmlReturn_t nvmlDeviceGetUtilizationRates(nvmlDevice_t device, nvmlUtilization_t *utilization);
+// Retrieves the name of this device.
+extern nvmlReturn_t nvmlDeviceGetName(nvmlDevice_t device, char *name, unsigned int length);

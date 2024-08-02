@@ -43,6 +43,7 @@ typedef struct FFGpuDriverResult
     double* coreUsage;
     FFGPUType* type;
     uint32_t* frequency;
+    FFstrbuf* name;
 } FFGpuDriverResult;
 
 const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);

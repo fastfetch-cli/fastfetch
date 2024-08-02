@@ -14,6 +14,7 @@ struct FFNvmlData {
     FF_LIBRARY_SYMBOL(nvmlDeviceGetMaxClockInfo)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetUtilizationRates)
     FF_LIBRARY_SYMBOL(nvmlDeviceGetBrand)
+    FF_LIBRARY_SYMBOL(nvmlDeviceGetName)
 
     bool inited;
 } nvmlData;
@@ -38,6 +39,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetMaxClockInfo)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetUtilizationRates)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetBrand)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetName)
 
         if (ffnvmlInit_v2() != NVML_SUCCESS)
         {
@@ -131,6 +133,13 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         nvmlUtilization_t utilization;
         if (nvmlData.ffnvmlDeviceGetUtilizationRates(device, &utilization) == NVML_SUCCESS)
             *result.coreUsage = utilization.gpu;
+    }
+
+    if (result.name)
+    {
+        char name[NVML_DEVICE_NAME_V2_BUFFER_SIZE];
+        if (nvmlData.ffnvmlDeviceGetName(device, name, sizeof(name)) == NVML_SUCCESS)
+            ffStrbufSetS(result.name, name);
     }
 
     return NULL;

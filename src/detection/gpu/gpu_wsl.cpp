@@ -124,6 +124,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
                     .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,
                     .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                    .name = options->driverSpecific ? &gpu->name : NULL,
                 }, "/usr/lib/wsl/lib/libnvidia-ml.so");
             }
         }

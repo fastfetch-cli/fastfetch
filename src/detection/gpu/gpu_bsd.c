@@ -94,6 +94,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 .type = &gpu->type,
                 .frequency = &gpu->frequency,
                 .coreUsage = &gpu->coreUsage,
+                .name = options->driverSpecific ? &gpu->name : NULL,
             }, "libnvidia-ml.so");
 
             if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
