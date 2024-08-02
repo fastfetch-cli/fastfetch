@@ -173,6 +173,13 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         }
     }
 
+    if (result.name)
+    {
+        char name[MTML_DEVICE_NAME_BUFFER_SIZE];
+        if (mtmlData.ffmtmlDeviceGetName(device, name, sizeof(name)) == MTML_SUCCESS)
+            ffStrbufSetS(result.name, name);
+    }
+
     return NULL;
 
 #else
