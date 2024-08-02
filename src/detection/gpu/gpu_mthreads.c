@@ -158,7 +158,18 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         {
             uint32_t clockMHz;
             if (mtmlData.ffmtmlGpuGetMaxClock(gpu, &clockMHz) == MTML_SUCCESS)
-                *result.frequency = clockMHz / 1000.;
+                *result.frequency = clockMHz;
+        }
+    }
+
+    if (result.coreUsage)
+    {
+        MtmlGpu *gpu = NULL;
+        if (mtmlData.ffmtmlDeviceInitGpu(device, &gpu) == MTML_SUCCESS)
+        {
+            unsigned int utilization;
+            if (mtmlData.ffmtmlGpuGetUtilization(gpu, &utilization) == MTML_SUCCESS)
+                *result.coreUsage = utilization;
         }
     }
 
