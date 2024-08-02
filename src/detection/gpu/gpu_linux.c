@@ -384,6 +384,8 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     return NULL;
 }
 
+#if __aarch64__
+
 FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, const char* drmKey)
 {
     uint32_t index = ffStrbufFirstIndexS(buffer, "apple,agx-t");
@@ -427,6 +429,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
 
     return NULL;
 }
+#endif
 
 static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 {
