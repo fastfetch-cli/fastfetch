@@ -96,9 +96,22 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 .coreUsage = &gpu->coreUsage,
                 .name = options->driverSpecific ? &gpu->name : NULL,
             }, "libnvidia-ml.so");
+        }
 
-            if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
-                gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        if (gpu->type == FF_GPU_TYPE_UNKNOWN)
+        {
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
         }
     }
 
