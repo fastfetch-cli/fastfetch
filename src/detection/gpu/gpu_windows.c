@@ -54,7 +54,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         swscanf(hardwareId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInit(&gpu->vendor);
+        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
         ffStrbufInitStatic(&gpu->platformApi, "Direct3D");
