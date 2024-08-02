@@ -12,6 +12,7 @@ extern const char* FF_GPU_VENDOR_NAME_APPLE;
 extern const char* FF_GPU_VENDOR_NAME_AMD;
 extern const char* FF_GPU_VENDOR_NAME_INTEL;
 extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
+extern const char* FF_GPU_VENDOR_NAME_MTHREADS;
 extern const char* FF_GPU_VENDOR_NAME_VMWARE;
 extern const char* FF_GPU_VENDOR_NAME_PARALLEL;
 extern const char* FF_GPU_VENDOR_NAME_MICROSOFT;
