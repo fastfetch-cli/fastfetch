@@ -62,8 +62,6 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
             ffStrbufSetS(&options->libOSMesa, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "pulse"))
             ffStrbufSetS(&options->libPulse, yyjson_get_str(val));
-        else if (ffStrEqualsIgnCase(key, "nm"))
-            ffStrbufSetS(&options->libnm, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "ddcutil"))
             ffStrbufSetS(&options->libDdcutil, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "drm"))
@@ -129,8 +127,6 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libOSMesa);
         else if(ffStrEqualsIgnCase(subkey, "pulse"))
             ffOptionParseString(key, value, &options->libPulse);
-        else if(ffStrEqualsIgnCase(subkey, "nm"))
-            ffOptionParseString(key, value, &options->libnm);
         else if(ffStrEqualsIgnCase(subkey, "ddcutil"))
             ffOptionParseString(key, value, &options->libDdcutil);
         else if(ffStrEqualsIgnCase(subkey, "drm"))
@@ -226,9 +222,6 @@ void ffOptionsGenerateLibraryJsonConfig(FFOptionsLibrary* options, yyjson_mut_do
 
     if (!ffStrbufEqual(&options->libPulse, &defaultOptions.libPulse))
         yyjson_mut_obj_add_strbuf(doc, obj, "pulse", &options->libPulse);
-
-    if (!ffStrbufEqual(&options->libnm, &defaultOptions.libnm))
-        yyjson_mut_obj_add_strbuf(doc, obj, "nm", &options->libnm);
 
     if (!ffStrbufEqual(&options->libDdcutil, &defaultOptions.libDdcutil))
         yyjson_mut_obj_add_strbuf(doc, obj, "ddcutil", &options->libDdcutil);

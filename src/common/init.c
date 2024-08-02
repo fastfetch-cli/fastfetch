@@ -245,9 +245,6 @@ void ffListFeatures(void)
         #if FF_HAVE_PULSE
             "libpulse\n"
         #endif
-        #if FF_HAVE_LIBNM
-            "libnm\n"
-        #endif
         #if FF_HAVE_DDCUTIL
             "libddcutil\n"
         #endif
