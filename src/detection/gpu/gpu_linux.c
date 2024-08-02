@@ -343,11 +343,13 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         pciDetectIntelSpecific(gpu, deviceDir, buffer);
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
-    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+    else
     {
-        if (options->temp || options->driverSpecific)
+        __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
+        const char* soName;
+        if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &soName) && (options->temp || options->driverSpecific))
         {
-            ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
+            detectFn(&(FFGpuDriverCondition) {
                 .type = FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID,
                 .pciBusId = {
                     .domain = pciDomain,
@@ -359,41 +361,27 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 .temp = options->temp ? &gpu->temperature : NULL,
                 .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                 .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                 .type = &gpu->type,
                 .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 .name = options->driverSpecific ? &gpu->name : NULL,
-            }, "libnvidia-ml.so");
+            }, soName);
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN)
         {
-            if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
-                ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
-                ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
-                gpu->type = FF_GPU_TYPE_DISCRETE;
-        }
-    }
-    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
-    {
-        if (options->temp || options->driverSpecific)
-        {
-            ffDetectMthreadsGpuInfo(&(FFGpuDriverCondition){
-                    .type = FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID,
-                    .pciBusId = {
-                        .domain = pciDomain,
-                        .bus = pciBus,
-                        .device = pciDevice,
-                        .func = pciFunc,
-                    },
-                },
-                (FFGpuDriverResult){
-                    .temp = options->temp ? &gpu->temperature : NULL,
-                    .memory = options->driverSpecific ? &gpu->dedicated : NULL,
-                    .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-                    .type = &gpu->type,
-                    .frequency = options->driverSpecific ? &gpu->frequency : NULL,
-                },
-                "libmtml.so");
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
         }
     }
 

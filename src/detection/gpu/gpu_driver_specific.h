@@ -50,3 +50,53 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
 const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
 const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
 const char* ffDetectMthreadsGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName);
+
+FF_MAYBE_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName)
+{
+    if (vendor == FF_GPU_VENDOR_NAME_NVIDIA)
+    {
+        *pDetectFn = ffDetectNvidiaGpuInfo;
+        #ifdef _WIN32
+        *pDllName = "nvml.dll";
+        #else
+        *pDllName = "libnvidia-ml.so";
+        #endif
+    }
+    else if (vendor == FF_GPU_VENDOR_NAME_MTHREADS)
+    {
+        *pDetectFn = ffDetectMthreadsGpuInfo;
+        #ifdef _WIN32
+        *pDllName = "mtml.dll";
+        #else
+        *pDllName = "libmtml.so";
+        #endif
+    }
+    #ifdef _WIN32
+    else if (vendor == FF_GPU_VENDOR_NAME_INTEL)
+    {
+        *pDetectFn = ffDetectIntelGpuInfo;
+        #ifdef _WIN64
+            *pDllName = "ControlLib.dll";
+        #else
+            *pDllName = "ControlLib32.dll";
+        #endif
+    }
+    else if (vendor == FF_GPU_VENDOR_NAME_AMD)
+    {
+        *pDetectFn = ffDetectAmdGpuInfo;
+        #ifdef _WIN64
+            *pDllName = "amd_ags_x64.dll";
+        #else
+            *pDllName = "amd_ags_x86.dll";
+        #endif
+    }
+    #endif
+    else
+    {
+        *pDetectFn = NULL;
+        *pDllName = NULL;
+        return false;
+    }
+
+    return true;
+}

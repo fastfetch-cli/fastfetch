@@ -10,41 +10,6 @@ static int isGpuNameEqual(const FFGPUResult* gpu, const FFstrbuf* name)
     return ffStrbufEqual(&gpu->name, name);
 }
 
-static inline bool getDriverSpecificDetectionFn(const char* vendor, __typeof__(&ffDetectNvidiaGpuInfo)* pDetectFn, const char** pDllName)
-{
-    if (vendor == FF_GPU_VENDOR_NAME_NVIDIA)
-    {
-        *pDetectFn = ffDetectNvidiaGpuInfo;
-        *pDllName = "nvml.dll";
-    }
-    else if (vendor == FF_GPU_VENDOR_NAME_INTEL)
-    {
-        *pDetectFn = ffDetectIntelGpuInfo;
-        #ifdef _WIN64
-            *pDllName = "ControlLib.dll";
-        #else
-            *pDllName = "ControlLib32.dll";
-        #endif
-    }
-    else if (vendor == FF_GPU_VENDOR_NAME_AMD)
-    {
-        *pDetectFn = ffDetectAmdGpuInfo;
-        #ifdef _WIN64
-            *pDllName = "amd_ags_x64.dll";
-        #else
-            *pDllName = "amd_ags_x86.dll";
-        #endif
-    }
-    else
-    {
-        *pDetectFn = NULL;
-        *pDllName = NULL;
-        return false;
-    }
-
-    return true;
-}
-
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
     DISPLAY_DEVICEW displayDevice = { .cb = sizeof(displayDevice) };
@@ -150,7 +115,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             if (vendorId && deviceId)
             {
                 int bus = -1, dev = -1, func = -1;
-                if (detectFn == ffDetectNvidiaGpuInfo)
+                if (detectFn == ffDetectNvidiaGpuInfo || detectFn == ffDetectMthreadsGpuInfo)
                 {
                     // Find PCI id from video id
                     // HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\PCI\DEVICE_ID\INSTANCE_ID\Device Parameters\VideoID
