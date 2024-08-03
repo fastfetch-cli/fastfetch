@@ -67,7 +67,11 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
     else if(ffStrEquals(deviceProperty, "Icon"))
         ffDBusGetString(dbus, &dictIter, &device->type);
     else if(ffStrEquals(deviceProperty, "Percentage"))
-        ffDBusGetByte(dbus, &dictIter, &device->battery);
+    {
+        uint32_t percentage;
+        if (ffDBusGetUint(dbus, &dictIter, &percentage))
+            device->battery = (uint8_t) percentage;
+    }
     else if(ffStrEquals(deviceProperty, "Connected"))
         ffDBusGetBool(dbus, &dictIter, &device->connected);
 }
@@ -97,11 +101,10 @@ static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFB
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    while(true)
+    do
     {
         detectBluetoothValue(dbus, &arrayIter, device);
-        FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
-    }
+    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
 static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
@@ -137,11 +140,10 @@ static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessage
     device->battery = 0;
     device->connected = false;
 
-    while(true)
+    do
     {
         detectBluetoothProperty(dbus, &arrayIter, device);
-        FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
-    }
+    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 
     if(device->name.length == 0)
     {
@@ -160,11 +162,10 @@ static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIt
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &arrayIter);
 
-    while(true)
+    do
     {
         detectBluetoothObject(devices, dbus, &arrayIter);
-        FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
-    }
+    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
 static const char* detectBluetooth(FFlist* devices)
@@ -174,7 +175,7 @@ static const char* detectBluetooth(FFlist* devices)
     if(error)
         return error;
 
-    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", NULL);
     if(!managedObjects)
         return "Failed to call GetManagedObjects";
 

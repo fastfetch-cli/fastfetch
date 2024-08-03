@@ -65,16 +65,12 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
         ffDBusGetString(dbus, &dictIter, &device->name);
     else if(ffStrEquals(deviceProperty, "Manufacturer"))
     {
-        uint16_t vendorId;
-        if (ffDBusGetUint16(dbus, &dictIter, &vendorId))
+        uint32_t vendorId;
+        if (ffDBusGetUint(dbus, &dictIter, &vendorId))
             ffStrbufSetStatic(&device->vendor, ffBluetoothRadioGetVendor(vendorId));
     }
     else if(ffStrEquals(deviceProperty, "Version"))
-    {
-        uint8_t byte;
-        if (ffDBusGetByte(dbus, &dictIter, &byte))
-            device->lmpVersion = byte;
-    }
+        ffDBusGetUint(dbus, &dictIter, (uint32_t*) &device->lmpVersion);
     else if(ffStrEquals(deviceProperty, "Powered"))
         ffDBusGetBool(dbus, &dictIter, &device->enabled);
     else if(ffStrEquals(deviceProperty, "Discoverable"))
@@ -108,11 +104,10 @@ static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFB
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
 
-    while(true)
+    do
     {
         detectBluetoothValue(dbus, &arrayIter, device);
-        FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
-    }
+    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
 static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
@@ -149,11 +144,10 @@ static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessage
     device->lmpSubversion = INT_MIN;
     device->enabled = false;
 
-    while(true)
+    do
     {
         detectBluetoothProperty(dbus, &arrayIter, device);
-        FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
-    }
+    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 
     if(device->name.length == 0)
     {
@@ -171,11 +165,10 @@ static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIt
     DBusMessageIter arrayIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &arrayIter);
 
-    while(true)
+    do
     {
         detectBluetoothObject(devices, dbus, &arrayIter);
-        FF_DBUS_ITER_CONTINUE(dbus, &arrayIter);
-    }
+    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
 }
 
 static const char* detectBluetooth(FFlist* devices)
@@ -185,7 +178,7 @@ static const char* detectBluetooth(FFlist* devices)
     if(error)
         return error;
 
-    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", NULL);
     if(!managedObjects)
         return "Failed to call GetManagedObjects";
 
