@@ -11,6 +11,13 @@
 #include "common/dbus.h"
 #include "common/library.h"
 
+#define FF_DBUS_ITER_CONTINUE(dbus, iterator) \
+    { \
+        if(!(dbus)->lib->ffdbus_message_iter_next(iterator)) \
+            break; \
+        continue; \
+    }
+
 static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResult* result)
 {
     DBusMessage* reply = ffDBusGetProperty(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", "Metadata");
@@ -85,6 +92,8 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
         return false;
     }
 
+    ffDBusGetPropertyString(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", "PlaybackStatus", &result->status);
+
     //Set short bus name
     ffStrbufAppendS(&result->playerId, busName + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
 
@@ -119,7 +128,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
         getBusProperties(data, FF_DBUS_MPRIS_PREFIX"plasma-browser-integration", result)
     ) return;
 
-    DBusMessage* reply = ffDBusGetMethodReply(data, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames");
+    DBusMessage* reply = ffDBusGetMethodReply(data, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames", NULL);
     if(reply == NULL)
         return;
 
