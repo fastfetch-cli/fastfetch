@@ -4,9 +4,9 @@
 #include "common/properties.h"
 #include "util/stringUtils.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <net/if.h>
 
+#ifdef FF_HAVE_DBUS
 // https://people.freedesktop.org/~lkundrak/nm-docs/nm-dbus-types.html#NM80211ApFlags
 typedef enum {
     NM_802_11_AP_FLAGS_NONE    = 0x00000000,
@@ -118,6 +118,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 
     return NULL;
 }
+#endif // FF_HAVE_DBUS
 
 static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
 {
@@ -178,7 +179,6 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
 #if FF_HAVE_LINUX_WIRELESS
 #include "common/io/io.h"
 
-#include <net/if.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -263,8 +263,7 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
 
     return NULL;
 }
-
-#endif
+#endif // FF_HAVE_LINUX_WIRELESS
 
 const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
 {
@@ -307,7 +306,9 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
             #endif
         }
 
-        detectWifiWithNm(item, &buffer);
+        #ifdef FF_HAVE_DBUS
+            detectWifiWithNm(item, &buffer);
+        #endif
     }
     if_freenameindex(infs);
 
