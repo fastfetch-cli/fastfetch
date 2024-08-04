@@ -3508,6 +3508,17 @@ static const FFlogo P[] = {
 };
 
 static const FFlogo Q[] = {
+    // QTS
+    {
+        .names = {"qts"},
+        .lines = FASTFETCH_DATATEXT_LOGO_QTS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Q4OS
     {
         .names = {"Q4OS"},
