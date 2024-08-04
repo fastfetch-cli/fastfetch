@@ -15,6 +15,9 @@ Paste content of /etc/os-release and /etc/lsb-release here. If none of these fil
 ```
 
 # Ascii
+
+An ASCII logo should not take up too much space (smaller than 50x20 characters). Please also include the color codes if not available in `os-release` 
+
 ```
 Paste ascii art here.
 ```
