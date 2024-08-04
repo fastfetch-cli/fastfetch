@@ -30,3 +30,4 @@ typedef struct FFCPUResult
 
 const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu);
 const char* ffCPUAppleCodeToName(uint32_t code);
+const char* ffCPUApplePPCCodeToName(int cpuSubType);

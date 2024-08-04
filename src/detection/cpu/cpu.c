@@ -39,3 +39,14 @@ const char* ffCPUAppleCodeToName(uint32_t code)
         default: return "Apple Silicon";
     }
 }
+
+const char* ffCPUApplePPCCodeToName(int cpuSubType)
+{
+    switch (cpuSubType)
+    {
+        case 10: return "PowerPC 7400";
+        case 11: return "PowerPC 7450";
+        case 100: return "PowerPC 970";
+        default: return "PowerPC";
+    }
+}

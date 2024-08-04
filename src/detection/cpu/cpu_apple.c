@@ -100,12 +100,23 @@ static const char* detectCoreCount(FFCPUResult* cpu)
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
+#ifdef __POWERPC__
+    int cpuSubType;
+    size_t size = sizeof(cpuSubType);
+    if (sysctlbyname("hw.cpusubtype", &cpuSubType, &size, NULL, 0) == 0) {
+        const char *cpuName = ffCPUApplePPCCodeToName(cpuSubType);
+        ffStrbufAppendS(&cpu->name, cpuName);
+    } else {
+        return "sysctlbyname(hw.cpusubtype) failed";
+    }
+#else
     if (ffSysctlGetString("machdep.cpu.brand_string", &cpu->name) != NULL)
         return "sysctlbyname(machdep.cpu.brand_string) failed";
 
     ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
     if (cpu->vendor.length == 0 && ffStrbufStartsWithS(&cpu->name, "Apple "))
         ffStrbufAppendS(&cpu->vendor, "Apple");
+#endif
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.physicalcpu_max", 1);
     if(cpu->coresPhysical == 1)
