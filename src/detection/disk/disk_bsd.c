@@ -123,7 +123,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         FFDisk* disk = ffListAdd(disks);
 
-        disk->bytesTotal = fs->f_blocks * fs->f_bsize;
+        disk->bytesTotal = (uint64_t)fs->f_blocks * fs->f_bsize;
         disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;
         disk->bytesAvailable = (uint64_t)fs->f_bavail * fs->f_bsize;
         disk->bytesUsed = 0; // To be filled in ./disk.c
