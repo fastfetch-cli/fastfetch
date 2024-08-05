@@ -166,6 +166,60 @@ static const char* getProductNameWithHwModel(const FFstrbuf* hwModel)
         if(ffStrEquals(version, "10,1"))        return "iMac (27/21.5-inch, Late 2009)";
         if(ffStrEquals(version, "9,1"))         return "iMac (24/20-inch, Early 2009)";
     }
+    else if(ffStrbufStartsWithS(hwModel, "PowerBook"))
+    {
+        const char* version = hwModel->chars + strlen("PowerBook");
+        if(ffStrEquals(version, "3,2"))         return "PowerBook G4 (Original - Ti)";
+        if(ffStrEquals(version, "3,3"))         return "PowerBook G4 (Gigabit - Ti)";
+        if(ffStrEquals(version, "3,4"))         return "PowerBook G4 (DVI - Ti)";
+        if(ffStrEquals(version, "3,5"))         return "PowerBook G4 (Ti)";
+        if(ffStrEquals(version, "4,1") ||
+           ffStrEquals(version, "4,2") ||
+           ffStrEquals(version, "4,3"))         return "iBook G3";
+        if(ffStrEquals(version, "5,1") ||
+           ffStrEquals(version, "5,3") ||
+           ffStrEquals(version, "5,4") ||
+           ffStrEquals(version, "5,5") ||
+           ffStrEquals(version, "5,6") ||
+           ffStrEquals(version, "5,7") ||
+           ffStrEquals(version, "6,1") ||
+           ffStrEquals(version, "6,4") ||
+           ffStrEquals(version, "6,8"))         return "PowerBook G4 (17/15/12-inch, Al)";
+        if(ffStrEquals(version, "5,2"))         return "PowerBook G4 (15-inch, FW800 - Al)";
+        if(ffStrEquals(version, "5,8") ||
+           ffStrEquals(version, "5,9"))         return "PowerBook G4 (17/15-inch, DLSD/HR - Al)";
+        if(ffStrEquals(version, "6,2"))         return "PowerBook G4 (12-inch, DVI - Al)";
+        if(ffStrEquals(version, "6,3") ||
+           ffStrEquals(version, "6,5") ||
+           ffStrEquals(version, "6,7"))         return "iBook G4 (14/12-inch)";
+    }
+    else if(ffStrbufStartsWithS(hwModel, "PowerMac"))
+    {
+        const char* version = hwModel->chars + strlen("PowerMac");
+        if(ffStrEquals(version, "1,1"))         return "Power Macintosh G3 (Blue & White)";
+        if(ffStrEquals(version, "1,2"))         return "Power Macintosh G4 (PCI)";
+        if(ffStrEquals(version, "2,1") ||
+           ffStrEquals(version, "2,2") ||
+           ffStrEquals(version, "4,1"))         return "iMac G3";
+        if(ffStrEquals(version, "3,1"))         return "Power Macintosh G4 (AGP)";
+        if(ffStrEquals(version, "3,3"))         return "Power Macintosh G4 (Gigabit)";
+        if(ffStrEquals(version, "3,4"))         return "Power Macintosh G4 (Digital Audio)";
+        if(ffStrEquals(version, "3,5"))         return "Power Macintosh G4 (Quicksilver)";
+        if(ffStrEquals(version, "3,6"))         return "Power Macintosh G4 (MDD/FW800)";
+        if(ffStrEquals(version, "4,2"))         return "iMac G4 (Flat Panel)";
+        if(ffStrEquals(version, "4,4") ||
+           ffStrEquals(version, "6,4"))         return "eMac G4";
+        if(ffStrEquals(version, "4,5") ||
+           ffStrEquals(version, "6,1"))         return "iMac G4 (17-inch, Flat Panel)";
+        if(ffStrEquals(version, "5,1"))         return "Power Macintosh G4 Cube";
+        if(ffStrEquals(version, "6,3"))         return "iMac G4 (20/17/15-inch, USB 2.0)";
+        if(ffStrEquals(version, "7,2") ||
+           ffStrEquals(version, "7,3"))         return "Power Macintosh G5 (PCI/PCI-X)";
+        if(ffStrEquals(version, "8,1"))         return "iMac G5 (20/17-inch)";
+        if(ffStrEquals(version, "8,2"))         return "iMac G5 (20/17-inch, ALS)";
+        if(ffStrEquals(version, "11,2"))        return "Power Macintosh G5";
+        if(ffStrEquals(version, "12,1"))        return "iMac G5 (20/17-inch, iSight)";
+    }
     return NULL;
 }
 
