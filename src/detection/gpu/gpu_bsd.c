@@ -112,6 +112,10 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
                     gpu->type = FF_GPU_TYPE_DISCRETE;
             }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+            {
+                gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+            }
         }
     }
 
