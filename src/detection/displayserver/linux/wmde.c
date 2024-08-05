@@ -240,38 +240,6 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
     }
 }
 
-static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
-{
-    //This is only called if all connection attempts to a display server failed
-    //We don't need to check for wayland here, as the wayland code will always set the protocol name to wayland
-
-    const char* env = getenv("XDG_SESSION_TYPE");
-    if(ffStrSet(env))
-    {
-        if(ffStrEqualsIgnCase(env, "x11"))
-            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
-        else if(ffStrEqualsIgnCase(env, "tty"))
-            ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
-        else
-            ffStrbufSetS(&result->wmProtocolName, env);
-
-        return;
-    }
-
-    env = getenv("DISPLAY");
-    if(ffStrSet(env))
-    {
-        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
-        return;
-    }
-
-    env = getenv("TERM");
-    if(ffStrSet(env) && ffStrEqualsIgnCase(env, "linux"))
-    {
-        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY);
-        return;
-    }
-}
 
 static const char* getFromProcesses(FFDisplayServerResult* result)
 {
@@ -396,15 +364,6 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 
 void ffdsDetectWMDE(FFDisplayServerResult* result)
 {
-    //If all connections failed, use the environment variables to detect protocol name
-    if(result->wmProtocolName.length == 0)
-        getWMProtocolNameFromEnv(result);
-
-    //We don't want to detect anything in TTY
-    //This can't happen if a connection succeeded, so we don't need to clear wmProcessName
-    if(ffStrbufIgnCaseCompS(&result->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
-        return;
-
     const char* env = parseEnv();
 
     if(result->wmProcessName.length > 0)

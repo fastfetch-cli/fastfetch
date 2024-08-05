@@ -8,8 +8,10 @@
 #include <dirent.h>
 #include <errno.h>
 
-#if __has_include(<wordexp.h>)
-#include <wordexp.h>
+#if FF_HAVE_WORDEXP
+    #include <wordexp.h>
+#else
+    #warning "<wordexp.h> not available"
 #endif
 
 static void createSubfolders(const char* fileName)
@@ -112,7 +114,7 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
 {
     bool result = false;
 
-    #if __has_include(<wordexp.h>) // https://github.com/termux/termux-packages/pull/7056
+    #if FF_HAVE_WORDEXP // https://github.com/termux/termux-packages/pull/7056
 
     wordexp_t exp;
     if(wordexp(in, &exp, 0) != 0)
@@ -131,46 +133,39 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
     return result;
 }
 
+static int ftty = -1;
+static struct termios oldTerm;
+void restoreTerm(void)
+{
+    tcsetattr(ftty, TCSAFLUSH, &oldTerm);
+}
+
 const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
-    int fin = STDIN_FILENO, fout = STDOUT_FILENO;
-    FF_AUTO_CLOSE_FD int ftty = -1;
-
-    if (!isatty(STDIN_FILENO))
+    if (ftty < 0)
     {
+        ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
         if (ftty < 0)
-            ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
-        fin = ftty;
+            return "open(\"/dev/tty\", O_RDWR | O_NOCTTY | O_CLOEXEC) failed";
+
+        if(tcgetattr(ftty, &oldTerm) == -1)
+            return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
+
+        struct termios newTerm = oldTerm;
+        newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
+        if(tcsetattr(ftty, TCSAFLUSH, &newTerm) == -1)
+            return "tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTerm)";
+        atexit(restoreTerm);
     }
-    if (!isatty(STDOUT_FILENO))
-    {
-        if (ftty < 0)
-            ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
-        fout = ftty;
-    }
 
-    struct termios oldTerm;
-    if(tcgetattr(fin, &oldTerm) == -1)
-        return "tcgetattr(STDIN_FILENO, &oldTerm) failed";
-
-    struct termios newTerm = oldTerm;
-    newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
-    if(tcsetattr(fin, TCSAFLUSH, &newTerm) == -1)
-        return "tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTerm)";
-
-    ffWriteFDData(fout, strlen(request), request);
+    ffWriteFDData(ftty, strlen(request), request);
 
     //Give the terminal some time to respond
-    if(poll(&(struct pollfd) { .fd = fin, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
-    {
-        tcsetattr(fin, TCSANOW, &oldTerm);
+    if(poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
         return "poll() timeout or failed";
-    }
 
     char buffer[512];
-    ssize_t bytesRead = read(fin, buffer, sizeof(buffer) - 1);
-
-    tcsetattr(fin, TCSANOW, &oldTerm);
+    ssize_t bytesRead = read(ftty, buffer, sizeof(buffer) - 1);
 
     if(bytesRead <= 0)
         return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";

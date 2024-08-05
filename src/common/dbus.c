@@ -10,9 +10,8 @@ static bool loadLibSymbols(FFDBusLibrary* lib)
     FF_LIBRARY_LOAD(dbus, &instance.config.library.libDBus, false, "libdbus-1" FF_LIBRARY_EXTENSION, 4);
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_bus_get, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_new_method_call, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_append_args, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_init, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_init_append, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_append_basic, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_get_arg_type, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_get_basic, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_recurse, false)
@@ -20,10 +19,6 @@ static bool loadLibSymbols(FFDBusLibrary* lib)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_iter_next, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_message_unref, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_connection_send_with_reply_and_block, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_connection_flush, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_pending_call_block, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_pending_call_steal_reply, false)
-    FF_LIBRARY_LOAD_SYMBOL_PTR(dbus, lib, dbus_pending_call_unref, false)
     dbus = NULL; // don't auto dlclose
     return true;
 }
@@ -56,11 +51,11 @@ const char* ffDBusLoadData(DBusBusType busType, FFDBusData* data)
     return NULL;
 }
 
-bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
+bool ffDBusGetString(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
 {
     int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
 
-    if(argType == DBUS_TYPE_STRING)
+    if(argType == DBUS_TYPE_STRING || argType == DBUS_TYPE_OBJECT_PATH)
     {
         const char* value = NULL;
         dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
@@ -72,6 +67,14 @@ bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
         return true;
     }
 
+    if (argType == DBUS_TYPE_BYTE)
+    {
+        uint8_t value;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        ffStrbufAppendC(result, (char) value);
+        return false; // Don't append a comma
+    }
+
     if(argType != DBUS_TYPE_VARIANT && argType != DBUS_TYPE_ARRAY)
         return false;
 
@@ -79,7 +82,7 @@ bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
     dbus->lib->ffdbus_message_iter_recurse(iter, &subIter);
 
     if(argType == DBUS_TYPE_VARIANT)
-        return ffDBusGetValue(dbus, &subIter, result);
+        return ffDBusGetString(dbus, &subIter, result);
 
     //At this point we have an array
 
@@ -87,13 +90,16 @@ bool ffDBusGetValue(FFDBusData* dbus, DBusMessageIter* iter, FFstrbuf* result)
 
     while(true)
     {
-        if(ffDBusGetValue(dbus, &subIter, result))
+        if(ffDBusGetString(dbus, &subIter, result))
         {
             foundAValue = true;
             ffStrbufAppendS(result, ", ");
         }
 
-        FF_DBUS_ITER_CONTINUE(dbus, &subIter);
+        if(!dbus->lib->ffdbus_message_iter_next(&subIter))
+            break;
+        else
+            continue;
     }
 
     if(foundAValue)
@@ -122,11 +128,27 @@ bool ffDBusGetBool(FFDBusData* dbus, DBusMessageIter* iter, bool* result)
     return ffDBusGetBool(dbus, &subIter, result);
 }
 
-bool ffDBusGetByte(FFDBusData* dbus, DBusMessageIter* iter, uint8_t* result)
+bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result)
 {
     int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
 
     if(argType == DBUS_TYPE_BYTE)
+    {
+        uint8_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = value;
+        return true;
+    }
+
+    if(argType == DBUS_TYPE_UINT16)
+    {
+        uint16_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = value;
+        return true;
+    }
+
+    if(argType == DBUS_TYPE_UINT32)
     {
         dbus->lib->ffdbus_message_iter_get_basic(iter, result);
         return true;
@@ -137,14 +159,17 @@ bool ffDBusGetByte(FFDBusData* dbus, DBusMessageIter* iter, uint8_t* result)
 
     DBusMessageIter subIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &subIter);
-    return ffDBusGetByte(dbus, &subIter, result);
+    return ffDBusGetUint(dbus, &subIter, result);
 }
 
-DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method)
+DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg)
 {
     DBusMessage* message = dbus->lib->ffdbus_message_new_method_call(busName, objectPath, interface, method);
     if(message == NULL)
         return NULL;
+
+    if (arg)
+        dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg, DBUS_TYPE_INVALID);
 
     DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, FF_DBUS_TIMEOUT_MILLISECONDS, NULL);
 
@@ -159,20 +184,10 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
     if(message == NULL)
         return NULL;
 
-    DBusMessageIter requestIterator;
-    dbus->lib->ffdbus_message_iter_init_append(message, &requestIterator);
-
-    if(!dbus->lib->ffdbus_message_iter_append_basic(&requestIterator, DBUS_TYPE_STRING, &interface))
-    {
-        dbus->lib->ffdbus_message_unref(message);
-        return NULL;
-    }
-
-    if(!dbus->lib->ffdbus_message_iter_append_basic(&requestIterator, DBUS_TYPE_STRING, &property))
-    {
-        dbus->lib->ffdbus_message_unref(message);
-        return NULL;
-    }
+    dbus->lib->ffdbus_message_append_args(message,
+        DBUS_TYPE_STRING, &interface,
+        DBUS_TYPE_STRING, &property,
+        DBUS_TYPE_INVALID);
 
     DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, FF_DBUS_TIMEOUT_MILLISECONDS, NULL);
 
@@ -194,7 +209,27 @@ bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* 
         return false;
     }
 
-    bool ret = ffDBusGetValue(dbus, &rootIterator, result);
+    bool ret = ffDBusGetString(dbus, &rootIterator, result);
+
+    dbus->lib->ffdbus_message_unref(reply);
+
+    return ret;
+}
+
+bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint32_t* result)
+{
+    DBusMessage* reply = ffDBusGetProperty(dbus, busName, objectPath, interface, property);
+    if(reply == NULL)
+        return false;
+
+    DBusMessageIter rootIterator;
+    if(!dbus->lib->ffdbus_message_iter_init(reply, &rootIterator))
+    {
+        dbus->lib->ffdbus_message_unref(reply);
+        return false;
+    }
+
+    bool ret = ffDBusGetUint(dbus, &rootIterator, result);
 
     dbus->lib->ffdbus_message_unref(reply);
 

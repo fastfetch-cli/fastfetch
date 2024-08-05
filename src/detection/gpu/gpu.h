@@ -6,11 +6,13 @@
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
 #define FF_GPU_FREQUENCY_UNSET 0
+#define FF_GPU_CORE_USAGE_UNSET (0/0.0)
 
 extern const char* FF_GPU_VENDOR_NAME_APPLE;
 extern const char* FF_GPU_VENDOR_NAME_AMD;
 extern const char* FF_GPU_VENDOR_NAME_INTEL;
 extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
+extern const char* FF_GPU_VENDOR_NAME_MTHREADS;
 extern const char* FF_GPU_VENDOR_NAME_VMWARE;
 extern const char* FF_GPU_VENDOR_NAME_PARALLEL;
 extern const char* FF_GPU_VENDOR_NAME_MICROSOFT;
@@ -35,6 +37,7 @@ typedef struct FFGPUResult
     uint32_t frequency; // Maximum time clock frequency in MHz
     FFGPUMemory dedicated;
     FFGPUMemory shared;
+    double coreUsage;
     uint64_t deviceId; // Used internally, may be uninitialized
 } FFGPUResult;
 

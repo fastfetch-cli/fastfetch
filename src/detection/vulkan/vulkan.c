@@ -237,6 +237,7 @@ static const char* detectVulkan(FFVulkanResult* result)
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
 
     next:
         continue;

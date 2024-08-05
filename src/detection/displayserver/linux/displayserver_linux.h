@@ -7,8 +7,7 @@
 
 bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName);
 
-const char* ffdsConnectWlroots(FFDisplayServerResult* result);
-void ffdsConnectWayland(FFDisplayServerResult* result);
+const char* ffdsConnectWayland(FFDisplayServerResult* result);
 
 void ffdsConnectXcbRandr(FFDisplayServerResult* result);
 void ffdsConnectXcb(FFDisplayServerResult* result);

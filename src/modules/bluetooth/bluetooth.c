@@ -178,8 +178,8 @@ void ffGenerateBluetoothJsonResult(FF_MAYBE_UNUSED FFBluetoothOptions* options, 
 void ffPrintBluetoothHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BLUETOOTH_MODULE_NAME, "{1} ({4})", FF_BLUETOOTH_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name - name",
-        "Address - address",
+        "Name - device name",
+        "Address - remote device address",
         "Type - type",
         "Battery percentage number - battery-percentage",
         "Is connected - connected",
@@ -192,7 +192,7 @@ void ffInitBluetoothOptions(FFBluetoothOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_BLUETOOTH_MODULE_NAME,
-        "List bluetooth devices",
+        "List (connected) bluetooth devices",
         ffParseBluetoothCommandOptions,
         ffParseBluetoothJsonObject,
         ffPrintBluetooth,

@@ -2,4 +2,4 @@
 check-filenames =
 builtin = clear,rare,usage,informal
 skip = */.git,*/cmake-build-*,*/.idea,*/completions,*/presets,*/screenshots,*/tests,*/3rdparty,*/logo/ascii
-ignore-words-list = iterm,compiletime,unknwn,pengwin,siduction,master,sur,doas
+ignore-words-list = iterm,compiletime,unknwn,pengwin,siduction,master,sur,doas,conexant

@@ -33,7 +33,7 @@
     #else
         #include <pthread.h>
         #include <signal.h>
-        #if __has_include(<pthread_np.h>)
+        #if FF_HAVE_PTHREAD_NP
             #include <pthread_np.h>
         #endif
         #define FF_THREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
@@ -51,7 +51,7 @@
         static inline void ffThreadDetach(FFThreadType thread) { pthread_detach(thread); }
         static inline bool ffThreadJoin(FFThreadType thread, FF_MAYBE_UNUSED uint32_t timeout)
         {
-            #if (defined(__linux__) && !defined(__ANDROID__)) || __has_include(<pthread_np.h>)
+            #if HAVE_TIMEDJOIN_NP
                 if (timeout > 0)
                 {
                     struct timespec ts;

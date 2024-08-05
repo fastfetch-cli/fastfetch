@@ -23,6 +23,12 @@ static inline const char* getVendorString(unsigned vendorId)
 
 void FFPhysicalMemoryUpdateVendorString(FFPhysicalMemoryResult* device)
 {
+    if (ffStrbufEqualS(&device->vendor, "Unknown"))
+    {
+        ffStrbufClear(&device->vendor);
+        return;
+    }
+
     char vendorIdStr[5];
     if (ffStrbufStartsWithS(&device->vendor, "0x"))
     {

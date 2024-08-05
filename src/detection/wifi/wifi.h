@@ -12,7 +12,7 @@ struct FFWifiConnection
 {
     FFstrbuf status;
     FFstrbuf ssid;
-    FFstrbuf macAddress;
+    FFstrbuf bssid;
     FFstrbuf protocol;
     FFstrbuf security;
     double signalQuality; // Percentage

@@ -745,6 +745,7 @@
                             "battery",
                             "bios",
                             "bluetooth",
+                            "bluetoothradio",
                             "board",
                             "bootmgr",
                             "break",
@@ -1049,7 +1050,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                     "type": {
-                                        "description": "List bluetooth devices",
+                                        "description": "List (connected) bluetooth devices",
                                         "const": "bluetooth"
                                     },
                                     "showDisconnected": {
@@ -1059,6 +1060,35 @@
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Bluetooth Radio",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "description": "List bluetooth radios width supported version and vendor",
+                                        "const": "bluetoothradio"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

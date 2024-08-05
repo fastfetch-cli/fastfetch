@@ -6,21 +6,17 @@
 struct Apple80211; // https://code.google.com/archive/p/iphone-wireless/wikis/Apple80211.wiki
 
 // 0 is successful; < 0 is failure
-int Apple80211Open(struct Apple80211 **handle) __attribute__((weak_import));
-int Apple80211BindToInterface(struct Apple80211 *handle, CFStringRef interface) __attribute__((weak_import));
 int Apple80211GetInfoCopy(struct Apple80211 *handle, CFDictionaryRef *info) __attribute__((weak_import));
-int Apple80211Close(struct Apple80211 *handle) __attribute__((weak_import));
 
-static NSDictionary* getWifiInfoByApple80211(NSString* ifName)
+@interface CWInterface()
+@property (readonly) struct Apple80211* device;
+@end
+
+static NSDictionary* getWifiInfoByApple80211(CWInterface* inf)
 {
-    if (!Apple80211Open || !Apple80211BindToInterface || !Apple80211GetInfoCopy || !Apple80211Close) return NULL;
-
-    struct Apple80211* handle = NULL;
-    if (Apple80211Open(&handle) < 0) return NULL;
-    if (Apple80211BindToInterface(handle, (__bridge CFStringRef)ifName) < 0) return NULL;
-    CFDictionaryRef result;
-    if (Apple80211GetInfoCopy(handle, &result) < 0) return NULL;
-    Apple80211Close(handle);
+    if (!Apple80211GetInfoCopy) return NULL;
+    CFDictionaryRef result = NULL;
+    if (Apple80211GetInfoCopy(inf.device, &result) < 0) return NULL;
     return CFBridgingRelease(result);
 }
 
@@ -37,7 +33,7 @@ const char* ffDetectWifi(FFlist* result)
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
         ffStrbufInit(&item->conn.ssid);
-        ffStrbufInit(&item->conn.macAddress);
+        ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
         item->conn.signalQuality = 0.0/0.0;
@@ -57,15 +53,15 @@ const char* ffDetectWifi(FFlist* result)
 
         if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+        else if (apple || (apple = getWifiInfoByApple80211(inf)))
             ffStrbufAppendS(&item->conn.ssid, [[apple valueForKey:@"SSID_STR"] UTF8String]);
         else
             ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
 
         if (inf.bssid)
-            ffStrbufAppendS(&item->conn.macAddress, inf.bssid.UTF8String);
-        else if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
-            ffStrbufAppendS(&item->conn.macAddress, [[apple valueForKey:@"BSSID"] UTF8String]);
+            ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
+        else if (apple || (apple = getWifiInfoByApple80211(inf)))
+            ffStrbufAppendS(&item->conn.bssid, [[apple valueForKey:@"BSSID"] UTF8String]);
 
         switch(inf.activePHYMode)
         {
@@ -152,7 +148,7 @@ const char* ffDetectWifi(FFlist* result)
                 break;
             case kCWSecurityUnknown:
                 // Sonoma...
-                if (apple || (apple = getWifiInfoByApple80211(inf.interfaceName)))
+                if (apple || (apple = getWifiInfoByApple80211(inf)))
                 {
                     NSDictionary* authType = [apple valueForKey:@"AUTH_TYPE"];
                     if (authType)

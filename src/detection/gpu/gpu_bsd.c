@@ -57,6 +57,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufInit(&gpu->platformApi);
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->deviceId = ((uint64_t) pc->pc_sel.pc_domain << 6) | ((uint64_t) pc->pc_sel.pc_bus << 4) | ((uint64_t) pc->pc_sel.pc_dev << 2) | pc->pc_sel.pc_func;
@@ -92,10 +93,29 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                 .type = &gpu->type,
                 .frequency = &gpu->frequency,
+                .coreUsage = &gpu->coreUsage,
+                .name = options->driverSpecific ? &gpu->name : NULL,
             }, "libnvidia-ml.so");
+        }
 
-            if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)
-                gpu->type = gpu->dedicated.total > (uint64_t)1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        if (gpu->type == FF_GPU_TYPE_UNKNOWN)
+        {
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
+            {
+                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                    gpu->type = FF_GPU_TYPE_DISCRETE;
+            }
+            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+            {
+                gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+            }
         }
     }
 

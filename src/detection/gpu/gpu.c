@@ -7,6 +7,7 @@ const char* FF_GPU_VENDOR_NAME_APPLE = "Apple";
 const char* FF_GPU_VENDOR_NAME_AMD = "AMD";
 const char* FF_GPU_VENDOR_NAME_INTEL = "Intel";
 const char* FF_GPU_VENDOR_NAME_NVIDIA = "NVIDIA";
+const char* FF_GPU_VENDOR_NAME_MTHREADS = "Moore Threads";
 const char* FF_GPU_VENDOR_NAME_QUALCOMM = "Qualcomm";
 const char* FF_GPU_VENDOR_NAME_MTK = "MTK";
 const char* FF_GPU_VENDOR_NAME_VMWARE = "VMware";
@@ -24,6 +25,7 @@ const char* ffGetGPUVendorString(unsigned vendorId)
         case 0x1002: case 0x1022: return FF_GPU_VENDOR_NAME_AMD;
         case 0x8086: case 0x8087: case 0x03e7: return FF_GPU_VENDOR_NAME_INTEL;
         case 0x0955: case 0x10de: case 0x12d2: return FF_GPU_VENDOR_NAME_NVIDIA;
+        case 0x1ed5: return FF_GPU_VENDOR_NAME_MTHREADS;
         case 0x5143: return FF_GPU_VENDOR_NAME_QUALCOMM;
         case 0x14c3: return FF_GPU_VENDOR_NAME_MTK;
         case 0x15ad: return FF_GPU_VENDOR_NAME_VMWARE;
@@ -56,6 +58,7 @@ const char* detectByOpenGL(FFlist* gpus)
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->dedicated = gpu->shared = (FFGPUMemory){0, 0};
         gpu->deviceId = 0;
 
@@ -70,6 +73,8 @@ const char* detectByOpenGL(FFlist* gpus)
             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
         else if (ffStrbufContainS(&gpu->name, "NVIDIA"))
             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_NVIDIA);
+        else if (ffStrbufContainS(&gpu->name, "MTT"))
+            ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_MTHREADS);
 
     }
 

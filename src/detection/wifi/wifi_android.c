@@ -37,7 +37,7 @@ const char* ffDetectWifi(FFlist* result)
     ffStrbufInit(&item->inf.status);
     ffStrbufInit(&item->conn.status);
     ffStrbufInit(&item->conn.ssid);
-    ffStrbufInit(&item->conn.macAddress);
+    ffStrbufInit(&item->conn.bssid);
     ffStrbufInit(&item->conn.protocol);
     ffStrbufInit(&item->conn.security);
     item->conn.signalQuality = 0.0/0.0;
@@ -53,12 +53,12 @@ const char* ffDetectWifi(FFlist* result)
 
     if(!ffStrbufEqualS(&item->inf.status, "COMPLETED"))
         return NULL;
-    
+
     double rssi = yyjson_get_num(yyjson_obj_get(root, "rssi"));
     item->conn.signalQuality = rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2;
-    
+
     ffStrbufAppendS(&item->inf.description, yyjson_get_str(yyjson_obj_get(root, "ip")));
-    ffStrbufAppendS(&item->conn.macAddress, yyjson_get_str(yyjson_obj_get(root, "bssid")));
+    ffStrbufAppendS(&item->conn.bssid, yyjson_get_str(yyjson_obj_get(root, "bssid")));
     ffStrbufAppendS(&item->conn.ssid, yyjson_get_str(yyjson_obj_get(root, "ssid")));
 
     return NULL;

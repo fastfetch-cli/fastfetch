@@ -5,13 +5,13 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#if __has_include(<linux/videodev2.h>)
+#if FF_HAVE_LINUX_VIDEODEV2
     #include <linux/videodev2.h>
 #endif
 
 const char* ffDetectCamera(FFlist* result)
 {
-#if __has_include(<linux/videodev2.h>)
+#if FF_HAVE_LINUX_VIDEODEV2
     char path[] = "/dev/videoN";
 
     for (uint32_t i = 0; i <= 9; ++i)

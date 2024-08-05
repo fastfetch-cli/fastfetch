@@ -106,7 +106,7 @@
         {
             "type": "cpu",
             "key": "│ CPU FREQ   │{$1}",
-            "format": "{freq-max}{/freq-max}{freq-base}{/} GHz"
+            "format": "{freq-max}{/freq-max}{freq-base}{/}"
         },
         {
             "type": "loadavg",

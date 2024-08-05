@@ -75,6 +75,7 @@
     "opencl",
     "users",
     "bluetooth",
+    "bluetoothradio",
     "sound",
     "camera",
     "gamepad",

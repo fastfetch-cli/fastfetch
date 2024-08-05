@@ -30,7 +30,6 @@ typedef struct FFOptionsLibrary
     FFstrbuf libGLX;
     FFstrbuf libOSMesa;
     FFstrbuf libPulse;
-    FFstrbuf libnm;
     FFstrbuf libDdcutil;
     FFstrbuf libdrm;
 #endif

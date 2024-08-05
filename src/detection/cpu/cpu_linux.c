@@ -46,6 +46,8 @@ static void detectQualcomm(FFCPUResult* cpu)
     else if (ffStrbufEqualS(&cpu->name, "SM6450"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 1 [SM6450]");
 
+    else if (ffStrbufEqualS(&cpu->name, "SM4635"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4s Gen 2 [SM4635]");
     else if (ffStrbufEqualS(&cpu->name, "SM4450"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 2 [SM4450]");
     else if (ffStrbufEqualS(&cpu->name, "SM4375"))
