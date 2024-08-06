@@ -14,11 +14,12 @@
     #include <fcntl.h>
     #include <sys/ioctl.h>
 
-    #if __has_include(<drm/asahi_drm.h>)
-    #include <drm/asahi_drm.h>
-    #else
+    // https://github.com/AsahiLinux/linux/blob/asahi/include/uapi/drm/asahi_drm.h
     /* SPDX-License-Identifier: MIT */
     /* Copyright (C) The Asahi Linux Contributors */
+
+    #define DRM_ASAHI_UNSTABLE_UABI_VERSION		10011
+
     #define DRM_ASAHI_GET_PARAMS			0x00
     #define DRM_ASAHI_MAX_CLUSTERS	32
     struct drm_asahi_params_global
@@ -46,8 +47,9 @@
         __u32 pad1;
         __u64 vm_user_start;
         __u64 vm_user_end;
-        __u64 vm_shader_start;
-        __u64 vm_shader_end;
+        __u64 vm_usc_start;
+        __u64 vm_usc_end;
+        __u64 vm_kernel_min_size;
 
         __u32 max_syncs_per_submission;
         __u32 max_commands_per_submission;
@@ -61,6 +63,8 @@
 
         __u32 result_render_size;
         __u32 result_compute_size;
+
+        __u32 firmware_version[4];
     };
 
     struct drm_asahi_get_params
@@ -85,7 +89,6 @@
     {
         DRM_IOCTL_ASAHI_GET_PARAMS       = DRM_IOWR(DRM_COMMAND_BASE + DRM_ASAHI_GET_PARAMS, struct drm_asahi_get_params),
     };
-    #endif
 #endif
 
 #define FF_STR_INDIR(x) #x
@@ -424,9 +427,14 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
             .size = sizeof(paramsGlobal),
         }) >= 0)
         {
-            gpu->coreCount = (int) paramsGlobal.num_cores_total_active;
-            gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
-            gpu->deviceId = paramsGlobal.chip_id;
+            // FIXME: They will introduce ABI breaking changes. Always check the latest version
+            // https://www.reddit.com/r/AsahiLinux/comments/1ei2qiv/comment/lgm0v5s/
+            if (paramsGlobal.unstable_uabi_version == DRM_ASAHI_UNSTABLE_UABI_VERSION)
+            {
+                gpu->coreCount = (int) paramsGlobal.num_cores_total_active;
+                gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
+                gpu->deviceId = paramsGlobal.chip_id;
+            }
         }
     }
     #endif
