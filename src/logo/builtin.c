@@ -2334,6 +2334,18 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // LinuxFromScratch
+    {
+        .names = {"lfs", "mlfs", "cmlfs", "optimux", "yosild", "yamlld"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LFS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_BLACK,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // LinuxSmall
     {
         .names = {"Linux_small", "linux-generic_small"},
