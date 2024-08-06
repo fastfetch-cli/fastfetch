@@ -638,3 +638,5 @@ jobs:
           commit: ${{ github.sha }}
           bodyFile: fastfetch-release-notes.md
           allowUpdates: true
+
+githhub: [MMONSTER124]
