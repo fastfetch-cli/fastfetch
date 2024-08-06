@@ -4440,6 +4440,15 @@ static const FFlogo V[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    // VanillaSmall
+    {
+        .names = {"vanilla-small", "vanilla-os-small", "vanilla-linux-small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_VANILLA_SMALL,
+        .colors = {
+            FF_COLOR_FG_LIGHT_YELLOW,
+            FF_COLOR_FG_YELLOW,
+        },
+    },
     // Venom
     {
         .names = {"Venom"},
