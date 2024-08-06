@@ -10,7 +10,7 @@
     #define FF_ARCHITECTURE "arm"
 #elif defined(__mips__)
     #define FF_ARCHITECTURE "mips"
-#elif defined(__powerpc__) || defined(__powerpc)
+#elif defined(__powerpc__) || defined(__powerpc) || defined(__POWERPC__)
     #define FF_ARCHITECTURE "powerpc"
 #elif defined(__riscv__) || defined(__riscv)
     #define FF_ARCHITECTURE "riscv"
