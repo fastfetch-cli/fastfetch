@@ -2336,7 +2336,7 @@ static const FFlogo L[] = {
     },
     // LinuxFromScratch
     {
-        .names = {"lfs", "mlfs", "cmlfs", "optimux", "yosild", "yamlld"},
+        .names = {"LinuxFromScratch", "lfs"},
         .lines = FASTFETCH_DATATEXT_LOGO_LFS,
         .colors = {
             FF_COLOR_FG_WHITE,
