@@ -4,6 +4,10 @@
 
 void ffDetectLocale(FFstrbuf* result)
 {
+    ffStrbufAppendS(result, getenv("LC_ALL"));
+    if(result->length > 0)
+        return;
+
     ffStrbufAppendS(result, getenv("LC_MESSAGES"));
     if(result->length > 0)
         return;
