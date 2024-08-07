@@ -4443,6 +4443,7 @@ static const FFlogo V[] = {
     // VanillaSmall
     {
         .names = {"vanilla-small", "vanilla-os-small", "vanilla-linux-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_VANILLA_SMALL,
         .colors = {
             FF_COLOR_FG_LIGHT_YELLOW,
