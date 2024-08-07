@@ -52,6 +52,12 @@ void ffPrintColors(FFColorsOptions* options)
             ffStrbufClear(&result);
         }
 
+        #ifdef __linux__
+        // Required by Linux Console for light background to work
+        if (options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
+            ffStrbufAppendS(&result, "\e[5m");
+        #endif
+
         // 9%d: Set the foreground to the bright color
         for(uint8_t i = max(options->block.range[0], 8); i <= options->block.range[1]; i++)
         {
