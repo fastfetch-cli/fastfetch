@@ -4455,6 +4455,7 @@ static const FFlogo V[] = {
     // Vanilla2
     {
         .names = {"vanilla2", "vanilla-os2", "vanilla-linux2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_VANILLA2,
         .colors = {
             FF_COLOR_FG_YELLOW,
