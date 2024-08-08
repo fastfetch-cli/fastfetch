@@ -421,7 +421,13 @@ void ffInitGPUOptions(FFGPUOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
 
     options->driverSpecific = false;
-    options->detectionMethod = FF_GPU_DETECTION_METHOD_AUTO;
+    options->detectionMethod =
+        #if defined(__x86_64__) || defined(__i386__)
+        FF_GPU_DETECTION_METHOD_PCI
+        #else
+        FF_GPU_DETECTION_METHOD_AUTO
+        #endif
+    ;
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
