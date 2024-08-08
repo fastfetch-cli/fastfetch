@@ -69,7 +69,7 @@ cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -621,6 +621,7 @@ elseif(FreeBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
+        src/util/linux/elf.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -828,6 +829,7 @@ elseif(SunOS)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
         src/util/platform/FFPlatform_unix.c
+        src/util/linux/elf.c
     )
 endif()
 

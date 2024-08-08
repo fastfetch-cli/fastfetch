@@ -38,7 +38,6 @@ const char* ffElfExtractStrings(const char* elfFile, bool (*cb)(const char* str,
     }
 
     Elf_Scn* scn = NULL;
-    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     while ((scn = ffelf_nextscn(elf, scn)) != NULL)
     {
         Elf64_Shdr* shdr64 = ffelf64_getshdr(scn);
