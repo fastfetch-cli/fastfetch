@@ -3,7 +3,7 @@
 #include "util/linux/elf.h"
 #include <unistd.h>
 
-static bool elfExtractStringsCallBack(const char* str, uint32_t len, void* data)
+FF_MAYBE_UNUSED static bool elfExtractStringsCallBack(const char* str, uint32_t len, void* data)
 {
     if (len > strlen("systemd 0.0 running in ") && memcmp(str, "systemd ", strlen("systemd ")) == 0)
     {
@@ -46,6 +46,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
 
     if (instance.config.general.detectVersion)
     {
+        #ifdef __linux__
         if (ffStrbufEqualS(&result->name, "systemd"))
         {
             ffElfExtractStrings(result->exe.chars, elfExtractStringsCallBack, &result->version);
@@ -67,7 +68,8 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                 }
             }
         }
-        else if (ffStrbufEqualS(&result->name, "launchd"))
+        #elif __APPLE__
+        if (ffStrbufEqualS(&result->name, "launchd"))
         {
             if (ffProcessAppendStdOut(&result->version, (char* const[]) {
                 "/bin/launchctl",
@@ -85,6 +87,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                 }
             }
         }
+        #endif
     }
 
     return NULL;
