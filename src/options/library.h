@@ -32,6 +32,7 @@ typedef struct FFOptionsLibrary
     FFstrbuf libPulse;
     FFstrbuf libDdcutil;
     FFstrbuf libdrm;
+    FFstrbuf libelf;
 #endif
 } FFOptionsLibrary;
 

@@ -66,6 +66,8 @@ const char* ffOptionsParseLibraryJsonConfig(FFOptionsLibrary* options, yyjson_va
             ffStrbufSetS(&options->libDdcutil, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "drm"))
             ffStrbufSetS(&options->libdrm, yyjson_get_str(val));
+        else if (ffStrEqualsIgnCase(key, "elf"))
+            ffStrbufSetS(&options->libelf, yyjson_get_str(val));
 #endif
 
         else
@@ -131,6 +133,8 @@ bool ffOptionsParseLibraryCommandLine(FFOptionsLibrary* options, const char* key
             ffOptionParseString(key, value, &options->libDdcutil);
         else if(ffStrEqualsIgnCase(subkey, "drm"))
             ffOptionParseString(key, value, &options->libdrm);
+        else if(ffStrEqualsIgnCase(subkey, "elf"))
+            ffOptionParseString(key, value, &options->libelf);
 #endif
 
         else

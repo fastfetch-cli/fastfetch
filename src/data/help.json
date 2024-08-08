@@ -935,6 +935,13 @@
             "arg": {
                 "type": "path"
             }
+        },
+        {
+            "long": "lib-elf",
+            "desc": "Used for st terminal font detection and systemd version detection",
+            "arg": {
+                "type": "path"
+            }
         }
     ],
     "Module specific": [
