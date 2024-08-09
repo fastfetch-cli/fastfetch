@@ -97,7 +97,8 @@
         {
             "key": "Public IP    ",
             "keyColor": "cyan",
-            "type": "publicip"
+            "type": "publicip",
+            "timeout": 1000
         },
         "break",
         {

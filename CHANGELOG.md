@@ -1,3 +1,30 @@
+# 2.21.1
+
+Hotfix for a regression that breaks WM detection when running `startx` from TTY (Regression from 2.21.0, #1172 / #1162)
+
+Changes:
+* On Linux, FreeBSD and SunOS, a new recommended dependency `libelf` is introduced to extract strings in ELF binary, used for
+    * st term font detection when the term font is compiled directly into the binary
+    * fast path of systemd version detection
+
+Features:
+* Improve performance of
+    * kitty version detection (Terminal, Linux)
+    * st term font detection (TerminalFont, Linux)
+    * systemd version detection (InitSystem, Linux)
+
+Bugfixes:
+* Fix building error without `linux/wireless.h` (Wifi, Linux)
+* Fix wrong GPU max frequency on Asahi Linux (GPU, Linux)
+* Don't rely `$XDG_SESSION_TYPE` for detecting wm protocol (#1172 / #1162, WM, Linux)
+* Fix light color doesn't work on Linux console (Colors, Linux)
+* `LC_ALL`, if set, overrides every other locale-related environment variable (Locale)
+* Increase timeout of DBus calls (Linux)
+
+Logos:
+* Add vanilla_small and vanilla2
+* Add LFS (Linux From Scratch)
+
 # 2.21.0
 
 Changes:

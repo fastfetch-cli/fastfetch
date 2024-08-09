@@ -730,6 +730,10 @@
                 "ddcutil": {
                     "description": "Used for brightness detection of external displays (Linux)",
                     "type": "string"
+                },
+                "elf": {
+                    "description": "Used for st terminal font detection and systemd version detection (Linux)",
+                    "type": "string"
                 }
             }
         },

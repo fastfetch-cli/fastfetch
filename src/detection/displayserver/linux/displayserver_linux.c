@@ -46,9 +46,7 @@ static void getWMProtocolNameFromEnv(FFDisplayServerResult* result)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    getWMProtocolNameFromEnv(ds);
-
-    if (!ffStrbufEqualS(&ds->wmProtocolName, FF_WM_PROTOCOL_TTY) &&instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE)
+    if (instance.config.general.dsForceDrm == FF_DS_FORCE_DRM_TYPE_FALSE)
     {
         //We try wayland as our preferred display server, as it supports the most features.
         //This method can't detect the name of our WM / DE
@@ -95,6 +93,9 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         }
     }
     #endif
+
+    if (ds->wmProtocolName.length == 0)
+        getWMProtocolNameFromEnv(ds);
 
     if(!ffStrbufEqualS(&ds->wmProtocolName, FF_WM_PROTOCOL_TTY))
     {

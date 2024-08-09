@@ -89,7 +89,7 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
     yyjson_mut_obj_add_str(doc, obj, "sysName", result->sysName);
     yyjson_mut_obj_add_str(doc, obj, "architecture", result->architecture);
     yyjson_mut_obj_add_str(doc, obj, "version", result->version);
-    yyjson_mut_obj_add_str(doc, obj, "versionTweak", result->versionTweak);
+    yyjson_mut_obj_add_str(doc, obj, "versionGit", result->versionGit);
     yyjson_mut_obj_add_str(doc, obj, "cmakeBuiltType", result->cmakeBuiltType);
     yyjson_mut_obj_add_str(doc, obj, "compileTime", result->compileTime);
     yyjson_mut_obj_add_str(doc, obj, "compiler", result->compiler);

@@ -44,6 +44,7 @@ FFVersionResult ffVersionResult = {
     .architecture = FF_ARCHITECTURE,
     .version = FASTFETCH_PROJECT_VERSION,
     .versionTweak = FASTFETCH_PROJECT_VERSION_TWEAK,
+    .versionGit = FASTFETCH_PROJECT_VERSION_GIT,
     .cmakeBuiltType = FASTFETCH_PROJECT_CMAKE_BUILD_TYPE,
     .compileTime = __DATE__ ", " __TIME__,
     .compiler =

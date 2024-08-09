@@ -1,0 +1,57 @@
+// designed for presenting Vanilla Linux
+// inspired from imstilllearnin's Vanilla Logo Ultra
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "small"
+    },
+    "display": {
+        "color": {
+            "output": "cyan"
+        },
+        "separator": ""
+    },
+    "modules": [ 
+        {
+            "type": "kernel",
+            "key": "Vanilla ",
+            "keyColor": "blue"
+        },
+        {
+            "type": "packages",
+            "key": " [_Packages_> ",
+            "keyColor": "green"
+        },
+        {
+            "type": "localip",
+            "key": " [_Local_IP_> ",
+            "keyColor": "green"
+        },
+        {
+            "type": "cpu",
+            "key": " [_CPU______> ",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "memory",
+            "key": " [_RAM______> ",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "swap",
+            "key": " [_SWAP_____> ",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "disk",
+            "key": " [_Disk_____> ",
+            "keyColor": "magenta"
+        },
+        "break",
+        {
+            "type":"colors",
+            "paddingLeft": 9,
+            "symbol": "circle"
+        }
+    ]
+}

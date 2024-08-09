@@ -1,5 +1,6 @@
 #include "wifi.h"
 #include "common/dbus.h"
+#include "common/io/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
 #include "util/stringUtils.h"
@@ -177,8 +178,6 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
 }
 
 #if FF_HAVE_LINUX_WIRELESS
-#include "common/io/io.h"
-
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>

@@ -9,6 +9,7 @@ typedef struct FFVersionResult
     const char* architecture;
     const char* version;
     const char* versionTweak;
+    const char* versionGit;
     const char* cmakeBuiltType;
     const char* compileTime;
     const char* compiler;

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.21.0
+    VERSION 2.21.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -69,6 +69,7 @@ cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -201,10 +202,10 @@ if (SET_TWEAK AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process(
         COMMAND git describe --tags
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        OUTPUT_VARIABLE PROJECT_VERSION_TWEAK
+        OUTPUT_VARIABLE PROJECT_VERSION_GIT
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_TWEAK}")
+    string(REGEX MATCH "-[0-9]+" PROJECT_VERSION_TWEAK "${PROJECT_VERSION_GIT}")
 endif()
 if(PROJECT_VERSION_TWEAK)
     string(REGEX MATCH "[0-9]+" PROJECT_VERSION_TWEAK_NUM "${PROJECT_VERSION_TWEAK}")
@@ -480,6 +481,7 @@ if(LINUX)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
+        src/util/linux/elf.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -619,6 +621,7 @@ elseif(FreeBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
+        src/util/linux/elf.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -826,6 +829,7 @@ elseif(SunOS)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
         src/util/platform/FFPlatform_unix.c
+        src/util/linux/elf.c
     )
 endif()
 
@@ -1074,6 +1078,10 @@ ff_lib_enable(PULSE
 ff_lib_enable(DDCUTIL
     "ddcutil"
     "Ddcutil"
+)
+ff_lib_enable(ELF
+    "libelf"
+    "libelf"
 )
 ff_lib_enable(DIRECTX_HEADERS
     "DirectX-Headers"

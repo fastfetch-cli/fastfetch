@@ -161,7 +161,8 @@
         {
             "type": "publicip",
             "key": "├─󰩠",
-            "keyColor": "blue"
+            "keyColor": "blue",
+            "timeout": 1000
         },
         {
             "type": "wifi",

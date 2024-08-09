@@ -8,6 +8,7 @@
 #include "detection/displayserver/displayserver.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
+#include "util/linux/elf.h"
 
 static const char* getSystemMonospaceFont(void)
 {
@@ -286,6 +287,13 @@ static void detectXterm(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
+static bool elfExtractStringsCallBack(const char* str, uint32_t len, void* userData)
+{
+    if (!ffStrContains(str, "size=")) return true;
+    ffStrbufSetNS((FFstrbuf*) userData, len, str);
+    return false;
+}
+
 static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult* terminal)
 {
     FF_STRBUF_AUTO_DESTROY size = ffStrbufCreateF("/proc/%u/cmdline", terminal->pid);
@@ -306,30 +314,18 @@ static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult*
     else
     {
         ffStrbufClear(&font);
-        if (ffProcessAppendStdOut(&font, (char* const[]) {
-            "strings",
-            terminal->exePath.chars,
-            NULL,
-        }) != NULL || font.length == 0)
+
+        const char* error = ffElfExtractStrings(terminal->exePath.chars, elfExtractStringsCallBack, &font);
+        if (error)
         {
-            ffStrbufAppendS(&terminalFont->error, "Failed to run `strings st`");
+            ffStrbufAppendS(&terminalFont->error, error);
             return;
         }
-
-        // Search font config string in st binary
-        uint32_t middleIndex = ffStrbufFirstIndexS(&font, "size=");
-        if (middleIndex == font.length)
+        if (font.length == 0)
         {
             ffStrbufAppendS(&terminalFont->error, "No font config found in st binary");
             return;
         }
-
-        uint32_t startIndex = ffStrbufPreviousIndexC(&font, middleIndex, '\n');
-        if (startIndex == font.length) startIndex = 0;
-        uint32_t endIndex = ffStrbufNextIndexC(&font, middleIndex, '\n');
-
-        ffStrbufSubstrBefore(&font, endIndex);
-        ffStrbufSubstrAfter(&font, startIndex);
     }
 
     // JetBrainsMono Nerd Font Mono:pixelsize=12:antialias=true:autohint=true
