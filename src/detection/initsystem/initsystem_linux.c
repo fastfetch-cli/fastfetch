@@ -46,7 +46,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
 
     if (instance.config.general.detectVersion)
     {
-        #ifdef __linux__
+        #if __linux__ && !__ANDROID__
         if (ffStrbufEqualS(&result->name, "systemd"))
         {
             ffElfExtractStrings(result->exe.chars, elfExtractStringsCallBack, &result->version);
