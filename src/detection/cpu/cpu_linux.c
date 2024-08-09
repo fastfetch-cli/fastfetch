@@ -383,6 +383,12 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
                 }
 
                 pstart = pend + 1;
+
+                if (strstr(pstart, "BIOS Model name:")) {
+                    pstart = strstr(pstart, "BIOS Model name:");
+                    pstart += strlen("BIOS Model name:");
+                }
+
                 if (pstart >= buffer.chars + buffer.length)
                     return NULL;
             }
