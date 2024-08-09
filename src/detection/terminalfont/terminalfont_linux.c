@@ -315,7 +315,12 @@ static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult*
     {
         ffStrbufClear(&font);
 
-        ffElfExtractStrings(terminal->exePath.chars, elfExtractStringsCallBack, &font);
+        const char* error = ffElfExtractStrings(terminal->exePath.chars, elfExtractStringsCallBack, &font);
+        if (error)
+        {
+            ffStrbufAppendS(&terminalFont->error, error);
+            return;
+        }
         if (font.length == 0)
         {
             ffStrbufAppendS(&terminalFont->error, "No font config found in st binary");
