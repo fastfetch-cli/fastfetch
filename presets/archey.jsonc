@@ -75,7 +75,8 @@
         },
         {
             "type": "publicip",
-            "key": "WAN IP"
+            "key": "WAN IP",
+            "timeout": 1000
         }
     ]
 }

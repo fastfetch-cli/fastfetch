@@ -60,7 +60,10 @@
     "poweradapter",
     "player",
     "media",
-    "publicip",
+    {
+        "type": "publicip",
+        "timeout": 1000
+    },
     {
         "type": "localip",
         "showIpv6": true,
