@@ -44,17 +44,17 @@ void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint
                 if (!end)
                     end = content->chars + content->length;
 
-                char* openingBracket = memchr(start, '[', (uint32_t) (end - start));
-                if (openingBracket)
+                char* closingBracket = end - 1;
+                if (*closingBracket == ']')
                 {
-                    openingBracket++;
-                    char* closingBracket = memchr(openingBracket, ']', (uint32_t) (end - openingBracket));
-                    if (closingBracket)
+                    char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
+                    if (openingBracket)
                     {
+                        openingBracket++;
                         ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
                         if (coreName)
                         {
-                            ffStrbufSetNS(coreName, (uint32_t) (closingBracket - openingBracket), start);
+                            ffStrbufSetNS(coreName, (uint32_t) (openingBracket - start) - 1, start);
                             ffStrbufTrimRight(coreName, ' ');
                         }
                     }
