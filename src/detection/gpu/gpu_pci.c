@@ -1,6 +1,6 @@
 #include "gpu.h"
 
-void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu)
+void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu, FFstrbuf* coreName)
 {
     if (content->length)
     {
@@ -50,7 +50,14 @@ void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint
                     openingBracket++;
                     char* closingBracket = memchr(openingBracket, ']', (uint32_t) (end - openingBracket));
                     if (closingBracket)
+                    {
                         ffStrbufSetNS(&gpu->name, (uint32_t) (closingBracket - openingBracket), openingBracket);
+                        if (coreName)
+                        {
+                            ffStrbufSetNS(coreName, (uint32_t) (closingBracket - openingBracket), start);
+                            ffStrbufTrimRight(coreName, ' ');
+                        }
+                    }
                 }
                 if (!gpu->name.length)
                     ffStrbufSetNS(&gpu->name, (uint32_t) (end - start), start);

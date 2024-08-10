@@ -199,14 +199,20 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
     }
 }
 
-static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const FFstrbuf* coreName)
 {
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
 
     if (ffStrbufStartsWithS(&gpu->name, "Intel "))
-        ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel"));
-    gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+        ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel "));
+
+    if ((coreName->chars[0] == 'D' || coreName->chars[0] == 'S') &&
+            coreName->chars[1] == 'G' &&
+            ffCharIsDigit(coreName->chars[2]))
+        gpu->type = FF_GPU_TYPE_DISCRETE; // DG1 / DG2 / SG1
+    else
+        gpu->type = FF_GPU_TYPE_INTEGRATED;
 
     if (ffStrbufEqualS(&gpu->driver, "xe"))
     {
@@ -322,6 +328,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
 
+    FF_STRBUF_AUTO_DESTROY coreName = ffStrbufCreate();
     if (gpu->name.length == 0)
     {
         static FFstrbuf pciids;
@@ -330,7 +337,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             ffStrbufInit(&pciids);
             loadPciIds(&pciids);
         }
-        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu, &coreName);
     }
 
     pciDetectDriver(gpu, deviceDir, buffer, drmKey);
@@ -343,7 +350,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
     {
-        pciDetectIntelSpecific(gpu, deviceDir, buffer);
+        pciDetectIntelSpecific(gpu, deviceDir, buffer, &coreName);
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
     else
