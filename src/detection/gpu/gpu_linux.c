@@ -205,7 +205,7 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
 
     if (ffStrbufStartsWithS(&gpu->name, "Intel "))
-        ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel "));
+        ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel"));
     gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
 
     if (ffStrbufEqualS(&gpu->driver, "xe"))
