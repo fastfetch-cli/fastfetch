@@ -3,6 +3,7 @@
 #include "common/io/io.h"
 #include "common/properties.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <dev/pci/pcireg.h>
 #include <sys/pciio.h>
@@ -115,9 +116,9 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             }
             else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
             {
-                if ((coreName->chars[0] == 'D' || coreName->chars[0] == 'S') &&
-                        coreName->chars[1] == 'G' &&
-                        ffCharIsDigit(coreName->chars[2]))
+                if ((coreName.chars[0] == 'D' || coreName.chars[0] == 'S') &&
+                        coreName.chars[1] == 'G' &&
+                        ffCharIsDigit(coreName.chars[2]))
                     gpu->type = FF_GPU_TYPE_DISCRETE; // DG1 / DG2 / SG1
                 else
                     gpu->type = FF_GPU_TYPE_INTEGRATED;
