@@ -33,11 +33,11 @@ typedef struct FFGPUResult
     FFstrbuf driver;
     FFstrbuf platformApi;
     double temperature;
+    double coreUsage;
     int32_t coreCount;
     uint32_t frequency; // Maximum time clock frequency in MHz
     FFGPUMemory dedicated;
     FFGPUMemory shared;
-    double coreUsage;
     uint64_t deviceId; // Used internally, may be uninitialized
 } FFGPUResult;
 

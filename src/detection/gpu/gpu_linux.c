@@ -299,6 +299,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     ffStrbufInit(&gpu->driver);
     ffStrbufInit(&gpu->platformApi);
     gpu->temperature = FF_GPU_TEMP_UNSET;
+    gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->type = FF_GPU_TYPE_UNKNOWN;
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
