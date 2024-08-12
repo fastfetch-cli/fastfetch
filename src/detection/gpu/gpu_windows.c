@@ -33,9 +33,30 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     SP_DEVINFO_DATA did = { .cbSize = sizeof(did) };
     for (DWORD idev = 0; SetupDiEnumDeviceInfo(hdev, idev, &did); ++idev)
     {
+        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+        ffStrbufInit(&gpu->vendor);
+        ffStrbufInit(&gpu->name);
+        ffStrbufInit(&gpu->driver);
+        ffStrbufInitStatic(&gpu->platformApi, "Direct3D");
+        gpu->temperature = FF_GPU_TEMP_UNSET;
+        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
+        gpu->type = FF_GPU_TYPE_UNKNOWN;
+        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+        gpu->deviceId = 0;
+        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+
+        wchar_t name[256];
+        if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) name, sizeof(name), NULL))
+            ffStrbufSetWS(&gpu->name, name);
+
         wchar_t hardwareId[256];
         if (!SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_HARDWAREID, NULL, (PBYTE) hardwareId, sizeof(hardwareId), NULL))
             continue;
+
+        unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
+        swscanf(hardwareId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
+        ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
 
         wchar_t videoId[39];
         {
@@ -50,28 +71,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         FF_HKEY_AUTO_DESTROY hKey = NULL;
         if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regControlVideoKey, &hKey, NULL)) continue;
 
-        unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
-        swscanf(hardwareId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
-
-        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
-        ffStrbufInit(&gpu->name);
-        ffStrbufInit(&gpu->driver);
-        ffStrbufInitStatic(&gpu->platformApi, "Direct3D");
-        gpu->temperature = FF_GPU_TEMP_UNSET;
-        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
-        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
-        gpu->type = FF_GPU_TYPE_UNKNOWN;
-        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = 0;
-        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
-
-        if (!ffRegReadStrbuf(hKey, L"DriverDesc", &gpu->name, NULL)) // faster, for some reason
-        {
-            wchar_t name[256];
-            if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) name, sizeof(name), NULL))
-                ffStrbufSetWS(&gpu->name, name);
-        }
         ffRegReadStrbuf(hKey, L"DriverVersion", &gpu->driver, NULL);
 
         wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, videoId, FF_GUID_STRLEN);
