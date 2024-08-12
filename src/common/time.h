@@ -9,7 +9,7 @@
     #include <sysinfoapi.h>
 #endif
 
-static inline double ffTimeGetTick() //In msec
+static inline double ffTimeGetTick(void) //In msec
 {
     #ifdef _WIN32
         LARGE_INTEGER frequency;
@@ -24,7 +24,7 @@ static inline double ffTimeGetTick() //In msec
     #endif
 }
 
-static inline uint64_t ffTimeGetNow()
+static inline uint64_t ffTimeGetNow(void)
 {
     #ifdef _WIN32
         uint64_t timeNow;

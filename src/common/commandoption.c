@@ -1,4 +1,5 @@
 #include "commandoption.h"
+#include "common/color.h"
 #include "common/printing.h"
 #include "common/time.h"
 #include "common/jsonconfig.h"
@@ -105,6 +106,7 @@ static void parseStructureCommand(
 void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
 {
     //Parse the structure and call the modules
+    uint32_t thres = (uint32_t) instance.config.display.stat;
     uint32_t startIndex = 0;
     while (startIndex < data->structure.length)
     {
@@ -112,12 +114,12 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
         data->structure.chars[colonIndex] = '\0';
 
         double ms = 0;
-        if(instance.config.display.stat)
+        if(thres >= 0)
             ms = ffTimeGetTick();
 
         parseStructureCommand(data->structure.chars + startIndex, genJsonResult, jsonDoc);
 
-        if(instance.config.display.stat)
+        if(thres >= 0)
         {
             ms = ffTimeGetTick() - ms;
 
@@ -128,9 +130,11 @@ void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
             }
             else
             {
-                char str[32];
+                char str[64];
                 int len = snprintf(str, sizeof str, "%.3fms", ms);
-                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                if (thres > 0)
+                    snprintf(str, sizeof str, "\e[%sm%.3fms\e[m", (ms <= thres ? FF_COLOR_FG_GREEN : ms <= 2 * thres ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_RED), ms);
+                printf("\e[s\e[1A\e[9999999C\e[%dD%s\e[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
             }
         }
 

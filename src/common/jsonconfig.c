@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/color.h"
 #include "common/jsonconfig.h"
 #include "common/printing.h"
 #include "common/io/io.h"
@@ -181,12 +182,13 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
     if (!modules) return NULL;
     if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
 
+    uint32_t thres = (uint32_t) instance.config.display.stat;
     yyjson_val* item;
     size_t idx, max;
     yyjson_arr_foreach(modules, idx, max, item)
     {
         double ms = 0;
-        if(!prepare && instance.config.display.stat)
+        if(!prepare && thres >= 0)
             ms = ffTimeGetTick();
 
         yyjson_val* module = item;
@@ -208,7 +210,7 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
         else if(!parseModuleJsonObject(type, module, jsonDoc))
             return "Unknown module type";
 
-        if(!prepare && instance.config.display.stat)
+        if(!prepare && thres >= 0)
         {
             ms = ffTimeGetTick() - ms;
             if (jsonDoc)
@@ -218,9 +220,11 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
             }
             else
             {
-                char str[32];
+                char str[64];
                 int len = snprintf(str, sizeof str, "%.3fms", ms);
-                printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                if (thres > 0)
+                    snprintf(str, sizeof str, "\e[%sm%.3fms\e[m", (ms <= thres ? FF_COLOR_FG_GREEN : ms <= 2 * thres ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_RED), ms);
+                printf("\e[s\e[1A\e[9999999C\e[%dD%s\e[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
             }
         }
 
