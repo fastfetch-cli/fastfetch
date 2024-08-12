@@ -7,11 +7,10 @@
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
+#ifdef MAC_OS_X_VERSION_10_15
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
-
-#ifndef MAC_OS_X_VERSION_10_15
-#import <IOKit/graphics/IOGraphicsLib.h>
-extern CFDictionaryRef CoreDisplay_IODisplayCreateInfoDictionary(io_service_t framebuffer, IOOptionBits options)  __attribute__((weak_import));
+#else
+#include <IOKit/graphics/IOGraphicsLib.h>
 #endif
 
 static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
@@ -57,7 +56,7 @@ const char* ffDetectMonitor(FFlist* results)
         CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary((CGDirectDisplayID) display->id);
         #else
         io_service_t servicePort = CGDisplayIOServicePort((CGDirectDisplayID) display->id);
-        CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
+        CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
         #endif
         if(!displayInfo) continue;
 
@@ -67,7 +66,7 @@ const char* ffDetectMonitor(FFlist* results)
 
         uint8_t edidData[128] = {};
         uint32_t edidLength = 0;
-        if (ffCfDictGetData(displayInfo, CFSTR("IODisplayEDID"), 0, sizeof(edidData), edidData, &edidLength) == NULL)
+        if (ffCfDictGetData(displayInfo, CFSTR(kIODisplayEDIDKey), 0, sizeof(edidData), edidData, &edidLength) == NULL)
         {
             uint32_t width, height;
             ffEdidGetPhysicalResolution(edidData, &width, &height);

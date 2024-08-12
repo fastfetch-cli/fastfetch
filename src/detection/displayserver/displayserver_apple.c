@@ -8,10 +8,11 @@
 #include <CoreGraphics/CGDirectDisplay.h>
 #include <CoreVideo/CVDisplayLink.h>
 
+#ifdef MAC_OS_X_VERSION_10_15
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
-#ifndef MAC_OS_X_VERSION_10_15
-#import <IOKit/graphics/IOGraphicsLib.h>
-extern CFDictionaryRef CoreDisplay_IODisplayCreateInfoDictionary(io_service_t framebuffer, IOOptionBits options)  __attribute__((weak_import));
+extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) __attribute__((weak_import));
+#else
+#include <IOKit/graphics/IOGraphicsLib.h>
 #endif
 
 static void detectDisplays(FFDisplayServerResult* ds)
@@ -43,30 +44,22 @@ static void detectDisplays(FFDisplayServerResult* ds)
             }
 
             FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+            CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = NULL;
             #ifdef MAC_OS_X_VERSION_10_15
             if(CoreDisplay_DisplayCreateInfoDictionary)
-            {
-                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
-                if(displayInfo)
-                {
-                    CFDictionaryRef productNames;
-                    if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
-                        ffCfDictGetString(productNames, CFSTR("en_US"), &name);
-                }
-            }
+                displayInfo = CoreDisplay_DisplayCreateInfoDictionary(screen);
             #else
-            if(CoreDisplay_IODisplayCreateInfoDictionary)
             {
                 io_service_t servicePort = CGDisplayIOServicePort(screen);
-                CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = CoreDisplay_IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
-                if(displayInfo)
-                {
-                    CFDictionaryRef productNames;
-                    if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
-                        ffCfDictGetString(productNames, CFSTR("en_US"), &name);
-                }
+                displayInfo = IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
             }
             #endif
+            if(displayInfo)
+            {
+                CFDictionaryRef productNames;
+                if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
+                    ffCfDictGetString(productNames, CFSTR("en_US"), &name);
+            }
 
             CGSize size = CGDisplayScreenSize(screen);
 
@@ -94,6 +87,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     int32_t bitDepth;
                     ffCfDictGetInt(dict, kCGDisplayBitsPerSample, &bitDepth);
                     display->bitDepth = (uint8_t) bitDepth;
+                }
+
+                if (CoreDisplay_Display_IsHDRModeEnabled)
+                {
+                    display->hdrEnabled = CoreDisplay_Display_IsHDRModeEnabled(screen);
                 }
             }
             CGDisplayModeRelease(mode);
