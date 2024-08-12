@@ -185,7 +185,7 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
     size_t idx, max;
     yyjson_arr_foreach(modules, idx, max, item)
     {
-        uint64_t ms = 0;
+        double ms = 0;
         if(!prepare && instance.config.display.stat)
             ms = ffTimeGetTick();
 
@@ -214,12 +214,12 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
             if (jsonDoc)
             {
                 yyjson_mut_val* moduleJson = yyjson_mut_arr_get_last(jsonDoc->root);
-                yyjson_mut_obj_add_uint(jsonDoc, moduleJson, "stat", ms);
+                yyjson_mut_obj_add_real(jsonDoc, moduleJson, "stat", ms);
             }
             else
             {
                 char str[32];
-                int len = snprintf(str, sizeof str, "%" PRIu64 "ms", ms);
+                int len = snprintf(str, sizeof str, "%.3fms", ms);
                 printf("\033[s\033[1A\033[9999999C\033[%dD%s\033[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
             }
         }
