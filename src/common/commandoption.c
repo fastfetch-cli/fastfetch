@@ -106,7 +106,7 @@ static void parseStructureCommand(
 void ffPrintCommandOption(FFdata* data, yyjson_mut_doc* jsonDoc)
 {
     //Parse the structure and call the modules
-    uint32_t thres = (uint32_t) instance.config.display.stat;
+    int32_t thres = instance.config.display.stat;
     uint32_t startIndex = 0;
     while (startIndex < data->structure.length)
     {

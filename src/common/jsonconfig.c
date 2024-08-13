@@ -182,7 +182,7 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
     if (!modules) return NULL;
     if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
 
-    uint32_t thres = (uint32_t) instance.config.display.stat;
+    int32_t thres = instance.config.display.stat;
     yyjson_val* item;
     size_t idx, max;
     yyjson_arr_foreach(modules, idx, max, item)
