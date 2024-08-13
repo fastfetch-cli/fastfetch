@@ -46,7 +46,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     ffEfiFillLoadOption((FFEfiLoadOption *)buffer, result);
 
     DWORD uefiSecureBootEnabled = 0, bufSize = 0;
-    if (RegGetValueW(HKEY_LOCAL_MACHINE, L"SYSTEM\\ControlSet001\\Control\\SecureBoot\\State", L"UEFISecureBootEnabled", RRF_RT_REG_DWORD, NULL, &uefiSecureBootEnabled, &bufSize) == ERROR_SUCCESS)
+    if (RegGetValueW(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State", L"UEFISecureBootEnabled", RRF_RT_REG_DWORD, NULL, &uefiSecureBootEnabled, &bufSize) == ERROR_SUCCESS)
         result->secureBoot = !!uefiSecureBootEnabled;
 
     return NULL;
