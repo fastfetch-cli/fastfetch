@@ -15,7 +15,7 @@ static inline void wrapSetupDiDestroyDeviceInfoList(HDEVINFO* hdev)
 }
 
 #define FF_EMPTY_GUID_STR L"{00000000-0000-0000-0000-000000000000}"
-#define FF_GUID_STRLEN (sizeof(FF_EMPTY_GUID_STR) / sizeof(wchar_t) - 1)
+enum { FF_GUID_STRLEN = sizeof(FF_EMPTY_GUID_STR) / sizeof(wchar_t) - 1 };
 
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
@@ -37,7 +37,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
-        ffStrbufInitStatic(&gpu->platformApi, "Direct3D");
+        ffStrbufInitStatic(&gpu->platformApi, "SetupAPI");
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
@@ -46,34 +46,31 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->deviceId = 0;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        wchar_t name[256];
-        if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) name, sizeof(name), NULL))
-            ffStrbufSetWS(&gpu->name, name);
+        wchar_t buffer[256];
+        if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) buffer, sizeof(buffer), NULL))
+            ffStrbufSetWS(&gpu->name, buffer);
 
-        wchar_t hardwareId[256];
-        if (!SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_HARDWAREID, NULL, (PBYTE) hardwareId, sizeof(hardwareId), NULL))
+        if (!SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_HARDWAREID, NULL, (PBYTE) buffer, sizeof(buffer), NULL))
             continue;
 
         unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
-        swscanf(hardwareId, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
+        swscanf(buffer, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
         ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
 
-        wchar_t videoId[39];
-        {
-            FF_HKEY_AUTO_DESTROY hKey = SetupDiOpenDevRegKey(hdev, &did, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
-            if (!hKey) continue;
-            DWORD videoIdLength = sizeof(videoId);
-            if (RegGetValueW(hKey, NULL, L"VideoID", RRF_RT_REG_SZ, NULL, videoId, &videoIdLength) != ERROR_SUCCESS || videoIdLength != (FF_GUID_STRLEN + 1) * sizeof(wchar_t))
-                continue;
-        }
+        FF_HKEY_AUTO_DESTROY hVideoIdKey = SetupDiOpenDevRegKey(hdev, &did, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
+        if (!hVideoIdKey) continue;
+        DWORD videoIdLength = sizeof(buffer);
+        if (RegGetValueW(hVideoIdKey, NULL, L"VideoID", RRF_RT_REG_SZ, NULL, buffer, &videoIdLength) != ERROR_SUCCESS)
+            continue;
 
-        wmemcpy(regControlVideoKey + regControlVideoKeyPrefixLength, videoId, FF_GUID_STRLEN);
-        FF_HKEY_AUTO_DESTROY hKey = NULL;
-        if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regControlVideoKey, &hKey, NULL)) continue;
+        if (videoIdLength != (FF_GUID_STRLEN + 1) * sizeof(wchar_t))
+            continue; // Should not happen
 
-        ffRegReadStrbuf(hKey, L"DriverVersion", &gpu->driver, NULL);
+        wmemcpy(regControlVideoKey + regControlVideoKeyPrefixLength, buffer, FF_GUID_STRLEN);
+        FF_HKEY_AUTO_DESTROY hRegControlVideoKey = NULL;
+        if (!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regControlVideoKey, &hRegControlVideoKey, NULL)) continue;
 
-        wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, videoId, FF_GUID_STRLEN);
+        wmemcpy(regDirectxKey + regDirectxKeyPrefixLength, buffer, FF_GUID_STRLEN);
         FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
         if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDirectxKey, &hDirectxKey, NULL))
         {
@@ -97,17 +94,17 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             else if(ffRegReadUint(hDirectxKey, L"MaxD3D11FeatureLevel", &featureLevel, NULL) && featureLevel)
                 ffStrbufSetF(&gpu->platformApi, "Direct3D 11.%u", (featureLevel & 0x0F00) >> 8);
         }
-        else if (!ffRegReadUint64(hKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
+        else if (!ffRegReadUint64(hRegControlVideoKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
         {
             uint32_t vmem = 0;
-            if (ffRegReadUint(hKey, L"HardwareInformation.MemorySize", &vmem, NULL))
+            if (ffRegReadUint(hRegControlVideoKey, L"HardwareInformation.MemorySize", &vmem, NULL))
                 gpu->dedicated.total = vmem;
             gpu->type = gpu->dedicated.total > 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
         }
 
         if (gpu->vendor.length == 0)
         {
-            ffRegReadStrbuf(hKey, L"ProviderName", &gpu->vendor, NULL);
+            ffRegReadStrbuf(hRegControlVideoKey, L"ProviderName", &gpu->vendor, NULL);
             if (ffStrbufContainS(&gpu->vendor, "Intel"))
                 ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_INTEL);
             else if (ffStrbufContainS(&gpu->vendor, "NVIDIA"))
