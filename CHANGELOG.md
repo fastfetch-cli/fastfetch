@@ -13,6 +13,7 @@ Bugfixes:
 
 Logos:
 * Add HyprOS
+* Add GoldenDog Linux
 
 # 2.21.1
 
