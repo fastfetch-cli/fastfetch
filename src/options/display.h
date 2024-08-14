@@ -28,7 +28,7 @@ typedef struct FFOptionsDisplay
 
     FFstrbuf keyValueSeparator;
 
-    bool stat;
+    int32_t stat; // <0: disable stat; 0: no threshold; >0: threshold in ms
     bool pipe; //disables all escape sequences
     bool showErrors;
     bool disableLinewrap;

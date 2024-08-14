@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.21.1
+    VERSION 2.21.2
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1210,13 +1210,19 @@ if(NOT WIN32)
     if(HAVE_WORDEXP)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
     endif()
-    CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
-    if(HAVE_PTHREAD_NP)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_PTHREAD_NP=1)
-    endif()
-    check_function_exists("pthread_timedjoin_np" HAVE_TIMEDJOIN_NP)
-    if(HAVE_TIMEDJOIN_NP)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_TIMEDJOIN_NP=1)
+    if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
+        CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
+        if(HAVE_PTHREAD_NP)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_PTHREAD_NP=1)
+            set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} pthread_np.h)
+        endif()
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} Threads::Threads)
+        check_function_exists("pthread_timedjoin_np" HAVE_TIMEDJOIN_NP)
+        if(HAVE_TIMEDJOIN_NP)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_TIMEDJOIN_NP=1)
+        else()
+            message(WARNING "pthread_timedjoin_np was not found; networking timeout will not work")
+        endif()
     endif()
 endif()
 

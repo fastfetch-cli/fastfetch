@@ -357,9 +357,17 @@
             "additionalProperties": false,
             "properties": {
                 "stat": {
-                    "type": "boolean",
-                    "description": "Show time usage (in ms) for individual modules",
-                    "default": false
+                    "description": "Show time usage (in ms) for individual modules with optional threshold",
+                    "oneOf": [
+                        {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    ]
                 },
                 "pipe": {
                     "type": "boolean",

@@ -3,6 +3,7 @@
 #include "common/io/io.h"
 #include "common/properties.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <dev/pci/pcireg.h>
 #include <sys/pciio.h>
@@ -70,11 +71,12 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
         }
 
+        FF_STRBUF_AUTO_DESTROY coreName = ffStrbufCreate();
         if (gpu->name.length == 0)
         {
             if (pciids.length == 0)
                 loadPciIds(&pciids);
-            ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
+            ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu, &coreName);
         }
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
@@ -114,7 +116,12 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             }
             else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
             {
-                gpu->type = ffStrbufStartsWithIgnCaseS(&gpu->name, "Arc ") ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+                if ((coreName.chars[0] == 'D' || coreName.chars[0] == 'S') &&
+                        coreName.chars[1] == 'G' &&
+                        ffCharIsDigit(coreName.chars[2]))
+                    gpu->type = FF_GPU_TYPE_DISCRETE; // DG1 / DG2 / SG1
+                else
+                    gpu->type = FF_GPU_TYPE_INTEGRATED;
             }
         }
     }

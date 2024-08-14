@@ -9,22 +9,22 @@
     #include <sysinfoapi.h>
 #endif
 
-static inline uint64_t ffTimeGetTick() //In msec
+static inline double ffTimeGetTick(void) //In msec
 {
     #ifdef _WIN32
         LARGE_INTEGER frequency;
         QueryPerformanceFrequency(&frequency);
         LARGE_INTEGER start;
         QueryPerformanceCounter(&start);
-        return (uint64_t)(start.QuadPart * 1000 / frequency.QuadPart);
+        return (double) start.QuadPart * 1000 / (double) frequency.QuadPart;
     #else
         struct timespec timeNow;
         clock_gettime(CLOCK_MONOTONIC, &timeNow);
-        return (uint64_t)(((uint64_t) timeNow.tv_sec * 1000u) + ((uint64_t) timeNow.tv_nsec / 1000000u));
+        return (double) timeNow.tv_sec * 1000. + (double) timeNow.tv_nsec / 1000000.;
     #endif
 }
 
-static inline uint64_t ffTimeGetNow()
+static inline uint64_t ffTimeGetNow(void)
 {
     #ifdef _WIN32
         uint64_t timeNow;

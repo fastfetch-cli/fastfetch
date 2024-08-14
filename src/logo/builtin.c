@@ -1861,6 +1861,16 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    // GoldenDogLinux
+    {
+        .names = {"GoldenDog Linux", "GDL", "goldendoglinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_GOLDENDOGLINUX,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // GrapheneOS
     {
         .names = {"GrapheneOS"},
@@ -2007,6 +2017,17 @@ static const FFlogo H[] = {
         },
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // HyprOS
+    {
+        .names = {"hypros"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HYPROS,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+        },
     },
     // Hyperbola
     {

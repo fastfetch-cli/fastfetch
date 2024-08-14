@@ -20,8 +20,23 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
         if (ffStrEqualsIgnCase(key, "stat"))
         {
-            if ((options->stat = yyjson_get_bool(val)))
+            if (yyjson_is_bool(val))
+            {
+                if (yyjson_get_bool(val))
+                {
+                    options->stat = 0;
+                    options->showErrors = true;
+                }
+                else
+                    options->stat = -1;
+            }
+            else if (yyjson_is_uint(val))
+            {
+                options->stat = (int) yyjson_get_uint(val);
                 options->showErrors = true;
+            }
+            else
+                return "display.stat must be a boolean or a positive integer";
         }
         else if (ffStrEqualsIgnCase(key, "pipe"))
             options->pipe = yyjson_get_bool(val);
@@ -271,8 +286,25 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
 {
     if(ffStrEqualsIgnCase(key, "--stat"))
     {
-        if((options->stat = ffOptionParseBoolean(value)))
+        if(ffOptionParseBoolean(value))
+        {
+            options->stat = 0;
             options->showErrors = true;
+        }
+        else if (value)
+        {
+            char* end;
+            uint32_t num = (uint32_t) strtoul(value, &end, 10);
+            if (*end == '\0')
+            {
+                options->stat = (int32_t) num;
+                options->showErrors = true;
+            }
+            else
+                options->stat = -1;
+        }
+        else
+            options->stat = -1;
     }
     else if(ffStrEqualsIgnCase(key, "--pipe"))
         options->pipe = ffOptionParseBoolean(value);
@@ -470,7 +502,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->sizeBinaryPrefix = FF_SIZE_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
     options->sizeMaxPrefix = UINT8_MAX;
-    options->stat = false;
+    options->stat = -1;
     options->noBuffer = false;
     options->keyWidth = 0;
     options->keyPaddingLeft = 0;
@@ -519,7 +551,12 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
     yyjson_mut_val* obj = yyjson_mut_obj(doc);
 
     if (options->stat != defaultOptions.stat)
-        yyjson_mut_obj_add_bool(doc, obj, "stat", options->stat);
+    {
+        if (options->stat <= 0)
+            yyjson_mut_obj_add_bool(doc, obj, "stat", options->stat == 0);
+        else
+            yyjson_mut_obj_add_int(doc, obj, "stat", options->stat);
+    }
 
     if (options->pipe != defaultOptions.pipe)
         yyjson_mut_obj_add_bool(doc, obj, "pipe", options->pipe);

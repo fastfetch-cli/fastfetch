@@ -30,6 +30,12 @@ static bool printImageIterm(bool printError)
 
     fflush(stdout);
 
+    bool inTmux = false;
+    {
+        const char* term = getenv("TERM");
+        inTmux = term && (ffStrStartsWith(term, "screen") || ffStrStartsWith(term, "tmux"));
+    }
+
     FF_STRBUF_AUTO_DESTROY base64 = ffBase64EncodeStrbuf(&buf);
     ffStrbufClear(&buf);
 
@@ -57,10 +63,15 @@ static bool printImageIterm(bool printError)
             }
             ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
         }
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\ePtmux;\e");
+
         if (options->width)
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u:%s\a", (unsigned) options->width, base64.chars);
         else
             ffStrbufAppendF(&buf, "\e]1337;File=inline=1:%s\a", base64.chars);
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\e\\");
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
 
         if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
@@ -90,12 +101,17 @@ static bool printImageIterm(bool printError)
             ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
         else if (options->paddingLeft)
             ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
-        ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a\n",
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\ePtmux;\e");
+        ffStrbufAppendF(&buf, "\e]1337;File=inline=1;width=%u;height=%u;preserveAspectRatio=%u:%s\a",
             (unsigned) options->width,
             (unsigned) options->height,
             (unsigned) options->preserveAspectRatio,
             base64.chars
         );
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\e\\");
+        ffStrbufAppendC(&buf, '\n');
 
         if (options->position == FF_LOGO_POSITION_LEFT)
         {
@@ -130,22 +146,31 @@ static bool printImageKittyDirect(bool printError)
         return false;
     }
 
+    fflush(stdout);
+
+    bool inTmux = false;
+    {
+        const char* term = getenv("TERM");
+        inTmux = term && (ffStrStartsWith(term, "screen") || ffStrStartsWith(term, "tmux"));
+    }
+
     FF_STRBUF_AUTO_DESTROY base64 = ffBase64EncodeStrbuf(&options->source);
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
     if (!options->width || !options->height)
     {
         if (options->position == FF_LOGO_POSITION_LEFT)
         {
             // We must clear the entre screen to make sure that terminal buffer won't scroll up
-            printf("\e[2J\e[3J\e[%u;%uH",
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
                 (unsigned) options->paddingTop + 1,
                 (unsigned) options->paddingLeft + 1
             );
         }
         else if (options->position == FF_LOGO_POSITION_TOP)
         {
-            ffPrintCharTimes('\n', options->paddingTop);
-            ffPrintCharTimes(' ', options->paddingLeft);
+            ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+            ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
         }
         else if (options->position == FF_LOGO_POSITION_RIGHT)
         {
@@ -155,14 +180,23 @@ static bool printImageKittyDirect(bool printError)
                     fputs("Logo (iterm): Must set logo width when using position right\n", stderr);
                 return false;
             }
-            printf("\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
+            ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;9999999H\e[%uD", (unsigned) options->paddingTop + 1, (unsigned) options->paddingRight + options->width);
         }
 
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\ePtmux;\e");
         if (options->width)
-            printf("\e_Ga=T,f=100,t=f,c=%u;%s\e\\", (unsigned) options->width, base64.chars);
+            ffStrbufAppendF(&buf, "\e_Ga=T,f=100,t=f,c=%u;%s", (unsigned) options->width, base64.chars);
         else
-            printf("\e_Ga=T,f=100,t=f;%s\e\\", base64.chars);
-        fflush(stdout);
+            ffStrbufAppendF(&buf, "\e_Ga=T,f=100,t=f;%s", base64.chars);
+        if (inTmux)
+            ffStrbufAppendC(&buf, '\e');
+        ffStrbufAppendS(&buf, "\e\\");
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\e\\");
+
+        ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
+
         if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
         {
             uint16_t X = 0, Y = 0;
@@ -186,33 +220,42 @@ static bool printImageKittyDirect(bool printError)
     }
     else
     {
-        ffPrintCharTimes('\n', options->paddingTop);
-        if (options->position == FF_LOGO_POSITION_RIGHT)
-            printf("\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
-        else if (options->paddingLeft)
-            printf("\e[%uC", (unsigned) options->paddingLeft);
+        ffStrbufAppendNC(&buf, options->paddingTop, '\n');
 
-        printf("\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\\n",
+        if (options->position == FF_LOGO_POSITION_RIGHT)
+            ffStrbufAppendF(&buf, "\e[9999999C\e[%uD", (unsigned) options->paddingRight + options->width);
+        else if (options->paddingLeft)
+            ffStrbufAppendF(&buf, "\e[%uC", (unsigned) options->paddingLeft);
+
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\ePtmux;\e");
+
+        ffStrbufAppendF(&buf, "\e_Ga=T,f=100,t=f,c=%u,r=%u;%s\e\\",
             (unsigned) options->width,
             (unsigned) options->height,
             base64.chars
         );
+        if (inTmux)
+            ffStrbufAppendS(&buf, "\e\\");
+        ffStrbufAppendC(&buf, '\n');
         if (options->position == FF_LOGO_POSITION_LEFT)
         {
             instance.state.logoWidth = options->width + options->paddingLeft + options->paddingRight;
             instance.state.logoHeight = options->paddingTop + options->height;
-            printf("\e[%uA", (unsigned) instance.state.logoHeight);
+            ffStrbufAppendF(&buf, "\e[%uA", (unsigned) instance.state.logoHeight);
         }
         else if (options->position == FF_LOGO_POSITION_TOP)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            ffPrintCharTimes('\n', options->paddingRight);
+            ffStrbufAppendNC(&buf, options->paddingRight, '\n');
         }
         else if (options->position == FF_LOGO_POSITION_RIGHT)
         {
             instance.state.logoWidth = instance.state.logoHeight = 0;
-            printf("\e[1G\e[%uA", (unsigned) options->height);
+            ffStrbufAppendF(&buf, "\e[1G\e[%uA", (unsigned) options->height);
         }
+
+        ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
     }
 
     return true;
