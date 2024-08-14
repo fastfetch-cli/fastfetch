@@ -34,7 +34,6 @@ FFDisplayResult* ffdsAppendDisplay(
 
     display->bitDepth = 0;
     display->hdrEnabled = false;
-    display->wcgEnabled = false;
 
     return display;
 }

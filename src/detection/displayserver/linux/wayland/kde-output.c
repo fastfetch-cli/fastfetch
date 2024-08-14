@@ -119,12 +119,6 @@ static void waylandKdeHdrListener(void *data, FF_MAYBE_UNUSED struct kde_output_
     display->hdrEnabled = !!hdr_enabled;
 }
 
-static void waylandKdeWcgListener(void *data, FF_MAYBE_UNUSED struct kde_output_device_v2 *kde_output_device_v2, uint32_t wcg_enabled)
-{
-    WaylandDisplay* display = data;
-    display->wcgEnabled = !!wcg_enabled;
-}
-
 static struct kde_output_device_v2_listener outputListener = {
     .geometry = waylandKdeGeometryListener,
     .current_mode = waylandKdeCurrentModeListener,
@@ -143,7 +137,7 @@ static struct kde_output_device_v2_listener outputListener = {
     .name = waylandKdeNameListener,
     .high_dynamic_range = waylandKdeHdrListener,
     .sdr_brightness = (void*) stubListener,
-    .wide_color_gamut = waylandKdeWcgListener,
+    .wide_color_gamut = (void*) stubListener,
     .auto_rotate_policy = (void*) stubListener,
     .icc_profile_path = (void*) stubListener,
     .brightness_metadata = (void*) stubListener,
@@ -202,7 +196,6 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
     if (item)
     {
         item->hdrEnabled = display.hdrEnabled;
-        item->wcgEnabled = display.wcgEnabled;
     }
 
     ffStrbufDestroy(&display.description);
