@@ -8,7 +8,7 @@ Bugfixes:
 * Fix uninited struct fields (GPU, Linux)
 * Skip cpu model smbios detection on ARM platforms (CPU, Linux)
 * Always use `CurrentControlSet` instead of `ControlSet001` when querying registry (Windows)
-* Fix NVIDIA GPUs are missing in GPU detection sometimes (GPU, Linux)
+* Fix NVIDIA GPUs are missing in GPU detection sometimes (GPU, Windows)
 * Fixing detection of `pthread_timedjoin_np` (Linux)
 
 Logos:
