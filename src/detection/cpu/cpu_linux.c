@@ -74,7 +74,7 @@ static void detectAndroid(FFCPUResult* cpu)
 }
 #endif
 
-#ifdef __aarch64__
+#if __arm__ || __aarch64__
 #include "cpu_arm.h"
 
 static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
@@ -156,7 +156,7 @@ static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physi
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
 
-            #if __aarch64__
+            #if __arm__ || __aarch64__
             (cpu->vendor.length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
             #endif
             #if __ANDROID__
@@ -358,20 +358,16 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         ffStrbufAppend(&cpu->name, &cpuIsa);
     }
 
-    #ifdef __aarch64__
+    #if __arm__ || __aarch64__
     uint32_t cpuImplementer = (uint32_t) strtoul(cpuImplementerStr.chars, NULL, 16);
     ffStrbufSetStatic(&cpu->vendor, hwImplId2Vendor(cpuImplementer));
-    #endif
 
-    #ifdef __ANDROID__
+    #if __ANDROID__
     detectAndroid(cpu);
-    #endif
-
-    #if defined(__linux__) && defined(__aarch64__) && !defined(__ANDROID__)
+    #elif __aarch64__
     detectAsahi(cpu);
     #endif
 
-    #ifdef __aarch64__
     if (cpu->name.length == 0)
         detectArmName(cpuinfo, cpu, cpuImplementer);
     #endif
