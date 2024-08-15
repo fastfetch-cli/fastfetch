@@ -137,7 +137,7 @@ static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
 }
 #endif
 
-static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch, FFstrbuf* cpuImplementer)
+static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch, FF_MAYBE_UNUSED FFstrbuf* cpuImplementer)
 {
     FF_AUTO_FREE char* line = NULL;
     size_t len = 0;
