@@ -204,9 +204,6 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
 
-    if (ffStrbufStartsWithS(&gpu->name, "Intel "))
-        ffStrbufSubstrAfter(&gpu->name, (uint32_t) strlen("Intel "));
-
     if ((coreName->chars[0] == 'D' || coreName->chars[0] == 'S') &&
             coreName->chars[1] == 'G' &&
             ffCharIsDigit(coreName->chars[2]))
