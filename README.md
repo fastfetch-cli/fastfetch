@@ -30,22 +30,23 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 Some distros packaged an outdated fastfetch version. Older version receive no support, so please try always to use the latest version.
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
-* Debian: `su -c apt install fastfetch` (for Debian 13 or newer)
+* Debian: `sudo apt install fastfetch` (for Debian 13 or newer)
 * Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
-* Arch Linux: `su -c pacman -Syy fastfetch`. An outdated version of fastfetch is also available [on the AUR](https://aur.archlinux.org/packages/fastfetch-git).
-* Fedora: `su -c dnf install fastfetch`
-* Gentoo: `su -c emerge --ask --verbose app-misc/fastfetch`
-* Alpine: `su -c apk add --upgrade fastfetch`
-* NixOS: `su -c nix-env -iA nixos.fastfetch`
-* openSUSE: `su -c zypper install fastfetch`
-* ALT Linux: `su -c apt-get install fastfetch`
-* Exherbo: `su -c cave resolve --execute app-misc/fastfetch`
-* GNU Guix: `su -c guix install fastfetch`
-* Solus: `su -c eopkg install fastfetch`
-* Slackware: With [sbopkg](https://www.sbopkg.org/index.php), run `su -c sbopkg -i fastfetch` to install [the fastfetch SlackBuild](https://slackbuilds.org/repository/15.0/system/fastfetch/).
-* Void Linux: `su -c xbps-install fastfetch`
-* RebornOS: `su -c pamac install fastfetch`
-* Venom Linux: `su -c scratch install fastfetch`
+* Arch Linux: `sudo pacman -Syy fastfetch`. An outdated version of fastfetch is also available [on the AUR](https://aur.archlinux.org/packages/fastfetch-git).
+* Fedora: `sudo dnf install fastfetch`
+* Gentoo: `sudo emerge --ask app-misc/fastfetch`
+* Alpine: `sudo apk add --upgrade fastfetch`
+* NixOS: `nix-shell -p fastfetch`
+* openSUSE: `sudo zypper install fastfetch`
+* ALT Linux: `sudo apt-get install fastfetch`
+* Exherbo: `sudo cave resolve --execute app-misc/fastfetch`
+* GNU Guix: `sudo guix install fastfetch`
+* Solus: `sudo eopkg install fastfetch`
+* Slackware: `sudo sbopkg -i fastfetch`
+* Void Linux: `sudo xbps-install fastfetch`
+* Venom Linux: `sudo scratch install fastfetch`
+
+Replace sudo with doas or sup depending on what you use.
 
 [See also if fastfetch has been packaged for your favorite Linux distro](#Packaging).
 
@@ -71,10 +72,7 @@ You may also download the program directly from [the GitHub releases page](https
 
 ### Android (Termux)
 
-* Fastfetch is available [in the Termux repository](https://github.com/termux/termux-packages/tree/master/packages/fastfetch), run `pkg install fastfetch`
-
-* You can also install fastfetch directly with APT: `apt install fastfetch`
-
+* `pkg install fastfetch`
 
 ## Build from source
 
@@ -112,7 +110,7 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 
 1. Fastfetch is actively maintained.
 2. Fastfetch is faster. As the name suggests.
-3. Fastfetch has a greater number of features, though by default fastfetch only has a few modules enabled; use `fastfetch -c all.jsonc` to find what you want.
+3. Fastfetch has a greater number of features, though by default fastfetch only has a few modules enabled; use `fastfetch -c all` to find what you want.
 4. Fastfetch is more configurable. You can find more information in the Wiki: <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration>.
 5. Fastfetch is more polished. For example, neofetch prints `555MiB` in `Memory` module and `23G` in `Disk` module, whereas fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
 6. Fastfetch is more accurate. For example, [neofetch never actually supports the Wayland protocol](https://github.com/dylanaraps/neofetch/pull/2395).
@@ -121,7 +119,7 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 
 A local IP (10.x.x.x, 172.x.x.x, 192.168.x.x) has nothing to do with privacy. It only makes sense if you are on the same network, for example, if you connect to the same Wi-Fi network.
 
-Actually the `Local IP` module is the most useful module for me personally. I ([@CarterLi](https://github.com/CarterLi)) have several VMs installed to test fastfetch and often need to SSH into them. I have fastfetch running on shell startup and I never need to type `ip addr` manually.
+Actually the `Local IP` module is the most useful module for me personally. I (@CarterLi) have several VMs installed to test fastfetch and often need to SSH into them. I have fastfetch running on shell startup and I never need to type `ip addr` manually.
 
 If you really don't like it, you can disable the `Local IP` module in `config.jsonc`.
 
