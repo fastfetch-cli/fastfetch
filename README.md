@@ -30,17 +30,23 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 Some distros packaged an outdated fastfetch version. Older version receive no support, so please try always to use the latest version.
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
-* Debian: `sudo apt install fastfetch` (for Debian 13 or newer)
+* Debian: `apt install fastfetch` (for Debian 13 or newer)
 * Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
-* Arch Linux: `sudo pacman -S fastfetch`
-* Fedora: `sudo dnf install fastfetch`
-* Gentoo: `sudo emerge --ask app-misc/fastfetch`
+* Arch Linux: `pacman -S fastfetch`
+* Fedora: `dnf install fastfetch`
+* Gentoo: `emerge --ask app-misc/fastfetch`
 * Alpine: `apk add --upgrade fastfetch`
 * NixOS: `nix-shell -p fastfetch`
-* openSUSE: `sudo zypper install fastfetch`
-* ALT Linux: `sudo apt-get install fastfetch`
+* openSUSE: `zypper install fastfetch`
+* ALT Linux: `apt-get install fastfetch`
+* Exherbo: `cave resolve --execute app-misc/fastfetch`
+* GNU Guix: `guix install fastfetch`
+* Solus: `eopkg install fastfetch`
+* Slackware: `sbopkg -i fastfetch`
+* Void Linux: `xbps-install fastfetch`
+* Venom Linux: `scratch install fastfetch`
 
-Replace sudo with doas depending on what you use.
+You may need `sudo`, `doas` or `sup` to run these commands.
 
 [See also if fastfetch has been packaged for your favorite Linux distro](#Packaging).
 
@@ -54,6 +60,7 @@ If fastfetch is not packaged for your distro or an outdated version is packaged,
 ### Windows
 
 * [scoop](https://scoop.sh/#/apps?q=fastfetch): `scoop install fastfetch`
+* [Chocolatey](https://community.chocolatey.org/packages/fastfetch): `choco install fastfetch`
 * [winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Fastfetch-cli/Fastfetch): `winget install fastfetch`
 * [MSYS2 MinGW](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
 
