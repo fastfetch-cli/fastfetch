@@ -89,10 +89,12 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     display->bitDepth = (uint8_t) bitDepth;
                 }
 
+                #ifdef MAC_OS_X_VERSION_10_15
                 if (CoreDisplay_Display_IsHDRModeEnabled)
                 {
                     display->hdrEnabled = CoreDisplay_Display_IsHDRModeEnabled(screen);
                 }
+                #endif
             }
             CGDisplayModeRelease(mode);
         }
