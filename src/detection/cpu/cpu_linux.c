@@ -82,44 +82,51 @@ static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
     FF_AUTO_FREE char* line = NULL;
     rewind(cpuinfo);
     size_t len = 0;
-    const char* lastName = NULL;
+    uint32_t lastPartId = UINT32_MAX;
     uint32_t num = 0;
     while(getline(&line, &len, cpuinfo) != -1)
     {
         if (!ffStrStartsWith(line, "CPU part\t: ")) continue;
         uint32_t partId = (uint32_t) strtoul(line + strlen("CPU part\t: "), NULL, 16);
         const char* name = NULL;
-        switch (implId)
+        if (partId > 0) // Linux reports 0 for unknown CPUs
         {
-            case 0x41: name = armPartId2name(partId); break;
-            case 0x42: name = brcmPartId2name(partId); break;
-            case 0x43: name = caviumPartId2name(partId); break;
-            case 0x44: name = decPartId2name(partId); break;
-            case 0x46: name = fujitsuPartId2name(partId); break;
-            case 0x48: name = hisiPartId2name(partId); break;
-            case 0x4e: name = nvidiaPartId2name(partId); break;
-            case 0x50: name = apmPartId2name(partId); break;
-            case 0x51: name = qcomPartId2name(partId); break;
-            case 0x53: name = samsungPartId2name(partId); break;
-            case 0x56: name = marvellPartId2name(partId); break;
-            case 0x61: name = applePartId2name(partId); break;
-            case 0x66: name = faradayPartId2name(partId); break;
-            case 0x69: name = intelPartId2name(partId); break;
-            case 0x6d: name = msPartId2name(partId); break;
-            case 0x70: name = ftPartId2name(partId); break;
-            case 0xc0: name = amperePartId2name(partId); break;
-            default: name = "Unknown"; break;
+            switch (implId)
+            {
+                case 0x41: name = armPartId2name(partId); break;
+                case 0x42: name = brcmPartId2name(partId); break;
+                case 0x43: name = caviumPartId2name(partId); break;
+                case 0x44: name = decPartId2name(partId); break;
+                case 0x46: name = fujitsuPartId2name(partId); break;
+                case 0x48: name = hisiPartId2name(partId); break;
+                case 0x4e: name = nvidiaPartId2name(partId); break;
+                case 0x50: name = apmPartId2name(partId); break;
+                case 0x51: name = qcomPartId2name(partId); break;
+                case 0x53: name = samsungPartId2name(partId); break;
+                case 0x56: name = marvellPartId2name(partId); break;
+                case 0x61: name = applePartId2name(partId); break;
+                case 0x66: name = faradayPartId2name(partId); break;
+                case 0x69: name = intelPartId2name(partId); break;
+                case 0x6d: name = msPartId2name(partId); break;
+                case 0x70: name = ftPartId2name(partId); break;
+                case 0xc0: name = amperePartId2name(partId); break;
+            }
         }
-        if (lastName != name)
+        if (lastPartId != partId)
         {
-            if (lastName)
+            if (lastPartId != UINT32_MAX)
             {
                 if (num > 1)
                     ffStrbufAppendF(&cpu->name, "*%u", num);
                 ffStrbufAppendS(&cpu->name, " + ");
             }
-            ffStrbufAppendS(&cpu->name, name);
-            lastName = name;
+            if (name)
+                ffStrbufAppendS(&cpu->name, name);
+            else if (partId)
+                ffStrbufAppendF(&cpu->name, "%s-%X", cpu->vendor.chars, partId);
+            else
+                ffStrbufAppend(&cpu->name, &cpu->vendor);
+            lastPartId = partId;
             num = 1;
         }
         else

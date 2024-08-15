@@ -28,7 +28,7 @@ static const char* hwImplId2Vendor(uint32_t implId)
     case 0x6D: return "Microsoft";
     case 0x70: return "Phytium";
     case 0xc0: return "Ampere";
-    default: return 0;
+    default: return "Unknown";
     }
 }
 
@@ -106,7 +106,7 @@ static const char* armPartId2name(uint32_t partId)
     case 0xd80: return "Cortex-A520";
     case 0xd81: return "Cortex-A720";
     case 0xd82: return "Cortex-X4";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -117,7 +117,7 @@ static const char* brcmPartId2name(uint32_t partId)
     case 0x0f: return "Brahma-B15";
     case 0x100: return "Brahma-B53";
     case 0x516: return "ThunderX2";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -127,7 +127,7 @@ static const char* decPartId2name(uint32_t partId)
     {
     case 0xa10: return "SA110";
     case 0xa11: return "SA1100";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -148,7 +148,7 @@ static const char* caviumPartId2name(uint32_t partId)
     case 0x0b5: return "OcteonTX2-95XXMM";
     case 0x0b6: return "OcteonTX2-95XXO";
     case 0x0b8: return "ThunderX3-T110";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -157,7 +157,7 @@ static const char* apmPartId2name(uint32_t partId)
     switch (partId)
     {
     case 0x000: return "X-Gene";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -181,7 +181,7 @@ static const char* qcomPartId2name(uint32_t partId)
     case 0x805: return "Kryo-4XX-Silver";
     case 0xc00: return "Falkor";
     case 0xc01: return "Saphira";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -189,11 +189,11 @@ static const char* samsungPartId2name(uint32_t partId)
 {
     switch (partId)
     {
-    case 0x001: return "exynos-m1";
-    case 0x002: return "exynos-m3";
-    case 0x003: return "exynos-m4";
-    case 0x004: return "exynos-m5";
-    default: return "Unknown";
+    case 0x001: return "Exynos-M1";
+    case 0x002: return "Exynos-M3";
+    case 0x003: return "Exynos-M4";
+    case 0x004: return "Exynos-M5";
+    default: return NULL;
     }
 }
 
@@ -204,7 +204,7 @@ static const char* nvidiaPartId2name(uint32_t partId)
     case 0x000: return "Denver";
     case 0x003: return "Denver 2";
     case 0x004: return "Carmel";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -215,7 +215,7 @@ static const char* marvellPartId2name(uint32_t partId)
     case 0x131: return "Feroceon-88FR131";
     case 0x581: return "PJ4/PJ4b";
     case 0x584: return "PJ4B-MP";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -259,7 +259,7 @@ static const char* applePartId2name(uint32_t partId)
     case 0x037: return "Everest-A16";
     case 0x038: return "Blizzard-M2-Max";
     case 0x039: return "Avalanche-M2-Max";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -269,7 +269,7 @@ static const char* faradayPartId2name(uint32_t partId)
     {
     case 0x526: return "FA526";
     case 0x626: return "FA626";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -298,7 +298,7 @@ static const char* intelPartId2name(uint32_t partId)
     case 0x689: return "PXA31x";
     case 0xb11: return "SA1110";
     case 0xc12: return "IPX1200";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -307,7 +307,7 @@ static const char* fujitsuPartId2name(uint32_t partId)
     switch (partId)
     {
     case 0x001: return "A64FX";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -319,7 +319,7 @@ static const char* hisiPartId2name(uint32_t partId)
     case 0xd02: return "TaiShan-v120";	/* used in Kirin 990A and 9000S SoCs */
     case 0xd40: return "Cortex-A76";	/* HiSilicon uses this ID though advertises A76 */
     case 0xd41: return "Cortex-A77";	/* HiSilicon uses this ID though advertises A77 */
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -329,7 +329,7 @@ static const char* amperePartId2name(uint32_t partId)
     {
     case 0xac3: return "Ampere-1";
     case 0xac4: return "Ampere-1a";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -344,7 +344,7 @@ static const char* ftPartId2name(uint32_t partId)
     case 0x663: return "FTC663";
     case 0x664: return "FTC664";
     case 0x862: return "FTC862";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
 
@@ -353,6 +353,6 @@ static const char* msPartId2name(uint32_t partId)
     switch (partId)
     {
     case 0xd49: return "Azure-Cobalt-100";
-    default: return "Unknown";
+    default: return NULL;
     }
 }
