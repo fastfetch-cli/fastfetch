@@ -1,3 +1,9 @@
+# 2.21.3
+
+Bugfixes:
+* Fix bad Intel Arc GPU name detection, which was supposed to be fixed in the last version but the change was reverted accidentally (#1177, GPU, Linux)
+* Fix arm32 CPU name detection no longer work. Regression of 2.21.2 (CPU, Linux)
+
 # 2.21.2
 
 Features:
