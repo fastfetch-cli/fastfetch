@@ -26,7 +26,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     {
         ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(gpu->vendor.length + 1 + gpu->name.length);
+        FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
         if(gpu->vendor.length > 0 && !ffStrbufStartsWith(&gpu->name, &gpu->vendor))
         {

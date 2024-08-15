@@ -1,3 +1,26 @@
+# 2.21.3
+
+Bugfixes:
+* Fix bad Intel Arc GPU name detection, which was supposed to be fixed in the last version but the change was reverted accidentally (#1177, GPU, Linux)
+* Fix arm32 CPU name detection no longer work. Regression of 2.21.2 (CPU, Linux)
+
+# 2.21.2
+
+Features:
+* Support `--stat <num_in_ms>` to display long running modules in yellow or red
+
+Bugfixes:
+* Fix bad Intel Arc GPU name and type detection (GPU, Linux)
+* Fix uninited struct fields (GPU, Linux)
+* Skip cpu model smbios detection on ARM platforms (CPU, Linux)
+* Always use `CurrentControlSet` instead of `ControlSet001` when querying registry (Windows)
+* Fix NVIDIA GPUs are missing in GPU detection sometimes (GPU, Windows)
+* Fixing detection of `pthread_timedjoin_np` (Linux)
+
+Logos:
+* Add HyprOS
+* Add GoldenDog Linux
+
 # 2.21.1
 
 Hotfix for a regression that breaks WM detection when running `startx` from TTY (Regression from 2.21.0, #1172 / #1162)
