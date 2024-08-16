@@ -2342,7 +2342,6 @@ static const FFlogo L[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
-        
     },
     // Linspire
     {
