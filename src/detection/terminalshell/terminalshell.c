@@ -3,6 +3,7 @@
 #include "common/processing.h"
 #include "common/properties.h"
 #include "util/stringUtils.h"
+#include "util/linux/elf.h"
 
 #include <ctype.h>
 #ifdef __FreeBSD__
@@ -250,8 +251,24 @@ FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
     return version->length > 0;
 }
 
-FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* version)
+static bool extractGnomeTerminalVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
+    if (!ffCharIsDigit(str[0])) return true;
+    int count = 0;
+    sscanf(str, "%*d.%*d.%*d%n", &count);
+    if (count == 0) return true;
+    ffStrbufSetS((FFstrbuf*) userdata, str);
+    return false;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* version)
+{
+    if (exe->chars[0] == '/')
+    {
+        ffElfExtractStrings(exe->chars, extractGnomeTerminalVersion, version);
+        if (version->length) return true;
+    }
+
     if(ffProcessAppendStdOut(version, (char* const[]){
         "gnome-terminal",
         "--version",
@@ -590,7 +607,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
 
     if(ffStrbufStartsWithIgnCaseS(processName, "gnome-terminal"))
-        return getTerminalVersionGnome(version);
+        return getTerminalVersionGnome(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "konsole"))
         return getTerminalVersionKonsole(exe, version);
