@@ -54,31 +54,6 @@ typedef struct FFSmbiosProcessorInfo
 static_assert(offsetof(FFSmbiosProcessorInfo, ThreadEnabled) == 0x30,
     "FFSmbiosProcessorInfo: Wrong struct alignment");
 
-#if defined(__x86_64__) || defined(__i386__)
-
-#include <cpuid.h>
-
-inline static const char* detectSpeedByCpuid(FFCPUResult* cpu)
-{
-    uint32_t base = 0, max = 0, bus = 0, unused = 0;
-    if (!__get_cpuid(0x16, &base, &max, &bus, &unused))
-        return "Unsupported instruction";
-
-    // cpuid returns 0 MHz when hyper-v is enabled
-    if (base) cpu->frequencyBase = base;
-    if (max) cpu->frequencyMax = max;
-    return NULL;
-}
-
-#else
-
-inline static const char* detectSpeedByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
-{
-    return "Unsupported platform";
-}
-
-#endif
-
 static const char* detectMaxSpeedBySmbios(FFCPUResult* cpu)
 {
     const FFSmbiosHeaderTable* smbiosTable = ffGetSmbiosHeaderTable();
@@ -193,7 +168,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (error)
         return error;
 
-    detectSpeedByCpuid(cpu);
+    ffCPUDetectSpeedByCpuid(cpu);
     if (options->showPeCoreCount) detectCoreTypes(cpu);
 
     if (cpu->frequencyMax == 0)
