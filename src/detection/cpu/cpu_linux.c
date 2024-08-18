@@ -265,8 +265,8 @@ static double detectCPUTemp(void)
     {
         if(
             ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
-            ffStrbufCompS(&value->name, "k10temp") == 0 ||
-            ffStrbufCompS(&value->name, "coretemp") == 0
+            ffStrbufEqualS(&value->name, "k10temp") ||
+            ffStrbufEqualS(&value->name, "coretemp")
         ) return value->value;
     }
 
