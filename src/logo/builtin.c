@@ -3970,6 +3970,15 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // SleeperOS
+    {
+        .names = {"sleeperos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SLEEPEROS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        }
+    },
     // Slitaz
     {
         .names = {"Slitaz"},
