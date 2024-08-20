@@ -62,7 +62,7 @@ If fastfetch is not packaged for your distro or an outdated version is packaged,
 * [scoop](https://scoop.sh/#/apps?q=fastfetch): `scoop install fastfetch`
 * [Chocolatey](https://community.chocolatey.org/packages/fastfetch): `choco install fastfetch`
 * [winget](https://github.com/microsoft/winget-pkgs/tree/master/manifests/f/Fastfetch-cli/Fastfetch): `winget install fastfetch`
-* [MSYS2 MinGW](https://github.com/msys2/MINGW-packages/tree/master/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
+* [MSYS2 MinGW](https://packages.msys2.org/base/mingw-w64-fastfetch): `pacman -S mingw-w64-<subsystem>-<arch>-fastfetch`
 
 You may also download the program directly from [the GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) in the form of an archive file.
 
