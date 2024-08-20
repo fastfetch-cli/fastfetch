@@ -72,7 +72,7 @@ static bool isPhysicalDevice(const struct mntent* device)
     ) return false;
 
     // https://source.android.com/docs/core/ota/apex?hl=zh-cn
-    if(ffStrStartsWith(device->mnt_dir, "/apex/")) 
+    if(ffStrStartsWith(device->mnt_dir, "/apex/"))
         return false;
 
     #endif // __ANDROID__
@@ -240,8 +240,16 @@ static void detectStats(FFDisk* disk)
     disk->bytesAvailable = fs.f_bavail * fs.f_frsize;
     disk->bytesUsed = 0; // To be filled in ./disk.c
 
-    disk->filesTotal = (uint32_t) fs.f_files;
-    disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
+    if (fs.f_files >= fs.f_ffree)
+    {
+        disk->filesTotal = (uint32_t) fs.f_files;
+        disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
+    }
+    else
+    {
+        // Windows filesystem in WSL
+        disk->filesTotal = disk->filesUsed = 0;
+    }
 
     if(fs.f_flag & ST_RDONLY)
         disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
