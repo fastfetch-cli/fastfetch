@@ -3,7 +3,7 @@
 #include "common/processing.h"
 #include "common/properties.h"
 #include "util/stringUtils.h"
-#include "util/linux/elf.h"
+#include "util/binary.h"
 
 #include <ctype.h>
 #ifdef __FreeBSD__
@@ -265,7 +265,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
 {
     if (exe->chars[0] == '/')
     {
-        ffElfExtractStrings(exe->chars, extractGnomeTerminalVersion, version);
+        ffBinaryExtractStrings(exe->chars, extractGnomeTerminalVersion, version);
         if (version->length) return true;
     }
 

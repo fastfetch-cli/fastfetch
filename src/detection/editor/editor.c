@@ -2,7 +2,7 @@
 #include "common/processing.h"
 #include "util/stringUtils.h"
 #include "util/path.h"
-#include "util/linux/elf.h"
+#include "util/binary.h"
 
 #include <stdlib.h>
 
@@ -92,11 +92,11 @@ const char* ffDetectEditor(FFEditorResult* result)
 
     #if __linux__ || __FreeBSD__
     if (ffStrbufEqualS(&result->exe, "nvim"))
-        ffElfExtractStrings(buf, extractNvimVersion, &result->version);
+        ffBinaryExtractStrings(buf, extractNvimVersion, &result->version);
     else if (ffStrbufEqualS(&result->exe, "vim"))
-        ffElfExtractStrings(buf, extractVimVersion, &result->version);
+        ffBinaryExtractStrings(buf, extractVimVersion, &result->version);
     else if (ffStrbufEqualS(&result->exe, "nano"))
-        ffElfExtractStrings(buf, extractNanoVersion, &result->version);
+        ffBinaryExtractStrings(buf, extractNanoVersion, &result->version);
 
     if (result->version.length > 0) return NULL;
     #endif

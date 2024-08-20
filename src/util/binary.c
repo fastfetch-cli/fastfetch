@@ -1,4 +1,4 @@
-#include "elf.h"
+#include "binary.h"
 
 #ifdef FF_HAVE_ELF
 
@@ -23,7 +23,7 @@ struct FFElfData {
     bool inited;
 } elfData;
 
-const char* ffElfExtractStrings(const char* elfFile, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata)
+const char* ffBinaryExtractStrings(const char* elfFile, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata)
 {
     if (!elfData.inited)
     {
@@ -98,9 +98,9 @@ const char* ffElfExtractStrings(const char* elfFile, bool (*cb)(const char* str,
 
 #else
 
-const char* ffElfExtractStrings(const char* elfFile, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata)
+const char* ffBinaryExtractStrings(const char* file, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata)
 {
-    FF_UNUSED(elfFile, cb, userdata);
+    FF_UNUSED(file, cb, userdata);
     return "Fastfetch was built without libelf support";
 }
 

@@ -1,6 +1,6 @@
 #include "initsystem.h"
 #include "common/processing.h"
-#include "util/linux/elf.h"
+#include "util/binary.h"
 #include <unistd.h>
 
 FF_MAYBE_UNUSED static bool elfExtractStringsCallBack(const char* str, uint32_t len, void* data)
@@ -49,7 +49,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
         #if __linux__ && !__ANDROID__
         if (ffStrbufEqualS(&result->name, "systemd"))
         {
-            ffElfExtractStrings(result->exe.chars, elfExtractStringsCallBack, &result->version);
+            ffBinaryExtractStrings(result->exe.chars, elfExtractStringsCallBack, &result->version);
             if (result->version.length == 0)
             {
                 if (ffProcessAppendStdOut(&result->version, (char* const[]) {
