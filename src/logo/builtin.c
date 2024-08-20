@@ -3972,7 +3972,7 @@ static const FFlogo S[] = {
     },
     // SleeperOS
     {
-        .names = {"sleeperos"},
+        .names = {"SleeperOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_SLEEPEROS,
         .colors = {
             FF_COLOR_FG_CYAN,
