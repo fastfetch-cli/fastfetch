@@ -13,7 +13,6 @@ static inline char* realpath(const char* restrict file_name, char* restrict reso
 }
 #endif
 
-#if __linux__ || __FreeBSD__
 static bool extractNvimVersion(const char* str, uint32_t len, void* userdata)
 {
     if (len < strlen("NVIM v0.0.0")) return true;
@@ -38,7 +37,6 @@ static bool extractNanoVersion(const char* str, uint32_t len, void* userdata)
     ffStrbufSetS((FFstrbuf*) userdata, str + strlen("GNU nano "));
     return false;
 }
-#endif
 
 const char* ffDetectEditor(FFEditorResult* result)
 {
@@ -90,7 +88,6 @@ const char* ffDetectEditor(FFEditorResult* result)
         #endif
     }
 
-    #if __linux__ || __FreeBSD__
     if (ffStrbufEqualS(&result->exe, "nvim"))
         ffBinaryExtractStrings(buf, extractNvimVersion, &result->version);
     else if (ffStrbufEqualS(&result->exe, "vim"))
@@ -99,7 +96,6 @@ const char* ffDetectEditor(FFEditorResult* result)
         ffBinaryExtractStrings(buf, extractNanoVersion, &result->version);
 
     if (result->version.length > 0) return NULL;
-    #endif
 
     const char* param = NULL;
     if (

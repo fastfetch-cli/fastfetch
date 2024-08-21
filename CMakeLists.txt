@@ -482,7 +482,7 @@ if(LINUX)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
-        src/util/binary.c
+        src/util/binary_linux.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
@@ -544,7 +544,7 @@ elseif(ANDROID)
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_android.c
         src/util/platform/FFPlatform_unix.c
-        src/util/binary.c
+        src/util/binary_linux.c
     )
 elseif(FreeBSD)
     list(APPEND LIBFASTFETCH_SRC
@@ -623,7 +623,7 @@ elseif(FreeBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/util/platform/FFPlatform_unix.c
-        src/util/binary.c
+        src/util/binary_linux.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -689,7 +689,7 @@ elseif(APPLE)
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/platform/FFPlatform_unix.c
-        src/util/binary.c
+        src/util/binary_apple.c
     )
 elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
@@ -756,7 +756,7 @@ elseif(WIN32)
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
         src/util/platform/FFPlatform_windows.c
-        src/util/binary.c
+        src/util/binary_linux.c
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
@@ -833,7 +833,7 @@ elseif(SunOS)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
         src/util/platform/FFPlatform_unix.c
-        src/util/binary.c
+        src/util/binary_linux.c
     )
 endif()
 
