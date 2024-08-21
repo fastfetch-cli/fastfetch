@@ -144,8 +144,12 @@ static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physi
 
     while(getline(&line, &len, cpuinfo) != -1)
     {
-        //Stop after the first CPU
-        if(*line == '\0' || *line == '\n')
+        //Stop after reasonable information is acquired
+        if((*line == '\0' || *line == '\n')
+            #if __ANDROID__ && __arm__
+            && cpu->name.length > 0 // #1202
+            #endif
+        )
             break;
 
         (void)(
@@ -157,7 +161,7 @@ static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physi
             ffParsePropLine(line, "uarch :", cpuUarch) ||
 
             #if __arm__ || __aarch64__
-            (cpu->vendor.length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
+            (cpuImplementer->length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
             #endif
             #if __ANDROID__
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
