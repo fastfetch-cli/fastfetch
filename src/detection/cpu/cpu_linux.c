@@ -137,7 +137,14 @@ static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
 }
 #endif
 
-static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physicalCoresBuffer, FFstrbuf* cpuMHz, FFstrbuf* cpuIsa, FFstrbuf* cpuUarch, FF_MAYBE_UNUSED FFstrbuf* cpuImplementer)
+static const char* parseCpuInfo(
+    FILE* cpuinfo,
+    FFCPUResult* cpu,
+    FFstrbuf* physicalCoresBuffer,
+    FFstrbuf* cpuMHz,
+    FF_MAYBE_UNUSED FFstrbuf* cpuIsa,
+    FF_MAYBE_UNUSED FFstrbuf* cpuUarch,
+    FF_MAYBE_UNUSED FFstrbuf* cpuImplementer)
 {
     FF_AUTO_FREE char* line = NULL;
     size_t len = 0;
@@ -157,8 +164,11 @@ static const char* parseCpuInfo(FILE* cpuinfo, FFCPUResult* cpu, FFstrbuf* physi
             ffParsePropLine(line, "vendor_id :", &cpu->vendor) ||
             ffParsePropLine(line, "cpu cores :", physicalCoresBuffer) ||
             ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
+
+            #if !(__x86_64__ || __i386__ || __arm__ || __aarch64__)
             ffParsePropLine(line, "isa :", cpuIsa) ||
             ffParsePropLine(line, "uarch :", cpuUarch) ||
+            #endif
 
             #if __arm__ || __aarch64__
             (cpuImplementer->length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
@@ -277,7 +287,7 @@ static double detectCPUTemp(void)
     return FF_CPU_TEMP_UNSET;
 }
 
-static void parseIsa(FFstrbuf* cpuIsa)
+FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
 {
     if(ffStrbufStartsWithS(cpuIsa, "rv"))
     {
@@ -300,7 +310,7 @@ static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-void detectAsahi(FFCPUResult* cpu)
+FF_MAYBE_UNUSED static void detectAsahi(FFCPUResult* cpu)
 {
     // In Asahi Linux, reading /proc/device-tree/compatible gives
     // information on the device model. It consists of 3 NUL terminated
@@ -349,6 +359,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (!detectFrequency(cpu, options) || cpu->frequencyBase == 0)
         cpu->frequencyBase = (uint32_t) ffStrbufToUInt(&cpuMHz, 0);
 
+    #if !(__x86_64__ || __i386__ || __arm__ || __aarch64__)
     if(cpuUarch.length > 0)
     {
         if(cpu->name.length > 0)
@@ -363,6 +374,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             ffStrbufAppendC(&cpu->name, ' ');
         ffStrbufAppend(&cpu->name, &cpuIsa);
     }
+    #endif
 
     #if __arm__ || __aarch64__
     uint32_t cpuImplementer = (uint32_t) strtoul(cpuImplementerStr.chars, NULL, 16);
