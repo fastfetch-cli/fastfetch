@@ -138,10 +138,10 @@ static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
 #endif
 
 static const char* parseCpuInfo(
-    FILE* cpuinfo,
-    FFCPUResult* cpu,
-    FFstrbuf* physicalCoresBuffer,
-    FFstrbuf* cpuMHz,
+    FF_MAYBE_UNUSED FILE* cpuinfo,
+    FF_MAYBE_UNUSED FFCPUResult* cpu,
+    FF_MAYBE_UNUSED FFstrbuf* physicalCoresBuffer,
+    FF_MAYBE_UNUSED FFstrbuf* cpuMHz,
     FF_MAYBE_UNUSED FFstrbuf* cpuIsa,
     FF_MAYBE_UNUSED FFstrbuf* cpuUarch,
     FF_MAYBE_UNUSED FFstrbuf* cpuImplementer)
@@ -153,21 +153,25 @@ static const char* parseCpuInfo(
     {
         //Stop after reasonable information is acquired
         if((*line == '\0' || *line == '\n')
-            #if __ANDROID__ && __arm__
-            && cpu->name.length > 0 // #1202
+            #if __arm__ || __loongarch__
+            && cpu->name.length > 0 // #1202 #1204
             #endif
         )
             break;
 
         (void)(
-            ffParsePropLine(line, "model name :", &cpu->name) ||
-            ffParsePropLine(line, "vendor_id :", &cpu->vendor) ||
-            ffParsePropLine(line, "cpu cores :", physicalCoresBuffer) ||
-            ffParsePropLine(line, "cpu MHz :", cpuMHz) ||
+            // arm64 doesn't have "model name"; arm32 does have "model name" but its value is not useful.
+            // "Hardware" should always be used in this case
+            #if !(__arm__ || __aarch64__)
+            (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
+            (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor_id :", &cpu->vendor)) ||
+            (physicalCoresBuffer->length == 0 && ffParsePropLine(line, "cpu cores :", physicalCoresBuffer)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz :", cpuMHz)) ||
+            #endif
 
             #if !(__x86_64__ || __i386__ || __arm__ || __aarch64__)
-            ffParsePropLine(line, "isa :", cpuIsa) ||
-            ffParsePropLine(line, "uarch :", cpuUarch) ||
+            (cpuIsa->length == 0 && ffParsePropLine(line, "isa :", cpuIsa)) ||
+            (cpuUarch->length == 0 && ffParsePropLine(line, "uarch :", cpuUarch)) ||
             #endif
 
             #if __arm__ || __aarch64__
@@ -177,10 +181,10 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
             #endif
             #if __powerpc__ || __powerpc
-            (cpu->name.length == 0 && ffParsePropLine(line, "cpu     :", &cpu->name)) || //For POWER
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) || //For POWER
             #endif
             #if __mips__
-            (cpu->name.length == 0 && ffParsePropLine(line, "cpu model               :", &cpu->name)) || //For MIPS
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu model :", &cpu->name)) || //For MIPS
             #endif
             false
         );
@@ -289,6 +293,9 @@ static double detectCPUTemp(void)
 
 FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
 {
+    // Always use the last part of the ISA string. Ref: #590 #1204
+    ffStrbufSubstrAfterLastC(cpuIsa, ' ');
+
     if(ffStrbufStartsWithS(cpuIsa, "rv"))
     {
         // RISC-V ISA string example: "rv64imafdch_zicsr_zifencei".
@@ -303,10 +310,6 @@ FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
             cpuIsa->chars[4] = 'g';
         }
         // The final ISA output of the above example is "rv64gch".
-    }
-    if(ffStrbufStartsWithS(cpuIsa, "mips"))
-    {
-        ffStrbufSubstrAfterLastC(cpuIsa, ' ');
     }
 }
 
