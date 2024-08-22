@@ -756,7 +756,7 @@ elseif(WIN32)
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
         src/util/platform/FFPlatform_windows.c
-        src/util/binary_linux.c
+        src/util/binary_windows.c
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
@@ -1139,6 +1139,7 @@ elseif(WIN32)
         PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
+        PRIVATE "imagehlp"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch

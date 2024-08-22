@@ -57,14 +57,14 @@ const char* ffDetectEditor(FFEditorResult* result)
     else
     {
         const char* error = ffFindExecutableInPath(result->name.chars, &result->path);
-        if (error) return error;
+        if (error) return NULL;
     }
-
-    if (!instance.config.general.detectVersion) return NULL;
 
     char buf[PATH_MAX + 1];
     if (!realpath(result->path.chars, buf))
         return NULL;
+
+    // WIN32: Should we handle scoop shim exe here?
 
     ffStrbufSetS(&result->path, buf);
 
@@ -87,6 +87,8 @@ const char* ffDetectEditor(FFEditorResult* result)
             ffStrbufSubstrBefore(&result->exe, result->exe.length - 4);
         #endif
     }
+
+    if (!instance.config.general.detectVersion) return NULL;
 
     if (ffStrbufEqualS(&result->exe, "nvim"))
         ffBinaryExtractStrings(buf, extractNvimVersion, &result->version);
