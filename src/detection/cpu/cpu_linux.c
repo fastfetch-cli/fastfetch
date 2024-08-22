@@ -176,8 +176,6 @@ static const char* parseCpuInfo(
 
             #if __arm__ || __aarch64__
             (cpuImplementer->length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
-            #endif
-            #if __ANDROID__
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
             #endif
             #if __powerpc__ || __powerpc
