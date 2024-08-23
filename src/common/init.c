@@ -54,9 +54,6 @@ void ffInitInstance(void)
     #else
         // Never use `setlocale(LC_ALL, "")`
         setlocale(LC_TIME, "");
-        #ifdef LC_MESSAGES
-            setlocale(LC_MESSAGES, "");
-        #endif
     #endif
 
     initState(&instance.state);
