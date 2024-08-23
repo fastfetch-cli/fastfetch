@@ -345,6 +345,10 @@ const FFShellResult* ffDetectShell(void)
     if(!ffProcessGetInfoWindows(0, &ppid, NULL, NULL, NULL, NULL, NULL))
         return &result;
 
+    const char* ignoreParent = getenv("FFTS_IGNORE_PARENT");
+    if (ignoreParent && ffStrEquals(ignoreParent, "1"))
+        ffProcessGetInfoWindows(ppid, &ppid, NULL, NULL, NULL, NULL, NULL);
+
     ppid = getShellInfo(&result, ppid);
 
     if (result.processName.length > 0)

@@ -384,6 +384,14 @@ const FFShellResult* ffDetectShell()
     result.tty = -1;
 
     pid_t ppid = getppid();
+
+    const char* ignoreParent = getenv("FFTS_IGNORE_PARENT");
+    if (ignoreParent && ffStrEquals(ignoreParent, "1"))
+    {
+        FF_STRBUF_AUTO_DESTROY _ = ffStrbufCreate();
+        ffProcessGetBasicInfoLinux(ppid, &_, &ppid, NULL);
+    }
+
     ppid = getShellInfo(&result, ppid);
     getUserShellFromEnv(&result);
     setShellInfoDetails(&result);
