@@ -1,5 +1,6 @@
 #include "editor.h"
 #include "common/processing.h"
+#include "common/library.h"
 #include "util/stringUtils.h"
 #include "util/path.h"
 #include "util/binary.h"
@@ -13,7 +14,7 @@ static inline char* realpath(const char* restrict file_name, char* restrict reso
 }
 #endif
 
-static bool extractNvimVersion(const char* str, uint32_t len, void* userdata)
+static bool extractNvimVersionFromBinary(const char* str, uint32_t len, void* userdata)
 {
     if (len < strlen("NVIM v0.0.0")) return true;
     if (!ffStrStartsWith(str, "NVIM v")) return true;
@@ -21,7 +22,7 @@ static bool extractNvimVersion(const char* str, uint32_t len, void* userdata)
     return false;
 }
 
-static bool extractVimVersion(const char* str, uint32_t len, void* userdata)
+static bool extractVimVersionFromBinary(const char* str, uint32_t len, void* userdata)
 {
     if (len < strlen("VIM - Vi IMproved 0.0")) return true;
     if (!ffStrStartsWith(str, "VIM - Vi IMproved ")) return true;
@@ -30,7 +31,7 @@ static bool extractVimVersion(const char* str, uint32_t len, void* userdata)
     return false;
 }
 
-static bool extractNanoVersion(const char* str, uint32_t len, void* userdata)
+static bool extractNanoVersionFromBinary(const char* str, uint32_t len, void* userdata)
 {
     if (len < strlen("GNU nano 0.0")) return true;
     if (!ffStrStartsWith(str, "GNU nano ")) return true;
@@ -60,13 +61,18 @@ const char* ffDetectEditor(FFEditorResult* result)
         if (error) return NULL;
     }
 
-    char buf[PATH_MAX + 1];
-    if (!realpath(result->path.chars, buf))
-        return NULL;
+    {
+        char buf[PATH_MAX + 1];
+        if (!realpath(result->path.chars, buf))
+            return NULL;
 
-    // WIN32: Should we handle scoop shim exe here?
+        // WIN32: Should we handle scoop shim exe here?
 
-    ffStrbufSetS(&result->path, buf);
+        #ifdef __linux__
+        if (!ffStrEndsWith(buf, "/snap"))
+        #endif
+            ffStrbufSetS(&result->path, buf);
+    }
 
     {
         uint32_t index = ffStrbufLastIndexC(&result->path,
@@ -91,11 +97,11 @@ const char* ffDetectEditor(FFEditorResult* result)
     if (!instance.config.general.detectVersion) return NULL;
 
     if (ffStrbufEqualS(&result->exe, "nvim"))
-        ffBinaryExtractStrings(buf, extractNvimVersion, &result->version);
+        ffBinaryExtractStrings(result->path.chars, extractNvimVersionFromBinary, &result->version);
     else if (ffStrbufEqualS(&result->exe, "vim"))
-        ffBinaryExtractStrings(buf, extractVimVersion, &result->version);
+        ffBinaryExtractStrings(result->path.chars, extractVimVersionFromBinary, &result->version);
     else if (ffStrbufEqualS(&result->exe, "nano"))
-        ffBinaryExtractStrings(buf, extractNanoVersion, &result->version);
+        ffBinaryExtractStrings(result->path.chars, extractNanoVersionFromBinary, &result->version);
 
     if (result->version.length > 0) return NULL;
 

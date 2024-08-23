@@ -13,14 +13,17 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
     const bool appendExe = !ffStrEndsWithIgnCase(name, ".exe");
     #endif
 
-    for (char* token = NULL; (token = strchr(path,
-        #ifdef _WIN32
-            ';'
-        #else
-            ':'
-        #endif
-    )) != NULL; path = token + 1)
+    for (char* token = path; *token; path = token + 1)
     {
+        token = strchr(path,
+            #ifdef _WIN32
+                ';'
+            #else
+                ':'
+            #endif
+        );
+        if (!token) token = path + strlen(path);
+
         ffStrbufSetNS(result, (uint32_t)(token - path), path);
         ffStrbufEnsureEndsWithC(result,
             #ifdef _WIN32
