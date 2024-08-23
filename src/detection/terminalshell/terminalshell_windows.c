@@ -5,6 +5,7 @@
 #include "util/mallocHelper.h"
 #include "util/windows/registry.h"
 #include "util/windows/unicode.h"
+#include "util/stringUtils.h"
 
 #include <windows.h>
 #include <wchar.h>
