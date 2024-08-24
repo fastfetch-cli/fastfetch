@@ -187,7 +187,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             struct ethtool_cmd edata = { .cmd = ETHTOOL_GSET };
             ifr.ifr_data = (void*) &edata;
             if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0)
-                iface->speed = (int32_t) ethtool_cmd_speed(&edata);
+                iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
             #elif __FreeBSD__ || __APPLE__
             struct ifmediareq ifmr = {};
             strncpy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ - 1);
