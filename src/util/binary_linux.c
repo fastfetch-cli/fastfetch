@@ -1,6 +1,6 @@
 #include "binary.h"
 
-#ifdef FF_HAVE_ELF
+#if defined(FF_HAVE_ELF) || defined(__sun)
 
 #include "common/io/io.h"
 #include "common/library.h"
