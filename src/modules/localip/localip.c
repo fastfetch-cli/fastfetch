@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
-#define FF_LOCALIP_NUM_FORMAT_ARGS 6
+#define FF_LOCALIP_NUM_FORMAT_ARGS 7
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
@@ -111,6 +111,14 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
             }
             else
             {
+                FF_STRBUF_AUTO_DESTROY speedStr = ffStrbufCreate();
+                if (ip->speed > 0)
+                {
+                    if (ip->speed >= 1000)
+                        ffStrbufSetF(&speedStr, "%g Gbps", ip->speed / 1000.0);
+                    else
+                        ffStrbufSetF(&speedStr, "%u Mbps", (unsigned) ip->speed);
+                }
                 FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_LOCALIP_NUM_FORMAT_ARGS, ((FFformatarg[]){
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4, "ipv4"},
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6, "ipv6"},
@@ -118,6 +126,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                     {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name, "ifname"},
                     {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute, "is-default-route"},
                     {FF_FORMAT_ARG_TYPE_INT, &ip->mtu, "mtu"},
+                    {FF_FORMAT_ARG_TYPE_STRBUF, &speedStr, "speed"},
                 }));
             }
             ++index;
@@ -397,6 +406,7 @@ void ffPrintLocalIpHelpFormat(void)
         "Interface name - ifname",
         "Is default route - is-default-route",
         "MTU size in bytes - mtu",
+        "Link speed (formatted) - speed",
     }));
 }
 

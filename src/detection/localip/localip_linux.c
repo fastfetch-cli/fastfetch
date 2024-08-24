@@ -185,7 +185,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             #ifdef __linux__
             struct ethtool_cmd edata = { .cmd = ETHTOOL_GSET };
-            ifr.ifr_data = (__caddr_t) &edata;
+            ifr.ifr_data = (caddr_t) &edata;
             if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0)
                 iface->speed = (int32_t) ethtool_cmd_speed(&edata);
             #elif __FreeBSD__ || __APPLE__
