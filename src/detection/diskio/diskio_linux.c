@@ -37,24 +37,23 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         if (!ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY))
             continue;
 
-        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInit(&device->name);
+        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
         {
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/vendor", devName);
-            if (ffAppendFileBuffer(pathSysBlock, &device->name))
+            if (ffAppendFileBuffer(pathSysBlock, &name))
             {
-                ffStrbufTrimRightSpace(&device->name);
-                if (device->name.length > 0)
-                    ffStrbufAppendC(&device->name, ' ');
+                ffStrbufTrimRightSpace(&name);
+                if (name.length > 0)
+                    ffStrbufAppendC(&name, ' ');
             }
 
             snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/model", devName);
-            ffAppendFileBuffer(pathSysBlock, &device->name);
-            ffStrbufTrimRightSpace(&device->name);
+            ffAppendFileBuffer(pathSysBlock, &name);
+            ffStrbufTrimRightSpace(&name);
 
-            if (device->name.length == 0)
-                ffStrbufSetS(&device->name, devName);
+            if (name.length == 0)
+                ffStrbufSetS(&name, devName);
             else if (ffStrStartsWith(devName, "nvme"))
             {
                 int devid, nsid;
@@ -69,17 +68,13 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                     if (multiNs)
                     {
                         // In Asahi Linux, there are multiple namespaces for the same NVMe drive.
-                        ffStrbufAppendF(&device->name, " - %d", nsid);
+                        ffStrbufAppendF(&name, " - %d", nsid);
                     }
                 }
             }
 
-            if (options->namePrefix.length && !ffStrbufStartsWith(&device->name, &options->namePrefix))
-            {
-                ffStrbufDestroy(&device->name);
-                result->length--;
+            if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
                 continue;
-            }
         }
 
         // I/Os merges sectors ticks ...
@@ -94,6 +89,8 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
                 continue;
         }
 
+        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+        ffStrbufInitMove(&device->name, &name);
         ffStrbufInitF(&device->devPath, "/dev/%s", devName);
         device->bytesRead = sectorRead * 512;
         device->bytesWritten = sectorWritten * 512;
