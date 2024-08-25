@@ -71,6 +71,8 @@ static bool isPhysicalDevice(const struct mntent* device)
         ffStrStartsWith(device->mnt_fsname + 5, "fd")      //Ignore fd devices
     ) return false;
 
+    #else
+
     // https://source.android.com/docs/core/ota/apex?hl=zh-cn
     if(ffStrStartsWith(device->mnt_dir, "/apex/"))
         return false;
