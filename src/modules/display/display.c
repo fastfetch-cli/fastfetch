@@ -140,10 +140,21 @@ void ffPrintDisplay(FFDisplayOptions* options)
         {
             double ppi = sqrt(result->width * result->width + result->height * result->height) / inch;
 
+            char refreshRate[16];
+            if(result->refreshRate > 0)
+            {
+                if(options->preciseRefreshRate)
+                    snprintf(refreshRate, sizeof(refreshRate), "%g", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
+                else
+                    snprintf(refreshRate, sizeof(refreshRate), "%i", (uint32_t) (result->refreshRate + 0.5));
+            }
+            else
+                refreshRate[0] = 0;
+
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 {FF_FORMAT_ARG_TYPE_UINT, &result->width, "width"},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->height, "height"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &result->refreshRate, "refresh-rate"},
+                {FF_FORMAT_ARG_TYPE_STRING, refreshRate, "refresh-rate"},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth, "scaled-width"},
                 {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight, "scaled-height"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
