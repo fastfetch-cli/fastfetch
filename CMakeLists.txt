@@ -1338,6 +1338,12 @@ install(
 )
 
 install(
+    FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.zsh"
+    DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/zsh/site-functions"
+    RENAME "_${CMAKE_PROJECT_NAME}"
+)
+
+install(
     FILES "${CMAKE_SOURCE_DIR}/completions/${CMAKE_PROJECT_NAME}.fish"
     DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/fish/vendor_completions.d"
     RENAME "${CMAKE_PROJECT_NAME}.fish"
