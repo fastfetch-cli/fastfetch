@@ -73,7 +73,10 @@ EOF
       _describe 'module' modules
       ;;
     presets)
-      local -a presets=( ${$(fastfetch --list-presets autocompletion):#.*} )
+      local -a presets=(
+        ${$(fastfetch --list-presets autocompletion):#.*}
+        "none:Disable loading config file"
+      )
       _describe 'preset' presets
       ;;
     structure)
@@ -81,7 +84,11 @@ EOF
       _describe 'structure' structures
       ;;
     logo)
-      local -a logos=( $(fastfetch --list-logos autocompletion) )
+      local -a logos=(
+        $(fastfetch --list-logos autocompletion)
+        "none:Don't print logo"
+        "small:Print small ascii logo if available"
+      )
       _describe 'logo' logos
       ;;
   esac
