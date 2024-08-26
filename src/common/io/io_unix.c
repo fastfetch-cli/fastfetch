@@ -232,12 +232,15 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 
     while((entry = readdir(dir)) != NULL)
     {
+        if(entry->d_name[0] == '.') // skip hidden files
+            continue;
+
         bool isDir = false;
-#ifdef _DIRENT_HAVE_D_TYPE
+#ifndef __sun
         if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
             isDir = entry->d_type == DT_DIR;
         else
-#else
+#endif
         {
             struct stat stbuf;
             if (fstatat(dfd, entry->d_name, &stbuf, 0) < 0)
@@ -245,12 +248,8 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
             else
                 isDir = S_ISDIR(stbuf.st_mode);
         }
-#endif
         if (isDir)
         {
-            if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
-                continue;
-
             ffStrbufAppendS(folder, entry->d_name);
             ffStrbufAppendC(folder, '/');
             listFilesRecursively(baseLength, folder, (uint8_t) (indentation + 1), entry->d_name, pretty);
