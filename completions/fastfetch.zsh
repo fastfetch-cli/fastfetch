@@ -22,11 +22,11 @@ def main():
                 continue
 
             if "short" in flag:
-                command_prefix = f"""-{flag["short"]}[{flag["desc"]}]"""
+                command_prefix = f"-{flag["short"]}[{flag["desc"]}]"
                 print_command(command_prefix, flag)
 
             if "long" in flag:
-                command_prefix = f"""--{flag["long"]}[{flag["desc"]}]"""
+                command_prefix = f"--{flag["long"]}[{flag["desc"]}]"
                 print_command(command_prefix, flag)
 
 
@@ -40,16 +40,16 @@ def print_command(command_prefix: str, flag: dict):
         elif type == "command":
             print(f"{command_prefix}:module:->modules")
         elif type == "config":
-            print(f"{command_prefix}:presets:->presets")
+            print(f"{command_prefix}:preset:->presets")
         elif type == "enum":
             temp: str = " ".join(flag["arg"]["enum"])
-            print(f'{command_prefix}:type:( {temp} )')
+            print(f'{command_prefix}:type:({temp})')
         elif type == "logo":
-            print(f"{command_prefix}:logo:->logo")
+            print(f"{command_prefix}:logo:->logos")
         elif type == "structure":
-            print(f"{command_prefix}:structure:->structure")
+            print(f"{command_prefix}:structure:->structures")
         elif type == "path":
-            print(f"{command_prefix}:path:_files -/")
+            print(f"{command_prefix}:path:_files")
         else:
             print(f"{command_prefix}:")
     else:
@@ -64,28 +64,28 @@ if __name__ == "__main__":
 EOF
   )"})
 
-  _arguments -C "$opts[@]"
+  _arguments "$opts[@]"
 
   case $state in
     modules)
-      local -a modules=( ${(f)"$(fastfetch --list-modules autocompletion)"} )
-      modules=( ${(L)^modules%%:*}-format format color )
+      local -a modules=(${(f)"$(fastfetch --list-modules autocompletion)"})
+      modules=(${(L)^modules%%:*}-format format color)
       _describe 'module' modules
       ;;
     presets)
       local -a presets=(
-        ${$(fastfetch --list-presets autocompletion):#.*}
+        ${(f)"$(fastfetch --list-presets autocompletion)"}
         "none:Disable loading config file"
       )
       _describe 'preset' presets
       ;;
-    structure)
-      local -a structures=( ${(f)"$(fastfetch --list-modules autocompletion)"} )
+    structures)
+      local -a structures=(${(f)"$(fastfetch --list-modules autocompletion)"})
       _describe 'structure' structures
       ;;
-    logo)
+    logos)
       local -a logos=(
-        $(fastfetch --list-logos autocompletion)
+        ${(f)"$(fastfetch --list-logos autocompletion)"}
         "none:Don't print logo"
         "small:Print small ascii logo if available"
       )
