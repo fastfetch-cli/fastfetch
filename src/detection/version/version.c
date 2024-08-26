@@ -1,8 +1,8 @@
 #include "version.h"
 
-#if defined(__x86_64__) || defined(__x86_64) || defined(__amd64__) || defined(__amd64)
+#if defined(__x86_64__)
     #define FF_ARCHITECTURE "x86_64"
-#elif defined(__i386__) || defined(__i386) || defined(__i486__) || defined(__i486) || defined(__i586__) || defined(__i586) || defined(__i686__) || defined(__i686)
+#elif defined(__i386__)
     #define FF_ARCHITECTURE "i386"
 #elif defined(__aarch64__)
     #define FF_ARCHITECTURE "aarch64"
@@ -16,6 +16,8 @@
     #define FF_ARCHITECTURE "riscv"
 #elif defined(__s390x__)
     #define FF_ARCHITECTURE "s390x"
+#elif defined(__loongarch__)
+    #define FF_ARCHITECTURE "loongarch"
 #else
     #define FF_ARCHITECTURE "unknown"
 #endif

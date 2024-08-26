@@ -11,45 +11,51 @@
         },
         "separator": ""
     },
-    "modules": [ 
+    "modules": [
         {
             "type": "kernel",
-            "key": "Vanilla ",
+            "key": "[_Kernel___> ",
             "keyColor": "blue"
         },
         {
             "type": "packages",
+            "outputColor": "white",
             "key": " [_Packages_> ",
             "keyColor": "green"
         },
         {
             "type": "localip",
+            "outputColor": "white",
             "key": " [_Local_IP_> ",
             "keyColor": "green"
         },
         {
-            "type": "cpu",
-            "key": " [_CPU______> ",
-            "keyColor": "magenta"
-        },
-        {
             "type": "memory",
+            "format": "[{3}] {1} / {2}",
             "key": " [_RAM______> ",
             "keyColor": "magenta"
         },
         {
             "type": "swap",
+            "format": "[{3}] {1} / {2}",
             "key": " [_SWAP_____> ",
             "keyColor": "magenta"
         },
         {
             "type": "disk",
+            "format": "[{3}] {1} / {2} {9}",
             "key": " [_Disk_____> ",
+            "keyColor": "magenta"
+        },
+        {
+            "type": "battery",
+            "format": "[{4}] {5}",
+            "key": " [_Battery__> ",
             "keyColor": "magenta"
         },
         "break",
         {
-            "type":"colors",
+            "type": "colors",
             "paddingLeft": 9,
             "symbol": "circle"
         }

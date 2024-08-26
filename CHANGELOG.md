@@ -1,3 +1,27 @@
+# 2.22.0
+
+Features:
+* Small performance improvements (Terminal, Editor)
+* Improve arm32 and loongarch support (CPU, Linux)
+* Ignore the parent process if env `$FFTS_IGNORE_PARENT` is set to `1` (Shell)
+* Add code name of Apple M4 (CPU, Linux)
+* Add ethernet speed rate detection support (LocalIP)
+* Add zsh completion script
+* Add Linglong package manager detection support (Packages, Linux)
+
+Bugfixes:
+* Fix building on macOS 10.14
+* Fix tmux in linux TTY (Colors)
+* Fix hang in WSL when custom format is used (Disk, Linux)
+* Fix `/proc/loadavg` parsing (Loadavg, Linux)
+* Disable use of `LC_NUMERIC` locale settings to fix parsing of decimal numbers
+* Fix possible segfault (DiskIO, Linux)
+* Honor `preciseRefreshRate` in custom format (Display)
+
+Logos:
+* Add Lingmo OS
+* Add Sleeper OS
+
 # 2.21.3
 
 Bugfixes:

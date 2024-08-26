@@ -9,12 +9,12 @@ const char* ffDetectLoadavg(double result[3])
 
     // Don't use syscall for container compatibility. #620
     char buf[64];
-    ssize_t nRead = ffReadFileData("/proc/uptime", sizeof(buf) - 1, buf);
+    ssize_t nRead = ffReadFileData("/proc/loadavg", sizeof(buf) - 1, buf);
     if (nRead > 0)
     {
         buf[nRead] = '\0';
 
-        if (sscanf(buf, "%lf %lf %lf", &result[0], &result[1], &result[2]) == 3)
+        if (sscanf(buf, "%lf%lf%lf", &result[0], &result[1], &result[2]) == 3)
             return NULL;
     }
 

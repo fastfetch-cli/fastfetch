@@ -57,7 +57,8 @@ void ffPrintColors(FFColorsOptions* options)
         if (options->symbol == FF_COLORS_SYMBOL_BACKGROUND)
         {
             const char* term = getenv("TERM");
-            if (term && ffStrEquals(term, "linux"))
+            // Should be "linux", however some terminal mulitplexer overrides $TERM
+            if (term && !ffStrStartsWith(term, "xterm"))
                 ffStrbufAppendS(&result, "\e[5m");
         }
         #endif

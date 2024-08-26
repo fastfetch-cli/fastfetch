@@ -1,16 +1,43 @@
 #include "editor.h"
 #include "common/processing.h"
+#include "common/library.h"
 #include "util/stringUtils.h"
+#include "util/path.h"
+#include "util/binary.h"
 
 #include <stdlib.h>
 
 #ifdef _WIN32
-#include <windows.h>
 static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
 {
     return _fullpath(resolved_name, file_name, _MAX_PATH);
 }
 #endif
+
+static bool extractNvimVersionFromBinary(const char* str, uint32_t len, void* userdata)
+{
+    if (len < strlen("NVIM v0.0.0")) return true;
+    if (!ffStrStartsWith(str, "NVIM v")) return true;
+    ffStrbufSetS((FFstrbuf*) userdata, str + strlen("NVIM v"));
+    return false;
+}
+
+static bool extractVimVersionFromBinary(const char* str, uint32_t len, void* userdata)
+{
+    if (len < strlen("VIM - Vi IMproved 0.0")) return true;
+    if (!ffStrStartsWith(str, "VIM - Vi IMproved ")) return true;
+    ffStrbufSetS((FFstrbuf*) userdata, str + strlen("VIM - Vi IMproved "));
+    ffStrbufSubstrBeforeFirstC(userdata, ' ');
+    return false;
+}
+
+static bool extractNanoVersionFromBinary(const char* str, uint32_t len, void* userdata)
+{
+    if (len < strlen("GNU nano 0.0")) return true;
+    if (!ffStrStartsWith(str, "GNU nano ")) return true;
+    ffStrbufSetS((FFstrbuf*) userdata, str + strlen("GNU nano "));
+    return false;
+}
 
 const char* ffDetectEditor(FFEditorResult* result)
 {
@@ -26,41 +53,26 @@ const char* ffDetectEditor(FFEditorResult* result)
             return "$VISUAL or $EDITOR not set";
     }
 
-    if (!instance.config.general.detectVersion) return NULL;
-
-    #ifndef _WIN32
-    if (result->name.chars[0] != '/')
-    {
-        if (ffProcessAppendStdOut(&result->path, (char* const[]){
-            FASTFETCH_TARGET_DIR_USR "/bin/which",
-            result->name.chars,
-            NULL,
-        }) != NULL || result->path.length == 0)
-            return NULL;
-    }
-    #else
-    if (!(result->name.length > 3 && ffCharIsEnglishAlphabet(result->name.chars[0]) && result->name.chars[1] == ':' && result->name.chars[2] == '\\'))
-    {
-        char buf[32];
-        uint32_t len = GetSystemDirectoryA(buf, sizeof(buf));
-        if (len < strlen("C:\\WINDOWS\\system32")) return NULL;
-        strncpy(buf + len, "\\where.exe", sizeof(buf) - len);
-        if (ffProcessAppendStdOut(&result->path, (char* const[]){
-            buf,
-            result->name.chars,
-            NULL,
-        }) != NULL || result->path.length == 0)
-            return NULL;
-    }
-    #endif
-    else
+    if (ffIsAbsolutePath(result->name.chars))
         ffStrbufSet(&result->path, &result->name);
+    else
+    {
+        const char* error = ffFindExecutableInPath(result->name.chars, &result->path);
+        if (error) return NULL;
+    }
 
-    char buf[PATH_MAX + 1];
-    if (!realpath(result->path.chars, buf))
-        return NULL;
+    {
+        char buf[PATH_MAX + 1];
+        if (!realpath(result->path.chars, buf))
+            return NULL;
 
-    ffStrbufSetS(&result->path, buf);
+        // WIN32: Should we handle scoop shim exe here?
+
+        #ifdef __linux__
+        if (!ffStrEndsWith(buf, "/snap"))
+        #endif
+            ffStrbufSetS(&result->path, buf);
+    }
 
     {
         uint32_t index = ffStrbufLastIndexC(&result->path,
@@ -81,6 +93,17 @@ const char* ffDetectEditor(FFEditorResult* result)
             ffStrbufSubstrBefore(&result->exe, result->exe.length - 4);
         #endif
     }
+
+    if (!instance.config.general.detectVersion) return NULL;
+
+    if (ffStrbufEqualS(&result->exe, "nvim"))
+        ffBinaryExtractStrings(result->path.chars, extractNvimVersionFromBinary, &result->version);
+    else if (ffStrbufEqualS(&result->exe, "vim"))
+        ffBinaryExtractStrings(result->path.chars, extractVimVersionFromBinary, &result->version);
+    else if (ffStrbufEqualS(&result->exe, "nano"))
+        ffBinaryExtractStrings(result->path.chars, extractNanoVersionFromBinary, &result->version);
+
+    if (result->version.length > 0) return NULL;
 
     const char* param = NULL;
     if (

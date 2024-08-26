@@ -5,6 +5,7 @@
 #include "util/mallocHelper.h"
 #include "util/windows/registry.h"
 #include "util/windows/unicode.h"
+#include "util/stringUtils.h"
 
 #include <windows.h>
 #include <wchar.h>
@@ -344,6 +345,10 @@ const FFShellResult* ffDetectShell(void)
     uint32_t ppid;
     if(!ffProcessGetInfoWindows(0, &ppid, NULL, NULL, NULL, NULL, NULL))
         return &result;
+
+    const char* ignoreParent = getenv("FFTS_IGNORE_PARENT");
+    if (ignoreParent && ffStrEquals(ignoreParent, "1"))
+        ffProcessGetInfoWindows(ppid, &ppid, NULL, NULL, NULL, NULL, NULL);
 
     ppid = getShellInfo(&result, ppid);
 

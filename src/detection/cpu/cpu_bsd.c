@@ -39,6 +39,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         }
     }
 
+    ffCPUDetectSpeedByCpuid(cpu);
+
     for (uint16_t i = 0; i < cpu->coresLogical; ++i)
     {
         ffStrbufClear(&buffer);

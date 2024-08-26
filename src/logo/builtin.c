@@ -2332,6 +2332,17 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    // Lingmo OS
+    {
+        .names = {"Lingmo", "lingmo", "LingmoOS", "lingmoos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LINGMO,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Linspire
     {
         .names = {"Linspire", "Lindows"},
@@ -3958,6 +3969,25 @@ static const FFlogo S[] = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
         },
+    },
+    // SleeperOS
+    {
+        .names = {"SleeperOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SLEEPEROS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        }
+    },
+    // SleeperOS
+    {
+        .names = {"SleeperOS_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_SLEEPEROS_SMALL,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        }
     },
     // Slitaz
     {

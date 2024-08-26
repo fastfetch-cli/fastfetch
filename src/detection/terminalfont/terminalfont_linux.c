@@ -8,7 +8,7 @@
 #include "detection/displayserver/displayserver.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
-#include "util/linux/elf.h"
+#include "util/binary.h"
 
 static const char* getSystemMonospaceFont(void)
 {
@@ -315,7 +315,7 @@ static void detectSt(FFTerminalFontResult* terminalFont, const FFTerminalResult*
     {
         ffStrbufClear(&font);
 
-        const char* error = ffElfExtractStrings(terminal->exePath.chars, elfExtractStringsCallBack, &font);
+        const char* error = ffBinaryExtractStrings(terminal->exePath.chars, elfExtractStringsCallBack, &font);
         if (error)
         {
             ffStrbufAppendS(&terminalFont->error, error);
