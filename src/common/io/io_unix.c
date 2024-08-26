@@ -236,15 +236,12 @@ void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indenta
 #ifdef _DIRENT_HAVE_D_TYPE
         if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
             isDir = entry->d_type == DT_DIR;
-        else
 #else
-        {
-            struct stat stbuf;
-            if (fstatat(dfd, entry->d_name, &stbuf, 0) < 0)
-                isDir = false;
-            else
-                isDir = S_ISDIR(stbuf.st_mode);
-        }
+        struct stat stbuf;
+        if (fstatat(dfd, entry->d_name, &stbuf, 0) < 0)
+            isDir = false;
+        else
+            isDir = S_ISDIR(stbuf.st_mode);
 #endif
         if (isDir)
         {
