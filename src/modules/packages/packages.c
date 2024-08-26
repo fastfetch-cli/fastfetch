@@ -114,7 +114,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.guixSystem, "guix-system"},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.guixUser, "guix-user"},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.guixHome, "guix-home"},
-            {FF_FORMAT_ARG_TYPE_UINT, &counts.linglong, "ll-cli"},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.linglong, "linglong"},
             {FF_FORMAT_ARG_TYPE_UINT, &nixAll, "nix-all"},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpakAll, "flatpak-all"},
             {FF_FORMAT_ARG_TYPE_UINT, &brewAll, "brew-all"},
@@ -417,7 +417,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
 
 void ffPrintPackagesHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home), {33} (ll-cli)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home), {33} (linglong)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
         "Number of all packages - all",
         "Number of pacman packages - pacman",
         "Pacman branch on manjaro - pacman-branch",
@@ -450,7 +450,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of guix-system packages - guix-system",
         "Number of guix-user packages - guix-user",
         "Number of guix-home packages - guix-home",
-        "Number of linglong packages - ll-cli",
+        "Number of linglong packages - linglong",
         "Total number of all nix packages - nix-all",
         "Total number of all flatpak app packages - flatpak-all",
         "Total number of all brew packages - brew-all",
