@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 36
+#define FF_PACKAGES_NUM_FORMAT_ARGS 37
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -71,6 +71,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE_NAME(guixSystem, "guix-system")
         FF_PRINT_PACKAGE_NAME(guixUser, "guix-user")
         FF_PRINT_PACKAGE_NAME(guixHome, "guix-home")
+        FF_PRINT_PACKAGE(linglong)
 
         putchar('\n');
     }
@@ -113,6 +114,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &counts.guixSystem, "guix-system"},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.guixUser, "guix-user"},
             {FF_FORMAT_ARG_TYPE_UINT, &counts.guixHome, "guix-home"},
+            {FF_FORMAT_ARG_TYPE_UINT, &counts.linglong, "linglong"},
             {FF_FORMAT_ARG_TYPE_UINT, &nixAll, "nix-all"},
             {FF_FORMAT_ARG_TYPE_UINT, &flatpakAll, "flatpak-all"},
             {FF_FORMAT_ARG_TYPE_UINT, &brewAll, "brew-all"},
@@ -171,6 +173,7 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                 case 'L': if (false);
                     FF_TEST_PACKAGE_NAME(LPKG)
                     FF_TEST_PACKAGE_NAME(LPKGBUILD)
+                    FF_TEST_PACKAGE_NAME(LINGLONG)
                     break;
                 case 'M': if (false);
                     FF_TEST_PACKAGE_NAME(MACPORTS)
@@ -279,6 +282,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'L': if (false);
                             FF_TEST_PACKAGE_NAME(LPKG)
                             FF_TEST_PACKAGE_NAME(LPKGBUILD)
+                            FF_TEST_PACKAGE_NAME(LINGLONG)
                             break;
                         case 'M': if (false);
                             FF_TEST_PACKAGE_NAME(MACPORTS)
@@ -356,6 +360,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(AM)
         FF_TEST_PACKAGE_NAME(SORCERY)
         FF_TEST_PACKAGE_NAME(GUIX)
+        FF_TEST_PACKAGE_NAME(LINGLONG)
         #undef FF_TEST_PACKAGE_NAME
     }
 }
@@ -406,12 +411,13 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(guixSystem)
     FF_APPEND_PACKAGE_COUNT(guixUser)
     FF_APPEND_PACKAGE_COUNT(guixHome)
+    FF_APPEND_PACKAGE_COUNT(linglong)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
 void ffPrintPackagesHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home), {33} (linglong)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
         "Number of all packages - all",
         "Number of pacman packages - pacman",
         "Pacman branch on manjaro - pacman-branch",
@@ -444,6 +450,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of guix-system packages - guix-system",
         "Number of guix-user packages - guix-user",
         "Number of guix-home packages - guix-home",
+        "Number of linglong packages - linglong",
         "Total number of all nix packages - nix-all",
         "Total number of all flatpak app packages - flatpak-all",
         "Total number of all brew packages - brew-all",
