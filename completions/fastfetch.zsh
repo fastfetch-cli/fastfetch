@@ -34,11 +34,11 @@ def print_command(command_prefix: str, flag: dict):
     if "arg" in flag:
         type: str = flag["arg"]["type"]
         if type == "bool":
-            print(f"{command_prefix}:bool:(true false)")
+            print(f"{command_prefix}::bool:(true false)")
         elif type == "color":
             print(f"{command_prefix}:color:(black red green yellow blue magenta cyan white default)")
         elif type == "command":
-            print(f"{command_prefix}:module:->modules")
+            print(f"{command_prefix}::module:->modules")
         elif type == "config":
             print(f"{command_prefix}:preset:->presets")
         elif type == "enum":
@@ -49,7 +49,7 @@ def print_command(command_prefix: str, flag: dict):
         elif type == "structure":
             print(f"{command_prefix}:structure:->structures")
         elif type == "path":
-            print(f"{command_prefix}:path:_files")
+            print(f"{command_prefix}::path:_files")
         else:
             print(f"{command_prefix}:")
     else:
@@ -68,24 +68,24 @@ EOF
 
   case $state in
     modules)
-      local -a modules=(${(f)"$(fastfetch --list-modules autocompletion)"})
+      local -a modules=("${(f)$(fastfetch --list-modules autocompletion)}")
       modules=(${(L)^modules%%:*}-format format color)
       _describe 'module' modules
       ;;
     presets)
       local -a presets=(
-        ${(f)"$(fastfetch --list-presets autocompletion)"}
+        "${(f)$(fastfetch --list-presets autocompletion)}"
         "none:Disable loading config file"
       )
       _describe 'preset' presets
       ;;
     structures)
-      local -a structures=(${(f)"$(fastfetch --list-modules autocompletion)"})
+      local -a structures=("${(f)$(fastfetch --list-modules autocompletion)}")
       _describe 'structure' structures
       ;;
     logos)
       local -a logos=(
-        ${(f)"$(fastfetch --list-logos autocompletion)"}
+        "${(f)$(fastfetch --list-logos autocompletion)}"
         "none:Don't print logo"
         "small:Print small ascii logo if available"
       )
