@@ -64,16 +64,30 @@ static bool getExeVersionGeneral(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
-static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
+static bool extractBashVersion(const char* line, uint32_t len, void *userdata)
 {
+    if (len < strlen("@(#)Bash version 0.0.0(0) release GNU")) return true;
+    if (!ffStrStartsWith(line, "@(#)Bash version ")) return true;
+    const char* start = line + strlen("@(#)Bash version ");
+    const char* end = strchr(start, '(');
+    if (!end) return true;
+    ffStrbufSetNS((FFstrbuf*) userdata, (uint32_t) (end - start), start);
+    return false;
+}
+
+static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+{
+    const char* path = exePath->chars;
+    if (*path == '\0')
+        path = exe->chars;
+    ffBinaryExtractStrings(path, extractBashVersion, version);
+
     if(!getExeVersionRaw(exe, version))
         return false;
 
     // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)\nCopyright...
-    ffStrbufSubstrBeforeFirstC(version, '\n'); // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)
-    ffStrbufSubstrBeforeLastC(version, ' '); // GNU bash, version 5.1.16(1)-release
-    ffStrbufSubstrAfterLastC(version, ' '); // 5.1.16(1)-release
-    ffStrbufSubstrBeforeFirstC(version, '('); // 5.1.16
+    ffStrbufSubstrBeforeFirstC(version, '('); // GNU bash, version 5.1.16
+    ffStrbufSubstrAfterLastC(version, ' '); // 5.1.16
     return true;
 }
 
@@ -189,6 +203,30 @@ static bool getShellVersionXonsh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool extractZshVersion(const char* line, uint32_t len, void *userdata)
+{
+    if (len < strlen("zsh-0.0-0")) return true;
+    if (!ffStrStartsWith(line, "zsh-")) return true;
+    const char* start = line + strlen("zsh-");
+    const char* end = strchr(start, '-');
+    if (!end) return true;
+
+    ffStrbufSetNS((FFstrbuf*) userdata, (uint32_t) (end - start), start);
+    return false;
+}
+
+static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+{
+    const char* path = exePath->chars;
+    if (*path == '\0')
+        path = exe->chars;
+
+    ffBinaryExtractStrings(path, extractZshVersion, version);
+    if (version->length) return true;
+
+    return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -203,7 +241,7 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 }
 #endif
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, FFstrbuf* version)
 {
     if (!instance.config.general.detectVersion) return false;
 
@@ -211,9 +249,9 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return false;
 
     if(ffStrEqualsIgnCase(exeName, "bash"))
-        return getShellVersionBash(exe, version);
+        return getShellVersionBash(exe, exePath, version);
     if(ffStrEqualsIgnCase(exeName, "zsh"))
-        return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
+        return getShellVersionZsh(exe, exePath, version);
     if(ffStrEqualsIgnCase(exeName, "fish"))
         return getShellVersionFish(exe, version);
     if(ffStrEqualsIgnCase(exeName, "pwsh"))

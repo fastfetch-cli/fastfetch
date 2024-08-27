@@ -38,7 +38,7 @@ static bool getProductVersion(const wchar_t* filePath, FFstrbuf* version)
     return false;
 }
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, const FFstrbuf* exePath, FFstrbuf* version);
 
 static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
@@ -359,7 +359,7 @@ const FFShellResult* ffDetectShell(void)
         strcpy(tmp, result.exeName);
         char* ext = strrchr(tmp, '.');
         if (ext) *ext = '\0';
-        fftsGetShellVersion(&result.exe, tmp, &result.version);
+        fftsGetShellVersion(&result.exe, tmp, &result.exePath, &result.version);
     }
 
     return &result;
