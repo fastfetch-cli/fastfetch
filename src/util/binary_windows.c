@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata)
+const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     __attribute__((__cleanup__(UnMapAndLoad))) LOADED_IMAGE loadedImage = {};
     if (!MapAndLoad(peFile, NULL, &loadedImage, FALSE, TRUE))
@@ -26,6 +26,7 @@ const char* ffBinaryExtractStrings(const char *peFile, bool (*cb)(const char *st
                 const char* p = (const char*) data + off;
                 if (*p == '\0') continue;
                 uint32_t len = (uint32_t) strlen(p);
+                if (len < minLength) continue;
                 if (*p >= ' ' && *p <= '~') // Ignore control characters
                 {
                     if (!cb(p, len, userdata)) break;

@@ -64,9 +64,8 @@ static bool getExeVersionGeneral(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
-static bool extractBashVersion(const char* line, uint32_t len, void *userdata)
+static bool extractBashVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
-    if (len < strlen("@(#)Bash version 0.0.0(0) release GNU")) return true;
     if (!ffStrStartsWith(line, "@(#)Bash version ")) return true;
     const char* start = line + strlen("@(#)Bash version ");
     const char* end = strchr(start, '(');
@@ -80,7 +79,7 @@ static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* vers
     const char* path = exePath->chars;
     if (*path == '\0')
         path = exe->chars;
-    ffBinaryExtractStrings(path, extractBashVersion, version);
+    ffBinaryExtractStrings(path, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
 
     if(!getExeVersionRaw(exe, version))
         return false;
@@ -203,9 +202,8 @@ static bool getShellVersionXonsh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
-static bool extractZshVersion(const char* line, uint32_t len, void *userdata)
+static bool extractZshVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
-    if (len < strlen("zsh-0.0-0")) return true;
     if (!ffStrStartsWith(line, "zsh-")) return true;
     const char* start = line + strlen("zsh-");
     const char* end = strchr(start, '-');
@@ -221,7 +219,7 @@ static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* versi
     if (*path == '\0')
         path = exe->chars;
 
-    ffBinaryExtractStrings(path, extractZshVersion, version);
+    ffBinaryExtractStrings(path, extractZshVersion, version, (uint32_t) strlen("zsh-0.0-0"));
     if (version->length) return true;
 
     return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
@@ -303,7 +301,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
 {
     if (exe->chars[0] == '/')
     {
-        ffBinaryExtractStrings(exe->chars, extractGnomeTerminalVersion, version);
+        ffBinaryExtractStrings(exe->chars, extractGnomeTerminalVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
     }
 
