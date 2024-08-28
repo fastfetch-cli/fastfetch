@@ -392,6 +392,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
+    src/modules/zpool/zpool.c
     src/options/display.c
     src/options/modules.c
     src/options/logo.c
@@ -481,6 +482,7 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -543,6 +545,7 @@ elseif(ANDROID)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_android.c
+        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -622,6 +625,7 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -686,6 +690,7 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
+        src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/platform/FFPlatform_unix.c
@@ -750,6 +755,7 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
+        src/detection/zpool/zpool_nosupport.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -832,6 +838,7 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
+        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )

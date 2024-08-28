@@ -70,3 +70,4 @@
 #include "modules/wifi/option.h"
 #include "modules/wm/option.h"
 #include "modules/wmtheme/option.h"
+#include "modules/zpool/option.h"
