@@ -99,9 +99,9 @@ const char* ffBinaryExtractStrings(const char* elfFile, bool (*cb)(const char* s
 
 #else
 
-const char* ffBinaryExtractStrings(const char* file, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata)
+const char* ffBinaryExtractStrings(const char* file, bool (*cb)(const char* str, uint32_t len, void* userdata), void* userdata, uint32_t minLength)
 {
-    FF_UNUSED(file, cb, userdata);
+    FF_UNUSED(file, cb, userdata, minLength);
     return "Fastfetch was built without libelf support";
 }
 
