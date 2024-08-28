@@ -54,6 +54,7 @@
         "physicalmemory",
         "swap",
         "disk",
+        "zpool",
         "battery",
         "poweradapter",
         "player",
