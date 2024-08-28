@@ -3,9 +3,8 @@
 function _fastfetch() {
   local state
 
-  local -a opts
-  opts=(${(f)"$(
-        python <<EOF
+  local -a opts=("${(f)$(
+        python3 <<EOF
 import json
 import subprocess
 import sys
@@ -18,6 +17,12 @@ def main():
 
     for key in data:
         for flag in data[key]:
+            if flag["long"] == "logo-color-[1-9]":
+                for i in range(1, 10):
+                    command_prefix = f"--logo-color-{i}[{flag["desc"]} ({i})]"
+                    print_command(command_prefix, flag)
+                continue
+
             if flag.get("pseudo", False):
                 continue
 
@@ -36,7 +41,7 @@ def print_command(command_prefix: str, flag: dict):
         if type == "bool":
             print(f"{command_prefix}::bool:(true false)")
         elif type == "color":
-            print(f"{command_prefix}:color:(black red green yellow blue magenta cyan white default)")
+            print(f"{command_prefix}:color:->colors")
         elif type == "command":
             print(f"{command_prefix}::module:->modules")
         elif type == "config":
@@ -62,14 +67,18 @@ if __name__ == "__main__":
     except Exception:
         sys.exit(1)
 EOF
-  )"})
+  )}")
 
   _arguments "$opts[@]"
 
   case $state in
+    colors)
+      local -a colors=(black red green yellow blue magenta cyan white default)
+      _describe 'color' colors
+      ;;
     modules)
       local -a modules=("${(f)$(fastfetch --list-modules autocompletion)}")
-      modules=(${(L)^modules%%:*}-format format color)
+      modules=(${(L)^modules[@]%%:*}-format format color)
       _describe 'module' modules
       ;;
     presets)
@@ -77,7 +86,7 @@ EOF
         "${(f)$(fastfetch --list-presets autocompletion)}"
         "none:Disable loading config file"
       )
-      _describe 'preset' presets
+      _describe 'preset' presets || _files
       ;;
     structures)
       local -a structures=("${(f)$(fastfetch --list-modules autocompletion)}")
