@@ -287,7 +287,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
     return version->length > 0;
 }
 
-static bool extractGnomeTerminalVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+static bool extractGeneralVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
     if (!ffCharIsDigit(str[0])) return true;
     int count = 0;
@@ -301,7 +301,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
 {
     if (exe->chars[0] == '/')
     {
-        ffBinaryExtractStrings(exe->chars, extractGnomeTerminalVersion, version, (uint32_t) strlen("0.0.0"));
+        ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
     }
 
@@ -315,6 +315,17 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
     ffStrbufSubstrAfterFirstS(version, "Terminal ");
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return true;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionXfce4Terminal(FFstrbuf* exe, FFstrbuf* version)
+{
+    if (exe->chars[0] == '/')
+    {
+        ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
+        if (version->length) return true;
+    }
+
+    return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
 }
 
 FF_MAYBE_UNUSED static bool getTerminalVersionKgx(FFstrbuf* version)
@@ -652,7 +663,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         return getExeVersionGeneral(exe, version);//yakuake 22.12.3
 
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
-        return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
+        return getTerminalVersionXfce4Terminal(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "terminator"))
         return getExeVersionGeneral(exe, version);//terminator 2.1.3
