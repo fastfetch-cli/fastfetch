@@ -2630,7 +2630,6 @@ static const FFlogo M[] = {
         .colors = {
             FF_COLOR_FG_LIGHT_MAGENTA,
             FF_COLOR_FG_CYAN,
-
         },
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_LIGHT_MAGENTA,
