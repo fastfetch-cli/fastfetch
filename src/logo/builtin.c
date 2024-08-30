@@ -2623,6 +2623,17 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Magix
+    {
+        .names = {"Magix","MagixOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MAGIX,
+        .colors = {
+            FF_COLOR_FG_LIGHT_MAGENTA,
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_LIGHT_MAGENTA,
+    },
     // MagpieOS
     {
         .names = {"MagpieOS", "Magpie"},
