@@ -4147,7 +4147,28 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
-    // Sulin
+    // Steam Deck
+    {
+        .names = {"steamdeck"},
+        .lines = FASTFETCH_DATATEXT_LOGO_STEAMDECK,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // Steam Deck OLED
+    {
+        .names = {"steamdeckoled"},
+        .lines = FASTFETCH_DATATEXT_LOGO_STEAMDECK,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },    // Sulin
     {
         .names = {"Sulin"},
         .lines = FASTFETCH_DATATEXT_LOGO_SULIN,
