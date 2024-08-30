@@ -4138,7 +4138,7 @@ static const FFlogo S[] = {
     },
     // SteamOS
     {
-        .names = {"steamos"},
+        .names = {"SteamOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_STEAMOS,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -4149,7 +4149,7 @@ static const FFlogo S[] = {
     },
     // Steam Deck
     {
-        .names = {"steamdeck"},
+        .names = {"SteamDeck"},
         .lines = FASTFETCH_DATATEXT_LOGO_STEAMDECK,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -4160,7 +4160,7 @@ static const FFlogo S[] = {
     },
     // Steam Deck OLED
     {
-        .names = {"steamdeckoled"},
+        .names = {"SteamDeckOled"},
         .lines = FASTFETCH_DATATEXT_LOGO_STEAMDECK,
         .colors = {
             FF_COLOR_FG_RED,
