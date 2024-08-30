@@ -3,16 +3,16 @@
        -+ssssssssssssssssssyyssss+-
      .ossssssssssssssssssd$2MMMNy$1sssso.
    /sssssssssss$2hdmmNNmmyNMMMMh$1ssssss/
-  +sssssssss$2hmydMMMMMMMNddddy$1ssssssss+
- /ssssssss$2hNMMMyhhyyyyhmNMMMNh$1ssssssss/
+  +sssssssss$2hm$1yd$2MMMMMMMNddddy$1ssssssss+
+ /ssssssss$2hNMMM$1yh$2hyyyyhmNMMMNh$1ssssssss/
 .ssssssss$2dMMMNh$1ssssssssss$2hNMMMd$1ssssssss.
 +ssss$2hhhyNMMNy$1ssssssssssss$2yNMMMy$1sssssss+
 oss$2yNMMMNyMMh$1ssssssssssssss$2hmmmh$1ssssssso
-oss$2yNMMMNyMMh$1ssssssssssssss$2hmmmh$1ssssssso
+oss$2yNMMMNyMMh$1sssssssssssssshmmmhssssssso
 +ssss$2hhhyNMMNy$1ssssssssssss$2yNMMMy$1sssssss+
 .ssssssss$2dMMMNh$1ssssssssss$2hNMMMd$1ssssssss.
- /ssssssss$2hNMMMyhhyyyyhdNMMMNh$1ssssssss/
-  +sssssssss$2dmydMMMMMMMMddddy$1ssssssss+
+ /ssssssss$2hNMMM$1yh$2hyyyyhdNMMMNh$1ssssssss/
+  +sssssssss$2dm$1yd$2MMMMMMMMddddy$1ssssssss+
    /sssssssssss$2hdmNNNNmyNMMMMh$1ssssss/
     .ossssssssssssssssss$2dMMMNy$1sssso.
      -+sssssssssssssssss$2yyy$1ssss+-

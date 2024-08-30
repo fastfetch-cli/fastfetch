@@ -1,20 +1,20 @@
-                            ....
-              .',:clooo:  .:looooo:.
-           .;looooooooc  .oooooooooo'
-        .;looooool:,''.  :ooooooooooc
-       ;looool;.         'oooooooooo,
-      ;clool'             .cooooooc.  ,,
-         ...                ......  .:oo,
-  .;clol:,.                        .loooo'
- :ooooooooo,                        'ooool
-'ooooooooooo.                        loooo.
-'ooooooooool                         coooo.
- ,loooooooc.                        .loooo.
-   .,;;;'.                          ;ooooc
-       ...                         ,ooool.
-    .cooooc.              ..',,'.  .cooo.
-      ;ooooo:.           ;oooooooc.  :l.
-       .coooooc,..      coooooooooo.
-         .:ooooooolc:. .ooooooooooo'
-           .':loooooo;  ,oooooooooc
-               ..';::c'  .;loooo:'
+                             ....
+              $2.',:clooo:  $1.:looooo:.
+           $2.;looooooooc  $1.oooooooooo'
+        $2.;looooool:,''.  $1:ooooooooooc
+       $2;looool;.         $1'oooooooooo,
+      $2;clool'             $1.cooooooc.  $2,,
+         $2...                $1......  $2.:oo,
+  $1.;clol:,.                        $2.loooo'
+ $1:ooooooooo,                        $2'ooool
+$1'ooooooooooo.                        $2loooo.
+$1'ooooooooool                         $2coooo.
+ $1,loooooooc.                        $2.loooo.
+   $1.,;;;'.                          $2;ooooc
+       $2...                         $2,ooool.
+    $2.cooooc.              $1..',,'.  $2.cooo.
+      $2;ooooo:.           $1;oooooooc.  $2:l.
+       $2.coooooc,..      $1coooooooooo.
+         $2.:ooooooolc:. $1.ooooooooooo'
+           $2.':loooooo;  $1,oooooooooc
+               $2..';::c'  $1.;loooo:'

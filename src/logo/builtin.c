@@ -4286,7 +4286,51 @@ static const FFlogo U[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU,
         .colors = {
             FF_COLOR_FG_RED,
+            FF_COLOR_FG_RED,
+        },
+    },
+    // UbuntuSmall
+    {
+        .names = {"ubuntu_small", "ubuntu-linux-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_SMALL,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_RED,
+        },
+    },
+    // UbuntuOld
+    {
+        .names = {"ubuntu_old", "ubuntu-linux_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD,
+        .colors = {
+            FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    // UbuntuOld2
+    {
+        .names = {"ubuntu_old2"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD2,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_YELLOW,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    // UbuntuOld2Small
+    {
+        .names = {"ubuntu_old2_small", "ubuntu_old2-small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD2_SMALL,
+        .colors = {
+            FF_COLOR_FG_RED,
         },
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
@@ -4348,18 +4392,6 @@ static const FFlogo U[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
-    // UbuntuOld
-    {
-        .names = {"ubuntu_old", "ubuntu-linux_old"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_OLD,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_RED,
-        .colorTitle = FF_COLOR_FG_RED,
-    },
     // UbuntuKde
     {
         .names = {"ubuntu kde", "ubuntu-kde", "ubuntu-plasma"},
@@ -4370,17 +4402,6 @@ static const FFlogo U[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
-    },
-    // UbuntuSmall
-    {
-        .names = {"ubuntu_small", "ubuntu-linux-small"},
-        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU_SMALL,
-        .colors = {
-            FF_COLOR_FG_RED,
-        },
-        .colorKeys = FF_COLOR_FG_RED,
-        .colorTitle = FF_COLOR_FG_RED,
     },
     // UbuntuStudio
     {
@@ -4416,28 +4437,6 @@ static const FFlogo U[] = {
         .colors = {
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_WHITE,
-        },
-    },
-    // Ubuntu2Small
-    {
-        .names = {"ubuntu2_small", "ubuntu2-small"},
-        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU2_SMALL,
-        .colors = {
-            FF_COLOR_FG_RED,
-        },
-        .colorKeys = FF_COLOR_FG_RED,
-        .colorTitle = FF_COLOR_FG_RED,
-    },
-    // Ubuntu2Old
-    {
-        .names = {"ubuntu2_old"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU2_OLD,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_YELLOW,
         },
     },
     // Ultramarine
