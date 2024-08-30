@@ -4168,7 +4168,8 @@ static const FFlogo S[] = {
         },
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
-    },    // Sulin
+    },
+    // Sulin
     {
         .names = {"Sulin"},
         .lines = FASTFETCH_DATATEXT_LOGO_SULIN,
