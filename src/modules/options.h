@@ -2,6 +2,7 @@
 
 // For "fastfetch.h"
 
+#include "modules/abi/option.h"
 #include "modules/battery/option.h"
 #include "modules/bios/option.h"
 #include "modules/bluetooth/option.h"

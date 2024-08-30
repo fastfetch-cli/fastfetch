@@ -2,6 +2,7 @@
 
 // For "fastfetch.c" and "flashfetch.c"
 
+#include "modules/abi/abi.h"
 #include "modules/battery/battery.h"
 #include "modules/bios/bios.h"
 #include "modules/bluetooth/bluetooth.h"
