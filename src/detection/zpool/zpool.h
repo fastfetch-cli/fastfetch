@@ -6,7 +6,6 @@ typedef struct FFZpoolResult
 {
     FFstrbuf name;
     FFstrbuf state;
-    FFstrbuf status;
     uint64_t used;
     uint64_t total;
     uint64_t version;

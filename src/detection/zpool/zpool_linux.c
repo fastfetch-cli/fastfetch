@@ -1,6 +1,43 @@
 #include "zpool.h"
-#include "common/library.h"
+
+#ifdef __sun
+#define FF_DISABLE_DLOPEN
+#include <libzfs.h>
+
+const char* zpool_get_state_str(zpool_handle_t* zpool)
+{
+    if (zpool_get_state(zpool) == POOL_STATE_UNAVAIL)
+        return "FAULTED";
+    else
+    {
+        const char *str;
+        zpool_errata_t errata;
+        zpool_status_t status = zpool_get_status(zpool, (char**) &str, &errata);
+        if (status == ZPOOL_STATUS_IO_FAILURE_WAIT ||
+            status == ZPOOL_STATUS_IO_FAILURE_CONTINUE ||
+            status == ZPOOL_STATUS_IO_FAILURE_MMP)
+            return "SUSPENDED";
+        else
+        {
+            nvlist_t *nvroot = fnvlist_lookup_nvlist(zpool_get_config(zpool, NULL), ZPOOL_CONFIG_VDEV_TREE);
+            uint_t vsc;
+            vdev_stat_t *vs;
+            #ifdef __x86_64__
+            if (nvlist_lookup_uint64_array(nvroot, ZPOOL_CONFIG_VDEV_STATS, (uint64_t**) &vs, &vsc) != 0)
+            #else
+            if (nvlist_lookup_uint32_array(nvroot, ZPOOL_CONFIG_VDEV_STATS, (uint32_t**) &vs, &vsc) != 0)
+            #endif
+                return "UNKNOWN";
+            else
+                return zpool_state_to_name(vs->vs_state, vs->vs_aux);
+        }
+    }
+}
+#else
 #include "libzfs_simplified.h"
+#endif
+
+#include "common/library.h"
 
 typedef struct FFZfsData
 {
@@ -9,7 +46,6 @@ typedef struct FFZfsData
     FF_LIBRARY_SYMBOL(zpool_get_prop_int)
     FF_LIBRARY_SYMBOL(zpool_get_name)
     FF_LIBRARY_SYMBOL(zpool_get_state_str)
-    FF_LIBRARY_SYMBOL(zpool_get_status)
 
     libzfs_handle_t* handle;
     FFlist* result;
@@ -31,13 +67,6 @@ static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
     FFZpoolResult* item = ffListAdd(data->result);
     ffStrbufInitS(&item->name, data->ffzpool_get_name(zpool));
     ffStrbufInitS(&item->state, data->ffzpool_get_state_str(zpool));
-    const char* msgid = NULL;
-    zpool_status_t status = data->ffzpool_get_status(zpool, &msgid, NULL);
-    if (msgid && *msgid)
-        ffStrbufInitS(&item->status, msgid);
-    else
-        ffStrbufInitStatic(&item->status, status == ZPOOL_STATUS_OK ? "OK" : "NOT OK");
-
     item->version = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_VERSION, &source);
     item->total = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_SIZE, &source);
     item->used = item->total - data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FREE, &source);
@@ -63,7 +92,6 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_prop_int);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_name);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_state_str);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_status);
 
     if (ffzpool_iter(handle, enumZpoolCallback, &data) < 0)
         return "zpool_iter() failed";
