@@ -71,6 +71,7 @@ cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR FreeBSD OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
+cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
@@ -1098,6 +1099,25 @@ ff_lib_enable(DIRECTX_HEADERS
     "DirectX-Headers"
     "DirectX-Headers"
 )
+# The system <libzfs.h> is only usable on SunOS. We provide our local copy of it so it's always available.
+if(ENABLE_LIBZFS)
+    if(BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+    else()
+        set(CMAKE_REQUIRED_LIBRARIES_BACKUP ${CMAKE_REQUIRED_LIBRARIES})
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} zfs)
+        check_function_exists("libzfs_init" LIBZFS_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACKUP})
+        if(NOT LIBZFS_FOUND)
+            message(STATUS "Library: missing: LIBZFS")
+        else()
+            message(STATUS "Library: found LIBZFS")
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+            target_link_libraries(libfastfetch PRIVATE zfs)
+        endif()
+    endif()
+endif()
+
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
