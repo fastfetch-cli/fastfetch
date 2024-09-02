@@ -111,8 +111,7 @@
         {
             "type": "loadavg",
             "compact": false,
-            // {duration} is not fixed length, hack it
-            "key": "│ LOAD \u001b[s{duration}m\u001b[u\u001b[6C│{$1}"
+            "key": "│ LOAD  {duration>2}m  │{$1}" // pad duration to 2 chars
         },
         {
             "type": "custom",
