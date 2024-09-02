@@ -144,7 +144,7 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
 {
     if (ftty < 0)
     {
-        ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
+        ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC | O_NONBLOCK);
         if (ftty < 0)
             return "open(\"/dev/tty\", O_RDWR | O_NOCTTY | O_CLOEXEC) failed";
 
