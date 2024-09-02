@@ -1342,9 +1342,17 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-format
+        tests/format.c
+    )
+    target_link_libraries(fastfetch-test-format
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
+    add_test(NAME test-format COMMAND fastfetch-test-format)
 endif()
 
 ##################
