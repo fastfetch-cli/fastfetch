@@ -4158,6 +4158,17 @@ static const FFlogo S[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // Steam Deck Small
+    {
+        .names = {"SteamDeck_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_STEAMDECK_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Steam Deck OLED
     {
         .names = {"SteamDeckOled"},
