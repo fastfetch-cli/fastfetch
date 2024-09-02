@@ -1987,6 +1987,16 @@ static const FFlogo H[] = {
             FF_COLOR_FG_256 "123",
         },
     },
+    // Huawei Cloud EulerOS
+    {
+        .names = {"Huawei Cloud EulerOS", "hce"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HCE,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // Huayra
     {
         .names = {"Huayra"},
