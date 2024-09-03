@@ -1348,6 +1348,9 @@ if (BUILD_TESTS)
     target_link_libraries(fastfetch-test-format
         PRIVATE libfastfetch
     )
+    if(yyjson_FOUND)
+        target_compile_definitions(fastfetch-test-format PRIVATE FF_USE_SYSTEM_YYJSON)
+    endif()
 
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
