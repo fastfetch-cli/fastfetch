@@ -1,3 +1,31 @@
+# 2.23.0
+
+Features:
+* Support unity version detection (DE, Linux)
+* Print model name in Battery keys if available (Battery)
+* Add module `Zpool`
+* Improve performance (Shell / Terminal, Linux)
+* Support syntax of padded strings in `--<module>-format`. `{variable<padlength}` and `{variable>padlength}` are supported.
+    * If pad length is greater than the length of the variable, the variable will be padded with spaces.
+        * `fastfetch -l none -s command --command-text 'echo 12345' --command-format 'output({1<20})'` prints `Command: output(12345               )`
+        * `fastfetch -l none -s command --command-text 'echo 12345' --command-format 'output({1>20})'` prints `Command: output(               12345)`
+    * If pad length is less than the length of the variable, the variable will be truncated.
+
+Bugfixes:
+* Fix broken `--list-presets`
+* Update zsh completion script
+* Don't print `*` if `defaultRouteOnly` is set (NetIO)
+* Fix Camera module incorrectly disabled on FreeBSD (Camera, FreeBSD)
+* Fix hanging on screen 5.0 (Terminal)
+* Improve image logo support on Windows (Logo, Windows)
+
+Logos:
+* Update AmogOS
+* Add Magix
+* Make ubuntu logo colorable
+* Add Steam Deck Logo
+* add Huawei Cloud EulerOS
+
 # 2.22.0
 
 Features:
