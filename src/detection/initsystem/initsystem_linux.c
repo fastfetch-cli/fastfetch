@@ -3,6 +3,7 @@
 #include "util/binary.h"
 #include "util/stringUtils.h"
 
+#include <libgen.h>
 #include <unistd.h>
 
 FF_MAYBE_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata)
