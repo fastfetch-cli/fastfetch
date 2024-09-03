@@ -196,7 +196,7 @@ void ffInitZpoolOptions(FFZpoolOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_ZPOOL_MODULE_NAME,
-        "Print zfs pools",
+        "Print ZFS storage pools",
         ffParseZpoolCommandOptions,
         ffParseZpoolJsonObject,
         ffPrintZpool,
