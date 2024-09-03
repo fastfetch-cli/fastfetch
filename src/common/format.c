@@ -8,39 +8,53 @@
 
 void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
 {
-    if(formatarg->type == FF_FORMAT_ARG_TYPE_INT)
-        ffStrbufAppendF(buffer, "%i", *(int*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT)
-        ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT64)
-        ffStrbufAppendF(buffer, "%" PRIu64, *(uint64_t*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT16)
-        ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_UINT8)
-        ffStrbufAppendF(buffer, "%" PRIu8, *(uint8_t*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRING)
-        ffStrbufAppendS(buffer, (const char*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_STRBUF)
-        ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_FLOAT)
-        ffStrbufAppendF(buffer, "%f", *(float*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_DOUBLE)
-        ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_BOOL)
-        ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
-    else if(formatarg->type == FF_FORMAT_ARG_TYPE_LIST)
+    switch(formatarg->type)
     {
-        const FFlist* list = formatarg->value;
-        for(uint32_t i = 0; i < list->length; i++)
+        case FF_FORMAT_ARG_TYPE_INT:
+            ffStrbufAppendF(buffer, "%" PRIi32, *(int32_t*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_UINT:
+            ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_UINT64:
+            ffStrbufAppendF(buffer, "%" PRIu64, *(uint64_t*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_UINT16:
+            ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_UINT8:
+            ffStrbufAppendF(buffer, "%" PRIu8, *(uint8_t*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_STRING:
+            ffStrbufAppendS(buffer, (const char*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_STRBUF:
+            ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_FLOAT:
+            ffStrbufAppendF(buffer, "%f", *(float*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_DOUBLE:
+            ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+            break;
+        case FF_FORMAT_ARG_TYPE_BOOL:
+            ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
+            break;
+        case FF_FORMAT_ARG_TYPE_LIST:
         {
-            ffStrbufAppend(buffer, ffListGet(list, i));
-            if(i < list->length - 1)
-                ffStrbufAppendS(buffer, ", ");
+            const FFlist* list = formatarg->value;
+            for(uint32_t i = 0; i < list->length; i++)
+            {
+                ffStrbufAppend(buffer, ffListGet(list, i));
+                if(i < list->length - 1)
+                    ffStrbufAppendS(buffer, ", ");
+            }
+            break;
         }
-    }
-    else if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
-    {
-        fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);
+        default:
+            if(formatarg->type != FF_FORMAT_ARG_TYPE_NULL)
+                fprintf(stderr, "Error: format string \"%s\": argument is not implemented: %i\n", buffer->chars, formatarg->type);
+            break;
     }
 }
 
@@ -100,7 +114,8 @@ static inline bool formatArgSet(const FFformatarg* arg)
         (arg->type == FF_FORMAT_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT16 && *(uint16_t*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_BOOL && arg->value != NULL)
+        (arg->type == FF_FORMAT_ARG_TYPE_BOOL && *(bool*)arg->value) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_LIST && ((FFlist*)arg->value)->length > 0)
     );
 }
 
