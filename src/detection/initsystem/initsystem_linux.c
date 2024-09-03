@@ -79,6 +79,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
             }) == NULL && result->version.length)
             {
                 // Dinit version 0.18.0.
+                ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufTrimRight(&result->version, '.');
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
