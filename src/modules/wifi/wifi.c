@@ -87,7 +87,7 @@ void ffPrintWifi(FFWifiOptions* options)
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.ssid, "ssid"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.bssid, "bssid"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.protocol, "protocol"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &percentNum, "signal-quality"},
+                {FF_FORMAT_ARG_TYPE_STRBUF, &percentNum, "signal-quality"},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate, "rx-rate"},
                 {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate, "tx-rate"},
                 {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.security, "security"},
