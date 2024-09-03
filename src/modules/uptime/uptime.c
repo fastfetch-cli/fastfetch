@@ -84,7 +84,7 @@ void ffPrintUptime(FFUptimeOptions* options)
             {FF_FORMAT_ARG_TYPE_UINT, &minutes, "minutes"},
             {FF_FORMAT_ARG_TYPE_UINT, &seconds, "seconds"},
             {FF_FORMAT_ARG_TYPE_UINT, &milliseconds, "milliseconds"},
-            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.uptime), "boot-time"},
+            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"},
         }));
     }
 }
