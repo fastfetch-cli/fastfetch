@@ -39,7 +39,10 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
         // In some old system, /sbin/init is a symlink
         char buf[PATH_MAX];
         if (realpath(result->exe.chars, buf))
+        {
             ffStrbufSetS(&result->exe, buf);
+            ffStrbufSetS(&result->name, basename(result->exe.chars));
+        }
     }
 
     if (instance.config.general.detectVersion)
@@ -64,6 +67,19 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                         ffStrbufSubstrAfter(&result->version, iStart);
                     }
                 }
+            }
+        }
+        else if (ffStrbufEqualS(&result->name, "dinit"))
+        {
+            if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+                ffStrbufEndsWithS(&result->exe, "/dinit") ? result->exe.chars : "dinit",
+                "--version",
+                NULL,
+            }) == NULL && result->version.length)
+            {
+                // Dinit version 0.18.0.
+                ffStrbufTrimRight(&result->version, '.');
+                ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
         }
         #elif __APPLE__
