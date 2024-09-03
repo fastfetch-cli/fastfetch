@@ -456,7 +456,7 @@ jobs:
         with:
           msystem: CLANG64
           update: true
-          install: git mingw-w64-clang-x86_64-7zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-vulkan-headers mingw-w64-clang-x86_64-opencl-icd mingw-w64-clang-x86_64-opencl-headers mingw-w64-clang-x86_64-cppwinrt
+          install: git mingw-w64-clang-x86_64-7zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-vulkan-headers mingw-w64-clang-x86_64-opencl-icd mingw-w64-clang-x86_64-opencl-headers mingw-w64-clang-x86_64-cppwinrt mingw-w64-clang-x86_64-imagemagick
 
       - name: print msys version
         run: uname -a
