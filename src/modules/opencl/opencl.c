@@ -25,9 +25,9 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENCL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->vendor, "vendor"},
+            FF_FORMAT_ARG(result->version, "version"),
+            FF_FORMAT_ARG(result->name, "name"),
+            FF_FORMAT_ARG(result->vendor, "vendor"),
         }));
     }
 }

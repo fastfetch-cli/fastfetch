@@ -26,9 +26,9 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, 3, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+            FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(inf->name, "name"),
+            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 }
@@ -81,18 +81,18 @@ void ffPrintNetIO(FFNetIOOptions* options)
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETIO_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &buffer, "rx-size"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &buffer2, "tx-size"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &inf->name, "ifname"},
-                {FF_FORMAT_ARG_TYPE_BOOL, &inf->defaultRoute, "is-default-route"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->txBytes, "tx-bytes"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxBytes, "rx-bytes"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->txPackets, "tx-packets"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxPackets, "rx-packets"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxErrors, "rx-errors"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->txErrors, "tx-errors"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->rxDrops, "rx-drops"},
-                {FF_FORMAT_ARG_TYPE_UINT64, &inf->txDrops, "tx-drops"},
+                FF_FORMAT_ARG(buffer, "rx-size"),
+                FF_FORMAT_ARG(buffer2, "tx-size"),
+                FF_FORMAT_ARG(inf->name, "ifname"),
+                FF_FORMAT_ARG(inf->defaultRoute, "is-default-route"),
+                FF_FORMAT_ARG(inf->txBytes, "tx-bytes"),
+                FF_FORMAT_ARG(inf->rxBytes, "rx-bytes"),
+                FF_FORMAT_ARG(inf->txPackets, "tx-packets"),
+                FF_FORMAT_ARG(inf->rxPackets, "rx-packets"),
+                FF_FORMAT_ARG(inf->rxErrors, "rx-errors"),
+                FF_FORMAT_ARG(inf->txErrors, "tx-errors"),
+                FF_FORMAT_ARG(inf->rxDrops, "rx-drops"),
+                FF_FORMAT_ARG(inf->txDrops, "tx-drops"),
             }));
         }
         ++index;

@@ -23,8 +23,8 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     {
         ffStrbufClear(&key);
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT8, &index, "index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName, "name"},
+            FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(result->modelName, "name"),
         }));
     }
 
@@ -81,16 +81,16 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer, "manufacturer"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName, "model-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology, "technology"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &capacityNum, "capacity"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->status, "status"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr, "temperature"},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->cycleCount, "cycle-count"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->serial, "serial"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufactureDate, "manufacture-date"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &capacityBar, "capacity-bar"},
+            FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
+            FF_FORMAT_ARG(result->modelName, "model-name"),
+            FF_FORMAT_ARG(result->technology, "technology"),
+            FF_FORMAT_ARG(capacityNum, "capacity"),
+            FF_FORMAT_ARG(result->status, "status"),
+            FF_FORMAT_ARG(tempStr, "temperature"),
+            FF_FORMAT_ARG(result->cycleCount, "cycle-count"),
+            FF_FORMAT_ARG(result->serial, "serial"),
+            FF_FORMAT_ARG(result->manufactureDate, "manufacture-date"),
+            FF_FORMAT_ARG(capacityBar, "capacity-bar"),
         }));
     }
 }

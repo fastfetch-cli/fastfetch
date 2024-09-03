@@ -66,28 +66,28 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     strftime(result.timezoneName, sizeof(result.timezoneName), "%Z", tm);
 
     FF_PRINT_FORMAT_CHECKED(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DATETIME_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-        {FF_FORMAT_ARG_TYPE_UINT16, &result.year, "year"}, // 1
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.yearShort, "year-short"}, // 2
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.month, "month"}, // 3
-        {FF_FORMAT_ARG_TYPE_STRING, result.monthPretty, "month-pretty"}, // 4
-        {FF_FORMAT_ARG_TYPE_STRING, result.monthName, "month-name"}, // 5
-        {FF_FORMAT_ARG_TYPE_STRING, result.monthNameShort, "month-name-short"}, // 6
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.week, "week"}, // 7
-        {FF_FORMAT_ARG_TYPE_STRING, result.weekday, "weekday"}, // 8
-        {FF_FORMAT_ARG_TYPE_STRING, result.weekdayShort, "weekday-short"}, // 9
-        {FF_FORMAT_ARG_TYPE_UINT16, &result.dayInYear, "day-in-year"}, // 10
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInMonth, "day-in-month"}, // 11
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.dayInWeek, "day-in-week"}, // 12
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour, "hour"}, // 13
-        {FF_FORMAT_ARG_TYPE_STRING, result.hourPretty, "hour-pretty"}, // 14
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.hour12, "hour-12"}, // 15
-        {FF_FORMAT_ARG_TYPE_STRING, result.hour12Pretty, "hour-12-pretty"}, // 16
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.minute, "minute"}, // 17
-        {FF_FORMAT_ARG_TYPE_STRING, result.minutePretty, "minute-pretty"}, // 18
-        {FF_FORMAT_ARG_TYPE_UINT8, &result.second, "second"}, // 19
-        {FF_FORMAT_ARG_TYPE_STRING, result.secondPretty, "second-pretty"}, // 20
-        {FF_FORMAT_ARG_TYPE_STRING, result.offsetFromUtc, "offset-from-utc"}, // 21
-        {FF_FORMAT_ARG_TYPE_STRING, result.timezoneName, "timezone-name"}, // 22
+        FF_FORMAT_ARG(result.year, "year"), // 1
+        FF_FORMAT_ARG(result.yearShort, "year-short"), // 2
+        FF_FORMAT_ARG(result.month, "month"), // 3
+        FF_FORMAT_ARG(result.monthPretty, "month-pretty"), // 4
+        FF_FORMAT_ARG(result.monthName, "month-name"), // 5
+        FF_FORMAT_ARG(result.monthNameShort, "month-name-short"), // 6
+        FF_FORMAT_ARG(result.week, "week"), // 7
+        FF_FORMAT_ARG(result.weekday, "weekday"), // 8
+        FF_FORMAT_ARG(result.weekdayShort, "weekday-short"), // 9
+        FF_FORMAT_ARG(result.dayInYear, "day-in-year"), // 10
+        FF_FORMAT_ARG(result.dayInMonth, "day-in-month"), // 11
+        FF_FORMAT_ARG(result.dayInWeek, "day-in-week"), // 12
+        FF_FORMAT_ARG(result.hour, "hour"), // 13
+        FF_FORMAT_ARG(result.hourPretty, "hour-pretty"), // 14
+        FF_FORMAT_ARG(result.hour12, "hour-12"), // 15
+        FF_FORMAT_ARG(result.hour12Pretty, "hour-12-pretty"), // 16
+        FF_FORMAT_ARG(result.minute, "minute"), // 17
+        FF_FORMAT_ARG(result.minutePretty, "minute-pretty"), // 18
+        FF_FORMAT_ARG(result.second, "second"), // 19
+        FF_FORMAT_ARG(result.secondPretty, "second-pretty"), // 20
+        FF_FORMAT_ARG(result.offsetFromUtc, "offset-from-utc"), // 21
+        FF_FORMAT_ARG(result.timezoneName, "timezone-name"), // 22
     }));
 }
 

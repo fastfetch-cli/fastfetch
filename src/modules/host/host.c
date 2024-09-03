@@ -49,13 +49,13 @@ void ffPrintHost(FFHostOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_HOST_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.family, "family"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.sku, "sku"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.serial, "serial"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &host.uuid, "uuid"},
+            FF_FORMAT_ARG(host.family, "family"),
+            FF_FORMAT_ARG(host.name, "name"),
+            FF_FORMAT_ARG(host.version, "version"),
+            FF_FORMAT_ARG(host.sku, "sku"),
+            FF_FORMAT_ARG(host.vendor, "vendor"),
+            FF_FORMAT_ARG(host.serial, "serial"),
+            FF_FORMAT_ARG(host.uuid, "uuid"),
         }));
     }
 

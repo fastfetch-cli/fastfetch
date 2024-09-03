@@ -91,18 +91,18 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         ffParseFrequency(gpu->frequency, &frequency);
 
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->driver, "driver"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &tempStr, "temperature"},
-            {FF_FORMAT_ARG_TYPE_INT, &gpu->coreCount, "core-count"},
-            {FF_FORMAT_ARG_TYPE_STRING, type, "type"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &dTotal, "dedicated-total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &dUsed, "dedicated-used"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &sTotal, "shared-total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &sUsed, "shared-used"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &gpu->platformApi, "platform-api"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &frequency, "frequency"},
+            FF_FORMAT_ARG(gpu->vendor, "vendor"),
+            FF_FORMAT_ARG(gpu->name, "name"),
+            FF_FORMAT_ARG(gpu->driver, "driver"),
+            FF_FORMAT_ARG(tempStr, "temperature"),
+            FF_FORMAT_ARG(gpu->coreCount, "core-count"),
+            FF_FORMAT_ARG(type, "type"),
+            FF_FORMAT_ARG(dTotal, "dedicated-total"),
+            FF_FORMAT_ARG(dUsed, "dedicated-used"),
+            FF_FORMAT_ARG(sTotal, "shared-total"),
+            FF_FORMAT_ARG(sUsed, "shared-used"),
+            FF_FORMAT_ARG(gpu->platformApi, "platform-api"),
+            FF_FORMAT_ARG(frequency, "frequency"),
         }));
     }
 }

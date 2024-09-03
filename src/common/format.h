@@ -2,7 +2,7 @@
 
 #include "util/FFstrbuf.h"
 
-typedef enum FFformatargtype
+typedef enum FFformatArgType
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
     FF_FORMAT_ARG_TYPE_UINT,
@@ -16,11 +16,26 @@ typedef enum FFformatargtype
     FF_FORMAT_ARG_TYPE_DOUBLE,
     FF_FORMAT_ARG_TYPE_LIST,
     FF_FORMAT_ARG_TYPE_BOOL
-} FFformatargtype;
+} FFformatArgType;
+
+#define FF_FORMAT_ARG(variable, var_name) { _Generic((variable), \
+        uint32_t: FF_FORMAT_ARG_TYPE_UINT, \
+        uint64_t: FF_FORMAT_ARG_TYPE_UINT64, \
+        uint16_t: FF_FORMAT_ARG_TYPE_UINT16, \
+        uint8_t: FF_FORMAT_ARG_TYPE_UINT8, \
+        int32_t: FF_FORMAT_ARG_TYPE_INT, \
+        char*: FF_FORMAT_ARG_TYPE_STRING, \
+        const char*: FF_FORMAT_ARG_TYPE_STRING, \
+        FFstrbuf: FF_FORMAT_ARG_TYPE_STRBUF, \
+        float: FF_FORMAT_ARG_TYPE_FLOAT, \
+        double: FF_FORMAT_ARG_TYPE_DOUBLE, \
+        FFlist: FF_FORMAT_ARG_TYPE_LIST, \
+        bool: FF_FORMAT_ARG_TYPE_BOOL \
+    ), _Generic((variable), char*: (variable), const char*: (variable), default: &(variable) ), (var_name) }
 
 typedef struct FFformatarg
 {
-    FFformatargtype type;
+    FFformatArgType type;
     const void* value;
     const char* name; // argument name, must start with an alphabet
 } FFformatarg;

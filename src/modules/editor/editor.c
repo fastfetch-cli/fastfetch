@@ -42,11 +42,11 @@ void ffPrintEditor(FFEditorOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_EDITOR_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, result.type, "type"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.exe, "exe-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.path, "path"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+            FF_FORMAT_ARG(result.type, "type"),
+            FF_FORMAT_ARG(result.name, "name"),
+            FF_FORMAT_ARG(result.exe, "exe-name"),
+            FF_FORMAT_ARG(result.path, "path"),
+            FF_FORMAT_ARG(result.version, "version"),
         }));
     }
 

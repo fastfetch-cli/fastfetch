@@ -36,10 +36,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     else
     {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 4, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountpoint, "mountpoint"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->mountFrom, "mount-from"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+            FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
+            FF_FORMAT_ARG(disk->name, "name"),
+            FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
+            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -121,20 +121,20 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty, "size-used"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty, "size-total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageNum, "size-percentage"},
-            {FF_FORMAT_ARG_TYPE_UINT, &disk->filesUsed, "files-used"},
-            {FF_FORMAT_ARG_TYPE_UINT, &disk->filesTotal, "files-total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &filesPercentageNum, "files-percentage"},
-            {FF_FORMAT_ARG_TYPE_BOOL, &isExternal, "is-external"},
-            {FF_FORMAT_ARG_TYPE_BOOL, &isHidden, "is-hidden"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->filesystem, "filesystem"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &disk->name, "name"},
-            {FF_FORMAT_ARG_TYPE_BOOL, &isReadOnly, "is-readonly"},
+            FF_FORMAT_ARG(usedPretty, "size-used"),
+            FF_FORMAT_ARG(totalPretty, "size-total"),
+            FF_FORMAT_ARG(bytesPercentageNum, "size-percentage"),
+            FF_FORMAT_ARG(disk->filesUsed, "files-used"),
+            FF_FORMAT_ARG(disk->filesTotal, "files-total"),
+            FF_FORMAT_ARG(filesPercentageNum, "files-percentage"),
+            FF_FORMAT_ARG(isExternal, "is-external"),
+            FF_FORMAT_ARG(isHidden, "is-hidden"),
+            FF_FORMAT_ARG(disk->filesystem, "filesystem"),
+            FF_FORMAT_ARG(disk->name, "name"),
+            FF_FORMAT_ARG(isReadOnly, "is-readonly"),
             {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(disk->createTime), "create-time"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageBar, "size-percentage-bar"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &filesPercentageBar, "files-percentage-bar"},
+            FF_FORMAT_ARG(bytesPercentageBar, "size-percentage-bar"),
+            FF_FORMAT_ARG(filesPercentageBar, "files-percentage-bar"),
         }));
     }
 }

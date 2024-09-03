@@ -36,8 +36,8 @@ void ffPrintIcons(FFIconsOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_ICONS_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.icons1, "icons1"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.icons2, "icons2"},
+            FF_FORMAT_ARG(result.icons1, "icons1"),
+            FF_FORMAT_ARG(result.icons2, "icons2"),
         }));
     }
 

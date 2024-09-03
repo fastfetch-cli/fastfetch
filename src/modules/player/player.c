@@ -74,10 +74,10 @@ void ffPrintPlayer(FFPlayerOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PLAYER_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &playerPretty, "player"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->player, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->playerId, "id"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &media->url, "url"},
+            FF_FORMAT_ARG(playerPretty, "player"),
+            FF_FORMAT_ARG(media->player, "name"),
+            FF_FORMAT_ARG(media->playerId, "id"),
+            FF_FORMAT_ARG(media->url, "url"),
         }));
     }
 }
