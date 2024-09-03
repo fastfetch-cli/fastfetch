@@ -20,7 +20,7 @@ static inline bool readData(FILE *objFile, void *buf, size_t size, off_t offset)
     return fread(buf, 1, size, objFile) == size;
 }
 
-static bool handleMachSection(FILE *objFile, const char *name, off_t offset, size_t size, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata)
+static bool handleMachSection(FILE *objFile, const char *name, off_t offset, size_t size, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     if (!ffStrEquals(name, "__cstring")) return true;
 
@@ -33,6 +33,7 @@ static bool handleMachSection(FILE *objFile, const char *name, off_t offset, siz
         const char* p = (const char*) data + off;
         if (*p == '\0') continue;
         uint32_t len = (uint32_t) strlen(p);
+        if (len < minLength) continue;
         if (*p >= ' ' && *p <= '~') // Ignore control characters
         {
             if (!cb(p, len, userdata)) return false;
@@ -42,7 +43,7 @@ static bool handleMachSection(FILE *objFile, const char *name, off_t offset, siz
     return true;
 }
 
-static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata)
+static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     uint32_t ncmds;
     off_t loadCommandsOffset = offset;
@@ -87,7 +88,7 @@ static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool 
                 if (!readData(objFile, &section, sizeof(section), (off_t) ((size_t) commandOffset + sizeof(segment) + j * sizeof(section))))
                     continue;
 
-                if (!handleMachSection(objFile, section.sectname, section.offset, section.size, cb, userdata))
+                if (!handleMachSection(objFile, section.sectname, section.offset, section.size, cb, userdata, minLength))
                     return NULL;
             }
         }
@@ -105,7 +106,7 @@ static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool 
                 if (!readData(objFile, &section, sizeof(section), (off_t) ((size_t) commandOffset + sizeof(segment) + j * sizeof(section))))
                     continue;
 
-                if (!handleMachSection(objFile, section.sectname, section.offset, section.size, cb, userdata))
+                if (!handleMachSection(objFile, section.sectname, section.offset, section.size, cb, userdata, minLength))
                     return NULL;
             }
         }
@@ -116,7 +117,7 @@ static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool 
     return NULL;
 }
 
-static const char* dumpFatHeader(FILE *objFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata)
+static const char* dumpFatHeader(FILE *objFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     struct fat_header header;
     if (!readData(objFile, &header, sizeof(header), 0))
@@ -157,14 +158,14 @@ static const char* dumpFatHeader(FILE *objFile, bool (*cb)(const char *str, uint
 
         if (magic == MH_MAGIC_64 || magic == MH_MAGIC)
         {
-            dumpMachHeader(objFile, machHeaderOffset, magic == MH_MAGIC_64, cb, userdata);
+            dumpMachHeader(objFile, machHeaderOffset, magic == MH_MAGIC_64, cb, userdata, minLength);
             return NULL;
         }
     }
     return "Unsupported fat header";
 }
 
-const char *ffBinaryExtractStrings(const char *machoFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata)
+const char *ffBinaryExtractStrings(const char *machoFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     FF_AUTO_CLOSE_FILE FILE *objFile = fopen(machoFile, "rb");
     if (objFile == NULL)
@@ -180,7 +181,7 @@ const char *ffBinaryExtractStrings(const char *machoFile, bool (*cb)(const char 
         return "Unsupported format or big endian mach-o file";
 
     if (magic == FAT_MAGIC || magic == FAT_MAGIC_64 || magic == FAT_CIGAM || magic == FAT_CIGAM_64)
-        return dumpFatHeader(objFile, cb, userdata);
+        return dumpFatHeader(objFile, cb, userdata, minLength);
     else
-        return dumpMachHeader(objFile, 0, magic == MH_MAGIC_64, cb, userdata);
+        return dumpMachHeader(objFile, 0, magic == MH_MAGIC_64, cb, userdata, minLength);
 }

@@ -820,7 +820,8 @@
                             "weather",
                             "wm",
                             "wifi",
-                            "wmtheme"
+                            "wmtheme",
+                            "zpool"
                         ]
                     },
                     {
@@ -993,6 +994,10 @@
                                             {
                                                 "const": "wmtheme",
                                                 "description": "Print current theme of window manager"
+                                            },
+                                            {
+                                                "const": "zpool",
+                                                "description": "Print ZFS storage pools"
                                             }
                                         ]
                                     },

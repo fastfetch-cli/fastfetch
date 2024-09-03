@@ -83,6 +83,8 @@ static bool printImageIterm(bool printError)
                 fprintf(stderr, "\nLogo (iterm): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
+            if (X < options->paddingLeft + options->width)
+                X = (uint16_t) (options->paddingLeft + options->width);
             if (options->position == FF_LOGO_POSITION_LEFT)
                 instance.state.logoWidth = X + options->paddingRight - 1;
             instance.state.logoHeight = Y;
@@ -207,6 +209,8 @@ static bool printImageKittyDirect(bool printError)
                     fprintf(stderr, "\nLogo (kitty-direct): fail to query cursor position: %s\n", error);
                 return true; // We already printed image logo, don't print ascii logo then
             }
+            if (X < options->paddingLeft + options->width)
+                X = (uint16_t) (options->paddingLeft + options->width);
             if (options->position == FF_LOGO_POSITION_LEFT)
                 instance.state.logoWidth = X + options->paddingRight - 1;
             instance.state.logoHeight = Y;

@@ -64,16 +64,29 @@ static bool getExeVersionGeneral(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
-static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
+static bool extractBashVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
+    if (!ffStrStartsWith(line, "@(#)Bash version ")) return true;
+    const char* start = line + strlen("@(#)Bash version ");
+    const char* end = strchr(start, '(');
+    if (!end) return true;
+    ffStrbufSetNS((FFstrbuf*) userdata, (uint32_t) (end - start), start);
+    return false;
+}
+
+static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+{
+    const char* path = exePath->chars;
+    if (*path == '\0')
+        path = exe->chars;
+    ffBinaryExtractStrings(path, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
+
     if(!getExeVersionRaw(exe, version))
         return false;
 
     // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)\nCopyright...
-    ffStrbufSubstrBeforeFirstC(version, '\n'); // GNU bash, version 5.1.16(1)-release (x86_64-pc-msys)
-    ffStrbufSubstrBeforeLastC(version, ' '); // GNU bash, version 5.1.16(1)-release
-    ffStrbufSubstrAfterLastC(version, ' '); // 5.1.16(1)-release
-    ffStrbufSubstrBeforeFirstC(version, '('); // 5.1.16
+    ffStrbufSubstrBeforeFirstC(version, '('); // GNU bash, version 5.1.16
+    ffStrbufSubstrAfterLastC(version, ' '); // 5.1.16
     return true;
 }
 
@@ -189,6 +202,29 @@ static bool getShellVersionXonsh(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool extractZshVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    if (!ffStrStartsWith(line, "zsh-")) return true;
+    const char* start = line + strlen("zsh-");
+    const char* end = strchr(start, '-');
+    if (!end) return true;
+
+    ffStrbufSetNS((FFstrbuf*) userdata, (uint32_t) (end - start), start);
+    return false;
+}
+
+static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+{
+    const char* path = exePath->chars;
+    if (*path == '\0')
+        path = exe->chars;
+
+    ffBinaryExtractStrings(path, extractZshVersion, version, (uint32_t) strlen("zsh-0.0-0"));
+    if (version->length) return true;
+
+    return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
+}
+
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -203,7 +239,7 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 }
 #endif
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, FFstrbuf* version)
 {
     if (!instance.config.general.detectVersion) return false;
 
@@ -211,9 +247,9 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return false;
 
     if(ffStrEqualsIgnCase(exeName, "bash"))
-        return getShellVersionBash(exe, version);
+        return getShellVersionBash(exe, exePath, version);
     if(ffStrEqualsIgnCase(exeName, "zsh"))
-        return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
+        return getShellVersionZsh(exe, exePath, version);
     if(ffStrEqualsIgnCase(exeName, "fish"))
         return getShellVersionFish(exe, version);
     if(ffStrEqualsIgnCase(exeName, "pwsh"))
@@ -251,7 +287,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionTermux(FFstrbuf* version)
     return version->length > 0;
 }
 
-static bool extractGnomeTerminalVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+static bool extractGeneralVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
     if (!ffCharIsDigit(str[0])) return true;
     int count = 0;
@@ -265,7 +301,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
 {
     if (exe->chars[0] == '/')
     {
-        ffBinaryExtractStrings(exe->chars, extractGnomeTerminalVersion, version);
+        ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
     }
 
@@ -279,6 +315,17 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
     ffStrbufSubstrAfterFirstS(version, "Terminal ");
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return true;
+}
+
+FF_MAYBE_UNUSED static bool getTerminalVersionXfce4Terminal(FFstrbuf* exe, FFstrbuf* version)
+{
+    if (exe->chars[0] == '/')
+    {
+        ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
+        if (version->length) return true;
+    }
+
+    return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
 }
 
 FF_MAYBE_UNUSED static bool getTerminalVersionKgx(FFstrbuf* version)
@@ -616,7 +663,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         return getExeVersionGeneral(exe, version);//yakuake 22.12.3
 
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
-        return getExeVersionGeneral(exe, version);//xfce4-terminal 1.0.4 (Xfce 4.18)...
+        return getTerminalVersionXfce4Terminal(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "terminator"))
         return getExeVersionGeneral(exe, version);//terminator 2.1.3

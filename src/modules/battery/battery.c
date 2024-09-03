@@ -11,9 +11,26 @@
 
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+    if (options->moduleArgs.key.length == 0)
+    {
+        if (result->modelName.length > 0)
+            ffStrbufSetF(&key, "%s (%s)", FF_BATTERY_MODULE_NAME, result->modelName.chars);
+        else
+            ffStrbufSetS(&key, FF_BATTERY_MODULE_NAME);
+    }
+    else
+    {
+        ffStrbufClear(&key);
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
+            {FF_FORMAT_ARG_TYPE_UINT8, &index, "index"},
+            {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName, "name"},
+        }));
+    }
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
-        ffPrintLogoAndKey(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         bool showStatus =
@@ -63,7 +80,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         ffPercentAppendBar(&capacityBar, result->capacity, options->percent, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
-        FF_PRINT_FORMAT_CHECKED(FF_BATTERY_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(key.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->manufacturer, "manufacturer"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->modelName, "model-name"},
             {FF_FORMAT_ARG_TYPE_STRBUF, &result->technology, "technology"},

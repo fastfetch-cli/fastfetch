@@ -71,6 +71,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitWallpaperOptions(&options->wallpaper);
     ffInitWeatherOptions(&options->weather);
     ffInitWifiOptions(&options->wifi);
+    ffInitZpoolOptions(&options->zpool);
 }
 
 void ffOptionsDestroyModules(FFOptionsModules* options)
@@ -143,4 +144,5 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyWallpaperOptions(&options->wallpaper);
     ffDestroyWeatherOptions(&options->weather);
     ffDestroyWifiOptions(&options->wifi);
+    ffDestroyZpoolOptions(&options->zpool);
 }

@@ -68,7 +68,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (OUT)");
 
-            if (inf->defaultRoute)
+            if (inf->defaultRoute && !options->defaultRouteOnly)
                 ffStrbufAppendS(&buffer, " *");
             ffStrbufPutTo(&buffer, stdout);
         }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.22.0
+    VERSION 2.23.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -71,6 +71,7 @@ cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR FreeBSD OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
+cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
@@ -392,6 +393,7 @@ set(LIBFASTFETCH_SRC
     src/modules/wifi/wifi.c
     src/modules/wm/wm.c
     src/modules/wmtheme/wmtheme.c
+    src/modules/zpool/zpool.c
     src/options/display.c
     src/options/modules.c
     src/options/logo.c
@@ -481,6 +483,7 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -543,6 +546,7 @@ elseif(ANDROID)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_android.c
+        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -622,6 +626,7 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
+        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -686,6 +691,7 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
+        src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/platform/FFPlatform_unix.c
@@ -750,6 +756,7 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
+        src/detection/zpool/zpool_nosupport.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -832,6 +839,7 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
+        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -1091,6 +1099,25 @@ ff_lib_enable(DIRECTX_HEADERS
     "DirectX-Headers"
     "DirectX-Headers"
 )
+# The system <libzfs.h> is only usable on SunOS. We provide our local copy of it so it's always available.
+if(ENABLE_LIBZFS)
+    if(BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+    else()
+        set(CMAKE_REQUIRED_LIBRARIES_BACKUP ${CMAKE_REQUIRED_LIBRARIES})
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} zfs)
+        check_function_exists("libzfs_init" LIBZFS_FOUND)
+        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACKUP})
+        if(NOT LIBZFS_FOUND)
+            message(STATUS "Library: missing: LIBZFS")
+        else()
+            message(STATUS "Library: found LIBZFS")
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+            target_link_libraries(libfastfetch PRIVATE zfs)
+        endif()
+    endif()
+endif()
+
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
@@ -1153,6 +1180,8 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
+        PRIVATE "zfs"
+        PRIVATE "nvpair"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
@@ -1196,11 +1225,16 @@ if(WIN32)
     endif()
     set(CMAKE_CXX_STANDARD 17)
 endif()
-if(LINUX)
+if(FreeBSD)
+  set(CMAKE_REQUIRED_INCLUDES "/usr/local/include" "/usr/include")
+endif()
+if(LINUX OR FreeBSD)
     CHECK_INCLUDE_FILE("linux/videodev2.h" HAVE_LINUX_VIDEODEV2)
     if(HAVE_LINUX_VIDEODEV2)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LINUX_VIDEODEV2=1)
     endif()
+endif()
+if(LINUX)
     CHECK_INCLUDE_FILE("linux/wireless.h" HAVE_LINUX_WIRELESS)
     if(HAVE_LINUX_WIRELESS)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LINUX_WIRELESS=1)
@@ -1308,9 +1342,17 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-format
+        tests/format.c
+    )
+    target_link_libraries(fastfetch-test-format
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
+    add_test(NAME test-format COMMAND fastfetch-test-format)
 endif()
 
 ##################

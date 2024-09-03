@@ -238,6 +238,13 @@ static void applyPrettyNameIfDE(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->deProcessName, "ukui-session");
         ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_UKUI);
     }
+
+    else if(
+        ffStrStartsWithIgnCase(name, "Unity:Unity")
+    ) {
+        ffStrbufSetS(&result->deProcessName, "unity-session");
+        ffStrbufSetS(&result->dePrettyName, FF_DE_PRETTY_UNITY);
+    }
 }
 
 

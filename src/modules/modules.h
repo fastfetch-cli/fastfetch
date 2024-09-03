@@ -70,3 +70,4 @@
 #include "modules/wifi/wifi.h"
 #include "modules/wm/wm.h"
 #include "modules/wmtheme/wmtheme.h"
+#include "modules/zpool/zpool.h"

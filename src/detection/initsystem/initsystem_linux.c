@@ -1,20 +1,18 @@
 #include "initsystem.h"
 #include "common/processing.h"
 #include "util/binary.h"
+#include "util/stringUtils.h"
+
 #include <unistd.h>
 
-FF_MAYBE_UNUSED static bool elfExtractStringsCallBack(const char* str, uint32_t len, void* data)
+FF_MAYBE_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata)
 {
-    if (len > strlen("systemd 0.0 running in ") && memcmp(str, "systemd ", strlen("systemd ")) == 0)
-    {
-        const char* pend = memmem(str + strlen("systemd "), len - strlen("systemd "), " running in ", strlen(" running in "));
-        if (pend)
-        {
-            ffStrbufSetNS((FFstrbuf*) data, (uint32_t) (pend - str) - (uint32_t) strlen("systemd "), str + strlen("systemd "));
-            return false;
-        }
-    }
-    return true;
+    if (!ffStrStartsWith(str, "systemd ")) return true;
+    const char* pstart = str + strlen("systemd ");
+    const char* pend = memmem(pstart, len - strlen("systemd "), " running in ", strlen(" running in "));
+    if (!pend) return true;
+    ffStrbufSetNS((FFstrbuf*) userdata, (uint32_t) (pend - pstart), pstart);
+    return false;
 }
 
 const char* ffDetectInitSystem(FFInitSystemResult* result)
@@ -49,7 +47,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
         #if __linux__ && !__ANDROID__
         if (ffStrbufEqualS(&result->name, "systemd"))
         {
-            ffBinaryExtractStrings(result->exe.chars, elfExtractStringsCallBack, &result->version);
+            ffBinaryExtractStrings(result->exe.chars, extractSystemdVersion, &result->version, (uint32_t) strlen("systemd 0.0 running in x"));
             if (result->version.length == 0)
             {
                 if (ffProcessAppendStdOut(&result->version, (char* const[]) {

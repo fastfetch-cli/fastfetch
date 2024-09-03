@@ -388,8 +388,8 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
-            time ./fastfetch
-            time ./fastfetch --format json
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
             ctest
@@ -426,8 +426,8 @@ jobs:
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
-            time ./fastfetch
-            time ./fastfetch --format json
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
             ctest

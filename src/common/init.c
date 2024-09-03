@@ -247,6 +247,9 @@ void ffListFeatures(void)
         #if FF_HAVE_ELF
             "libelf\n"
         #endif
+        #if FF_HAVE_LIBZFS
+            "libzfs\n"
+        #endif
         #if FF_HAVE_DIRECTX_HEADERS
             "Directx Headers\n"
         #endif

@@ -72,6 +72,7 @@ typedef struct FFOptionsModules
     FFWallpaperOptions wallpaper;
     FFWeatherOptions weather;
     FFWifiOptions wifi;
+    FFZpoolOptions zpool;
 } FFOptionsModules;
 
 void ffOptionsInitModules(FFOptionsModules* options);

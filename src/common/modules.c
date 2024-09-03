@@ -169,6 +169,7 @@ static FFModuleBaseInfo* Y[] = {
 };
 
 static FFModuleBaseInfo* Z[] = {
+    (void*) &instance.config.modules.zpool,
     NULL,
 };
 
