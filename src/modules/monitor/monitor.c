@@ -82,7 +82,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
                 {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureYear, "manufacture-year"},
                 {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureWeek, "manufacture-week"},
                 {FF_FORMAT_ARG_TYPE_STRING, buf, "serial"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, buf, "refresh-rate"},
+                {FF_FORMAT_ARG_TYPE_DOUBLE, &display->refreshRate, "refresh-rate"},
             }));
         }
 
