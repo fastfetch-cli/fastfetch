@@ -17,7 +17,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
     if (!inited)
     {
         inited = true;
-        FF_LIBRARY_LOAD(libags, NULL, "dlopen amd_ags failed", soName , 1);
+        FF_LIBRARY_LOAD(libags, "dlopen amd_ags failed", soName , 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libags, agsInitialize)
 
         struct AGSContext* apiHandle;

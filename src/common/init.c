@@ -43,7 +43,6 @@ static void defaultConfig(void)
     ffOptionsInitGeneral(&instance.config.general);
     ffOptionsInitModules(&instance.config.modules);
     ffOptionsInitDisplay(&instance.config.display);
-    ffOptionsInitLibrary(&instance.config.library);
 }
 
 void ffInitInstance(void)
@@ -148,7 +147,6 @@ static void destroyConfig(void)
     ffOptionsDestroyGeneral(&instance.config.general);
     ffOptionsDestroyModules(&instance.config.modules);
     ffOptionsDestroyDisplay(&instance.config.display);
-    ffOptionsDestroyLibrary(&instance.config.library);
 }
 
 static void destroyState(void)

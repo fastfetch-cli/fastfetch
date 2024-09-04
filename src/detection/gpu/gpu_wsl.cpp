@@ -28,7 +28,7 @@ private:
 extern "C"
 const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_LIBRARY_LOAD(libdxcore, nullptr, "dlopen libdxcore.so failed", "/usr/lib/wsl/lib/libdxcore" FF_LIBRARY_EXTENSION, 4)
+    FF_LIBRARY_LOAD(libdxcore, "dlopen libdxcore.so failed", "/usr/lib/wsl/lib/libdxcore" FF_LIBRARY_EXTENSION, 4)
     // DXCoreCreateAdapterFactory is a reloaded function, so we can't use FF_LIBRARY_LOAD_SYMBOL_MESSAGE here
     typedef HRESULT (*DXCoreCreateAdapterFactory_t)(REFIID riid, void** ppvFactory);
 

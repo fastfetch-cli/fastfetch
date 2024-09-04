@@ -33,8 +33,8 @@ static inline void ffLibraryUnload(void** handle)
 #define FF_LIBRARY_SYMBOL(symbolName) \
     __typeof__(&symbolName) ff ## symbolName;
 
-#define FF_LIBRARY_LOAD(libraryObjectName, userLibraryName, returnValue, ...) \
-    void* __attribute__((__cleanup__(ffLibraryUnload))) libraryObjectName = ffLibraryLoad(userLibraryName, __VA_ARGS__, NULL);\
+#define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...) \
+    void* __attribute__((__cleanup__(ffLibraryUnload))) libraryObjectName = ffLibraryLoad(__VA_ARGS__, NULL);\
     if(libraryObjectName == NULL) \
         return returnValue;
 
@@ -72,7 +72,7 @@ static inline void ffLibraryUnload(void** handle)
 #define FF_LIBRARY_LOAD_SYMBOL_PTR(library, varName, symbolName, returnValue) \
     FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, (varName)->ff ## symbolName, symbolName, returnValue);
 
-void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
+void* ffLibraryLoad(const char* path, int maxVersion, ...);
 
 #else
 
@@ -81,7 +81,7 @@ void* ffLibraryLoad(const FFstrbuf* userProvidedName, ...);
 #define FF_LIBRARY_SYMBOL(symbolName) \
     __typeof__(&symbolName) ff ## symbolName;
 
-#define FF_LIBRARY_LOAD(libraryObjectName, userLibraryName, returnValue, ...) \
+#define FF_LIBRARY_LOAD(libraryObjectName, returnValue, ...) \
     FF_MAYBE_UNUSED void* libraryObjectName = NULL; // Placeholder
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \

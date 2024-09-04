@@ -34,7 +34,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
     if (!igclData.inited)
     {
         igclData.inited = true;
-        FF_LIBRARY_LOAD(libigcl, NULL, "dlopen igcl (ControlLib) failed", soName , 1);
+        FF_LIBRARY_LOAD(libigcl, "dlopen igcl (ControlLib) failed", soName , 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libigcl, ctlInit)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlClose)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumerateDevices)

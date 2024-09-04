@@ -54,7 +54,7 @@ static_assert(sizeof(BTH_LOCAL_RADIO_INFO) == 292, "BTH_LOCAL_RADIO_INFO should 
 const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 {
     // Actually bluetoothapis.dll, but it's missing on Windows 7
-    FF_LIBRARY_LOAD(bluetoothapis, NULL, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
+    FF_LIBRARY_LOAD(bluetoothapis, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstRadio)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextRadio)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindRadioClose)

@@ -121,7 +121,7 @@ static const char* getXfce4ByLib(FFstrbuf* result)
 {
 #ifndef FF_DISABLE_DLOPEN
     const char* xfce_version_string(void); // from `xfce4/libxfce4util/xfce-misutils.h
-    FF_LIBRARY_LOAD(xfce4util, NULL, "dlopen libxfce4util" FF_LIBRARY_EXTENSION "failed", "libxfce4util" FF_LIBRARY_EXTENSION, 7);
+    FF_LIBRARY_LOAD(xfce4util, "dlopen libxfce4util" FF_LIBRARY_EXTENSION "failed", "libxfce4util" FF_LIBRARY_EXTENSION, 7);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xfce4util, xfce_version_string);
     ffStrbufSetS(result, ffxfce_version_string());
     return NULL;

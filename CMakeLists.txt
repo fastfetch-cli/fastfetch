@@ -398,7 +398,6 @@ set(LIBFASTFETCH_SRC
     src/options/modules.c
     src/options/logo.c
     src/options/general.c
-    src/options/library.c
     src/util/edidHelper.c
     src/util/base64.c
     src/util/FFlist.c

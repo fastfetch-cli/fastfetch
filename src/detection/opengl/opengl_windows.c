@@ -81,7 +81,7 @@ static LRESULT CALLBACK wglHandleWndProc(HWND hWnd, UINT message, WPARAM wParam,
 
 static const char* wglDetectOpenGL(FFOpenGLResult* result)
 {
-    FF_LIBRARY_LOAD(opengl32, NULL, "dlopen opengl32" FF_LIBRARY_EXTENSION " failed", "opengl32" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(opengl32, "dlopen opengl32" FF_LIBRARY_EXTENSION " failed", "opengl32" FF_LIBRARY_EXTENSION, 1);
 
     WGLData data = { .result = result };
 

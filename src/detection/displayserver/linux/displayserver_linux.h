@@ -9,13 +9,13 @@ bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName);
 
 const char* ffdsConnectWayland(FFDisplayServerResult* result);
 
-void ffdsConnectXcbRandr(FFDisplayServerResult* result);
-void ffdsConnectXcb(FFDisplayServerResult* result);
+const char* ffdsConnectXcbRandr(FFDisplayServerResult* result);
+const char* ffdsConnectXcb(FFDisplayServerResult* result);
 
-void ffdsConnectXrandr(FFDisplayServerResult* result);
-void ffdsConnectXlib(FFDisplayServerResult* result);
+const char* ffdsConnectXrandr(FFDisplayServerResult* result);
+const char* ffdsConnectXlib(FFDisplayServerResult* result);
 
-void ffdsConnectDrm(FFDisplayServerResult* result);
+const char* ffdsConnectDrm(FFDisplayServerResult* result);
 
 void ffdsDetectWMDE(FFDisplayServerResult* result);
 

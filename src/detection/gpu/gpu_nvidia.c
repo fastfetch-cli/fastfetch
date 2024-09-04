@@ -26,7 +26,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     if (!nvmlData.inited)
     {
         nvmlData.inited = true;
-        FF_LIBRARY_LOAD(libnvml, NULL, "dlopen nvml failed", soName , 1);
+        FF_LIBRARY_LOAD(libnvml, "dlopen nvml failed", soName , 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlInit_v2)
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvml, nvmlShutdown)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libnvml, nvmlData, nvmlDeviceGetCount_v2)

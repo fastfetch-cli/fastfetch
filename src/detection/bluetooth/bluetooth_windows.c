@@ -10,7 +10,7 @@
 const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 {
     // Actually bluetoothapis.dll, but it's missing on Windows 7
-    FF_LIBRARY_LOAD(bluetoothapis, NULL, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
+    FF_LIBRARY_LOAD(bluetoothapis, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindFirstDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindNextDevice)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(bluetoothapis, BluetoothFindDeviceClose)

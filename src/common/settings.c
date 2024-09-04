@@ -60,7 +60,7 @@ static const GSettingsData* getGSettingsData(void)
     if (!data.inited)
     {
         data.inited = true;
-        FF_LIBRARY_LOAD(libgsettings, &instance.config.library.libGIO, NULL, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD(libgsettings, NULL, "libgio-2.0" FF_LIBRARY_EXTENSION, 1);
         FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_source_lookup, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_schema_has_key, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libgsettings, data, g_settings_new_full, NULL)
@@ -141,7 +141,7 @@ static const DConfData* getDConfData(void)
     {
         data.inited = true;
 
-        FF_LIBRARY_LOAD(libdconf, &instance.config.library.libDConf, NULL, "libdconf" FF_LIBRARY_EXTENSION, 2);
+        FF_LIBRARY_LOAD(libdconf, NULL, "libdconf" FF_LIBRARY_EXTENSION, 2);
         FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_read_full, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data, dconf_client_new, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libdconf, data.variantGetters, g_variant_dup_string, NULL)
@@ -218,7 +218,7 @@ static const XFConfData* getXFConfData(void)
     if (!data.inited)
     {
         data.inited = true;
-        FF_LIBRARY_LOAD(libxfconf, &instance.config.library.libXFConf, NULL, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
+        FF_LIBRARY_LOAD(libxfconf, NULL, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
 
         FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_has_property, NULL)
@@ -292,7 +292,7 @@ static const SQLiteData* getSQLiteData(void)
     if (!data.inited)
     {
         data.inited = true;
-        FF_LIBRARY_LOAD(libsqlite, &instance.config.library.libSQLite3, NULL, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD(libsqlite, NULL, "libsqlite3" FF_LIBRARY_EXTENSION, 1);
         FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_open_v2, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_prepare_v2, NULL)
         FF_LIBRARY_LOAD_SYMBOL_VAR(libsqlite, data, sqlite3_step, NULL)

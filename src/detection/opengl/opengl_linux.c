@@ -120,7 +120,7 @@ static const char* detectByGlx(FFOpenGLResult* result)
 {
     GLXData data;
 
-    FF_LIBRARY_LOAD(glx, &instance.config.library.libGLX, "dlopen glx failed", "libGLX" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(glx, "dlopen glx failed", "libGLX" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, glXQueryVersion);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(glx, data, XOpenDisplay);
@@ -189,7 +189,7 @@ static const char* detectByOsMesa(FFOpenGLResult* result)
 {
     OSMesaData data;
 
-    FF_LIBRARY_LOAD(osmesa, &instance.config.library.libOSMesa, "dlopen osmesa failed", "libOSMesa" FF_LIBRARY_EXTENSION, 8);
+    FF_LIBRARY_LOAD(osmesa, "dlopen osmesa failed", "libOSMesa" FF_LIBRARY_EXTENSION, 8);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaCreateContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaMakeCurrent);
