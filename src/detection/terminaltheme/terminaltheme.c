@@ -8,7 +8,8 @@ static bool detectByEscapeCode(FFTerminalThemeResult* result)
 {
     int command = 0;
 
-    if (ffGetTerminalResponse("\e]10;?\e\\", "\e]%d;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 "\e\\", &command, &result->fg.r, &result->fg.g, &result->fg.b) == NULL)
+    // Windows Terminal doesn't report `\e` for some reason
+    if (ffGetTerminalResponse("\e]10;?\e\\", "%*[^0-9]%d;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 "\e\\", &command, &result->fg.r, &result->fg.g, &result->fg.b) == NULL)
     {
         if (command != 10)
             return false;
@@ -18,7 +19,7 @@ static bool detectByEscapeCode(FFTerminalThemeResult* result)
     else
         return false;
 
-    if (ffGetTerminalResponse("\e]11;?\e\\", "\e]%d;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 "\e\\", &command, &result->bg.r, &result->bg.g, &result->bg.b) == NULL)
+    if (ffGetTerminalResponse("\e]11;?\e\\", "%*[^0-9]%d;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 "\e\\", &command, &result->bg.r, &result->bg.g, &result->bg.b) == NULL)
     {
         if (command != 11)
             return false;
