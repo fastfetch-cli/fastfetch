@@ -4,7 +4,7 @@ function _fastfetch() {
   local state
 
   local -a opts=("${(f)$(
-        python3 <<EOF
+    python3 <<EOF
 import json
 import subprocess
 import sys
@@ -74,23 +74,23 @@ EOF
   case $state in
     colors)
       local -a colors=(black red green yellow blue magenta cyan white default)
-      _describe 'color' colors
+      _describe 'colors' colors
       ;;
     modules)
       local -a modules=("${(f)$(fastfetch --list-modules autocompletion)}")
       modules=(${(L)^modules[@]%%:*}-format format color)
-      _describe 'module' modules
+      _describe 'modules' modules
       ;;
     presets)
       local -a presets=(
         "${(f)$(fastfetch --list-presets autocompletion)}"
         "none:Disable loading config file"
       )
-      _describe 'preset' presets || _files
+      _describe 'presets' presets || _files
       ;;
     structures)
       local -a structures=("${(f)$(fastfetch --list-modules autocompletion)}")
-      _describe 'structure' structures
+      _describe 'structures' structures
       ;;
     logos)
       local -a logos=(
@@ -98,7 +98,7 @@ EOF
         "none:Don't print logo"
         "small:Print small ascii logo if available"
       )
-      _describe 'logo' logos
+      _describe 'builtin logos' logos || _files
       ;;
   esac
 }
