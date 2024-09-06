@@ -9,7 +9,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
     cpu->coresLogical = cpu->coresPhysical;
-    cpu->coresOnline = cpu->coresPhysical;
+    cpu->coresOnline = (uint16_t) ffSysctlGetInt("kern.smp.cpus", cpu->coresLogical);
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     if (ffSysctlGetString("kern.sched.topology_spec", &buffer) == NULL && buffer.length > 0)
