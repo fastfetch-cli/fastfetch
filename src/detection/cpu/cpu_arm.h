@@ -106,6 +106,9 @@ static const char* armPartId2name(uint32_t partId)
     case 0xd80: return "Cortex-A520";
     case 0xd81: return "Cortex-A720";
     case 0xd82: return "Cortex-X4";
+    case 0xd84: return "Neoverse-V3";
+    case 0xd85: return "Cortex-X925";
+    case 0xd87: return "Cortex-A725";
     default: return NULL;
     }
 }
