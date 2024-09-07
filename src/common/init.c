@@ -242,7 +242,7 @@ void ffListFeatures(void)
         #if FF_HAVE_DDCUTIL
             "libddcutil\n"
         #endif
-        #if FF_HAVE_ELF
+        #if FF_HAVE_ELF || __sun || __FreeBSD__
             "libelf\n"
         #endif
         #if FF_HAVE_LIBZFS
