@@ -375,6 +375,9 @@ FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* vers
 
 FF_MAYBE_UNUSED static bool getTerminalVersionMateTerminal(FFstrbuf* exe, FFstrbuf* version)
 {
+    ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
+    if (version->length > 0) return true;
+
     if(!getExeVersionRaw(exe, version)) return false;
 
     //MATE Terminal 1.26.1
