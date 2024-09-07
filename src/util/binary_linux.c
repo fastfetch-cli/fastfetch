@@ -6,8 +6,7 @@
 #include "common/library.h"
 #include "util/stringUtils.h"
 
-// WARNING: On FreeBSD, there are system `/usr/include/libelf.h` and pkg elfutils `/usr/local/include/libelf.h`; they are not compatible.
-#include <libelf.h>
+#include <libelf.h> // #1254
 #include <fcntl.h>
 
 struct FFElfData {
