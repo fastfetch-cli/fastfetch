@@ -319,25 +319,55 @@ FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-FF_MAYBE_UNUSED static void detectAsahi(FFCPUResult* cpu)
+FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
 {
-    // In Asahi Linux, reading /proc/device-tree/compatible gives
-    // information on the device model. It consists of 3 NUL terminated
-    // strings, the second of which gives the actual SoC model. But it
-    // is not the marketing name, i.e. for M2 there is "apple,t8112" in
-    // the compatible string.
-    if (cpu->name.length == 0 && ffStrbufEqualS(&cpu->vendor, "Apple"))
-    {
-        char content[32];
-        ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
-        if (length <= 0) return;
+    if (cpu->name.length > 0)
+        return;
 
-        // get the second NUL terminated string
-        char* modelName = memchr(content, '\0', (size_t) length) + 1;
-        if (modelName - content < length && ffStrStartsWith(modelName, "apple,t"))
+    char content[64];
+    ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
+    if (length <= 2) return;
+
+    // get the second NUL terminated string
+    char* modelName = memchr(content, '\0', (size_t) length) + 1;
+    if (!modelName || modelName - content >= length) return;
+
+    if (ffStrStartsWith(modelName, "apple,t"))
+    {
+        // https://elixir.bootlin.com/linux/v6.11-rc7/source/arch/arm64/boot/dts/apple
+        // In Asahi Linux, reading /proc/device-tree/compatible gives
+        // information on the device model. It consists of 3 NUL terminated
+        // strings, the second of which gives the actual SoC model. But it
+        // is not the marketing name, i.e. for M2 there is "apple,t8112" in
+        // the compatible string.
+        const char* code = modelName + strlen("qcom,sc");
+        uint32_t deviceId = (uint32_t) strtoul(code, NULL, 10);
+        ffStrbufSetStatic(&cpu->name, ffCPUAppleCodeToName(deviceId));
+        if (!cpu->name.length)
         {
-            uint32_t deviceId = (uint32_t) strtoul(modelName + strlen("apple,t"), NULL, 10);
-            ffStrbufSetStatic(&cpu->name, ffCPUAppleCodeToName(deviceId));
+            ffStrbufAppendS(&cpu->name, "Apple Silicon T");
+            ffStrbufAppendS(&cpu->name, code);
+        }
+    }
+    else if (ffStrStartsWith(modelName, "qcom,"))
+    {
+        // https://elixir.bootlin.com/linux/v6.11-rc7/source/arch/arm64/boot/dts/qcom
+        if (ffStrStartsWith(modelName + strlen("qcom,"), "x"))
+        {
+            ffStrbufSetS(&cpu->name, "Qualcomm Snapdragon X Elite ");
+            for (const char* p = modelName + strlen("qcom,"); *p; ++p)
+                ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+        }
+        else if (ffStrStartsWith(modelName + strlen("qcom,"), "sc"))
+        {
+            const char* code = modelName + strlen("qcom,sc");
+            uint32_t deviceId = (uint32_t) strtoul(code, NULL, 10);
+            ffStrbufSetStatic(&cpu->name, ffCPUQualcommCodeToName(deviceId));
+            if (!cpu->name.length)
+            {
+                ffStrbufAppendS(&cpu->name, "Qualcomm Snapdragon SC");
+                ffStrbufAppendS(&cpu->name, code);
+            }
         }
     }
 }
@@ -392,7 +422,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     #if __ANDROID__
     detectAndroid(cpu);
     #elif __aarch64__
-    detectAsahi(cpu);
+    detectArmSoc(cpu);
     #endif
 
     if (cpu->name.length == 0)
