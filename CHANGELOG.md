@@ -1,3 +1,25 @@
+# 2.24.0
+
+Changes:
+* Support of `--lib-XXX` is removed
+    * If fastfetch fails to load some `.so` `.dylib` libraries, `LD_LIBRARY_PATH` should be used.
+
+Features:
+* Support sixel image protocol on Windows (Logo, Windows)
+    * Requires imagemagick7 to be installed. MSYS2 is recommended.
+* Improve terminal query on Windows (Windows)
+    * TerminalSize, TerminalTheme
+* Detect more ARM microarchitectures (CPU, Linux)
+* Detect the number of online cores (CPU, FreeBSD)
+
+Bugfixes:
+* Fix tests building when system yyjson is used (#1244)
+* Fix dinit detection; support dinit version detection (#1245, InitSystem, Linux)
+* Fix signal quality, refresh rate and maybe others in custom format (#1241)
+* Fix boot time calculation (#1249, Uptime, Linux)
+* Fix custom format for boolean values
+    * `{?false-value}This should not print{?}{?true-value}This should print{?}` will print `This should print`
+
 # 2.23.0
 
 Features:
