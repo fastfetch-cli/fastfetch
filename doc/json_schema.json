@@ -1236,6 +1236,10 @@
                                         "description": "Set the shell program to execute the command text\nDefault: cmd for Windows, /bin/sh for *nix",
                                         "type": "string"
                                     },
+                                    "param": {
+                                        "description": "Set the parameter used when starting the shell\nDefault: /c for Windows, -c for *nix",
+                                        "type": "string"
+                                    },
                                     "text": {
                                         "description": "Set the command text to be executed",
                                         "type": "string"
