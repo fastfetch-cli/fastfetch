@@ -324,6 +324,7 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
     if (cpu->name.length > 0)
         return;
 
+    // device-vendor,device-model\0soc-vendor,soc-model\0
     char content[64];
     ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
     if (length <= 2) return;
@@ -335,12 +336,7 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
     if (ffStrStartsWith(modelName, "apple,t"))
     {
         // https://elixir.bootlin.com/linux/v6.11-rc7/source/arch/arm64/boot/dts/apple
-        // In Asahi Linux, reading /proc/device-tree/compatible gives
-        // information on the device model. It consists of 3 NUL terminated
-        // strings, the second of which gives the actual SoC model. But it
-        // is not the marketing name, i.e. for M2 there is "apple,t8112" in
-        // the compatible string.
-        const char* code = modelName + strlen("qcom,sc");
+        const char* code = modelName + strlen("apple,t");
         uint32_t deviceId = (uint32_t) strtoul(code, NULL, 10);
         ffStrbufSetStatic(&cpu->name, ffCPUAppleCodeToName(deviceId));
         if (!cpu->name.length)
