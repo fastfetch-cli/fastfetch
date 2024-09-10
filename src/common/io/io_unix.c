@@ -4,9 +4,13 @@
 
 #include <fcntl.h>
 #include <termios.h>
-#include <poll.h>
 #include <dirent.h>
 #include <errno.h>
+#ifndef __APPLE__
+#include <poll.h>
+#else
+#include <sys/select.h>
+#endif
 
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
@@ -161,8 +165,20 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     ffWriteFDData(ftty, strlen(request), request);
 
     //Give the terminal some time to respond
+    #ifndef __APPLE__
     if(poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
-        return "poll() timeout or failed";
+        return "poll(/dev/tty) timeout or failed";
+    #else
+    {
+        // On macOS, poll(/dev/tty) always returns immediately
+        // See also https://nathancraddock.com/blog/macos-dev-tty-polling/
+        fd_set rd;
+        FD_ZERO(&rd);
+        FD_SET(ftty, &rd);
+        if(select(ftty + 1, &rd, NULL, NULL, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 }) <= 0)
+            return "select(/dev/tty) timeout or failed";
+    }
+    #endif
 
     char buffer[512];
     ssize_t bytesRead = read(ftty, buffer, sizeof(buffer) - 1);
