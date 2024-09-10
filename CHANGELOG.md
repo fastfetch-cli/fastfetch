@@ -11,6 +11,7 @@ Features:
     * TerminalSize, TerminalTheme
 * Detect more ARM microarchitectures (CPU, Linux)
 * Detect the number of online cores (CPU, FreeBSD)
+* Support board name detection for Asahi Linux (Board, Linux)
 
 Bugfixes:
 * Fix tests building when system yyjson is used (#1244)
