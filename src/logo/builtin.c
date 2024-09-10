@@ -2295,6 +2295,16 @@ static const FFlogo K[] = {
 };
 
 static const FFlogo L[] = {
+    // LainOS
+    {
+        .names = {"LainOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LAINOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // LangitKetujuh
     {
         .names = {"langitketujuh", "l7"},
@@ -2479,16 +2489,6 @@ static const FFlogo L[] = {
         },
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_WHITE,
-    },
-    // LainOS
-    {
-        .names = {"LainOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_LAINOS,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_256 "14",
-            FF_COLOR_FG_WHITE,
-        },
     },
     // Loc-OS
     {
