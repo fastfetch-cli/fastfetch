@@ -144,7 +144,7 @@ void restoreTerm(void)
     tcsetattr(ftty, TCSAFLUSH, &oldTerm);
 }
 
-const char* ffGetTerminalResponse(const char* request, const char* format, ...)
+const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...)
 {
     if (ftty < 0)
     {
@@ -180,17 +180,29 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     }
     #endif
 
-    char buffer[512];
-    ssize_t bytesRead = read(ftty, buffer, sizeof(buffer) - 1);
-
-    if(bytesRead <= 0)
-        return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
-
-    buffer[bytesRead] = '\0';
+    char buffer[1024];
+    size_t bytesRead = 0;
 
     va_list args;
     va_start(args, format);
-    vsscanf(buffer, format, args);
+
+    while (true)
+    {
+        ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
+
+        if (nRead <= 0)
+            return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
+
+        bytesRead += (size_t) nRead;
+        buffer[bytesRead] = '\0';
+
+        int ret = vsscanf(buffer, format, args);
+        if (ret <= 0)
+            return "vsscanf(buffer, format, args) failed";
+        if (ret >= nParams)
+            break;
+    }
+
     va_end(args);
 
     return NULL;

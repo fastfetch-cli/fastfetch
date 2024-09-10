@@ -130,8 +130,8 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
 #define FF_IO_TERM_RESP_WAIT_MS 100 // #554
 
-FF_C_SCANF(2, 3)
-const char* ffGetTerminalResponse(const char* request, const char* format, ...);
+FF_C_SCANF(3, 4)
+const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...);
 
 // Not thread safe!
 bool ffSuppressIO(bool suppress);

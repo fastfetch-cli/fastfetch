@@ -78,7 +78,7 @@ static bool printImageIterm(bool printError)
         if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
         {
             uint16_t X = 0, Y = 0;
-            const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
+            const char* error = ffGetTerminalResponse("\e[6n", 2, "%*[^0-9]%hu;%huR", &Y, &X);
             if (error)
             {
                 fprintf(stderr, "\nLogo (iterm): fail to query cursor position: %s\n", error);
@@ -203,7 +203,7 @@ static bool printImageKittyDirect(bool printError)
         if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
         {
             uint16_t X = 0, Y = 0;
-            const char* error = ffGetTerminalResponse("\e[6n", "\e[%hu;%huR", &Y, &X);
+            const char* error = ffGetTerminalResponse("\e[6n", 2, "%*[^0-9]%hu;%huR", &Y, &X);
             if (error)
             {
                 if (printError)

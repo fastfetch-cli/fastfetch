@@ -25,7 +25,7 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result)
         else
         {
             // Windows Terminal doesn't report `\e` for some reason
-            ffGetTerminalResponse("\e[18t", "%*[^;];%hu;%hut", &result->rows, &result->columns);
+            ffGetTerminalResponse("\e[18t", 2, "%*[^;];%hu;%hut", &result->rows, &result->columns);
         }
     }
 
@@ -42,7 +42,7 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result)
         if (result->width == 0 || result->height == 0)
         {
             // Windows Terminal doesn't report `\e` for some reason
-            ffGetTerminalResponse("\e[14t", "%*[^;];%hu;%hut", &result->height, &result->width);
+            ffGetTerminalResponse("\e[14t", 2, "%*[^;];%hu;%hut", &result->height, &result->width);
         }
     }
 

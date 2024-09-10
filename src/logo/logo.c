@@ -52,7 +52,7 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
         {
             uint16_t X = 0, Y = 0;
             // Windows Terminal doesn't report `\e` for some reason
-            const char* error = ffGetTerminalResponse("\e[6n", "%*[^0-9]%hu;%huR", &Y, &X); // %*[^0-9]: ignore optional \e[
+            const char* error = ffGetTerminalResponse("\e[6n", 2, "%*[^0-9]%hu;%huR", &Y, &X); // %*[^0-9]: ignore optional \e[
             if (error)
             {
                 if (printError)
