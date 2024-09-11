@@ -280,34 +280,18 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
             continue;
         }
 
-        int32_t truncLength = 0;
-        char align = '\0';
-        char* pSep = memchr(placeholderValue.chars, ':', placeholderValue.length);
-        if (pSep)
-            align = ':';
+        char* pSep = placeholderValue.chars;
+        char cSep = '\0';
+        while (*pSep && *pSep != ':' && *pSep != '<' && *pSep != '>' && *pSep != '~')
+            ++pSep;
+        if (*pSep)
+        {
+            cSep = *pSep;
+            *pSep = '\0';
+        }
         else
         {
-            pSep = memchr(placeholderValue.chars, '<', placeholderValue.length);
-            if (pSep)
-                align = '<';
-            else
-            {
-                pSep = memchr(placeholderValue.chars, '>', placeholderValue.length);
-                if (pSep)
-                    align = '>';
-            }
-        }
-
-        if (pSep)
-        {
-            char* pEnd = NULL;
-            truncLength = (int32_t) strtol(pSep + 1, &pEnd, 10);
-            if (*pEnd != '\0')
-            {
-                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
-                continue;
-            }
-            *pSep = '\0';
+            pSep = NULL;
         }
 
         uint32_t index = getArgumentIndex(placeholderValue.chars, numArgs, arguments);
@@ -318,53 +302,97 @@ void ffParseFormatString(FFstrbuf* buffer, const FFstrbuf* formatstr, uint32_t n
 
         if (index > numArgs)
         {
-            if (pSep) *pSep = align;
+            if (pSep) *pSep = cSep;
             appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
             continue;
         }
 
-        bool ellipsis = false;
-        if (truncLength < 0)
-        {
-            ellipsis = true;
-            truncLength = -truncLength;
-        }
-
-        if (!align)
+        if (!cSep)
             ffFormatAppendFormatArg(buffer, &arguments[index - 1]);
+        else if (cSep == '~')
+        {
+            FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
+            ffFormatAppendFormatArg(&tempString, &arguments[index - 1]);
+
+            char* pEnd = NULL;
+            int32_t start = (int32_t) strtol(pSep + 1, &pEnd, 10);
+            if (start < 0)
+                start = (int32_t) tempString.length + start;
+            if (start >= 0 && (uint32_t) start < tempString.length)
+            {
+                if (*pEnd == '\0')
+                    ffStrbufAppendNS(buffer, tempString.length - (uint32_t) start, &tempString.chars[start]);
+                else if (*pEnd == ',')
+                {
+                    int32_t end = (int32_t) strtol(pEnd + 1, &pEnd, 10);
+                    if (!*pEnd)
+                    {
+                        if (end < 0)
+                            end = (int32_t) tempString.length + end;
+                        if ((uint32_t) end > tempString.length)
+                            end = (int32_t) tempString.length;
+                        if (end > start)
+                            ffStrbufAppendNS(buffer, (uint32_t) (end - start), &tempString.chars[start]);
+                    }
+                }
+            }
+
+            if (*pEnd)
+            {
+                *pSep = cSep;
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+                continue;
+            }
+        }
         else
         {
-            ffStrbufClear(&placeholderValue);
-            ffFormatAppendFormatArg(&placeholderValue, &arguments[index - 1]);
-            if (placeholderValue.length == (uint32_t) truncLength)
-                ffStrbufAppend(buffer, &placeholderValue);
-            else if (placeholderValue.length > (uint32_t) truncLength)
+            char* pEnd = NULL;
+            int32_t truncLength = (int32_t) strtol(pSep + 1, &pEnd, 10);
+            if (*pEnd != '\0')
             {
-                if (align == ':')
+                *pSep = cSep;
+                appendInvalidPlaceholder(buffer, "{", &placeholderValue, i, formatstr->length);
+                continue;
+            }
+
+            bool ellipsis = false;
+            if (truncLength < 0)
+            {
+                ellipsis = true;
+                truncLength = -truncLength;
+            }
+
+            FF_STRBUF_AUTO_DESTROY tempString = ffStrbufCreate();
+            ffFormatAppendFormatArg(&tempString, &arguments[index - 1]);
+            if (tempString.length == (uint32_t) truncLength)
+                ffStrbufAppend(buffer, &tempString);
+            else if (tempString.length > (uint32_t) truncLength)
+            {
+                if (cSep == ':')
                 {
-                    ffStrbufSubstrBefore(&placeholderValue, (uint32_t) truncLength);
-                    ffStrbufTrimRightSpace(&placeholderValue);
+                    ffStrbufSubstrBefore(&tempString, (uint32_t) truncLength);
+                    ffStrbufTrimRightSpace(&tempString);
                 }
                 else
-                    ffStrbufSubstrBefore(&placeholderValue, (uint32_t) (!ellipsis? truncLength : truncLength - 1));
-                ffStrbufAppend(buffer, &placeholderValue);
+                    ffStrbufSubstrBefore(&tempString, (uint32_t) (!ellipsis? truncLength : truncLength - 1));
+                ffStrbufAppend(buffer, &tempString);
 
                 if (ellipsis)
                     ffStrbufAppendS(buffer, "…");
             }
-            else if (align == ':')
-                ffStrbufAppend(buffer, &placeholderValue);
+            else if (cSep == ':')
+                ffStrbufAppend(buffer, &tempString);
             else
             {
-                if (align == '<')
+                if (cSep == '<')
                 {
-                    ffStrbufAppend(buffer, &placeholderValue);
-                    ffStrbufAppendNC(buffer, (uint32_t) truncLength - placeholderValue.length, ' ');
+                    ffStrbufAppend(buffer, &tempString);
+                    ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
                 }
                 else
                 {
-                    ffStrbufAppendNC(buffer, (uint32_t) truncLength - placeholderValue.length, ' ');
-                    ffStrbufAppend(buffer, &placeholderValue);
+                    ffStrbufAppendNC(buffer, (uint32_t) truncLength - tempString.length, ' ');
+                    ffStrbufAppend(buffer, &tempString);
                 }
             }
         }
