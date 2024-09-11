@@ -10,5 +10,6 @@ typedef struct FFCommandOptions
     FFModuleArgs moduleArgs;
 
     FFstrbuf shell;
+    FFstrbuf param;
     FFstrbuf text;
 } FFCommandOptions;

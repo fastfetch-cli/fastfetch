@@ -37,6 +37,19 @@ const char* ffCPUAppleCodeToName(uint32_t code)
         case 6031:
         case 6034: return "Apple M3 Max";
         case 8132: return "Apple M4";
-        default: return "Apple Silicon";
+        default: return NULL;
+    }
+}
+
+const char* ffCPUQualcommCodeToName(uint32_t code)
+{
+    // https://github.com/AsahiLinux/docs/wiki/Codenames
+    switch (code)
+    {
+        case 7180: return "Qualcomm Snapdragon 7c";
+        case 7280: return "Qualcomm Snapdragon 7c+ Gen 3";
+        case 8180: return "Qualcomm Snapdragon 8cx Gen 2 5G";
+        case 8280: return "Qualcomm Snapdragon 8cx Gen 3";
+        default: return NULL;
     }
 }

@@ -29,11 +29,11 @@ void ffPrintFont(FFFontOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_FONT_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[0], "font1"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[1], "font2"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[2], "font3"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.fonts[3], "font4"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &font.display, "combined"},
+                FF_FORMAT_ARG(font.fonts[0], "font1"),
+                FF_FORMAT_ARG(font.fonts[1], "font2"),
+                FF_FORMAT_ARG(font.fonts[2], "font3"),
+                FF_FORMAT_ARG(font.fonts[3], "font4"),
+                FF_FORMAT_ARG(font.display, "combined"),
             }));
         }
     }

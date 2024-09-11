@@ -28,12 +28,12 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CAMERA_NUM_FORMAT_ARGS, (((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->colorspace, "colorspace"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->id, "id"},
-            {FF_FORMAT_ARG_TYPE_UINT, &device->width, "width"},
-            {FF_FORMAT_ARG_TYPE_UINT, &device->height, "height"},
+            FF_FORMAT_ARG(device->name, "name"),
+            FF_FORMAT_ARG(device->vendor, "vendor"),
+            FF_FORMAT_ARG(device->colorspace, "colorspace"),
+            FF_FORMAT_ARG(device->id, "id"),
+            FF_FORMAT_ARG(device->width, "width"),
+            FF_FORMAT_ARG(device->height, "height"),
         })));
     }
 }

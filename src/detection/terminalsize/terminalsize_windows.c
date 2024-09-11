@@ -24,7 +24,8 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result)
         }
         else
         {
-            ffGetTerminalResponse("\e[18t", "\e[8;%hu;%hut", &result->rows, &result->columns);
+            // Windows Terminal doesn't report `\e` for some reason
+            ffGetTerminalResponse("\e[18t", 2, "%*[^;];%hu;%hut", &result->rows, &result->columns);
         }
     }
 
@@ -38,12 +39,10 @@ bool ffDetectTerminalSize(FFTerminalSizeResult* result)
             result->width = result->columns * (uint16_t) cfi.dwFontSize.X;
             result->height = result->rows * (uint16_t) cfi.dwFontSize.Y;
         }
-        else
+        if (result->width == 0 || result->height == 0)
         {
-            // Pending https://github.com/microsoft/terminal/issues/8581
-            // if (result->width == 0 && result->height == 0)
-            //     ffGetTerminalResponse("\033[14t", "\033[4;%hu;%hut", &result->height, &result->width);
-            return false;
+            // Windows Terminal doesn't report `\e` for some reason
+            ffGetTerminalResponse("\e[14t", 2, "%*[^;];%hu;%hut", &result->height, &result->width);
         }
     }
 

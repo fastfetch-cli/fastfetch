@@ -86,14 +86,14 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         FF_STRBUF_AUTO_DESTROY maxBar = ffStrbufCreate();
         ffPercentAppendBar(&maxBar, maxValue, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPUUSAGE_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &avgNum, "avg"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &maxNum, "max"},
-            {FF_FORMAT_ARG_TYPE_UINT, &maxIndex, "max-index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &minNum, "min"},
-            {FF_FORMAT_ARG_TYPE_UINT, &minIndex, "min-index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &avgBar, "avg-bar"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &maxBar, "max-bar"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &minBar, "min-bar"},
+            FF_FORMAT_ARG(avgNum, "avg"),
+            FF_FORMAT_ARG(maxNum, "max"),
+            FF_FORMAT_ARG(maxIndex, "max-index"),
+            FF_FORMAT_ARG(minNum, "min"),
+            FF_FORMAT_ARG(minIndex, "min-index"),
+            FF_FORMAT_ARG(avgBar, "avg-bar"),
+            FF_FORMAT_ARG(maxBar, "max-bar"),
+            FF_FORMAT_ARG(minBar, "min-bar"),
         }));
     }
 }

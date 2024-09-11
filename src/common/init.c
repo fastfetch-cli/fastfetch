@@ -43,7 +43,6 @@ static void defaultConfig(void)
     ffOptionsInitGeneral(&instance.config.general);
     ffOptionsInitModules(&instance.config.modules);
     ffOptionsInitDisplay(&instance.config.display);
-    ffOptionsInitLibrary(&instance.config.library);
 }
 
 void ffInitInstance(void)
@@ -148,7 +147,6 @@ static void destroyConfig(void)
     ffOptionsDestroyGeneral(&instance.config.general);
     ffOptionsDestroyModules(&instance.config.modules);
     ffOptionsDestroyDisplay(&instance.config.display);
-    ffOptionsDestroyLibrary(&instance.config.library);
 }
 
 static void destroyState(void)
@@ -244,7 +242,7 @@ void ffListFeatures(void)
         #if FF_HAVE_DDCUTIL
             "libddcutil\n"
         #endif
-        #if FF_HAVE_ELF
+        #if FF_HAVE_ELF || __sun || __FreeBSD__
             "libelf\n"
         #endif
         #if FF_HAVE_LIBZFS

@@ -32,14 +32,14 @@ void ffPrintShell(FFShellOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SHELL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->processName, "process-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exe, "exe"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->exeName, "exe-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->version, "version"},
-            {FF_FORMAT_ARG_TYPE_UINT, &result->pid, "pid"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->prettyName, "pretty-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->exePath, "exe-path"},
-            {FF_FORMAT_ARG_TYPE_INT, &result->tty, "tty"},
+            FF_FORMAT_ARG(result->processName, "process-name"),
+            FF_FORMAT_ARG(result->exe, "exe"),
+            FF_FORMAT_ARG(result->exeName, "exe-name"),
+            FF_FORMAT_ARG(result->version, "version"),
+            FF_FORMAT_ARG(result->pid, "pid"),
+            FF_FORMAT_ARG(result->prettyName, "pretty-name"),
+            FF_FORMAT_ARG(result->exePath, "exe-path"),
+            FF_FORMAT_ARG(result->tty, "tty"),
         }));
     }
 }

@@ -9,13 +9,13 @@
 void ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&result, (char* const[]){
+    const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
         options->shell.chars,
-        #ifdef _WIN32
-        "/c",
-        #else
-        "-c",
-        #endif
+        options->param.chars,
+        options->text.chars,
+        NULL
+    } : (char* const[]){
+        options->shell.chars,
         options->text.chars,
         NULL
     });
@@ -40,7 +40,7 @@ void ffPrintCommand(FFCommandOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_COMMAND_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result, "result"}
+            FF_FORMAT_ARG(result, "result")
         }));
     }
 }
@@ -55,6 +55,12 @@ bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, co
     if(ffStrEqualsIgnCase(subKey, "shell"))
     {
         ffOptionParseString(key, value, &options->shell);
+        return true;
+    }
+
+    if(ffStrEqualsIgnCase(subKey, "param"))
+    {
+        ffOptionParseString(key, value, &options->param);
         return true;
     }
 
@@ -86,6 +92,12 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "param"))
+        {
+            ffStrbufSetS(&options->param, yyjson_get_str(val));
+            continue;
+        }
+
         if (ffStrEqualsIgnCase(key, "text"))
         {
             ffStrbufSetS(&options->text, yyjson_get_str(val));
@@ -106,6 +118,9 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
     if (!ffStrbufEqual(&defaultOptions.shell, &options->shell))
         yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
 
+    if (!ffStrbufEqual(&defaultOptions.param, &options->param))
+        yyjson_mut_obj_add_strbuf(doc, module, "param", &options->param);
+
     if (!ffStrbufEqual(&defaultOptions.text, &options->text))
         yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
 }
@@ -113,13 +128,13 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
 void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&result, (char* const[]){
+    const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
         options->shell.chars,
-        #ifdef _WIN32
-        "/c",
-        #else
-        "-c",
-        #endif
+        options->param.chars,
+        options->text.chars,
+        NULL
+    } : (char* const[]){
+        options->shell.chars,
         options->text.chars,
         NULL
     });
@@ -168,7 +183,13 @@ void ffInitCommandOptions(FFCommandOptions* options)
         "/bin/sh"
         #endif
     );
-
+    ffStrbufInitStatic(&options->param,
+        #ifdef _WIN32
+        "/c"
+        #else
+        "-c"
+        #endif
+    );
     ffStrbufInit(&options->text);
 }
 
@@ -176,5 +197,6 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
     ffStrbufDestroy(&options->shell);
+    ffStrbufDestroy(&options->param);
     ffStrbufDestroy(&options->text);
 }

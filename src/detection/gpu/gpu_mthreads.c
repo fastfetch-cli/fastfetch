@@ -41,7 +41,7 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
     if (!mtmlData.inited)
     {
         mtmlData.inited = true;
-        FF_LIBRARY_LOAD(libmtml, NULL, "dlopen mtml failed", soName, 1);
+        FF_LIBRARY_LOAD(libmtml, "dlopen mtml failed", soName, 1);
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libmtml, mtmlLibraryInit)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlDeviceGetBrand)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libmtml, mtmlData, mtmlDeviceGetIndex)

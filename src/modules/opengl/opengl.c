@@ -30,11 +30,11 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENGL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.renderer, "renderer"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.slv, "slv"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.library, "library"},
+            FF_FORMAT_ARG(result.version, "version"),
+            FF_FORMAT_ARG(result.renderer, "renderer"),
+            FF_FORMAT_ARG(result.vendor, "vendor"),
+            FF_FORMAT_ARG(result.slv, "slv"),
+            FF_FORMAT_ARG(result.library, "library"),
         }));
     }
 

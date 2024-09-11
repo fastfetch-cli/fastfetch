@@ -36,10 +36,10 @@ void ffPrintInitSystem(FFInitSystemOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_INITSYSTEM_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.exe, "exe"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
-            {FF_FORMAT_ARG_TYPE_UINT, &result.pid, "pid"},
+            FF_FORMAT_ARG(result.name, "name"),
+            FF_FORMAT_ARG(result.exe, "exe"),
+            FF_FORMAT_ARG(result.version, "version"),
+            FF_FORMAT_ARG(result.pid, "pid"),
         }));
     }
 

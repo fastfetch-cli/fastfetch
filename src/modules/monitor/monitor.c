@@ -42,9 +42,9 @@ void ffPrintMonitor(FFMonitorOptions* options)
         {
             uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex, "index"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &display->name, "name"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+                FF_FORMAT_ARG(moduleIndex, "index"),
+                FF_FORMAT_ARG(display->name, "name"),
+                FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
             }));
         }
 
@@ -72,17 +72,17 @@ void ffPrintMonitor(FFMonitorOptions* options)
                 buf[0] = '\0';
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_MONITOR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_STRBUF, &display->name, "name"},
-                {FF_FORMAT_ARG_TYPE_UINT, &display->width, "width"},
-                {FF_FORMAT_ARG_TYPE_UINT, &display->height, "height"},
-                {FF_FORMAT_ARG_TYPE_UINT, &display->physicalWidth, "physical-width"},
-                {FF_FORMAT_ARG_TYPE_UINT, &display->physicalHeight, "physical-height"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &inch, "inch"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &ppi, "ppi"},
-                {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureYear, "manufacture-year"},
-                {FF_FORMAT_ARG_TYPE_UINT16, &display->manufactureWeek, "manufacture-week"},
-                {FF_FORMAT_ARG_TYPE_STRING, buf, "serial"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, buf, "refresh-rate"},
+                FF_FORMAT_ARG(display->name, "name"),
+                FF_FORMAT_ARG(display->width, "width"),
+                FF_FORMAT_ARG(display->height, "height"),
+                FF_FORMAT_ARG(display->physicalWidth, "physical-width"),
+                FF_FORMAT_ARG(display->physicalHeight, "physical-height"),
+                FF_FORMAT_ARG(inch, "inch"),
+                FF_FORMAT_ARG(ppi, "ppi"),
+                FF_FORMAT_ARG(display->manufactureYear, "manufacture-year"),
+                FF_FORMAT_ARG(display->manufactureWeek, "manufacture-week"),
+                FF_FORMAT_ARG(buf, "serial"),
+                FF_FORMAT_ARG(display->refreshRate, "refresh-rate"),
             }));
         }
 

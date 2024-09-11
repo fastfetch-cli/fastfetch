@@ -5,7 +5,7 @@
 
 static const char* getMedia(FFMediaResult* media)
 {
-    FF_LIBRARY_LOAD(libffwinrt, NULL, "dlopen libffwinrt" FF_LIBRARY_EXTENSION " failed", "libffwinrt" FF_LIBRARY_EXTENSION, 0)
+    FF_LIBRARY_LOAD(libffwinrt, "dlopen libffwinrt" FF_LIBRARY_EXTENSION " failed", "libffwinrt" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libffwinrt, ffWinrtDetectMedia)
     libffwinrt = NULL; // Don't close libffwinrt or it may crash
 

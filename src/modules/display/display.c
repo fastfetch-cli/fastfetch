@@ -92,10 +92,10 @@ void ffPrintDisplay(FFDisplayOptions* options)
         else
         {
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 4, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_UINT, &moduleIndex, "index"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
-                {FF_FORMAT_ARG_TYPE_STRING, displayType, "type"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+                FF_FORMAT_ARG(moduleIndex, "index"),
+                FF_FORMAT_ARG(result->name, "name"),
+                FF_FORMAT_ARG(displayType, "type"),
+                FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
             }));
         }
 
@@ -152,21 +152,21 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 refreshRate[0] = 0;
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_UINT, &result->width, "width"},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->height, "height"},
-                {FF_FORMAT_ARG_TYPE_STRING, refreshRate, "refresh-rate"},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledWidth, "scaled-width"},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->scaledHeight, "scaled-height"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
-                {FF_FORMAT_ARG_TYPE_STRING, displayType, "type"},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->rotation, "rotation"},
-                {FF_FORMAT_ARG_TYPE_BOOL, &result->primary, "is-primary"},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->physicalWidth, "physical-width"},
-                {FF_FORMAT_ARG_TYPE_UINT, &result->physicalHeight, "physical-height"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &inch, "inch"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &ppi, "ppi"},
-                {FF_FORMAT_ARG_TYPE_UINT8, &result->bitDepth, "bit-depth"},
-                {FF_FORMAT_ARG_TYPE_BOOL, &result->hdrEnabled, "hdr-enabled"},
+                FF_FORMAT_ARG(result->width, "width"),
+                FF_FORMAT_ARG(result->height, "height"),
+                FF_FORMAT_ARG(refreshRate, "refresh-rate"),
+                FF_FORMAT_ARG(result->scaledWidth, "scaled-width"),
+                FF_FORMAT_ARG(result->scaledHeight, "scaled-height"),
+                FF_FORMAT_ARG(result->name, "name"),
+                FF_FORMAT_ARG(displayType, "type"),
+                FF_FORMAT_ARG(result->rotation, "rotation"),
+                FF_FORMAT_ARG(result->primary, "is-primary"),
+                FF_FORMAT_ARG(result->physicalWidth, "physical-width"),
+                FF_FORMAT_ARG(result->physicalHeight, "physical-height"),
+                FF_FORMAT_ARG(inch, "inch"),
+                FF_FORMAT_ARG(ppi, "ppi"),
+                FF_FORMAT_ARG(result->bitDepth, "bit-depth"),
+                FF_FORMAT_ARG(result->hdrEnabled, "hdr-enabled"),
             }));
         }
     }

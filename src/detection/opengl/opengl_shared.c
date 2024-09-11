@@ -74,14 +74,8 @@ static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data)
 
 static const char* eglHandleDisplay(FFOpenGLResult* result, EGLData* data)
 {
-    if(data->ffeglBindAPI(
-        #ifdef _WIN32
-        EGL_OPENGL_ES_API
-        #else
-        EGL_OPENGL_API
-        #endif
-    ) != EGL_TRUE)
-        return "eglBindAPI returned EGL_FALSE";
+    // try use OpenGL API. If failed, use the default API (usually OpenGL ES)
+    data->ffeglBindAPI(EGL_OPENGL_API);
 
     EGLint eglConfigCount;
     data->ffeglGetConfigs(data->display, &data->config, 1, &eglConfigCount);
@@ -121,11 +115,12 @@ static const char* eglHandleData(FFOpenGLResult* result, EGLData* data)
     return error;
 }
 
+
 const char* ffOpenGLDetectByEGL(FFOpenGLResult* result)
 {
     EGLData eglData;
 
-    FF_LIBRARY_LOAD(egl, &instance.config.library.libEGL, "dlopen egl failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(egl, "dlopen libEGL" FF_LIBRARY_EXTENSION " failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetProcAddress);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglGetDisplay);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglQueryString);

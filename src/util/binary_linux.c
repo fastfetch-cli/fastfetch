@@ -1,12 +1,12 @@
 #include "binary.h"
 
-#if defined(FF_HAVE_ELF) || defined(__sun)
+#if defined(FF_HAVE_ELF) || defined(__sun) || defined(__FreeBSD__)
 
 #include "common/io/io.h"
 #include "common/library.h"
 #include "util/stringUtils.h"
 
-#include <libelf.h>
+#include <libelf.h> // #1254
 #include <fcntl.h>
 
 struct FFElfData {
@@ -28,7 +28,7 @@ const char* ffBinaryExtractStrings(const char* elfFile, bool (*cb)(const char* s
     if (!elfData.inited)
     {
         elfData.inited = true;
-        FF_LIBRARY_LOAD(libelf, &instance.config.library.libelf, "dlopen libelf" FF_LIBRARY_EXTENSION " failed", "libelf" FF_LIBRARY_EXTENSION, 1);
+        FF_LIBRARY_LOAD(libelf, "dlopen libelf" FF_LIBRARY_EXTENSION " failed", "libelf" FF_LIBRARY_EXTENSION, 1);
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libelf, elfData, elf_version)
         if (elfData.ffelf_version(EV_CURRENT) == EV_NONE) return "elf_version() failed";
 

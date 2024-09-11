@@ -69,10 +69,10 @@ void ffPrintUsers(FFUsersOptions* options)
             FFUserResult* user = (FFUserResult*)ffListGet(&users, i);
 
             FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_USERS_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->name, "name"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->hostName, "host-name"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->sessionName, "session-name"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &user->clientIp, "client-ip"},
+                FF_FORMAT_ARG(user->name, "name"),
+                FF_FORMAT_ARG(user->hostName, "host-name"),
+                FF_FORMAT_ARG(user->sessionName, "session-name"),
+                FF_FORMAT_ARG(user->clientIp, "client-ip"),
                 {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(user->loginTime), "login-time"},
             }));
         }

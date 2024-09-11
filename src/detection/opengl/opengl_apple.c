@@ -34,7 +34,7 @@ static const char* cglHandlePixelFormat(FFOpenGLResult* result, CGLPixelFormatOb
     return error;
 }
 
-const char* ffDetectOpenGL(FF_MAYBE_UNUSED FFOpenGLOptions* options, FFOpenGLResult* result)
+const char* cglDetectOpenGL(FFOpenGLResult* result)
 {
     CGLPixelFormatObj pixelFormat;
     CGLPixelFormatAttribute attrs[] = {
@@ -50,4 +50,21 @@ const char* ffDetectOpenGL(FF_MAYBE_UNUSED FFOpenGLOptions* options, FFOpenGLRes
     const char* error = cglHandlePixelFormat(result, pixelFormat);
     CGLDestroyPixelFormat(pixelFormat);
     return error;
+}
+
+const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
+{
+    if (options->library == FF_OPENGL_LIBRARY_AUTO)
+        return cglDetectOpenGL(result);
+    else if (options->library == FF_OPENGL_LIBRARY_EGL)
+    {
+        #if __has_include(<EGL/egl.h>)
+        const char* ffOpenGLDetectByEGL(FFOpenGLResult* result);
+        return ffOpenGLDetectByEGL(result);
+        #else
+        return "fastfetch was compiled without egl support";
+        #endif
+    }
+    else
+        return "Unsupported OpenGL library";
 }

@@ -70,10 +70,10 @@ void ffPrintSwap(FFSwapOptions* options)
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
         ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SWAP_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty, "used"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty, "total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageNum, "percentage"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageBar, "percentage-bar"},
+            FF_FORMAT_ARG(usedPretty, "used"),
+            FF_FORMAT_ARG(totalPretty, "total"),
+            FF_FORMAT_ARG(percentageNum, "percentage"),
+            FF_FORMAT_ARG(percentageBar, "percentage-bar"),
         }));
     }
 }

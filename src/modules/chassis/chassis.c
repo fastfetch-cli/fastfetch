@@ -39,10 +39,10 @@ void ffPrintChassis(FFChassisOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CHASSIS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type, "type"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.serial, "serial"},
+            FF_FORMAT_ARG(result.type, "type"),
+            FF_FORMAT_ARG(result.vendor, "vendor"),
+            FF_FORMAT_ARG(result.version, "version"),
+            FF_FORMAT_ARG(result.serial, "serial"),
         }));
     }
 

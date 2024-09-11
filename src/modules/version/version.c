@@ -30,17 +30,18 @@ void ffPrintVersion(FFVersionOptions* options)
             }
         }
 
+        const char* buildType = result->debugMode ? "debug" : "release";
         FF_PRINT_FORMAT_CHECKED(FF_VERSION_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_VERSION_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRING, result->projectName, "project-name"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->versionTweak, "version-tweak"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->debugMode ? "debug" : "release", "build-type"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->sysName, "sysname"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->architecture, "arch"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->cmakeBuiltType, "cmake-built-type"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->compileTime, "compile-time"},
-            {FF_FORMAT_ARG_TYPE_STRING, result->compiler, "compiler"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &buf, "libc-used"},
+            FF_FORMAT_ARG(result->projectName, "project-name"),
+            FF_FORMAT_ARG(result->version, "version"),
+            FF_FORMAT_ARG(result->versionTweak, "version-tweak"),
+            FF_FORMAT_ARG(buildType, "build-type"),
+            FF_FORMAT_ARG(result->sysName, "sysname"),
+            FF_FORMAT_ARG(result->architecture, "arch"),
+            FF_FORMAT_ARG(result->cmakeBuiltType, "cmake-built-type"),
+            FF_FORMAT_ARG(result->compileTime, "compile-time"),
+            FF_FORMAT_ARG(result->compiler, "compiler"),
+            FF_FORMAT_ARG(buf, "libc-used"),
         }));
     }
 }

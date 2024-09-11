@@ -6,22 +6,15 @@
 
 static bool detectByEscapeCode(FFTerminalThemeResult* result)
 {
-    int command = 0;
-
-    if (ffGetTerminalResponse("\e]10;?\e\\", "\e]%d;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 "\e\\", &command, &result->fg.r, &result->fg.g, &result->fg.b) == NULL)
+    // Windows Terminal removes all `\e`s in its output
+    if (ffGetTerminalResponse("\e]10;?\e\\" /*fg*/ "\e]11;?\e\\" /*bg*/,
+        6,
+        "%*[^0-9]10;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 /*"\e\\"*/ "%*[^0-9]11;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 /*"\e\\"*/,
+        &result->fg.r, &result->fg.g, &result->fg.b,
+        &result->bg.r, &result->bg.g, &result->bg.b) == NULL)
     {
-        if (command != 10)
-            return false;
         if (result->fg.r > 0x0100 || result->fg.g > 0x0100 || result->fg.b > 0x0100)
             result->fg.r /= 0x0100, result->fg.g /= 0x0100, result->fg.b /= 0x0100;
-    }
-    else
-        return false;
-
-    if (ffGetTerminalResponse("\e]11;?\e\\", "\e]%d;rgb:%" SCNx16 "/%" SCNx16 "/%" SCNx16 "\e\\", &command, &result->bg.r, &result->bg.g, &result->bg.b) == NULL)
-    {
-        if (command != 11)
-            return false;
         if (result->bg.r > 0x0100 || result->bg.g > 0x0100 || result->bg.b > 0x0100)
             result->bg.r /= 0x0100, result->bg.g /= 0x0100, result->bg.b /= 0x0100;
     }

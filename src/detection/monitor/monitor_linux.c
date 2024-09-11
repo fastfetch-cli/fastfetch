@@ -135,7 +135,7 @@ static const char* xrandrHandleMonitors(XrandrData* data, Screen* screen, FFlist
 
 static const char* detectByXrandr(FFlist* results)
 {
-    FF_LIBRARY_LOAD(xrandr, &instance.config.library.libXrandr, "dlopen libXrandr" FF_LIBRARY_EXTENSION " failed", "libXrandr" FF_LIBRARY_EXTENSION, 3)
+    FF_LIBRARY_LOAD(xrandr, "dlopen libXrandr" FF_LIBRARY_EXTENSION " failed", "libXrandr" FF_LIBRARY_EXTENSION, 3)
 
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xrandr, XOpenDisplay)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xrandr, XCloseDisplay)

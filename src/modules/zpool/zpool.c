@@ -20,9 +20,10 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     else
     {
         ffStrbufClear(&buffer);
-        FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 2, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT8, &index, "index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
+        FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 3, ((FFformatarg[]){
+            FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(result->name, "name"),
+            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -60,14 +61,14 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
         ffPercentAppendBar(&fragPercentageBar, fragPercentage, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_ZPOOL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result->state, "state"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &usedPretty, "size-used"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &totalPretty, "size-total"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageNum, "size-percentage"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &fragPercentage, "frag-percentage"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &bytesPercentageBar, "size-percentage-bar"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &fragPercentageBar, "frag-percentage-bar"},
+            FF_FORMAT_ARG(result->name, "name"),
+            FF_FORMAT_ARG(result->state, "state"),
+            FF_FORMAT_ARG(usedPretty, "size-used"),
+            FF_FORMAT_ARG(totalPretty, "size-total"),
+            FF_FORMAT_ARG(bytesPercentageNum, "size-percentage"),
+            FF_FORMAT_ARG(fragPercentage, "frag-percentage"),
+            FF_FORMAT_ARG(bytesPercentageBar, "size-percentage-bar"),
+            FF_FORMAT_ARG(fragPercentageBar, "frag-percentage-bar"),
         }));
     }
 }

@@ -26,10 +26,10 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
     {
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, 4, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac, "mac"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+            FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(ip->name, "name"),
+            FF_FORMAT_ARG(ip->mac, "mac"),
+            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 }
@@ -120,13 +120,13 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                         ffStrbufSetF(&speedStr, "%u Mbps", (unsigned) ip->speed);
                 }
                 FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_LOCALIP_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv4, "ipv4"},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->ipv6, "ipv6"},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->mac, "mac"},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &ip->name, "ifname"},
-                    {FF_FORMAT_ARG_TYPE_BOOL, &ip->defaultRoute, "is-default-route"},
-                    {FF_FORMAT_ARG_TYPE_INT, &ip->mtu, "mtu"},
-                    {FF_FORMAT_ARG_TYPE_STRBUF, &speedStr, "speed"},
+                    FF_FORMAT_ARG(ip->ipv4, "ipv4"),
+                    FF_FORMAT_ARG(ip->ipv6, "ipv6"),
+                    FF_FORMAT_ARG(ip->mac, "mac"),
+                    FF_FORMAT_ARG(ip->name, "ifname"),
+                    FF_FORMAT_ARG(ip->defaultRoute, "is-default-route"),
+                    FF_FORMAT_ARG(ip->mtu, "mtu"),
+                    FF_FORMAT_ARG(speedStr, "speed"),
                 }));
             }
             ++index;

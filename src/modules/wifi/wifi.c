@@ -81,17 +81,17 @@ void ffPrintWifi(FFWifiOptions* options)
             FF_STRBUF_AUTO_DESTROY percentBar = ffStrbufCreate();
             ffPercentAppendBar(&percentBar, item->conn.signalQuality, options->percent, &options->moduleArgs);
             FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WIFI_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.description, "inf-desc"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->inf.status, "inf-status"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.status, "status"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.ssid, "ssid"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.bssid, "bssid"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.protocol, "protocol"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &percentNum, "signal-quality"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.rxRate, "rx-rate"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &item->conn.txRate, "tx-rate"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &item->conn.security, "security"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &percentBar, "signal-quality-bar"},
+                FF_FORMAT_ARG(item->inf.description, "inf-desc"),
+                FF_FORMAT_ARG(item->inf.status, "inf-status"),
+                FF_FORMAT_ARG(item->conn.status, "status"),
+                FF_FORMAT_ARG(item->conn.ssid, "ssid"),
+                FF_FORMAT_ARG(item->conn.bssid, "bssid"),
+                FF_FORMAT_ARG(item->conn.protocol, "protocol"),
+                FF_FORMAT_ARG(percentNum, "signal-quality"),
+                FF_FORMAT_ARG(item->conn.rxRate, "rx-rate"),
+                FF_FORMAT_ARG(item->conn.txRate, "tx-rate"),
+                FF_FORMAT_ARG(item->conn.security, "security"),
+                FF_FORMAT_ARG(percentBar, "signal-quality-bar"),
             }));
         }
 

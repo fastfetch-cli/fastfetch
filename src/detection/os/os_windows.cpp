@@ -31,7 +31,7 @@ PWSTR WINAPI BrandingFormatString(PCWSTR format);
 static const char* getOsNameByWinbrand(FFstrbuf* osName)
 {
     //https://dennisbabkin.com/blog/?t=how-to-tell-the-real-version-of-windows-your-app-is-running-on#ver_string
-    FF_LIBRARY_LOAD(winbrand, nullptr, "dlopen winbrand" FF_LIBRARY_EXTENSION " failed", "winbrand" FF_LIBRARY_EXTENSION, 1);
+    FF_LIBRARY_LOAD(winbrand, "dlopen winbrand" FF_LIBRARY_EXTENSION " failed", "winbrand" FF_LIBRARY_EXTENSION, 1);
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(winbrand, BrandingFormatString);
 
     const wchar_t* rawName = ffBrandingFormatString(L"%WINDOWS_LONG%");

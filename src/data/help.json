@@ -766,184 +766,6 @@
             }
         }
     ],
-    "Library path": [
-        {
-            "long": "lib-vulkan",
-            "desc": "Vulkan module & fallback for GPU output",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-wayland",
-            "desc": "Better display performance and output in wayland sessions",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-xcb-randr",
-            "desc": "X11 sessions for better display detection and faster WM detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-xcb",
-            "desc": "X11 sessions for better display detection and faster WM detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-xrandr",
-            "desc": "X11 sessions for better display detection and faster WM detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-x11",
-            "desc": "X11 sessions for better display detection and faster WM detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-drm",
-            "desc": "Used for fast resolution and refresh rate detection",
-            "remark": "Linux only",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-gio",
-            "desc": "Needed for values that are only stored GSettings",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-dconf",
-            "desc": "Needed for values that are only stored in DConf + Fallback for GSettings",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-dbus",
-            "desc": "Bluetooth, Player & Media detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-xfconf",
-            "desc": "Needed for XFWM theme and XFCE Terminal font",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-sqlite3",
-            "desc": "Needed for pkg & rpm package count",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-rpm",
-            "desc": "Slower fallback for rpm package count",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-imagemagick",
-            "desc": "Images in terminal using sixel or kitty graphics protocol",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-z",
-            "desc": "Libz. Faster image output when using kitty graphics protocol",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-chafa",
-            "desc": "Image output as ascii art",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-egl",
-            "desc": "Needed by the OpenGL module for gl context creation",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-glx",
-            "desc": "Needed by the OpenGL module for gl context creation",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-osmesa",
-            "desc": "Needed by the OpenGL module for gl context creation",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-opencl",
-            "desc": "OpenCL module",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-pulse",
-            "desc": "Pulseaudio. Used for Sound detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-nm",
-            "desc": "NetworkManager. Used for Wifi detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-freetype",
-            "desc": "Used for Termux font detection",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-ddcutil",
-            "desc": "Used for brightness detection of external displays",
-            "arg": {
-                "type": "path"
-            }
-        },
-        {
-            "long": "lib-elf",
-            "desc": "Used for st terminal font detection and systemd version detection",
-            "arg": {
-                "type": "path"
-            }
-        }
-    ],
     "Module specific": [
         {
             "long": "title-fqdn",
@@ -1552,6 +1374,15 @@
             "arg": {
                 "type": "str",
                 "default": "\"cmd\" for Windows; \"/bin/sh\" for *nix"
+            }
+        },
+        {
+            "long": "command-param",
+            "desc": "Set the parameter used when starting the shell",
+            "remark": "Due to the difference of how OSes handle command line parameters, Windows will parse whitespaces as param separators, while *nix will not",
+            "arg": {
+                "type": "str",
+                "default": "\"/c\" for Windows; \"-c\" for *nix"
             }
         },
         {

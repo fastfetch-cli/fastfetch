@@ -17,6 +17,10 @@ In 2.23.0 or newer, `<` or `>` can be specified instead of `:` to set a left or 
 For example: "--title-format '{user-name<20}'" will generate `<user-name>         `;
 "--title-format '{user-name>20}'" will generate `         <user-name>`
 
+In 2.24.0 or newer, `{~startIndex,endIndex}` can be specified to slice a string. Negative index counts back from the end of the string.
+If an index is omitted, 0 is used. For example, both `{~,0}` `{~0,}` and `{~,}` are same as `{~0,0}` and will always generate a empty string.
+If `,endIndex` is omitted or greater than the length of the string, the length of string is used.
+
 If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.
 This means that the format string "Values: {1} ({2})" is equivalent to "Values: {} ({})".
 Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.

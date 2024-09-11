@@ -353,7 +353,6 @@ static bool parseJsoncFile(const char* path)
             (error = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
             (error = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
             (error = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
-            (error = ffOptionsParseLibraryJsonConfig(&instance.config.library, root)) ||
             false
         ) {
             fprintf(stderr, "JsonConfig Error: %s\n", error);
@@ -596,7 +595,6 @@ static void parseOption(FFdata* data, const char* key, const char* value)
         ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
         ffOptionsParseLogoCommandLine(&instance.config.logo, key, value) ||
         ffOptionsParseDisplayCommandLine(&instance.config.display, key, value) ||
-        ffOptionsParseLibraryCommandLine(&instance.config.library, key, value) ||
         ffParseModuleOptions(key, value)
     ) {}
 
@@ -688,7 +686,6 @@ static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
     ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
     ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
     ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
-    ffOptionsGenerateLibraryJsonConfig(&instance.config.library, doc);
     ffMigrateCommandOptionToJsonc(data, doc);
 
     if (ffStrbufEqualS(filename, "-"))

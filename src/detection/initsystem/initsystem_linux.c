@@ -3,6 +3,7 @@
 #include "util/binary.h"
 #include "util/stringUtils.h"
 
+#include <libgen.h>
 #include <unistd.h>
 
 FF_MAYBE_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata)
@@ -39,7 +40,10 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
         // In some old system, /sbin/init is a symlink
         char buf[PATH_MAX];
         if (realpath(result->exe.chars, buf))
+        {
             ffStrbufSetS(&result->exe, buf);
+            ffStrbufSetS(&result->name, basename(result->exe.chars));
+        }
     }
 
     if (instance.config.general.detectVersion)
@@ -64,6 +68,20 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                         ffStrbufSubstrAfter(&result->version, iStart);
                     }
                 }
+            }
+        }
+        else if (ffStrbufEqualS(&result->name, "dinit"))
+        {
+            if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+                ffStrbufEndsWithS(&result->exe, "/dinit") ? result->exe.chars : "dinit",
+                "--version",
+                NULL,
+            }) == NULL && result->version.length)
+            {
+                // Dinit version 0.18.0.
+                ffStrbufSubstrBeforeFirstC(&result->version, '\n');
+                ffStrbufTrimRight(&result->version, '.');
+                ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
         }
         #elif __APPLE__

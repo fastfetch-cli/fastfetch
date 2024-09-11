@@ -407,6 +407,8 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     gpu->deviceId = strtoul(buffer->chars + index, NULL, 10);
     ffStrbufInitStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
+    if (!gpu->name.length)
+        ffStrbufAppendF(&gpu->name, "Apple Silicon T%u", (uint32_t) gpu->deviceId);
     ffStrbufInitStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
     ffStrbufInit(&gpu->driver);
     ffStrbufInitF(&gpu->platformApi, "DRM (%s)", drmKey);

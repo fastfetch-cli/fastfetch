@@ -39,9 +39,9 @@ void ffPrintLM(FFLMOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LM_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.service, "service"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.type, "type"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &result.version, "version"},
+            FF_FORMAT_ARG(result.service, "service"),
+            FF_FORMAT_ARG(result.type, "type"),
+            FF_FORMAT_ARG(result.version, "version"),
         }));
     }
     ffStrbufDestroy(&result.service);

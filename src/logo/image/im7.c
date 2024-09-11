@@ -14,7 +14,7 @@ static void* logoResize(const void* image, size_t width, size_t height, void* ex
 
 FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData)
 {
-    FF_LIBRARY_LOAD(imageMagick, &instance.config.library.libImageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
+    FF_LIBRARY_LOAD(imageMagick, FF_LOGO_IMAGE_RESULT_INIT_ERROR,
         "libMagickCore-7.Q16HDRI" FF_LIBRARY_EXTENSION, 11,
         "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11,
         "libMagickCore-7.Q16HDRI-10" FF_LIBRARY_EXTENSION, -1 // Required for Windows

@@ -205,7 +205,7 @@ void ffListFilesRecursively(const char* path, bool pretty)
     listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
 }
 
-const char* ffGetTerminalResponse(const char* request, const char* format, ...)
+const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...)
 {
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
     FF_AUTO_CLOSE_FD HANDLE hConin = INVALID_HANDLE_VALUE;
@@ -256,20 +256,30 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
             ReadConsoleInputW(hInput, &record, 1, &len);
     }
 
-    char buffer[512];
-    DWORD bytes = 0;
-    ReadFile(hInput, buffer, sizeof(buffer) - 1, &bytes, NULL);
+    va_list args;
+    va_start(args, format);
+
+    char buffer[1024];
+    uint32_t bytesRead = 0;
+
+    while (true)
+    {
+        DWORD bytes = 0;
+        if (!ReadFile(hInput, buffer, sizeof(buffer) - 1, &bytes, NULL) || bytes == 0)
+            return "ReadFile() failed";
+
+        bytesRead += bytes;
+        buffer[bytesRead] = '\0';
+
+        int ret = vsscanf(buffer, format, args);
+        if (ret <= 0)
+            return "vsscanf(buffer, format, args) failed";
+        if (ret >= nParams)
+            break;
+    }
 
     SetConsoleMode(hInput, inputMode);
 
-    if(bytes <= 0)
-        return "ReadFile() failed";
-
-    buffer[bytes] = '\0';
-
-    va_list args;
-    va_start(args, format);
-    vsscanf(buffer, format, args);
     va_end(args);
 
     return NULL;

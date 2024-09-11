@@ -79,12 +79,12 @@ void ffPrintUptime(FFUptimeOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_UPTIME_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &days, "days"},
-            {FF_FORMAT_ARG_TYPE_UINT, &hours, "hours"},
-            {FF_FORMAT_ARG_TYPE_UINT, &minutes, "minutes"},
-            {FF_FORMAT_ARG_TYPE_UINT, &seconds, "seconds"},
-            {FF_FORMAT_ARG_TYPE_UINT, &milliseconds, "milliseconds"},
-            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.uptime), "boot-time"},
+            FF_FORMAT_ARG(days, "days"),
+            FF_FORMAT_ARG(hours, "hours"),
+            FF_FORMAT_ARG(minutes, "minutes"),
+            FF_FORMAT_ARG(seconds, "seconds"),
+            FF_FORMAT_ARG(milliseconds, "milliseconds"),
+            {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(result.bootTime), "boot-time"},
         }));
     }
 }

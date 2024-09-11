@@ -4,9 +4,13 @@
 
 #include <fcntl.h>
 #include <termios.h>
-#include <poll.h>
 #include <dirent.h>
 #include <errno.h>
+#ifndef __APPLE__
+#include <poll.h>
+#else
+#include <sys/select.h>
+#endif
 
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
@@ -140,11 +144,11 @@ void restoreTerm(void)
     tcsetattr(ftty, TCSAFLUSH, &oldTerm);
 }
 
-const char* ffGetTerminalResponse(const char* request, const char* format, ...)
+const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...)
 {
     if (ftty < 0)
     {
-        ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC | O_NONBLOCK);
+        ftty = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
         if (ftty < 0)
             return "open(\"/dev/tty\", O_RDWR | O_NOCTTY | O_CLOEXEC) failed";
 
@@ -161,20 +165,44 @@ const char* ffGetTerminalResponse(const char* request, const char* format, ...)
     ffWriteFDData(ftty, strlen(request), request);
 
     //Give the terminal some time to respond
+    #ifndef __APPLE__
     if(poll(&(struct pollfd) { .fd = ftty, .events = POLLIN }, 1, FF_IO_TERM_RESP_WAIT_MS) <= 0)
-        return "poll() timeout or failed";
+        return "poll(/dev/tty) timeout or failed";
+    #else
+    {
+        // On macOS, poll(/dev/tty) always returns immediately
+        // See also https://nathancraddock.com/blog/macos-dev-tty-polling/
+        fd_set rd;
+        FD_ZERO(&rd);
+        FD_SET(ftty, &rd);
+        if(select(ftty + 1, &rd, NULL, NULL, &(struct timeval) { .tv_sec = FF_IO_TERM_RESP_WAIT_MS / 1000, .tv_usec = (FF_IO_TERM_RESP_WAIT_MS % 1000) * 1000 }) <= 0)
+            return "select(/dev/tty) timeout or failed";
+    }
+    #endif
 
-    char buffer[512];
-    ssize_t bytesRead = read(ftty, buffer, sizeof(buffer) - 1);
-
-    if(bytesRead <= 0)
-        return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
-
-    buffer[bytesRead] = '\0';
+    char buffer[1024];
+    size_t bytesRead = 0;
 
     va_list args;
     va_start(args, format);
-    vsscanf(buffer, format, args);
+
+    while (true)
+    {
+        ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
+
+        if (nRead <= 0)
+            return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
+
+        bytesRead += (size_t) nRead;
+        buffer[bytesRead] = '\0';
+
+        int ret = vsscanf(buffer, format, args);
+        if (ret <= 0)
+            return "vsscanf(buffer, format, args) failed";
+        if (ret >= nParams)
+            break;
+    }
+
     va_end(args);
 
     return NULL;

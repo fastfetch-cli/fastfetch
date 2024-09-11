@@ -199,7 +199,7 @@ static const char* drmGetNameByConnId(uint32_t connId, FFstrbuf* name)
 
 static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 {
-    FF_LIBRARY_LOAD(libdrm, &instance.config.library.libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
+    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetResources)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetConnectorCurrent)
@@ -376,17 +376,19 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 
 #endif
 
-void ffdsConnectDrm(FFDisplayServerResult* result)
+const char* ffdsConnectDrm(FFDisplayServerResult* result)
 {
     #ifdef FF_HAVE_DRM
     if (instance.config.general.dsForceDrm != FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY)
     {
         if (drmConnectLibdrm(result) == NULL)
-            return;
+            return NULL;
     }
     #endif
 
     #ifdef __linux__
-    drmParseSysfs(result);
+    return drmParseSysfs(result);
     #endif
+
+    return "fastfetch was compiled without drm support";
 }

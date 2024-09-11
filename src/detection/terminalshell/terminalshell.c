@@ -375,6 +375,9 @@ FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* vers
 
 FF_MAYBE_UNUSED static bool getTerminalVersionMateTerminal(FFstrbuf* exe, FFstrbuf* version)
 {
+    ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
+    if (version->length > 0) return true;
+
     if(!getExeVersionRaw(exe, version)) return false;
 
     //MATE Terminal 1.26.1
@@ -580,6 +583,7 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
     // https://github.com/fastfetch-cli/fastfetch/discussions/1030#discussioncomment-9845233
     if (ffGetTerminalResponse(
         "\eP+q6b697474792d71756572792d76657273696f6e\e\\", // kitty-query-version
+        1,
         "\eP1+r%*[^=]=%63[^\e]\e\\\\", versionHex) == NULL)
     {
         // decode hex string

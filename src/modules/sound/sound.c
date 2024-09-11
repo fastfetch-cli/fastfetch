@@ -52,11 +52,11 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
         ffPercentAppendBar(&percentageBar, device->volume, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SOUND_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_BOOL, &device->main, "is-main"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageNum, "volume-percentage"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &device->identifier, "identifier"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &percentageBar, "volume-percentage-bar"},
+            FF_FORMAT_ARG(device->main, "is-main"),
+            FF_FORMAT_ARG(device->name, "name"),
+            FF_FORMAT_ARG(percentageNum, "volume-percentage"),
+            FF_FORMAT_ARG(device->identifier, "identifier"),
+            FF_FORMAT_ARG(percentageBar, "volume-percentage-bar"),
         }));
     }
 }

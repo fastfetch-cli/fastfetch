@@ -57,14 +57,14 @@ void ffPrintTitle(FFTitleOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TITLE_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userName, "user-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &hostName, "host-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.homeDir, "home-dir"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.exePath, "exe-path"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.userShell, "user-shell"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &userNameColored, "user-name-colored"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &atColored, "at-symbol-colored"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &hostNameColored, "host-name-colored"},
+            FF_FORMAT_ARG(instance.state.platform.userName, "user-name"),
+            FF_FORMAT_ARG(hostName, "host-name"),
+            FF_FORMAT_ARG(instance.state.platform.homeDir, "home-dir"),
+            FF_FORMAT_ARG(instance.state.platform.exePath, "exe-path"),
+            FF_FORMAT_ARG(instance.state.platform.userShell, "user-shell"),
+            FF_FORMAT_ARG(userNameColored, "user-name-colored"),
+            FF_FORMAT_ARG(atColored, "at-symbol-colored"),
+            FF_FORMAT_ARG(hostNameColored, "host-name-colored"),
         }));
     }
 }

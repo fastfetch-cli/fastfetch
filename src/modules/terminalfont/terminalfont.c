@@ -34,10 +34,10 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALFONT_NUM_FORMAT_ARGS, ((FFformatarg[]){
-                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.pretty, "combined"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.name, "name"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &terminalFont.font.size, "size"},
-                {FF_FORMAT_ARG_TYPE_LIST, &terminalFont.font.styles, "styles"},
+                FF_FORMAT_ARG(terminalFont.font.pretty, "combined"),
+                FF_FORMAT_ARG(terminalFont.font.name, "name"),
+                FF_FORMAT_ARG(terminalFont.font.size, "size"),
+                FF_FORMAT_ARG(terminalFont.font.styles, "styles"),
             }));
         }
     }

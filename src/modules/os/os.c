@@ -112,18 +112,18 @@ void ffPrintOS(FFOSOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OS_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.sysinfo.name, "sysname"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->prettyName, "pretty-name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->id, "id"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->idLike, "id-like"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->variant, "variant"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->variantID, "variant-id"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->versionID, "version-id"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->codename, "codename"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &os->buildID, "build-id"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &instance.state.platform.sysinfo.architecture, "arch"}
+            FF_FORMAT_ARG(instance.state.platform.sysinfo.name, "sysname"),
+            FF_FORMAT_ARG(os->name, "name"),
+            FF_FORMAT_ARG(os->prettyName, "pretty-name"),
+            FF_FORMAT_ARG(os->id, "id"),
+            FF_FORMAT_ARG(os->idLike, "id-like"),
+            FF_FORMAT_ARG(os->variant, "variant"),
+            FF_FORMAT_ARG(os->variantID, "variant-id"),
+            FF_FORMAT_ARG(os->version, "version"),
+            FF_FORMAT_ARG(os->versionID, "version-id"),
+            FF_FORMAT_ARG(os->codename, "codename"),
+            FF_FORMAT_ARG(os->buildID, "build-id"),
+            FF_FORMAT_ARG(instance.state.platform.sysinfo.architecture, "arch")
         }));
     }
 }

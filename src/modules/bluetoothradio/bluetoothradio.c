@@ -18,9 +18,9 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
     else
     {
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
-            {FF_FORMAT_ARG_TYPE_STRING, radio->name.chars, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+            FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(radio->name, "name"),
+            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
 
@@ -56,14 +56,14 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
     else
     {
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-            {FF_FORMAT_ARG_TYPE_STRBUF, &radio->name, "name"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &radio->address, "address"},
-            {FF_FORMAT_ARG_TYPE_INT, &radio->lmpVersion, "lmp-version"},
-            {FF_FORMAT_ARG_TYPE_INT, &radio->lmpSubversion, "lmp-subversion"},
-            {FF_FORMAT_ARG_TYPE_STRING, version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &radio->vendor, "vendor"},
-            {FF_FORMAT_ARG_TYPE_BOOL, &radio->discoverable, "discoverable"},
-            {FF_FORMAT_ARG_TYPE_BOOL, &radio->connectable, "connectable"},
+            FF_FORMAT_ARG(radio->name, "name"),
+            FF_FORMAT_ARG(radio->address, "address"),
+            FF_FORMAT_ARG(radio->lmpVersion, "lmp-version"),
+            FF_FORMAT_ARG(radio->lmpSubversion, "lmp-subversion"),
+            FF_FORMAT_ARG(version, "version"),
+            FF_FORMAT_ARG(radio->vendor, "vendor"),
+            FF_FORMAT_ARG(radio->discoverable, "discoverable"),
+            FF_FORMAT_ARG(radio->connectable, "connectable"),
         }));
     }
 }

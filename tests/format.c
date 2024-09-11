@@ -69,10 +69,48 @@ int main(void)
     VERIFY("output({1n>20})", "12345 67890", "output({1n>20})");
     VERIFY("output({120})", "12345 67890", "output({120})");
     VERIFY("output({1:11})", "", "output()");
+    VERIFY("output({2:2})", "", "output({2:2})");
+    }
+
+    {
+    VERIFY("output({1~0})", "12345 67890", "output(12345 67890)");
+    VERIFY("output({1~1})", "12345 67890", "output(2345 67890)");
+    VERIFY("output({1~10})", "12345 67890", "output(0)");
+    VERIFY("output({1~20})", "12345 67890", "output()");
+    VERIFY("output({1~-5})", "12345 67890", "output(67890)");
+    VERIFY("output({1~-50})", "12345 67890", "output()");
+    VERIFY("output({1~0,1})", "12345 67890", "output(1)");
+    VERIFY("output({1~0,6})", "12345 67890", "output(12345 )");
+    VERIFY("output({1~0,10})", "12345 67890", "output(12345 6789)");
+    VERIFY("output({1~5,10})", "12345 67890", "output( 6789)");
+    VERIFY("output({1~5,100})", "12345 67890", "output( 67890)");
+    VERIFY("output({1~10,10})", "12345 67890", "output()");
+    VERIFY("output({1~10,5})", "12345 67890", "output()");
+    VERIFY("output({1~3,-3})", "12345 67890", "output(45 67)");
+    VERIFY("output({1~-5,-3})", "12345 67890", "output(67)");
+    VERIFY("output({1~-0,10})", "12345 67890", "output(12345 6789)");
+    VERIFY("output({1~-3,-5})", "12345 67890", "output()");
+    VERIFY("output({1~})", "12345 67890", "output(12345 67890)"); // Same as {1~0}
+    VERIFY("output({1~-0})", "12345 67890", "output(12345 67890)"); // Same as {1~0}
+    VERIFY("output({1~,-1})", "12345 67890", "output(12345 6789)"); // Same as {1~0,-1}
+    VERIFY("output({1~,})", "12345 67890", "output()"); // Same as {1~0,0}
+    }
+
+    {
+    VERIFY("output({1n~0})", "12345 67890", "output({1n~0})");
+    VERIFY("output({1~<0})", "12345 67890", "output({1~<0})");
+    VERIFY("output({1~-})", "12345 67890", "output({1~-})");
+    VERIFY("output({1~-,1})", "12345 67890", "output({1~-,1})");
+    VERIFY("output({1~0,,1})", "12345 67890", "output({1~0,,1})");
+    VERIFY("output({1~0,1,})", "12345 67890", "output({1~0,1,})");
+    VERIFY("output({1~,0,1})", "12345 67890", "output({1~,0,1})");
+    VERIFY("output({2,0})", "12345 67890", "output({2,0})");
     }
 
     {
     VERIFY("output({1:20}{1<20}{1>20})", "12345 67890", "output(12345 6789012345 67890                  12345 67890)");
+    VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "12345 67890", "output(OK)");
+    VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "", "output(NOT OK)");
     }
 
     //Success

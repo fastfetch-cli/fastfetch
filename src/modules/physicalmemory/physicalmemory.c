@@ -55,17 +55,17 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
         else
         {
             FF_PRINT_FORMAT_CHECKED(FF_PHYSICALMEMORY_DISPLAY_NAME, (uint8_t) i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PHYSICALMEMORY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
-                {FF_FORMAT_ARG_TYPE_UINT64, &device->size, "bytes"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &prettySize, "size"},
-                {FF_FORMAT_ARG_TYPE_UINT, &device->maxSpeed, "max-speed"},
-                {FF_FORMAT_ARG_TYPE_UINT, &device->runningSpeed, "running-speed"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &device->type, "type"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &device->formFactor, "form-factor"},
-                {FF_FORMAT_ARG_TYPE_DOUBLE, &device->locator, "locator"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &device->vendor, "vendor"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &device->serial, "serial"},
-                {FF_FORMAT_ARG_TYPE_STRBUF, &device->partNumber, "part-number"},
-                {FF_FORMAT_ARG_TYPE_BOOL, &device->ecc, "is-ecc-enabled"},
+                FF_FORMAT_ARG(device->size, "bytes"),
+                FF_FORMAT_ARG(prettySize, "size"),
+                FF_FORMAT_ARG(device->maxSpeed, "max-speed"),
+                FF_FORMAT_ARG(device->runningSpeed, "running-speed"),
+                FF_FORMAT_ARG(device->type, "type"),
+                FF_FORMAT_ARG(device->formFactor, "form-factor"),
+                FF_FORMAT_ARG(device->locator, "locator"),
+                FF_FORMAT_ARG(device->vendor, "vendor"),
+                FF_FORMAT_ARG(device->serial, "serial"),
+                FF_FORMAT_ARG(device->partNumber, "part-number"),
+                FF_FORMAT_ARG(device->ecc, "is-ecc-enabled"),
             }));
         }
     }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.23.0
+    VERSION 2.24.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -69,7 +69,7 @@ cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR FreeBSD OR ANDROID" OFF)
+cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
 
@@ -398,7 +398,6 @@ set(LIBFASTFETCH_SRC
     src/options/modules.c
     src/options/logo.c
     src/options/general.c
-    src/options/library.c
     src/util/edidHelper.c
     src/util/base64.c
     src/util/FFlist.c
@@ -1348,6 +1347,9 @@ if (BUILD_TESTS)
     target_link_libraries(fastfetch-test-format
         PRIVATE libfastfetch
     )
+    if(yyjson_FOUND)
+        target_compile_definitions(fastfetch-test-format PRIVATE FF_USE_SYSTEM_YYJSON)
+    endif()
 
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)

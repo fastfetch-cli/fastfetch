@@ -21,9 +21,9 @@ private:
 extern "C"
 const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
 {
-    FF_LIBRARY_LOAD(mfplat, NULL, "dlopen mfplat" FF_LIBRARY_EXTENSION " failed", "mfplat" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(mfplat, "dlopen mfplat" FF_LIBRARY_EXTENSION " failed", "mfplat" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mfplat, MFCreateAttributes)
-    FF_LIBRARY_LOAD(mf, NULL, "dlopen mf" FF_LIBRARY_EXTENSION " failed", "mf" FF_LIBRARY_EXTENSION, 1)
+    FF_LIBRARY_LOAD(mf, "dlopen mf" FF_LIBRARY_EXTENSION " failed", "mf" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(mf, MFEnumDeviceSources)
 
     const char* error = ffInitCom();

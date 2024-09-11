@@ -638,113 +638,6 @@
                 }
             }
         },
-        "library": {
-            "description": "Set the path of a library to load",
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "vulkan": {
-                    "type": "string",
-                    "description": "Vulkan module & fallback for GPU output"
-                },
-                "freetype": {
-                    "type": "string",
-                    "description": "Used for Termux font detection (Android)"
-                },
-                "wayland": {
-                    "type": "string",
-                    "description": "Better display performance and output in wayland sessions.\nSupports different refresh rates per monitor.\n(Linux, FreeBSD)"
-                },
-                "xcbRandr": {
-                    "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
-                },
-                "xcb": {
-                    "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
-                },
-                "xrandr": {
-                    "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
-                },
-                "x11": {
-                    "type": "string",
-                    "description": "X11 sessions for better display detection and faster WM detection.\nThe *randr ones provide multi monitor support The libxcb* ones usually have better performance.\n (Linux, FreeBSD, SunOS)"
-                },
-                "drm": {
-                    "type": "string",
-                    "description": "Used for fast resolution and refresh rate detection (Linux, FreeBSD)"
-                },
-                "gio": {
-                    "type": "string",
-                    "description": "Needed for values that are only stored GSettings (Linux, FreeBSD, SunOS)"
-                },
-                "dconf": {
-                    "type": "string",
-                    "description": "Needed for values that are only stored in DConf + Fallback for GSettings (Linux, FreeBSD, SunOS)"
-                },
-                "dbus": {
-                    "type": "string",
-                    "description": "Bluetooth, Player & Media detection (Linux, FreeBSD, SunOS)"
-                },
-                "xfconf": {
-                    "type": "string",
-                    "description": "Needed for XFWM theme and XFCE Terminal font (Linux, FreeBSD, SunOS)"
-                },
-                "sqlite3": {
-                    "type": "string",
-                    "description": "Needed for pkg & rpm package count (Linux, FreeBSD)"
-                },
-                "rpm": {
-                    "type": "string",
-                    "description": "Slower fallback for rpm package count. Needed on openSUSE & old CentOS / Redhat. (Linux)"
-                },
-                "imagemagick": {
-                    "type": "string",
-                    "description": "Images in terminal using sixel or kitty graphics protocol (Linux, FreeBSD, SunOS, macOS)"
-                },
-                "z": {
-                    "description": "Libz. Faster image output when using kitty graphics protocol (Linux, FreeBSD, SunOS, macOS)",
-                    "type": "string"
-                },
-                "chafa": {
-                    "type": "string",
-                    "description": "Image output as ascii art (Linux, FreeBSD, SunOS, macOS)"
-                },
-                "egl": {
-                    "type": "string",
-                    "description": "Library used by the OpenGL module for gl context creation (Linux, FreeBSD, SunOS, Windows)"
-                },
-                "glx": {
-                    "type": "string",
-                    "description": "Library used by the OpenGL module for gl context creation (Linux, FreeBSD, SunOS)"
-                },
-                "osmesa": {
-                    "type": "string",
-                    "description": "Library used by the OpenGL module for gl context creation (Linux, FreeBSD, SunOS)"
-                },
-                "opencl": {
-                    "type": "string",
-                    "description": "OpenCL module (Linux, FreeBSD, SunOS, Windows)"
-                },
-                "pulse": {
-                    "description": "Pulseaudio. Used for Sound detection (Linux, FreeBSD, SunOS)",
-                    "type": "string"
-                },
-                "nm": {
-                    "description": "NetworkManager. Used for Wifi detection (Linux)",
-                    "type": "string"
-                },
-                "ddcutil": {
-                    "description": "Used for brightness detection of external displays (Linux)",
-                    "type": "string"
-                },
-                "elf": {
-                    "description": "Used for st terminal font detection and systemd version detection (Linux)",
-                    "type": "string"
-                }
-            }
-        },
         "modules": {
             "description": "Fastfetch modules to run",
             "type": "array",
@@ -1341,6 +1234,10 @@
                                     },
                                     "shell": {
                                         "description": "Set the shell program to execute the command text\nDefault: cmd for Windows, /bin/sh for *nix",
+                                        "type": "string"
+                                    },
+                                    "param": {
+                                        "description": "Set the parameter used when starting the shell\nDefault: /c for Windows, -c for *nix",
                                         "type": "string"
                                     },
                                     "text": {

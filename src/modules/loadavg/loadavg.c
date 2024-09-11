@@ -50,9 +50,9 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
                 {
                     ffStrbufClear(&buffer);
                     FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 3, ((FFformatarg[]){
-                        {FF_FORMAT_ARG_TYPE_UINT, &index, "index"},
-                        {FF_FORMAT_ARG_TYPE_UINT, &duration, "duration"},
-                        {FF_FORMAT_ARG_TYPE_STRBUF, &options->moduleArgs.keyIcon, "icon"},
+                        FF_FORMAT_ARG(index, "index"),
+                        FF_FORMAT_ARG(duration, "duration"),
+                        FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
                     }));
                 }
 
@@ -85,9 +85,9 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LOADAVG_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[0], "loadavg1"},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[1], "loadavg2"},
-            {FF_FORMAT_ARG_TYPE_DOUBLE, &result[2], "loadavg3"},
+            FF_FORMAT_ARG(result[0], "loadavg1"),
+            FF_FORMAT_ARG(result[1], "loadavg2"),
+            FF_FORMAT_ARG(result[2], "loadavg3"),
         }));
     }
 }

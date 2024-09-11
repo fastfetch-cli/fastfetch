@@ -23,12 +23,12 @@ void ffPrintKernel(FFKernelOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         ffParseSize(info->pageSize, &str);
         FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_KERNEL_NUM_FORMAT_ARGS, ((FFformatarg[]){
-            {FF_FORMAT_ARG_TYPE_STRBUF, &info->name, "sysname"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &info->release, "release"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &info->version, "version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &info->architecture, "arch"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &info->displayVersion, "display-version"},
-            {FF_FORMAT_ARG_TYPE_STRBUF, &str, "page-size"},
+            FF_FORMAT_ARG(info->name, "sysname"),
+            FF_FORMAT_ARG(info->release, "release"),
+            FF_FORMAT_ARG(info->version, "version"),
+            FF_FORMAT_ARG(info->architecture, "arch"),
+            FF_FORMAT_ARG(info->displayVersion, "display-version"),
+            FF_FORMAT_ARG(str, "page-size"),
         }));
     }
 }
