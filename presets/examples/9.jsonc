@@ -25,7 +25,10 @@
             "type": "disk",
             "folders": "/"
         },
-        "battery",
+        {
+            "type": "battery",
+            "key": "Battery"
+        },
         {
             "type": "colors",
             "paddingLeft": 10,
