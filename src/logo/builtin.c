@@ -2485,7 +2485,6 @@ static const FFlogo L[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_LLIUREX,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_BLUE,
