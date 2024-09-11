@@ -52,14 +52,6 @@ static void getUbuntuFlavour(FFOSResult* result)
     if(!ffStrSet(xdgConfigDirs))
         return;
 
-    if(ffStrContains(xdgConfigDirs, "lliurex"))
-	{
-        ffStrbufSetS(&result->name, "LliureX");
-        ffStrbufSetS(&result->prettyName, "LliureX");
-        ffStrbufSetS(&result->id, "lliurex");
-        ffStrbufSetS(&result->idLike, "ubuntu");
-		return;;
-	}
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetS(&result->name, "Kubuntu");
@@ -137,6 +129,15 @@ static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->name, "Ubuntu Touch");
         ffStrbufSetS(&result->prettyName, "Ubuntu Touch");
         ffStrbufSetS(&result->id, "ubuntu-touch");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
+
+    if(ffStrContains(xdgConfigDirs, "lliurex"))
+    {
+        ffStrbufSetS(&result->name, "LliureX");
+        ffStrbufSetS(&result->prettyName, "LliureX");
+        ffStrbufSetS(&result->id, "lliurex");
         ffStrbufSetS(&result->idLike, "ubuntu");
         return;
     }
