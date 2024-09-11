@@ -88,13 +88,13 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
         for (const char* p = fontHex; p[0] && p[1]; p += 2)
         {
             unsigned value;
-            if (sscanf(p, "%2x", &value))
+            if (sscanf(p, "%2x", &value) == 1)
                 ffStrbufAppendC(&fontName, (char) value);
         }
         for (const char* p = sizeHex; p[0] && p[1]; p += 2)
         {
             unsigned value;
-            if (sscanf(p, "%2x", &value))
+            if (sscanf(p, "%2x", &value) == 1)
                 ffStrbufAppendC(&fontSize, (char) value);
         }
     }
