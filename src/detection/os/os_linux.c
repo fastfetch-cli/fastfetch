@@ -132,6 +132,15 @@ static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->idLike, "ubuntu");
         return;
     }
+
+    if(ffStrContains(xdgConfigDirs, "lliurex"))
+    {
+        ffStrbufSetS(&result->name, "LliureX");
+        ffStrbufSetS(&result->prettyName, "LliureX");
+        ffStrbufSetS(&result->id, "lliurex");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        return;
+    }
 }
 
 static void getDebianVersion(FFOSResult* result)
