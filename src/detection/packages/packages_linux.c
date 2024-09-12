@@ -56,21 +56,49 @@ static uint32_t getNumStringsImpl(const char* filename, const char* needle)
     return count;
 }
 
-static uint32_t getNumStrings(FFstrbuf* baseDir, const char* filename, const char* needle)
+static uint32_t getNumStrings(FFstrbuf* baseDir, const char* filename, const char* needle, const char* packageId)
 {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, filename);
-    uint32_t num_elements = getNumStringsImpl(baseDir->chars, needle);
+
+    FF_STRBUF_AUTO_DESTROY cacheDir = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreate();
+
+    uint32_t num_elements;
+    if (ffPackagesReadCache(&cacheDir, &cacheContent, baseDir->chars, packageId, &num_elements))
+    {
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        return num_elements;
+    }
+
+    num_elements = getNumStringsImpl(baseDir->chars, needle);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    ffPackagesWriteCache(&cacheDir, &cacheContent, num_elements);
+
     return num_elements;
 }
 
-static uint32_t getSQLite3Int(FFstrbuf* baseDir, const char* dbPath, const char* query)
+static uint32_t getSQLite3Int(FFstrbuf* baseDir, const char* dbPath, const char* query, const char* packageId)
 {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dbPath);
-    uint32_t num_elements = (uint32_t) ffSettingsGetSQLite3Int(baseDir->chars, query);
+
+    FF_STRBUF_AUTO_DESTROY cacheDir = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY cacheContent = ffStrbufCreate();
+
+    uint32_t num_elements;
+    if (ffPackagesReadCache(&cacheDir, &cacheContent, baseDir->chars, packageId, &num_elements))
+    {
+        ffStrbufSubstrBefore(baseDir, baseDirLength);
+        return num_elements;
+    }
+
+    num_elements = (uint32_t) ffSettingsGetSQLite3Int(baseDir->chars, query);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
+
+    ffPackagesWriteCache(&cacheDir, &cacheContent, num_elements);
+
     return num_elements;
 }
 
@@ -441,9 +469,9 @@ static uint32_t getGuixPackages(FFstrbuf* baseDir, const char* dirname)
 
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
-    if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q");
-    if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed");
-    if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n");
+    if (!(options->disabled & FF_PACKAGES_FLAG_APK_BIT)) packageCounts->apk += getNumStrings(baseDir, "/lib/apk/db/installed", "C:Q", "apk");
+    if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
+    if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
     if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
     if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getNumElements(baseDir, "/var/lib/flatpak/app", DT_DIR);
@@ -455,7 +483,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", DT_REG);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", DT_REG);
-    if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT)) packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Packages");
+    if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT)) packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Packages", "rpm");
     if (!(options->disabled & FF_PACKAGES_FLAG_SNAP_BIT)) packageCounts->snap += getSnap(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_XBPS_BIT)) packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
     if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT))
@@ -464,9 +492,9 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
-    if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:"); // openwrt
+    if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:", "opkg"); // openwrt
     if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->am = getAM(baseDir);
-    if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:");
+    if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:", "sorcery");
     if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
     {
       packageCounts->guixSystem += getGuixPackages(baseDir, "/run/current-system/profile");
