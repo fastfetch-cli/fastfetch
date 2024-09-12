@@ -7,8 +7,8 @@ const char* ffDetectCpuTemp(double* current)
     if (temp == -999999)
         return "ffSysctlGetInt(\"dev.cpu.0.temperature\") failed";
 
-    // In tenth of degrees Celsius
-    *current = (double) temp / 10;
+    // In tenth of degrees Kelvin
+    *current = (double) temp / 10 - 273.15;
     return NULL;
 }
 
