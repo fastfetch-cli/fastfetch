@@ -885,8 +885,8 @@ add_library(libfastfetch OBJECT
 )
 
 if(yyjson_FOUND)
-    target_compile_definitions(libfastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
-    target_link_libraries(libfastfetch PRIVATE yyjson::yyjson)
+    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)
+    target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
 else()
     # Used for dlopen finding dylibs installed by homebrew
@@ -928,11 +928,11 @@ elseif(SunOS)
 endif()
 
 if(HAVE_STATX)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_STATX)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_STATX)
 endif()
 
 if(HAVE_WCWIDTH)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WCWIDTH)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_WCWIDTH)
 endif()
 
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
@@ -1294,13 +1294,6 @@ set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
 set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
-if(yyjson_FOUND)
-    target_compile_definitions(fastfetch PRIVATE FF_USE_SYSTEM_YYJSON)
-    target_link_libraries(fastfetch PRIVATE yyjson::yyjson)
-    target_compile_definitions(flashfetch PRIVATE FF_USE_SYSTEM_YYJSON)
-    target_link_libraries(flashfetch PRIVATE yyjson::yyjson)
-endif()
-
 if(WIN32)
     target_sources(fastfetch
         PRIVATE src/util/windows/version.rc
@@ -1347,9 +1340,6 @@ if (BUILD_TESTS)
     target_link_libraries(fastfetch-test-format
         PRIVATE libfastfetch
     )
-    if(yyjson_FOUND)
-        target_compile_definitions(fastfetch-test-format PRIVATE FF_USE_SYSTEM_YYJSON)
-    endif()
 
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
