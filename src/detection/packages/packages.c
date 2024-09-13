@@ -27,7 +27,7 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
 {
     #ifndef _WIN32
     struct stat st;
-    if (stat(filePath, &st) < 0) // file doesn't exist or isn't accessable
+    if (stat(filePath, &st) < 0) // file doesn't exist or isn't accessible
     {
         *result = 0;
         return true;
@@ -40,7 +40,7 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
     #else
     FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-    if (handle == INVALID_HANDLE_VALUE) // file doesn't exist or isn't accessable
+    if (handle == INVALID_HANDLE_VALUE) // file doesn't exist or isn't accessible
     {
         *result = 0;
         return true;
