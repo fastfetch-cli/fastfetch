@@ -32,6 +32,9 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
         return true;
     }
 
+    if (__builtin_expect(st.st_mtim.tv_sec <= 0, false))
+        return false;
+
     uint64_t mtime_current = (uint64_t) st.st_mtim.tv_sec * 1000 + (uint64_t) st.st_mtim.tv_nsec / 1000000;
 
     ffStrbufSet(cacheDir, &instance.state.platform.cacheDir);
@@ -57,6 +60,9 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
 
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements)
 {
+    if (__builtin_expect(cacheContent->length == 0, false))
+        return false;
+
     ffStrbufAppendF(cacheContent, "%" PRIu32, num_elements);
     return ffWriteFileBuffer(cacheDir->chars, cacheContent);
 }
