@@ -25,6 +25,7 @@ const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* option
 
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result)
 {
+    #ifndef _WIN32
     struct stat st;
     if (stat(filePath, &st) < 0) // file doesn't exist or isn't accessable
     {
@@ -35,7 +36,25 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
     if (__builtin_expect(st.st_mtim.tv_sec <= 0, false))
         return false;
 
-    uint64_t mtime_current = (uint64_t) st.st_mtim.tv_sec * 1000 + (uint64_t) st.st_mtim.tv_nsec / 1000000;
+    uint64_t mtime_current = (uint64_t) st.st_mtim.tv_sec * 1000ull + (uint64_t) st.st_mtim.tv_nsec / 1000000ull;
+    #else
+    FF_AUTO_CLOSE_FD HANDLE handle = CreateFileA(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+    if (handle == INVALID_HANDLE_VALUE) // file doesn't exist or isn't accessable
+    {
+        *result = 0;
+        return true;
+    }
+
+    uint64_t mtime_current;
+    if (!GetFileTime(handle, NULL, NULL, (FILETIME*) &mtime_current))
+        return false;
+
+    mtime_current = (mtime_current - 116444736000000000ull) / 10000ull;
+
+    if (__builtin_expect(mtime_current == 0, false))
+        return false;
+    #endif
 
     ffStrbufSet(cacheDir, &instance.state.platform.cacheDir);
     ffStrbufEnsureEndsWithC(cacheDir, '/');
