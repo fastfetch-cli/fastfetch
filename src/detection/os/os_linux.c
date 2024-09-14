@@ -172,6 +172,13 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetS(&result->idLike, "debian");
         return true;
     }
+    else if (ffStrbufEqualS(&result->name, "Parrot Security"))
+    {
+        // https://github.com/ParrotSec/base-files/blob/c06f6d42ddf8d79564882306576576eddab7d907/etc/os-release
+        ffStrbufSetS(&result->id, "parrot");
+        ffStrbufSetS(&result->idLike, "debian");
+        return true;
+    }
     else if (ffPathExists("/usr/bin/pveversion", FF_PATHTYPE_FILE))
     {
         ffStrbufSetS(&result->id, "pve");
