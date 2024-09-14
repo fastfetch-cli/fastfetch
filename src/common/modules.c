@@ -13,6 +13,7 @@ static FFModuleBaseInfo* B[] = {
     (void*) &instance.config.modules.bootmgr,
     (void*) &instance.config.modules.break_,
     (void*) &instance.config.modules.brightness,
+    (void*) &instance.config.modules.btrfs,
     NULL,
 };
 

@@ -11,6 +11,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitBootmgrOptions(&options->bootmgr);
     ffInitBreakOptions(&options->break_);
     ffInitBrightnessOptions(&options->brightness);
+    ffInitBtrfsOptions(&options->btrfs);
     ffInitCameraOptions(&options->camera);
     ffInitCPUOptions(&options->cpu);
     ffInitCPUUsageOptions(&options->cpuUsage);
@@ -84,6 +85,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyBootmgrOptions(&options->bootmgr);
     ffDestroyBreakOptions(&options->break_);
     ffDestroyBrightnessOptions(&options->brightness);
+    ffDestroyBtrfsOptions(&options->btrfs);
     ffDestroyCameraOptions(&options->camera);
     ffDestroyCPUOptions(&options->cpu);
     ffDestroyCPUCacheOptions(&options->cpuCache);

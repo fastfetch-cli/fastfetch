@@ -342,6 +342,7 @@ set(LIBFASTFETCH_SRC
     src/modules/bootmgr/bootmgr.c
     src/modules/brightness/brightness.c
     src/modules/break/break.c
+    src/modules/btrfs/btrfs.c
     src/modules/camera/camera.c
     src/modules/chassis/chassis.c
     src/modules/colors/colors.c
@@ -428,6 +429,7 @@ if(LINUX)
         src/detection/board/board_linux.c
         src/detection/bootmgr/bootmgr_linux.c
         src/detection/brightness/brightness_linux.c
+        src/detection/btrfs/btrfs_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpucache/cpucache_linux.c
@@ -508,6 +510,7 @@ elseif(ANDROID)
         src/detection/board/board_android.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
+        src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpucache/cpucache_linux.c
@@ -573,6 +576,7 @@ elseif(FreeBSD)
         src/detection/board/board_bsd.c
         src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_bsd.c
+        src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_bsd.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpucache/cpucache_shared.c
@@ -652,6 +656,7 @@ elseif(APPLE)
         src/detection/board/board_apple.c
         src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
+        src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpucache/cpucache_apple.c
@@ -718,6 +723,7 @@ elseif(WIN32)
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_windows.c
         src/detection/brightness/brightness_windows.cpp
+        src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
         src/detection/cpucache/cpucache_windows.c
@@ -785,6 +791,7 @@ elseif(SunOS)
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
+        src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_sunos.c
         src/detection/cpucache/cpucache_shared.c
