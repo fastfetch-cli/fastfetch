@@ -334,6 +334,7 @@ set(LIBFASTFETCH_SRC
     src/logo/image/im7.c
     src/logo/image/image.c
     src/logo/logo.c
+    src/modules/abi/abi.c
     src/modules/battery/battery.c
     src/modules/bios/bios.c
     src/modules/bluetooth/bluetooth.c
@@ -423,6 +424,7 @@ if(LINUX)
         src/common/netif/netif_linux.c
         src/common/networking_linux.c
         src/common/processing_linux.c
+        src/detection/abi/abi_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
         src/detection/board/board_linux.c
@@ -501,6 +503,7 @@ elseif(ANDROID)
         src/common/netif/netif_linux.c
         src/common/networking_linux.c
         src/common/processing_linux.c
+        src/detection/abi/abi_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -566,6 +569,7 @@ elseif(FreeBSD)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
+        src/detection/abi/abi_nosupport.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
         src/detection/bluetooth/bluetooth_linux.c
@@ -645,6 +649,7 @@ elseif(APPLE)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
+        src/detection/abi/abi_nosupport.c
         src/detection/battery/battery_apple.c
         src/detection/bios/bios_apple.c
         src/detection/bluetooth/bluetooth_apple.m
@@ -711,6 +716,7 @@ elseif(WIN32)
         src/common/netif/netif_windows.c
         src/common/networking_windows.c
         src/common/processing_windows.c
+        src/detection/abi/abi_nosupport.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
@@ -780,6 +786,7 @@ elseif(SunOS)
         src/common/netif/netif_bsd.c
         src/common/networking_linux.c
         src/common/processing_linux.c
+        src/detection/abi/abi_nosupport.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
         src/detection/board/board_windows.c

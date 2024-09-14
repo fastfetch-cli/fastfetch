@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 
 static FFModuleBaseInfo* A[] = {
+    (void*) &instance.config.modules.abi,
     NULL,
 };
 

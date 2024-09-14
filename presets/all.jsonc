@@ -15,6 +15,7 @@
         "board",
         "chassis",
         "kernel",
+        "abi",
         "initsystem",
         "uptime",
         "loadavg",

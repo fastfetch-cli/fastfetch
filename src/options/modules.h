@@ -4,6 +4,7 @@
 
 typedef struct FFOptionsModules
 {
+    FFABIOptions abi;
     FFBatteryOptions battery;
     FFBiosOptions bios;
     FFBluetoothOptions bluetooth;

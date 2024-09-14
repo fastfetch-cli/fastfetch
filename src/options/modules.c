@@ -3,6 +3,7 @@
 
 void ffOptionsInitModules(FFOptionsModules* options)
 {
+    ffInitABIOptions(&options->abi);
     ffInitBatteryOptions(&options->battery);
     ffInitBiosOptions(&options->bios);
     ffInitBluetoothOptions(&options->bluetooth);
@@ -76,6 +77,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
 
 void ffOptionsDestroyModules(FFOptionsModules* options)
 {
+    ffDestroyABIOptions(&options->abi);
     ffDestroyBatteryOptions(&options->battery);
     ffDestroyBiosOptions(&options->bios);
     ffDestroyBluetoothOptions(&options->bluetooth);
