@@ -54,6 +54,28 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute)
             printf(" (%s)", ip->mac.chars);
         else
             ffStrbufWriteTo(&ip->mac, stdout);
+        flag = true;
+    }
+    if (ip->mtu > 0 || ip->speed > 0)
+    {
+        if (flag)
+            fputs(" [", stdout);
+        if (ip->speed > 0)
+        {
+            if (ip->speed >= 1000000)
+                printf("%g Tbps", ip->speed / 1000000.0);
+            else if (ip->speed >= 1000)
+                printf("Speed %g Gbps", ip->speed / 1000.0);
+            else
+                printf("Speed %u Mbps", (unsigned) ip->speed);
+
+            if (ip->mtu > 0)
+                fputs(" / ", stdout);
+        }
+        if (ip->mtu > 0)
+            printf("MTU %u", (unsigned) ip->mtu);
+        putchar(']');
+        flag = true;
     }
     if (markDefaultRoute && flag && ip->defaultRoute)
         fputs(" *", stdout);
@@ -114,7 +136,9 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                 FF_STRBUF_AUTO_DESTROY speedStr = ffStrbufCreate();
                 if (ip->speed > 0)
                 {
-                    if (ip->speed >= 1000)
+                    if (ip->speed >= 1000000)
+                        ffStrbufSetF(&speedStr, "%g Tbps", ip->speed / 1000000.0);
+                    else if (ip->speed >= 1000)
                         ffStrbufSetF(&speedStr, "%g Gbps", ip->speed / 1000.0);
                     else
                         ffStrbufSetF(&speedStr, "%u Mbps", (unsigned) ip->speed);
@@ -191,6 +215,24 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
             options->showType |= FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
         else
             options->showType &= ~FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "show-mtu"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_MTU_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_MTU_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "show-speed"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_SPEED_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_SPEED_BIT;
         return true;
     }
 
@@ -288,6 +330,24 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "showMtu"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_MTU_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_MTU_BIT;
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "showSpeed"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_SPEED_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_SPEED_BIT;
+            continue;
+        }
+
         if (ffStrEqualsIgnCase(key, "compact"))
         {
             if (yyjson_get_bool(val))
@@ -348,6 +408,12 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
 
         if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
             yyjson_mut_obj_add_bool(doc, module, "showPrefixLen", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showMtu", true);
+
+        if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showSpeed", true);
 
         if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
             yyjson_mut_obj_add_bool(doc, module, "compact", true);
