@@ -202,7 +202,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     #elif __FreeBSD__ || __APPLE__
                     struct ifmediareq ifmr = {};
                     strncpy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ - 1);
-                    if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0)
+                    if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))
                     {
                         switch (IFM_SUBTYPE(ifmr.ifm_active))
                         {
