@@ -4288,10 +4288,10 @@ static const FFlogo T[] = {
             FF_COLOR_FG_GREEN,
         },
     },
-    // TorizonCore
+    // Torizon OS
     {
-        .names = {"TorizonCore"},
-        .lines = FASTFETCH_DATATEXT_LOGO_TORIZONCORE,
+        .names = {"Torizon OS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TORIZON_OS,
         .colors = {
             FF_COLOR_FG_LIGHT_WHITE,
             FF_COLOR_FG_YELLOW,
