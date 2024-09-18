@@ -1,5 +1,6 @@
 #include "wifi.h"
 #include "common/processing.h"
+#include "util/stringUtils.h"
 
 #import <CoreWLAN/CoreWLAN.h>
 
@@ -20,7 +21,7 @@ static NSDictionary* getWifiInfoByApple80211(CWInterface* inf)
     return CFBridgingRelease(result);
 }
 
-const char* ffDetectWifi(FFlist* result)
+static const char* detectWifiByCoreWlan(FFlist* result)
 {
     NSArray<CWInterface*>* interfaces = CWWiFiClient.sharedWiFiClient.interfaces;
     if(!interfaces)
@@ -210,4 +211,105 @@ const char* ffDetectWifi(FFlist* result)
         }
     }
     return NULL;
+}
+
+static const char* detectWifiBySystemProfiler(FFlist* result)
+{
+    // Warning: costs about 2s on my machine
+
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&buffer, (char* const[]) {
+        "system_profiler",
+        "SPAirPortDataType",
+        "-xml",
+        "-detailLevel",
+        "basic",
+        NULL
+    }) != NULL)
+        return "Starting `system_profiler SPAirPortDataType -xml -detailLevel basic` failed";
+
+    NSArray* arr = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytes:buffer.chars length:buffer.length]
+                    options:NSPropertyListImmutable
+                    format:nil
+                    error:nil];
+    if (!arr || !arr.count)
+        return "system_profiler SPAirPortDataType returned an empty array";
+
+    for (NSDictionary* data in arr[0][@"_items"])
+    {
+        for (NSDictionary* inf in data[@"spairport_airport_interfaces"])
+        {
+            if (![inf[@"spairport_wireless_card_type"] isEqualToString:@"spairport_wireless_card_type_wifi (0x14E4, 0x4387)"]) continue;
+
+            FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
+            ffStrbufInitS(&item->inf.description, [inf[@"_name"] UTF8String]);
+            ffStrbufInit(&item->inf.status);
+            ffStrbufInit(&item->conn.status);
+            ffStrbufInit(&item->conn.ssid);
+            ffStrbufInit(&item->conn.bssid);
+            ffStrbufInit(&item->conn.protocol);
+            ffStrbufInit(&item->conn.security);
+            item->conn.signalQuality = 0.0/0.0;
+            item->conn.rxRate = 0.0/0.0;
+            item->conn.txRate = 0.0/0.0;
+
+            NSString* status = inf[@"spairport_status_information"]; // spairport_status_connected spairport_status_disassociated spairport_status_off
+
+            ffStrbufSetStatic(&item->inf.status, [status isEqualToString:@"spairport_status_off"] ? "Power Off" : "Power On");
+
+            NSDictionary* station = inf[@"spairport_current_network_information"];
+            if (!station) continue;
+
+            ffStrbufSetS(&item->conn.status, status.UTF8String + strlen("spairport_status_"));
+            item->conn.status.chars[0] = (char) toupper(item->conn.status.chars[0]);
+
+            ffStrbufSetS(&item->conn.ssid, [station[@"_name"] UTF8String]);
+
+            ffStrbufSetS(&item->conn.protocol, [station[@"spairport_network_phymode"] UTF8String]);
+            if (ffStrbufStartsWithS(&item->conn.protocol, "802.11"))
+            {
+                const char* subProtocol = item->conn.protocol.chars + strlen("802.11");
+                if (ffStrEquals(subProtocol, "be"))
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
+                else if (ffStrEquals(subProtocol, "ax"))
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+                else if (ffStrEquals(subProtocol, "ac"))
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+                else if (ffStrEquals(subProtocol, "n"))
+                    ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+            }
+
+            ffStrbufSetS(&item->conn.security, [station[@"spairport_security_mode"] UTF8String]);
+            ffStrbufSubstrAfterFirstS(&item->conn.security, "_mode_");
+            if (ffStrbufEqualS(&item->conn.security, "none"))
+                ffStrbufSetStatic(&item->conn.security, "Insecure");
+            else
+            {
+                ffStrbufReplaceAllC(&item->conn.security, '_', ' ');
+                if (ffStrbufStartsWithS(&item->conn.security, "wpa"))
+                {
+                    item->conn.security.chars[0] = 'W';
+                    item->conn.security.chars[1] = 'P';
+                    item->conn.security.chars[2] = 'A';
+                    char* sub = strchr(item->conn.security.chars, ' ');
+                    if (sub && sub[1])
+                        sub[1] = (char) toupper(sub[1]);
+                }
+            }
+
+            double rssiValue = strtod([station[@"spairport_signal_noise"] UTF8String], nil);
+            item->conn.signalQuality = (double) (rssiValue >= -50 ? 100 : rssiValue <= -100 ? 0 : (rssiValue + 100) * 2);
+            item->conn.txRate = (double) [station[@"spairport_network_rate"] longValue];
+        }
+    }
+
+    return NULL;
+}
+
+const char* ffDetectWifi(FFlist* result)
+{
+    if (@available(macOS 15.0, *))
+        return detectWifiBySystemProfiler(result);
+    else
+        return detectWifiByCoreWlan(result);
 }
