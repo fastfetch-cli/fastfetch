@@ -132,5 +132,6 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     } while (ffStrbufGetFree(buffer) > 0 && strstr(buffer->chars + recvStart, "\r\n\r\n") == NULL);
 
     close(state->sockfd);
+    if (buffer->length == 0) return "Empty server response received";
     return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n") ? NULL : "Invalid response";
 }
