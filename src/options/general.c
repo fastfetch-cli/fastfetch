@@ -111,7 +111,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
 
 void ffOptionsInitGeneral(FFOptionsGeneral* options)
 {
-    options->processingTimeout = 1000;
+    options->processingTimeout = 5000;
     options->multithreading = true;
     options->detectVersion = true;
 
