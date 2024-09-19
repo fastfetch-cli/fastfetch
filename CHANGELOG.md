@@ -2,7 +2,7 @@
 
 Features:
 * Moore Threads GPU add support to query number of cores (#1259, GPU)
-* Cache result based on mtime (Packages)
+* Cache detection result based on last modification time (Packages)
 * Add cmake options to disable certain package managers at compile time
     * Package managers are encouraged to disable some package managers by passing `-DPACKAGES_DISABLE_` when running `cmake`. For example, when building for Arch Linux, `-DPACKAGES_DISABLE_APK=ON -DPACKAGES_DISABLE_DPKG=ON -DPACKAGES_DISABLE_RPM=ON ...` should be specified.
     * See all available options by [running `cmake -L | grep PACKAGES_DISABLE_`](https://github.com/fastfetch-cli/fastfetch/blob/dev/CMakeLists.txt#L91)
@@ -17,9 +17,11 @@ Bugfixes:
 * Remove `showPeCoreCount` support on FreeBSD (#1260, CPU, FreeBSD)
 * Don't use Wifi speed as Ethernet speed (LocalIP, FreeBSD)
 * Fix compiling with old linux headers (Camera, Linux)
+* Fix detecting public ipv6 address (PublicIP, Windows)
 
 Logo:
-* fix parrot logo detection
+* Fix parrot logo detection
+* Rename TorizonCore to Torizon OS
 
 # 2.24.0
 
