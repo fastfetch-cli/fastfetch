@@ -336,6 +336,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "disabled");
         #define FF_TEST_PACKAGE_NAME(name) else if ((options->disabled & FF_PACKAGES_FLAG_ ## name ## _BIT) != (defaultOptions.disabled & FF_PACKAGES_FLAG_ ## name ## _BIT)) { yyjson_mut_arr_add_str(doc, arr, #name); }
         if (false);
+        FF_TEST_PACKAGE_NAME(AM)
         FF_TEST_PACKAGE_NAME(APK)
         FF_TEST_PACKAGE_NAME(BREW)
         FF_TEST_PACKAGE_NAME(CHOCO)
@@ -343,24 +344,23 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(EMERGE)
         FF_TEST_PACKAGE_NAME(EOPKG)
         FF_TEST_PACKAGE_NAME(FLATPAK)
+        FF_TEST_PACKAGE_NAME(GUIX)
+        FF_TEST_PACKAGE_NAME(LINGLONG)
         FF_TEST_PACKAGE_NAME(LPKG)
         FF_TEST_PACKAGE_NAME(LPKGBUILD)
+        FF_TEST_PACKAGE_NAME(MACPORTS)
         FF_TEST_PACKAGE_NAME(NIX)
         FF_TEST_PACKAGE_NAME(OPKG)
         FF_TEST_PACKAGE_NAME(PACMAN)
         FF_TEST_PACKAGE_NAME(PALUDIS)
         FF_TEST_PACKAGE_NAME(PKG)
         FF_TEST_PACKAGE_NAME(PKGTOOL)
-        FF_TEST_PACKAGE_NAME(MACPORTS)
         FF_TEST_PACKAGE_NAME(RPM)
         FF_TEST_PACKAGE_NAME(SCOOP)
         FF_TEST_PACKAGE_NAME(SNAP)
+        FF_TEST_PACKAGE_NAME(SORCERY)
         FF_TEST_PACKAGE_NAME(WINGET)
         FF_TEST_PACKAGE_NAME(XBPS)
-        FF_TEST_PACKAGE_NAME(AM)
-        FF_TEST_PACKAGE_NAME(SORCERY)
-        FF_TEST_PACKAGE_NAME(GUIX)
-        FF_TEST_PACKAGE_NAME(LINGLONG)
         #undef FF_TEST_PACKAGE_NAME
     }
 }
@@ -473,7 +473,7 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
-    options->disabled = FF_PACKAGES_FLAG_WINGET_BIT;
+    options->disabled = FF_PACKAGES_DISABLE_LIST;
 }
 
 void ffDestroyPackagesOptions(FFPackagesOptions* options)

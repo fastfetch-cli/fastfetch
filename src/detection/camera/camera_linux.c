@@ -43,10 +43,10 @@ const char* ffDetectCamera(FFlist* result)
         case V4L2_COLORSPACE_JPEG: ffStrbufInitStatic(&camera->colorspace, "JPEG"); break;
         case V4L2_COLORSPACE_REC709:
         case V4L2_COLORSPACE_SRGB: ffStrbufInitStatic(&camera->colorspace, "sRGB"); break;
-        case V4L2_COLORSPACE_OPRGB: ffStrbufInitStatic(&camera->colorspace, "Adobe RGB"); break;
-        case V4L2_COLORSPACE_BT2020: ffStrbufInitStatic(&camera->colorspace, "BT.2020"); break;
-        case V4L2_COLORSPACE_RAW: ffStrbufInitStatic(&camera->colorspace, "RAW"); break;
-        case V4L2_COLORSPACE_DCI_P3: ffStrbufInitStatic(&camera->colorspace, "DCI-P3"); break;
+        case 9 /* V4L2_COLORSPACE_OPRGB */: ffStrbufInitStatic(&camera->colorspace, "Adobe RGB"); break;
+        case 10 /* V4L2_COLORSPACE_BT2020 */: ffStrbufInitStatic(&camera->colorspace, "BT.2020"); break;
+        case 11 /* V4L2_COLORSPACE_RAW */: ffStrbufInitStatic(&camera->colorspace, "RAW"); break;
+        case 12 /* V4L2_COLORSPACE_DCI_P3 */: ffStrbufInitStatic(&camera->colorspace, "DCI-P3"); break;
         default: ffStrbufInit(&camera->colorspace); break;
         }
         camera->width = fmt.fmt.pix.width;

@@ -128,7 +128,7 @@
             "desc": "Set the timeout (ms) when waiting for child processes",
             "arg": {
                 "type": "num",
-                "default": 1000
+                "default": 5000
             }
         },
         {

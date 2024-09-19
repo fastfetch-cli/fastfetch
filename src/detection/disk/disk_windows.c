@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <winioctl.h>
 
-static unsigned __stdcall testRemoteVolumeAccessable(void* mountpoint)
+static unsigned __stdcall testRemoteVolumeAccessible(void* mountpoint)
 {
     FF_AUTO_CLOSE_FD HANDLE handle = CreateFileW(
         (wchar_t*) mountpoint,
@@ -84,7 +84,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         #ifdef FF_HAVE_THREADS
         if (driveType == DRIVE_REMOTE)
         {
-            FFThreadType thread = ffThreadCreate(testRemoteVolumeAccessable, mountpoint);
+            FFThreadType thread = ffThreadCreate(testRemoteVolumeAccessible, mountpoint);
             if (!ffThreadJoin(thread, 500))
                 continue;
         }

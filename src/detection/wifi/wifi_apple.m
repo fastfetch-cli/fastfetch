@@ -1,5 +1,6 @@
 #include "wifi.h"
 #include "common/processing.h"
+#include "util/stringUtils.h"
 
 #import <CoreWLAN/CoreWLAN.h>
 
@@ -12,21 +13,61 @@ int Apple80211GetInfoCopy(struct Apple80211 *handle, CFDictionaryRef *info) __at
 @property (readonly) struct Apple80211* device;
 @end
 
-static NSDictionary* getWifiInfoByApple80211(CWInterface* inf)
+inline static NSDictionary* getWifiInfoByApple80211(CWInterface* inf)
 {
-    if (!Apple80211GetInfoCopy) return NULL;
+    if (!inf.device || !Apple80211GetInfoCopy) return NULL;
     CFDictionaryRef result = NULL;
     if (Apple80211GetInfoCopy(inf.device, &result) < 0) return NULL;
     return CFBridgingRelease(result);
 }
 
+static NSDictionary* getWifiInfoBySystemProfiler(NSString* ifName)
+{
+    // Warning: costs about 2s on my machine
+    static NSArray* spData;
+    static bool inited;
+    if (!inited)
+    {
+        inited = true;
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (ffProcessAppendStdOut(&buffer, (char* const[]) {
+            "system_profiler",
+            "SPAirPortDataType",
+            "-xml",
+            "-detailLevel",
+            "basic",
+            NULL
+        }) != NULL)
+            return nil;
+
+        spData = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytes:buffer.chars length:buffer.length]
+                                              options:NSPropertyListImmutable
+                                              format:nil
+                                              error:nil];
+    }
+
+    if (spData)
+    {
+        for (NSDictionary* data in spData[0][@"_items"])
+        {
+            for (NSDictionary* inf in data[@"spairport_airport_interfaces"])
+            {
+                if ([ifName isEqualToString:inf[@"_name"]])
+                    return inf[@"spairport_current_network_information"];
+            }
+        }
+    }
+
+    return NULL;
+}
+
 const char* ffDetectWifi(FFlist* result)
 {
     NSArray<CWInterface*>* interfaces = CWWiFiClient.sharedWiFiClient.interfaces;
-    if(!interfaces)
+    if (!interfaces)
         return "CWWiFiClient.sharedWiFiClient.interfaces is nil";
 
-    for(CWInterface* inf in interfaces)
+    for (CWInterface* inf in interfaces)
     {
         FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
         ffStrbufInit(&item->inf.description);
@@ -46,22 +87,25 @@ const char* ffDetectWifi(FFlist* result)
             continue;
 
         ffStrbufSetStatic(&item->conn.status, inf.interfaceMode != kCWInterfaceModeNone ? "Active" : "Inactive");
-        if(!inf.serviceActive)
+        if(inf.interfaceMode == kCWInterfaceModeNone)
             continue;
 
-        NSDictionary* apple = NULL;
+        NSDictionary* apple = nil; // For getWifiInfoByApple80211
+        NSDictionary* sp = nil; // For getWifiInfoBySystemProfiler
 
         if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
         else if (apple || (apple = getWifiInfoByApple80211(inf)))
-            ffStrbufAppendS(&item->conn.ssid, [[apple valueForKey:@"SSID_STR"] UTF8String]);
+            ffStrbufAppendS(&item->conn.ssid, [apple[@"SSID_STR"] UTF8String]);
+        else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
+            ffStrbufAppendS(&item->conn.ssid, [sp[@"_name"] UTF8String]);
         else
             ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
 
         if (inf.bssid)
             ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
         else if (apple || (apple = getWifiInfoByApple80211(inf)))
-            ffStrbufAppendS(&item->conn.bssid, [[apple valueForKey:@"BSSID"] UTF8String]);
+            ffStrbufAppendS(&item->conn.bssid, [apple[@"BSSID"] UTF8String]);
 
         switch(inf.activePHYMode)
         {
@@ -90,7 +134,24 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
                 break;
             default:
-                ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
+                if (inf.activePHYMode < 64)
+                    ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
+                else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
+                {
+                    ffStrbufSetS(&item->conn.protocol, [sp[@"spairport_network_phymode"] UTF8String]);
+                    if (ffStrbufStartsWithS(&item->conn.protocol, "802.11"))
+                    {
+                        const char* subProtocol = item->conn.protocol.chars + strlen("802.11");
+                        if (ffStrEquals(subProtocol, "be"))
+                            ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
+                        else if (ffStrEquals(subProtocol, "ax"))
+                            ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+                        else if (ffStrEquals(subProtocol, "ac"))
+                            ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+                        else if (ffStrEquals(subProtocol, "n"))
+                            ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+                    }
+                }
                 break;
         }
         item->conn.signalQuality = (double) (inf.rssiValue >= -50 ? 100 : inf.rssiValue <= -100 ? 0 : (inf.rssiValue + 100) * 2);
@@ -150,17 +211,17 @@ const char* ffDetectWifi(FFlist* result)
                 // Sonoma...
                 if (apple || (apple = getWifiInfoByApple80211(inf)))
                 {
-                    NSDictionary* authType = [apple valueForKey:@"AUTH_TYPE"];
+                    NSDictionary* authType = apple[@"AUTH_TYPE"];
                     if (authType)
                     {
                         // AUTH_LOWER seems useless. `airport` verifies if its value is between 1 and 3, and prints `unknown` if not
 
-                        NSNumber* authUpper = [authType valueForKey:@"AUTH_UPPER"];
+                        NSNumber* authUpper = authType[@"AUTH_UPPER"];
                         if (!authUpper)
                             ffStrbufSetStatic(&item->conn.security, "Insecure");
                         else
                         {
-                            int authUpperValue = [authUpper intValue];
+                            int authUpperValue = authUpper.intValue;
                             switch (authUpperValue)
                             {
                                 case 1:
@@ -200,6 +261,26 @@ const char* ffDetectWifi(FFlist* result)
                                     ffStrbufAppendF(&item->conn.security, "To be supported (%d)", authUpperValue);
                                     break;
                             }
+                        }
+                    }
+                }
+                else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
+                {
+                    ffStrbufSetS(&item->conn.security, [sp[@"spairport_security_mode"] UTF8String]);
+                    ffStrbufSubstrAfterFirstS(&item->conn.security, "_mode_");
+                    if (ffStrbufEqualS(&item->conn.security, "none"))
+                        ffStrbufSetStatic(&item->conn.security, "Insecure");
+                    else
+                    {
+                        ffStrbufReplaceAllC(&item->conn.security, '_', ' ');
+                        if (ffStrbufStartsWithS(&item->conn.security, "wpa"))
+                        {
+                            item->conn.security.chars[0] = 'W';
+                            item->conn.security.chars[1] = 'P';
+                            item->conn.security.chars[2] = 'A';
+                            char* sub = strchr(item->conn.security.chars, ' ');
+                            if (sub && sub[1])
+                                sub[1] = (char) toupper(sub[1]);
                         }
                     }
                 }

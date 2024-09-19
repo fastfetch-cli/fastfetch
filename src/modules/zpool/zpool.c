@@ -66,7 +66,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
             FF_FORMAT_ARG(usedPretty, "size-used"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
             FF_FORMAT_ARG(bytesPercentageNum, "size-percentage"),
-            FF_FORMAT_ARG(fragPercentage, "frag-percentage"),
+            FF_FORMAT_ARG(fragPercentageNum, "frag-percentage"),
             FF_FORMAT_ARG(bytesPercentageBar, "size-percentage-bar"),
             FF_FORMAT_ARG(fragPercentageBar, "frag-percentage-bar"),
         }));
@@ -171,10 +171,10 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
         yyjson_mut_obj_add_uint(doc, obj, "fragmentation", zpool->fragmentation);
     }
 
-    FF_LIST_FOR_EACH(FFZpoolResult, battery, results)
+    FF_LIST_FOR_EACH(FFZpoolResult, zpool, results)
     {
-        ffStrbufDestroy(&battery->name);
-        ffStrbufDestroy(&battery->state);
+        ffStrbufDestroy(&zpool->name);
+        ffStrbufDestroy(&zpool->state);
     }
 }
 

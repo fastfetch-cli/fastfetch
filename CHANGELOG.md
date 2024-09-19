@@ -1,3 +1,28 @@
+# 2.25.0
+
+Features:
+* Moore Threads GPU add support to query number of cores (#1259, GPU)
+* Cache detection result based on last modification time (Packages)
+* Add cmake options to disable certain package managers at compile time
+    * Package managers are encouraged to disable some package managers by passing `-DPACKAGES_DISABLE_` when running `cmake`. For example, when building for Arch Linux, `-DPACKAGES_DISABLE_APK=ON -DPACKAGES_DISABLE_DPKG=ON -DPACKAGES_DISABLE_RPM=ON ...` should be specified.
+    * See all available options by [running `cmake -L | grep PACKAGES_DISABLE_`](https://github.com/fastfetch-cli/fastfetch/blob/dev/CMakeLists.txt#L91)
+    * This option does NOT remove the detection code. It just disables the detection at runtime. One can still use `--packages-disabled ""` to enable all package managers.
+* Add new option `--show-localip-{speed,mtu}` (LocalIP)
+* Add new module `Btrfs`, which prints all mounted Btrfs volumes, like `Zpool` module (#1262, Linux)
+* Improve Wifi module support for macOS Sequoia (Wifi, macOS)
+    * Currently it uses `system_profiler` which costs about 2 seconds on my MBP. I suggest disabling it for now until a better solution is found.
+
+Bugfixes:
+* Fix invalid CPU temperature detection on FreeBSD (#1260, CPU, FreeBSD)
+* Remove `showPeCoreCount` support on FreeBSD (#1260, CPU, FreeBSD)
+* Don't use Wifi speed as Ethernet speed (LocalIP, FreeBSD)
+* Fix compiling with old linux headers (Camera, Linux)
+* Fix detecting public ipv6 address (PublicIP, Windows)
+
+Logo:
+* Fix parrot logo detection
+* Rename TorizonCore to Torizon OS
+
 # 2.24.0
 
 Changes:

@@ -54,8 +54,12 @@
         "physicalmemory",
         "swap",
         "disk",
+        "btrfs",
         "zpool",
-        "battery",
+        {
+            "type": "battery",
+            "temp": true
+        },
         "poweradapter",
         "player",
         "media",
@@ -66,7 +70,9 @@
         {
             "type": "localip",
             "showIpv6": true,
-            "showMac": true
+            "showMac": true,
+            "showSpeed": true,
+            "showMtu": true
         },
         "dns",
         "wifi",

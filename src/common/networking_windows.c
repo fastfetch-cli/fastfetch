@@ -63,19 +63,21 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         return "socket() failed";
     }
 
-    {
-        //ConnectEx requires the socket to be initially bound
-        if(bind(state->sockfd, (SOCKADDR *) &(struct sockaddr_in) {
+    //ConnectEx requires the socket to be initially bound
+    if((state->ipv6
+        ? bind(state->sockfd, (SOCKADDR *) &(struct sockaddr_in6) {
+            .sin6_family = AF_INET6,
+            .sin6_addr = in6addr_any,
+        }, sizeof(struct sockaddr_in6))
+        : bind(state->sockfd, (SOCKADDR *) &(struct sockaddr_in) {
             .sin_family = AF_INET,
             .sin_addr.s_addr = INADDR_ANY,
-            .sin_port = 0,
-        }, sizeof(struct sockaddr_in)) != 0)
-        {
-            closesocket(state->sockfd);
-            freeaddrinfo(addr);
-            state->sockfd = INVALID_SOCKET;
-            return "bind() failed";
-        }
+        }, sizeof(struct sockaddr_in))) != 0)
+    {
+        closesocket(state->sockfd);
+        freeaddrinfo(addr);
+        state->sockfd = INVALID_SOCKET;
+        return "bind() failed";
     }
 
     FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(64);
@@ -93,7 +95,6 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     if(!result && WSAGetLastError() != WSA_IO_PENDING)
     {
         closesocket(state->sockfd);
-        freeaddrinfo(addr);
         state->sockfd = INVALID_SOCKET;
         return "ConnectEx() failed";
     }
@@ -140,5 +141,6 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     } while (ffStrbufGetFree(buffer) > 0 && strstr(buffer->chars + recvStart, "\r\n\r\n") == NULL);
 
     closesocket(state->sockfd);
+    if (buffer->length == 0) return "Empty server response received";
     return ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n") ? NULL : "Invalid response";
 }

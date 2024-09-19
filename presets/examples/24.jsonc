@@ -1,0 +1,152 @@
+// By jan-rex
+// Modified from: https://github.com/fastfetch-cli/fastfetch/discussions/1269
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+      "padding": {
+        "top": 2
+      }
+    },
+    "display": {
+      "separator": "",
+      "constants": [
+        // CONSTANT {$1} - COLOR BACKGROUND FOR KEY
+        "\u001b[48;2;43;43;69m",
+        // CONSTANT {$2} - COLOR BACKGROUND FOR OUTPUT
+        "\u001b[48;2;56;59;78m",
+        // CONSTANT {$3} - VERTICAL BARS AT START AND 75th CHARACTERS FORWARD AND BACKWARD
+        "\u001b[90m│                                                            │\u001b[60D\u001b[39m",
+      ]
+    },
+    "modules": [
+      // CUSTOM - Top UI bar
+      {
+        "type": "custom",
+        "key": "{#90}{$1}╭─────────────╮",
+        "format": "{#90}{$2}╭────────────────────────────────────────────────────────────╮",
+      },
+      {
+        "type": "title",
+        "key": "{#90}{$1}│ {#92}User        {#90}│",
+        "format": "{$2}{$3}{user-name} {#2}[{home-dir}]"
+      },
+      {
+        "type": "users",
+        "key": "{#90}{$1}│ {#92}Users       {#90}│",
+        "myselfOnly": false,
+        "format": "{$2}{$3}{1}@{host-name}{/host-name}localhost{/}{?client-ip}  {#2}[IP:{client-ip}]{?}  {#2}[Login time: {login-time}]",
+      },
+      {
+        "type": "datetime",
+        "key": "{#90}{$1}│ {#92}Datetime    {#90}│",
+        "format": "{$2}{$3}{year}-{month-pretty}-{day-in-month}  {hour-pretty}:{minute-pretty}:{second-pretty}  {#2}{weekday}  {#2}[W{week}] {#2}[UTC{offset-from-utc}]"
+      },
+      {
+        "type": "title",
+        "key": "{#90}{$1}│ {#93}Host:       {#90}│",
+        "format": "{$2}{$3}{#1}{#36}{host-name}"
+      },
+      {
+        "type": "host",
+        "key": "{#90}{$1}│ {#93}Machine     {#90}│",
+        "format": "{$2}{$3}{name} {#2}{version}"
+      },
+      {
+        "type": "os",
+        "key": "{#90}{$1}│ {#93}OS          {#90}│",
+        "format": "{$2}{$3}{pretty-name} {codename} {#2}[v{version}] {#2}[{arch}]"
+      },
+      {
+        "type": "kernel",
+        "key": "{#90}{$1}│ {#93}Kernel      {#90}│",
+        "format": "{$2}{$3}{sysname} {#2}[v{release}]"
+      },
+      {
+        "type": "uptime",
+        "key": "{#90}{$1}│ {#93}Uptime      {#90}│",
+        "format": "{$2}{$3}{?days}{days} Days + {?}{hours}:{minutes}:{seconds}"
+      },
+      {
+        "type": "cpu",
+        "key": "{#90}{$1}│ {#91}CPU         {#90}│",
+        "showPeCoreCount": true,
+        "temp": true,
+        "format": "{$2}{$3}{name} {#2}[C:{core-types}] {#2}[{freq-max}]"
+      },
+      {
+        "type": "gpu",
+        "key": "{#90}{$1}│ {#91}GPU         {#90}│",
+        "detectionMethod": "auto",
+        "driverSpecific": true,
+        "format": "{$2}{$3}{name} {#2}[C:{core-count}] {#2}[{type}]"
+      },
+      {
+        "type": "memory",
+        "key": "{#90}{$1}│ {#91}Memory      {#90}│",
+        "format": "{$2}{$3}{used} / {total} ({percentage}{$2})"
+      },
+      {
+        "type": "disk",
+        "key": "{#90}{$1}│ {#91}Disk        {#90}│",
+        "format": "{$2}{$3}{size-used} / {size-used} ({size-percentage}{$2})"
+      },
+      {
+        "type": "poweradapter",
+        "key": "{#90}{$1}│ {#91}Power       {#90}│",
+        "format": "{$2}{$3}{name}"
+      },
+      {
+        "type": "terminal",
+        "key": "{#90}{$1}│ {#95}Terminal    {#90}│",
+        "format": "{$2}{$3}{pretty-name} {#2}[{version}] [PID:{pid}]"
+      },
+      {
+        "type": "terminalfont",
+        "key": "{#90}{$1}│ {#95}Font        {#90}│",
+        "format": "{$2}{$3}{name}  {#2}[{size}]"
+      },
+      {
+        "type": "shell",
+        "key": "{#90}{$1}│ {#95}Shell       {#90}│",
+        "format": "{$2}{$3}{pretty-name}  {#2}[v{version}] [PID:{pid}]"
+      },
+      {
+        // localip IPv4
+        "type": "localip",
+        "key": "{#90}{$1}│ {#94}Local IPv4  {#90}│",
+        "showPrefixLen": true,
+        "showIpv4": true,
+        "showIpv6": false,
+        "showMtu": true,
+        "format": "{$2}{$3}{ifname}: {ipv4}  {#2}[MTU:{mtu}]"
+      },
+      {
+        // localip IPv6
+        "type": "localip",
+        "key": "{#90}{$1}│ {#94}Local IPv6  {#90}│",
+        "showPrefixLen": true,
+        "showIpv4": false,
+        "showIpv6": true,
+        "showMtu": true,
+        "format": "{$2}{$3}{ifname}: {ipv6}  {#2}[MTU:{mtu}]"
+      },
+      {
+        "type": "publicip",
+        "key": "{#90}{$1}│ {#94}Public IPv4 {#90}│",
+        "ipv6": false,
+        "format": "{$2}{$3}{ip}  {#2}[{location}]"
+      },
+      {
+        "type": "publicip",
+        "key": "{#90}{$1}│ {#94}Public IPv6 {#90}│",
+        "ipv6": true,
+        "format": "{$2}{$3}{ip}  {#2}[{location}]"
+      },
+      // CUSTOM - Button UI bar
+      {
+        "type": "custom",
+        "key": "{#90}{$1}╰─────────────╯",
+        "format": "{#90}{$2}╰────────────────────────────────────────────────────────────╯",
+      }
+    ]
+  }

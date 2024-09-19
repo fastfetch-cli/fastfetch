@@ -337,7 +337,7 @@
                 "processingTimeout": {
                     "type": "integer",
                     "description": "Set the timeout (ms) when waiting for child processes, `-1` for no timeout",
-                    "default": 1000
+                    "default": 5000
                 },
                 "preRun": {
                     "type": "string",
@@ -655,6 +655,7 @@
                             "bootmgr",
                             "break",
                             "brightness",
+                            "btrfs",
                             "camera",
                             "chassis",
                             "cpu",
@@ -887,10 +888,6 @@
                                             {
                                                 "const": "wmtheme",
                                                 "description": "Print current theme of window manager"
-                                            },
-                                            {
-                                                "const": "zpool",
-                                                "description": "Print ZFS storage pools"
                                             }
                                         ]
                                     },
@@ -1038,6 +1035,38 @@
                                         "minimum": 0,
                                         "maximum": 400,
                                         "default": 10
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "BTRFS",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "btrfs",
+                                        "description": "Print Btrfs volumes"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1631,6 +1660,16 @@
                                     },
                                     "showIpv6": {
                                         "description": "Show IPv6 addresses",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "showSpeed": {
+                                        "description": "Show ethernet rx speed",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "showMtu": {
+                                        "description": "Show MTU",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -2241,6 +2280,38 @@
                                         "description": "Set if window manager plugin should be detected on supported platforms",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/format"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Zpool",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "zpool",
+                                        "description": "Print ZFS storage pools"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

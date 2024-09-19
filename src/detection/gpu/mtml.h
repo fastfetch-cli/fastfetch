@@ -56,6 +56,8 @@ typedef struct
     int rsvd[6];                                 //!< Reserved for future extension.
 } MtmlPciInfo;
 
+// Retrieves the number of cores of a device.
+MtmlReturn MTML_API mtmlDeviceCountGpuCores(const MtmlDevice* device, unsigned int* numCores);
 // Retrieves the brand of a device.
 MtmlReturn MTML_API mtmlDeviceGetBrand(const MtmlDevice *dev, MtmlBrandType *type);
 // Retrieves the index associated with the specified device.

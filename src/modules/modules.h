@@ -10,6 +10,7 @@
 #include "modules/board/board.h"
 #include "modules/bootmgr/bootmgr.h"
 #include "modules/break/break.h"
+#include "modules/btrfs/btrfs.h"
 #include "modules/camera/camera.h"
 #include "modules/chassis/chassis.h"
 #include "modules/cpu/cpu.h"

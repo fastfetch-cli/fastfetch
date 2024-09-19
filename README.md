@@ -27,7 +27,7 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ### Linux
 
-Some distros packaged an outdated fastfetch version. Older version receive no support, so please try always to use the latest version.
+Some distros package an outdated fastfetch version. Older versions receive no support, so please try always to use the latest version.
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
 * Debian: `apt install fastfetch` (for Debian 13 or newer)
@@ -90,7 +90,7 @@ See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 
 Fastfetch uses the JSONC (or JSON with comments) for configuration. [See Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `-c <filename>`. Those files can serve as examples of the configuration syntax.
 
-Logos can be heavily customized too; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
+Logos can also be heavily customized; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
 
 
 ## Packaging
@@ -112,7 +112,7 @@ Logos can be heavily customized too; see the [logo documentation](https://github
 2. Fastfetch is faster. As the name suggests.
 3. Fastfetch has a greater number of features, though by default fastfetch only has a few modules enabled; use `fastfetch -c all` to find what you want.
 4. Fastfetch is more configurable. You can find more information in the Wiki: <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration>.
-5. Fastfetch is more polished. For example, neofetch prints `555MiB` in `Memory` module and `23G` in `Disk` module, whereas fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
+5. Fastfetch is more polished. For example, neofetch prints `555 MiB` in the Memory module and `23 G` in the Disk module, whereas fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
 6. Fastfetch is more accurate. For example, [neofetch never actually supports the Wayland protocol](https://github.com/dylanaraps/neofetch/pull/2395).
 
 ### Q: Fastfetch shows my local IP address. It leaks my privacy!
