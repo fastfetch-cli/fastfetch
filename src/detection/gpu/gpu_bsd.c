@@ -56,6 +56,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufInit(&gpu->name);
         ffStrbufInitS(&gpu->driver, pc->pd_name);
         ffStrbufInit(&gpu->platformApi);
+        gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
@@ -90,6 +91,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                     .func = pc->pc_sel.pc_func,
                 },
             }, (FFGpuDriverResult) {
+                .index = &gpu->index,
                 .temp = options->temp ? &gpu->temperature : NULL,
                 .memory = options->driverSpecific ? &gpu->dedicated : NULL,
                 .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,

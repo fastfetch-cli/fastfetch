@@ -134,6 +134,13 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         }
     }
 
+    if (result.index)
+    {
+        unsigned int value;
+        if (mtmlData.ffmtmlDeviceGetIndex(device, &value) == MTML_SUCCESS)
+            *result.index = (uint8_t)value;
+    }
+
     if (result.temp)
     {
         MtmlGpu *gpu = NULL;

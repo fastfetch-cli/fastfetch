@@ -55,6 +55,7 @@ const char* detectByOpenGL(FFlist* gpus)
         ffStrbufInitMove(&gpu->name, &result.renderer);
         ffStrbufInitMove(&gpu->driver, &result.vendor);
         ffStrbufInitF(&gpu->platformApi, "OpenGL %s", result.version.chars);
+        gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;

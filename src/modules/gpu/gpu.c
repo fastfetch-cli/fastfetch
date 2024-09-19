@@ -322,6 +322,15 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
+
+        if (gpu->index != FF_GPU_INDEX_UNSET){
+            yyjson_mut_obj_add_uint(doc, obj, "index", (uint64_t)gpu->index);
+        }
+        else
+        {
+            yyjson_mut_obj_add_null(doc, obj, "index");
+        }
+
         if (gpu->coreCount != FF_GPU_CORE_COUNT_UNSET)
             yyjson_mut_obj_add_int(doc, obj, "coreCount", gpu->coreCount);
         else

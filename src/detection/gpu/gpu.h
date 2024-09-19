@@ -7,6 +7,7 @@
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
 #define FF_GPU_FREQUENCY_UNSET 0
 #define FF_GPU_CORE_USAGE_UNSET (0/0.0)
+#define FF_GPU_INDEX_UNSET ((uint8_t)-1)
 
 extern const char* FF_GPU_VENDOR_NAME_APPLE;
 extern const char* FF_GPU_VENDOR_NAME_AMD;
@@ -27,6 +28,7 @@ typedef struct FFGPUMemory
 
 typedef struct FFGPUResult
 {
+    uint8_t index;
     FFGPUType type;
     FFstrbuf vendor;
     FFstrbuf name;
