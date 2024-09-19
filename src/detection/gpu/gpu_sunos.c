@@ -57,6 +57,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
         ffStrbufInit(&gpu->platformApi);
+        gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;

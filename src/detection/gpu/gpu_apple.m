@@ -43,6 +43,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
 
             gpu->type = device.hasUnifiedMemory ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            gpu->index = (uint8_t)device.locationNumber;
             #endif
         }
         return NULL;
