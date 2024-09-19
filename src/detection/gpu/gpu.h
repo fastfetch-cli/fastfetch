@@ -28,7 +28,7 @@ typedef struct FFGPUMemory
 
 typedef struct FFGPUResult
 {
-    uint8_t index;
+    uint32_t index;
     FFGPUType type;
     FFstrbuf vendor;
     FFstrbuf name;

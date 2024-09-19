@@ -111,9 +111,9 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     {
         unsigned int value;
         if (nvmlData.ffnvmlDeviceGetIndex(device, &value) == NVML_SUCCESS)
-            *result.index = (uint8_t)value;
+            *result.index = value;
     }
-       
+
 
     if (result.temp)
     {
