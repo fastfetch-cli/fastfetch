@@ -365,6 +365,13 @@ FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* v
 
 FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* version)
 {
+    uint32_t major = 0, minor = 0, patch = 0;
+    if (ffGetTerminalResponse("\e[>c", 3, "\e[>1;%2u%2u%2u;0c", &major, &minor, &patch) == NULL)
+    {
+        ffStrbufSetF(version, "%u.%u.%u", major, minor, patch);
+        return true;
+    }
+
     if(!getExeVersionRaw(exe, version)) return false;
 
     //foot version: 1.13.1 -pgo +ime -graphemes -assertions
