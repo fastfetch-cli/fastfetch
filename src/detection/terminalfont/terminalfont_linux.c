@@ -244,13 +244,19 @@ static void detectFootTerminal(FFTerminalFontResult* terminalFont)
         return;
     }
     uint32_t equal = ffStrbufNextIndexS(&font, colon, "size=");
-    font.chars[colon] = 0;
+    font.chars[colon] = '\0';
     if (equal == font.length)
     {
         ffFontInitValues(&terminalFont->font, font.chars, "8");
         return;
     }
-    ffFontInitValues(&terminalFont->font, font.chars, &font.chars[equal + strlen("size=")]);
+    uint32_t size = equal + strlen("size=");
+    uint32_t comma = ffStrbufNextIndexC(&font, size, ',');
+    if (comma < font.length)
+        font.chars[comma] = '\0';
+    ffFontInitValues(&terminalFont->font, font.chars, &font.chars[size]);
+    if (comma < font.length)
+        ffFontInitValues(&terminalFont->fallback, &font.chars[comma + 1], NULL);
 }
 
 static void detectQTerminal(FFTerminalFontResult* terminalFont)
