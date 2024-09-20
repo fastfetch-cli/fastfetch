@@ -671,7 +671,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         return getTerminalVersionKonsole(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "yakuake"))
-        return getExeVersionGeneral(exe, version);//yakuake 22.12.3
+        return getTerminalVersionKonsole(exe, version); // yakuake shares code with konsole
 
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
         return getTerminalVersionXfce4Terminal(exe, version);
