@@ -4029,12 +4029,12 @@ static const FFlogo S[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
-    // SpoinkOS
+    // FoxOS
     {
-        .names = {"SpoinkOS", "spoink-os"},
-        .lines = FASTFETCH_DATATEXT_LOGO_SPOINKOS,
+        .names = {"FoxOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_FOXOS,
         .colors = {
-            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_ORANGE,
         },
     },
     // Slackel
