@@ -4034,7 +4034,7 @@ static const FFlogo S[] = {
         .names = {"FoxOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_FOXOS,
         .colors = {
-            FF_COLOR_FG_ORANGE,
+            FF_COLOR_FG_YELLOW,
         },
     },
     // Slackel
