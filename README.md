@@ -214,6 +214,13 @@ Otherwise, open a feature request in [GitHub Issues](https://github.com/fastfetc
 * For usage questions, please start a discussion in [GitHub Discussions](https://github.com/fastfetch-cli/fastfetch/discussions).
 * For possible bugs, please open an issue in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues). Be sure to fill the bug-report template carefully for developers to investigate.
 
+## Donate
+
+If you find Fastfetch to be useful, please consider donating.
+
+* Current maintainer: [@CarterLi](https://paypal.me/zhangsongcui)
+* Original author: [@LinusDierheimer](https://github.com/sponsors/LinusDierheimer)
+
 ## Star History
 
 Give it a star to support us!
