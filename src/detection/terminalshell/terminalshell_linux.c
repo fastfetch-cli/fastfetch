@@ -83,6 +83,8 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
     {
         //Known shells
         if (
+            ffStrbufEqualS(&result->processName, "sudo")       ||
+            ffStrbufEqualS(&result->processName, "su")         ||
             ffStrbufEqualS(&result->processName, "sh")         ||
             ffStrbufEqualS(&result->processName, "ash")        ||
             ffStrbufEqualS(&result->processName, "bash")       ||
