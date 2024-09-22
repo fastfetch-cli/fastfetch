@@ -152,13 +152,13 @@ Fastfetch uses `format` to generate output. For example, to make the `GPU` modul
     "modules": [
         {
             "type": "gpu",
-            "format": "{2}" // See `fastfetch -h gpu-format` for detail
+            "format": "{name}" // See `fastfetch -h gpu-format` for detail
         }
     ]
 }
 ```
 
-. . which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
+. . which is equivalent to `fastfetch -s gpu --gpu-format '{name}'`
 
 See `fastfetch -h format` for information on basic usage. For module specific formattion, see `fastfetch -h <module>-format`
 
@@ -185,6 +185,10 @@ You can always use `fastfetch --pipe false` to force fastfetch running in colorf
 ### Q: Why do fastfetch and neofetch show different memory usage result?
 
 See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
+
+### Q: I use Debian / Ubuntu / Debian deserved distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is it a bug?
+
+See [#1282](https://github.com/fastfetch-cli/fastfetch/issues/1282)
 
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
