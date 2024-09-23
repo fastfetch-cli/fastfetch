@@ -77,7 +77,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         {
             if (pciids.length == 0)
                 ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
-            ffGPUParsePciIds(&pciids, (uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu, NULL);
+            ffGPUParsePciIds(&pciids, (uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
     }
 
