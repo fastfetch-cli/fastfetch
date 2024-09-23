@@ -97,26 +97,6 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
 
     uint32_t value;
 
-    if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_VDDNB, sizeof(value), &value) >= 0 && value > 0)
-        gpu->type = FF_GPU_TYPE_DISCRETE;
-    else
-        gpu->type = FF_GPU_TYPE_INTEGRATED;
-
-    struct amdgpu_heap_info heapInfo;
-    if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_VRAM, 0, &heapInfo) >= 0)
-    {
-        if (gpu->type == FF_GPU_TYPE_DISCRETE)
-        {
-            gpu->dedicated.total = heapInfo.heap_size;
-            gpu->dedicated.used = heapInfo.heap_usage;
-        }
-        else
-        {
-            gpu->shared.total = heapInfo.heap_size;
-            gpu->shared.used = heapInfo.heap_usage;
-        }
-    }
-
     if (options->temp)
     {
         if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_TEMP, sizeof(value), &value) >= 0)
@@ -131,6 +111,22 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
         gpu->coreCount = (int32_t) gpuInfo.num_shader_engines;
         gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
         gpu->index = gpuInfo.asic_id;
+        gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+
+        struct amdgpu_heap_info heapInfo;
+        if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_VRAM, 0, &heapInfo) >= 0)
+        {
+            if (gpu->type == FF_GPU_TYPE_DISCRETE)
+            {
+                gpu->dedicated.total = heapInfo.heap_size;
+                gpu->dedicated.used = heapInfo.heap_usage;
+            }
+            else
+            {
+                gpu->shared.total = heapInfo.heap_size;
+                gpu->shared.used = heapInfo.heap_usage;
+            }
+        }
     }
 
     if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_LOAD, sizeof(value), &value) >= 0)
@@ -203,17 +199,13 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
     }
 }
 
-static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const FFstrbuf* coreName)
+static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
 {
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
 
-    if ((coreName->chars[0] == 'D' || coreName->chars[0] == 'S') &&
-            coreName->chars[1] == 'G' &&
-            ffCharIsDigit(coreName->chars[2]))
-        gpu->type = FF_GPU_TYPE_DISCRETE; // DG1 / DG2 / SG1
-    else
-        gpu->type = FF_GPU_TYPE_INTEGRATED;
+    // 0000:00:02.0 is reserved for Intel integrated graphics
+    gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
 
     if (ffStrbufEqualS(&gpu->driver, "xe"))
     {
@@ -305,12 +297,11 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->type = FF_GPU_TYPE_UNKNOWN;
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-    gpu->deviceId = ((uint64_t) pciDomain << 6) | ((uint64_t) pciBus << 4) | (deviceId << 2) | pciFunc;
+    gpu->deviceId = (pciDomain * 100000ull) + (pciBus * 1000ull) + (pciDevice * 10ull) + pciFunc;
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
     if (drmKey) ffStrbufSetF(&gpu->platformApi, "DRM (%s)", drmKey);
 
-    FF_STRBUF_AUTO_DESTROY coreName = ffStrbufCreate();
     if (gpu->name.length == 0)
     {
         static FFstrbuf pciids;
@@ -319,7 +310,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             ffStrbufInit(&pciids);
             loadPciIds(&pciids);
         }
-        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu, &coreName);
+        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
     pciDetectDriver(&gpu->driver, deviceDir, buffer, drmKey);
@@ -357,7 +348,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
     {
-        pciDetectIntelSpecific(gpu, deviceDir, buffer, &coreName);
+        pciDetectIntelSpecific(gpu, deviceDir, buffer);
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
     }
     else
