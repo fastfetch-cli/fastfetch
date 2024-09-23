@@ -47,9 +47,20 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->deviceId = 0;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
+        uint32_t pciBus, pciAddr, pciDev, pciFunc;
+        if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_BUSNUMBER, NULL, (PBYTE) &pciBus, sizeof(pciBus), NULL) &&
+            SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_ADDRESS, NULL, (PBYTE) &pciAddr, sizeof(pciAddr), NULL))
+        {
+            pciDev = (pciAddr >> 16) & 0xFFFF;
+            pciFunc = pciAddr & 0xFFFF;
+            gpu->deviceId = (pciBus * 1000ull) + (pciDev * 10ull) + pciFunc;
+        }
+
         wchar_t buffer[256];
         if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) buffer, sizeof(buffer), NULL))
             ffStrbufSetWS(&gpu->name, buffer);
+
+        uint64_t adapterLuid = 0;
 
         FF_HKEY_AUTO_DESTROY hVideoIdKey = SetupDiOpenDevRegKey(hdev, &did, DICS_FLAG_GLOBAL, 0, DIREG_DEV, KEY_QUERY_VALUE);
         if (!hVideoIdKey) continue;
@@ -61,9 +72,19 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             FF_HKEY_AUTO_DESTROY hDirectxKey = NULL;
             if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, regDirectxKey, &hDirectxKey, NULL))
             {
+                uint32_t vendorId = 0;
+                if(ffRegReadUint(hDirectxKey, L"VendorId", &vendorId, NULL) && vendorId)
+                    ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
+
+                if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
+                    gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+
                 uint64_t dedicatedVideoMemory = 0;
                 if(ffRegReadUint64(hDirectxKey, L"DedicatedVideoMemory", &dedicatedVideoMemory, NULL))
-                    gpu->type = dedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+                {
+                    if (gpu->type == FF_GPU_TYPE_UNKNOWN)
+                        gpu->type = dedicatedVideoMemory >= 1024 * 1024 * 1024 ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
+                }
 
                 uint64_t dedicatedSystemMemory, sharedSystemMemory;
                 if(ffRegReadUint64(hDirectxKey, L"DedicatedSystemMemory", &dedicatedSystemMemory, NULL) &&
@@ -73,7 +94,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->shared.total = sharedSystemMemory;
                 }
 
-                ffRegReadUint64(hDirectxKey, L"AdapterLuid", &gpu->deviceId, NULL);
+                ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL);
 
                 uint32_t featureLevel = 0;
                 if(ffRegReadUint(hDirectxKey, L"MaxD3D12FeatureLevel", &featureLevel, NULL) && featureLevel)
@@ -91,10 +112,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         (unsigned) (driverVersion >> 0) & 0xFFFF
                     );
                 }
-
-                uint32_t vendorId = 0;
-                if(ffRegReadUint(hDirectxKey, L"VendorId", &vendorId, NULL) && vendorId)
-                    ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
             }
         }
 
@@ -132,44 +149,36 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
             }
 
-            uint32_t pciBus, pciAddr;
-            if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_BUSNUMBER, NULL, (PBYTE) &pciBus, sizeof(pciBus), NULL) &&
-                SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_ADDRESS, NULL, (PBYTE) &pciAddr, sizeof(pciAddr), NULL))
-            {
-                uint32_t pciDev = (pciAddr >> 16) & 0xFFFF;
-                uint32_t pciFunc = pciAddr & 0xFFFF;
-
-                detectFn(
-                    &(FFGpuDriverCondition) {
-                        .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID
-                              | (gpu->deviceId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_LUID : 0)
-                              | (vendorId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
-                        .pciDeviceId = {
-                            .deviceId = deviceId,
-                            .vendorId = vendorId,
-                            .subSystemId = subSystemId,
-                            .revId = revId,
-                        },
-                        .pciBusId = {
-                            .domain = 0,
-                            .bus = pciBus,
-                            .device = pciDev,
-                            .func = pciFunc,
-                        },
-                        .luid = gpu->deviceId,
+            detectFn(
+                &(FFGpuDriverCondition) {
+                    .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID
+                            | (adapterLuid > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_LUID : 0)
+                            | (vendorId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
+                    .pciDeviceId = {
+                        .deviceId = deviceId,
+                        .vendorId = vendorId,
+                        .subSystemId = subSystemId,
+                        .revId = revId,
                     },
-                    (FFGpuDriverResult){
-                        .index = &gpu->index,
-                        .temp = options->temp ? &gpu->temperature : NULL,
-                        .memory = options->driverSpecific ? &gpu->dedicated : NULL,
-                        .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-                        .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
-                        .type = &gpu->type,
-                        .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                    .pciBusId = {
+                        .domain = 0,
+                        .bus = pciBus,
+                        .device = pciDev,
+                        .func = pciFunc,
                     },
-                    dllName
-                );
-            }
+                    .luid = adapterLuid,
+                },
+                (FFGpuDriverResult){
+                    .index = &gpu->index,
+                    .temp = options->temp ? &gpu->temperature : NULL,
+                    .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                    .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
+                    .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
+                    .type = &gpu->type,
+                    .frequency = options->driverSpecific ? &gpu->frequency : NULL,
+                },
+                dllName
+            );
         }
     }
 
