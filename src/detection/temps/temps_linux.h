@@ -5,8 +5,6 @@
 typedef struct FFTempValue
 {
     FFstrbuf name;
-    FFstrbuf deviceName;
-    uint32_t deviceClass;
     double value;
 } FFTempValue;
 
