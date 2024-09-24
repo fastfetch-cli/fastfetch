@@ -1,61 +1,61 @@
 #include "fastfetch.h"
 #include "common/io/io.h"
-#include "common/thread.h"
 #include "temps_linux.h"
 
-#include <string.h>
 #include <dirent.h>
 
-static bool parseHwmonDir(FFstrbuf* dir, FFTempValue* value)
+static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
 {
     //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
     uint32_t dirLength = dir->length;
     ffStrbufAppendS(dir, "temp1_input");
 
-    FF_STRBUF_AUTO_DESTROY valueBuffer = ffStrbufCreate();
-    if(!ffReadFileBuffer(dir->chars, &valueBuffer))
+    if(!ffReadFileBuffer(dir->chars, buffer))
     {
         // Some badly implemented system put temp file in /hwmonN/device
         ffStrbufSubstrBefore(dir, dirLength);
-        ffStrbufAppendS(dir, "/device");
+        ffStrbufAppendS(dir, "device/");
         dirLength = dir->length;
+        ffStrbufAppendS(dir, "temp1_input");
 
-        if(!ffReadFileBuffer(dir->chars, &valueBuffer))
-            return false;
+        if(!ffReadFileBuffer(dir->chars, buffer))
+            return 0.0/0.0;
     }
 
     ffStrbufSubstrBefore(dir, dirLength);
 
-    value->value = ffStrbufToDouble(&valueBuffer) / 1000; // valueBuffer is millidegree Celsius
+    double value = ffStrbufToDouble(buffer);// millidegree Celsius
 
-    if(value->value != value->value)
-        return false;
+    if(value != value)
+        return 0.0/0.0;
 
     ffStrbufAppendS(dir, "name");
-    ffReadFileBuffer(dir->chars, &value->name);
-    ffStrbufTrimRightSpace(&value->name);
-    ffStrbufSubstrBefore(dir, dirLength);
+    if (!ffReadFileBuffer(dir->chars, buffer))
+        return 0.0/0.0;
 
-    return true;
+    ffStrbufTrimRightSpace(buffer);
+
+    if(
+        ffStrbufContainS(buffer, "cpu") ||
+        ffStrbufEqualS(buffer, "k10temp") || // AMD
+        ffStrbufEqualS(buffer, "coretemp") // Intel
+    ) return value / 1000.;
+
+    return false;
 }
 
-const FFlist* ffDetectTemps(void)
+double ffDetectCPUTemp(void)
 {
-    static FFlist result;
-
-    if(result.elementSize > 0)
-        return &result;
-
-    ffListInitA(&result, sizeof(FFTempValue), 16);
-
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
     ffStrbufAppendS(&baseDir, "/sys/class/hwmon/");
+
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     uint32_t baseDirLength = baseDir.length;
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
-        return &result;
+        return 0.0/0.0;
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
@@ -66,16 +66,12 @@ const FFlist* ffDetectTemps(void)
         ffStrbufAppendS(&baseDir, entry->d_name);
         ffStrbufAppendC(&baseDir, '/');
 
-        FFTempValue* temp = ffListAdd(&result);
-        ffStrbufInit(&temp->name);
-        if(!parseHwmonDir(&baseDir, temp))
-        {
-            ffStrbufDestroy(&temp->name);
-            --result.length;
-        }
+        double result = parseHwmonDir(&baseDir, &buffer);
+        if (result == result)
+            return result;
 
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
 
-    return &result;
+    return 0.0/0.0;
 }

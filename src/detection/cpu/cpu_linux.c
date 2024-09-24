@@ -281,22 +281,6 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
     return true;
 }
 
-static double detectCPUTemp(void)
-{
-    const FFlist* tempsResult = ffDetectTemps();
-
-    FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
-    {
-        if(
-            ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
-            ffStrbufEqualS(&value->name, "k10temp") ||
-            ffStrbufEqualS(&value->name, "coretemp")
-        ) return value->value;
-    }
-
-    return FF_CPU_TEMP_UNSET;
-}
-
 FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
 {
     // Always use the last part of the ISA string. Ref: #590 #1204
@@ -374,7 +358,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if(cpuinfo == NULL)
         return "fopen(\"/proc/cpuinfo\", \"r\") failed";
 
-    cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? ffDetectCPUTemp() : FF_CPU_TEMP_UNSET;
 
     FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
