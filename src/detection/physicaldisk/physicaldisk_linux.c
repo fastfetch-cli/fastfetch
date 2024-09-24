@@ -1,7 +1,6 @@
 #include "physicaldisk.h"
 #include "common/io/io.h"
 #include "common/properties.h"
-#include "detection/temps/temps_linux.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>

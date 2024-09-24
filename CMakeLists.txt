@@ -480,7 +480,6 @@ if(LINUX)
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
-        src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
@@ -544,7 +543,6 @@ elseif(ANDROID)
         src/detection/processes/processes_linux.c
         src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_linux.c
-        src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c

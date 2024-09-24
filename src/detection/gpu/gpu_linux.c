@@ -1,6 +1,5 @@
 #include "detection/gpu/gpu.h"
 #include "detection/vulkan/vulkan.h"
-#include "detection/temps/temps_linux.h"
 #include "detection/cpu/cpu.h"
 #include "detection/gpu/gpu_driver_specific.h"
 #include "common/io/io.h"
