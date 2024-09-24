@@ -689,7 +689,6 @@ elseif(APPLE)
         src/detection/processes/processes_bsd.c
         src/detection/sound/sound_apple.c
         src/detection/swap/swap_apple.c
-        src/detection/temps/temps_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
@@ -705,6 +704,7 @@ elseif(APPLE)
         src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
+        src/util/apple/smc_temps.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_apple.c
     )
