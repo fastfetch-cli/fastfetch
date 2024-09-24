@@ -623,7 +623,6 @@ elseif(FreeBSD)
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_bsd.c
         src/detection/swap/swap_bsd.c
-        src/detection/temps/temps_bsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
