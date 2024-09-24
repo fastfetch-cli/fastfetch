@@ -1,11 +1,7 @@
-extern "C"
-{
-#include "temps_windows.h"
-}
 #include "util/windows/wmi.hpp"
 
 extern "C"
-const char* ffDetectSmbiosTemp(double* current, double* critical)
+const char* detectThermalTemp(double* current, double* critical)
 {
     // Requires Administrator privileges
     // https://wutils.com/wmi/root/wmi/msacpi_thermalzonetemperature/#properties

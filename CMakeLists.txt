@@ -723,6 +723,7 @@ elseif(WIN32)
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
+        src/detection/cpu/cpu_windows.cpp
         src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
@@ -757,7 +758,6 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
-        src/detection/temps/temps_windows.cpp
         src/detection/theme/theme_nosupport.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
