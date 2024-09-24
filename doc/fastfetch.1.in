@@ -23,7 +23,104 @@ the exit code will be non\-zero.
 
 .SH OPTIONS
 
-.SS "Informative Options"
+.SS "Informative options:"
+.HP
+\fB\-h\fR, \fB\-\-help\fR <?command>: Show this message, or help for a specific command
+.HP
+\fB\-v\fR, \fB\-\-version\fR: Show the full version of fastfetch
+.HP
+\fB\-\-version\-raw\fR: Show the raw version string (major.minor.patch)
+.HP
+\fB\-\-list\-config\-paths\fR: List search paths of config files
+.HP
+\fB\-\-list\-data\-paths\fR: List search paths of presets and logos
+.HP
+\fB\-\-list\-logos\fR: List available logos
+.HP
+\fB\-\-list\-modules\fR: List available modules
+.HP
+\fB\-\-list\-presets\fR: List presets fastfetch knows about
+.HP
+\fB\-\-list\-features\fR: List the supported features fastfetch was compiled with
+.HP
+\fB\-\-print\-logos\fR: Print available logos
+.HP
+\fB\-\-print\-structure\fR: Print the default structure
+.SS "Config options:"
+.HP
+\fB\-c\fR, \fB\-\-config\fR <config>: Specify the config file or preset to be loaded
+.HP
+\fB\-\-gen\-config\fR <?path>: Generate a config file to specified path with options specified in the command line (if any)
+.HP
+\fB\-\-gen\-config\-force\fR <?path>: Generate a config file to specified path. Overwrite the existing one
+.SS "General options:"
+.HP
+\fB\-\-thread\fR <?bool>: Use separate threads to send HTTP requests
+.HP
+\fB\-\-escape\-bedrock\fR <?bool>: On Bedrock Linux, whether to escape the bedrock jail
+.HP
+\fB\-\-wmi\-timeout\fR <num>: Set the timeout (ms) for WMI queries
+.HP
+\fB\-\-processing\-timeout\fR <num>: Set the timeout (ms) when waiting for child processes
+.HP
+\fB\-\-ds\-force\-drm\fR <?enum>: Set if only DRM should be used to detect displays
+.SS "Logo options:"
+.HP
+\fB\-l\fR, \fB\-\-logo\fR <logo>: Set the logo source
+.HP
+\fB\-\-logo\-type\fR <enum>: Set the type of the logo given in "\-\-logo"
+.HP
+\fB\-\-logo\-width\fR <num>: Set the width of the logo (in characters), if it is an image
+.HP
+\fB\-\-logo\-height\fR <num>: Set the height of the logo (in characters), if it is an image
+.HP
+\fB\-\-logo\-preserve\-aspect\-ratio\fR <?bool>: Set if the logo should fill the specified width and height as much as possible without stretching
+.HP
+\fB\-\-logo\-color\-[1\-9]\fR <color>: Overwrite a color in the logo
+.HP
+\fB\-\-logo\-padding\fR <num>: Set the padding on the left and the right of the logo
+.HP
+\fB\-\-logo\-padding\-left\fR <num>: Set the padding on the left of the logo
+.HP
+\fB\-\-logo\-padding\-right\fR <num>: Set the padding on the right of the logo
+.HP
+\fB\-\-logo\-padding\-top\fR <num>: Set the padding on the top of the logo
+.HP
+\fB\-\-logo\-print\-remaining\fR <?bool>: Whether to print the remaining logo, if it has more lines than modules to display
+.HP
+\fB\-\-logo\-separate\fR <?bool>: If true, print modules at bottom of the logo
+.HP
+\fB\-\-logo\-recache\fR <?bool>: If true, regenerate image logo cache
+.HP
+\fB\-\-file\fR <path>: Short for \fB\-\-logo\-type\fR file \fB\-\-logo\fR <path>
+.HP
+\fB\-\-file\-raw\fR <path>: Short for \fB\-\-logo\-type\fR file\-raw \fB\-\-logo\fR <path>
+.HP
+\fB\-\-data\fR <data>: Short for \fB\-\-logo\-type\fR data \fB\-\-logo\fR <data>
+.HP
+\fB\-\-data\-raw\fR <data>: Short for \fB\-\-logo\-type\fR data\-raw \fB\-\-logo\fR <data>
+.HP
+\fB\-\-raw\fR <path>: Short for \fB\-\-logo\-type\fR raw \fB\-\-logo\fR <path>
+.HP
+\fB\-\-sixel\fR <path>: Short for \fB\-\-logo\-type\fR sixel \fB\-\-logo\fR <path>
+.HP
+\fB\-\-kitty\fR <path>: Short for \fB\-\-logo\-type\fR kitty \fB\-\-logo\fR <path>
+.HP
+\fB\-\-kitty\-direct\fR <path>: Short for \fB\-\-logo\-type\fR kitty\-direct \fB\-\-logo\fR <path>
+.HP
+\fB\-\-iterm\fR <path>: Short for \fB\-\-logo\-type\fR iterm \fB\-\-logo\fR <path>
+.HP
+\fB\-\-chafa\fR <path>: Short for \fB\-\-logo\-type\fR chafa \fB\-\-logo\fR <path>
+.HP
+\fB\-\-chafa\-fg\-only\fR <?bool>: Produce character\-cell output using foreground colors only
+.HP
+\fB\-\-chafa\-symbols\fR <str>: Specify character symbols to employ in final output
+.HP
+\fB\-\-chafa\-canvas\-mode\fR <enum>: Determine how colors are used in the output
+.HP
+\fB\-\-chafa\-color\-space\fR <enum>: Set color space used for quantization
+.HP
+\fB\-\-chafa\-dither\-mode\fR <enum>: Set output dither mode (No effect with 24\-bit color)
 .TP
 
 .B \-h, \-\-help \fI[command]
@@ -74,7 +171,71 @@ format, only
 is supported currently.
 
 
-.SS "Display Options"
+.SS "Display options:"
+.HP
+\fB\-s\fR, \fB\-\-structure\fR <structure>: Set the structure of the fetch
+.HP
+\fB\-\-stat\fR <?bool>: Show time usage (in ms) for individual modules
+.HP
+\fB\-\-pipe\fR <?bool>: Disable logo and all escape sequences
+.HP
+\fB\-\-color\-keys\fR <color>: Set the color of the keys
+.HP
+\fB\-\-color\-title\fR <color>: Set the color of the title
+.HP
+\fB\-\-color\-output\fR <color>: Set the color of module output
+.HP
+\fB\-\-color\fR <color>: Set the color of both the keys and title
+.HP
+\fB\-\-key\-width\fR <num>: Align the width of keys to <num> characters
+.HP
+\fB\-\-bright\-color\fR <?bool>: Set if the keys, title and ASCII logo should be printed in bright color
+.HP
+\fB\-\-separator\fR <str>: Set the separator between key and value
+.HP
+\fB\-\-show\-errors\fR <?bool>: Print occurring errors
+.HP
+\fB\-\-disable\-linewrap\fR <?bool>: Whether to disable line wrap during the run
+.HP
+\fB\-\-hide\-cursor\fR <?bool>: Whether to hide the cursor during the run
+.HP
+\fB\-\-binary\-prefix\fR <enum>: Set the binary prefix to used
+.HP
+\fB\-\-percent\-type\fR <num>: Set the percentage output type
+.HP
+\fB\-\-percent\-ndigits\fR <num>: Set the number of digits to keep after the decimal point when formatting percentage numbers
+.HP
+\fB\-\-percent\-color\-green\fR <color>: Set color used in green state of percentage bars and numbers
+.HP
+\fB\-\-percent\-color\-yellow\fR <color>: Set color used in yellow state of percentage bars and numbers
+.HP
+\fB\-\-percent\-color\-red\fR <color>: Set color used in red state of percentage bars and numbers
+.HP
+\fB\-\-bar\-char\-elapsed\fR <str>: Set the character to use in elapsed part of percentage bars
+.HP
+\fB\-\-bar\-char\-total\fR <str>: Set the character to use in total part of percentage bars
+.HP
+\fB\-\-bar\-width\fR <num>: Set the width of percentage bars, in number of characters
+.HP
+\fB\-\-bar\-border\fR <?bool>: Whether to show a border around percentage bars
+.HP
+\fB\-\-no\-buffer\fR <?bool>: Set if the stdout application buffer should be disabled
+.HP
+\fB\-\-size\-ndigits\fR <num>: Set the number of digits to keep after the decimal point when formatting sizes
+.HP
+\fB\-\-size\-max\-prefix\fR <enum>: Set the largest binary prefix to use when formatting sizes
+.HP
+\fB\-\-temp\-unit\fR <enum>: Set the unit of the temperature
+.HP
+\fB\-\-temp\-ndigits\fR <num>: Set the number of digits to keep after the decimal point when printing temperature
+.HP
+\fB\-\-temp\-color\-green\fR <color>: Set color used in green state of temperature values
+.HP
+\fB\-\-temp\-color\-yellow\fR <color>: Set color used in yellow state of temperature values
+.HP
+\fB\-\-temp\-color\-red\fR <color>: Set color used in red state of temperature values
+.HP
+\fB\-\-ts\-version\fR <?bool>: Whether to detect and display the version of terminal and shell
 .TP
 
 .B \-l, \-\-logo \fI<logo>
@@ -84,6 +245,192 @@ Set the logo to display
 .B \-s, \-\-structure \fI<structure>
 Set the structure of the fetch. For details about the structure,
 see the CONFIGURATION section.
+
+.SS "Library path options:"
+.HP
+\fB\-\-lib\-pci\fR <path>: Pciutils. Used for GPU output
+.HP
+\fB\-\-lib\-vulkan\fR <path>: Vulkan module & fallback for GPU output
+.HP
+\fB\-\-lib\-wayland\fR <path>: Better display performance and output in wayland sessions
+.HP
+\fB\-\-lib\-xcb\-randr\fR <path>: X11 sessions for better display detection and faster WM detection
+.HP
+\fB\-\-lib\-xcb\fR <path>: X11 sessions for better display detection and faster WM detection
+.HP
+\fB\-\-lib\-xrandr\fR <path>: X11 sessions for better display detection and faster WM detection
+.HP
+\fB\-\-lib\-x11\fR <path>: X11 sessions for better display detection and faster WM detection
+.HP
+\fB\-\-lib\-drm\fR <path>: Used for fast resolution and refresh rate detection
+.HP
+\fB\-\-lib\-gio\fR <path>: Needed for values that are only stored GSettings
+.HP
+\fB\-\-lib\-dconf\fR <path>: Needed for values that are only stored in DConf + Fallback for GSettings
+.HP
+\fB\-\-lib\-dbus\fR <path>: Bluetooth, Player & Media detection
+.HP
+\fB\-\-lib\-xfconf\fR <path>: Needed for XFWM theme and XFCE Terminal font
+.HP
+\fB\-\-lib\-sqlite3\fR <path>: Needed for pkg & rpm package count
+.HP
+\fB\-\-lib\-rpm\fR <path>: Slower fallback for rpm package count
+.HP
+\fB\-\-lib\-imagemagick\fR <path>: Images in terminal using sixel or kitty graphics protocol
+.HP
+\fB\-\-lib\-z\fR <path>: Libz. Faster image output when using kitty graphics protocol
+.HP
+\fB\-\-lib\-chafa\fR <path>: Image output as ascii art
+.HP
+\fB\-\-lib\-egl\fR <path>: Needed by the OpenGL module for gl context creation
+.HP
+\fB\-\-lib\-glx\fR <path>: Needed by the OpenGL module for gl context creation
+.HP
+\fB\-\-lib\-osmesa\fR <path>: Needed by the OpenGL module for gl context creation
+.HP
+\fB\-\-lib\-opencl\fR <path>: OpenCL module
+.HP
+\fB\-\-lib\-pulse\fR <path>: Pulseaudio. Used for Sound detection
+.HP
+\fB\-\-lib\-nm\fR <path>: NetworkManager. Used for Wifi detection
+.HP
+\fB\-\-lib\-freetype\fR <path>: Used for Termux font detection
+.HP
+\fB\-\-lib\-ddcutil\fR <path>: Used for brightness detection of external displays
+.SS "Module specific options:"
+.HP
+\fB\-\-title\-fqdn\fR <?bool>: Set if the title should use fully qualified domain name
+.HP
+\fB\-\-title\-color\-user\fR <color>: Set color of the user name (left part)
+.HP
+\fB\-\-title\-color\-at\fR <color>: Set color of the @ symbol (middle part)
+.HP
+\fB\-\-title\-color\-host\fR <color>: Set color of the host name (right part)
+.HP
+\fB\-\-separator\-string\fR <str>: Set the string printed by the separator module
+.HP
+\fB\-\-separator\-output\-color\fR <color>: Set the color of the separator module
+.HP
+\fB\-\-disk\-folders\fR <path>: A colon (semicolon on Windows) separated list of folder paths to be detected
+.HP
+\fB\-\-disk\-show\-regular\fR <?bool>: Set if regular volume should be printed
+.HP
+\fB\-\-disk\-show\-external\fR <?bool>: Set if external volume should be printed
+.HP
+\fB\-\-disk\-show\-hidden\fR <?bool>: Set if hidden volumes should be printed
+.HP
+\fB\-\-disk\-show\-subvolumes\fR <?bool>: Set if subvolumes should be printed
+.HP
+\fB\-\-disk\-show\-readonly\fR <?bool>: Set if read only volumes should be printed
+.HP
+\fB\-\-disk\-show\-unknown\fR <?bool>: Set if unknown (unable to detect sizes) volumes should be printed
+.HP
+\fB\-\-disk\-use\-available\fR <?bool>: Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes
+.HP
+\fB\-\-diskio\-detect\-total\fR <bool>: Detect total bytes instead of current rate
+.HP
+\fB\-\-diskio\-name\-prefix\fR <str>: Show disks with given name prefix only
+.HP
+\fB\-\-physicaldisk\-name\-prefix\fR <str>: Show disks with given name prefix only
+.HP
+\fB\-\-physicaldisk\-temp\fR <?bool>: Detect and display SSD temperature if supported
+.HP
+\fB\-\-bluetooth\-show\-disconnected\fR <?bool>: Set if disconnected bluetooth devices should be printed
+.HP
+\fB\-\-packages\-disabled\fR <string>: A colon separated list of package managers to be disabled when detecting
+.HP
+\fB\-\-display\-compact\-type\fR <enum>: Set if all displays should be printed in one line
+.HP
+\fB\-\-display\-precise\-refresh\-rate\fR <?bool>: Set if decimal refresh rates should not be rounded into integers when printing
+.HP
+\fB\-\-display\-order\fR <enum>: Set the order should be used when printing displays
+.HP
+\fB\-\-brightness\-ddcci\-sleep\fR <num>: Set the sleep times (in ms) when sending DDC/CI requests
+.HP
+\fB\-\-sound\-type\fR <enum>: Set what type of sound devices should be printed
+.HP
+\fB\-\-battery\-use\-setup\-api\fR <?bool>: Set if "SetupAPI" should be used on Windows to detect battery info
+.HP
+\fB\-\-cpu\-temp\fR <?bool>: Detect and display CPU temperature if supported
+.HP
+\fB\-\-cpu\-freq\-ndigits\fR <num>: Set the number of digits to keep after the decimal point when printing CPU frequency
+.HP
+\fB\-\-cpu\-show\-pe\-core\-count\fR <?bool>: Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported
+.HP
+\fB\-\-cpuusage\-separate\fR <?bool>: Display CPU usage per CPU logical core, instead of an average result
+.HP
+\fB\-\-de\-slow\-version\-detection\fR <?bool>: Set if DE version should be detected with slow operations
+.HP
+\fB\-\-gpu\-temp\fR <?bool>: Detect and display GPU temperature if supported
+.HP
+\fB\-\-gpu\-driver\-specific\fR <?bool>: Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)
+.HP
+\fB\-\-gpu\-detection\-method\fR <enum>: Force using a specified method to detect GPUs
+.HP
+\fB\-\-gpu\-hide\-type\fR <enum>: Specify the type of GPUs should not be printed
+.HP
+\fB\-\-battery\-temp\fR <?bool>: Detect and display Battery temperature if supported
+.HP
+\fB\-\-loadavg\-ndigits\fR <num>: Set the number of digits to keep after the decimal point when printing load average
+.HP
+\fB\-\-localip\-show\-ipv4\fR <?bool>: Show IPv4 addresses in local ip module
+.HP
+\fB\-\-localip\-show\-ipv6\fR <?bool>: Show IPv6 addresses in local ip module
+.HP
+\fB\-\-localip\-show\-mac\fR <?bool>: Show mac addresses in local ip module
+.HP
+\fB\-\-localip\-show\-loop\fR <?bool>: Show loop back addresses (127.0.0.1) in local ip module
+.HP
+\fB\-\-localip\-show\-prefix\-len\fR <?bool>: Show network prefix length (\fI\,/N\/\fP) in local ip module
+.HP
+\fB\-\-localip\-name\-prefix\fR <str>: Show interfaces with given interface name prefix only
+.HP
+\fB\-\-localip\-default\-route\-only\fR <?bool>: Show the interface that is used for default routing only
+.HP
+\fB\-\-localip\-show\-all\-ips\fR <?bool>: Show all IPs bound to the same interface. By default only the first IP is shown
+.HP
+\fB\-\-localip\-compact\fR <?bool>: Show all IPs in one line
+.HP
+\fB\-\-netio\-name\-prefix\fR <str>: Show interfaces with given name prefix only
+.HP
+\fB\-\-netio\-default\-route\-only\fR <?bool>: Show the interfac that is used for default routing only
+.HP
+\fB\-\-netio\-detect\-total\fR <bool>: Detect total bytes instead of current rate
+.HP
+\fB\-\-publicip\-timeout\fR <num>: Time in milliseconds to wait for the public ip server to respond
+.HP
+\fB\-\-publicip\-url\fR <str>: The URL of public IP detection server to be used
+.HP
+\fB\-\-publicip\-ipv6\fR <bool>: Whether to use IPv6 for public IP detection server
+.HP
+\fB\-\-weather\-location\fR <str>: Set the location to be used
+.HP
+\fB\-\-weather\-timeout\fR <num>: Time in milliseconds to wait for the weather server to respond
+.HP
+\fB\-\-weather\-output\-format\fR <str>: The output weather format to be used
+.HP
+\fB\-\-wm\-detect\-plugin\fR <?bool>: Set if window manager plugin should be detected on supported platforms
+.HP
+\fB\-\-player\-name\fR <str>: The name of the player to use for module Media and Player
+.HP
+\fB\-\-opengl\-library\fR <enum>: Set the OpenGL context creation library to use
+.HP
+\fB\-\-command\-shell\fR <str>: Set the shell program to execute the command text
+.HP
+\fB\-\-command\-key\fR <str>: Set the module key to display
+.HP
+\fB\-\-command\-text\fR <str>: Set the command text to be executed
+.HP
+\fB\-\-colors\-symbol\fR <enum>: Set the symbol to be printed by Colors module
+.HP
+\fB\-\-colors\-padding\-left\fR <num>: Set the number of white spaces to print before the symbol
+.HP
+\fB\-\-colors\-block\-width\fR <num>: Set the block width in spaces
+.HP
+\fB\-\-colors\-block\-range\-start\fR <num>: Set the start range of colors in the blocks to print
+.HP
+\fB\-\-colors\-block\-range\-end\fR <num>: Set the end range of colors in the blocks to print
+
 
 
 .SS "Config Options"
@@ -105,7 +452,26 @@ file, otherwise it will be written to stdout.
 .B \-\-gen\-config\-force \fI[file]
 Same as \fB\-\-gen\-config\fR, but overwrites existing config
 .TP
-
+.SS "General module options:"
+.HP
+\fB\-\-\fR<module>\-format <format>: Set the format string to use for each specific module To see how a format string works, use "fastfetch \fB\-h\fR format". To see help about a specific format string, use "fastfetch \fB\-h\fR <module>\-format"
+.HP
+\fB\-\-\fR<module>\-key <key>: Set the key to use for each specific module. For modules which print multiple lines, the string is parsed as a format string with the index as first character
+.HP
+\fB\-\-\fR<module>\-key\-color <color>: Override the global "\-\-color\-keys" option for each specific module
+.HP
+\fB\-\-\fR<module>\-output\-color <color>: Override the global "\-\-color\-output" option for each specific module
+.HP
+\fB\-\-\fR<module>\-key\-width <num>: Override the global "\-\-key\-width" option for each specific module
+.HP
+\fB\-\-\fR<module>\-percent\-green <num>: Threshold of percentage colors Value less then percent\-green will be shown in green
+.HP
+\fB\-\-\fR<module>\-percent\-yellow <num>: Threshold of percentage colors Value greater than percent\-green and less then yellow will be shown in yellow Value greater than percent\-yellow will be shown in red
+.HP
+\fB\-\-\fR<module>\-temp\-green <num>: Threshold of temperature colors Value less then temp\-green will be shown in green
+.HP
+\fB\-\-\fR<module>\-temp\-yellow <num>: Threshold of temperature colors Value greater than temp\-green and less then yellow will be shown in yellow Value greater than temp\-yellow will be shown in red
+.PP
 
 To list all options, use \fB\-\-help\fR. It will also print all available module options.
 
