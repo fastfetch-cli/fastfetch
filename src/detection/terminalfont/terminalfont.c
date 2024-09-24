@@ -82,7 +82,7 @@ FF_MAYBE_UNUSED static bool detectKitty(const FFstrbuf* exe, FFTerminalFontResul
     if (ffGetTerminalResponse(
         "\eP+q6b697474792d71756572792d666f6e745f66616d696c79;6b697474792d71756572792d666f6e745f73697a65\e\\", // kitty-query-font_family;kitty-query-font_size
         2,
-        "\eP1+r%*[^=]=%64[^\e]\e\\\eP1+r%*[^=]=%64[^\e]\e\\", fontHex, sizeHex) == NULL && *fontHex && *sizeHex)
+        "\eP1+r%*[^=]=%512[^\e]\e\\\eP1+r%*[^=]=%512[^\e]\e\\", fontHex, sizeHex) == NULL && *fontHex && *sizeHex)
     {
         // decode hex string
         for (const char* p = fontHex; p[0] && p[1]; p += 2)
