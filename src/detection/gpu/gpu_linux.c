@@ -257,7 +257,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     uint32_t vendorId, deviceId, subVendorId, subDeviceId;
     uint8_t classId, subclassId;
     if (sscanf(buffer->chars + strlen("pci:"), "v%8" SCNx32 "d%8" SCNx32 "sv%8" SCNx32 "sd%8" SCNx32 "bc%2" SCNx8 "sc%2" SCNx8, &vendorId, &deviceId, &subVendorId, &subDeviceId, &classId, &subclassId) != 6)
-        return "Invalid modalias string";
+        return "Failed to parse pci modalias";
 
     if (classId != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
         return "Not a GPU device";
@@ -398,25 +398,11 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
 #if __aarch64__
 
-FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, const char* drmKey)
+FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FFstrbuf* buffer, const char* drmKey)
 {
-    uint32_t index = ffStrbufFirstIndexS(buffer, "apple,agx-t");
-    if (index == buffer->length) return "display-subsystem?";
-    index += (uint32_t) strlen("apple,agx-t");
-
-    FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-    gpu->index = FF_GPU_INDEX_UNSET;
-    gpu->deviceId = strtoul(buffer->chars + index, NULL, 10);
-    ffStrbufInitStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
-    ffStrbufInitStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
-    ffStrbufInit(&gpu->driver);
-    ffStrbufInitF(&gpu->platformApi, "DRM (%s)", drmKey);
-    gpu->temperature = FF_GPU_TEMP_UNSET;
-    gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
-    gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
-    gpu->type = FF_GPU_TYPE_INTEGRATED;
-    gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-    gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+    if (sscanf(name, "agx-t%lu", &gpu->deviceId) == 1)
+        ffStrbufSetStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
+    ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
 
     #if FF_HAVE_DRM
     ffStrbufSetS(buffer, "/dev/dri/");
@@ -431,7 +417,7 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
             .size = sizeof(paramsGlobal),
         }) >= 0)
         {
-            ffStrbufSetF(&gpu->driver, "asahi %u", paramsGlobal.unstable_uabi_version);
+            ffStrbufAppendF(&gpu->driver, " %u", paramsGlobal.unstable_uabi_version);
 
             // FIXME: They will introduce ABI breaking changes. Always check the latest version
             // https://www.reddit.com/r/AsahiLinux/comments/1ei2qiv/comment/lgm0v5s/
@@ -466,18 +452,56 @@ FF_MAYBE_UNUSED static const char* detectAsahi(FFlist* gpus, FFstrbuf* buffer, F
             }
         }
     }
-
-    if (!gpu->driver.length)
-    {
-        pciDetectDriver(&gpu->driver, drmDir, buffer, drmKey);
-        if (!gpu->name.length)
-            ffStrbufSetF(&gpu->name, "Apple Silicon T%u", (uint32_t) gpu->deviceId);
-    }
     #endif
 
     return NULL;
 }
 #endif
+
+static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, const char* drmKey)
+{
+    char compatible[256]; // vendor,model-name
+    if (sscanf(buffer->chars + strlen("of:"), "NgpuT%*[^C]C%256[^C]", compatible) != 1)
+        return "Failed to parse of modalias or not a GPU device";
+
+    char* name = strchr(compatible, ',');
+    if (name)
+    {
+        *name = '\0';
+        ++name;
+    }
+
+    FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+    gpu->index = FF_GPU_INDEX_UNSET;
+    gpu->deviceId = 0;
+    ffStrbufInit(&gpu->name);
+    ffStrbufInit(&gpu->vendor);
+    ffStrbufInit(&gpu->driver);
+    ffStrbufInitF(&gpu->platformApi, "DRM (%s)", drmKey);
+    gpu->temperature = FF_GPU_TEMP_UNSET;
+    gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+    gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
+    gpu->type = FF_GPU_TYPE_INTEGRATED;
+    gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+    gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+
+    pciDetectDriver(&gpu->driver, drmDir, buffer, drmKey);
+
+    #ifdef __aarch64__
+    if (ffStrbufEqualS(&gpu->driver, "asahi"))
+        drmDetectAsahiSpecific(gpu, name, buffer, drmKey);
+    #endif
+
+    if (!gpu->name.length)
+        ffStrbufSetS(&gpu->name, name ? name : compatible);
+    if (!gpu->vendor.length && name)
+    {
+        compatible[0] = (char) toupper(compatible[0]);
+        ffStrbufSetS(&gpu->vendor, compatible);
+    }
+
+    return NULL;
+}
 
 static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 {
@@ -507,10 +531,8 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
         if (ffStrbufStartsWithS(&buffer, "pci:"))
             detectPci(options, gpus, &buffer, &drmDir, entry->d_name);
-        #ifdef __aarch64__
         else if (ffStrbufStartsWithS(&buffer, "of:"))
-            detectAsahi(gpus, &buffer, &drmDir, entry->d_name);
-        #endif
+            detectOf(gpus, &buffer, &drmDir, entry->d_name);
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
     }
