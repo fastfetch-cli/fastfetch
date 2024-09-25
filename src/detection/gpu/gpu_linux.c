@@ -303,13 +303,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     if (gpu->name.length == 0)
     {
-        static FFstrbuf pciids;
-        if (pciids.chars == NULL)
-        {
-            ffStrbufInit(&pciids);
-            loadPciIds(&pciids);
-        }
-        ffGPUParsePciIds(&pciids, subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        ffGPUParsePciIds(subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
     pciDetectDriver(&gpu->driver, deviceDir, buffer, drmKey);

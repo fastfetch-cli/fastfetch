@@ -1,7 +1,45 @@
 #include "gpu.h"
 
-void ffGPUParsePciIds(FFstrbuf* content, uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu)
+#ifdef __FreeBSD__
+#include <paths.h>
+#endif
+
+static const FFstrbuf* loadPciIds()
 {
+    static FFstrbuf pciids;
+
+    if (pciids.chars) return &pciids;
+    ffStrbufinit(&pciids);
+
+    #ifdef FF_CUSTOM_PCI_IDS_PATH
+
+        ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
+
+    #else // FF_CUSTOM_PCI_IDS_PATH
+
+        #if __linux__
+        ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
+        if (pciids.length == 0)
+            ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/misc/pci.ids", pciids); // debian?
+        if (pciids.length == 0)
+            ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", pciids);
+        #elif __FreeBSD__
+        // https://github.com/freebsd/freebsd-src/blob/main/usr.sbin/pciconf/pathnames.h
+        ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", pciids);
+        if (pciids.length == 0)
+            ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/pciids/pci.ids", pciids);
+        #elif __sun
+        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
+        #endif
+
+    #endif // FF_CUSTOM_PCI_IDS_PATH
+
+    return &pciids;
+}
+
+void ffGPUParsePciIds(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu)
+{
+    const FFstrbuf* content = loadPciIds();
     if (content->length)
     {
         char buffer[32];

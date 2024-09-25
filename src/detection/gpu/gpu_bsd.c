@@ -8,20 +8,6 @@
 #include <dev/pci/pcireg.h>
 #include <sys/pciio.h>
 #include <fcntl.h>
-#include <paths.h>
-
-static bool loadPciIds(FFstrbuf* pciids)
-{
-    // https://github.com/freebsd/freebsd-src/blob/main/usr.sbin/pciconf/pathnames.h
-
-    ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", pciids);
-    if (pciids->length > 0) return true;
-
-    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/pciids/pci.ids", pciids);
-    if (pciids->length > 0) return true;
-
-    return false;
-}
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
@@ -44,8 +30,6 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 
     if (pcio.status == PCI_GETCONF_ERROR)
         return "ioctl(fd, PCIOCGETCONF, &pc) returned error";
-
-    FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
 
     for (uint32_t i = 0; i < pcio.num_matches; ++i)
     {
@@ -74,9 +58,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 
         if (gpu->name.length == 0)
         {
-            if (pciids.length == 0)
-                loadPciIds(&pciids);
-            ffGPUParsePciIds(&pciids, pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
+            ffGPUParsePciIds(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))

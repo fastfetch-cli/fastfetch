@@ -20,8 +20,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     if (!ffStrbufStartsWithS(&buffer, "\npci "))
         return "Invalid scanpci result";
 
-    FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
-
     // pci bus 0x0000 cardnum 0x00 function 0x00: vendor 0x1414 device 0x008e
     //  Device unknown
     //  CardVendor 0x0000 card 0x0000 (Card unknown)
@@ -75,9 +73,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (gpu->name.length == 0)
         {
-            if (pciids.length == 0)
-                ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
-            ffGPUParsePciIds(&pciids, (uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+            ffGPUParsePciIds((uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
     }
 
