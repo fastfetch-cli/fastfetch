@@ -176,7 +176,7 @@ FF_MAYBE_UNUSED static const char* detectByDrm(FFlist* results)
 {
     const char* drmDirPath = "/sys/class/drm/";
 
-    DIR* dirp = opendir(drmDirPath);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
     if(dirp == NULL)
         return "opendir(drmDirPath) == NULL";
 
@@ -232,23 +232,23 @@ FF_MAYBE_UNUSED static const char* detectByDrm(FFlist* results)
         ffStrbufSubstrBefore(&drmDir, drmDirLength);
     }
 
-    closedir(dirp);
     return NULL;
 }
 #endif // __linux__
 
 const char* ffDetectMonitor(FFlist* results)
 {
-    const char* error = "Fastfetch was compiled without xrandr support";
+    const char* error = NULL;
+
+    #if defined(__linux__)
+        error = detectByDrm(results);
+        if (!error && results->length > 0) return NULL;
+    #endif
 
     #ifdef FF_HAVE_XRANDR
         error = detectByXrandr(results);
         if (!error) return NULL;
     #endif
 
-    #if defined(__linux__)
-        error = detectByDrm(results);
-    #endif
-
-    return error;
+    return "Fastfetch was compiled without xrandr support";
 }
