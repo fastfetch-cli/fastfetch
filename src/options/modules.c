@@ -63,6 +63,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitTerminalThemeOptions(&options->terminalTheme);
     ffInitThemeOptions(&options->theme);
     ffInitTitleOptions(&options->title);
+    ffInitTPMOptions(&options->tpm);
     ffInitUptimeOptions(&options->uptime);
     ffInitUsersOptions(&options->users);
     ffInitVersionOptions(&options->version);
@@ -137,6 +138,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyTerminalThemeOptions(&options->terminalTheme);
     ffDestroyThemeOptions(&options->theme);
     ffDestroyTitleOptions(&options->title);
+    ffDestroyTPMOptions(&options->tpm);
     ffDestroyUptimeOptions(&options->uptime);
     ffDestroyUsersOptions(&options->users);
     ffDestroyVersionOptions(&options->version);

@@ -64,6 +64,7 @@ typedef struct FFOptionsModules
     FFTerminalThemeOptions terminalTheme;
     FFThemeOptions theme;
     FFTitleOptions title;
+    FFTPMOptions tpm;
     FFUptimeOptions uptime;
     FFUsersOptions users;
     FFVersionOptions version;

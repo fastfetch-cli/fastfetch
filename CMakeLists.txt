@@ -405,6 +405,7 @@ set(LIBFASTFETCH_SRC
     src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
     src/modules/title/title.c
+    src/modules/tpm/tpm.c
     src/modules/uptime/uptime.c
     src/modules/users/users.c
     src/modules/version/version.c
@@ -495,6 +496,7 @@ if(LINUX)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -558,6 +560,7 @@ elseif(ANDROID)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_nosupport.c
@@ -638,6 +641,7 @@ elseif(FreeBSD)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -703,6 +707,7 @@ elseif(APPLE)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.m
@@ -770,6 +775,7 @@ elseif(WIN32)
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
         src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
@@ -854,6 +860,7 @@ elseif(SunOS)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_sunos.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -1179,7 +1186,7 @@ elseif(APPLE)
         PRIVATE "-weak_framework Apple80211"
     )
 elseif(WIN32)
-    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
+    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0A00)
     target_link_libraries(libfastfetch
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
