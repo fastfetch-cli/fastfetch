@@ -228,29 +228,6 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
         gpu->frequency = (uint32_t) ffStrbufToUInt(buffer, 0);
 }
 
-static bool loadPciIds(FFstrbuf* pciids)
-{
-    #ifdef FF_CUSTOM_PCI_IDS_PATH
-
-    ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
-    if (pciids->length > 0) return true;
-
-    #else
-
-    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/hwdata/pci.ids", pciids);
-    if (pciids->length > 0) return true;
-
-    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/misc/pci.ids", pciids); // debian?
-    if (pciids->length > 0) return true;
-
-    ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", pciids);
-    if (pciids->length > 0) return true;
-
-    #endif
-
-    return false;
-}
-
 static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* deviceDir, const char* drmKey)
 {
     const uint32_t drmDirPathLength = deviceDir->length;
@@ -303,7 +280,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     if (gpu->name.length == 0)
     {
-        ffGPUParsePciIds(subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+        ffGPUFillVendorAndName(subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
     }
 
     pciDetectDriver(&gpu->driver, deviceDir, buffer, drmKey);

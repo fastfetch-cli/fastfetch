@@ -80,6 +80,7 @@ option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
+option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -252,6 +253,16 @@ if(Python_FOUND)
 else()
     message(STATUS "Python3 is not found, 'help.json' will not be minified")
     file(READ "src/data/help.json" DATATEXT_JSON_HELP)
+endif()
+
+if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "fastfetch_pciids.c.inc")
+    if(Python_FOUND)
+        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
+                        OUTPUT_FILE "fastfetch_pciids.c.inc")
+    else()
+        message(STATUS "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
+        set(ENABLE_EMBEDDED_PCIIDS OFF)
+    endif()
 endif()
 
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
@@ -1130,12 +1141,15 @@ if(ENABLE_LIBZFS)
     endif()
 endif()
 
-
 if(ENABLE_THREADS)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
+endif()
+
+if(ENABLE_EMBEDDED_PCIIDS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_PCIIDS=1)
 endif()
 
 if(LINUX)

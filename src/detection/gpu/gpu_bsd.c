@@ -58,7 +58,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 
         if (gpu->name.length == 0)
         {
-            ffGPUParsePciIds(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
+            ffGPUFillVendorAndName(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))

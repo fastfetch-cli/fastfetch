@@ -73,7 +73,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (gpu->name.length == 0)
         {
-            ffGPUParsePciIds((uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+            ffGPUFillVendorAndName((uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
     }
 

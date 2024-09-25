@@ -49,5 +49,5 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus);
 const char* ffGetGPUVendorString(unsigned vendorId);
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
-void ffGPUParsePciIds(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
+void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 #endif
