@@ -10,6 +10,9 @@
 #include "fastfetch_pciids.c.inc"
 #endif
 
+#define FF_STR_INDIR(x) #x
+#define FF_STR(x) FF_STR_INDIR(x)
+
 static const FFstrbuf* loadPciIds()
 {
     static FFstrbuf pciids;
@@ -19,7 +22,7 @@ static const FFstrbuf* loadPciIds()
 
     #ifdef FF_CUSTOM_PCI_IDS_PATH
 
-        ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), pciids);
+        ffReadFileBuffer(FF_STR(FF_CUSTOM_PCI_IDS_PATH), &pciids);
 
     #else // FF_CUSTOM_PCI_IDS_PATH
 
