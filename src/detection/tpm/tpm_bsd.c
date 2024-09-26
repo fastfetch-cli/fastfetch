@@ -1,10 +1,16 @@
 #include "tpm.h"
 #include "common/sysctl.h"
 
+#include <sys/param.h>
+#include <sys/module.h>
+
 const char* ffDetectTPM(FFTPMResult* result)
 {
     if (ffSysctlGetString("dev.tpmcrb.0.%desc", &result->description) != NULL)
-        return "TPM device is not found or TPM kernel module is not loaded";
+    {
+        if (modfind("tpm") < 0) return "TPM kernel module is not loaded";
+        return "TPM device is not found";
+    }
 
     if (ffStrbufContainS(&result->description, "2.0"))
         ffStrbufSetStatic(&result->version, "2.0");
