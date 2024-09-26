@@ -9,10 +9,10 @@ class PciVendorModel:
     def __init__(self, id: int, name: str):
         self.id = id
         self.name = name
-        self.devices: list[PciDeviceModel] = []
+        self.devices = []
 
-def main(keep_vendor_list: set[int]):
-    vendors: list[PciVendorModel] = []
+def main(keep_vendor_list: set):
+    vendors = []
     try:
         with open('pci.ids', 'r') as f:
             full_text = f.read()
