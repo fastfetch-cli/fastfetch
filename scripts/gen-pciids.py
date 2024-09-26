@@ -55,17 +55,19 @@ typedef struct FFPciVendor
 
     for vendor in vendors:
         if vendor.devices:
+            piece = ',\n    '.join('{{ 0x{:04X}, "{}" }}'.format(device.id, device.name.replace('"', '\\"')) for device in vendor.devices)
             code += f"""
 // {vendor.name}
 static const FFPciDevice pciDevices_{vendor.id:04X}[] = {{
-    {',\n    '.join(f'{{ 0x{device.id:04X}, "{device.name.replace('"', '\\"')}" }}' for device in vendor.devices)},
+    {piece},
     {{}},
 }};
 """
 
+    piece = ',\n    '.join('{{ 0x{:04X}, "{}", {}, {} }}'.format(vendor.id, vendor.name.replace('"', '\\"'), vendor.devices and f"pciDevices_{vendor.id:04X}" or "NULL", len(vendor.devices)) for vendor in vendors)
     code += f"""
 const FFPciVendor ffPciVendors[] = {{
-    {',\n    '.join(f'{{ 0x{vendor.id:04X}, "{vendor.name.replace('"', '\\"')}", {vendor.devices and f"pciDevices_{vendor.id:04X}" or "NULL"}, {len(vendor.devices)} }}' for vendor in vendors)},
+    {piece},
     {{}},
 }};"""
 
