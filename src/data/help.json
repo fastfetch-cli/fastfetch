@@ -1379,7 +1379,7 @@
         {
             "long": "command-param",
             "desc": "Set the parameter used when starting the shell",
-            "remark": "Due to the difference of how OSes handle command line parameters, Windows will parse whitespaces as param separators, while *nix will not",
+            "remark": "If set to empty string, it will be ignored",
             "arg": {
                 "type": "str",
                 "default": "\"/c\" for Windows; \"-c\" for *nix"
