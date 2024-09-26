@@ -9,7 +9,7 @@
 
 #include <inttypes.h>
 
-#ifdef FF_HAVE_DRM
+#ifdef FF_HAVE_DRM_AMDGPU
     #include <amdgpu.h>
     #include <amdgpu_drm.h>
     #include <fcntl.h>
@@ -73,8 +73,8 @@ static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer
 
 static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
 {
-    #if FF_HAVE_DRM
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm_amdgpu" FF_LIBRARY_EXTENSION " failed", "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 2)
+    #if FF_HAVE_DRM_AMDGPU
+    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm_amdgpu" FF_LIBRARY_EXTENSION " failed", "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_gpu_info)
@@ -135,6 +135,7 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
 
     return NULL;
     #else
+    FF_UNUSED(options, gpu, drmKey, buffer);
     return "Fastfetch is compiled without libdrm support";
     #endif
 }

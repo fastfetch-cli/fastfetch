@@ -191,6 +191,9 @@ void ffListFeatures(void)
         #if FF_HAVE_DRM
             "drm\n"
         #endif
+        #if FF_HAVE_DRM_AMDGPU
+            "drm_amdgpu\n"
+        #endif
         #if FF_HAVE_GIO
             "gio\n"
         #endif

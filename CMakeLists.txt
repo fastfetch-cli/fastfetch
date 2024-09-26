@@ -51,6 +51,7 @@ cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR FreeBSD OR SunOS" OF
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR SunOS" OFF)
@@ -1053,6 +1054,10 @@ ff_lib_enable(X11
 ff_lib_enable(DRM
     "libdrm"
     "Libdrm"
+)
+ff_lib_enable(DRM_AMDGPU
+    "libdrm_amdgpu"
+    "Libdrm_Amdgpu"
 )
 ff_lib_enable(GIO
     "gio-2.0"
