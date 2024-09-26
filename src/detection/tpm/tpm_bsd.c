@@ -6,7 +6,7 @@ const char* ffDetectTPM(FFTPMResult* result)
 {
     if (ffSysctlGetString("dev.tpmcrb.0.%desc", &result->description) != NULL)
     {
-        if (ffKernelModLoaded("tpm")) return "`tpm` kernel module is not loaded";
+        if (!ffKernelModLoaded("tpm")) return "`tpm` kernel module is not loaded";
         return "TPM device is not found";
     }
 
@@ -17,5 +17,5 @@ const char* ffDetectTPM(FFTPMResult* result)
     else
         ffStrbufSetStatic(&result->version, "unknown");
 
-    return "Not supported on this platform";
+    return NULL;
 }
