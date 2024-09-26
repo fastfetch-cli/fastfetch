@@ -47,6 +47,9 @@ void ffStrbufAppendVF(FFstrbuf* strbuf, const char* format, va_list arguments);
 const char* ffStrbufAppendSUntilC(FFstrbuf* strbuf, const char* value, char until);
 
 void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value);
+void ffStrbufPrependC(FFstrbuf* strbuf, char c);
+
+void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c);
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
 void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
