@@ -641,7 +641,7 @@ elseif(FreeBSD)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
-        src/detection/tpm/tpm_nosupport.c
+        src/detection/tpm/tpm_bsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
