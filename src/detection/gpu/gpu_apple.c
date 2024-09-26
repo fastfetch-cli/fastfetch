@@ -7,6 +7,7 @@
 #include <IOKit/graphics/IOGraphicsLib.h>
 
 const char* ffGpuDetectMetal(FFlist* gpus);
+const char* ffGpuDetectDriverVersion(FFlist* gpus);
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
@@ -185,5 +186,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
     }
 
     ffGpuDetectMetal(gpus);
+    if (instance.config.general.detectVersion)
+        ffGpuDetectDriverVersion(gpus);
     return NULL;
 }
