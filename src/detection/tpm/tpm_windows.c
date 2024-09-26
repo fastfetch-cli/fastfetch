@@ -60,19 +60,19 @@ const char* ffDetectTPM(FFTPMResult* result)
     switch (deviceInfo.tpmInterfaceType)
     {
     case TPM_IFTYPE_1:
-        ffStrbufSetStatic(&result->interfaceType, "I/O-port or MMIO");
+        ffStrbufSetF(&result->description, "I/O-port or MMIO TPM %s", result->version.chars);
         break;
     case TPM_IFTYPE_TRUSTZONE:
-        ffStrbufSetStatic(&result->interfaceType, "Trustzone");
+        ffStrbufSetF(&result->description, "Trustzone TPM %s", result->version.chars);
         break;
     case TPM_IFTYPE_HW:
-        ffStrbufSetStatic(&result->interfaceType, "HW TPM");
+        ffStrbufSetF(&result->description, "HW TPM %s", result->version.chars);
         break;
     case TPM_IFTYPE_EMULATOR:
-        ffStrbufSetStatic(&result->interfaceType, "SW-emulator");
+        ffStrbufSetF(&result->description, "SW-emulator TPM %s", result->version.chars);
         break;
     case TPM_IFTYPE_SPB:
-        ffStrbufSetStatic(&result->interfaceType, "SPB attached");
+        ffStrbufSetF(&result->description, "SPB attached TPM %s", result->version.chars);
         break;
     default:
         break;

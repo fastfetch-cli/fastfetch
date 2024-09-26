@@ -5,7 +5,7 @@
 typedef struct FFTPMResult
 {
     FFstrbuf version;
-    FFstrbuf interfaceType;
+    FFstrbuf description;
 } FFTPMResult;
 
 const char* ffDetectTPM(FFTPMResult* result);

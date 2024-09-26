@@ -10,7 +10,7 @@ void ffPrintTPM(FFTPMOptions* options)
 {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
-        .interfaceType = ffStrbufCreate()
+        .description = ffStrbufCreate()
     };
     const char* error = ffDetectTPM(&result);
 
@@ -23,18 +23,21 @@ void ffPrintTPM(FFTPMOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&result.version, stdout);
+        if (result.description.length > 0)
+            ffStrbufPutTo(&result.description, stdout);
+        else
+            ffStrbufPutTo(&result.version, stdout);
     }
     else
     {
         FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TPM_NUM_FORMAT_ARGS, ((FFformatarg[]){
             FF_FORMAT_ARG(result.version, "version"),
-            FF_FORMAT_ARG(result.interfaceType, "interface-type"),
+            FF_FORMAT_ARG(result.description, "description"),
         }));
     }
 
     ffStrbufDestroy(&result.version);
-    ffStrbufDestroy(&result.interfaceType);
+    ffStrbufDestroy(&result.description);
 }
 
 bool ffParseTPMCommandOptions(FFTPMOptions* options, const char* key, const char* value)
@@ -76,7 +79,7 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
 {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
-        .interfaceType = ffStrbufCreate()
+        .description = ffStrbufCreate()
     };
     const char* error = ffDetectTPM(&result);
 
@@ -88,17 +91,17 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
-    yyjson_mut_obj_add_strbuf(doc, obj, "interfaceType", &result.interfaceType);
+    yyjson_mut_obj_add_strbuf(doc, obj, "description", &result.description);
 
     ffStrbufDestroy(&result.version);
-    ffStrbufDestroy(&result.interfaceType);
+    ffStrbufDestroy(&result.description);
 }
 
 void ffPrintTPMHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TPM_MODULE_NAME, "{1} [{2}]", FF_TPM_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TPM_MODULE_NAME, "{2}", FF_TPM_NUM_FORMAT_ARGS, ((const char* []) {
         "TPM device version - version",
-        "TPM interface type - interface-type",
+        "TPM general description - description",
     }));
 }
 
@@ -115,7 +118,7 @@ void ffInitTPMOptions(FFTPMOptions* options)
         ffPrintTPMHelpFormat,
         ffGenerateTPMJsonConfig
     );
-    ffOptionInitModuleArg(&options->moduleArgs, "󰔎");
+    ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
 void ffDestroyTPMOptions(FFTPMOptions* options)
