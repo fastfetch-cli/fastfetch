@@ -87,7 +87,7 @@ jobs:
           languages: c
 
       - name: configure project
-        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -252,7 +252,7 @@ jobs:
 
       - name: build
         run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -DIS_MUSL=ON -GNinja .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -DIS_MUSL=ON -DENABLE_EMBEDDED_PCIIDS=On -GNinja .
             cmake --build . --target package --verbose -j4
         shell: alpine.sh {0}
 
@@ -385,7 +385,7 @@ jobs:
             pkg install gcc13 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
 
           run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -423,7 +423,7 @@ jobs:
             uname -a
             sudo pkg update
             sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm libelf glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
