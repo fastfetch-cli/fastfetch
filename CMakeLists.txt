@@ -1169,6 +1169,14 @@ if(LINUX)
     target_link_libraries(libfastfetch
         PRIVATE "m"
     )
+
+    if(ENABLE_DIRECTX_HEADERS)
+        if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+            target_link_libraries(libfastfetch
+                PRIVATE "/usr/lib/wsl/lib/libdxcore.so"
+            )
+        endif()
+    endif()
 elseif(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework AVFoundation"

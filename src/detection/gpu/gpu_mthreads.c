@@ -30,7 +30,7 @@ struct FFMtmlData
     MtmlSystem *sys;
 } mtmlData;
 
-static void shutdownMtml()
+FF_MAYBE_UNUSED static void shutdownMtml(void)
 {
     mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
 }
