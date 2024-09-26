@@ -99,7 +99,7 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
     if (options->temp)
     {
         if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_TEMP, sizeof(value), &value) >= 0)
-            gpu->temperature = value;
+            gpu->temperature = value / 1000.;
     }
 
     ffStrbufSetS(&gpu->name, ffamdgpu_get_marketing_name(handle));
@@ -107,9 +107,9 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
     struct amdgpu_gpu_info gpuInfo;
     if (ffamdgpu_query_gpu_info(handle, &gpuInfo) >= 0)
     {
-        gpu->coreCount = (int32_t) gpuInfo.num_shader_engines;
+        gpu->coreCount = (int32_t) gpuInfo.cu_active_number;
         gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
-        gpu->index = gpuInfo.asic_id;
+        gpu->index = FF_GPU_INDEX_UNSET;
         gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
 
         struct amdgpu_heap_info heapInfo;
