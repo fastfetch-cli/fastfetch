@@ -99,6 +99,7 @@
             "type": "physicaldisk",
             "temp": true
         },
+        "tpm",
         "version",
         "break",
         "colors"
