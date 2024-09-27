@@ -71,9 +71,30 @@ static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer
     return true;
 }
 
+static const char* drmFindRenderFromCard(const char* drmCardKey, FFstrbuf* result)
+{
+    char path[PATH_MAX];
+    sprintf(path, "/sys/class/drm/%s/device/drm", drmCardKey);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(path);
+    if (!dirp) return "Failed to open `/sys/class/drm/{drmCardKey}/device/drm`";
+
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if (ffStrStartsWith(entry->d_name, "render"))
+        {
+            ffStrbufSetS(result, "/dev/dri/");
+            ffStrbufAppendS(result, entry->d_name);
+            return NULL;
+        }
+    }
+    return "Failed to find render device";
+}
+
 static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
 {
     #if FF_HAVE_DRM_AMDGPU
+
     FF_LIBRARY_LOAD(libdrm, "dlopen libdrm_amdgpu" FF_LIBRARY_EXTENSION " failed", "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
@@ -82,8 +103,10 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_heap_info)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_deinitialize)
 
-    ffStrbufSetS(buffer, "/dev/dri/");
-    ffStrbufAppendS(buffer, drmKey);
+    {
+        const char* error = drmFindRenderFromCard(drmKey, buffer);
+        if (error) return error;
+    }
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
     if (fd < 0) return "Failed to open DRM device";
 
