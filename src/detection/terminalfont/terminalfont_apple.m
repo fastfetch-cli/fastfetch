@@ -26,12 +26,12 @@ static void detectIterm2(FFTerminalFontResult* terminalFont)
         return;
     }
 
-    for(NSDictionary* bookmark in [dict valueForKey:@"New Bookmarks"])
+    for(NSDictionary* bookmark in dict[@"New Bookmarks"])
     {
-        if(![[bookmark valueForKey:@"Name"] isEqualToString:@(profile)])
+        if(![bookmark[@"Name"] isEqualToString:@(profile)])
             continue;
 
-        NSString* normalFont = [bookmark valueForKey:@"Normal Font"];
+        NSString* normalFont = bookmark[@"Normal Font"];
         if(!normalFont)
         {
             ffStrbufAppendF(&terminalFont->error, "`Normal Font` key in profile `%s` doesn't exist", profile);
@@ -39,10 +39,10 @@ static void detectIterm2(FFTerminalFontResult* terminalFont)
         }
         ffFontInitWithSpace(&terminalFont->font, normalFont.UTF8String);
 
-        NSNumber* useNonAsciiFont = [bookmark valueForKey:@"Use Non-ASCII Font"];
+        NSNumber* useNonAsciiFont = bookmark[@"Use Non-ASCII Font"];
         if(useNonAsciiFont.boolValue)
         {
-            NSString* nonAsciiFont = [bookmark valueForKey:@"Non Ascii Font"];
+            NSString* nonAsciiFont = bookmark[@"Non Ascii Font"];
             if (nonAsciiFont)
                 ffFontInitWithSpace(&terminalFont->fallback, nonAsciiFont.UTF8String);
         }
@@ -78,13 +78,13 @@ static void detectWarpTerminal(FFTerminalFontResult* terminalFont)
         return;
     }
 
-    NSString* fontName = [dict valueForKey:@"FontName"];
+    NSString* fontName = dict[@"FontName"];
     if(!fontName)
         fontName = @"Hack";
     else
         fontName = [fontName stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\""]];
 
-    NSString* fontSize = [dict valueForKey:@"FontSize"];
+    NSString* fontSize = dict[@"FontSize"];
     if(!fontSize)
         fontSize = @"13";
 

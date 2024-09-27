@@ -29,7 +29,7 @@ static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
         for (NSScreen* screen in NSScreen.screens)
         {
             if (screen == mainScreen) continue;
-            NSNumber* screenNumber = [screen.deviceDescription valueForKey:@"NSScreenNumber"];
+            NSNumber* screenNumber = screen.deviceDescription[@"NSScreenNumber"];
             if (screenNumber && screenNumber.longValue == (long) display->id)
             {
                 #ifdef MAC_OS_X_VERSION_10_15

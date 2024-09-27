@@ -19,11 +19,11 @@ static void parseSystemVersion(FFOSResult* os)
 
     NSString* value;
 
-    if((value = [dict valueForKey:@"ProductName"]))
+    if((value = dict[@"ProductName"]))
         ffStrbufInitS(&os->name, value.UTF8String);
-    if((value = [dict valueForKey:@"ProductUserVisibleVersion"]))
+    if((value = dict[@"ProductUserVisibleVersion"]))
         ffStrbufInitS(&os->version, value.UTF8String);
-    if((value = [dict valueForKey:@"ProductBuildVersion"]))
+    if((value = dict[@"ProductBuildVersion"]))
         ffStrbufInitS(&os->buildID, value.UTF8String);
 }
 
