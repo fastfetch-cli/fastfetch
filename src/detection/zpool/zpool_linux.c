@@ -1,7 +1,7 @@
 #include "zpool.h"
 
 #ifdef FF_HAVE_LIBZFS
-#include "util/kernelMod.h"
+#include "util/kmod.h"
 
 #ifdef __sun
 #define FF_DISABLE_DLOPEN
@@ -85,7 +85,7 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
     libzfs_handle_t* handle = fflibzfs_init();
     if (!handle)
     {
-        if (!ffKernelModLoaded("zfs")) return "`zfs` kernel module is not loaded";
+        if (!ffKmodLoaded("zfs")) return "`zfs` kernel module is not loaded";
         return "libzfs_init() failed";
     }
 

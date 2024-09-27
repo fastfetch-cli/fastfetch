@@ -425,7 +425,7 @@ set(LIBFASTFETCH_SRC
     src/util/base64.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
-    src/util/kernelMod.c
+    src/util/kmod.c
     src/util/path.c
     src/util/platform/FFPlatform.c
     src/util/smbiosHelper.c

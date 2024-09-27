@@ -1,9 +1,9 @@
-#include "kernelMod.h"
+#include "kmod.h"
 
 #if __linux__
 #include "common/io/io.h"
 
-bool ffKernelModLoaded(const char* modName)
+bool ffKmodLoaded(const char* modName)
 {
     static FFstrbuf modules;
     if (modules.chars == NULL)
@@ -27,12 +27,12 @@ bool ffKernelModLoaded(const char* modName)
 #include <sys/param.h>
 #include <sys/module.h>
 
-bool ffKernelModLoaded(const char* modName)
+bool ffKmodLoaded(const char* modName)
 {
     return modfind(modName) >= 0;
 }
 #else
-bool ffKernelModLoaded(FF_MAYBE_UNUSED const char* modName)
+bool ffKmodLoaded(FF_MAYBE_UNUSED const char* modName)
 {
     return true; // Don't generate kernel module related errors
 }

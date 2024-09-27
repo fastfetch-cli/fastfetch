@@ -1,12 +1,12 @@
 #include "tpm.h"
 #include "common/sysctl.h"
-#include "util/kernelMod.h"
+#include "util/kmod.h"
 
 const char* ffDetectTPM(FFTPMResult* result)
 {
     if (ffSysctlGetString("dev.tpmcrb.0.%desc", &result->description) != NULL)
     {
-        if (!ffKernelModLoaded("tpm")) return "`tpm` kernel module is not loaded";
+        if (!ffKmodLoaded("tpm")) return "`tpm` kernel module is not loaded";
         return "TPM device is not found";
     }
 
