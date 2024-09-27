@@ -124,9 +124,9 @@ static void parsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t 
 }
 
 #if FF_HAVE_EMBEDDED_PCIIDS
-static inline int pciDeviceCmp(const FFPciDevice* a, const FFPciDevice* b)
+static inline int pciDeviceCmp(const uint16_t* key, const FFPciDevice* element)
 {
-    return (int) a->id - (int) b->id;
+    return (int) *key - (int) element->id;
 }
 
 static bool loadPciidsInc(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu)
