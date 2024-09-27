@@ -49,18 +49,6 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         gpu->deviceId = (pc->pc_sel.pc_domain * 100000ull) + (pc->pc_sel.pc_bus * 1000ull) + (pc->pc_sel.pc_dev * 10ull) + pc->pc_sel.pc_func;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
-        {
-            char query[32];
-            snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) pc->pc_device, (unsigned) pc->pc_revid);
-            ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
-        }
-
-        if (gpu->name.length == 0)
-        {
-            ffGPUFillVendorAndName(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
-        }
-
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && (options->temp || options->driverSpecific))
         {
             ffDetectNvidiaGpuInfo(&(FFGpuDriverCondition) {
@@ -79,8 +67,20 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 .type = &gpu->type,
                 .frequency = &gpu->frequency,
                 .coreUsage = &gpu->coreUsage,
-                .name = options->driverSpecific ? &gpu->name : NULL,
+                .name = &gpu->name,
             }, "libnvidia-ml.so");
+        }
+
+        if (gpu->name.length == 0)
+        {
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
+            {
+                char query[32];
+                snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) pc->pc_device, (unsigned) pc->pc_revid);
+                ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
+            }
+            if (gpu->name.length == 0)
+            ffGPUFillVendorAndName(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN)

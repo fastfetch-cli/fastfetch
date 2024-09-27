@@ -302,11 +302,6 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
     if (drmKey) ffStrbufSetF(&gpu->platformApi, "DRM (%s)", drmKey);
 
-    if (gpu->name.length == 0)
-    {
-        ffGPUFillVendorAndName(subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
-    }
-
     pciDetectDriver(&gpu->driver, deviceDir, buffer, drmKey);
     ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
 
@@ -367,7 +362,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                 .type = &gpu->type,
                 .frequency = options->driverSpecific ? &gpu->frequency : NULL,
-                .name = options->driverSpecific ? &gpu->name : NULL,
+                .name = &gpu->name,
             }, soName);
         }
 
@@ -387,6 +382,9 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             }
         }
     }
+
+    if (gpu->name.length == 0)
+        ffGPUFillVendorAndName(subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
 
     return NULL;
 }

@@ -57,8 +57,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         }
 
         wchar_t buffer[256];
-        if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) buffer, sizeof(buffer), NULL))
-            ffStrbufSetWS(&gpu->name, buffer);
 
         uint64_t adapterLuid = 0;
 
@@ -175,10 +173,17 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                     .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,
+                    .name = &gpu->name,
                     .frequency = options->driverSpecific ? &gpu->frequency : NULL,
                 },
                 dllName
             );
+        }
+
+        if (!gpu->name.length)
+        {
+            if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_DEVICEDESC, NULL, (PBYTE) buffer, sizeof(buffer), NULL))
+                ffStrbufSetWS(&gpu->name, buffer);
         }
     }
 
