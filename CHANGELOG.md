@@ -25,6 +25,7 @@ Bugfixes:
 
 Logos:
 * Add FoxOS
+* Add GXDE OS
 
 # 2.25.0
 
