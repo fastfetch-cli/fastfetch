@@ -325,17 +325,24 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
         if (ffStrStartsWith(entry->d_name, "policy") && ffCharIsDigit(entry->d_name[strlen("policy")]))
         {
             ffStrbufAppendS(&path, entry->d_name);
+
+            uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
+            if (fmax == 0) continue;
+
+            if (cpu->frequencyMax >= fmax)
+            {
+                if (!options->showPeCoreCount)
+                {
+                    ffStrbufSubstrBefore(&path, baseLen);
+                    continue;
+                }
+            }
+            else
+                cpu->frequencyMax = fmax;
+
             uint32_t fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
             if (fbase > 0)
                 cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
-
-            uint32_t fbioslimit = getFrequency(&path, "/bios_limit", NULL, &buffer);
-            if (fbioslimit > 0)
-                cpu->frequencyBiosLimit = cpu->frequencyBiosLimit > fbioslimit ? cpu->frequencyBiosLimit : fbioslimit;
-
-            uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
-            if (fmax > 0)
-                cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
 
             if (options->showPeCoreCount)
             {

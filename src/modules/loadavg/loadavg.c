@@ -32,7 +32,6 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
                 .temperature = FF_CPU_TEMP_UNSET,
                 .frequencyMax = 0,
                 .frequencyBase = 0,
-                .frequencyBiosLimit = 0,
                 .name = ffStrbufCreate(),
                 .vendor = ffStrbufCreate(),
             };

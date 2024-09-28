@@ -1,5 +1,8 @@
 # 2.26.0
 
+Changes:
+* To be consistent to other platforms, CPU frequency detection on Linux no longer checks `bios_limit`
+
 Features:
 * Detect GPU index (#1267, GPU)
 * Count Flatpak runtime packages (#1085, Packages, Linux)
