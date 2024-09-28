@@ -32,6 +32,10 @@ def main(keep_vendor_list: set):
             vendors[-1].devices.append(PciDeviceModel(int(id, 16), name))
 
     code = """\
+// SPDX-License-Identifier: BSD-3-Clause
+// https://opensource.org/license/BSD-3-Clause
+// Generated from https://pci-ids.ucw.cz/v2.2/pci.ids
+
 #include <stdint.h>
 #include <stddef.h>
 
