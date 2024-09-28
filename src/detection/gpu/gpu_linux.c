@@ -17,8 +17,7 @@
 #endif
 
 #ifdef FF_HAVE_DRM
-    #include <i915_drm.h>
-    #include "xe_drm.h"
+    #include "intel_drm.h"
     #include <fcntl.h>
     #include <sys/ioctl.h>
 #endif
@@ -241,15 +240,9 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
     if (!drmKey) return;
 
     if (ffStrbufEqualS(&gpu->driver, "xe"))
-    {
         ffStrbufAppendS(pciDir, "/tile0/gt0/freq0/max_freq");
-    }
     else
-    {
-        ffStrbufAppendC(pciDir, '/');
-        ffStrbufAppendS(pciDir, drmKey);
-        ffStrbufAppendS(pciDir, "/gt_max_freq_mhz");
-    }
+        ffStrbufAppendF(pciDir, "/drm/%s/gt_max_freq_mhz", drmKey);
     if (ffReadFileBuffer(pciDir->chars, buffer))
         gpu->frequency = (uint32_t) ffStrbufToUInt(buffer, 0);
 }
@@ -455,7 +448,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
     char drmKeyBuffer[8];
-    if (options->driverSpecific && !drmKey)
+    if (!drmKey)
     {
         ffStrbufAppendS(deviceDir, "/drm");
         FF_AUTO_CLOSE_DIR DIR* dirp = opendir(deviceDir->chars);
