@@ -1,3 +1,28 @@
+# 2.26.0
+
+Features:
+* Detect GPU index (#1267, GPU)
+* Count Flatpak runtime packages (#1085, Packages, Linux)
+* Support pacstall package manager (Packages, Linux)
+* Support CU core count, max frequency, VMEM usage detection for AMD cards on Linux (GPU, Linux)
+    * Requires `--gpu-driver-specific`
+* Support EU core count, VMEM size detection Intel cards on Linux (GPU, Linux)
+    * Requires `--gpu-driver-specific`. VMEM usage detection requires root permissions.
+* Add new module `TPM` to print TPM (Trusted Platform Module) version if available (TPM)
+* Support GPU driver version detection (GPU, macOS)
+* Add new CMake option `-DENABLE_EMBEDDED_PCIIDS=ON`.
+    * If enabled, fastfetch will download the newest [`pci.ids`](https://pci-ids.ucw.cz/) file, [transform it into C code](https://github.com/fastfetch-cli/fastfetch/blob/dev/scripts/gen-pciids.py) and compile it into fastfetch binaries.
+
+Bugfixes:
+* Fix font size detecton of foot terminal (#1276, TerminalFont, Linux)
+* Ignore `su` and `sudo` when detecting terminal (#1283, Terminal, Linux)
+* Always print inches in integer (Display)
+* Fix Wifi connection protocol detection on macOS Sequoia (Wifi, macOS)
+* Fix hanging when font name is long when detecting kitty term font (#1289, TerminalFont)
+
+Logos:
+* Add FoxOS
+
 # 2.25.0
 
 Features:
