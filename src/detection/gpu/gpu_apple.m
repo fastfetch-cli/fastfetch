@@ -65,7 +65,7 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             else if ([device supportsFamily:MTLGPUFamilyCommon1])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
 
-            gpu->type = device.hasUnifiedMemory ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            gpu->type = device.location == MTLDeviceLocationBuiltIn ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
             gpu->index = (uint32_t) device.locationNumber;
             #endif
         }
