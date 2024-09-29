@@ -22,6 +22,7 @@ Bugfixes:
 * Always print inches in integer (Display)
 * Fix Wifi connection protocol detection on macOS Sequoia (Wifi, macOS)
 * Fix hanging when font name is long when detecting kitty term font (#1289, TerminalFont)
+* Detect all enabled or connected connectors (#1301, Display, Linux)
 
 Logos:
 * Add FoxOS
