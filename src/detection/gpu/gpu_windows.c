@@ -47,7 +47,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->deviceId = 0;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        uint32_t pciBus, pciAddr, pciDev, pciFunc;
+        uint32_t pciBus = 0, pciAddr = UINT32_MAX, pciDev = 0, pciFunc = 0;
         if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_BUSNUMBER, NULL, (PBYTE) &pciBus, sizeof(pciBus), NULL) &&
             SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_ADDRESS, NULL, (PBYTE) &pciAddr, sizeof(pciAddr), NULL))
         {
@@ -151,7 +151,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                 &(FFGpuDriverCondition) {
                     .type = FF_GPU_DRIVER_CONDITION_TYPE_DEVICE_ID
                             | (adapterLuid > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_LUID : 0)
-                            | (vendorId > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
+                            | (pciAddr > 0 ? FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID : 0),
                     .pciDeviceId = {
                         .deviceId = deviceId,
                         .vendorId = vendorId,
