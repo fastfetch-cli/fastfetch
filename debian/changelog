@@ -1,3 +1,15 @@
+fastfetch (2.26.1ubuntu1) jammy; urgency=medium
+
+  * Update correct code
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 30 Sep 2024 00:21:20 +0800
+
+fastfetch (2.26.1) jammy; urgency=medium
+
+  * Update to 2.26.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Sun, 29 Sep 2024 16:15:31 +0800
+
 fastfetch (2.26.0) jammy; urgency=medium
 
   * Update to 2.26.0
