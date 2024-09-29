@@ -92,7 +92,10 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     gpu->shared.total = sharedSystemMemory;
                 }
 
-                ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL);
+                if (ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL))
+                {
+                    if (!gpu->deviceId) gpu->deviceId = adapterLuid;
+                }
 
                 uint32_t featureLevel = 0;
                 if(ffRegReadUint(hDirectxKey, L"MaxD3D12FeatureLevel", &featureLevel, NULL) && featureLevel)
