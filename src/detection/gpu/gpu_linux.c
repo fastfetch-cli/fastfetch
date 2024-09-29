@@ -657,7 +657,10 @@ static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, co
     #endif
 
     if (!gpu->name.length)
+    {
         ffStrbufSetS(&gpu->name, name ? name : compatible);
+        ffStrbufTrimRightSpace(&gpu->name);
+    }
     if (!gpu->vendor.length && name)
     {
         compatible[0] = (char) toupper(compatible[0]);
