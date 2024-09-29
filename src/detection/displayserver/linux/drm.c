@@ -257,7 +257,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
             if (!conn)
                 continue;
 
-            if (conn->connection == DRM_MODE_CONNECTED)
+            if (conn->connection != DRM_MODE_DISCONNECTED)
             {
                 drmModeEncoder* encoder = ffdrmModeGetEncoder(fd, conn->encoder_id);
                 uint32_t width = 0, height = 0, refreshRate = 0;
