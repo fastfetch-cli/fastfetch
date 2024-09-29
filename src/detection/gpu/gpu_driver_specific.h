@@ -37,6 +37,7 @@ typedef struct FFGpuDriverCondition
 // detect x if not NULL
 typedef struct FFGpuDriverResult
 {
+    uint32_t* index;
     double* temp;
     FFGPUMemory* memory;
     uint32_t* coreCount;

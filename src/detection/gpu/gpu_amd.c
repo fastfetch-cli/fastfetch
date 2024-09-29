@@ -65,5 +65,11 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
     if (result.type)
         *result.type = device->isAPU ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
 
+    if (result.index)
+        *result.type = (uint32_t) device->adlAdapterIndex;
+
+    if (result.name)
+        ffStrbufSetS(result.name, device->adapterString);
+
     return NULL;
 }

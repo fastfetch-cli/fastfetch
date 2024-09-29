@@ -195,5 +195,8 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         }
     }
 
+    if (result.name)
+        ffStrbufSetS(result.name, properties.name);
+
     return NULL;
 }

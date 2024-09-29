@@ -1,12 +1,13 @@
 #include "gpu.h"
 #include "common/library.h"
 #include "detection/cpu/cpu.h"
-#include "detection/temps/temps_apple.h"
 #include "util/apple/cf_helpers.h"
+#include "util/apple/smc_temps.h"
 
 #include <IOKit/graphics/IOGraphicsLib.h>
 
 const char* ffGpuDetectMetal(FFlist* gpus);
+const char* ffGpuDetectDriverVersion(FFlist* gpus);
 
 static double detectGpuTemp(const FFstrbuf* gpuName)
 {
@@ -185,5 +186,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
     }
 
     ffGpuDetectMetal(gpus);
+    if (instance.config.general.detectVersion)
+        ffGpuDetectDriverVersion(gpus);
     return NULL;
 }

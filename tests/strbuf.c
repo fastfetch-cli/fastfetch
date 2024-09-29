@@ -279,6 +279,20 @@ int main(void)
     VERIFY(ffStrbufEqualS(&strbuf, "TEST_TEST"));
     VERIFY(strbuf.length == 9);
     VERIFY(strbuf.allocated >= 10);
+    ffStrbufAppendC(&strbuf, '_');
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST_TEST_"));
+    ffStrbufDestroy(&strbuf);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 0);
+
+    //ffStrbufCreateStatic / Prepend
+    ffStrbufInitStatic(&strbuf, "TEST");
+    ffStrbufPrependS(&strbuf, "TEST_");
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST_TEST"));
+    VERIFY(strbuf.length == 9);
+    VERIFY(strbuf.allocated >= 10);
+    ffStrbufPrependC(&strbuf, '_');
+    VERIFY(ffStrbufEqualS(&strbuf, "_TEST_TEST"));
     ffStrbufDestroy(&strbuf);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 0);
@@ -414,6 +428,18 @@ int main(void)
     VERIFY(strbuf.length == strlen("__TEST__"));
     VERIFY(strbuf.allocated == strlen("__TEST__") + 1 + 10);
     VERIFY(ffStrbufEqualS(&strbuf, "__TEST__"));
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufInsertNC
+    ffStrbufInitStatic(&strbuf, "123456");
+    ffStrbufInsertNC(&strbuf, 0, 2, 'A');
+    VERIFY(ffStrbufEqualS(&strbuf, "AA123456"));
+    ffStrbufInsertNC(&strbuf, 4, 2, 'B');
+    VERIFY(ffStrbufEqualS(&strbuf, "AA12BB3456"));
+    ffStrbufInsertNC(&strbuf, strbuf.length, 2, 'C');
+    VERIFY(ffStrbufEqualS(&strbuf, "AA12BB3456CC"));
+    ffStrbufInsertNC(&strbuf, 999, 2, 'D');
+    VERIFY(ffStrbufEqualS(&strbuf, "AA12BB3456CCDD"));
     ffStrbufDestroy(&strbuf);
 
     //Success

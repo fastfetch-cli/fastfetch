@@ -35,7 +35,7 @@ jobs:
         run: uname -a
 
       - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_XFCONF=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OSMESA=OFF -DENABLE_OPENCL=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_ELF=OFF -DENABLE_DIRECTX_HEADERS=OFF -DENABLE_THREADS=OFF
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr . -DENABLE_VULKAN=OFF -DENABLE_WAYLAND=OFF -DENABLE_XCB_RANDR=OFF -DENABLE_XCB=OFF -DENABLE_XRANDR=OFF -DENABLE_X11=OFF -DENABLE_DRM=OFF -DENABLE_DRM_AMDGPU=OFF -DENABLE_GIO=OFF -DENABLE_DCONF=OFF -DENABLE_DBUS=OFF -DENABLE_XFCONF=OFF -DENABLE_SQLITE3=OFF -DENABLE_RPM=OFF -DENABLE_IMAGEMAGICK7=OFF -DENABLE_IMAGEMAGICK6=OFF -DENABLE_CHAFA=OFF -DENABLE_ZLIB=OFF -DENABLE_EGL=OFF -DENABLE_GLX=OFF -DENABLE_OSMESA=OFF -DENABLE_OPENCL=OFF -DENABLE_FREETYPE=OFF -DENABLE_PULSE=OFF -DENABLE_DDCUTIL=OFF -DENABLE_ELF=OFF -DENABLE_DIRECTX_HEADERS=OFF -DENABLE_THREADS=OFF
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -74,7 +74,7 @@ jobs:
         run: uname -a
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev python3-requests
 
       - name: install linuxbrew packages
         run: |
@@ -87,7 +87,7 @@ jobs:
           languages: c
 
       - name: configure project
-        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -247,12 +247,12 @@ jobs:
         run: |
           cat /etc/alpine-release
           uname -a
-          apk add cmake samurai vulkan-loader-dev libxcb-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev gcc g++
+          apk add cmake samurai vulkan-loader-dev libxcb-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev py3-requests gcc g++
         shell: alpine.sh --root {0}
 
       - name: build
         run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -DIS_MUSL=ON -GNinja .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -DIS_MUSL=ON -DENABLE_EMBEDDED_PCIIDS=On -GNinja .
             cmake --build . --target package --verbose -j4
         shell: alpine.sh {0}
 
@@ -422,8 +422,8 @@ jobs:
           run: |
             uname -a
             sudo pkg update
-            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm libelf glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm libelf glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py311-requests
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false

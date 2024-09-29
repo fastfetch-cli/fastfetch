@@ -365,6 +365,13 @@ FF_MAYBE_UNUSED static bool getTerminalVersionKonsole(FFstrbuf* exe, FFstrbuf* v
 
 FF_MAYBE_UNUSED static bool getTerminalVersionFoot(FFstrbuf* exe, FFstrbuf* version)
 {
+    uint32_t major = 0, minor = 0, patch = 0;
+    if (ffGetTerminalResponse("\e[>c", 3, "\e[>1;%2u%2u%2u;0c", &major, &minor, &patch) == NULL)
+    {
+        ffStrbufSetF(version, "%u.%u.%u", major, minor, patch);
+        return true;
+    }
+
     if(!getExeVersionRaw(exe, version)) return false;
 
     //foot version: 1.13.1 -pgo +ime -graphemes -assertions
@@ -664,7 +671,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
         return getTerminalVersionKonsole(exe, version);
 
     if(ffStrbufIgnCaseEqualS(processName, "yakuake"))
-        return getExeVersionGeneral(exe, version);//yakuake 22.12.3
+        return getTerminalVersionKonsole(exe, version); // yakuake shares code with konsole
 
     if(ffStrbufIgnCaseEqualS(processName, "xfce4-terminal"))
         return getTerminalVersionXfce4Terminal(exe, version);

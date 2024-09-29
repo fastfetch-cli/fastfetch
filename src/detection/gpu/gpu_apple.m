@@ -1,6 +1,7 @@
 #include "gpu.h"
 
 #import <Metal/MTLDevice.h>
+#import <IOKit/kext/KextManager.h>
 
 #ifndef MAC_OS_VERSION_13_0
     #define MTLGPUFamilyMetal3 ((MTLGPUFamily) 5001)
@@ -9,6 +10,28 @@
     #define MTLFeatureSet_macOS_GPUFamily1_v4 ((MTLFeatureSet) 10004)
     #define MTLFeatureSet_macOS_GPUFamily2_v1 ((MTLFeatureSet) 10005)
 #endif
+
+const char* ffGpuDetectDriverVersion(FFlist* gpus)
+{
+    if (@available(macOS 10.7, *))
+    {
+        NSMutableArray* arr = NSMutableArray.new;
+        FF_LIST_FOR_EACH(FFGPUResult, x, *gpus)
+            [arr addObject:@(x->driver.chars)];
+
+        NSDictionary* dict = CFBridgingRelease(KextManagerCopyLoadedKextInfo((__bridge CFArrayRef)arr, (__bridge CFArrayRef)@[@"CFBundleVersion"]));
+        FF_LIST_FOR_EACH(FFGPUResult, x, *gpus)
+        {
+            NSString* version = dict[@(x->driver.chars)][@"CFBundleVersion"];
+            if (version)
+            {
+                ffStrbufAppendC(&x->driver, ' ');
+                ffStrbufAppendS(&x->driver, version.UTF8String);
+            }
+        }
+    }
+    return "Unsupported macOS version";
+}
 
 const char* ffGpuDetectMetal(FFlist* gpus)
 {
@@ -42,7 +65,8 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             else if ([device supportsFamily:MTLGPUFamilyCommon1])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
 
-            gpu->type = device.hasUnifiedMemory ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            gpu->type = device.location == MTLDeviceLocationBuiltIn ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            gpu->index = (uint32_t) device.locationNumber;
             #endif
         }
         return NULL;

@@ -152,13 +152,13 @@ Fastfetch uses `format` to generate output. For example, to make the `GPU` modul
     "modules": [
         {
             "type": "gpu",
-            "format": "{2}" // See `fastfetch -h gpu-format` for detail
+            "format": "{name}" // See `fastfetch -h gpu-format` for detail
         }
     ]
 }
 ```
 
-. . which is equivalent to `fastfetch -s gpu --gpu-format '{2}'`
+. . which is equivalent to `fastfetch -s gpu --gpu-format '{name}'`
 
 See `fastfetch -h format` for information on basic usage. For module specific formattion, see `fastfetch -h <module>-format`
 
@@ -186,6 +186,10 @@ You can always use `fastfetch --pipe false` to force fastfetch running in colorf
 
 See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
 
+### Q: I use Debian / Ubuntu / Debian deserved distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is it a bug?
+
+See [#1282](https://github.com/fastfetch-cli/fastfetch/issues/1282)
+
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
 Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
@@ -209,6 +213,13 @@ Otherwise, open a feature request in [GitHub Issues](https://github.com/fastfetc
 
 * For usage questions, please start a discussion in [GitHub Discussions](https://github.com/fastfetch-cli/fastfetch/discussions).
 * For possible bugs, please open an issue in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues). Be sure to fill the bug-report template carefully for developers to investigate.
+
+## Donate
+
+If you find Fastfetch to be useful, please consider donating.
+
+* Current maintainer: [@CarterLi](https://paypal.me/zhangsongcui)
+* Original author: [@LinusDierheimer](https://github.com/sponsors/LinusDierheimer)
 
 ## Star History
 

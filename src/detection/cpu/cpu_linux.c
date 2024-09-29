@@ -2,13 +2,85 @@
 #include "common/io/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
-#include "detection/temps/temps_linux.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dirent.h>
+
+static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
+{
+    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
+    uint32_t dirLength = dir->length;
+    ffStrbufAppendS(dir, "temp1_input");
+
+    if(!ffReadFileBuffer(dir->chars, buffer))
+    {
+        // Some badly implemented system put temp file in /hwmonN/device
+        ffStrbufSubstrBefore(dir, dirLength);
+        ffStrbufAppendS(dir, "device/");
+        dirLength = dir->length;
+        ffStrbufAppendS(dir, "temp1_input");
+
+        if(!ffReadFileBuffer(dir->chars, buffer))
+            return 0.0/0.0;
+    }
+
+    ffStrbufSubstrBefore(dir, dirLength);
+
+    double value = ffStrbufToDouble(buffer);// millidegree Celsius
+
+    if(value != value)
+        return 0.0/0.0;
+
+    ffStrbufAppendS(dir, "name");
+    if (!ffReadFileBuffer(dir->chars, buffer))
+        return 0.0/0.0;
+
+    ffStrbufTrimRightSpace(buffer);
+
+    if(
+        ffStrbufContainS(buffer, "cpu") ||
+        ffStrbufEqualS(buffer, "k10temp") || // AMD
+        ffStrbufEqualS(buffer, "coretemp") // Intel
+    ) return value / 1000.;
+
+    return false;
+}
+
+static double detectCPUTemp(void)
+{
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
+    ffStrbufAppendS(&baseDir, "/sys/class/hwmon/");
+
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
+    uint32_t baseDirLength = baseDir.length;
+
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
+    if(dirp == NULL)
+        return 0.0/0.0;
+
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        if(entry->d_name[0] == '.')
+            continue;
+
+        ffStrbufAppendS(&baseDir, entry->d_name);
+        ffStrbufAppendC(&baseDir, '/');
+
+        double result = parseHwmonDir(&baseDir, &buffer);
+        if (result == result)
+            return result;
+
+        ffStrbufSubstrBefore(&baseDir, baseDirLength);
+    }
+
+    return 0.0/0.0;
+}
 
 #ifdef __ANDROID__
 #include "common/settings.h"
@@ -253,17 +325,24 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
         if (ffStrStartsWith(entry->d_name, "policy") && ffCharIsDigit(entry->d_name[strlen("policy")]))
         {
             ffStrbufAppendS(&path, entry->d_name);
+
+            uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
+            if (fmax == 0) continue;
+
+            if (cpu->frequencyMax >= fmax)
+            {
+                if (!options->showPeCoreCount)
+                {
+                    ffStrbufSubstrBefore(&path, baseLen);
+                    continue;
+                }
+            }
+            else
+                cpu->frequencyMax = fmax;
+
             uint32_t fbase = getFrequency(&path, "/base_frequency", NULL, &buffer);
             if (fbase > 0)
                 cpu->frequencyBase = cpu->frequencyBase > fbase ? cpu->frequencyBase : fbase;
-
-            uint32_t fbioslimit = getFrequency(&path, "/bios_limit", NULL, &buffer);
-            if (fbioslimit > 0)
-                cpu->frequencyBiosLimit = cpu->frequencyBiosLimit > fbioslimit ? cpu->frequencyBiosLimit : fbioslimit;
-
-            uint32_t fmax = getFrequency(&path, "/cpuinfo_max_freq", "/scaling_max_freq", &buffer);
-            if (fmax > 0)
-                cpu->frequencyMax = cpu->frequencyMax > fmax ? cpu->frequencyMax : fmax;
 
             if (options->showPeCoreCount)
             {
@@ -279,22 +358,6 @@ static bool detectFrequency(FFCPUResult* cpu, const FFCPUOptions* options)
         }
     }
     return true;
-}
-
-static double detectCPUTemp(void)
-{
-    const FFlist* tempsResult = ffDetectTemps();
-
-    FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
-    {
-        if(
-            ffStrbufFirstIndexS(&value->name, "cpu") < value->name.length ||
-            ffStrbufEqualS(&value->name, "k10temp") ||
-            ffStrbufEqualS(&value->name, "coretemp")
-        ) return value->value;
-    }
-
-    return FF_CPU_TEMP_UNSET;
 }
 
 FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)

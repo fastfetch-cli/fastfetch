@@ -18,16 +18,16 @@ const char* ffDetectWallpaper(FFstrbuf* result)
             NSArray* choices = [dict valueForKeyPath:@"SystemDefault.Desktop.Content.Choices"];
             if (choices.count > 0)
             {
-                NSDictionary* choice = [choices objectAtIndex:0];
-                NSArray* files = [choice valueForKey:@"Files"];
+                NSDictionary* choice = choices[0];
+                NSArray* files = choice[@"Files"];
                 if (files.count > 0)
                 {
-                    NSString* file = [[files objectAtIndex: 0] valueForKey: @"relative"];
+                    NSString* file = files[0][@"relative"];
                     ffStrbufAppendS(result, [NSURL URLWithString:file].path.UTF8String);
                 }
                 else
                 {
-                    NSString* provider = [choice valueForKey:@"Provider"];
+                    NSString* provider = choice[@"Provider"];
                     NSString* builtinPrefix = @"com.apple.wallpaper.choice.";
                     if ([provider hasPrefix:builtinPrefix])
                         provider = [provider substringFromIndex:builtinPrefix.length];

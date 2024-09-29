@@ -30,7 +30,7 @@ struct FFMtmlData
     MtmlSystem *sys;
 } mtmlData;
 
-static void shutdownMtml()
+FF_MAYBE_UNUSED static void shutdownMtml(void)
 {
     mtmlData.ffmtmlLibraryShutDown(mtmlData.lib);
 }
@@ -132,6 +132,13 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
         default:
             break;
         }
+    }
+
+    if (result.index)
+    {
+        unsigned int value;
+        if (mtmlData.ffmtmlDeviceGetIndex(device, &value) == MTML_SUCCESS)
+            *result.index = value;
     }
 
     if (result.temp)

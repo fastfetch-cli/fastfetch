@@ -706,6 +706,7 @@
                             "terminaltheme",
                             "title",
                             "theme",
+                            "tpm",
                             "uptime",
                             "users",
                             "version",
@@ -864,6 +865,10 @@
                                             {
                                                 "const": "theme",
                                                 "description": "Print current theme of desktop environment"
+                                            },
+                                            {
+                                                "const": "tpm",
+                                                "description": "Print info of Trusted Platform Module (TPM) Security Device"
                                             },
                                             {
                                                 "const": "uptime",

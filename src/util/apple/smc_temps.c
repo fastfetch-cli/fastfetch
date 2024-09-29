@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "temps_apple.h"
+#include "smc_temps.h"
 #include "util/stringUtils.h"
 
 #include <stdint.h>

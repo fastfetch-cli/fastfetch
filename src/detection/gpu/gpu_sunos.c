@@ -20,8 +20,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     if (!ffStrbufStartsWithS(&buffer, "\npci "))
         return "Invalid scanpci result";
 
-    FF_STRBUF_AUTO_DESTROY pciids = ffStrbufCreate();
-
     // pci bus 0x0000 cardnum 0x00 function 0x00: vendor 0x1414 device 0x008e
     //  Device unknown
     //  CardVendor 0x0000 card 0x0000 (Card unknown)
@@ -57,6 +55,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
         ffStrbufInit(&gpu->platformApi);
+        gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
@@ -74,9 +73,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (gpu->name.length == 0)
         {
-            if (pciids.length == 0)
-                ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
-            ffGPUParsePciIds(&pciids, (uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu, NULL);
+            ffGPUFillVendorAndName((uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
         }
     }
 

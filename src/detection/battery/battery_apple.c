@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "battery.h"
 #include "util/apple/cf_helpers.h"
-#include "detection/temps/temps_apple.h"
+#include "util/apple/smc_temps.h"
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/pwr_mgt/IOPM.h>

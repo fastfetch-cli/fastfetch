@@ -211,6 +211,14 @@ void ffStrbufPrependNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     strbuf->length += length;
 }
 
+void ffStrbufPrependC(FFstrbuf* strbuf, char c)
+{
+    ffStrbufEnsureFree(strbuf, 1);
+    memmove(strbuf->chars + 1, strbuf->chars, strbuf->length + 1); // + 1 for the null byte
+    strbuf->chars[0] = c;
+    strbuf->length += 1;
+}
+
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
 {
     ffStrbufClear(strbuf);
@@ -510,4 +518,16 @@ void ffStrbufLowerCase(FFstrbuf* strbuf)
 {
     for (uint32_t i = 0; i < strbuf->length; ++i)
         strbuf->chars[i] = (char) tolower(strbuf->chars[i]);
+}
+
+void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c)
+{
+    if(num == 0) return;
+    if (index >= strbuf->length)
+        index = strbuf->length;
+
+    ffStrbufEnsureFree(strbuf, num);
+    memmove(strbuf->chars + index + num, strbuf->chars + index, strbuf->length - index + 1);
+    memset(&strbuf->chars[index], c, num);
+    strbuf->length += num;
 }

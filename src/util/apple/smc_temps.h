@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "util/FFlist.h"
 
 typedef struct FFTempValue
 {

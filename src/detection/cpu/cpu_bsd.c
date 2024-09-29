@@ -1,6 +1,27 @@
 #include "cpu.h"
 #include "common/sysctl.h"
-#include "detection/temps/temps_bsd.h"
+
+static const char* detectCpuTemp(double* current)
+{
+    int temp = ffSysctlGetInt("dev.cpu.0.temperature", -999999);
+    if (temp == -999999)
+        return "ffSysctlGetInt(\"dev.cpu.0.temperature\") failed";
+
+    // In tenth of degrees Kelvin
+    *current = (double) temp / 10 - 273.15;
+    return NULL;
+}
+
+static const char* detectThermalTemp(double* current)
+{
+    int temp = ffSysctlGetInt("hw.acpi.thermal.tz0.temperature", -999999);
+    if (temp == -999999)
+        return "ffSysctlGetInt(\"hw.acpi.thermal.tz0.temperature\") failed";
+
+    // In tenth of degrees Kelvin
+    *current = (double) temp / 10 - 273.15;
+    return NULL;
+}
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
@@ -46,8 +67,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     if (options->temp)
     {
-        if (ffDetectCpuTemp(&cpu->temperature) != NULL)
-            ffDetectThermalTemp(&cpu->temperature);
+        if (detectCpuTemp(&cpu->temperature) != NULL)
+            detectThermalTemp(&cpu->temperature);
     }
 
     return NULL;

@@ -234,6 +234,7 @@ static const char* detectVulkan(FFVulkanResult* result)
         }
 
         //No way to detect those using vulkan
+        gpu->index = FF_GPU_INDEX_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;

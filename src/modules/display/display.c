@@ -100,7 +100,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
+        uint32_t inch = (uint32_t) (sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4 + 0.5);
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -121,8 +121,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
                 ffStrbufAppendF(&buffer, " (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
-            if (inch > 0)
-                ffStrbufAppendF(&buffer, " in %i″", (uint32_t) (inch + 0.5));
+            if (inch > 1)
+                ffStrbufAppendF(&buffer, " in %i″", inch);
 
             if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
                 ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");

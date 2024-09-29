@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.25.0
+    VERSION 2.26.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -51,6 +51,7 @@ cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR FreeBSD OR SunOS" OF
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR SunOS" OFF)
@@ -80,6 +81,7 @@ option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
+option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -254,6 +256,16 @@ else()
     file(READ "src/data/help.json" DATATEXT_JSON_HELP)
 endif()
 
+if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "fastfetch_pciids.c.inc")
+    if(Python_FOUND)
+        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
+                        OUTPUT_FILE "fastfetch_pciids.c.inc")
+    else()
+        message(STATUS "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
+        set(ENABLE_EMBEDDED_PCIIDS OFF)
+    endif()
+endif()
+
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 fastfetch_load_text(src/data/help_footer.txt DATATEXT_HELP_FOOTER)
@@ -394,6 +406,7 @@ set(LIBFASTFETCH_SRC
     src/modules/terminalsize/terminalsize.c
     src/modules/theme/theme.c
     src/modules/title/title.c
+    src/modules/tpm/tpm.c
     src/modules/uptime/uptime.c
     src/modules/users/users.c
     src/modules/version/version.c
@@ -412,6 +425,7 @@ set(LIBFASTFETCH_SRC
     src/util/base64.c
     src/util/FFlist.c
     src/util/FFstrbuf.c
+    src/util/kmod.c
     src/util/path.c
     src/util/platform/FFPlatform.c
     src/util/smbiosHelper.c
@@ -480,11 +494,11 @@ if(LINUX)
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
-        src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_linux.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -544,11 +558,11 @@ elseif(ANDROID)
         src/detection/processes/processes_linux.c
         src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_linux.c
-        src/detection/temps/temps_linux.c
         src/detection/terminalfont/terminalfont_android.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_nosupport.c
@@ -625,11 +639,11 @@ elseif(FreeBSD)
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_bsd.c
         src/detection/swap/swap_bsd.c
-        src/detection/temps/temps_bsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_bsd.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -691,11 +705,11 @@ elseif(APPLE)
         src/detection/processes/processes_bsd.c
         src/detection/sound/sound_apple.c
         src/detection/swap/swap_apple.c
-        src/detection/temps/temps_apple.c
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.m
@@ -707,6 +721,7 @@ elseif(APPLE)
         src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
+        src/util/apple/smc_temps.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_apple.c
     )
@@ -726,6 +741,7 @@ elseif(WIN32)
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
+        src/detection/cpu/cpu_windows.cpp
         src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
@@ -760,8 +776,8 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
-        src/detection/temps/temps_windows.cpp
         src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
         src/detection/wallpaper/wallpaper_windows.c
@@ -846,6 +862,7 @@ elseif(SunOS)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_sunos.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
@@ -1038,6 +1055,10 @@ ff_lib_enable(DRM
     "libdrm"
     "Libdrm"
 )
+ff_lib_enable(DRM_AMDGPU
+    "libdrm_amdgpu"
+    "Libdrm_Amdgpu"
+)
 ff_lib_enable(GIO
     "gio-2.0"
     "GIO"
@@ -1133,18 +1154,29 @@ if(ENABLE_LIBZFS)
     endif()
 endif()
 
-
 if(ENABLE_THREADS)
-    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
     if(CMAKE_USE_PTHREADS_INIT) #Threads::Threads is not set for WIN32
         target_link_libraries(libfastfetch PRIVATE Threads::Threads)
     endif()
+endif()
+
+if(ENABLE_EMBEDDED_PCIIDS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_PCIIDS=1)
 endif()
 
 if(LINUX)
     target_link_libraries(libfastfetch
         PRIVATE "m"
     )
+
+    if(ENABLE_DIRECTX_HEADERS)
+        if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+            target_link_libraries(libfastfetch
+                PRIVATE "/usr/lib/wsl/lib/libdxcore.so"
+            )
+        endif()
+    endif()
 elseif(APPLE)
     target_link_libraries(libfastfetch
         PRIVATE "-framework AVFoundation"
@@ -1168,7 +1200,7 @@ elseif(APPLE)
         PRIVATE "-weak_framework Apple80211"
     )
 elseif(WIN32)
-    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0601)
+    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0A00)
     target_link_libraries(libfastfetch
         PRIVATE "dwmapi"
         PRIVATE "gdi32"

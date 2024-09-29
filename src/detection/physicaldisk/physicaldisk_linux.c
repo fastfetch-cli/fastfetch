@@ -1,11 +1,33 @@
 #include "physicaldisk.h"
 #include "common/io/io.h"
 #include "common/properties.h"
-#include "detection/temps/temps_linux.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>
 #include <limits.h>
+
+static double detectNvmeTemp(const char* devName)
+{
+    char pathSysBlock[PATH_MAX];
+    int index = snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/hwmon$/temp1_input", devName);
+    if (index <= 0) return FF_PHYSICALDISK_TEMP_UNSET;
+    index -= (int) sizeof("/temp1_input");
+
+    for (char c = '0'; c <= '9'; c++) // hopefully there's only one digit
+    {
+        pathSysBlock[index] = c;
+        char buffer[64];
+        ssize_t size = ffReadFileData(pathSysBlock, sizeof(buffer), buffer);
+        if (size > 0)
+        {
+            buffer[size] = '\0';
+            double temp = strtod(buffer, NULL);
+            return temp > 0 ? temp / 1000 : FF_PHYSICALDISK_TEMP_UNSET;
+        }
+    }
+
+    return FF_PHYSICALDISK_TEMP_UNSET;
+}
 
 const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
 {
@@ -157,20 +179,10 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
             }
         }
 
-        device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
         if (options->temp)
-        {
-            const FFlist* tempsResult = ffDetectTemps();
-
-            FF_LIST_FOR_EACH(FFTempValue, value, *tempsResult)
-            {
-                if (ffStrStartsWith(devName, value->deviceName.chars)) // nvme0 - nvme0n1
-                {
-                    device->temperature = value->value;
-                    break;
-                }
-            }
-        }
+            device->temperature = detectNvmeTemp(devName);
+        else
+            device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
     }
 
     return NULL;

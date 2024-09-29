@@ -1,6 +1,6 @@
 #include "cpu.h"
 #include "common/sysctl.h"
-#include "detection/temps/temps_apple.h"
+#include "util/apple/smc_temps.h"
 #include "util/stringUtils.h"
 
 static double detectCpuTemp(const FFstrbuf* cpuName)

@@ -15,7 +15,7 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError)
         return false;
     }
 
-    NSNumber* wmThemeColor = [dict valueForKey:@"AppleAccentColor"];
+    NSNumber* wmThemeColor = dict[@"AppleAccentColor"];
     if(!wmThemeColor)
         ffStrbufAppendS(themeOrError, "Multicolor");
     else
@@ -34,7 +34,7 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError)
         }
     }
 
-    NSString* wmTheme = [dict valueForKey:@"AppleInterfaceStyle"];
+    NSString* wmTheme = dict[@"AppleInterfaceStyle"];
     ffStrbufAppendF(themeOrError, " (%s)", wmTheme ? wmTheme.UTF8String : "Light");
     return true;
 }

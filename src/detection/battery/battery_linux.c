@@ -1,6 +1,5 @@
 #include "battery.h"
 #include "common/io/io.h"
-#include "detection/temps/temps_linux.h"
 #include "util/stringUtils.h"
 
 #include <dirent.h>

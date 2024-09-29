@@ -191,6 +191,9 @@ void ffListFeatures(void)
         #if FF_HAVE_DRM
             "drm\n"
         #endif
+        #if FF_HAVE_DRM_AMDGPU
+            "drm_amdgpu\n"
+        #endif
         #if FF_HAVE_GIO
             "gio\n"
         #endif
@@ -259,6 +262,9 @@ void ffListFeatures(void)
         #endif
         #if FF_HAVE_LINUX_WIRELESS
             "linux/wireless\n"
+        #endif
+        #if FF_HAVE_EMBEDDED_PCIIDS
+            "Embedded pciids\n"
         #endif
         ""
     , stdout);

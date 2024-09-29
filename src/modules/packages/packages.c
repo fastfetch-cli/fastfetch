@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 37
+#define FF_PACKAGES_NUM_FORMAT_ARGS 38
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -72,6 +72,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE_NAME(guixUser, "guix-user")
         FF_PRINT_PACKAGE_NAME(guixHome, "guix-home")
         FF_PRINT_PACKAGE(linglong)
+        FF_PRINT_PACKAGE(pacstall)
 
         putchar('\n');
     }
@@ -115,6 +116,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.guixUser, "guix-user"),
             FF_FORMAT_ARG(counts.guixHome, "guix-home"),
             FF_FORMAT_ARG(counts.linglong, "linglong"),
+            FF_FORMAT_ARG(counts.pacstall, "pacstall"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -186,9 +188,10 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     break;
                 case 'P': if (false);
                     FF_TEST_PACKAGE_NAME(PACMAN)
+                    FF_TEST_PACKAGE_NAME(PACSTALL)
+                    FF_TEST_PACKAGE_NAME(PALUDIS)
                     FF_TEST_PACKAGE_NAME(PKG)
                     FF_TEST_PACKAGE_NAME(PKGTOOL)
-                    FF_TEST_PACKAGE_NAME(PALUDIS)
                     break;
                 case 'R': if (false);
                     FF_TEST_PACKAGE_NAME(RPM)
@@ -295,9 +298,10 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             break;
                         case 'P': if (false);
                             FF_TEST_PACKAGE_NAME(PACMAN)
+                            FF_TEST_PACKAGE_NAME(PACSTALL)
+                            FF_TEST_PACKAGE_NAME(PALUDIS)
                             FF_TEST_PACKAGE_NAME(PKG)
                             FF_TEST_PACKAGE_NAME(PKGTOOL)
-                            FF_TEST_PACKAGE_NAME(PALUDIS)
                             break;
                         case 'R': if (false);
                             FF_TEST_PACKAGE_NAME(RPM)
@@ -352,6 +356,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(NIX)
         FF_TEST_PACKAGE_NAME(OPKG)
         FF_TEST_PACKAGE_NAME(PACMAN)
+        FF_TEST_PACKAGE_NAME(PACSTALL)
         FF_TEST_PACKAGE_NAME(PALUDIS)
         FF_TEST_PACKAGE_NAME(PKG)
         FF_TEST_PACKAGE_NAME(PKGTOOL)
@@ -412,6 +417,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(guixUser)
     FF_APPEND_PACKAGE_COUNT(guixHome)
     FF_APPEND_PACKAGE_COUNT(linglong)
+    FF_APPEND_PACKAGE_COUNT(pacstall)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
@@ -451,6 +457,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of guix-user packages - guix-user",
         "Number of guix-home packages - guix-home",
         "Number of linglong packages - linglong",
+        "Number of pacstall packages - pacstall",
         "Total number of all nix packages - nix-all",
         "Total number of all flatpak app packages - flatpak-all",
         "Total number of all brew packages - brew-all",

@@ -38,7 +38,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
 
     uint8_t buffer[2048];
     wchar_t key[16];
-    wsprintfW(key, L"Boot%04X", value);
+    swprintf(key, sizeof(key) / sizeof(*key), L"Boot%04X", value);
     uint32_t size = GetFirmwareEnvironmentVariableW(key, L"{" FF_EFI_GLOBAL_GUID L"}", buffer, sizeof(buffer));
     if (size < sizeof(FFEfiLoadOption) || size == sizeof(buffer))
         return "GetFirmwareEnvironmentVariableW(Boot####) failed";

@@ -134,7 +134,7 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
                 break;
             default:
-                if (inf.activePHYMode < 64)
+                if (inf.activePHYMode < 8)
                     ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
                 else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
                 {

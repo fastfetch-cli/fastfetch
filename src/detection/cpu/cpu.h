@@ -21,7 +21,6 @@ typedef struct FFCPUResult
 
     uint32_t frequencyBase; // GHz
     uint32_t frequencyMax; // GHz
-    uint32_t frequencyBiosLimit; // GHz
 
     FFCPUCore coreTypes[16]; // number of P cores, E cores, etc.
 
