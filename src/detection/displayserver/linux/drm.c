@@ -28,13 +28,19 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
         ffStrbufAppendS(&drmDir, entry->d_name);
         uint32_t drmDirWithDnameLength = drmDir.length;
 
-        ffStrbufAppendS(&drmDir, "/status");
-        char status = 'd'; // disconnected
-        ffReadFileData(drmDir.chars, sizeof(status), &status);
-        if (status != 'c') // connected
-        {
+        char buf;
+        ffStrbufAppendS(&drmDir, "/enabled");
+        if (!ffReadFileData(drmDir.chars, sizeof(buf), &buf) || buf != 'e') {
+          /* read failed or enabled != "enabled" */
+          ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
+          ffStrbufAppendS(&drmDir, "/status");
+          buf = 'd';
+          ffReadFileData(drmDir.chars, sizeof(buf), &buf);
+          if (buf != 'c') {
+            /* read failed or status != "connected" */
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
             continue;
+          }
         }
 
         unsigned width = 0, height = 0, physicalWidth = 0, physicalHeight = 0;
