@@ -1,3 +1,11 @@
+# 2.26.1
+
+Features:
+* Allow to disable pacstall packager detection in CMake
+
+Bugfixes:
+* Fix uninitialized variables (GPU, Windows)
+
 # 2.26.0
 
 Changes:
