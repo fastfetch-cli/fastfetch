@@ -33,7 +33,10 @@ FFDisplayResult* ffdsAppendDisplay(
     display->primary = primary;
 
     display->bitDepth = 0;
-    display->hdrEnabled = false;
+    display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+    display->manufactureYear = 0;
+    display->manufactureWeek = 0;
+    display->serial = 0;
 
     return display;
 }

@@ -8,9 +8,10 @@
 #include <CoreGraphics/CGDirectDisplay.h>
 #include <CoreVideo/CVDisplayLink.h>
 
+extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) __attribute__((weak_import));
+extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) __attribute__((weak_import));
 #ifdef MAC_OS_X_VERSION_10_15
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
-extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) __attribute__((weak_import));
 #else
 #include <IOKit/graphics/IOGraphicsLib.h>
 #endif
@@ -89,12 +90,23 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     display->bitDepth = (uint8_t) bitDepth;
                 }
 
-                #ifdef MAC_OS_X_VERSION_10_15
-                if (CoreDisplay_Display_IsHDRModeEnabled)
+                if (display->type == FF_DISPLAY_TYPE_BUILTIN)
+                    display->hdrStatus = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance"))
+                        ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+                else if (CoreDisplay_Display_SupportsHDRMode)
                 {
-                    display->hdrEnabled = CoreDisplay_Display_IsHDRModeEnabled(screen);
+                    if (CoreDisplay_Display_SupportsHDRMode(screen))
+                    {
+                        if (CoreDisplay_Display_IsHDRModeEnabled)
+                        {
+                            display->hdrStatus = CoreDisplay_Display_IsHDRModeEnabled(screen)
+                                ? FF_DISPLAY_HDR_STATUS_ENABLED
+                                : FF_DISPLAY_HDR_STATUS_SUPPORTED;
+                        }
+                        else
+                            display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+                    }
                 }
-                #endif
             }
             CGDisplayModeRelease(mode);
         }
