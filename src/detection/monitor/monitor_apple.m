@@ -9,6 +9,7 @@
 
 #ifdef MAC_OS_X_VERSION_10_15
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
+extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) __attribute__((weak_import));
 #else
 #include <IOKit/graphics/IOGraphicsLib.h>
 #endif
@@ -41,6 +42,19 @@ static bool detectHdrSupportWithNSScreen(FFDisplayResult* display)
         }
     }
     return false;
+}
+
+static bool detectHdrSupport(CFDictionaryRef displayInfo, FFDisplayResult* display)
+{
+    #ifdef MAC_OS_X_VERSION_10_15
+    if (CoreDisplay_Display_SupportsHDRMode)
+    {
+        if (CoreDisplay_Display_SupportsHDRMode(display->id))
+            return true;
+    }
+    #endif
+    return CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance")) ||
+        detectHdrSupportWithNSScreen(display);
 }
 
 const char* ffDetectMonitor(FFlist* results)
@@ -77,8 +91,7 @@ const char* ffDetectMonitor(FFlist* results)
                 monitor->width = width;
                 monitor->height = height;
                 ffEdidGetPhysicalSize(edidData, &monitor->physicalWidth, &monitor->physicalHeight);
-                monitor->hdrCompatible = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance")) ||
-                    detectHdrSupportWithNSScreen(display);
+                monitor->hdrCompatible = detectHdrSupport(displayInfo, display);
                 continue;
             }
         }
@@ -97,8 +110,7 @@ const char* ffDetectMonitor(FFlist* results)
         CGSize size = CGDisplayScreenSize((CGDirectDisplayID) display->id);
         monitor->physicalWidth = (uint32_t) (size.width + 0.5);
         monitor->physicalHeight = (uint32_t) (size.height + 0.5);
-        monitor->hdrCompatible = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance")) ||
-            detectHdrSupportWithNSScreen(display);
+        monitor->hdrCompatible = detectHdrSupport(displayInfo, display);
         monitor->serial = CGDisplaySerialNumber((CGDirectDisplayID) display->id);
 
         FF_CFTYPE_AUTO_RELEASE CFArrayRef modes = CGDisplayCopyAllDisplayModes((CGDirectDisplayID) display->id, NULL);
