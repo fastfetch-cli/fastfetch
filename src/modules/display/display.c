@@ -100,7 +100,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        uint32_t inch = (uint32_t) (sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4 + 0.5);
+        double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -122,7 +122,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 ffStrbufAppendF(&buffer, " (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
             if (inch > 1)
-                ffStrbufAppendF(&buffer, " in %i″", inch);
+                ffStrbufAppendF(&buffer, " in %i″", (uint32_t) (inch + 0.5));
 
             if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
                 ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");
@@ -139,6 +139,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
         else
         {
             double ppi = sqrt(result->width * result->width + result->height * result->height) / inch;
+            bool hdrEnabled = result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
+            uint32_t iInch = (uint32_t) (inch + 0.5), iPpi = (uint32_t) (ppi + 0.5);
 
             char refreshRate[16];
             if(result->refreshRate > 0)
@@ -160,7 +162,6 @@ void ffPrintDisplay(FFDisplayOptions* options)
             else
                 buf[0] = '\0';
 
-            bool hdrEnabled = result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result->width, "width"),
                 FF_FORMAT_ARG(result->height, "height"),
@@ -173,8 +174,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 FF_FORMAT_ARG(result->primary, "is-primary"),
                 FF_FORMAT_ARG(result->physicalWidth, "physical-width"),
                 FF_FORMAT_ARG(result->physicalHeight, "physical-height"),
-                FF_FORMAT_ARG(inch, "inch"),
-                FF_FORMAT_ARG(ppi, "ppi"),
+                FF_FORMAT_ARG(iInch, "inch"),
+                FF_FORMAT_ARG(iPpi, "ppi"),
                 FF_FORMAT_ARG(result->bitDepth, "bit-depth"),
                 FF_FORMAT_ARG(hdrEnabled, "hdr-enabled"),
                 FF_FORMAT_ARG(result->manufactureYear, "manufacture-year"),
