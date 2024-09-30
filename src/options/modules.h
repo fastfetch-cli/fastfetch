@@ -42,7 +42,6 @@ typedef struct FFOptionsModules
     FFLocaleOptions locale;
     FFMediaOptions media;
     FFMemoryOptions memory;
-    FFMonitorOptions monitor;
     FFNetIOOptions netIo;
     FFOSOptions os;
     FFOpenCLOptions openCL;

@@ -382,7 +382,6 @@ set(LIBFASTFETCH_SRC
     src/modules/locale/locale.c
     src/modules/localip/localip.c
     src/modules/memory/memory.c
-    src/modules/monitor/monitor.c
     src/modules/netio/netio.c
     src/modules/opencl/opencl.c
     src/modules/opengl/opengl.c
@@ -484,7 +483,6 @@ if(LINUX)
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
-        src/detection/monitor/monitor_linux.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
@@ -549,7 +547,6 @@ elseif(ANDROID)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
-        src/detection/monitor/monitor_nosupport.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
@@ -629,7 +626,6 @@ elseif(FreeBSD)
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
-        src/detection/monitor/monitor_linux.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
@@ -696,7 +692,6 @@ elseif(APPLE)
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
-        src/detection/monitor/monitor_apple.m
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
@@ -764,7 +759,6 @@ elseif(WIN32)
         src/detection/media/media_windows.c
         src/detection/memory/memory_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
-        src/detection/monitor/monitor_windows.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
         src/detection/os/os_windows.cpp
@@ -848,7 +842,6 @@ elseif(SunOS)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_sunos.c
-        src/detection/monitor/monitor_linux.c
         src/detection/netio/netio_sunos.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_sunos.c

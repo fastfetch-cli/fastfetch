@@ -41,7 +41,6 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitLocaleOptions(&options->locale);
     ffInitMediaOptions(&options->media);
     ffInitMemoryOptions(&options->memory);
-    ffInitMonitorOptions(&options->monitor);
     ffInitNetIOOptions(&options->netIo);
     ffInitOSOptions(&options->os);
     ffInitOpenCLOptions(&options->openCL);
@@ -116,7 +115,6 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyLocaleOptions(&options->locale);
     ffDestroyMediaOptions(&options->media);
     ffDestroyMemoryOptions(&options->memory);
-    ffDestroyMonitorOptions(&options->monitor);
     ffDestroyNetIOOptions(&options->netIo);
     ffDestroyOSOptions(&options->os);
     ffDestroyOpenCLOptions(&options->openCL);

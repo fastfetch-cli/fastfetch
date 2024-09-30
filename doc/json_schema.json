@@ -684,7 +684,6 @@
                             "localip",
                             "media",
                             "memory",
-                            "monitor",
                             "netio",
                             "opencl",
                             "opengl",
@@ -813,10 +812,6 @@
                                             {
                                                 "const": "media",
                                                 "description": "Print playing song name"
-                                            },
-                                            {
-                                                "const": "monitor",
-                                                "description": "Print connected physical monitor information"
                                             },
                                             {
                                                 "const": "opencl",

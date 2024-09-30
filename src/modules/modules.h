@@ -40,7 +40,6 @@
 #include "modules/localip/localip.h"
 #include "modules/media/media.h"
 #include "modules/memory/memory.h"
-#include "modules/monitor/monitor.h"
 #include "modules/netio/netio.h"
 #include "modules/opengl/opengl.h"
 #include "modules/opencl/opencl.h"
