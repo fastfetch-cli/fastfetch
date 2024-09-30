@@ -122,7 +122,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 ffStrbufAppendF(&buffer, " (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
             if (inch > 1)
-                ffStrbufAppendF(&buffer, " in %i″", (uint32_t) (inch + 0.5));
+                ffStrbufAppendF(&buffer, " in %i\"", (uint32_t) (inch + 0.5));
 
             if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
                 ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");
