@@ -80,6 +80,9 @@ static void waylandKdeEdidListener(void* data, FF_MAYBE_UNUSED struct kde_output
     FF_STRBUF_AUTO_DESTROY edid = ffBase64DecodeStrbuf(&b64);
     if (edid.length < 128) return;
     ffEdidGetName((const uint8_t*) edid.chars, &wldata->edidName);
+    wldata->hdrSupported = ffEdidGetHdrCompatible((const uint8_t*) edid.chars, edid.length);
+    ffEdidGetSerialAndManufactureDate((const uint8_t*) edid.chars, &wldata->serial, &wldata->myear, &wldata->mweek);
+    wldata->hdrInfoAvailable = true;
 }
 
 static void waylandKdeEnabledListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_v2* _, int32_t enabled)
@@ -195,7 +198,18 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
     );
     if (item)
     {
-        item->hdrEnabled = display.hdrEnabled;
+        if (display.hdrEnabled)
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+        else if (display.hdrSupported)
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+        else if (display.hdrInfoAvailable)
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+        else
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+
+        item->manufactureYear = display.myear;
+        item->manufactureWeek = display.mweek;
+        item->serial = display.serial;
     }
 
     ffStrbufDestroy(&display.description);
