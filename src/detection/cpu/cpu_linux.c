@@ -388,38 +388,53 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
         return;
 
     // device-vendor,device-model\0soc-vendor,soc-model\0
-    char content[64];
+    char content[256];
     ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
     if (length <= 2) return;
 
-    // get the second NUL terminated string
-    char* modelName = memchr(content, '\0', (size_t) length) + 1;
-    if (!modelName || modelName - content >= length) return;
+    // get the second NUL terminated string if it exists
+    char* vendor = memchr(content, '\0', (size_t) length) + 1;
+    if (!vendor || vendor - content >= length) vendor = content;
 
-    if (ffStrStartsWith(modelName, "apple,t"))
+    char* model = strchr(vendor, ',');
+    if (!model) return;
+    *model = '\0';
+    ++model;
+
+    if (false) {}
+    #if __aarch64__
+    else if (ffStrEquals(vendor, "apple"))
     {
-        // https://elixir.bootlin.com/linux/v6.11-rc7/source/arch/arm64/boot/dts/apple
-        const char* code = modelName + strlen("apple,t");
-        uint32_t deviceId = (uint32_t) strtoul(code, NULL, 10);
-        ffStrbufSetStatic(&cpu->name, ffCPUAppleCodeToName(deviceId));
-        if (!cpu->name.length)
+        // https://elixir.bootlin.com/linux/v6.11/source/arch/arm64/boot/dts/apple
+        if (model[0] == 't')
         {
-            ffStrbufAppendS(&cpu->name, "Apple Silicon T");
-            ffStrbufAppendS(&cpu->name, code);
+            uint32_t deviceId = (uint32_t) strtoul(model + 1, NULL, 10);
+            ffStrbufSetStatic(&cpu->name, ffCPUAppleCodeToName(deviceId));
+
+            if (!cpu->name.length)
+            {
+                ffStrbufSetS(&cpu->name, "Apple Silicon ");
+                ffStrbufAppendS(&cpu->name, model);
+            }
         }
+        else
+            ffStrbufSetS(&cpu->name, model);
+
+        ffStrbufSetStatic(&cpu->vendor, "Apple");
     }
-    else if (ffStrStartsWith(modelName, "qcom,"))
+    #endif
+    else if (ffStrEquals(vendor, "qcom"))
     {
-        // https://elixir.bootlin.com/linux/v6.11-rc7/source/arch/arm64/boot/dts/qcom
-        if (ffStrStartsWith(modelName + strlen("qcom,"), "x"))
+        // https://elixir.bootlin.com/linux/v6.11/source/arch/arm64/boot/dts/qcom
+        if (ffStrStartsWith(model, "x"))
         {
             ffStrbufSetS(&cpu->name, "Qualcomm Snapdragon X Elite ");
-            for (const char* p = modelName + strlen("qcom,"); *p; ++p)
+            for (const char* p = model + 1; *p; ++p)
                 ffStrbufAppendC(&cpu->name, (char) toupper(*p));
         }
-        else if (ffStrStartsWith(modelName + strlen("qcom,"), "sc"))
+        else if (ffStrStartsWith(model, "sc"))
         {
-            const char* code = modelName + strlen("qcom,sc");
+            const char* code = model + 2;
             uint32_t deviceId = (uint32_t) strtoul(code, NULL, 10);
             ffStrbufSetStatic(&cpu->name, ffCPUQualcommCodeToName(deviceId));
             if (!cpu->name.length)
@@ -428,6 +443,23 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
                 ffStrbufAppendS(&cpu->name, code);
             }
         }
+        else
+            ffStrbufSetS(&cpu->name, model);
+
+        ffStrbufSetStatic(&cpu->vendor, "Qualcomm");
+    }
+    else if (ffStrEquals(vendor, "brcm"))
+    {
+        // Raspberry Pi
+        ffStrbufSetStatic(&cpu->vendor, "Broadcom");
+        for (const char* p = model; *p; ++p)
+            ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+    }
+    else
+    {
+        ffStrbufSetS(&cpu->name, model);
+        ffStrbufSetS(&cpu->vendor, vendor);
+        cpu->vendor.chars[0] = (char) toupper(vendor[0]);
     }
 }
 
@@ -480,7 +512,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     #if __ANDROID__
     detectAndroid(cpu);
-    #elif __aarch64__
+    #else
     detectArmSoc(cpu);
     #endif
 
