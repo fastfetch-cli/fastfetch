@@ -86,6 +86,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     .id = path->targetInfo.id,
                 },
             };
+            uint8_t edidData[1024];
+            DWORD edidLength = 0;
+
             if(DisplayConfigGetDeviceInfo(&targetName.header) == ERROR_SUCCESS)
             {
                 wchar_t regPath[256] = L"SYSTEM\\CurrentControlSet\\Enum";
@@ -103,8 +106,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 wcscpy(pRegPath, L"Device Parameters");
 
-                uint8_t edidData[1024];
-                DWORD edidLength = sizeof(edidData);
+                edidLength = sizeof(edidData);
                 if (RegGetValueW(HKEY_LOCAL_MACHINE, regPath, L"EDID", RRF_RT_REG_BINARY, NULL, edidData, &edidLength) == ERROR_SUCCESS &&
                     edidLength > 0 && edidLength % 128 == 0)
                 {
@@ -113,6 +115,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 else
                 {
+                    edidLength = 0;
                     if (targetName.flags.friendlyNameFromEdid)
                         ffStrbufSetWS(&name, targetName.monitorFriendlyDeviceName);
                     else
@@ -177,9 +180,18 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 };
                 if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS)
                 {
-                    display->hdrEnabled = !!advColorInfo.advancedColorEnabled;
+                    if (advColorInfo.advancedColorEnabled)
+                        display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+                    else if (advColorInfo.advancedColorSupported)
+                        display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+                    else
+                        display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
                     display->bitDepth = (uint8_t) advColorInfo.bitsPerColorChannel;
                 }
+                else
+                    display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+                if (edidLength > 0)
+                    ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
             }
         }
     }
