@@ -663,8 +663,13 @@ static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, co
     }
     if (!gpu->vendor.length && name)
     {
-        compatible[0] = (char) toupper(compatible[0]);
-        ffStrbufSetS(&gpu->vendor, compatible);
+        if (ffStrEquals(compatible, "brcm"))
+            ffStrbufSetStatic(&gpu->vendor, "Broadcom"); // Raspberry Pi
+        else
+        {
+            ffStrbufSetS(&gpu->vendor, compatible);
+            gpu->vendor.chars[0] = (char) toupper(compatible[0]);
+        }
     }
 
     return NULL;
