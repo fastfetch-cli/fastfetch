@@ -1041,6 +1041,11 @@
                                         "maximum": 400,
                                         "default": 10
                                     },
+                                    "compact": {
+                                        "description": "Set if multiple results should be printed in one line",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
