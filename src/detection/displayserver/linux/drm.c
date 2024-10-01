@@ -168,7 +168,7 @@ static inline const char* drmType2Name(uint32_t connector_type)
     }
 }
 
-static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edidData, ssize_t* edidLength)
+FF_MAYBE_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* edidData, ssize_t* edidLength)
 {
     const char* drmDirPath = "/sys/class/drm/";
 
@@ -229,7 +229,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 
     drmDevice* devices[64];
     int nDevices = ffdrmGetDevices(devices, sizeof(devices) / sizeof(devices[0]));
-    if (nDevices < 0)
+    if (nDevices <= 0)
         return "drmGetDevices() failed";
 
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
@@ -243,11 +243,13 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 
         const char* path = dev->nodes[DRM_NODE_PRIMARY];
 
+        #if __linux__
         ffStrbufSetF(&name, "/sys/class/drm/%s/device/power/runtime_status", strrchr(path, '/') + 1);
 
         char buffer[8] = "";
         if (ffReadFileData(name.chars, strlen("suspend"), buffer) > 0 && ffStrStartsWith(buffer, "suspend"))
             continue;
+        #endif
 
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0)
@@ -350,6 +352,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     ffdrmModeFreeProperty(prop);
                 }
 
+                #if __linux__
                 if (name.length == 0)
                 {
                     uint8_t edidData[512];
@@ -362,6 +365,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                         ffEdidGetSerialAndManufactureDate(edidData, &serial, &myear, &mweak);
                     }
                 }
+                #endif
 
                 if (name.length == 0)
                 {
