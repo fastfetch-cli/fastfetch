@@ -87,6 +87,7 @@ static FFModuleBaseInfo* L[] = {
 static FFModuleBaseInfo* M[] = {
     (void*) &instance.config.modules.media,
     (void*) &instance.config.modules.memory,
+    (void*) &instance.config.modules.monitor,
     NULL,
 };
 

@@ -382,6 +382,7 @@ set(LIBFASTFETCH_SRC
     src/modules/locale/locale.c
     src/modules/localip/localip.c
     src/modules/memory/memory.c
+    src/modules/monitor/monitor.c
     src/modules/netio/netio.c
     src/modules/opencl/opencl.c
     src/modules/opengl/opengl.c

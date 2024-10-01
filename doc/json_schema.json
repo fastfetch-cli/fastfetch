@@ -684,6 +684,7 @@
                             "localip",
                             "media",
                             "memory",
+                            "monitor",
                             "netio",
                             "opencl",
                             "opengl",
@@ -812,6 +813,10 @@
                                             {
                                                 "const": "media",
                                                 "description": "Print playing song name"
+                                            },
+                                            {
+                                                "const": "monitor",
+                                                "description": "Alias of Display module; deprecated"
                                             },
                                             {
                                                 "const": "opencl",
