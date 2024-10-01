@@ -344,7 +344,7 @@
                     "description": "Set the command to be executed before printing logos",
                     "default": ""
                 },
-                "showVersion": {
+                "detectVersion": {
                     "type": "boolean",
                     "description": "Whether to detect and display component versions. Mainly for benchmarking",
                     "default": true
