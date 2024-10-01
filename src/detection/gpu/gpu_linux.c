@@ -625,7 +625,7 @@ FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, cons
 static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, const char* drmKey)
 {
     char compatible[256]; // vendor,model-name
-    if (sscanf(buffer->chars + strlen("of:"), "NgpuT%*[^C]C%256[^C]", compatible) != 1)
+    if (sscanf(buffer->chars + strlen("of:"), "NgpuT%*[^C]C%255[^C]", compatible) != 1)
         return "Failed to parse of modalias or not a GPU device";
 
     char* name = strchr(compatible, ',');
