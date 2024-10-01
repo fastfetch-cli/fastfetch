@@ -47,7 +47,7 @@ static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
         ffStrbufEqualS(buffer, "coretemp") // Intel
     ) return value / 1000.;
 
-    return false;
+    return 0.0/0.0;
 }
 
 static double detectCPUTemp(void)
