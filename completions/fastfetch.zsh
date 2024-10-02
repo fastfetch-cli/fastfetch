@@ -1,6 +1,13 @@
 #compdef fastfetch
 
 function _fastfetch() {
+
+  whence python3 &> /dev/null
+  if [ $? -ne 0 ]
+  then
+    return
+  fi
+
   local state
 
   local -a opts=("${(f)$(
