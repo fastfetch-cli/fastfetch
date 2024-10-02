@@ -2,6 +2,11 @@ if not type -q fastfetch
     exit
 end
 
+command -q python3
+if test $status -ne 0
+    exit
+end
+
 complete -c fastfetch -f
 
 function __fastfetch_complete_bool
