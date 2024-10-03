@@ -4790,9 +4790,10 @@ static const FFlogo X[] = {
         .names = {"XeroArch"},
         .lines = FASTFETCH_DATATEXT_LOGO_XEROARCH,
         .colors = {
-            FF_COLOR_FG_256 "15",
-            FF_COLOR_FG_256 "14",
             FF_COLOR_FG_256 "16",
+            FF_COLOR_FG_256 "51",
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "51",
         }
     },
     //Xray_OS
@@ -4800,7 +4801,7 @@ static const FFlogo X[] = {
         .names = {"Xray_OS"},
         .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
         .colors = {
-            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "16",
             FF_COLOR_FG_256 "14",
             FF_COLOR_FG_256 "16",
         }
