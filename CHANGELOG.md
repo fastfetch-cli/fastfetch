@@ -1,3 +1,22 @@
+# 2.27.0
+
+Changes:
+* We now print `"` instead of `″` when displaying diagonal length in inches, so that the character can be correctly displayed in Linux console (Display)
+* All detection code of `monitor` module is merged into `display` module. Now `monitor` just prints the same information as `display` with different format. Notably:
+    * The resolution reported by `monitor` module is now current resolution instead of native / maximum resolution. PPI is calcuated based on current resolution too.
+    * The refresh rate reported by `monitor` module is the current refresh rate.
+
+Features:
+* Improve support for Raspberry pi (CPU / GPU, Linux)
+* Detect SOC name, instead of displaying components used in the SOC, if available (CPU, Linux)
+* Add option `--brightness-compact` to display multiple brightness values in one line (Brightness)
+* Add `day-pretty` (#1305, DateTime)
+
+Bugfixes:
+* Remove trailing newline in GPU name for Raspberry pi (#1303, GPU, Linux)
+* Fix a possible buffer overflow (GPU, Linux)
+* Fix CPU temp incorrectly reported as 0 celsius (#1308, CPU, Linux)
+
 # 2.26.1
 
 Features:
