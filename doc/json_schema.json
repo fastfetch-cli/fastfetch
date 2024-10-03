@@ -816,7 +816,7 @@
                                             },
                                             {
                                                 "const": "monitor",
-                                                "description": "Alias of Display module; deprecated"
+                                                "description": "Alias of Display module"
                                             },
                                             {
                                                 "const": "opencl",
