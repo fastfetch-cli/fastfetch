@@ -191,14 +191,20 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
 
         if (nRead <= 0)
+        {
+            va_end(args);
             return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
+        }
 
         bytesRead += (size_t) nRead;
         buffer[bytesRead] = '\0';
 
         int ret = vsscanf(buffer, format, args);
         if (ret <= 0)
+        {
+            va_end(args);
             return "vsscanf(buffer, format, args) failed";
+        }
         if (ret >= nParams)
             break;
     }

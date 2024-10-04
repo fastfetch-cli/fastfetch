@@ -1,6 +1,6 @@
 #include "binary.h"
 
-#if defined(FF_HAVE_ELF) || defined(__sun) || defined(__FreeBSD__)
+#if defined(FF_HAVE_ELF) || defined(__sun) || defined(__FreeBSD__) || defined(__OpenBSD__)
 
 #include "common/io/io.h"
 #include "common/library.h"

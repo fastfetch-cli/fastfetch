@@ -17,7 +17,7 @@
 #include <linux/sockios.h>
 #endif
 
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
 #else
@@ -143,7 +143,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
-        #if defined(__FreeBSD__) || defined(__APPLE__)
+        #if __FreeBSD__ || __OpenBSD__ || __APPLE__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT))
@@ -199,7 +199,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     ifr.ifr_data = (void*) &edata;
                     if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0)
                         iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
-                    #elif __FreeBSD__ || __APPLE__
+                    #elif __FreeBSD__ || __APPLE__ || __OpenBSD__
                     struct ifmediareq ifmr = {};
                     strncpy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ - 1);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))

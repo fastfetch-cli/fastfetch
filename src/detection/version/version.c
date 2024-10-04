@@ -33,6 +33,8 @@
     #define FF_SYSNAME "WIN32"
 #elif defined(__sun)
     #define FF_SYSNAME "SunOS"
+#elif defined(__OpenBSD__)
+    #define FF_SYSNAME "OpenBSD"
 #else
     #define FF_SYSNAME "unknown"
 #endif

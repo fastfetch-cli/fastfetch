@@ -8,6 +8,8 @@
 #include <ctype.h>
 #ifdef __FreeBSD__
     #include <paths.h>
+#elif __OpenBSD__
+    #define _PATH_LOCALBASE "/usr/local"
 #endif
 
 #ifdef _WIN32
@@ -119,6 +121,19 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 
 static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
 {
+#if __OpenBSD__
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "-c",
+        "echo $KSH_VERSION",
+        NULL
+    }) != NULL)
+        return false;
+
+    // @(#)PD KSH v5.2.14 99/07/13.2
+    ffStrbufSubstrAfterFirstC(version, 'v');
+    ffStrbufSubstrBeforeFirstC(version, ' ');
+#else
     if(ffProcessAppendStdErr(version, (char* const[]) {
         exe->chars,
         "--version",
@@ -129,6 +144,7 @@ static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
     //  version         sh (AT&T Research) 93u+ 2012-08-01
     ffStrbufSubstrAfterLastC(version, ')');
     ffStrbufTrim(version, ' ');
+#endif
     return true;
 }
 
@@ -559,7 +575,7 @@ static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__)
     char buffer[1024] = {};
     if (
         #ifdef __linux__
@@ -662,7 +678,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #endif
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun)
 
     if(ffStrbufStartsWithIgnCaseS(processName, "gnome-terminal"))
         return getTerminalVersionGnome(exe, version);

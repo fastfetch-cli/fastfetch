@@ -12,6 +12,10 @@
     #include <sys/sysctl.h>
     #include <sys/types.h>
     #include <sys/user.h>
+#elif defined(__OpenBSD__)
+    #include <sys/param.h>
+    #include <sys/sysctl.h>
+    #include <kvm.h>
 #elif defined(__sun)
     #include <procfs.h>
 #endif
@@ -252,7 +256,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 {
     uint32_t userId = getuid();
 
-#ifdef __FreeBSD__
+#if __FreeBSD__
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId};
     size_t length = 0;
 
@@ -276,7 +280,26 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
     }
-#elif defined(__sun)
+#elif __OpenBSD__
+    kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    int count = 0;
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_UID, userId, sizeof(struct kinfo_proc), &count);
+    if (proc)
+    {
+        for (int i = 0; i < count; ++i)
+        {
+            if(result->dePrettyName.length == 0)
+                applyPrettyNameIfDE(result, proc->p_comm);
+
+            if(result->wmPrettyName.length == 0)
+                applyNameIfWM(result, proc->p_comm);
+
+            if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
+                break;
+        }
+    }
+    kvm_close(kd);
+#elif __sun
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if(procdir == NULL)
         return "opendir(\"/proc\") failed";
@@ -312,7 +335,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
                 break;
         }
     }
-#else
+#elif __linux__
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if(procdir == NULL)
         return "opendir(\"/proc\") failed";

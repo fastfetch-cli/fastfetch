@@ -3088,6 +3088,7 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
         },
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,

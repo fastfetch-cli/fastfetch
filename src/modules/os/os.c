@@ -230,6 +230,8 @@ void ffInitOSOptions(FFOSOptions* options)
             ""
         #elif __sun
             ""
+        #elif __OpenBSD__
+            ""
         #else
             "?"
         #endif
