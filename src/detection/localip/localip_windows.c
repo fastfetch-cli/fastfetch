@@ -113,13 +113,13 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) continue;
 
                 SOCKADDR_IN* ipv4 = (SOCKADDR_IN*) ifa->Address.lpSockaddr;
-                char addressBuffer[INET_ADDRSTRLEN + 4];
+                char addressBuffer[INET_ADDRSTRLEN + 6];
                 inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
                 if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
                 {
                     size_t len = strlen(addressBuffer);
-                    snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
+                    snprintf(addressBuffer + len, 6, "/%u", (unsigned) ifa->OnLinkPrefixLength);
                 }
 
                 addNewIp(results, name, addressBuffer, AF_INET, newIp, isDefaultRoute);
@@ -133,13 +133,13 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV6_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) continue;
 
                 SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
-                char addressBuffer[INET6_ADDRSTRLEN + 4];
+                char addressBuffer[INET6_ADDRSTRLEN + 6];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 
                 if ((options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT) && ifa->OnLinkPrefixLength)
                 {
                     size_t len = strlen(addressBuffer);
-                    snprintf(addressBuffer + len, 4, "/%u", (unsigned) ifa->OnLinkPrefixLength);
+                    snprintf(addressBuffer + len, 6, "/%u", (unsigned) ifa->OnLinkPrefixLength);
                 }
 
                 addNewIp(results, name, addressBuffer, AF_INET6, newIp, isDefaultRoute);
