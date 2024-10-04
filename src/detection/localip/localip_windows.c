@@ -6,6 +6,21 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
+static const NIFlag niFlags[] = {
+    { IP_ADAPTER_DDNS_ENABLED, "DDNS_ENABLED" },
+    { IP_ADAPTER_REGISTER_ADAPTER_SUFFIX, "REGISTER_ADAPTER_SUFFIX" },
+    { IP_ADAPTER_DHCP_ENABLED, "DHCP_ENABLED" },
+    { IP_ADAPTER_RECEIVE_ONLY, "RECEIVE_ONLY" },
+    { IP_ADAPTER_NO_MULTICAST, "NO_MULTICAST" },
+    { IP_ADAPTER_IPV6_OTHER_STATEFUL_CONFIG, "IPV6_OTHER_STATEFUL_CONFIG" },
+    { IP_ADAPTER_NETBIOS_OVER_TCPIP_ENABLED, "NETBIOS_OVER_TCPIP_ENABLED" },
+    { IP_ADAPTER_IPV4_ENABLED, "IPV4_ENABLED" },
+    { IP_ADAPTER_IPV6_ENABLED, "IPV6_ENABLED" },
+    { IP_ADAPTER_IPV6_MANAGE_ADDRESS_CONFIG, "IPV6_MANAGE_ADDRESS_CONFIG" },
+    // sentinel
+    { 0, NULL }
+};
+
 static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool newIp, bool defaultRoute)
 {
     FFLocalIpResult* ip = NULL;
@@ -17,6 +32,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
+        ffStrbufInit(&ip->flags);
         ip->defaultRoute = defaultRoute;
         ip->speed = -1;
         ip->mtu = -1;
@@ -157,6 +173,8 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 result->speed = (int32_t) (adapter->ReceiveLinkSpeed / 1000);
             if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
                 result->mtu = (int32_t) adapter->Mtu;
+            if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
+                writeNIFlagsToStrBuf(&result->flags, (int)adapter->Flags, niFlags);
         }
     }
 

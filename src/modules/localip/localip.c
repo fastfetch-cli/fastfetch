@@ -5,7 +5,7 @@
 #include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
-#define FF_LOCALIP_NUM_FORMAT_ARGS 7
+#define FF_LOCALIP_NUM_FORMAT_ARGS 8
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
@@ -75,6 +75,12 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute)
         if (ip->mtu > 0)
             printf("MTU %u", (unsigned) ip->mtu);
         putchar(']');
+        flag = true;
+    }
+    if (ip->flags.length) {
+        if (flag) fputs(" <", stdout);
+        ffStrbufWriteTo(&ip->flags, stdout);
+        putchar('>');
         flag = true;
     }
     if (markDefaultRoute && flag && ip->defaultRoute)
@@ -151,6 +157,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                     FF_FORMAT_ARG(ip->defaultRoute, "is-default-route"),
                     FF_FORMAT_ARG(ip->mtu, "mtu"),
                     FF_FORMAT_ARG(speedStr, "speed"),
+                    FF_FORMAT_ARG(ip->flags, "flags"),
                 }));
             }
             ++index;
@@ -163,6 +170,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
         ffStrbufDestroy(&ip->ipv4);
         ffStrbufDestroy(&ip->ipv6);
         ffStrbufDestroy(&ip->mac);
+        ffStrbufDestroy(&ip->flags);
     }
 }
 
@@ -233,6 +241,15 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
             options->showType |= FF_LOCALIP_TYPE_SPEED_BIT;
         else
             options->showType &= ~FF_LOCALIP_TYPE_SPEED_BIT;
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "show-flags"))
+    {
+        if (ffOptionParseBoolean(value))
+            options->showType |= FF_LOCALIP_TYPE_FLAGS_BIT;
+        else
+            options->showType &= ~FF_LOCALIP_TYPE_FLAGS_BIT;
         return true;
     }
 
@@ -348,6 +365,15 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "showFlags"))
+        {
+            if (yyjson_get_bool(val))
+                options->showType |= FF_LOCALIP_TYPE_FLAGS_BIT;
+            else
+                options->showType &= ~FF_LOCALIP_TYPE_FLAGS_BIT;
+            continue;
+        }
+
         if (ffStrEqualsIgnCase(key, "compact"))
         {
             if (yyjson_get_bool(val))
@@ -415,6 +441,9 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
         if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
             yyjson_mut_obj_add_bool(doc, module, "showSpeed", true);
 
+        if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showFlags", true);
+
         if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
             yyjson_mut_obj_add_bool(doc, module, "compact", true);
 
@@ -452,6 +481,7 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
         yyjson_mut_obj_add_int(doc, obj, "mtu", ip->mtu);
         yyjson_mut_obj_add_int(doc, obj, "speed", ip->speed);
+        yyjson_mut_obj_add_strbuf(doc, obj, "flags", &ip->flags);
     }
 
     FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
@@ -460,6 +490,7 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
         ffStrbufDestroy(&ip->ipv4);
         ffStrbufDestroy(&ip->ipv6);
         ffStrbufDestroy(&ip->mac);
+        ffStrbufDestroy(&ip->flags);
     }
 }
 
@@ -473,6 +504,7 @@ void ffPrintLocalIpHelpFormat(void)
         "Is default route - is-default-route",
         "MTU size in bytes - mtu",
         "Link speed (formatted) - speed",
+        "Interface flags - flags",
     }));
 }
 

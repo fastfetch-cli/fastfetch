@@ -183,6 +183,7 @@ __fastfetch_completion()
         "--display-precise-refresh-rate"
         "--localip-show-ipv4"
         "--localip-show-ipv6"
+        "--localip-show-flags"
         "--localip-show-loop"
         "--localip-name-prefix"
         "--localip-compact-type"

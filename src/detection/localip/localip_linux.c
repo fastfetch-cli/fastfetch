@@ -15,6 +15,7 @@
 #ifdef __linux__
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
+#include <linux/if.h>
 #endif
 
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
@@ -26,6 +27,47 @@
 #ifdef __sun
 #include <sys/sockio.h>
 #endif
+
+static const NIFlag niFlags[] = {
+    { IFF_UP, "UP" },
+    { IFF_BROADCAST, "BROADCAST" },
+    { IFF_DEBUG, "DEBUG" },
+    { IFF_LOOPBACK, "LOOPBACK" },
+    { IFF_POINTOPOINT, "POINTOPOINT" },
+    { IFF_RUNNING, "RUNNING" },
+    { IFF_NOARP, "NOARP" },
+    { IFF_PROMISC, "PROMISC" },
+    { IFF_ALLMULTI, "ALLMULTI" },
+    { IFF_MULTICAST, "MULTICAST" },
+#if defined(__linux__) || defined(__APPLE__) || defined(__sun)
+    { IFF_NOTRAILERS, "NOTRAILERS" },
+#endif
+#ifdef __linux__
+    { IFF_MASTER, "MASTER" },
+    { IFF_SLAVE, "SLAVE" },
+    { IFF_PORTSEL, "PORTSEL" },
+    { IFF_AUTOMEDIA, "AUTOMEDIA" },
+    { IFF_DYNAMIC, "DYNAMIC" },
+    { IFF_LOWER_UP, "LOWER_UP" },
+    { IFF_DORMANT, "DORMANT" },
+    { IFF_ECHO, "ECHO" },
+#endif
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
+    { IFF_OACTIVE, "OACTIVE" },
+    { IFF_SIMPLEX, "SIMPLEX" },
+    { IFF_LINK0, "LINK0" },
+    { IFF_LINK1, "LINK1" },
+    { IFF_LINK2, "LINK2" },
+#endif
+#if defined(__FreeBSD__) || defined(__APPLE__)
+    { IFF_ALTPHYS, "ALTPHYS" },
+#endif
+#ifdef __FreeBSD__
+    { IFF_CANTCONFIG, "CANTCONFIG" },
+#endif
+    // sentinel
+    { 0, NULL }
+};
 
 static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, bool firstOnly)
 {
@@ -44,6 +86,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
+        ffStrbufInit(&ip->flags);
         ip->defaultRoute = defaultRoute;
         ip->mtu = -1;
         ip->speed = -1;
@@ -96,6 +139,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
+        bool newIP = false;
         if (ifa->ifa_addr->sa_family == AF_INET)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
@@ -117,6 +161,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             }
 
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
+            newIP = true;
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
@@ -142,6 +187,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             }
 
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
+            newIP = true;
         }
         #if __FreeBSD__ || __OpenBSD__ || __APPLE__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
@@ -154,6 +200,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
             addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
+            newIP = true;
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
@@ -166,8 +213,16 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
             addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
+            newIP = true;
         }
         #endif
+
+        if (newIP)
+        {
+            FFLocalIpResult* result = FF_LIST_GET(FFLocalIpResult, *results, results->length - 1);
+            if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
+                writeNIFlagsToStrBuf(&result->flags, (int)ifa->ifa_flags, niFlags);
+        }
     }
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);
