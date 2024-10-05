@@ -185,6 +185,8 @@ __fastfetch_completion()
         "--localip-show-ipv6"
         "--localip-show-flags"
         "--localip-show-loop"
+        "--localip-show-mtu"
+        "--localip-show-speed"
         "--localip-name-prefix"
         "--localip-compact-type"
         "--escape-bedrock"

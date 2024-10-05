@@ -1197,6 +1197,24 @@
             }
         },
         {
+            "long": "localip-show-mtu",
+            "desc": "Show net interface's MTU (Maximum Transmission Unit) size in bytes",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "localip-show-speed",
+            "desc": "Show net interface's link speed with human-readable format (or an 1Mb units integer in JSON format)",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "localip-show-prefix-len",
             "desc": "Show network prefix length (/N) in local ip module",
             "arg": {
