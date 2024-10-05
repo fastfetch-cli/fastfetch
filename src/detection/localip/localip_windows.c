@@ -6,7 +6,7 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
-static const NIFlag niFlags[] = {
+static const FFLocalIpNIFlag niFlagOptions[] = {
     { IP_ADAPTER_DDNS_ENABLED, "DDNS_ENABLED" },
     { IP_ADAPTER_REGISTER_ADAPTER_SUFFIX, "REGISTER_ADAPTER_SUFFIX" },
     { IP_ADAPTER_DHCP_ENABLED, "DHCP_ENABLED" },
@@ -18,7 +18,7 @@ static const NIFlag niFlags[] = {
     { IP_ADAPTER_IPV6_ENABLED, "IPV6_ENABLED" },
     { IP_ADAPTER_IPV6_MANAGE_ADDRESS_CONFIG, "IPV6_MANAGE_ADDRESS_CONFIG" },
     // sentinel
-    { 0, NULL }
+    {},
 };
 
 static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool newIp, bool defaultRoute)
@@ -174,7 +174,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
                 result->mtu = (int32_t) adapter->Mtu;
             if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
-                writeNIFlagsToStrBuf(&result->flags, (int)adapter->Flags, niFlags);
+                ffLocalIpFillNIFlags(&result->flags, adapter->Flags, niFlagOptions);
         }
     }
 

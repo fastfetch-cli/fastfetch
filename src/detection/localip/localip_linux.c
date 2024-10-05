@@ -28,7 +28,7 @@
 #include <sys/sockio.h>
 #endif
 
-static const NIFlag niFlags[] = {
+static const FFLocalIpNIFlag niFlagOptions[] = {
     { IFF_UP, "UP" },
     { IFF_BROADCAST, "BROADCAST" },
     { IFF_DEBUG, "DEBUG" },
@@ -66,10 +66,10 @@ static const NIFlag niFlags[] = {
     { IFF_CANTCONFIG, "CANTCONFIG" },
 #endif
     // sentinel
-    { 0, NULL }
+    {},
 };
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, bool firstOnly)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, uint32_t flags, bool firstOnly)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -90,6 +90,8 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
         ip->defaultRoute = defaultRoute;
         ip->mtu = -1;
         ip->speed = -1;
+
+        ffLocalIpFillNIFlags(&ip->flags, flags, niFlagOptions);
     }
 
     switch (type)
@@ -139,7 +141,8 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        bool newIP = false;
+        uint32_t flags = options->showType & FF_LOCALIP_TYPE_FLAGS_BIT ? ifa->ifa_flags : 0;
+
         if (ifa->ifa_addr->sa_family == AF_INET)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
@@ -160,8 +163,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
-            newIP = true;
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
@@ -186,8 +188,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
-            newIP = true;
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         #if __FreeBSD__ || __OpenBSD__ || __APPLE__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
@@ -199,8 +200,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
-            newIP = true;
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
@@ -212,17 +212,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
-            newIP = true;
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
         }
         #endif
-
-        if (newIP)
-        {
-            FFLocalIpResult* result = FF_LIST_GET(FFLocalIpResult, *results, results->length - 1);
-            if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
-                writeNIFlagsToStrBuf(&result->flags, (int)ifa->ifa_flags, niFlags);
-        }
     }
 
     if (ifAddrStruct) freeifaddrs(ifAddrStruct);

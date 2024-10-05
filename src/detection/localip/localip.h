@@ -14,18 +14,19 @@ typedef struct FFLocalIpResult
     bool defaultRoute;
 } FFLocalIpResult;
 
-typedef struct NIFlag
+typedef struct FFLocalIpNIFlag
 {
-    int flag;
+    uint32_t flag;
     const char *name;
-} NIFlag;
+} FFLocalIpNIFlag;
 
-static inline void writeNIFlagsToStrBuf(FFstrbuf *buf, int flag, const NIFlag names[])
+static inline void ffLocalIpFillNIFlags(FFstrbuf *buf, uint32_t flag, const FFLocalIpNIFlag names[])
 {
-    for (const NIFlag *nf = names; nf->name != NULL && flag != 0; ++nf)
+    for (const FFLocalIpNIFlag *nf = names; flag && nf->name; ++nf)
     {
-        if (flag & nf->flag) {
-            if (nf - names != 0)
+        if (flag & nf->flag)
+        {
+            if (buf->length > 0)
                 ffStrbufAppendC(buf, ',');
             ffStrbufAppendS(buf, nf->name);
             flag &= ~nf->flag;
