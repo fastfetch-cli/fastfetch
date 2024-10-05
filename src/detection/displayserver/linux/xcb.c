@@ -245,6 +245,7 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
     {
         item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
         ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        ffEdidGetPhysicalSize(edidData, &item->physicalWidth, &item->physicalHeight);
     }
 
     return !!item;
