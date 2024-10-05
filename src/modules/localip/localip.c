@@ -474,14 +474,20 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", ip->defaultRoute);
-        yyjson_mut_obj_add_strbuf(doc, obj, "ipv4", &ip->ipv4);
-        yyjson_mut_obj_add_strbuf(doc, obj, "ipv6", &ip->ipv6);
-        yyjson_mut_obj_add_strbuf(doc, obj, "mac", &ip->mac);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
-        yyjson_mut_obj_add_int(doc, obj, "mtu", ip->mtu);
-        yyjson_mut_obj_add_int(doc, obj, "speed", ip->speed);
-        yyjson_mut_obj_add_strbuf(doc, obj, "flags", &ip->flags);
+        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", ip->defaultRoute);
+        if (options->showType & FF_LOCALIP_TYPE_IPV4_BIT)
+            yyjson_mut_obj_add_strbuf(doc, obj, "ipv4", &ip->ipv4);
+        if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)
+            yyjson_mut_obj_add_strbuf(doc, obj, "ipv6", &ip->ipv6);
+        if (options->showType & FF_LOCALIP_TYPE_MAC_BIT)
+            yyjson_mut_obj_add_strbuf(doc, obj, "mac", &ip->mac);
+        if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
+            yyjson_mut_obj_add_int(doc, obj, "mtu", ip->mtu);
+        if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
+            yyjson_mut_obj_add_int(doc, obj, "speed", ip->speed);
+        if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
+            yyjson_mut_obj_add_strbuf(doc, obj, "flags", &ip->flags);
     }
 
     FF_LIST_FOR_EACH(FFLocalIpResult, ip, results)
