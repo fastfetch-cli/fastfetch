@@ -11,11 +11,14 @@ Features:
 * Detect SOC name, instead of displaying components used in the SOC, if available (CPU, Linux)
 * Add option `--brightness-compact` to display multiple brightness values in one line (Brightness)
 * Add `day-pretty` (#1305, DateTime)
+* Add basic, highly experimental support of OpenBSD (OpenBSD)
+* Support network interface adatper flag detection (LocalIP)
 
 Bugfixes:
 * Remove trailing newline in GPU name for Raspberry pi (#1303, GPU, Linux)
 * Fix a possible buffer overflow (GPU, Linux)
 * Fix CPU temp incorrectly reported as 0 celsius (#1308, CPU, Linux)
+* Corrently report `TPM device is not found` error (#1314, TPM, Windows)
 
 # 2.26.1
 
