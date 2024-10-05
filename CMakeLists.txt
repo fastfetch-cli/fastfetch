@@ -1026,7 +1026,7 @@ if(FreeBSD AND EXISTS "/usr/local/bin/objdump")
     endif()
 endif()
 
-if(LINUX)
+if(LINUX OR ANDROID)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1 _FILE_OFFSET_BITS=64)
 elseif(WIN32)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN=1 _WIN32_WINNT=0x0A00)
