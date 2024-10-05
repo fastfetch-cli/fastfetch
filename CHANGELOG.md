@@ -12,13 +12,18 @@ Features:
 * Add option `--brightness-compact` to display multiple brightness values in one line (Brightness)
 * Add `day-pretty` (#1305, DateTime)
 * Add basic, highly experimental support of OpenBSD (OpenBSD)
-* Support network interface adatper flag detection (LocalIP)
+* Support network interface adapter flag detection (#1315, LocalIP)
 
 Bugfixes:
 * Remove trailing newline in GPU name for Raspberry pi (#1303, GPU, Linux)
 * Fix a possible buffer overflow (GPU, Linux)
 * Fix CPU temp incorrectly reported as 0 celsius (#1308, CPU, Linux)
 * Corrently report `TPM device is not found` error (#1314, TPM, Windows)
+* Fix errors when triggering shell completion with python3 uninstalled (#1310)
+    * To package managers: as shell completion scripts of fastfetch use python3, it should be added as an optional dependency of fastfetch
+
+Logos:
+* Add XeroArch
 
 # 2.26.1
 
