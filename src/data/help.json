@@ -1232,6 +1232,15 @@
             }
         },
         {
+            "long": "localip-show-flags",
+            "desc": "Show net interface flags in local ip module",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "localip-compact",
             "desc": "Show all IPs in one line",
             "arg": {

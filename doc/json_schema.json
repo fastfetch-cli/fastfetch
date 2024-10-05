@@ -1703,6 +1703,11 @@
                                         "type": "boolean",
                                         "default": false
                                     },
+                                    "showFlags": {
+                                        "description": "Show the interface's flags",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "compact": {
                                         "description": "Show all IPs in one line",
                                         "type": "boolean",
