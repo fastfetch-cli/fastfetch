@@ -4575,6 +4575,16 @@ static const FFlogo U[] = {
 };
 
 static const FFlogo V[] = {
+    // Valhalla
+    {
+        .names = {"Valhalla", "valhallaos", "valhalla-linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_VALHALLA,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Vanilla
     {
         .names = {"vanilla", "vanilla-os", "vanilla-linux"},

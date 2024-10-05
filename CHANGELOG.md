@@ -24,6 +24,7 @@ Bugfixes:
 
 Logos:
 * Add XeroArch
+* Add ValhallaOS
 
 # 2.26.1
 
