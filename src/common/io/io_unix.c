@@ -15,7 +15,7 @@
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
 #elif FF_HAVE_GLOB
-    #warning "<wordexp.h> is not available, use <glob.h> instead
+    #warning "<wordexp.h> is not available, use <glob.h> instead"
     #include <glob.h>
 #else
     #warning "Neither <wordexp.h> nor <glob.h> is available"
