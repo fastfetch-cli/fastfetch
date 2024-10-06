@@ -48,6 +48,14 @@ typedef enum FFDisplayType {
     FF_DISPLAY_TYPE_EXTERNAL,
 } FFDisplayType;
 
+typedef enum FFDisplayHdrStatus
+{
+    FF_DISPLAY_HDR_STATUS_UNKNOWN,
+    FF_DISPLAY_HDR_STATUS_UNSUPPORTED,
+    FF_DISPLAY_HDR_STATUS_SUPPORTED,
+    FF_DISPLAY_HDR_STATUS_ENABLED,
+} FFDisplayHdrStatus;
+
 typedef struct FFDisplayResult
 {
     uint32_t width;
@@ -63,7 +71,10 @@ typedef struct FFDisplayResult
     uint32_t physicalHeight;
     bool primary;
     uint8_t bitDepth;
-    bool hdrEnabled;
+    FFDisplayHdrStatus hdrStatus;
+    uint16_t manufactureYear;
+    uint16_t manufactureWeek;
+    uint32_t serial;
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult

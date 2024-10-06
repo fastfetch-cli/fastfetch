@@ -112,7 +112,7 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
 
     uint32_t rotation = ffWaylandHandleRotation(&display);
 
-    ffdsAppendDisplay(wldata->result,
+    FFDisplayResult* item = ffdsAppendDisplay(wldata->result,
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
@@ -131,6 +131,19 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         (uint32_t) display.physicalWidth,
         (uint32_t) display.physicalHeight
     );
+    if (item)
+    {
+        if (display.hdrSupported)
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+        else if (display.hdrInfoAvailable)
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+        else
+            item->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+
+        item->manufactureYear = display.myear;
+        item->manufactureWeek = display.mweek;
+        item->serial = display.serial;
+    }
 
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.name);

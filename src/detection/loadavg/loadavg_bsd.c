@@ -2,10 +2,12 @@
 
 #include <sys/sysctl.h>
 
-#ifdef __FreeBSD__
+#if __FreeBSD__ || __OpenBSD__
     #include <sys/types.h>
     #include <sys/resource.h>
-    #include <vm/vm_param.h>
+    #if __FreeBSD__
+        #include <vm/vm_param.h>
+    #endif
 #endif
 
 const char* ffDetectLoadavg(double result[3])

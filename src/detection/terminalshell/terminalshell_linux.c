@@ -161,23 +161,30 @@ static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv
 
 static void getTerminalFromEnv(FFTerminalResult* result)
 {
-    if(
-        result->processName.length > 0 &&
-        !ffStrbufStartsWithS(&result->processName, "login") &&
-        !ffStrbufEqualS(&result->processName, "(login)") &&
+    if (result->processName.length > 0)
+    {
+        if (!ffStrbufStartsWithS(&result->processName, "login") &&
+            !ffStrbufEqualS(&result->processName, "(login)") &&
 
-        #ifdef __APPLE__
-        !ffStrbufEqualS(&result->processName, "launchd") &&
-        !ffStrbufEqualS(&result->processName, "stable") && //for WarpTerminal
-        #else
-        !ffStrbufEqualS(&result->processName, "systemd") &&
-        !ffStrbufEqualS(&result->processName, "init") &&
-        !ffStrbufEqualS(&result->processName, "(init)") &&
-        !ffStrbufEqualS(&result->processName, "SessionLeader") && // #750
-        #endif
+            #ifdef __APPLE__
+            !ffStrbufEqualS(&result->processName, "launchd") &&
+            !ffStrbufEqualS(&result->processName, "stable") && //for WarpTerminal
+            #else
+            !ffStrbufEqualS(&result->processName, "systemd") &&
+            !ffStrbufEqualS(&result->processName, "init") &&
+            !ffStrbufEqualS(&result->processName, "(init)") &&
+            !ffStrbufEqualS(&result->processName, "SessionLeader") && // #750
+            #endif
 
-        !ffStrbufEqualS(&result->processName, "0")
-    ) return;
+            !ffStrbufEqualS(&result->processName, "0")
+        ) return;
+
+        ffStrbufClear(&result->processName);
+        ffStrbufClear(&result->exe);
+        result->exeName = result->exe.chars;
+        ffStrbufClear(&result->exePath);
+        result->pid = result->ppid = 0;
+    }
 
     const char* term = NULL;
 

@@ -1,6 +1,7 @@
 #include "displayserver.h"
 #include "util/apple/cf_helpers.h"
 #include "util/stringUtils.h"
+#include "util/edidHelper.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -8,9 +9,10 @@
 #include <CoreGraphics/CGDirectDisplay.h>
 #include <CoreVideo/CVDisplayLink.h>
 
+extern Boolean CoreDisplay_Display_SupportsHDRMode(CGDirectDisplayID display) __attribute__((weak_import));
+extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) __attribute__((weak_import));
 #ifdef MAC_OS_X_VERSION_10_15
 extern CFDictionaryRef CoreDisplay_DisplayCreateInfoDictionary(CGDirectDisplayID display) __attribute__((weak_import));
-extern Boolean CoreDisplay_Display_IsHDRModeEnabled(CGDirectDisplayID display) __attribute__((weak_import));
 #else
 #include <IOKit/graphics/IOGraphicsLib.h>
 #endif
@@ -22,6 +24,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
     if(CGGetOnlineDisplayList(sizeof(screens) / sizeof(screens[0]), screens, &screenCount) != kCGErrorSuccess)
         return;
 
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     for(uint32_t i = 0; i < screenCount; i++)
     {
         CGDirectDisplayID screen = screens[i];
@@ -43,7 +46,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
             }
 
-            FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+            ffStrbufClear(&buffer);
             CFDictionaryRef FF_CFTYPE_AUTO_RELEASE displayInfo = NULL;
             #ifdef MAC_OS_X_VERSION_10_15
             if(CoreDisplay_DisplayCreateInfoDictionary)
@@ -54,14 +57,30 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 displayInfo = IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
             }
             #endif
+            uint32_t physicalWidth = 0, physicalHeight = 0;
             if(displayInfo)
             {
                 CFDictionaryRef productNames;
                 if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
-                    ffCfDictGetString(productNames, CFSTR("en_US"), &name);
+                    ffCfDictGetString(productNames, CFSTR("en_US"), &buffer);
+
+                // CGDisplayScreenSize reports invalid result for external displays on old Intel MacBook Pro
+                CFDataRef edidRef = (CFDataRef) CFDictionaryGetValue(displayInfo, CFSTR(kIODisplayEDIDKey));
+                if (edidRef && CFGetTypeID(edidRef) == CFDataGetTypeID())
+                {
+                    const uint8_t* edidData = CFDataGetBytePtr(edidRef);
+                    uint32_t edidLength = (uint32_t) CFDataGetLength(edidRef);
+                    if (edidLength >= 128)
+                        ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+                }
             }
 
-            CGSize size = CGDisplayScreenSize(screen);
+            if (!physicalWidth || !physicalHeight)
+            {
+                CGSize size = CGDisplayScreenSize(screen);
+                physicalWidth = (uint32_t) (size.width + 0.5);
+                physicalHeight = (uint32_t) (size.height + 0.5);
+            }
 
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 (uint32_t)CGDisplayModeGetPixelWidth(mode),
@@ -70,12 +89,12 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
                 (uint32_t)CGDisplayRotation(screen),
-                &name,
+                &buffer,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
                 CGDisplayIsMain(screen),
                 (uint64_t)screen,
-                (uint32_t) (size.width + 0.5),
-                (uint32_t) (size.height + 0.5)
+                physicalWidth,
+                physicalHeight
             );
             if (display)
             {
@@ -89,12 +108,27 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     display->bitDepth = (uint8_t) bitDepth;
                 }
 
-                #ifdef MAC_OS_X_VERSION_10_15
-                if (CoreDisplay_Display_IsHDRModeEnabled)
+                if (display->type == FF_DISPLAY_TYPE_BUILTIN)
+                    display->hdrStatus = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance"))
+                        ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+                else if (CoreDisplay_Display_SupportsHDRMode)
                 {
-                    display->hdrEnabled = CoreDisplay_Display_IsHDRModeEnabled(screen);
+                    if (CoreDisplay_Display_SupportsHDRMode(screen))
+                    {
+                        display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+                        if (CoreDisplay_Display_IsHDRModeEnabled && CoreDisplay_Display_IsHDRModeEnabled(screen))
+                            display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+                    }
+                    else
+                        display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
                 }
-                #endif
+
+                display->serial = CGDisplaySerialNumber(screen);
+                int value;
+                if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == NULL)
+                    display->manufactureYear = (uint16_t) value;
+                if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == NULL)
+                    display->manufactureWeek = (uint16_t) value;
             }
             CGDisplayModeRelease(mode);
         }

@@ -1,5 +1,6 @@
 #include "../displayserver_linux.h"
 #include "common/io/io.h"
+#include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
 #include <stdlib.h>
@@ -82,6 +83,46 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     }
 }
 
+static bool matchDrmConnector(const char* connName, WaylandDisplay* wldata)
+{
+    // https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output-event-name
+    // The doc says that "do not assume that the name is a reflection of an underlying DRM connector, X11 connection, etc."
+    // However I can't find a better method to get the edid data
+    const char* drmDirPath = "/sys/class/drm/";
+
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
+    if(dirp == NULL)
+        return false;
+
+    struct dirent* entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        const char* plainName = entry->d_name;
+        if (ffStrStartsWith(plainName, "card"))
+        {
+            const char* tmp = strchr(plainName + strlen("card"), '-');
+            if (tmp) plainName = tmp + 1;
+        }
+        if (ffStrEquals(plainName, connName))
+        {
+            FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateF("%s%s/edid", drmDirPath, entry->d_name);
+
+            uint8_t edidData[512];
+            ssize_t edidLength = ffReadFileData(path.chars, sizeof(edidData), edidData);
+            if (edidLength <= 0 || edidLength % 128 != 0)
+            {
+                ffEdidGetName(edidData, &wldata->edidName);
+                ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
+                ffEdidGetSerialAndManufactureDate(edidData, &wldata->serial, &wldata->myear, &wldata->mweek);
+                wldata->hdrInfoAvailable = true;
+                return true;
+            }
+            break;
+        }
+    }
+    return false;
+}
+
 void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const char *name)
 {
     WaylandDisplay* display = data;
@@ -89,7 +130,7 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
 
     display->type = ffdsGetDisplayType(name);
     if (!display->edidName.length)
-        ffdsMatchDrmConnector(name, &display->edidName);
+        matchDrmConnector(name, display);
     display->id = ffWaylandGenerateIdFromName(name);
     ffStrbufAppendS(&display->name, name);
 }

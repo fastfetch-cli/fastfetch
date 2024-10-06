@@ -1,37 +1,30 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "detection/monitor/monitor.h"
+#include "detection/displayserver/displayserver.h"
 #include "modules/monitor/monitor.h"
 #include "util/stringUtils.h"
 
 #include <math.h>
 
-#define FF_MONITOR_NUM_FORMAT_ARGS 11
+#define FF_MONITOR_NUM_FORMAT_ARGS 12
 
 void ffPrintMonitor(FFMonitorOptions* options)
 {
-    FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFMonitorResult));
+    const FFDisplayServerResult* result = ffConnectDisplayServer();
 
-    const char* error = ffDetectMonitor(&result);
-
-    if(error)
+    if(!result->displays.length)
     {
-        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
-    }
-
-    if(!result.length)
-    {
-        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical display detected");
+        ffPrintError(FF_MONITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No display detected");
         return;
     }
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
     uint32_t index = 0;
-    FF_LIST_FOR_EACH(FFMonitorResult, display, result)
+    FF_LIST_FOR_EACH(FFDisplayResult, display, result->displays)
     {
         double inch = sqrt(display->physicalWidth * display->physicalWidth + display->physicalHeight * display->physicalHeight) / 25.4;
         double ppi = sqrt(display->width * display->width + display->height * display->height) / inch;
+        bool hdrCompatible = display->hdrStatus == FF_DISPLAY_HDR_STATUS_SUPPORTED || display->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
 
         ffStrbufClear(&key);
         if(options->moduleArgs.key.length == 0)
@@ -40,7 +33,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
         }
         else
         {
-            uint32_t moduleIndex = result.length == 1 ? 0 : index + 1;
+            uint32_t moduleIndex = result->displays.length == 1 ? 0 : index + 1;
             FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
                 FF_FORMAT_ARG(moduleIndex, "index"),
                 FF_FORMAT_ARG(display->name, "name"),
@@ -56,9 +49,10 @@ void ffPrintMonitor(FFMonitorOptions* options)
             if (display->refreshRate > 0)
                 printf(" @ %g Hz", ((int) (display->refreshRate * 1000 + 0.5)) / 1000.0);
             if (inch > 0)
-                printf(" - %ux%u mm (%.2f inches, %.2f ppi)\n", display->physicalWidth, display->physicalHeight, inch, ppi);
-            else
-                putchar('\n');
+                printf(" - %ux%u mm (%.2f inches, %.2f ppi)", display->physicalWidth, display->physicalHeight, inch, ppi);
+            if (hdrCompatible)
+                fputs(" [HDR Compatible]", stdout);
+            putchar('\n');
         }
         else
         {
@@ -83,6 +77,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
                 FF_FORMAT_ARG(display->manufactureWeek, "manufacture-week"),
                 FF_FORMAT_ARG(buf, "serial"),
                 FF_FORMAT_ARG(display->refreshRate, "refresh-rate"),
+                FF_FORMAT_ARG(hdrCompatible, "hdr-compatible"),
             }));
         }
 
@@ -128,59 +123,7 @@ void ffGenerateMonitorJsonConfig(FFMonitorOptions* options, yyjson_mut_doc* doc,
 
 void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFMonitorResult));
-
-    const char* error = ffDetectMonitor(&results);
-
-    if (error)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", error);
-    }
-    else if(results.length == 0)
-    {
-        yyjson_mut_obj_add_str(doc, module, "error", "No monitors found");
-    }
-    else
-    {
-        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
-        FF_LIST_FOR_EACH(FFMonitorResult, item, results)
-        {
-            yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
-            yyjson_mut_obj_add_bool(doc, obj, "hdrCompatible", item->hdrCompatible);
-            yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
-
-            yyjson_mut_val* resolution = yyjson_mut_obj_add_obj(doc, obj, "resolution");
-            yyjson_mut_obj_add_uint(doc, resolution, "width", item->width);
-            yyjson_mut_obj_add_uint(doc, resolution, "height", item->height);
-
-            yyjson_mut_val* physical = yyjson_mut_obj_add_obj(doc, obj, "physical");
-            yyjson_mut_obj_add_uint(doc, physical, "height", item->physicalHeight);
-            yyjson_mut_obj_add_uint(doc, physical, "width", item->physicalWidth);
-
-            yyjson_mut_obj_add_real(doc, obj, "refreshRate", item->refreshRate);
-
-            if (item->manufactureYear)
-            {
-                yyjson_mut_val* manufactureDate = yyjson_mut_obj_add_obj(doc, obj, "manufactureDate");
-                yyjson_mut_obj_add_uint(doc, manufactureDate, "year", item->manufactureYear);
-                yyjson_mut_obj_add_uint(doc, manufactureDate, "week", item->manufactureWeek);
-            }
-            else
-            {
-                yyjson_mut_obj_add_null(doc, obj, "manufactureDate");
-            }
-
-            if (item->serial)
-                yyjson_mut_obj_add_uint(doc, obj, "serial", item->serial);
-            else
-                yyjson_mut_obj_add_null(doc, obj, "serial");
-        }
-    }
-
-    FF_LIST_FOR_EACH(FFMonitorResult, item, results)
-    {
-        ffStrbufDestroy(&item->name);
-    }
+    yyjson_mut_obj_add_str(doc, module, "error", "Monitor module is an alias of Display module");
 }
 
 void ffPrintMonitorHelpFormat(void)
@@ -197,6 +140,7 @@ void ffPrintMonitorHelpFormat(void)
         "Nth week of manufacturing in the year - manufacture-week",
         "Serial number - serial",
         "Maximum refresh rate in Hz - refresh-rate",
+        "True if the display is HDR compatible - hdr-compatible",
     }));
 }
 
@@ -205,7 +149,7 @@ void ffInitMonitorOptions(FFMonitorOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_MONITOR_MODULE_NAME,
-        "Print connected physical monitor information",
+        "Alias of Display module",
         ffParseMonitorCommandOptions,
         ffParseMonitorJsonObject,
         ffPrintMonitor,

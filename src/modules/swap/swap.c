@@ -10,7 +10,7 @@
 
 void ffPrintSwap(FFSwapOptions* options)
 {
-    FFSwapResult storage;
+    FFSwapResult storage = {};
     const char* error = ffDetectSwap(&storage);
 
     if(error)

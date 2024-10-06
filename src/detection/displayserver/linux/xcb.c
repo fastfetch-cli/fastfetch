@@ -180,47 +180,29 @@ typedef struct XcbRandrData
     xcb_randr_get_screen_resources_current_reply_t* screenResources;
 } XcbRandrData;
 
-static bool xcbRandrHandleModeInfo(XcbRandrData* data, xcb_randr_mode_info_t* modeInfo, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType)
-{
-    double refreshRate = (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
-
-    return ffdsAppendDisplay(
-        data->result,
-        (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height,
-        refreshRate,
-        (uint32_t) modeInfo->width,
-        (uint32_t) modeInfo->height,
-        rotation,
-        name,
-        displayType,
-        primary,
-        0,
-        (uint32_t) output->mm_width,
-        (uint32_t) output->mm_height
-    );
-}
-
-static bool xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode, FFstrbuf* name, uint32_t rotation, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType)
+static double xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
-        return false;
+        return 0;
 
     xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(data->screenResources);
 
     while(modesIterator.rem > 0)
     {
         if(modesIterator.data->id == mode)
-            return xcbRandrHandleModeInfo(data, modesIterator.data, name, rotation, primary, output, displayType);
+        {
+            xcb_randr_mode_info_t* modeInfo = modesIterator.data;
+            return (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
+        }
 
         data->ffxcb_randr_mode_info_next(&modesIterator);
     }
 
-    return false;
+    return 0;
 }
 
-static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType)
+static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength)
 {
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, crtc, XCB_CURRENT_TIME);
     FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
@@ -243,12 +225,12 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
             rotation = 0;
             break;
     }
-    bool res = xcbRandrHandleMode(data, crtcInfoReply->mode, name, rotation, primary, output, displayType);
-    res = res ? true : !!ffdsAppendDisplay(
+
+    FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
-        0,
+        xcbRandrHandleMode(data, crtcInfoReply->mode),
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
         rotation,
@@ -259,8 +241,14 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
         (uint32_t) output->mm_width,
         (uint32_t) output->mm_height
     );
+    if (item && edidLength)
+    {
+        item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+        ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        ffEdidGetPhysicalSize(edidData, &item->physicalWidth, &item->physicalHeight);
+    }
 
-    return res;
+    return !!item;
 }
 
 static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary, FFDisplayType displayType)
@@ -272,21 +260,27 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
 
     xcb_intern_atom_cookie_t requestAtomCookie = data->ffxcb_intern_atom(data->connection, true, (uint16_t) strlen("EDID"), "EDID");
     FF_AUTO_FREE xcb_intern_atom_reply_t* requestAtomReply = data->ffxcb_intern_atom_reply(data->connection, requestAtomCookie, NULL);
+    FF_AUTO_FREE xcb_randr_get_output_property_reply_t* outputPropertyReply = NULL;
+    uint8_t* edidData = NULL;
+    uint32_t edidLength = 0;
     if(requestAtomReply)
     {
         xcb_randr_get_output_property_cookie_t outputPropertyCookie = data->ffxcb_randr_get_output_property(data->connection, output, requestAtomReply->atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 100, false, false);
-        FF_AUTO_FREE xcb_randr_get_output_property_reply_t* outputPropertyReply = data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
+        outputPropertyReply = data->ffxcb_randr_get_output_property_reply(data->connection, outputPropertyCookie, NULL);
         if(outputPropertyReply)
         {
-            if(data->ffxcb_randr_get_output_property_data_length(outputPropertyReply) >= 128)
+            int len = data->ffxcb_randr_get_output_property_data_length(outputPropertyReply);
+            if(len >= 128)
             {
                 ffStrbufClear(name);
-                ffEdidGetName(data->ffxcb_randr_get_output_property_data(outputPropertyReply), name);
+                edidData = data->ffxcb_randr_get_output_property_data(outputPropertyReply);
+                ffEdidGetName(edidData, name);
+                edidLength = (uint32_t) len;
             }
         }
     }
 
-    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary, outputInfoReply, displayType);
+    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary, outputInfoReply, displayType, edidData, edidLength);
 
     return res;
 }

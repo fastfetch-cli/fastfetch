@@ -14,8 +14,11 @@
 
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
+#elif FF_HAVE_GLOB
+    #warning "<wordexp.h> is not available, use <glob.h> instead"
+    #include <glob.h>
 #else
-    #warning "<wordexp.h> not available"
+    #warning "Neither <wordexp.h> nor <glob.h> is available"
 #endif
 
 static void createSubfolders(const char* fileName)
@@ -121,7 +124,7 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
     #if FF_HAVE_WORDEXP // https://github.com/termux/termux-packages/pull/7056
 
     wordexp_t exp;
-    if(wordexp(in, &exp, 0) != 0)
+    if (wordexp(in, &exp, 0) != 0)
         return false;
 
     if (exp.we_wordc == 1)
@@ -131,6 +134,20 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
     }
 
     wordfree(&exp);
+
+    #elif FF_HAVE_GLOB
+
+    glob_t gb;
+    if (glob(in, GLOB_NOSORT | GLOB_TILDE, NULL, &gb) != 0)
+        return false;
+
+    if (gb.gl_matchc == 1)
+    {
+        result = true;
+        ffStrbufSetS(out, gb.gl_pathv[0]);
+    }
+
+    globfree(&gb);
 
     #endif
 
@@ -191,14 +208,24 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
 
         if (nRead <= 0)
+        {
+            va_end(args);
             return "read(STDIN_FILENO, buffer, sizeof(buffer) - 1) failed";
+        }
 
         bytesRead += (size_t) nRead;
         buffer[bytesRead] = '\0';
 
-        int ret = vsscanf(buffer, format, args);
+        va_list cargs;
+        va_copy(cargs, args);
+        int ret = vsscanf(buffer, format, cargs);
+        va_end(cargs);
+
         if (ret <= 0)
+        {
+            va_end(args);
             return "vsscanf(buffer, format, args) failed";
+        }
         if (ret >= nParams)
             break;
     }

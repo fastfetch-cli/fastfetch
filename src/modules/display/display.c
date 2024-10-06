@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 15
+#define FF_DISPLAY_NUM_FORMAT_ARGS 18
 
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
@@ -100,7 +100,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        uint32_t inch = (uint32_t) (sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4 + 0.5);
+        double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -122,12 +122,12 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 ffStrbufAppendF(&buffer, " (as %ix%i)", result->scaledWidth, result->scaledHeight);
 
             if (inch > 1)
-                ffStrbufAppendF(&buffer, " in %i″", inch);
+                ffStrbufAppendF(&buffer, " in %i\"", (uint32_t) (inch + 0.5));
 
             if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
                 ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");
 
-            if (result->hdrEnabled)
+            if (result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED)
                 ffStrbufAppendS(&buffer, " [HDR]");
 
             if(moduleIndex > 0 && result->primary)
@@ -139,6 +139,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
         else
         {
             double ppi = sqrt(result->width * result->width + result->height * result->height) / inch;
+            bool hdrEnabled = result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
+            uint32_t iInch = (uint32_t) (inch + 0.5), iPpi = (uint32_t) (ppi + 0.5);
 
             char refreshRate[16];
             if(result->refreshRate > 0)
@@ -150,6 +152,15 @@ void ffPrintDisplay(FFDisplayOptions* options)
             }
             else
                 refreshRate[0] = 0;
+
+            char buf[32];
+            if (result->serial)
+            {
+                const uint8_t* nums = (uint8_t*) &result->serial;
+                snprintf(buf, sizeof(buf), "%2X-%2X-%2X-%2X", nums[0], nums[1], nums[2], nums[3]);
+            }
+            else
+                buf[0] = '\0';
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result->width, "width"),
@@ -163,10 +174,13 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 FF_FORMAT_ARG(result->primary, "is-primary"),
                 FF_FORMAT_ARG(result->physicalWidth, "physical-width"),
                 FF_FORMAT_ARG(result->physicalHeight, "physical-height"),
-                FF_FORMAT_ARG(inch, "inch"),
-                FF_FORMAT_ARG(ppi, "ppi"),
+                FF_FORMAT_ARG(iInch, "inch"),
+                FF_FORMAT_ARG(iPpi, "ppi"),
                 FF_FORMAT_ARG(result->bitDepth, "bit-depth"),
-                FF_FORMAT_ARG(result->hdrEnabled, "hdr-enabled"),
+                FF_FORMAT_ARG(hdrEnabled, "hdr-enabled"),
+                FF_FORMAT_ARG(result->manufactureYear, "manufacture-year"),
+                FF_FORMAT_ARG(result->manufactureWeek, "manufacture-week"),
+                FF_FORMAT_ARG(buf, "serial"),
             }));
         }
     }
@@ -335,7 +349,23 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_real(doc, obj, "refreshRate", item->refreshRate);
         yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
         yyjson_mut_obj_add_uint(doc, obj, "bitDepth", item->bitDepth);
-        yyjson_mut_obj_add_bool(doc, obj, "hdrEnabled", item->hdrEnabled);
+        if (item->hdrStatus == FF_DISPLAY_HDR_STATUS_UNKNOWN)
+            yyjson_mut_obj_add_null(doc, obj, "hdrStatus");
+        else switch (item->hdrStatus)
+        {
+            case FF_DISPLAY_HDR_STATUS_UNSUPPORTED:
+                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Unsupported");
+                break;
+            case FF_DISPLAY_HDR_STATUS_SUPPORTED:
+                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Supported");
+                break;
+            case FF_DISPLAY_HDR_STATUS_ENABLED:
+                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Enabled");
+                break;
+            default:
+                yyjson_mut_obj_add_str(doc, obj, "hdrStatus", "Unknown");
+                break;
+        }
 
         switch (item->type)
         {
@@ -349,6 +379,22 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
                 yyjson_mut_obj_add_str(doc, obj, "type", "Unknown");
                 break;
         }
+
+        if (item->manufactureYear)
+        {
+            yyjson_mut_val* manufactureDate = yyjson_mut_obj_add_obj(doc, obj, "manufactureDate");
+            yyjson_mut_obj_add_uint(doc, manufactureDate, "year", item->manufactureYear);
+            yyjson_mut_obj_add_uint(doc, manufactureDate, "week", item->manufactureWeek);
+        }
+        else
+        {
+            yyjson_mut_obj_add_null(doc, obj, "manufactureDate");
+        }
+
+        if (item->serial)
+            yyjson_mut_obj_add_uint(doc, obj, "serial", item->serial);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "serial");
     }
 }
 
@@ -369,7 +415,10 @@ void ffPrintDisplayHelpFormat(void)
         "Physical diagonal length in inches - inch",
         "Pixels per inch (PPI) - ppi",
         "Bits per color channel - bit-depth",
-        "True if high dynamic range (HDR) is enabled - hdr-enabled",
+        "True if high dynamic range (HDR) mode is enabled - hdr-enabled",
+        "Year of manufacturing - manufacture-year",
+        "Nth week of manufacturing in the year - manufacture-week",
+        "Serial number - serial",
     }));
 }
 

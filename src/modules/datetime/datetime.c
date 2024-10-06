@@ -9,7 +9,7 @@
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
-#define FF_DATETIME_NUM_FORMAT_ARGS 22
+#define FF_DATETIME_NUM_FORMAT_ARGS 23
 
 typedef struct FFDateTimeResult
 {
@@ -26,6 +26,7 @@ typedef struct FFDateTimeResult
     uint16_t dayInYear; //52
     uint8_t dayInMonth; //21
     uint8_t dayInWeek; //1
+    char dayPretty[FASTFETCH_STRBUF_DEFAULT_ALLOC]; //01
     uint8_t hour; //15
     char hourPretty[FASTFETCH_STRBUF_DEFAULT_ALLOC]; //15
     uint8_t hour12; //3
@@ -54,6 +55,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     result.dayInYear = (uint8_t) (tm->tm_yday + 1);
     result.dayInMonth = (uint8_t) tm->tm_mday;
     result.dayInWeek = tm->tm_wday == 0 ? 7 : (uint8_t) tm->tm_wday;
+    strftime(result.dayPretty, sizeof(result.dayPretty), "%0d", tm);
     result.hour = (uint8_t) tm->tm_hour;
     strftime(result.hourPretty, sizeof(result.hourPretty), "%H", tm);
     result.hour12 = (uint8_t) (result.hour % 12);
@@ -88,6 +90,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
         FF_FORMAT_ARG(result.secondPretty, "second-pretty"), // 20
         FF_FORMAT_ARG(result.offsetFromUtc, "offset-from-utc"), // 21
         FF_FORMAT_ARG(result.timezoneName, "timezone-name"), // 22
+        FF_FORMAT_ARG(result.dayPretty, "day-pretty"), // 23
     }));
 }
 
@@ -157,7 +160,7 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
 
 void ffPrintDateTimeHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DATETIME_MODULE_NAME, "{1}-{4}-{11} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DATETIME_MODULE_NAME, "{1}-{4}-{23} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, ((const char* []) {
         "year - year",
         "last two digits of year - year-short",
         "month - month",
@@ -180,6 +183,7 @@ void ffPrintDateTimeHelpFormat(void)
         "second with leading zero - second-pretty",
         "offset from UTC in the ISO 8601 format - offset-from-utc",
         "locale-dependent timezone name or abbreviation - timezone-name",
+        "day in month with leading zero - day-pretty",
     }));
 }
 

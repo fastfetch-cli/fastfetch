@@ -3,10 +3,9 @@
 
 // #include <tbs.h>
 
-#define TBS_SUCCESS 0u
-#define TBS_E_INTERNAL_ERROR 0x80284001u
-#define TBS_E_INVALID_CONTEXT 0x80284004u
 typedef UINT32 TBS_RESULT;
+#define TBS_SUCCESS 0u
+#define TBS_E_TPM_NOT_FOUND  ((TBS_RESULT) 0x8028400Fu)
 
 #define TPM_VERSION_UNKNOWN     0
 #define TPM_VERSION_12          1
@@ -42,7 +41,7 @@ const char* ffDetectTPM(FFTPMResult* result)
     TPM_DEVICE_INFO deviceInfo = {};
     TBS_RESULT code = ffTbsi_GetDeviceInfo(sizeof(deviceInfo), &deviceInfo);
     if (code != TBS_SUCCESS)
-        return code == (TBS_RESULT) TBS_E_INVALID_CONTEXT ? "TPM device is not found" : "Tbsi_GetDeviceInfo() failed";
+        return code == TBS_E_TPM_NOT_FOUND ? "TPM device is not found" : "Tbsi_GetDeviceInfo() failed";
 
     switch (deviceInfo.tpmVersion)
     {

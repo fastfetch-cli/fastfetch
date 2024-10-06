@@ -22,8 +22,9 @@
     #define FF_ARCHITECTURE "unknown"
 #endif
 
-
-#if defined(__linux__)
+#if defined(__ANDROID__)
+    #define FF_SYSNAME "Android"
+#elif defined(__linux__)
     #define FF_SYSNAME "Linux"
 #elif defined(__FreeBSD__)
     #define FF_SYSNAME "FreeBSD"
@@ -33,6 +34,8 @@
     #define FF_SYSNAME "WIN32"
 #elif defined(__sun)
     #define FF_SYSNAME "SunOS"
+#elif defined(__OpenBSD__)
+    #define FF_SYSNAME "OpenBSD"
 #else
     #define FF_SYSNAME "unknown"
 #endif

@@ -1,6 +1,5 @@
 #include "displayserver_linux.h"
 #include "common/io/io.h"
-#include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
 #ifdef __FreeBSD__
@@ -102,44 +101,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         //This fills in missing information about WM / DE by using env vars and iterating processes
         ffdsDetectWMDE(ds);
     }
-}
-
-bool ffdsMatchDrmConnector(const char* connName, FFstrbuf* edidName)
-{
-    // https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output-event-name
-    // The doc says that "do not assume that the name is a reflection of an underlying DRM connector, X11 connection, etc."
-    // However I can't find a better method to get the edid data
-    const char* drmDirPath = "/sys/class/drm/";
-
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(drmDirPath);
-    if(dirp == NULL)
-        return false;
-
-    struct dirent* entry;
-    while((entry = readdir(dirp)) != NULL)
-    {
-        const char* plainName = entry->d_name;
-        if (ffStrStartsWith(plainName, "card"))
-        {
-            const char* tmp = strchr(plainName + strlen("card"), '-');
-            if (tmp) plainName = tmp + 1;
-        }
-        if (ffStrEquals(plainName, connName))
-        {
-            ffStrbufAppendF(edidName, "%s%s/edid", drmDirPath, entry->d_name);
-
-            uint8_t edidData[128];
-            if(ffReadFileData(edidName->chars, sizeof(edidData), edidData) == sizeof(edidData))
-            {
-                ffStrbufClear(edidName);
-                ffEdidGetName(edidData, edidName);
-                return true;
-            }
-            break;
-        }
-    }
-    ffStrbufClear(edidName);
-    return false;
 }
 
 FFDisplayType ffdsGetDisplayType(const char* name)

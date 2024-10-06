@@ -438,6 +438,42 @@ jobs:
           name: fastfetch-freebsd-amd64
           path: ./fastfetch-*.*
 
+  openbsd-amd64:
+    name: OpenBSD-amd64
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: openbsd
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          version: '7.5'
+          run: |
+            uname -a
+            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-openbsd-amd64
+          path: ./fastfetch-*.*
+
   windows-amd64:
     name: Windows-amd64
     runs-on: windows-latest
@@ -586,6 +622,7 @@ jobs:
       - musl-aarch64
       - macos-universal
       - freebsd-amd64
+      - openbsd-amd64
       - sunos-amd64
       - windows-amd64
       - windows-i686

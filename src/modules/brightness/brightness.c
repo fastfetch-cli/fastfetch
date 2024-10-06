@@ -25,6 +25,24 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         return;
     }
 
+    if (options->compact)
+    {
+        FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+
+        FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
+        {
+            if(str.length > 0)
+                ffStrbufAppendC(&str, ' ');
+
+            const double percent = (item->current - item->min) / (item->max - item->min) * 100;
+            ffPercentAppendNum(&str, percent, options->percent, false, &options->moduleArgs);
+        }
+
+        ffPrintLogoAndKey(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffStrbufPutTo(&str, stdout);
+        return;
+    }
+
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     uint32_t index = 0;
@@ -101,6 +119,12 @@ bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* k
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "compact"))
+    {
+        options->compact = ffOptionParseBoolean(value);
+        return true;
+    }
+
     if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
         return true;
 
@@ -126,6 +150,12 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "compact"))
+        {
+            options->compact = (uint32_t) yyjson_get_bool(val);
+            continue;
+        }
+
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
@@ -144,6 +174,9 @@ void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc
         yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
 
     ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+
+    if (defaultOptions.compact != options->compact)
+        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
 void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -205,6 +238,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
 
     options->ddcciSleep = 10;
     options->percent = (FFColorRangeConfig) { 100, 100 };
+    options->compact = false;
 }
 
 void ffDestroyBrightnessOptions(FFBrightnessOptions* options)

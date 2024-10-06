@@ -119,9 +119,10 @@
             "keyColor": "blue"
         },
         {
-            "type": "monitor",
+            "type": "display",
             "key": "MONITOR ({name})",
-            "keyColor": "blue"
+            "keyColor": "blue",
+            "format": "{width}x{height} @ {refresh-rate} Hz - {physical-width}x{physical-height} mm ({inch} inches, {ppi} ppi)"
         },
         {
             "type": "custom", // DesignInfo

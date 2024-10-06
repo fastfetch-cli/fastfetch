@@ -153,13 +153,13 @@ static double xrandrHandleMode(XrandrData* data, RRMode mode)
     return 0;
 }
 
-static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool primary, XRROutputInfo* output, FFDisplayType displayType)
+static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength)
 {
     //We do the check here, because we want the best fallback display if this call failed
     if(data->screenResources == NULL)
         return false;
 
-    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, data->screenResources, crtc);
+    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, data->screenResources, output->crtc);
     if(crtcInfo == NULL)
         return false;
 
@@ -180,7 +180,7 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool
             break;
     }
 
-    bool res = ffdsAppendDisplay(
+    FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
@@ -196,8 +196,15 @@ static bool xrandrHandleCrtc(XrandrData* data, RRCrtc crtc, FFstrbuf* name, bool
         (uint32_t) output->mm_height
     );
 
+    if (edidLength)
+    {
+        item->hdrStatus = ffEdidGetHdrCompatible(edidData, edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+        ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        ffEdidGetPhysicalSize(edidData, &item->physicalWidth, &item->physicalHeight);
+    }
+
     data->ffXRRFreeCrtcInfo(crtcInfo);
-    return res;
+    return !!item;
 }
 
 static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType)
@@ -206,26 +213,30 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
     if(outputInfo == NULL)
         return false;
 
+    uint8_t* edidData = NULL;
+    unsigned long edidLength = 0;
     Atom atomEdid = data->ffXInternAtom(data->display, "EDID", true);
     if (atomEdid != None)
     {
         int actual_format = 0;
-        unsigned long nitems = 0, bytes_after = 0;
+        unsigned long bytes_after = 0;
         Atom actual_type = None;
-        uint8_t* edidData = NULL;
-        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, false, false, AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &edidData) == Success)
+        if (data->ffXRRGetOutputProperty(data->display, output, atomEdid, 0, 100, false, false, AnyPropertyType, &actual_type, &actual_format, &edidLength, &bytes_after, &edidData) == Success)
         {
-            if (nitems >= 128)
+            if (edidLength >= 128)
             {
                 ffStrbufClear(name);
                 ffEdidGetName(edidData, name);
             }
+            else
+                edidLength = 0;
         }
-        if (edidData)
-            data->ffXFree(edidData);
     }
-    bool res = xrandrHandleCrtc(data, outputInfo->crtc, name, primary, outputInfo, displayType);
 
+    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, (uint32_t) edidLength);
+
+    if (edidData)
+        data->ffXFree(edidData);
     data->ffXRRFreeOutputInfo(outputInfo);
 
     return res;

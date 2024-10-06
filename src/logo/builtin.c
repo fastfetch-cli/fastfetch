@@ -3088,6 +3088,7 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
         },
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
@@ -4574,6 +4575,16 @@ static const FFlogo U[] = {
 };
 
 static const FFlogo V[] = {
+    // Valhalla
+    {
+        .names = {"Valhalla", "valhallaos", "valhalla-linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_VALHALLA,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Vanilla
     {
         .names = {"vanilla", "vanilla-os", "vanilla-linux"},
@@ -4785,12 +4796,25 @@ static const FFlogo X[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    //XeroArch
+    {
+        .names = {"XeroArch"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XEROARCH,
+        .colors = {
+            FF_COLOR_FG_256 "16",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "50",
+            FF_COLOR_FG_256 "93",
+            FF_COLOR_FG_256 "46",
+            FF_COLOR_FG_256 "15",
+        }
+    },
     //Xray_OS
     {
         .names = {"Xray_OS"},
         .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
         .colors = {
-            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "16",
             FF_COLOR_FG_256 "14",
             FF_COLOR_FG_256 "16",
         }

@@ -22,6 +22,10 @@
     #include <libproc.h>
 #elif defined(__sun)
     #include <procfs.h>
+#elif defined(__OpenBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <kvm.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -259,6 +263,18 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         }
     }
 
+    #elif defined(__OpenBSD__)
+
+    kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    int count = 0;
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
+    if (proc)
+    {
+        char** argv = kvm_getargv(kd, proc, 0);
+        if (argv) ffStrbufSetS(exe, argv[0]);
+    }
+    kvm_close(kd);
+
     #endif
 
     if(exe->length == 0)
@@ -372,6 +388,23 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         *ppid = proc.pr_ppid;
     if (tty)
         *tty = (int) proc.pr_ttydev;
+
+    #elif defined(__OpenBSD__)
+
+    kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    int count = 0;
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
+    if (proc)
+    {
+        ffStrbufSetS(name, proc->p_comm);
+        if (ppid)
+            *ppid = proc->p_ppid;
+        if (tty)
+            *tty = (int) proc->p_tdev;
+    }
+    kvm_close(kd);
+    if (!proc)
+        return "kvm_getprocs() failed";
 
     #else
 
