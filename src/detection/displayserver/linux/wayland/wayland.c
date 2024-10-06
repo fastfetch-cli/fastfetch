@@ -109,7 +109,7 @@ static bool matchDrmConnector(const char* connName, WaylandDisplay* wldata)
 
             uint8_t edidData[512];
             ssize_t edidLength = ffReadFileData(path.chars, sizeof(edidData), edidData);
-            if (edidLength <= 0 || edidLength % 128 != 0)
+            if (edidLength > 0 && edidLength % 128 == 0)
             {
                 ffEdidGetName(edidData, &wldata->edidName);
                 ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength);
