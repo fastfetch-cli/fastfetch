@@ -1,3 +1,8 @@
+# 2.27.1
+
+Bugfixes:
+* Fix invalid display name detection on GNOME, wayland (Display, Linux)
+
 # 2.27.0
 
 Changes:
