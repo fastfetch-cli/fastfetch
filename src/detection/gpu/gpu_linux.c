@@ -78,7 +78,7 @@ static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer
     return true;
 }
 
-static const char* drmFindRenderFromCard(const char* drmCardKey, FFstrbuf* result)
+FF_MAYBE_UNUSED static const char* drmFindRenderFromCard(const char* drmCardKey, FFstrbuf* result)
 {
     char path[PATH_MAX];
     sprintf(path, "/sys/class/drm/%s/device/drm", drmCardKey);
@@ -395,6 +395,7 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     }
     return NULL;
     #else
+    FF_UNUSED(gpu, drmKey, buffer);
     return "Fastfetch is not compiled with drm support";
     #endif
 }
