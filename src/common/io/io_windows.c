@@ -274,7 +274,11 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
         bytesRead += bytes;
         buffer[bytesRead] = '\0';
 
+        va_list cargs;
+        va_copy(cargs, args);
         int ret = vsscanf(buffer, format, args);
+        va_end(cargs);
+
         if (ret <= 0)
         {
             va_end(args);
