@@ -7,12 +7,13 @@ Changes:
     * The refresh rate reported by `monitor` module is the current refresh rate.
 
 Features:
+* Add basic, highly experimental support of OpenBSD (OpenBSD)
 * Improve support for Raspberry pi (CPU / GPU, Linux)
 * Detect SOC name, instead of displaying components used in the SOC, if available (CPU, Linux)
 * Add option `--brightness-compact` to display multiple brightness values in one line (Brightness)
 * Add `day-pretty` (#1305, DateTime)
-* Add basic, highly experimental support of OpenBSD (OpenBSD)
 * Support network interface adapter flag detection (#1315, LocalIP)
+    * Enable it with `--localip-show-flags`
 
 Bugfixes:
 * Remove trailing newline in GPU name for Raspberry pi (#1303, GPU, Linux)
@@ -21,6 +22,7 @@ Bugfixes:
 * Corrently report `TPM device is not found` error (#1314, TPM, Windows)
 * Fix errors when triggering shell completion with python3 uninstalled (#1310)
     * To package managers: as shell completion scripts of fastfetch use python3, it should be added as an optional dependency of fastfetch
+* Fix possible crashes when detecting term font of kitty (#1321, TerminalFont, Linux)
 
 Logos:
 * Add XeroArch
