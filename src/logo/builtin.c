@@ -1504,10 +1504,10 @@ static const FFlogo E[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_EWEOS,
         .colors = {
            FF_COLOR_FG_WHITE,
-           FF_COLOR_FG_256 "11",
-	    FF_COLOR_FG_256 "9",
-	    FF_COLOR_FG_256 "8",
-	    FF_COLOR_FG_RED,
+           FF_COLOR_FG_LIGHT_YELLOW,
+           FF_COLOR_FG_LIGHT_RED,
+           FF_COLOR_FG_LIGHT_BLACK,
+           FF_COLOR_FG_RED,
         },
     },
     // Exherbo
