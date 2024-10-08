@@ -1498,6 +1498,18 @@ static const FFlogo E[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // eweOS
+    {
+        .names = {"eweOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EWEOS,
+        .colors = {
+           FF_COLOR_FG_WHITE,
+           FF_COLOR_FG_LIGHT_YELLOW,
+           FF_COLOR_FG_LIGHT_RED,
+           FF_COLOR_FG_LIGHT_BLACK,
+           FF_COLOR_FG_RED,
+        },
+    },
     // Exherbo
     {
         .names = {"Exherbo", "exherbo-linux"},
