@@ -11,20 +11,8 @@ static void enumSet(IOHIDDeviceRef value, FFlist* results)
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->name);
 
-    CFStringRef manufacturer = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDManufacturerKey));
-    ffCfStrGetString(manufacturer, &device->name);
-
     CFStringRef product = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDProductKey));
-    if (device->name.length)
-    {
-        ffCfStrGetString(product, &device->serial);
-        ffStrbufAppendC(&device->name, ' ');
-        ffStrbufAppend(&device->name, &device->serial);
-    }
-    else
-    {
-        ffCfStrGetString(product, &device->name);
-    }
+    ffCfStrGetString(product, &device->name);
 
     CFStringRef serialNumber = IOHIDDeviceGetProperty(value, CFSTR(kIOHIDSerialNumberKey));
     ffCfStrGetString(serialNumber, &device->serial);
