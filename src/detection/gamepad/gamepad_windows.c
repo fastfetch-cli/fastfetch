@@ -78,7 +78,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 
     for (UINT i = 0; i < nDevices; ++i)
     {
-        if (pRawInputDeviceList[i].dwType != 2) continue;
+        if (pRawInputDeviceList[i].dwType != RIM_TYPEHID) continue;
 
         HANDLE hDevice = pRawInputDeviceList[i].hDevice;
 
@@ -104,7 +104,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         if (knownGamepad)
             ffStrbufSetS(&device->name, knownGamepad);
         HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
-        if (!hHidFile)
+        if (hHidFile == INVALID_HANDLE_VALUE)
         {
             if (!knownGamepad)
                 ffStrbufSetF(&device->name, "Unknown gamepad %04X-%04X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
