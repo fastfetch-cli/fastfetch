@@ -1312,6 +1312,7 @@ elseif(WIN32)
         PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
+        PRIVATE "cfgmgr32"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch

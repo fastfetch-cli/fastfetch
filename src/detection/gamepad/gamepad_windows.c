@@ -131,6 +131,10 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             }
         }
 
+        wchar_t serialNumber[127] = L"";
+        if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
+            ffStrbufSetWS(&device->serial, serialNumber);
+
         PHIDP_PREPARSED_DATA preparsedData = NULL;
         if (HidD_GetPreparsedData(hHidFile, &preparsedData))
         {
@@ -139,10 +143,6 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             HidD_FreePreparsedData(preparsedData);
             if (!NT_SUCCESS(capsResult))
                 continue;
-
-            wchar_t serialNumber[127] = L"";
-            if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
-                ffStrbufSetWS(&device->serial, serialNumber);
 
             if (
                 (rdi.hid.dwVendorId == 0x054C && (
