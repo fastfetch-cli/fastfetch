@@ -11,7 +11,7 @@
 #include <cfgmgr32.h>
 #include <devpkey.h>
 
-CMAPI CONFIGRET CM_Get_Device_Interface_PropertyW(
+WINAPI CMAPI CONFIGRET CM_Get_Device_Interface_PropertyW(
   _In_      LPCWSTR          pszDeviceInterface,
   _In_      const DEVPROPKEY *PropertyKey,
   _Out_     DEVPROPTYPE      *PropertyType,
