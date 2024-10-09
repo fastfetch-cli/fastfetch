@@ -379,6 +379,7 @@ set(LIBFASTFETCH_SRC
     src/modules/initsystem/initsystem.c
     src/modules/gamepad/gamepad.c
     src/modules/kernel/kernel.c
+    src/modules/keyboard/keyboard.c
     src/modules/lm/lm.c
     src/modules/loadavg/loadavg.c
     src/modules/locale/locale.c
@@ -402,6 +403,7 @@ set(LIBFASTFETCH_SRC
     src/modules/sound/sound.c
     src/modules/swap/swap.c
     src/modules/media/media.c
+    src/modules/mouse/mouse.c
     src/modules/terminal/terminal.c
     src/modules/terminaltheme/terminaltheme.c
     src/modules/terminalfont/terminalfont.c
@@ -478,6 +480,7 @@ if(LINUX)
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
         src/detection/loadavg/loadavg_linux.c
@@ -486,6 +489,7 @@ if(LINUX)
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/mouse/mouse_linux.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
@@ -542,6 +546,7 @@ elseif(ANDROID)
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_linux.c
@@ -550,6 +555,7 @@ elseif(ANDROID)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
+        src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
@@ -622,6 +628,7 @@ elseif(FreeBSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_bsd.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
@@ -629,6 +636,7 @@ elseif(FreeBSD)
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
+        src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
@@ -701,6 +709,7 @@ elseif(OpenBSD)
         src/detection/lm/lm_nosupport.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_nosupport.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
@@ -708,6 +717,7 @@ elseif(OpenBSD)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_obsd.c
+        src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_obsd.c
@@ -766,6 +776,7 @@ elseif(APPLE)
         src/detection/host/host_apple.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
@@ -774,6 +785,7 @@ elseif(APPLE)
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
+        src/detection/mouse/mouse_apple.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
@@ -832,6 +844,7 @@ elseif(WIN32)
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
+        src/detection/keyboard/keyboard_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
@@ -840,6 +853,7 @@ elseif(WIN32)
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_windows.c
         src/detection/memory/memory_windows.c
+        src/detection/mouse/mouse_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
@@ -1027,7 +1041,7 @@ if(FreeBSD AND EXISTS "/usr/local/bin/objdump")
 endif()
 
 if(LINUX OR ANDROID)
-    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1 _FILE_OFFSET_BITS=64)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE _ATFILE_SOURCE __STDC_WANT_LIB_EXT1__ _FILE_OFFSET_BITS=64)
 elseif(WIN32)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN=1 _WIN32_WINNT=0x0A00)
 elseif(APPLE)

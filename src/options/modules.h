@@ -36,6 +36,7 @@ typedef struct FFOptionsModules
     FFIconsOptions icons;
     FFInitSystemOptions initSystem;
     FFKernelOptions kernel;
+    FFKeyboardOptions keyboard;
     FFLMOptions lm;
     FFLoadavgOptions loadavg;
     FFLocalIpOptions localIP;
@@ -43,6 +44,7 @@ typedef struct FFOptionsModules
     FFMediaOptions media;
     FFMemoryOptions memory;
     FFMonitorOptions monitor;
+    FFMouseOptions mouse;
     FFNetIOOptions netIo;
     FFOSOptions os;
     FFOpenCLOptions openCL;
