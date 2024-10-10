@@ -5,16 +5,12 @@ set -e
 mkdir -p build/
 cd build/
 
-if [ -z "${CMAKE_BUILD_TYPE}" ]; then
-    CMAKE_BUILD_TYPE=Release
-fi
-
-cmake "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" ..
+cmake ..
 
 kernel_name="$(uname -s)"
 
 case "${kernel_name}" in
-    "Linux")
+    "Linux" | "MINGW"*)
         cmake_build_args="-j$(nproc)"
         ;;
     "Darwin" | *"BSD" | "DragonFly")
