@@ -41,7 +41,9 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         ffStrbufInit(&battery->technology);
         ffStrbufInit(&battery->serial);
         ffStrbufInit(&battery->manufactureDate);
-
+        battery->timeRemaining = -1;
+        if (battio.battinfo.min > 0)
+            battery->capacity = battio.battinfo.min * 60;
         battery->capacity = battio.battinfo.cap;
         if(battio.battinfo.state == ACPI_BATT_STAT_INVALID)
         {
@@ -74,6 +76,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             ffStrbufAppendS(&battery->manufacturer, battio.bix.oeminfo);
             ffStrbufAppendS(&battery->modelName, battio.bix.model);
             ffStrbufAppendS(&battery->technology, battio.bix.type);
+            battery->cycleCount = battio.bix.cycles;
         }
     }
     return NULL;
