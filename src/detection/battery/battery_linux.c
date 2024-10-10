@@ -6,131 +6,121 @@
 
 // https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-power
 
+static inline const char* findProperty(const char* buffer, ssize_t bufSize, const char* prefix)
+{
+    assert(bufSize > 0);
+    const char* p = memmem(buffer, (size_t) bufSize, prefix, strlen(prefix));
+    if (p) return p + strlen(prefix);
+    return NULL;
+}
+
 static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* options, FFlist* results)
 {
-    uint32_t dirLength = dir->length;
+    ffStrbufAppendS(dir, "/uevent");
 
-    FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
+    char buffer[16 * 1024];
+    ssize_t size = ffReadFileData(dir->chars, sizeof(buffer), buffer);
+    if (size <= 0) return;
 
     //type must exist and be "Battery"
-    ffStrbufAppendS(dir, "/type");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
-        ffStrbufTrimRightSpace(&tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if(!ffStrbufIgnCaseEqualS(&tmpBuffer, "Battery"))
-        return;
+    const char* type = findProperty(buffer, size, "\nPOWER_SUPPLY_TYPE=");
+    if (!type || !ffStrStartsWith(type, "Battery\n")) return;
 
     //scope may not exist or must not be "Device"
-    ffStrbufAppendS(dir, "/scope");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
-        ffStrbufTrimRightSpace(&tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if(ffStrbufIgnCaseEqualS(&tmpBuffer, "Device"))
-        return;
+    const char* scope = findProperty(buffer, size, "\nPOWER_SUPPLY_SCOPE=");
+    if (scope && ffStrStartsWith(scope, "Device\n")) return;
 
     //capacity must exist and be not empty
-    ffStrbufAppendS(dir, "/capacity");
-    bool available = ffReadFileBuffer(dir->chars, &tmpBuffer); // This is expensive in my laptop
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if (!available)
-        return;
-
-    FFBatteryResult* result = ffListAdd(results);
-    result->capacity = ffStrbufToDouble(&tmpBuffer);
+    const char* capacity = findProperty(buffer, size, "\nPOWER_SUPPLY_CAPACITY=");
+    if (!capacity) return;
 
     //At this point, we have a battery. Try to get as much values as possible.
 
+    FFBatteryResult* result = ffListAdd(results);
+    result->capacity = strtod(capacity, NULL);
+
     ffStrbufInit(&result->manufacturer);
-    ffStrbufAppendS(dir, "/manufacturer");
-    if (ffReadFileBuffer(dir->chars, &result->manufacturer))
-        ffStrbufTrimRightSpace(&result->manufacturer);
+    const char* manufacturer = findProperty(buffer, size, "\nPOWER_SUPPLY_MANUFACTURER=");
+    if (manufacturer)
+        ffStrbufAppendSUntilC(&result->manufacturer, manufacturer, '\n');
     else if (ffStrEquals(id, "macsmc-battery")) // asahi
         ffStrbufSetStatic(&result->manufacturer, "Apple Inc.");
-    ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->modelName);
-    ffStrbufAppendS(dir, "/model_name");
-    if (ffReadFileBuffer(dir->chars, &result->modelName))
-        ffStrbufTrimRightSpace(&result->modelName);
-    ffStrbufSubstrBefore(dir, dirLength);
+    ffStrbufAppendSUntilC(&result->modelName, findProperty(buffer, size, "\nPOWER_SUPPLY_MODEL_NAME="), '\n');
 
     ffStrbufInit(&result->technology);
-    ffStrbufAppendS(dir, "/technology");
-    if (ffReadFileBuffer(dir->chars, &result->technology))
-        ffStrbufTrimRightSpace(&result->technology);
-    ffStrbufSubstrBefore(dir, dirLength);
+    ffStrbufAppendSUntilC(&result->technology, findProperty(buffer, size, "\nPOWER_SUPPLY_TECHNOLOGY="), '\n');
 
     ffStrbufInit(&result->status);
-    ffStrbufAppendS(dir, "/status");
-    if (ffReadFileBuffer(dir->chars, &result->status))
-        ffStrbufTrimRightSpace(&result->status);
-    ffStrbufSubstrBefore(dir, dirLength);
+    const char* status = findProperty(buffer, size, "\nPOWER_SUPPLY_STATUS=");
 
     // Unknown, Charging, Discharging, Not charging, Full
-    if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full"))
+    if (ffStrStartsWith(status, "Not charging\n") || ffStrStartsWith(status, "Full\n"))
         ffStrbufSetStatic(&result->status, "AC Connected");
-    else if (ffStrbufEqualS(&result->status, "Unknown"))
-        ffStrbufClear(&result->status);
+    else if (ffStrStartsWith(status, "Charging\n"))
+        ffStrbufSetStatic(&result->status, "AC Connected, Charging");
+    else if (ffStrStartsWith(status, "Discharging\n"))
+        ffStrbufSetStatic(&result->status, "Discharging");
 
-    ffStrbufAppendS(dir, "/capacity_level");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+    const char* capacityLevel = findProperty(buffer, size, "\nPOWER_SUPPLY_CAPACITY_LEVEL=");
+    if (capacityLevel && ffStrStartsWith(capacityLevel, "Critical\n"))
     {
-        ffStrbufTrimRightSpace(&result->manufacturer);
-        if (ffStrbufEqualS(&tmpBuffer, "Critical"))
-        {
-            if (result->status.length)
-                ffStrbufAppendS(&result->status, ", Critical");
-            else
-                ffStrbufSetStatic(&result->status, "Critical");
-        }
+        if (result->status.length)
+            ffStrbufAppendS(&result->status, ", Critical");
+        else
+            ffStrbufSetStatic(&result->status, "Critical");
     }
-    ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->serial);
-    ffStrbufAppendS(dir, "/serial_number");
-    if (ffReadFileBuffer(dir->chars, &result->serial))
-        ffStrbufTrimRightSpace(&result->serial);
-    ffStrbufSubstrBefore(dir, dirLength);
+    ffStrbufAppendSUntilC(&result->serial, findProperty(buffer, size, "\nPOWER_SUPPLY_SERIAL_NUMBER="), '\n');
 
     ffStrbufAppendS(dir, "/cycle_count");
-    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-    if (available)
+    const char* cycleCountStr = findProperty(buffer, size, "\nPOWER_SUPPLY_CYCLE_COUNT=");
+    if (cycleCountStr)
     {
-        int64_t cycleCount = ffStrbufToSInt(&tmpBuffer, 0);
+        int64_t cycleCount = strtol(cycleCountStr, NULL, 10);
         result->cycleCount = cycleCount < 0 || cycleCount > UINT32_MAX ? 0 : (uint32_t) cycleCount;
     }
 
-    ffStrbufInit(&result->manufactureDate);
-    ffStrbufAppendS(dir, "/manufacture_year");
-    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-    if (available)
+    result->timeRemaining = -1;
+    const char* timeToEmptyStr = findProperty(buffer, size, "\nPOWER_SUPPLY_TIME_TO_EMPTY_NOW=");
+    if (timeToEmptyStr)
     {
-        int year = (int) ffStrbufToSInt(&tmpBuffer, 0);
+        int64_t value = strtol(timeToEmptyStr, NULL, 0);
+        if (value > 0)
+            result->timeRemaining = (int32_t) value;
+        else
+        {
+            const char* timeToFullStr = findProperty(buffer, size, "\nPOWER_SUPPLY_TIME_TO_FULL_NOW=");
+            if (timeToFullStr)
+            {
+                value = strtol(timeToFullStr, NULL, 0);
+                if (value > 0)
+                    result->timeRemaining = (int32_t) value;
+            }
+        }
+    }
+
+    ffStrbufInit(&result->manufactureDate);
+    const char* myear = findProperty(buffer, size, "\nPOWER_SUPPLY_MANUFACTURE_YEAR=");
+    if (myear)
+    {
+        int year = (int) strtol(myear, NULL, 10);
         if (year > 0)
         {
-            ffStrbufAppendS(dir, "/manufacture_month");
-            available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-            ffStrbufSubstrBefore(dir, dirLength);
-            if (available)
+            const char* mmonth = findProperty(buffer, size, "\nPOWER_SUPPLY_MANUFACTURE_MONTH=");
+            if (mmonth)
             {
-                int month = (int) ffStrbufToSInt(&tmpBuffer, 0);
+                int month = (int) strtol(mmonth, NULL, 10);
                 if (month > 0)
                 {
-                    ffStrbufAppendS(dir, "/manufacture_day");
-                    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-                    ffStrbufSubstrBefore(dir, dirLength);
-                    if (available)
+                    const char* mday = findProperty(buffer, size, "\nPOWER_SUPPLY_MANUFACTURE_DAY=");
+                    if (mday)
                     {
-                        int day = (int) ffStrbufToSInt(&tmpBuffer, 0);
+                        int day = (int) strtol(mday, NULL, 0);
                         if (day > 0)
-                        {
                             ffStrbufSetF(&result->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
-                        }
                     }
                 }
             }
@@ -140,10 +130,9 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp)
     {
-        ffStrbufAppendS(dir, "/temp");
-        if (ffReadFileBuffer(dir->chars, &tmpBuffer))
-            result->temperature = ffStrbufToDouble(&tmpBuffer) / 10;
-        ffStrbufSubstrBefore(dir, dirLength);
+        const char* tempStr = findProperty(buffer, size, "\nPOWER_SUPPLY_TEMP=");
+        if (tempStr)
+            result->temperature = strtod(tempStr, NULL) / 10.;
     }
 }
 
