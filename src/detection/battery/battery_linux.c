@@ -24,7 +24,18 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
 
     //type must exist and be "Battery"
     const char* type = findProperty(buffer, size, "\nPOWER_SUPPLY_TYPE=");
-    if (!type || !ffStrStartsWith(type, "Battery\n")) return;
+    if (type)
+    {
+        if (!ffStrStartsWith(type, "Battery\n")) return;
+    }
+    else if (!ffStrStartsWith(id, "BAT"))
+    {
+        char typeBuf[16] = {0};
+        ffStrbufSubstrBefore(dir, dir->length - (uint32_t) strlen("uevent"));
+        ffStrbufAppendS(dir, "type");
+        if (ffReadFileData(dir->chars, sizeof(typeBuf), typeBuf) < (ssize_t) strlen("Battery")) return;
+        if (!ffStrStartsWith(typeBuf, "Battery")) return;
+    }
 
     //scope may not exist or must not be "Device"
     const char* scope = findProperty(buffer, size, "\nPOWER_SUPPLY_SCOPE=");
@@ -50,18 +61,22 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     ffStrbufAppendSUntilC(&result->modelName, findProperty(buffer, size, "\nPOWER_SUPPLY_MODEL_NAME="), '\n');
 
     ffStrbufInit(&result->technology);
-    ffStrbufAppendSUntilC(&result->technology, findProperty(buffer, size, "\nPOWER_SUPPLY_TECHNOLOGY="), '\n');
+    const char* technology = findProperty(buffer, size, "\nPOWER_SUPPLY_TECHNOLOGY=");
+    if (technology && !ffStrStartsWith(technology, "Unknown"))
+        ffStrbufAppendSUntilC(&result->technology, technology, '\n');
 
     ffStrbufInit(&result->status);
     const char* status = findProperty(buffer, size, "\nPOWER_SUPPLY_STATUS=");
-
-    // Unknown, Charging, Discharging, Not charging, Full
-    if (ffStrStartsWith(status, "Not charging\n") || ffStrStartsWith(status, "Full\n"))
-        ffStrbufSetStatic(&result->status, "AC Connected");
-    else if (ffStrStartsWith(status, "Charging\n"))
-        ffStrbufSetStatic(&result->status, "AC Connected, Charging");
-    else if (ffStrStartsWith(status, "Discharging\n"))
-        ffStrbufSetStatic(&result->status, "Discharging");
+    if (status)
+    {
+        // Unknown, Charging, Discharging, Not charging, Full
+        if (ffStrStartsWith(status, "Not charging\n") || ffStrStartsWith(status, "Full\n"))
+            ffStrbufSetStatic(&result->status, "AC Connected");
+        else if (ffStrStartsWith(status, "Charging\n"))
+            ffStrbufSetStatic(&result->status, "AC Connected, Charging");
+        else if (ffStrStartsWith(status, "Discharging\n"))
+            ffStrbufSetStatic(&result->status, "Discharging");
+    }
 
     const char* capacityLevel = findProperty(buffer, size, "\nPOWER_SUPPLY_CAPACITY_LEVEL=");
     if (capacityLevel && ffStrStartsWith(capacityLevel, "Critical\n"))
@@ -98,6 +113,24 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
                 value = strtol(timeToFullStr, NULL, 0);
                 if (value > 0)
                     result->timeRemaining = (int32_t) value;
+            }
+        }
+    }
+    else if (ffStrStartsWith(status, "Discharging\n"))
+    {
+        const char* chargeNow = findProperty(buffer, size, "\nPOWER_SUPPLY_CHARGE_NOW=");
+        if (chargeNow)
+        {
+            int64_t charge = strtol(chargeNow, NULL, 0);
+            if (charge > 0)
+            {
+                const char* currentNow = findProperty(buffer, size, "\nPOWER_SUPPLY_CURRENT_NOW=");
+                if (currentNow)
+                {
+                    int64_t current = strtol(currentNow, NULL, 0);
+                    if (current > 0)
+                        result->timeRemaining = (int32_t) (charge * 3600 / current);
+                }
             }
         }
     }

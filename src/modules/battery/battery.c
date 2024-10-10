@@ -250,7 +250,8 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &battery->serial);
         yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
         yyjson_mut_obj_add_uint(doc, obj, "cycleCount", battery->cycleCount);
-        yyjson_mut_obj_add_int(doc, obj, "timeRemaining", battery->timeRemaining);
+        if (battery->timeRemaining > 0)
+            yyjson_mut_obj_add_int(doc, obj, "timeRemaining", battery->timeRemaining);
     }
 
     FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
