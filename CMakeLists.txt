@@ -628,7 +628,7 @@ elseif(FreeBSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
-        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/keyboard/keyboard_bsd.c
         src/detection/libc/libc_bsd.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
@@ -636,7 +636,7 @@ elseif(FreeBSD)
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
-        src/detection/mouse/mouse_nosupport.c
+        src/detection/mouse/mouse_bsd.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
