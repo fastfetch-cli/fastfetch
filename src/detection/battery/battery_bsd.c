@@ -43,7 +43,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         ffStrbufInit(&battery->manufactureDate);
         battery->timeRemaining = -1;
         if (battio.battinfo.min > 0)
-            battery->capacity = battio.battinfo.min * 60;
+            battery->timeRemaining = battio.battinfo.min * 60;
         battery->capacity = battio.battinfo.cap;
         if(battio.battinfo.state == ACPI_BATT_STAT_INVALID)
         {
