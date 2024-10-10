@@ -87,7 +87,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         if (GetRawInputDeviceInfoW(hDevice, RIDI_DEVICEINFO, &rdi, &rdiSize) == (UINT) -1)
             continue;
 
-        if (rdi.hid.usUsagePage != 1 || rdi.hid.usUsage != 5) // Gamepad
+        if (rdi.hid.usUsagePage != 1 || (rdi.hid.usUsage != 4/*Joystick*/ && rdi.hid.usUsage != 5/*Gamepad*/))
             continue;
 
         WCHAR devName[MAX_PATH] = L"";
