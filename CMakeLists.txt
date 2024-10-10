@@ -930,6 +930,7 @@ elseif(SunOS)
         src/detection/host/host_windows.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_sunos.c
@@ -938,6 +939,7 @@ elseif(SunOS)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_sunos.c
+        src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_sunos.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_sunos.c
