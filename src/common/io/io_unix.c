@@ -117,6 +117,15 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
     return ffAppendFDBuffer(fd, buffer);
 }
 
+bool ffAppendFileBufferRelative(int dfd, const char* fileName, FFstrbuf* buffer)
+{
+    int FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    if(fd == -1)
+        return false;
+
+    return ffAppendFDBuffer(fd, buffer);
+}
+
 bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* out)
 {
     bool result = false;

@@ -69,11 +69,18 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
 
 bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
+bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
 
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
     return ffAppendFileBuffer(fileName, buffer);
+}
+
+static inline bool ffReadFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer)
+{
+    ffStrbufClear(buffer);
+    return ffAppendFileBufferRelative(dfd, fileName, buffer);
 }
 
 //Bit flags, combine with |
