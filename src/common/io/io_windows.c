@@ -3,6 +3,8 @@
 #include "util/stringUtils.h"
 
 #include <windows.h>
+#include <ntstatus.h>
+#include <winternl.h>
 
 static void createSubfolders(const char* fileName)
 {
@@ -38,7 +40,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 
 static inline void readWithLength(HANDLE handle, FFstrbuf* buffer, uint32_t length)
 {
-    ffStrbufEnsureFixedLengthFree(buffer, length);
+    ffStrbufEnsureFree(buffer, length);
     DWORD bytesRead = 0;
     while(
         length > 0 &&
@@ -98,6 +100,31 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
         return false;
 
     return ffAppendFDBuffer(handle, buffer);
+}
+
+bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
+{
+    NTSTATUS ret;
+    UNICODE_STRING fileNameW;
+    ret = RtlAnsiStringToUnicodeString(&fileNameW, &(ANSI_STRING) {
+        .Length = (USHORT) strlen(fileName),
+        .Buffer = (PCHAR) fileName
+    }, TRUE);
+    if (!NT_SUCCESS(ret)) return false;
+
+    FF_AUTO_CLOSE_FD HANDLE hFile = INVALID_HANDLE_VALUE;
+    IO_STATUS_BLOCK iosb = {};
+    ret = NtOpenFile(&hFile, FILE_READ_DATA | SYNCHRONIZE, &(OBJECT_ATTRIBUTES) {
+        .Length = sizeof(OBJECT_ATTRIBUTES),
+        .RootDirectory = dfd,
+        .ObjectName = &fileNameW,
+    }, &iosb, FILE_SHARE_READ, FILE_SYNCHRONOUS_IO_NONALERT | FILE_NON_DIRECTORY_FILE);
+    RtlFreeUnicodeString(&fileNameW);
+
+    if(!NT_SUCCESS(ret) || iosb.Information != FILE_OPENED)
+        return false;
+
+    return ffAppendFDBuffer(hFile, buffer);
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)
