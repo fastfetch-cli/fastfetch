@@ -108,6 +108,15 @@ ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data)
     return ffReadFDData(fd, dataSize, data);
 }
 
+ssize_t ffReadFileDataRelative(int dfd, const char* fileName, size_t dataSize, void* data)
+{
+    int FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    if(fd == -1)
+        return -1;
+
+    return ffReadFDData(fd, dataSize, data);
+}
+
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     int FF_AUTO_CLOSE_FD fd = open(fileName, O_RDONLY | O_CLOEXEC);

@@ -102,7 +102,7 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
     return ffAppendFDBuffer(handle, buffer);
 }
 
-bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
+HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
 {
     NTSTATUS ret;
     UNICODE_STRING fileNameW;
@@ -110,21 +110,39 @@ bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buff
         .Length = (USHORT) strlen(fileName),
         .Buffer = (PCHAR) fileName
     }, TRUE);
-    if (!NT_SUCCESS(ret)) return false;
+    if (!NT_SUCCESS(ret)) return INVALID_HANDLE_VALUE;
 
-    FF_AUTO_CLOSE_FD HANDLE hFile = INVALID_HANDLE_VALUE;
+    FF_AUTO_CLOSE_FD HANDLE hFile;
     IO_STATUS_BLOCK iosb = {};
     ret = NtOpenFile(&hFile, FILE_READ_DATA | SYNCHRONIZE, &(OBJECT_ATTRIBUTES) {
         .Length = sizeof(OBJECT_ATTRIBUTES),
         .RootDirectory = dfd,
         .ObjectName = &fileNameW,
-    }, &iosb, FILE_SHARE_READ, FILE_SYNCHRONOUS_IO_NONALERT | FILE_NON_DIRECTORY_FILE);
+    }, &iosb, FILE_SHARE_READ, FILE_SYNCHRONOUS_IO_NONALERT | (directory ? FILE_DIRECTORY_FILE : FILE_NON_DIRECTORY_FILE));
     RtlFreeUnicodeString(&fileNameW);
 
     if(!NT_SUCCESS(ret) || iosb.Information != FILE_OPENED)
+        return INVALID_HANDLE_VALUE;
+
+    return hFile;
+}
+
+bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
+{
+    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    if(fd == INVALID_HANDLE_VALUE)
         return false;
 
-    return ffAppendFDBuffer(hFile, buffer);
+    return ffAppendFDBuffer(fd, buffer);
+}
+
+ssize_t ffReadFileDataRelative(int dfd, const char* fileName, size_t dataSize, void* data)
+{
+    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    if(fd == INVALID_HANDLE_VALUE)
+        return -1;
+
+    return ffReadFDData(fd, dataSize, data);
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)
