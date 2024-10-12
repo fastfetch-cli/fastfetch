@@ -66,7 +66,7 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
 }
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
-ssize_t ffReadFileDataRelative(int dfd, const char* fileName, size_t dataSize, void* data);
+ssize_t ffReadFileDataRelative(FFNativeFD dfd, const char* fileName, size_t dataSize, void* data);
 
 bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);

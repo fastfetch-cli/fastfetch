@@ -129,16 +129,16 @@ HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
 
 bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
 {
-    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, false);
     if(fd == INVALID_HANDLE_VALUE)
         return false;
 
     return ffAppendFDBuffer(fd, buffer);
 }
 
-ssize_t ffReadFileDataRelative(int dfd, const char* fileName, size_t dataSize, void* data)
+ssize_t ffReadFileDataRelative(HANDLE dfd, const char* fileName, size_t dataSize, void* data)
 {
-    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, O_RDONLY | O_CLOEXEC);
+    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, false);
     if(fd == INVALID_HANDLE_VALUE)
         return -1;
 
