@@ -6,6 +6,8 @@
 
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
+// /proc/net/route has a fixed 128 chars line size, +1 for the NUL
+#define NET_ROUTE_LINE_SIZE 129
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
 {
@@ -13,11 +15,10 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
     if (!netRoute) return false;
 
     // skip first line
-    flockfile(netRoute);
-    while (getc_unlocked(netRoute) != '\n');
-    funlockfile(netRoute);
-    unsigned long long destination; //, gateway, flags, refCount, use, metric, mask, mtu,
+    char skippedLine[NET_ROUTE_LINE_SIZE];
+    if (!fgets(skippedLine, NET_ROUTE_LINE_SIZE, netRoute)) return false;
 
+    unsigned long long destination; //, gateway, flags, refCount, use, metric, mask, mtu,
     while (fscanf(netRoute, "%" FF_STR(IF_NAMESIZE) "s%llx%*[^\n]", iface, &destination) == 2)
     {
         if (destination != 0) continue;
