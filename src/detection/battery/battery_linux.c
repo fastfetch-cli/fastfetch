@@ -8,6 +8,19 @@
 
 // https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-power
 
+static bool checkAc(const char* id, FFstrbuf* tmpBuffer)
+{
+    if (ffStrStartsWith(id, "BAT"))
+        ffStrbufSetS(tmpBuffer, "/sys/class/power_supply/ADP1/online");
+    else if (ffStrStartsWith(id, "macsmc-battery"))
+        ffStrbufSetS(tmpBuffer, "/sys/class/power_supply/macsmc-ac/online");
+    else
+        ffStrbufClear(tmpBuffer);
+
+    char online = '\0';
+    return ffReadFileData(tmpBuffer->chars, 1, &online) == 1 && online == '1';
+}
+
 static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFlist* results)
 {
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
@@ -78,12 +91,20 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
                 }
             }
         }
-    }
 
-    if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full"))
+        if (checkAc(id, &tmpBuffer))
+            ffStrbufAppendS(&result->status, ", AC Connected");
+    }
+    else if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full"))
         ffStrbufSetStatic(&result->status, "AC Connected");
+    else if (ffStrbufEqualS(&result->status, "Charging"))
+        ffStrbufAppendS(&result->status, ", AC Connected");
     else if (ffStrbufEqualS(&result->status, "Unknown"))
+    {
         ffStrbufClear(&result->status);
+        if (checkAc(id, &tmpBuffer))
+            ffStrbufAppendS(&result->status, "AC Connected");
+    }
 
     if (ffReadFileBufferRelative(dfd, "capacity_level", &tmpBuffer))
     {
