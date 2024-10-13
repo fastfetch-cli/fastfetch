@@ -34,7 +34,6 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     ffParseSize(result->total, &totalPretty);
 
     double bytesPercentage = result->total > 0 ? (double) result->used / (double) result->total * 100.0 : 0;
-    double fragPercentage = (double) result->fragmentation;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -44,7 +43,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
         ffStrbufSetF(&buffer, "%s / %s (", usedPretty.chars, totalPretty.chars);
         ffPercentAppendNum(&buffer, bytesPercentage, options->percent, false, &options->moduleArgs);
         ffStrbufAppendS(&buffer, ", ");
-        ffPercentAppendNum(&buffer, fragPercentage, options->percent, false, &options->moduleArgs);
+        ffPercentAppendNum(&buffer, result->fragmentation, options->percent, false, &options->moduleArgs);
         ffStrbufAppendF(&buffer, " frag) - %s", result->state.chars);
         ffStrbufPutTo(&buffer, stdout);
     }
@@ -56,9 +55,9 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
         ffPercentAppendBar(&bytesPercentageBar, bytesPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY fragPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&fragPercentageNum, fragPercentage, options->percent, false, &options->moduleArgs);
+        ffPercentAppendNum(&fragPercentageNum, result->fragmentation, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY fragPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&fragPercentageBar, fragPercentage, options->percent, &options->moduleArgs);
+        ffPercentAppendBar(&fragPercentageBar, result->fragmentation, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_ZPOOL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),
@@ -168,7 +167,7 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
         yyjson_mut_obj_add_uint(doc, obj, "used", zpool->used);
         yyjson_mut_obj_add_uint(doc, obj, "total", zpool->total);
         yyjson_mut_obj_add_uint(doc, obj, "version", zpool->version);
-        yyjson_mut_obj_add_uint(doc, obj, "fragmentation", zpool->fragmentation);
+        yyjson_mut_obj_add_real(doc, obj, "fragmentation", zpool->fragmentation);
     }
 
     FF_LIST_FOR_EACH(FFZpoolResult, zpool, results)
