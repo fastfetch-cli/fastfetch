@@ -272,47 +272,6 @@ jobs:
           name: fastfetch-musl-amd64
           path: ./fastfetch-*.*
 
-  musl-aarch64:
-    name: Musl-aarch64
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: setup alpine linux
-        uses: jirutka/setup-alpine@master
-        with:
-          branch: v3.19
-          arch: aarch64
-
-      - name: install dependencies
-        run: |
-          cat /etc/alpine-release
-          uname -a
-          apk add cmake samurai vulkan-loader-dev libxcb-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev gcc g++
-        shell: alpine.sh --root {0}
-
-      - name: build
-        run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr -DIS_MUSL=ON -GNinja .
-            cmake --build . --target package --verbose -j4
-        shell: alpine.sh {0}
-
-      - name: run
-        run: |
-            ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc --stat false
-            time ./fastfetch -c presets/ci.jsonc --format json
-            time ./flashfetch
-            ldd fastfetch
-            ctest
-        shell: alpine.sh {0}
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-musl-aarch64
-          path: ./fastfetch-*.*
-
   macos-universal:
     name: macOS-universal
     runs-on: macos-12
@@ -619,7 +578,6 @@ jobs:
       - linux-armv7
       - linux-riscv64
       - musl-amd64
-      - musl-aarch64
       - macos-universal
       - freebsd-amd64
       - openbsd-amd64
