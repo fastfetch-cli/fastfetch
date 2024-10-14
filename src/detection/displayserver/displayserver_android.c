@@ -66,7 +66,8 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
                 false,
                 0,
                 0,
-                0
+                0,
+                "dumpsys"
             );
         }
 
@@ -100,7 +101,8 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
             false,
             0,
             0,
-            0
+            0,
+            "getprop"
         );
     }
 

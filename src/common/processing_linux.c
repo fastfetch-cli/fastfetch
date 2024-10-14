@@ -22,6 +22,10 @@
     #include <libproc.h>
 #elif defined(__sun)
     #include <procfs.h>
+#elif defined(__OpenBSD__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <kvm.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -135,12 +139,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (exePath)
     {
         snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
-        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        char buf[PATH_MAX];
+        ssize_t length = readlink(filePath, buf, PATH_MAX - 1);
         if (length > 0) // doesn't contain trailing NUL
         {
-            exePath->chars[length] = '\0';
-            exePath->length = (uint32_t) length;
+            buf[length] = '\0';
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
 
@@ -238,7 +243,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     #elif defined(__sun)
 
-    char filePath[PATH_MAX];
+    char filePath[128];
     snprintf(filePath, sizeof(filePath), "/proc/%d/psinfo", (int) pid);
     psinfo_t proc;
     if (ffReadFileData(filePath, sizeof(proc), &proc) == sizeof(proc))
@@ -250,14 +255,27 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (exePath)
     {
         snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
-        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        char buf[PATH_MAX];
+        ssize_t length = readlink(filePath, buf, PATH_MAX - 1);
         if (length > 0) // doesn't contain trailing NUL
         {
-            exePath->chars[length] = '\0';
-            exePath->length = (uint32_t) length;
+            buf[length] = '\0';
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
+
+    #elif defined(__OpenBSD__)
+
+    kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    int count = 0;
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
+    if (proc)
+    {
+        char** argv = kvm_getargv(kd, proc, 0);
+        if (argv) ffStrbufSetS(exe, argv[0]);
+    }
+    kvm_close(kd);
 
     #endif
 
@@ -372,6 +390,23 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         *ppid = proc.pr_ppid;
     if (tty)
         *tty = (int) proc.pr_ttydev;
+
+    #elif defined(__OpenBSD__)
+
+    kvm_t* kd = kvm_open(NULL, NULL, NULL, KVM_NO_FILES, NULL);
+    int count = 0;
+    const struct kinfo_proc* proc = kvm_getprocs(kd, KERN_PROC_PID, pid, sizeof(struct kinfo_proc), &count);
+    if (proc)
+    {
+        ffStrbufSetS(name, proc->p_comm);
+        if (ppid)
+            *ppid = proc->p_ppid;
+        if (tty)
+            *tty = (int) proc->p_tdev;
+    }
+    kvm_close(kd);
+    if (!proc)
+        return "kvm_getprocs() failed";
 
     #else
 

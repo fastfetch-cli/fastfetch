@@ -344,7 +344,7 @@
                     "description": "Set the command to be executed before printing logos",
                     "default": ""
                 },
-                "showVersion": {
+                "detectVersion": {
                     "type": "boolean",
                     "description": "Whether to detect and display component versions. Mainly for benchmarking",
                     "default": true
@@ -816,7 +816,7 @@
                                             },
                                             {
                                                 "const": "monitor",
-                                                "description": "Alias of Display module; deprecated"
+                                                "description": "Alias of Display module"
                                             },
                                             {
                                                 "const": "opencl",
@@ -1700,6 +1700,11 @@
                                     },
                                     "showAllIps": {
                                         "description": "Show all IPs bound to the same interface.\nBy default only the first IP is shown",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "showFlags": {
+                                        "description": "Show the interface's flags",
                                         "type": "boolean",
                                         "default": false
                                     },

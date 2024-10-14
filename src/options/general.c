@@ -39,7 +39,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "detectVersion"))
             options->detectVersion = yyjson_get_bool(val);
 
-        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
+        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__)
         else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
             options->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "playerName"))
@@ -84,7 +84,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
     else if(ffStrEqualsIgnCase(key, "--detect-version"))
         options->detectVersion = ffOptionParseBoolean(value);
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__)
     else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
         options->escapeBedrock = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--player-name"))

@@ -73,6 +73,7 @@ static FFModuleBaseInfo* J[] = {
 
 static FFModuleBaseInfo* K[] = {
     (void*) &instance.config.modules.kernel,
+    (void*) &instance.config.modules.keyboard,
     NULL,
 };
 
@@ -88,6 +89,7 @@ static FFModuleBaseInfo* M[] = {
     (void*) &instance.config.modules.media,
     (void*) &instance.config.modules.memory,
     (void*) &instance.config.modules.monitor,
+    (void*) &instance.config.modules.mouse,
     NULL,
 };
 

@@ -18,7 +18,7 @@ static uint32_t getSQLite3Int(const char* dbPath, const char* query, const char*
     return num_elements;
 }
 
-void ffDetectPackagesImpl(FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
+void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
     if (!(options->disabled & FF_PACKAGES_FLAG_PKG_BIT))
     {

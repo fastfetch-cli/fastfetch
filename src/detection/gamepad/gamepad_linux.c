@@ -68,7 +68,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
     {
         if (!ffStrStartsWith(entry->d_name, "js"))
             continue;
-        if (!ffCharIsDigit(entry->d_name[2]))
+        if (!ffCharIsDigit(entry->d_name[strlen("js")]))
             continue;
 
         ffStrbufAppendS(&path, entry->d_name);

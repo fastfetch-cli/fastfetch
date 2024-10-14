@@ -1,6 +1,6 @@
 #include "fastfetch.h"
 #include "battery.h"
-
+#include "util/stringUtils.h"
 #include "common/processing.h"
 #include "common/properties.h"
 
@@ -36,6 +36,7 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results)
     FFBatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
+    battery->timeRemaining = -1;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);
@@ -44,7 +45,27 @@ static const char* parseTermuxApi(FFBatteryOptions* options, FFlist* results)
     ffStrbufInit(&battery->manufactureDate);
 
     battery->capacity = yyjson_get_num(yyjson_obj_get(root, "percentage"));
-    ffStrbufAppendS(&battery->status, yyjson_get_str(yyjson_obj_get(root, "status")));
+    const char* acStatus = yyjson_get_str(yyjson_obj_get(root, "plugged"));
+    if (acStatus)
+    {
+        if (ffStrEquals(acStatus, "PLUGGED_AC"))
+            ffStrbufAppendS(&battery->status, "AC Connected, ");
+        else if (ffStrEquals(acStatus, "PLUGGED_USB"))
+            ffStrbufAppendS(&battery->status, "USB Connected, ");
+        else if (ffStrEquals(acStatus, "PLUGGED_WIRELESS"))
+            ffStrbufAppendS(&battery->status, "Wireless Connected, ");
+    }
+    const char* status = yyjson_get_str(yyjson_obj_get(root, "status"));
+    if (status)
+    {
+        if (ffStrEquals(status, "CHARGING"))
+            ffStrbufAppendS(&battery->status, "Charging");
+        else if (ffStrEquals(status, "DISCHARGING"))
+            ffStrbufAppendS(&battery->status, "Discharging");
+    }
+    ffStrbufTrimRight(&battery->status, ' ');
+    ffStrbufTrimRight(&battery->status, ',');
+
     if(options->temp)
         battery->temperature = yyjson_get_num(yyjson_obj_get(root, "temperature"));
 
@@ -74,6 +95,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     FFBatteryResult* battery = ffListAdd(results);
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
+    battery->timeRemaining = -1;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);

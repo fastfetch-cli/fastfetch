@@ -60,7 +60,14 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "AC connected, ");
         else
+        {
             ffStrbufAppendS(&battery->status, "Discharging, ");
+            ffCfDictGetInt(properties, CFSTR(kIOPMPSTimeRemainingKey), &battery->timeRemaining); // in minutes
+            if (battery->timeRemaining == 0xFFFF)
+                battery->timeRemaining = -1;
+            else
+                battery->timeRemaining *= 60;
+        }
         if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) && boolValue)
             ffStrbufAppendS(&battery->status, "Charging, ");
         if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) && boolValue)

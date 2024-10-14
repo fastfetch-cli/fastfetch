@@ -78,7 +78,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
 
     for (UINT i = 0; i < nDevices; ++i)
     {
-        if (pRawInputDeviceList[i].dwType != 2) continue;
+        if (pRawInputDeviceList[i].dwType != RIM_TYPEHID) continue;
 
         HANDLE hDevice = pRawInputDeviceList[i].hDevice;
 
@@ -87,7 +87,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         if (GetRawInputDeviceInfoW(hDevice, RIDI_DEVICEINFO, &rdi, &rdiSize) == (UINT) -1)
             continue;
 
-        if (rdi.hid.usUsagePage != 1 || rdi.hid.usUsage != 5) // Gamepad
+        if (rdi.hid.usUsagePage != 1 || (rdi.hid.usUsage != 4/*Joystick*/ && rdi.hid.usUsage != 5/*Gamepad*/))
             continue;
 
         WCHAR devName[MAX_PATH] = L"";
@@ -104,7 +104,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         if (knownGamepad)
             ffStrbufSetS(&device->name, knownGamepad);
         HANDLE FF_AUTO_CLOSE_FD hHidFile = CreateFileW(devName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
-        if (!hHidFile)
+        if (hHidFile == INVALID_HANDLE_VALUE)
         {
             if (!knownGamepad)
                 ffStrbufSetF(&device->name, "Unknown gamepad %04X-%04X", (unsigned) rdi.hid.dwVendorId, (unsigned) rdi.hid.dwProductId);
@@ -131,6 +131,10 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             }
         }
 
+        wchar_t serialNumber[127] = L"";
+        if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
+            ffStrbufSetWS(&device->serial, serialNumber);
+
         PHIDP_PREPARSED_DATA preparsedData = NULL;
         if (HidD_GetPreparsedData(hHidFile, &preparsedData))
         {
@@ -139,10 +143,6 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
             HidD_FreePreparsedData(preparsedData);
             if (!NT_SUCCESS(capsResult))
                 continue;
-
-            wchar_t serialNumber[127] = L"";
-            if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
-                ffStrbufSetWS(&device->serial, serialNumber);
 
             if (
                 (rdi.hid.dwVendorId == 0x054C && (

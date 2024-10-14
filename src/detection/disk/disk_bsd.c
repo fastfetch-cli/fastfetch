@@ -92,6 +92,11 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
     }, &attrBuf, sizeof(attrBuf), 0) == 0)
         ffStrbufInitNS(&disk->name, attrBuf.nameRef.attr_length - 1 /* excluding '\0' */, attrBuf.nameSpace);
 }
+#else
+static void detectFsInfo(struct statfs* fs, FFDisk* disk)
+{
+    FF_UNUSED(fs, disk);
+}
 #endif
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
@@ -142,6 +147,10 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         if(fs->f_flags & MNT_RDONLY)
             disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
+
+        #ifdef __OpenBSD__
+        #define st_birthtimespec __st_birthtim
+        #endif
 
         struct stat st;
         if(stat(fs->f_mntonname, &st) == 0 && st.st_birthtimespec.tv_sec > 0)

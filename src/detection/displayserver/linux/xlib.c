@@ -89,7 +89,8 @@ const char* ffdsConnectXlib(FFDisplayServerResult* result)
             false,
             0,
             (uint32_t) WidthMMOfScreen(screen),
-            (uint32_t) HeightMMOfScreen(screen)
+            (uint32_t) HeightMMOfScreen(screen),
+            "xlib"
         );
     }
 
@@ -193,13 +194,15 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         primary,
         0,
         (uint32_t) output->mm_width,
-        (uint32_t) output->mm_height
+        (uint32_t) output->mm_height,
+        "xlib-randr-crtc"
     );
 
     if (edidLength)
     {
         item->hdrStatus = ffEdidGetHdrCompatible(edidData, edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
         ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        ffEdidGetPhysicalSize(edidData, &item->physicalWidth, &item->physicalHeight);
     }
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
@@ -267,7 +270,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         !!monitorInfo->primary,
         0,
         (uint32_t) monitorInfo->mwidth,
-        (uint32_t) monitorInfo->mheight
+        (uint32_t) monitorInfo->mheight,
+        "xlib-randr-monitor"
     );
 }
 
@@ -317,7 +321,8 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         false,
         0,
         (uint32_t) WidthMMOfScreen(screen),
-        (uint32_t) HeightMMOfScreen(screen)
+        (uint32_t) HeightMMOfScreen(screen),
+        "xlib_randr_screen"
     );
 }
 

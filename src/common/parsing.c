@@ -190,6 +190,48 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
     }
 }
 
+void ffParseDuration(uint32_t days, uint32_t hours, uint32_t minutes, uint32_t seconds, FFstrbuf* result)
+{
+    if(days == 0 && hours == 0 && minutes == 0)
+    {
+        ffStrbufAppendF(result, "%u seconds", seconds);
+        return;
+    }
+
+    if(days > 0)
+    {
+        ffStrbufAppendF(result, "%u day", days);
+
+        if(days > 1)
+            ffStrbufAppendC(result, 's');
+
+        if(days >= 100)
+            ffStrbufAppendS(result, "(!)");
+
+        if(hours > 0 || minutes > 0)
+            ffStrbufAppendS(result, ", ");
+    }
+
+    if(hours > 0)
+    {
+        ffStrbufAppendF(result, "%u hour", hours);
+
+        if(hours > 1)
+            ffStrbufAppendC(result, 's');
+
+        if(minutes > 0)
+            ffStrbufAppendS(result, ", ");
+    }
+
+    if(minutes > 0)
+    {
+        ffStrbufAppendF(result, "%u min", minutes);
+
+        if(minutes > 1)
+            ffStrbufAppendC(result, 's');
+    }
+}
+
 #ifdef _WIN32
     #pragma GCC diagnostic pop
 #endif

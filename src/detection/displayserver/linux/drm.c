@@ -90,7 +90,8 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             false,
             0,
             physicalWidth,
-            physicalHeight
+            physicalHeight,
+            "sysfs-drm"
         );
         if (item && edidLength)
         {
@@ -390,7 +391,8 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     false,
                     conn->connector_id,
                     conn->mmWidth,
-                    conn->mmHeight
+                    conn->mmHeight,
+                    "libdrm"
                 );
 
                 if (item)

@@ -17,10 +17,13 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
     {
         if (ffStrStartsWith(line, "nameserver"))
         {
-            const char* nameserver = line + strlen("nameserver");
+            char* nameserver = line + strlen("nameserver");
             while (*nameserver == ' ' || *nameserver == '\t')
                 nameserver++;
             if (*nameserver == '\0') continue;
+
+            char* comment = strchr(nameserver, '#');
+            if (comment) *comment = '\0';
 
             if ((ffStrContainsC(nameserver, ':') && !(options->showType & FF_DNS_TYPE_IPV6_BIT)) ||
                 (ffStrContainsC(nameserver, '.') && !(options->showType & FF_DNS_TYPE_IPV4_BIT)))

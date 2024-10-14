@@ -10,7 +10,7 @@
 
 void ffPrintMemory(FFMemoryOptions* options)
 {
-    FFMemoryResult storage;
+    FFMemoryResult storage = {};
     const char* error = ffDetectMemory(&storage);
 
     if(error)

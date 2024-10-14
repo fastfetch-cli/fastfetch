@@ -165,7 +165,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 !!(monitorInfo->info.dwFlags & MONITORINFOF_PRIMARY),
                 (uint64_t)(uintptr_t) monitorInfo->handle,
                 physicalWidth,
-                physicalHeight
+                physicalHeight,
+                "GDI"
             );
 
             if (display)

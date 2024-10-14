@@ -1,3 +1,56 @@
+# 2.28.0
+
+Features:
+* Add new module `Mouse` and `Keyboard` which display connected mice and keyboards
+* Support remaining time detection (Battery)
+* Report if AC is connected (Battery, Linux)
+* Report platform API used for display detection (Display)
+    * Mainly for debugging
+* Report Wine version when running in Wine (Kernel, Windows)
+
+Bugfixes:
+* Fix used memory size detection (Memory, OpenBSD)
+* Don't report invalid fragmentation percentage when fails to detect it (Zpool)
+
+Logos:
+* Add eweOS
+* Add MidOS
+
+# 2.27.1
+
+Bugfixes:
+* Fix invalid display name detection on GNOME, wayland (Display, Linux)
+
+# 2.27.0
+
+Changes:
+* We now print `"` instead of `″` when displaying diagonal length in inches, so that the character can be correctly displayed in Linux console (Display)
+* All detection code of `monitor` module is merged into `display` module. Now `monitor` just prints the same information as `display` with different format. Notably:
+    * The resolution reported by `monitor` module is now current resolution instead of native / maximum resolution. PPI is calculated based on current resolution too.
+    * The refresh rate reported by `monitor` module is the current refresh rate.
+
+Features:
+* Add basic, highly experimental support of OpenBSD (OpenBSD)
+* Improve support for Raspberry pi (CPU / GPU, Linux)
+* Detect SOC name, instead of displaying components used in the SOC, if available (CPU, Linux)
+* Add option `--brightness-compact` to display multiple brightness values in one line (Brightness)
+* Add `day-pretty` (#1305, DateTime)
+* Support network interface adapter flag detection (#1315, LocalIP)
+    * Enable it with `--localip-show-flags`
+
+Bugfixes:
+* Remove trailing newline in GPU name for Raspberry pi (#1303, GPU, Linux)
+* Fix a possible buffer overflow (GPU, Linux)
+* Fix CPU temp incorrectly reported as 0 celsius (#1308, CPU, Linux)
+* Correctly report `TPM device is not found` error (#1314, TPM, Windows)
+* Fix errors when triggering shell completion with python3 uninstalled (#1310)
+    * To package managers: as shell completion scripts of fastfetch use python3, it should be added as an optional dependency of fastfetch
+* Fix possible crashes when detecting term font of kitty (#1321, TerminalFont, Linux)
+
+Logos:
+* Add XeroArch
+* Add ValhallaOS
+
 # 2.26.1
 
 Features:

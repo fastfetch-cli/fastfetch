@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.26.1
+    VERSION 2.27.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -18,6 +18,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     set(LINUX TRUE CACHE BOOL "..." FORCE) # LINUX means GNU/Linux, not just the kernel
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
     set(FreeBSD TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "OpenBSD")
+    set(OpenBSD TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "SunOS")
     set(SunOS TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
@@ -44,30 +46,30 @@ include(CheckIncludeFile)
 
 include(CMakeDependentOption)
 
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR WIN32 OR ANDROID OR SunOS" OFF)
-cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD" OFF)
-cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR WIN32 OR ANDROID OR SunOS" OFF)
+cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD" OFF)
+cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR SunOS" OFF)
+cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR APPLE OR WIN32 OR SunOS" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR APPLE OR SunOS" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR APPLE OR WIN32 OR SunOS" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR APPLE OR SunOS" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
-cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR WIN32 OR SunOS" OFF)
-cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR WIN32 OR ANDROID OR SunOS" OFF)
+cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR WIN32 OR SunOS" OFF)
+cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR FreeBSD OR OpenBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR WIN32 OR ANDROID OR SunOS" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
+cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR OpenBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID" OFF)
@@ -377,6 +379,7 @@ set(LIBFASTFETCH_SRC
     src/modules/initsystem/initsystem.c
     src/modules/gamepad/gamepad.c
     src/modules/kernel/kernel.c
+    src/modules/keyboard/keyboard.c
     src/modules/lm/lm.c
     src/modules/loadavg/loadavg.c
     src/modules/locale/locale.c
@@ -400,6 +403,7 @@ set(LIBFASTFETCH_SRC
     src/modules/sound/sound.c
     src/modules/swap/swap.c
     src/modules/media/media.c
+    src/modules/mouse/mouse.c
     src/modules/terminal/terminal.c
     src/modules/terminaltheme/terminaltheme.c
     src/modules/terminalfont/terminalfont.c
@@ -476,6 +480,7 @@ if(LINUX)
         src/detection/host/host_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_linux.c
         src/detection/libc/libc_linux.c
         src/detection/lm/lm_linux.c
         src/detection/loadavg/loadavg_linux.c
@@ -484,6 +489,7 @@ if(LINUX)
         src/detection/gamepad/gamepad_linux.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
+        src/detection/mouse/mouse_linux.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
@@ -540,6 +546,7 @@ elseif(ANDROID)
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_android.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_linux.c
@@ -548,6 +555,7 @@ elseif(ANDROID)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_nosupport.c
         src/detection/memory/memory_linux.c
+        src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
@@ -620,6 +628,7 @@ elseif(FreeBSD)
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_bsd.c
         src/detection/libc/libc_bsd.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/locale/locale_linux.c
@@ -627,6 +636,7 @@ elseif(FreeBSD)
         src/detection/gamepad/gamepad_bsd.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_bsd.c
+        src/detection/mouse/mouse_bsd.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
@@ -650,6 +660,87 @@ elseif(FreeBSD)
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
         src/detection/zpool/zpool_linux.c
+        src/util/platform/FFPlatform_unix.c
+        src/util/binary_linux.c
+    )
+elseif(OpenBSD)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
+        src/common/io/io_unix.c
+        src/common/netif/netif_bsd.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/common/sysctl.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
+        src/detection/btrfs/btrfs_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_obsd.c
+        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpuusage/cpuusage_bsd.c
+        src/detection/cursor/cursor_linux.c
+        src/detection/disk/disk_bsd.c
+        src/detection/dns/dns_linux.c
+        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/diskio/diskio_nosupport.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/kde-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
+        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
+        src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/host/host_obsd.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/libc/libc_nosupport.c
+        src/detection/loadavg/loadavg_bsd.c
+        src/detection/locale/locale_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_obsd.c
+        src/detection/mouse/mouse_nosupport.c
+        src/detection/netio/netio_nosupport.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_obsd.c
+        src/detection/packages/packages_obsd.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_obsd.c
+        src/detection/gtk_qt/qt.c
+        src/detection/sound/sound_linux.c
+        src/detection/swap/swap_obsd.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
+        src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_nosupport.c
+        src/detection/uptime/uptime_bsd.c
+        src/detection/users/users_nosupport.c
+        src/detection/wallpaper/wallpaper_linux.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_nosupport.c
+        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -685,6 +776,7 @@ elseif(APPLE)
         src/detection/host/host_apple.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_apple.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_bsd.c
         src/detection/libc/libc_apple.c
@@ -693,6 +785,7 @@ elseif(APPLE)
         src/detection/gamepad/gamepad_apple.c
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
+        src/detection/mouse/mouse_apple.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
@@ -751,6 +844,7 @@ elseif(WIN32)
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
+        src/detection/keyboard/keyboard_windows.c
         src/detection/libc/libc_windows.cpp
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
@@ -759,6 +853,7 @@ elseif(WIN32)
         src/detection/gamepad/gamepad_windows.c
         src/detection/media/media_windows.c
         src/detection/memory/memory_windows.c
+        src/detection/mouse/mouse_windows.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
@@ -835,6 +930,7 @@ elseif(SunOS)
         src/detection/host/host_windows.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_sunos.c
@@ -843,6 +939,7 @@ elseif(SunOS)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_sunos.c
+        src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_sunos.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_sunos.c
@@ -945,13 +1042,16 @@ if(FreeBSD AND EXISTS "/usr/local/bin/objdump")
     endif()
 endif()
 
-target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__=1 _FILE_OFFSET_BITS=64)
-if(WIN32)
-    target_compile_definitions(libfastfetch PUBLIC WIN32_LEAN_AND_MEAN=1)
+if(LINUX OR ANDROID)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE _ATFILE_SOURCE __STDC_WANT_LIB_EXT1__ _FILE_OFFSET_BITS=64)
+elseif(WIN32)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN=1 _WIN32_WINNT=0x0A00)
 elseif(APPLE)
-    target_compile_definitions(libfastfetch PUBLIC _DARWIN_C_SOURCE)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__ _FILE_OFFSET_BITS=64 _DARWIN_C_SOURCE)
+elseif(OpenBSD)
+    target_compile_definitions(libfastfetch PUBLIC _XOPEN_SOURCE=700 _FILE_OFFSET_BITS=64 _BSD_SOURCE)
 elseif(SunOS)
-    target_compile_definitions(libfastfetch PUBLIC __EXTENSIONS__ _POSIX_C_SOURCE=1)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__ _FILE_OFFSET_BITS=64 __EXTENSIONS__ _POSIX_C_SOURCE)
 endif()
 
 if(HAVE_STATX)
@@ -1097,10 +1197,17 @@ ff_lib_enable(EGL
     "egl"
     "EGL"
 )
-ff_lib_enable(GLX
-    "glx"
-    "GLX"
-)
+if(NOT OpenBSD)
+    ff_lib_enable(GLX
+        "glx"
+        "GLX"
+    )
+else()
+    ff_lib_enable(GLX
+        "gl"
+        "GL"
+    )
+endif()
 ff_lib_enable(OSMESA
     "osmesa"
     "OSMesa"
@@ -1194,7 +1301,6 @@ elseif(APPLE)
         PRIVATE "-weak_framework Apple80211"
     )
 elseif(WIN32)
-    target_compile_definitions(libfastfetch PRIVATE -D_WIN32_WINNT=0x0A00)
     target_link_libraries(libfastfetch
         PRIVATE "dwmapi"
         PRIVATE "gdi32"
@@ -1208,12 +1314,18 @@ elseif(WIN32)
         PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
+        PRIVATE "cfgmgr32"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "usbhid"
         PRIVATE "geom"
+    )
+elseif(OpenBSD)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+        PRIVATE "kvm"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch
@@ -1289,6 +1401,10 @@ if(NOT WIN32)
     CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
     if(HAVE_WORDEXP)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+    endif()
+    CHECK_INCLUDE_FILE("glob.h" HAVE_GLOB)
+    if(HAVE_GLOB)
+        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLOB=1)
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)

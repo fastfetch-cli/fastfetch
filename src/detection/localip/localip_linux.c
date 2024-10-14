@@ -15,9 +15,10 @@
 #ifdef __linux__
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
+#include <linux/if.h>
 #endif
 
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
 #else
@@ -27,7 +28,48 @@
 #include <sys/sockio.h>
 #endif
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, bool firstOnly)
+static const FFLocalIpNIFlag niFlagOptions[] = {
+    { IFF_UP, "UP" },
+    { IFF_BROADCAST, "BROADCAST" },
+    { IFF_DEBUG, "DEBUG" },
+    { IFF_LOOPBACK, "LOOPBACK" },
+    { IFF_POINTOPOINT, "POINTOPOINT" },
+    { IFF_RUNNING, "RUNNING" },
+    { IFF_NOARP, "NOARP" },
+    { IFF_PROMISC, "PROMISC" },
+    { IFF_ALLMULTI, "ALLMULTI" },
+    { IFF_MULTICAST, "MULTICAST" },
+#if defined(__linux__) || defined(__APPLE__) || defined(__sun)
+    { IFF_NOTRAILERS, "NOTRAILERS" },
+#endif
+#ifdef __linux__
+    { IFF_MASTER, "MASTER" },
+    { IFF_SLAVE, "SLAVE" },
+    { IFF_PORTSEL, "PORTSEL" },
+    { IFF_AUTOMEDIA, "AUTOMEDIA" },
+    { IFF_DYNAMIC, "DYNAMIC" },
+    { IFF_LOWER_UP, "LOWER_UP" },
+    { IFF_DORMANT, "DORMANT" },
+    { IFF_ECHO, "ECHO" },
+#endif
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
+    { IFF_OACTIVE, "OACTIVE" },
+    { IFF_SIMPLEX, "SIMPLEX" },
+    { IFF_LINK0, "LINK0" },
+    { IFF_LINK1, "LINK1" },
+    { IFF_LINK2, "LINK2" },
+#endif
+#if defined(__FreeBSD__) || defined(__APPLE__)
+    { IFF_ALTPHYS, "ALTPHYS" },
+#endif
+#ifdef __FreeBSD__
+    { IFF_CANTCONFIG, "CANTCONFIG" },
+#endif
+    // sentinel
+    {},
+};
+
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, uint32_t flags, bool firstOnly)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -44,9 +86,12 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
         ffStrbufInit(&ip->ipv4);
         ffStrbufInit(&ip->ipv6);
         ffStrbufInit(&ip->mac);
+        ffStrbufInit(&ip->flags);
         ip->defaultRoute = defaultRoute;
         ip->mtu = -1;
         ip->speed = -1;
+
+        ffLocalIpFillNIFlags(&ip->flags, flags, niFlagOptions);
     }
 
     switch (type)
@@ -96,6 +141,8 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
+        uint32_t flags = options->showType & FF_LOCALIP_TYPE_FLAGS_BIT ? ifa->ifa_flags : 0;
+
         if (ifa->ifa_addr->sa_family == AF_INET)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
@@ -116,7 +163,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
@@ -141,9 +188,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
-        #if defined(__FreeBSD__) || defined(__APPLE__)
+        #if __FreeBSD__ || __OpenBSD__ || __APPLE__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT))
@@ -153,7 +200,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
@@ -165,7 +212,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr;
             snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, false);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
         }
         #endif
     }
@@ -199,7 +246,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     ifr.ifr_data = (void*) &edata;
                     if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0)
                         iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
-                    #elif __FreeBSD__ || __APPLE__
+                    #elif __FreeBSD__ || __APPLE__ || __OpenBSD__
                     struct ifmediareq ifmr = {};
                     strncpy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ - 1);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))

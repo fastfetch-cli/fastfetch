@@ -149,7 +149,7 @@ void ffInitMonitorOptions(FFMonitorOptions* options)
     ffOptionInitModuleBaseInfo(
         &options->moduleInfo,
         FF_MONITOR_MODULE_NAME,
-        "Alias of Display module; deprecated",
+        "Alias of Display module",
         ffParseMonitorCommandOptions,
         ffParseMonitorJsonObject,
         ffPrintMonitor,

@@ -72,7 +72,9 @@
             "showIpv6": true,
             "showMac": true,
             "showSpeed": true,
-            "showMtu": true
+            "showMtu": true,
+            "showLoop": true,
+            "showFlags": true
         },
         "dns",
         "wifi",

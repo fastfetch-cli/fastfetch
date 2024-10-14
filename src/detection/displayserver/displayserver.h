@@ -70,6 +70,7 @@ typedef struct FFDisplayResult
     uint32_t physicalWidth;
     uint32_t physicalHeight;
     bool primary;
+    const char* platformApi;
     uint8_t bitDepth;
     FFDisplayHdrStatus hdrStatus;
     uint16_t manufactureYear;
@@ -102,4 +103,5 @@ FFDisplayResult* ffdsAppendDisplay(
     bool primary,
     uint64_t id,
     uint32_t physicalWidth,
-    uint32_t physicalHeight);
+    uint32_t physicalHeight,
+    const char* platformApi);
