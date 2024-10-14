@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 18
+#define FF_DISPLAY_NUM_FORMAT_ARGS 19
 
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
@@ -181,6 +181,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 FF_FORMAT_ARG(result->manufactureYear, "manufacture-year"),
                 FF_FORMAT_ARG(result->manufactureWeek, "manufacture-week"),
                 FF_FORMAT_ARG(buf, "serial"),
+                FF_FORMAT_ARG(result->platformApi, "platform-api"),
             }));
         }
     }
@@ -395,6 +396,8 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
             yyjson_mut_obj_add_uint(doc, obj, "serial", item->serial);
         else
             yyjson_mut_obj_add_null(doc, obj, "serial");
+
+        yyjson_mut_obj_add_str(doc, obj, "platformApi", item->platformApi);
     }
 }
 
@@ -419,6 +422,7 @@ void ffPrintDisplayHelpFormat(void)
         "Year of manufacturing - manufacture-year",
         "Nth week of manufacturing in the year - manufacture-week",
         "Serial number - serial",
+        "The platform API used when detecting the display - platform-api",
     }));
 }
 

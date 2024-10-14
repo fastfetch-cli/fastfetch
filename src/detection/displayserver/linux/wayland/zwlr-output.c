@@ -138,7 +138,8 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
         false,
         display.id,
         (uint32_t) display.physicalWidth,
-        (uint32_t) display.physicalHeight
+        (uint32_t) display.physicalHeight,
+        "wayland-zwlr"
     );
     if (item)
     {

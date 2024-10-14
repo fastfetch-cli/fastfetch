@@ -94,7 +94,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 CGDisplayIsMain(screen),
                 (uint64_t)screen,
                 physicalWidth,
-                physicalHeight
+                physicalHeight,
+                "CoreGraphics"
             );
             if (display)
             {

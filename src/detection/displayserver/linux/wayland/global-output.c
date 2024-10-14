@@ -129,7 +129,8 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         false,
         display.id,
         (uint32_t) display.physicalWidth,
-        (uint32_t) display.physicalHeight
+        (uint32_t) display.physicalHeight,
+        "wayland-global"
     );
     if (item)
     {

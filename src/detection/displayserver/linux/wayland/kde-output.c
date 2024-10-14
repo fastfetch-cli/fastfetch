@@ -194,7 +194,8 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
         false,
         display.id,
         (uint32_t) display.physicalWidth,
-        (uint32_t) display.physicalHeight
+        (uint32_t) display.physicalHeight,
+        "wayland-kde"
     );
     if (item)
     {
