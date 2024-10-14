@@ -139,12 +139,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (exePath)
     {
         snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
-        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        char buf[PATH_MAX];
+        ssize_t length = readlink(filePath, buf, PATH_MAX - 1);
         if (length > 0) // doesn't contain trailing NUL
         {
-            exePath->chars[length] = '\0';
-            exePath->length = (uint32_t) length;
+            buf[length] = '\0';
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
 
@@ -242,7 +243,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     #elif defined(__sun)
 
-    char filePath[PATH_MAX];
+    char filePath[128];
     snprintf(filePath, sizeof(filePath), "/proc/%d/psinfo", (int) pid);
     psinfo_t proc;
     if (ffReadFileData(filePath, sizeof(proc), &proc) == sizeof(proc))
@@ -254,12 +255,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (exePath)
     {
         snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
-        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        char buf[PATH_MAX];
+        ssize_t length = readlink(filePath, buf, PATH_MAX - 1);
         if (length > 0) // doesn't contain trailing NUL
         {
-            exePath->chars[length] = '\0';
-            exePath->length = (uint32_t) length;
+            buf[length] = '\0';
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
 
