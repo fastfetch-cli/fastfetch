@@ -167,7 +167,8 @@ static void detectWine(FFstrbuf* buf)
     if (!hntdll) return;
     pwine_get_version = (void *)GetProcAddress(hntdll, "wine_get_version");
     if (!pwine_get_version) return;
-    ffStrbufAppendF(buf, " - wine %s", pwine_get_version());
+    ffStrbufAppendS(buf, buf->length ? " - wine " : "wine ");
+    ffStrbufAppendS(buf, pwine_get_version());
 }
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
