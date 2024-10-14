@@ -1,3 +1,21 @@
+# 2.28.0
+
+Features:
+* Add new module `Mouse` and `Keyboard` which display connected mice and keyboards
+* Support remaining time detection (Battery)
+* Report if AC is connected (Battery, Linux)
+* Report platform API used for display detection (Display)
+    * Mainly for debugging
+* Report Wine version when running in Wine (Kernel, Windows)
+
+Bugfixes:
+* Fix used memory size detection (Memory, OpenBSD)
+* Don't report invalid fragmentation percentage when fails to detect it (Zpool)
+
+Logos:
+* Add eweOS
+* Add MidOS
+
 # 2.27.1
 
 Bugfixes:
