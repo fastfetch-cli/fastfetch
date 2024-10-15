@@ -28,10 +28,10 @@ static double detectNvmeTemp(int devfd)
     return FF_PHYSICALDISK_TEMP_UNSET;
 }
 
-static void parsePhysicalDisk(int dfd, const char* devName, const char* pathSysDeviceReal, FFPhysicalDiskOptions* options, FFlist* result)
+static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOptions* options, FFlist* result)
 {
-    int devfd = openat(dfd, "device", O_RDONLY | O_CLOEXEC);
-    if (devfd < 0) return;
+    int devfd = openat(dfd, "device", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+    if (devfd < 0) return; // virtual device
 
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
@@ -80,18 +80,25 @@ static void parsePhysicalDisk(int dfd, const char* devName, const char* pathSysD
 
     {
         ffStrbufInit(&device->interconnect);
-        if (strstr(pathSysDeviceReal, "/usb") != NULL)
-            ffStrbufSetS(&device->interconnect, "USB");
-        else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
-            ffStrbufSetS(&device->interconnect, "NVMe");
-        else if (strstr(pathSysDeviceReal, "/ata") != NULL)
-            ffStrbufSetS(&device->interconnect, "ATA");
-        else if (strstr(pathSysDeviceReal, "/scsi") != NULL)
-            ffStrbufSetS(&device->interconnect, "SCSI");
-        else
+        char pathSysDeviceReal[PATH_MAX];
+        ssize_t pathLength = readlinkat(dfd, "device", pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
+        if (pathLength > 0)
         {
-            if (ffAppendFileBufferRelative(devfd, "transport", &device->interconnect))
-                ffStrbufTrimRightSpace(&device->interconnect);
+            pathSysDeviceReal[pathLength] = '\0';
+
+            if (strstr(pathSysDeviceReal, "/usb") != NULL)
+                ffStrbufSetS(&device->interconnect, "USB");
+            else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
+                ffStrbufSetS(&device->interconnect, "NVMe");
+            else if (strstr(pathSysDeviceReal, "/ata") != NULL)
+                ffStrbufSetS(&device->interconnect, "ATA");
+            else if (strstr(pathSysDeviceReal, "/scsi") != NULL)
+                ffStrbufSetS(&device->interconnect, "SCSI");
+            else
+            {
+                if (ffAppendFileBufferRelative(devfd, "transport", &device->interconnect))
+                    ffStrbufTrimRightSpace(&device->interconnect);
+            }
         }
     }
 
@@ -165,17 +172,8 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         char pathSysBlock[sizeof("/sys/block/") + sizeof(sysBlockEntry->d_name)];
         snprintf(pathSysBlock, sizeof(pathSysBlock), "/sys/block/%s", devName);
 
-        char pathSysDeviceReal[PATH_MAX];
-        ssize_t pathLength = readlink(pathSysBlock, pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
-        if (pathLength < 0)
-            continue;
-        pathSysDeviceReal[pathLength] = '\0';
-
-        if (strstr(pathSysDeviceReal, "/virtual/")) // virtual device
-            continue;
-
-        int dfd = openat(dirfd(sysBlockDirp), devName, O_RDONLY | O_CLOEXEC);
-        if (dfd > 0) parsePhysicalDisk(dfd, devName, pathSysDeviceReal, options, result);
+        int dfd = openat(dirfd(sysBlockDirp), devName, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+        if (dfd > 0) parsePhysicalDisk(dfd, devName, options, result);
     }
 
     return NULL;
