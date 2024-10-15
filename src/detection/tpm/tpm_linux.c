@@ -3,9 +3,9 @@
 
 const char* ffDetectTPM(FFTPMResult* result)
 {
-    if (!ffPathExists("/sys/class/tpm/tpm0", FF_PATHTYPE_DIRECTORY))
+    if (!ffPathExists("/sys/class/tpm/tpm0/", FF_PATHTYPE_DIRECTORY))
     {
-        if (!ffPathExists("/sys/class/tpm", FF_PATHTYPE_DIRECTORY))
+        if (!ffPathExists("/sys/class/tpm/", FF_PATHTYPE_DIRECTORY))
             return "TPM is not supported by kernel";
         return "TPM device is not found";
     }

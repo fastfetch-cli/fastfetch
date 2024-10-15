@@ -274,7 +274,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
 
     for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
     {
-        ffStrbufSetF(&buffer, "/sys/class/net/%s/phy80211", i->if_name);
+        ffStrbufSetF(&buffer, "/sys/class/net/%s/phy80211/", i->if_name);
         if(!ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY))
             continue;
 

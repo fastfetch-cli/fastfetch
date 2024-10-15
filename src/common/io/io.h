@@ -13,6 +13,7 @@
     #include <unistd.h>
     #include <dirent.h>
     #include <sys/stat.h>
+    #include <errno.h>
     typedef int FFNativeFD;
     #define FF_INVALID_FD (-1)
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
@@ -116,17 +117,22 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
     }
     else
     {
-        struct stat fileStat;
-        if(stat(path, &fileStat) != 0)
-            return false;
+        size_t len = strlen(path);
+        assert(len < PATH_MAX);
+        if (len == 0) return false;
 
-        unsigned int mode = fileStat.st_mode & S_IFMT;
-
-        if(pathType & FF_PATHTYPE_FILE && mode != S_IFDIR)
-            return true;
-
-        if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
-            return true;
+        int ret;
+        if (path[len - 1] != '/')
+        {
+            char buf[PATH_MAX + 1];
+            memcpy(buf, path, len);
+            buf[len] = '/';
+            buf[len + 1] = 0;
+            ret = access(buf, F_OK);
+        }
+        else
+            ret = access(path, F_OK);
+        return pathType == FF_PATHTYPE_DIRECTORY ? ret == 0 : ret == -1 && errno == ENOTDIR;
     }
 
     #endif
