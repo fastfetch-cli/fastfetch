@@ -25,7 +25,7 @@ static const char* detectWithBacklight(FFlist* result)
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&backlightDir, entry->d_name);

@@ -22,7 +22,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&drmDir, entry->d_name);
@@ -185,7 +185,7 @@ FF_MAYBE_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&drmDir, entry->d_name);
