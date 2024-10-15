@@ -14,6 +14,7 @@
     #include <dirent.h>
     #include <sys/stat.h>
     #include <errno.h>
+    #include <limits.h>
     typedef int FFNativeFD;
     #define FF_INVALID_FD (-1)
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
