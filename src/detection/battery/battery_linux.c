@@ -170,7 +170,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         if(entry->d_name[0] == '.')
             continue;
 
-        FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC);
+        FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
         if (dfd > 0) parseBattery(dfd, entry->d_name, options, results);
     }
 
