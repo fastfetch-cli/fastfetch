@@ -215,7 +215,7 @@ static bool isRemovable(FFDisk* currentDisk)
     return ffReadFileData(sysBlockVolume, 1, &removableChar) > 0 && removableChar == '1';
 }
 
-static void detectType(const FFlist* disks, FFDisk* currentDisk)
+static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mntent* device)
 {
     if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
@@ -225,6 +225,8 @@ static void detectType(const FFlist* disks, FFDisk* currentDisk)
         currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+    if (hasmntopt(device, MNTOPT_RO))
+        currentDisk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 }
 
 #endif
@@ -250,9 +252,6 @@ static void detectStats(FFDisk* disk)
         // Windows filesystem in WSL
         disk->filesTotal = disk->filesUsed = 0;
     }
-
-    if(fs.f_flag & ST_RDONLY)
-        disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 
     disk->createTime = 0;
     #ifdef FF_HAVE_STATX
@@ -298,7 +297,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         detectName(disk); // Also detects external devices
 
         //detect type
-        detectType(disks, disk);
+        detectType(disks, disk, device);
 
         //Detects stats
         detectStats(disk);
