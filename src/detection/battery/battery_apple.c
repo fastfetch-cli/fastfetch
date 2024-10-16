@@ -57,20 +57,24 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
         ffCfDictGetInt(properties, CFSTR(kIOPMPSCycleCountKey), &cycleCount);
         battery->cycleCount = cycleCount < 0 ? 0 : (uint32_t) cycleCount;
 
-        if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) && boolValue)
-            ffStrbufAppendS(&battery->status, "AC connected, ");
-        else
+        battery->timeRemaining = -1;
+        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSExternalConnectedKey), &boolValue) == NULL)
         {
-            ffStrbufAppendS(&battery->status, "Discharging, ");
-            ffCfDictGetInt(properties, CFSTR(kIOPMPSTimeRemainingKey), &battery->timeRemaining); // in minutes
-            if (battery->timeRemaining == 0xFFFF)
-                battery->timeRemaining = -1;
+            if (boolValue)
+                ffStrbufAppendS(&battery->status, "AC connected, ");
             else
-                battery->timeRemaining *= 60;
+            {
+                ffStrbufAppendS(&battery->status, "Discharging, ");
+                ffCfDictGetInt(properties, CFSTR("AvgTimeToEmpty"), &battery->timeRemaining); // in minutes
+                if (battery->timeRemaining < 0 || battery->timeRemaining >= 0xFFFF)
+                    battery->timeRemaining = -1;
+                else
+                    battery->timeRemaining *= 60;
+            }
         }
-        if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) && boolValue)
+        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSIsChargingKey), &boolValue) == NULL && boolValue)
             ffStrbufAppendS(&battery->status, "Charging, ");
-        if (!ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) && boolValue)
+        if (ffCfDictGetBool(properties, CFSTR(kIOPMPSAtCriticalLevelKey), &boolValue) == NULL && boolValue)
             ffStrbufAppendS(&battery->status, "Critical, ");
         ffStrbufTrimRight(&battery->status, ' ');
         ffStrbufTrimRight(&battery->status, ',');
