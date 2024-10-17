@@ -1,5 +1,6 @@
 #include "cpucache.h"
 #include "common/sysctl.h"
+#include "util/stringUtils.h"
 
 const char* ffDetectCPUCache(FFCPUCacheResult* result)
 {
@@ -19,35 +20,35 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
     {
         *pNum = (char) ('0' + i);
 
-        strlcpy(pSubkey, "physicalcpu", lenLeft);
+        ffStrCopyN(pSubkey, "physicalcpu", lenLeft);
         uint32_t ncpu = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (ncpu <= 0) continue;
 
-        strlcpy(pSubkey, "l1icachesize", lenLeft);
+        ffStrCopyN(pSubkey, "l1icachesize", lenLeft);
         uint32_t size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (size)
             ffCPUCacheAddItem(result, 1, size, lineSize, FF_CPU_CACHE_TYPE_INSTRUCTION)->num = ncpu;
 
-        strlcpy(pSubkey, "l1dcachesize", lenLeft);
+        ffStrCopyN(pSubkey, "l1dcachesize", lenLeft);
         size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (size)
             ffCPUCacheAddItem(result, 1, size, lineSize, FF_CPU_CACHE_TYPE_DATA)->num = ncpu;
 
-        strlcpy(pSubkey, "l2cachesize", lenLeft);
+        ffStrCopyN(pSubkey, "l2cachesize", lenLeft);
         size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (size)
         {
-            strlcpy(pSubkey, "cpusperl2", lenLeft);
+            ffStrCopyN(pSubkey, "cpusperl2", lenLeft);
             uint32_t cpuSper = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
             if (cpuSper)
                 ffCPUCacheAddItem(result, 2, size, lineSize, FF_CPU_CACHE_TYPE_UNIFIED)->num = ncpu / cpuSper;
         }
 
-        strlcpy(pSubkey, "l3cachesize", lenLeft);
+        ffStrCopyN(pSubkey, "l3cachesize", lenLeft);
         size = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
         if (size)
         {
-            strlcpy(pSubkey, "cpusperl3", lenLeft);
+            ffStrCopyN(pSubkey, "cpusperl3", lenLeft);
             uint32_t cpuSper = (uint32_t) ffSysctlGetInt(sysctlKey, 0);
             if (cpuSper)
                 ffCPUCacheAddItem(result, 3, size, lineSize, FF_CPU_CACHE_TYPE_UNIFIED)->num = ncpu / cpuSper;

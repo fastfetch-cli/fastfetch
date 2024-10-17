@@ -79,3 +79,14 @@ static inline bool ffCharIsDigit(char c)
 {
     return '0' <= c && c <= '9';
 }
+
+static inline char* ffStrCopyN(char* __restrict__ dst, const char* __restrict__ src, size_t nDst)
+{
+    assert(dst != NULL);
+    if (__builtin_expect(dst == NULL, false)) return dst;
+
+    size_t len = strnlen(src, nDst - 1);
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+    return dst + len;
+}

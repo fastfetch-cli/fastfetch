@@ -4,6 +4,7 @@
 #include "common/properties.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "util/windows/unicode.h"
+#include "util/stringUtils.h"
 #include "terminalfont.h"
 
 #include <shlobj.h>
@@ -97,13 +98,12 @@ static void detectFromWindowsTerminal(const FFstrbuf* terminalExe, FFTerminalFon
     if(terminalExe && terminalExe->length > 0 && !ffStrbufEqualS(terminalExe, "Windows Terminal"))
     {
         char jsonPath[MAX_PATH + 1];
-        strncpy(jsonPath, terminalExe->chars, ffStrbufLastIndexC(terminalExe, '\\') + 1);
-        char* pathEnd = jsonPath + strlen(jsonPath);
-        strncpy(pathEnd, ".portable", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
+        char* pathEnd = ffStrCopyN(jsonPath, terminalExe->chars, ffStrbufLastIndexC(terminalExe, '\\') + 1);
+        ffStrCopyN(pathEnd, ".portable", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
 
         if(ffPathExists(jsonPath, FF_PATHTYPE_ANY))
         {
-            strncpy(pathEnd, "settings\\settings.json", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
+            ffStrCopyN(pathEnd, "settings\\settings.json", sizeof(jsonPath) - (size_t) (pathEnd - jsonPath) - 1);
             if(!ffAppendFileBuffer(jsonPath, &json))
                 error = "Error reading Windows Terminal portable settings JSON file";
         }

@@ -58,8 +58,8 @@ static void detectChoco(FF_MAYBE_UNUSED FFPackagesResult* result)
         return;
 
     char chocoPath[MAX_PATH + 3];
-    strcpy(chocoPath, chocoInstall);
-    strncat(chocoPath, "/lib/*", sizeof(chocoPath) - 1 - strlen(chocoPath));
+    char* pend = ffStrCopyN(chocoPath, chocoInstall, sizeof(chocoPath));
+    ffStrCopyN(pend, "/lib/*", sizeof(chocoPath) - (pend - chocoPath));
     result->choco = getNumElements(chocoPath, FILE_ATTRIBUTE_DIRECTORY, "choco");
 }
 
