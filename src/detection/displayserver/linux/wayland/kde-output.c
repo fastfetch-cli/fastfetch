@@ -112,6 +112,7 @@ static void waylandKdeNameListener(void* data, FF_MAYBE_UNUSED struct kde_output
 {
     WaylandDisplay* display = data;
     display->type = ffdsGetDisplayType(name);
+    // As display->id is used as an internal identifier, we don't need it to be NUL terminated
     strncpy((char*) &display->id, name, sizeof(display->id));
     ffStrbufAppendS(&display->name, name);
 }

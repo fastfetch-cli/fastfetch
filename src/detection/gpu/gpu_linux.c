@@ -460,8 +460,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             {
                 if (ffStrStartsWith(entry->d_name, "card"))
                 {
-                    strncpy(drmKeyBuffer, entry->d_name, sizeof(drmKeyBuffer) - 1);
-                    drmKeyBuffer[sizeof(drmKeyBuffer) - 1] = '\0';
+                    strlcpy(drmKeyBuffer, entry->d_name, sizeof(drmKeyBuffer));
                     drmKey = drmKeyBuffer;
                     break;
                 }
