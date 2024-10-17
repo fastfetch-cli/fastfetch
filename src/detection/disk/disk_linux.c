@@ -149,7 +149,7 @@ static void detectName(FFDisk* disk)
 
 #ifdef __ANDROID__
 
-static void detectType(FF_MAYBE_UNUSED const FFlist* disks, FFDisk* currentDisk)
+static void detectType(FF_MAYBE_UNUSED const FFlist* disks, FFDisk* currentDisk, FF_MAYBE_UNUSED struct mntent* device)
 {
     if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
@@ -258,6 +258,11 @@ static void detectStats(FFDisk* disk)
     struct statx stx;
     if (statx(0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME))
         disk->createTime = (uint64_t)((stx.stx_btime.tv_sec * 1000) + (stx.stx_btime.tv_nsec / 1000000));
+    #endif
+
+    #ifdef __ANDROID__ // hasmntopt requires a higher Android API level
+    if(fs.f_flag & ST_RDONLY)
+        disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
     #endif
 }
 
