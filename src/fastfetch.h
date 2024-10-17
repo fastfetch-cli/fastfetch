@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED
-#define FASTFETCH_INCLUDED
-
 #include "fastfetch_config.h"
 
 #include <stdint.h>
@@ -80,5 +77,3 @@ void ffLogoPrintLine();
 void ffLogoBuiltinPrint();
 void ffLogoBuiltinList();
 void ffLogoBuiltinListAutocompletion();
-
-#endif

@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_LOGO_logo
-#define FASTFETCH_INCLUDED_LOGO_logo
-
 #include "fastfetch.h"
 
 typedef enum FFLogoLineType
@@ -31,5 +28,3 @@ extern const FFlogo ffLogoUnknown;
 
 //image/image.c
 bool ffLogoPrintImageIfExists(FFLogoType type, bool printError);
-
-#endif

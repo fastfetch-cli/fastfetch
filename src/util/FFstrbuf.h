@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_FFSTRBUF
-#define FASTFETCH_INCLUDED_FFSTRBUF
-
 #include "FFcheckmacros.h"
 
 #include <stdint.h>
@@ -491,5 +488,3 @@ static inline void ffStrbufTrim(FFstrbuf* strbuf, char c)
 }
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
-
-#endif
