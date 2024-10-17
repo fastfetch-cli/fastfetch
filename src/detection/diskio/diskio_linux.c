@@ -38,7 +38,7 @@ static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FF
                 {
                     char pathSysBlock[16];
                     snprintf(pathSysBlock, sizeof(pathSysBlock), "nvme%dn2", devid);
-                    faccessat(devfd, pathSysBlock, F_OK, 0);
+                    multiNs = faccessat(devfd, pathSysBlock, F_OK, 0) == 0;
                 }
                 if (multiNs)
                 {
