@@ -521,7 +521,7 @@ static bool getTerminalVersionScreen(FFstrbuf* exe, FFstrbuf* version)
 {
     if(!getExeVersionRaw(exe, version)) return false;
     // Screen version 4.09.01 (GNU) 20-Aug-23
-    ffStrbufSubstrAfter(version, strlen("Screen version ") - 1);
+    ffStrbufSubstrAfter(version, (uint32_t) strlen("Screen version ") - 1);
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return version->length > 0;
 }
