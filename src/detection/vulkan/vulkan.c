@@ -123,7 +123,7 @@ static const char* detectVulkan(FFVulkanResult* result)
         instanceVersion.major = 1;
 
     VkPhysicalDevice physicalDevices[128];
-    uint32_t physicalDeviceCount = (uint32_t) (sizeof(physicalDevices) / sizeof(*physicalDevices));
+    uint32_t physicalDeviceCount = (uint32_t) ARRAY_SIZE(physicalDevices);
     res = ffvkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, physicalDevices);
     if(res != VK_SUCCESS)
     {

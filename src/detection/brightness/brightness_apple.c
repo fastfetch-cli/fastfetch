@@ -92,13 +92,13 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
 
             for (uint32_t i = 0; i < 2; ++i)
             {
-                IOAVServiceWriteI2C(service, 0x37, 0x51, i2cIn, sizeof(i2cIn));
+                IOAVServiceWriteI2C(service, 0x37, 0x51, i2cIn, ARRAY_SIZE(i2cIn));
                 usleep(options->ddcciSleep * 1000);
             }
         }
 
         uint8_t i2cOut[12] = {};
-        if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cOut, sizeof(i2cOut)) == KERN_SUCCESS)
+        if (IOAVServiceReadI2C(service, 0x37, 0x51, i2cOut, ARRAY_SIZE(i2cOut)) == KERN_SUCCESS)
         {
             if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00)
                 continue;
@@ -113,7 +113,7 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
             ffStrbufInit(&brightness->name);
 
             uint8_t edid[128] = {};
-            if (IOAVServiceReadI2C(service, 0x50, 0x00, edid, sizeof(edid)) == KERN_SUCCESS)
+            if (IOAVServiceReadI2C(service, 0x50, 0x00, edid, ARRAY_SIZE(edid)) == KERN_SUCCESS)
                 ffEdidGetName(edid, &brightness->name);
         }
     }
@@ -155,12 +155,12 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                 .sendAddress = 0x6e,
                 .sendTransactionType = kIOI2CSimpleTransactionType,
                 .sendBuffer = (vm_address_t) i2cIn,
-                .sendBytes = sizeof(i2cIn) / sizeof(i2cIn[0]),
+                .sendBytes = ARRAY_SIZE(i2cIn),
                 .minReplyDelay = options->ddcciSleep,
                 .replyAddress = 0x6F,
                 .replySubAddress = 0x51,
                 .replyTransactionType = kIOI2CDDCciReplyTransactionType,
-                .replyBytes = sizeof(i2cOut) / sizeof(i2cOut[0]),
+                .replyBytes = ARRAY_SIZE(i2cOut),
                 .replyBuffer = (vm_address_t) i2cOut,
             };
             IOReturn ret = IOI2CSendRequest(connect, kNilOptions, &request);

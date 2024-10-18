@@ -13,7 +13,7 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)
     char path[16];
     for (int i = 0; i < MAX_UHID_JOYS; i++)
     {
-        snprintf(path, sizeof(path), "/dev/uhid%d", i);
+        snprintf(path, ARRAY_SIZE(path), "/dev/uhid%d", i);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0) continue;
 

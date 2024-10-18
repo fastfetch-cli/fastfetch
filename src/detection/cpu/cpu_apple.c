@@ -85,8 +85,8 @@ static const char* detectCoreCount(FFCPUResult* cpu)
     if (nPerfLevels <= 0) return "sysctl(hw.nperflevels) failed";
 
     char sysctlKey[] = "hw.perflevelN.logicalcpu";
-    if (nPerfLevels > sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]))
-        nPerfLevels = sizeof(cpu->coreTypes) / sizeof(cpu->coreTypes[0]);
+    if (nPerfLevels > ARRAY_SIZE(cpu->coreTypes))
+        nPerfLevels = ARRAY_SIZE(cpu->coreTypes);
     for (uint32_t i = 0; i < nPerfLevels; ++i)
     {
         sysctlKey[strlen("hw.perflevel")] = (char) ('0' + i);

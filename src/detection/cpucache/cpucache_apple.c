@@ -14,7 +14,7 @@ const char* ffDetectCPUCache(FFCPUCacheResult* result)
     char sysctlKey[128] = "hw.perflevelN.";
     char* pNum = sysctlKey + strlen("hw.perflevel");
     char* pSubkey = sysctlKey + strlen("hw.perflevelN.");
-    const size_t lenLeft = sizeof(sysctlKey) - strlen("hw.perflevelN.");
+    const size_t lenLeft = ARRAY_SIZE(sysctlKey) - strlen("hw.perflevelN.");
 
     for (uint32_t i = 0; i < nPerfLevels; ++i)
     {

@@ -76,7 +76,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
             {
                 char query[32];
-                snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) pc->pc_device, (unsigned) pc->pc_revid);
+                snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) pc->pc_device, (unsigned) pc->pc_revid);
                 ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
             }
             if (gpu->name.length == 0)

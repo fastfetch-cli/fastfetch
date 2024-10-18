@@ -139,7 +139,7 @@ static void getUserName(FFPlatform* platform)
     else
     {
         wchar_t buffer[128];
-        DWORD len = sizeof(buffer) / sizeof(*buffer);
+        DWORD len = ARRAY_SIZE(buffer);
         if(GetUserNameW(buffer, &len))
             ffStrbufSetWS(&platform->userName, buffer);
     }
@@ -148,7 +148,7 @@ static void getUserName(FFPlatform* platform)
 static void getHostName(FFPlatform* platform)
 {
     wchar_t buffer[128];
-    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    DWORD len = ARRAY_SIZE(buffer);
     if(GetComputerNameExW(ComputerNameDnsHostname, buffer, &len))
         ffStrbufSetWS(&platform->hostName, buffer);
 }

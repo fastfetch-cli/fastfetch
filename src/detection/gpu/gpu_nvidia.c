@@ -59,7 +59,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
     {
         char pciBusIdStr[32];
-        snprintf(pciBusIdStr, sizeof(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
+        snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
 
         nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(pciBusIdStr, &device);
         if (ret != NVML_SUCCESS)
@@ -148,7 +148,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     if (result.name)
     {
         char name[NVML_DEVICE_NAME_V2_BUFFER_SIZE];
-        if (nvmlData.ffnvmlDeviceGetName(device, name, sizeof(name)) == NVML_SUCCESS)
+        if (nvmlData.ffnvmlDeviceGetName(device, name, ARRAY_SIZE(name)) == NVML_SUCCESS)
             ffStrbufSetS(result.name, name);
     }
 

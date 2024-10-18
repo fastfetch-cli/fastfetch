@@ -15,7 +15,7 @@ const char* ffDetectProcesses(uint32_t* result)
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_PROC};
     size_t length;
 
-    if(sysctl(request, sizeof(request) / sizeof(*request), NULL, &length, NULL, 0) != 0)
+    if(sysctl(request, ARRAY_SIZE(request), NULL, &length, NULL, 0) != 0)
         return "sysctl({CTL_KERN, KERN_PROC, KERN_PROC_PROC}) failed";
 
     *result = (uint32_t)(length / sizeof(struct kinfo_proc));

@@ -50,7 +50,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     int timeout = instance.config.general.processingTimeout;
 
     wchar_t pipeName[32];
-    swprintf(pipeName, sizeof(pipeName) / sizeof(*pipeName), L"\\\\.\\pipe\\FASTFETCH-%u", GetCurrentProcessId());
+    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u", GetCurrentProcessId());
 
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = CreateNamedPipeW(
         pipeName,

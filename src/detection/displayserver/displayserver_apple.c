@@ -21,7 +21,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
 {
     CGDirectDisplayID screens[128];
     uint32_t screenCount;
-    if(CGGetOnlineDisplayList(sizeof(screens) / sizeof(screens[0]), screens, &screenCount) != kCGErrorSuccess)
+    if(CGGetOnlineDisplayList(ARRAY_SIZE(screens), screens, &screenCount) != kCGErrorSuccess)
         return;
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();

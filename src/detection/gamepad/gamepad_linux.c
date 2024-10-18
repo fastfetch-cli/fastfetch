@@ -28,7 +28,7 @@ static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path)
             ffStrbufAppendS(path, entry->d_name);
             ffStrbufAppendS(path, "/capacity"); // /sys/class/input/jsX/device/device/power_supply/XXX/capacity
             char capacity[32];
-            ssize_t nRead = ffReadFileData(path->chars, sizeof(capacity) - 1, capacity);
+            ssize_t nRead = ffReadFileData(path->chars, ARRAY_SIZE(capacity) - 1, capacity);
             if (nRead > 0) // Tested with a PS4 controller
             {
                 capacity[nRead] = '\0';
@@ -37,7 +37,7 @@ static void detectGamepad(FFlist* devices, FFstrbuf* name, FFstrbuf* path)
             }
 
             ffStrbufAppendS(path, "_level");
-            nRead = ffReadFileData(path->chars, sizeof(capacity) - 1, capacity);
+            nRead = ffReadFileData(path->chars, ARRAY_SIZE(capacity) - 1, capacity);
             if (nRead > 0) // Tested with a NS Pro controller
             {
                 // https://github.com/torvalds/linux/blob/52b1853b080a082ec3749c3a9577f6c71b1d4a90/drivers/power/supply/power_supply_sysfs.c#L124

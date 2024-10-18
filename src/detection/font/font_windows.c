@@ -6,7 +6,7 @@
 static void generateString(FFFontResult* font)
 {
     const char* types[] = { "Caption", "Menu", "Message", "Status" };
-    for(uint32_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i)
+    for(uint32_t i = 0; i < ARRAY_SIZE(types); ++i)
     {
         if(i == 0 || !ffStrbufEqual(&font->fonts[i - 1], &font->fonts[i]))
         {
@@ -31,7 +31,7 @@ const char* ffDetectFontImpl(FFFontResult* result)
 
     LOGFONTW* fonts[4] = { &info.lfCaptionFont, &info.lfMenuFont, &info.lfMessageFont, &info.lfStatusFont };
 
-    for(uint32_t i = 0; i < sizeof(fonts) / sizeof(fonts[0]); ++i)
+    for(uint32_t i = 0; i < ARRAY_SIZE(fonts); ++i)
     {
         ffStrbufSetWS(&result->fonts[i], fonts[i]->lfFaceName);
         if(fonts[i]->lfHeight < 0)

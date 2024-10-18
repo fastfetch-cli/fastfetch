@@ -107,7 +107,7 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     }
 
     char buffer[32];
-    if (strftime(buffer, sizeof(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
+    if (strftime(buffer, ARRAY_SIZE(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
     {
         ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
         return;

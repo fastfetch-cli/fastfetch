@@ -20,7 +20,7 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
             continue;
 
         char buffer[32]; // `../eventX`
-        ssize_t len = readlinkat(dirfd(dirp), entry->d_name, buffer, sizeof(buffer) - 1);
+        ssize_t len = readlinkat(dirfd(dirp), entry->d_name, buffer, ARRAY_SIZE(buffer) - 1);
         if (len != strlen("../eventX") || !ffStrStartsWith(buffer, "../event")) continue;
         buffer[len] = 0;
 

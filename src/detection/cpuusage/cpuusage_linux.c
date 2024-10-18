@@ -8,13 +8,13 @@
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
     char buf[PROC_FILE_BUFFSIZ];
-    ssize_t nRead = ffReadFileData("/proc/stat", sizeof(buf) - 1, buf);
+    ssize_t nRead = ffReadFileData("/proc/stat", ARRAY_SIZE(buf) - 1, buf);
     if(nRead < 0)
     {
         #ifdef __ANDROID__
         return "Accessing \"/proc/stat\" is restricted on Android O+";
         #else
-        return "ffReadFileData(\"/proc/stat\", sizeof(buf) - 1, buf) failed";
+        return "ffReadFileData(\"/proc/stat\", ARRAY_SIZE(buf) - 1, buf) failed";
         #endif
     }
     buf[nRead] = '\0';

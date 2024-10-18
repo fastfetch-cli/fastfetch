@@ -37,7 +37,7 @@ static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FF
                 if (!multiNs)
                 {
                     char pathSysBlock[16];
-                    snprintf(pathSysBlock, sizeof(pathSysBlock), "nvme%dn2", devid);
+                    snprintf(pathSysBlock, ARRAY_SIZE(pathSysBlock), "nvme%dn2", devid);
                     multiNs = faccessat(devfd, pathSysBlock, F_OK, 0) == 0;
                 }
                 if (multiNs)
@@ -56,7 +56,7 @@ static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FF
     uint64_t nRead, sectorRead, nWritten, sectorWritten;
     {
         char sysBlockStat[PROC_FILE_BUFFSIZ];
-        ssize_t fileSize = ffReadFileDataRelative(dfd, "stat", sizeof(sysBlockStat) - 1, sysBlockStat);
+        ssize_t fileSize = ffReadFileDataRelative(dfd, "stat", ARRAY_SIZE(sysBlockStat) - 1, sysBlockStat);
         if (fileSize <= 0) return;
         sysBlockStat[fileSize] = '\0';
         if (sscanf(sysBlockStat, "%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)

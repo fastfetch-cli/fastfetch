@@ -32,7 +32,7 @@ static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer
     uint32_t pciDirLength = pciDir->length;
     ffStrbufAppendS(pciDir, "/driver");
     char pathBuf[PATH_MAX];
-    ssize_t resultLength = readlink(pciDir->chars, pathBuf, sizeof(pathBuf));
+    ssize_t resultLength = readlink(pciDir->chars, pathBuf, ARRAY_SIZE(pathBuf));
     if(resultLength <= 0) return false;
 
     const char* slash = memrchr(pathBuf, '/', (size_t) resultLength);
@@ -415,7 +415,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     const char* pPciPath = NULL;
     if (drmKey)
     {
-        ssize_t pathLength = readlink(deviceDir->chars, pciPath, sizeof(pciPath) - 1);
+        ssize_t pathLength = readlink(deviceDir->chars, pciPath, ARRAY_SIZE(pciPath) - 1);
         if (pathLength <= 0)
             return "Unable to get PCI device path";
         pciPath[pathLength] = '\0';
@@ -460,7 +460,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
             {
                 if (ffStrStartsWith(entry->d_name, "card"))
                 {
-                    ffStrCopyN(drmKeyBuffer, entry->d_name, sizeof(drmKeyBuffer));
+                    ffStrCopyN(drmKeyBuffer, entry->d_name, ARRAY_SIZE(drmKeyBuffer));
                     drmKey = drmKeyBuffer;
                     break;
                 }
@@ -493,7 +493,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 if (pend != buffer->chars)
                 {
                     char query[32];
-                    snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
+                    snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
                     #ifdef FF_CUSTOM_AMDGPU_IDS_PATH
                     ffParsePropFile(FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), query, &gpu->name);
                     #else

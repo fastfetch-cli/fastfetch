@@ -52,7 +52,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
 
         wchar_t buffer[256];
         uint32_t length = 0;
-        if (FAILED(device->GetString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, buffer, sizeof(buffer), &length)) || length == 0)
+        if (FAILED(device->GetString(MF_DEVSOURCE_ATTRIBUTE_FRIENDLY_NAME, buffer, ARRAY_SIZE(buffer), &length)) || length == 0)
             continue;
 
         FFCameraResult* camera = (FFCameraResult*) ffListAdd(result);
@@ -63,7 +63,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
         camera->width = 0;
         camera->height = 0;
 
-        if (SUCCEEDED(device->GetString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK, buffer, sizeof(buffer), &length)) && length > 0)
+        if (SUCCEEDED(device->GetString(MF_DEVSOURCE_ATTRIBUTE_SOURCE_TYPE_VIDCAP_SYMBOLIC_LINK, buffer, ARRAY_SIZE(buffer), &length)) && length > 0)
             ffStrbufSetNWS(&camera->id, length, buffer);
 
         IMFMediaSource* FF_AUTO_RELEASE_COM_OBJECT source = nullptr;

@@ -7,10 +7,10 @@
 const char* ffDetectUptime(FFUptimeResult* result)
 {
     #ifndef __ANDROID__ // cat: /proc/uptime: Permission denied
-    
+
     // #620
     char buf[64];
-    ssize_t nRead = ffReadFileData("/proc/uptime", sizeof(buf) - 1, buf);
+    ssize_t nRead = ffReadFileData("/proc/uptime", ARRAY_SIZE(buf) - 1, buf);
     if(nRead > 0)
     {
         buf[nRead] = '\0';

@@ -86,7 +86,7 @@ static void detectStats(FFDisk* disk)
 {
     struct statvfs fs;
     if(statvfs(disk->mountpoint.chars, &fs) != 0)
-        memset(&fs, 0, sizeof(struct statvfs));
+        memset(&fs, 0, sizeof(fs));
 
     disk->bytesTotal = fs.f_blocks * fs.f_frsize;
     disk->bytesFree = fs.f_bfree * fs.f_frsize;

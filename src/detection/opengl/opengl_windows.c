@@ -31,7 +31,7 @@ static const char* wglHandlePixelFormat(WGLData* wglData, HWND hWnd)
 {
     PIXELFORMATDESCRIPTOR pfd =
     {
-        sizeof(PIXELFORMATDESCRIPTOR),
+        sizeof(pfd),
         1,
         PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
         PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.

@@ -114,10 +114,10 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         if (!knownGamepad)
         {
             wchar_t displayName[126];
-            if (HidD_GetProductString(hHidFile, displayName, sizeof(displayName)))
+            if (HidD_GetProductString(hHidFile, displayName, sizeof(displayName) /*in bytes*/))
             {
                 wchar_t manufacturer[126];
-                if (HidD_GetManufacturerString(hHidFile, manufacturer, sizeof(manufacturer)))
+                if (HidD_GetManufacturerString(hHidFile, manufacturer, sizeof(manufacturer) /*in bytes*/))
                 {
                     ffStrbufSetWS(&device->name, manufacturer);
                     FF_STRBUF_AUTO_DESTROY displayNameStr = ffStrbufCreateWS(displayName);
@@ -132,7 +132,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
         }
 
         wchar_t serialNumber[127] = L"";
-        if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber)))
+        if (HidD_GetSerialNumberString(hHidFile, serialNumber, sizeof(serialNumber) /*in bytes*/))
             ffStrbufSetWS(&device->serial, serialNumber);
 
         PHIDP_PREPARSED_DATA preparsedData = NULL;

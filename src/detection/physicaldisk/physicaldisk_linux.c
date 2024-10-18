@@ -16,7 +16,7 @@ static double detectNvmeTemp(int devfd)
     {
         pathHwmon[strlen("hwmon")] = c;
         char buffer[64];
-        ssize_t size = ffReadFileDataRelative(devfd, pathHwmon, sizeof(buffer), buffer);
+        ssize_t size = ffReadFileDataRelative(devfd, pathHwmon, ARRAY_SIZE(buffer), buffer);
         if (size > 0)
         {
             buffer[size] = '\0';
@@ -58,7 +58,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
                 if (!multiNs)
                 {
                     char pathSysBlock[32];
-                    snprintf(pathSysBlock, sizeof(pathSysBlock), "/dev/nvme%dn2", devid);
+                    snprintf(pathSysBlock, ARRAY_SIZE(pathSysBlock), "/dev/nvme%dn2", devid);
                     multiNs = access(pathSysBlock, F_OK) == 0;
                 }
                 if (multiNs)
@@ -81,7 +81,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
     {
         ffStrbufInit(&device->interconnect);
         char pathSysDeviceReal[PATH_MAX];
-        ssize_t pathLength = readlinkat(dfd, "device", pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
+        ssize_t pathLength = readlinkat(dfd, "device", pathSysDeviceReal, ARRAY_SIZE(pathSysDeviceReal) - 1);
         if (pathLength > 0)
         {
             pathSysDeviceReal[pathLength] = '\0';
@@ -110,7 +110,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
 
     {
         char blkSize[32];
-        ssize_t fileSize = ffReadFileDataRelative(dfd, "size", sizeof(blkSize) - 1, blkSize);
+        ssize_t fileSize = ffReadFileDataRelative(dfd, "size", ARRAY_SIZE(blkSize) - 1, blkSize);
         if (fileSize > 0)
         {
             blkSize[fileSize] = 0;
@@ -169,8 +169,8 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         if (devName[0] == '.')
             continue;
 
-        char pathSysBlock[sizeof("/sys/block/") + sizeof(sysBlockEntry->d_name)];
-        snprintf(pathSysBlock, sizeof(pathSysBlock), "/sys/block/%s", devName);
+        char pathSysBlock[ARRAY_SIZE("/sys/block/") + ARRAY_SIZE(sysBlockEntry->d_name)];
+        snprintf(pathSysBlock, ARRAY_SIZE(pathSysBlock), "/sys/block/%s", devName);
 
         int dfd = openat(dirfd(sysBlockDirp), devName, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
         if (dfd > 0) parsePhysicalDisk(dfd, devName, options, result);

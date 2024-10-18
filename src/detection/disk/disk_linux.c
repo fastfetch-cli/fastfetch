@@ -204,7 +204,7 @@ static bool isRemovable(FFDisk* currentDisk)
         return false;
 
     char sysBlockPartition[64];
-    snprintf(sysBlockPartition, sizeof(sysBlockPartition), "/sys/class/block/%s", currentDisk->mountFrom.chars + strlen("/dev/"));
+    snprintf(sysBlockPartition, ARRAY_SIZE(sysBlockPartition), "/sys/class/block/%s", currentDisk->mountFrom.chars + strlen("/dev/"));
 
     char sysBlockVolume[PATH_MAX]; // /sys/devices/pci0000:00/0000:00:14.0/usb4/4-3/4-3:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
     if (realpath(sysBlockPartition, sysBlockVolume) == NULL)
@@ -235,7 +235,7 @@ static void detectStats(FFDisk* disk)
 {
     struct statvfs fs;
     if(statvfs(disk->mountpoint.chars, &fs) != 0)
-        memset(&fs, 0, sizeof(struct statvfs)); //Set all values to 0, so our values get initialized to 0 too
+        memset(&fs, 0, sizeof(fs)); //Set all values to 0, so our values get initialized to 0 too
 
     disk->bytesTotal = fs.f_blocks * fs.f_frsize;
     disk->bytesFree = fs.f_bfree * fs.f_frsize;

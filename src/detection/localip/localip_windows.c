@@ -106,7 +106,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         bool newIp = true;
 
         char name[128];
-        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, sizeof(name), NULL, NULL);
+        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, ARRAY_SIZE(name), NULL, NULL);
         if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
@@ -114,7 +114,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         {
             char addressBuffer[32];
             uint8_t* ptr = adapter->PhysicalAddress;
-            snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
+            snprintf(addressBuffer, ARRAY_SIZE(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
             addNewIp(results, name, addressBuffer, -1, newIp, isDefaultRoute);
             newIp = false;

@@ -389,7 +389,7 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
 
     // device-vendor,device-model\0soc-vendor,soc-model\0
     char content[256];
-    ssize_t length = ffReadFileData("/proc/device-tree/compatible", sizeof(content), content);
+    ssize_t length = ffReadFileData("/proc/device-tree/compatible", ARRAY_SIZE(content), content);
     if (length <= 2) return;
 
     // get the second NUL terminated string if it exists

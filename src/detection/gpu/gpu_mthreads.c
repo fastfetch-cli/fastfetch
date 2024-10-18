@@ -86,7 +86,7 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
     if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
     {
         char pciBusIdStr[32];
-        snprintf(pciBusIdStr, sizeof(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
+        snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
 
         MtmlReturn ret = mtmlData.ffmtmlLibraryInitDeviceByPciSbdf(mtmlData.lib, pciBusIdStr, &device);
         if (ret != MTML_SUCCESS)
@@ -195,7 +195,7 @@ const char *ffDetectMthreadsGpuInfo(const FFGpuDriverCondition *cond, FFGpuDrive
     if (result.name)
     {
         char name[MTML_DEVICE_NAME_BUFFER_SIZE];
-        if (mtmlData.ffmtmlDeviceGetName(device, name, sizeof(name)) == MTML_SUCCESS)
+        if (mtmlData.ffmtmlDeviceGetName(device, name, ARRAY_SIZE(name)) == MTML_SUCCESS)
             ffStrbufSetS(result.name, name);
     }
 
