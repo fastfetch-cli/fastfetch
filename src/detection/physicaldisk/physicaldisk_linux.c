@@ -21,7 +21,7 @@ static double detectNvmeTemp(int devfd)
         {
             buffer[size] = '\0';
             double temp = strtod(buffer, NULL);
-            return temp > 0 ? temp / 1000 : FF_PHYSICALDISK_TEMP_UNSET;
+            return temp > 0 && temp < 10000000 /*VMware*/ ? temp / 1000 : FF_PHYSICALDISK_TEMP_UNSET;
         }
     }
 
