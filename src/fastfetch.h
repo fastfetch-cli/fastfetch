@@ -25,9 +25,12 @@
 #include "options/display.h"
 #include "options/general.h"
 
-#if __has_builtin(__builtin_types_compatible_p)
-    #define ARRAY_SIZE(x) ({ static_assert(!__builtin_types_compatible_p(__typeof__(x), __typeof__(&*(x))), "Must not be a pointer"); sizeof(x) / sizeof(*(x)); })
-#else
+#ifdef __has_builtin
+    #if __has_builtin(__builtin_types_compatible_p)
+        #define ARRAY_SIZE(x) ({ static_assert(!__builtin_types_compatible_p(__typeof__(x), __typeof__(&*(x))), "Must not be a pointer"); sizeof(x) / sizeof(*(x)); })
+    #endif
+#endif
+#ifndef ARRAY_SIZE
     #define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
 #endif
 
