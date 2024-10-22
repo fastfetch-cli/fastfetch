@@ -4,17 +4,20 @@ Features:
 * Add new module `Mouse` and `Keyboard` which display connected mice and keyboards
 * Support remaining time detection (Battery)
 * Report if AC is connected (Battery, Linux)
-* Report platform API used for display detection (Display)
-    * Mainly for debugging
+* Report platform API used for display detection for debugging (Display)
 * Report Wine version when running in Wine (Kernel, Windows)
+* Add option `waitTime` in modules `CPUUsage`, `DiskIO` and `NetIO`
 
 Bugfixes:
 * Fix used memory size detection (Memory, OpenBSD)
 * Don't report invalid fragmentation percentage when fails to detect it (Zpool)
+* Fix unexpected errors when running fastfetch in parallel (#1346, Windows)
+* Don't report obviously invalid temperature values (PhysicalDisk, Linux)
 
 Logos:
 * Add eweOS
 * Add MidOS
+* Update XeroArch
 
 # 2.27.1
 
