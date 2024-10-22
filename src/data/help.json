@@ -917,6 +917,14 @@
             }
         },
         {
+            "long": "diskio-wait-time",
+            "desc": "Set the wait time (in ms) when detecting disk usage",
+            "arg": {
+                "type": "num",
+                "default": 1000
+            }
+        },
+        {
             "long": "physicaldisk-name-prefix",
             "desc": "Show disks with given name prefix only",
             "arg": {
@@ -1068,6 +1076,14 @@
                 "type": "bool",
                 "optional": true,
                 "default": false
+            }
+        },
+        {
+            "long": "cpuusage-wait-time",
+            "desc": "Set the wait time (in ms) when detecting CPU usage",
+            "arg": {
+                "type": "num",
+                "default": 200
             }
         },
         {
@@ -1303,6 +1319,14 @@
             "arg": {
                 "type": "bool",
                 "default": false
+            }
+        },
+        {
+            "long": "netio-wait-time",
+            "desc": "Set the wait time (in ms) when detecting network usage",
+            "arg": {
+                "type": "num",
+                "default": 1000
             }
         },
         {

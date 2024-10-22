@@ -13,7 +13,7 @@ void ffPrepareCPUUsage(void)
     ffGetCpuUsageInfo(&cpuTimes1);
 }
 
-const char* ffGetCpuUsageResult(FFlist* result)
+const char* ffGetCpuUsageResult(FFCPUUsageOptions* options, FFlist* result)
 {
     const char* error = NULL;
     if(cpuTimes1.elementSize == 0)
@@ -21,7 +21,7 @@ const char* ffGetCpuUsageResult(FFlist* result)
         ffListInit(&cpuTimes1, sizeof(FFCpuUsageInfo));
         error = ffGetCpuUsageInfo(&cpuTimes1);
         if(error) return error;
-        ffTimeSleep(200);
+        ffTimeSleep(options->waitTime);
     }
 
     if(cpuTimes1.length == 0) return "No CPU cores found";
@@ -43,7 +43,7 @@ retry:
             if (++retryCount <= 3)
             {
                 ffListClear(&cpuTimes2);
-                ffTimeSleep(200);
+                ffTimeSleep(options->waitTime);
                 goto retry;
             }
         }

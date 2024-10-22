@@ -12,4 +12,5 @@ typedef struct FFCPUUsageOptions
 
     bool separate;
     FFColorRangeConfig percent;
+    uint32_t waitTime; // in ms
 } FFCPUUsageOptions;

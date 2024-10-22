@@ -1181,6 +1181,12 @@
                                         "description": "Display CPU usage per CPU logical core, instead of an average result",
                                         "default": false
                                     },
+                                    "waitTime": {
+                                        "type": "integer",
+                                        "description": "Wait time (in ms). CPU usage = (inUseEnd - inUseStart) / waitTime",
+                                        "default": 200,
+                                        "minimum": 1
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -1471,6 +1477,12 @@
                                         "description": "Detect total bytes instead of current rate",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "waitTime": {
+                                        "type": "integer",
+                                        "description": "Wait time (in ms). Disk I/O = (totalBytesEnd - totalBytesStart) / waitTime",
+                                        "default": 200,
+                                        "minimum": 1
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1840,6 +1852,12 @@
                                         "description": "Detect total bytes instead of current rate",
                                         "type": "boolean",
                                         "default": false
+                                    },
+                                    "waitTime": {
+                                        "type": "integer",
+                                        "description": "Wait time (in ms). Disk I/O = (totalBytesEnd - totalBytesStart) / waitTime",
+                                        "default": 200,
+                                        "minimum": 1
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

@@ -41,9 +41,9 @@ const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options)
         return "No network interfaces found";
 
     uint64_t time2 = ffTimeGetNow();
-    while (time2 - time1 < 1000)
+    while (time2 - time1 < options->waitTime)
     {
-        ffTimeSleep((uint32_t) (1000 - (time2 - time1)));
+        ffTimeSleep((uint32_t) (options->waitTime - (time2 - time1)));
         time2 = ffTimeGetNow();
     }
 
