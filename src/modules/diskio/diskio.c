@@ -115,6 +115,12 @@ bool ffParseDiskIOCommandOptions(FFDiskIOOptions* options, const char* key, cons
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "wait-time"))
+    {
+        options->waitTime = ffOptionParseUInt32(key, value);
+        return true;
+    }
+
     return false;
 }
 
@@ -140,6 +146,12 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "detectTotal"))
         {
             options->detectTotal = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "waitTime"))
+        {
+            options->waitTime = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
@@ -222,6 +234,7 @@ void ffInitDiskIOOptions(FFDiskIOOptions* options)
 
     ffStrbufInit(&options->namePrefix);
     options->detectTotal = false;
+    options->waitTime = 1000;
 }
 
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options)

@@ -39,7 +39,7 @@ void ffPrintCPU(FFCPUOptions* options)
         if (options->showPeCoreCount)
         {
             uint32_t typeCount = 0;
-            while (cpu.coreTypes[typeCount].count != 0 && typeCount < sizeof(cpu.coreTypes) / sizeof(cpu.coreTypes[0])) typeCount++;
+            while (cpu.coreTypes[typeCount].count != 0 && typeCount < ARRAY_SIZE(cpu.coreTypes)) typeCount++;
             if (typeCount > 0)
             {
                 qsort(cpu.coreTypes, typeCount, sizeof(cpu.coreTypes[0]), (void*) sortCores);

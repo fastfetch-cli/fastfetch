@@ -610,7 +610,7 @@ static void getPackageCountsBedrock(FFstrbuf* baseDir, FFPackagesResult* package
     {
         if(entry->d_type != DT_DIR)
             continue;
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(baseDir, entry->d_name);

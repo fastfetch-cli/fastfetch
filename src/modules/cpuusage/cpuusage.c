@@ -11,7 +11,7 @@
 void ffPrintCPUUsage(FFCPUUsageOptions* options)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
-    const char* error = ffGetCpuUsageResult(&percentages);
+    const char* error = ffGetCpuUsageResult(options, &percentages);
 
     if(error)
     {
@@ -111,6 +111,12 @@ bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, 
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "wait-time"))
+    {
+        options->waitTime = ffOptionParseUInt32(key, value);
+        return true;
+    }
+
     if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
         return true;
 
@@ -136,6 +142,12 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (ffStrEqualsIgnCase(key, "waitTime"))
+        {
+            options->waitTime = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
@@ -156,10 +168,10 @@ void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* do
     ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
-void ffGenerateCPUUsageJsonResult(FF_MAYBE_UNUSED FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
-    const char* error = ffGetCpuUsageResult(&percentages);
+    const char* error = ffGetCpuUsageResult(options, &percentages);
 
     if(error)
     {
@@ -203,6 +215,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
     options->separate = false;
     options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->waitTime = 200;
 }
 
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)

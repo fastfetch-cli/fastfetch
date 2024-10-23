@@ -198,7 +198,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             char addressBuffer[32];
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
-            snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
+            snprintf(addressBuffer, ARRAY_SIZE(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
             addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
         }
@@ -210,7 +210,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             char addressBuffer[32];
             uint8_t* ptr = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr;
-            snprintf(addressBuffer, sizeof(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
+            snprintf(addressBuffer, ARRAY_SIZE(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
             addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
         }
@@ -231,7 +231,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             FF_LIST_FOR_EACH(FFLocalIpResult, iface, *results)
             {
                 struct ifreq ifr;
-                strncpy(ifr.ifr_name, iface->name.chars, IFNAMSIZ - 1);
+                ffStrCopyN(ifr.ifr_name, iface->name.chars, IFNAMSIZ);
 
                 if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
                 {
@@ -248,7 +248,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                         iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
                     #elif __FreeBSD__ || __APPLE__ || __OpenBSD__
                     struct ifmediareq ifmr = {};
-                    strncpy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ - 1);
+                    ffStrCopyN(ifmr.ifm_name, iface->name.chars, IFNAMSIZ);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))
                     {
                         switch (IFM_SUBTYPE(ifmr.ifm_active))

@@ -22,7 +22,7 @@
 static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
     struct ucred ucred;
-    socklen_t len = sizeof(struct ucred);
+    socklen_t len = sizeof(ucred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1 || ucred.pid <= 0)
         return false;
 
@@ -108,7 +108,7 @@ static bool matchDrmConnector(const char* connName, WaylandDisplay* wldata)
             FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateF("%s%s/edid", drmDirPath, entry->d_name);
 
             uint8_t edidData[512];
-            ssize_t edidLength = ffReadFileData(path.chars, sizeof(edidData), edidData);
+            ssize_t edidLength = ffReadFileData(path.chars, ARRAY_SIZE(edidData), edidData);
             if (edidLength > 0 && edidLength % 128 == 0)
             {
                 ffEdidGetName(edidData, &wldata->edidName);
@@ -249,7 +249,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result)
             FF_LIST_FOR_EACH(FFstrbuf, basePath, instance.state.platform.configDirs)
             {
                 char path[1024];
-                snprintf(path, sizeof(path) - 1, "%s%s", basePath->chars, fileName);
+                snprintf(path, ARRAY_SIZE(path) - 1, "%s%s", basePath->chars, fileName);
                 if (ffReadFileBuffer(path, &monitorsXml))
                     break;
             }

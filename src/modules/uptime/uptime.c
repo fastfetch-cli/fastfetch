@@ -34,47 +34,10 @@ void ffPrintUptime(FFUptimeOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        ffParseDuration(days, hours, minutes, seconds, &buffer);
 
-        if(days == 0 && hours == 0 && minutes == 0)
-        {
-            printf("%u seconds\n", seconds);
-            return;
-        }
-
-        if(days > 0)
-        {
-            printf("%u day", days);
-
-            if(days > 1)
-                putchar('s');
-
-            if(days >= 100)
-                fputs("(!)", stdout);
-
-            if(hours > 0 || minutes > 0)
-                fputs(", ", stdout);
-        }
-
-        if(hours > 0)
-        {
-            printf("%u hour", hours);
-
-            if(hours > 1)
-                putchar('s');
-
-            if(minutes > 0)
-                fputs(", ", stdout);
-        }
-
-        if(minutes > 0)
-        {
-            printf("%u min", minutes);
-
-            if(minutes > 1)
-                putchar('s');
-        }
-
-        putchar('\n');
+        ffStrbufPutTo(&buffer, stdout);
     }
     else
     {

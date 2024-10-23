@@ -16,7 +16,7 @@ const char* ffDetectCamera(FFlist* result)
 
     for (uint32_t i = 0; i <= 9; ++i)
     {
-        path[sizeof(path) - 2] = (char) (i + '0');
+        path[ARRAY_SIZE(path) - 2] = (char) (i + '0');
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY);
         if (fd < 0)
             break;

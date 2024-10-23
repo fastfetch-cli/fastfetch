@@ -27,3 +27,4 @@ int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
 
 void ffParseSize(uint64_t bytes, FFstrbuf* result);
 bool ffParseFrequency(uint32_t mhz, FFstrbuf* result);
+void ffParseDuration(uint32_t days, uint32_t hours, uint32_t minutes, uint32_t seconds, FFstrbuf* result);

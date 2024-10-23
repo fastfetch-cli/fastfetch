@@ -5,18 +5,22 @@ set -e
 mkdir -p build/
 cd build/
 
-if [ -z "${CMAKE_BUILD_TYPE}" ]; then
-    CMAKE_BUILD_TYPE=Release
-fi
-cmake "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}" ..
+cmake ..
 
-if [ -z "$OSTYPE" ] || [ "$OSTYPE" = "linux-gnu" ]; then
-    cmake_build_args="-j$(nproc)"
-elif [ "$OSTYPE" = "darwin" ]; then
-    cmake_build_args="-j$(sysctl -n hw.ncpu)"
-else
-    cmake_build_args=""
-fi
-cmake --build . --target fastfetch ${cmake_build_args}
+kernel_name="$(uname -s)"
+
+case "${kernel_name}" in
+    "Linux" | "MINGW"*)
+        cmake_build_args="-j$(nproc)"
+        ;;
+    "Darwin" | *"BSD" | "DragonFly")
+        cmake_build_args="-j$(sysctl -n hw.ncpu)"
+        ;;
+    *)
+        cmake_build_args=""
+        ;;
+esac
+
+cmake --build . --target fastfetch "${cmake_build_args}"
 
 ./fastfetch "$@"

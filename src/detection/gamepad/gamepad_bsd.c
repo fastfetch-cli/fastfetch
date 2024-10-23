@@ -13,7 +13,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
     char path[16];
     for (int i = 0; i < MAX_UHID_JOYS; i++)
     {
-        snprintf(path, sizeof(path), "/dev/uhid%d", i);
+        snprintf(path, ARRAY_SIZE(path), "/dev/uhid%d", i);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0) continue;
 
@@ -31,8 +31,9 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
                 if (HID_PAGE(hItem.usage) != 1) continue;
                 switch (HID_USAGE(hItem.usage))
                 {
-                    case 1: // FreeBSD returns 1 for my Pro Controller for some reason
-                    case 5:
+                    case 1: // Pointer. FreeBSD returns 1 for my Pro Controller for some reason
+                    case 4: // Joystick
+                    case 5: // Gamepad
                         break;
                     default:
                         continue;

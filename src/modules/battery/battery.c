@@ -7,7 +7,7 @@
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
 
-#define FF_BATTERY_NUM_FORMAT_ARGS 10
+#define FF_BATTERY_NUM_FORMAT_ARGS 14
 
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
@@ -27,6 +27,17 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             FF_FORMAT_ARG(result->modelName, "name"),
         }));
     }
+
+
+    uint32_t timeRemaining = result->timeRemaining < 0 ? 0 : (uint32_t) result->timeRemaining;
+
+    uint32_t seconds = timeRemaining % 60;
+    timeRemaining /= 60;
+    uint32_t minutes = timeRemaining % 60;
+    timeRemaining /= 60;
+    uint32_t hours = timeRemaining % 24;
+    timeRemaining /= 24;
+    uint32_t days = timeRemaining;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -51,6 +62,15 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                     ffStrbufAppendC(&str, ' ');
 
                 ffPercentAppendNum(&str, result->capacity, options->percent, str.length > 0, &options->moduleArgs);
+            }
+
+            if(result->timeRemaining > 0)
+            {
+                if(str.length > 0)
+                    ffStrbufAppendS(&str, " (");
+
+                ffParseDuration(days, hours, minutes, seconds, &str);
+                ffStrbufAppendS(&str, " remaining)");
             }
         }
 
@@ -91,6 +111,10 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             FF_FORMAT_ARG(result->serial, "serial"),
             FF_FORMAT_ARG(result->manufactureDate, "manufacture-date"),
             FF_FORMAT_ARG(capacityBar, "capacity-bar"),
+            FF_FORMAT_ARG(days, "time-days"),
+            FF_FORMAT_ARG(hours, "time-hours"),
+            FF_FORMAT_ARG(minutes, "time-minutes"),
+            FF_FORMAT_ARG(seconds, "time-seconds"),
         }));
     }
 }
@@ -226,6 +250,8 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &battery->serial);
         yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
         yyjson_mut_obj_add_uint(doc, obj, "cycleCount", battery->cycleCount);
+        if (battery->timeRemaining > 0)
+            yyjson_mut_obj_add_int(doc, obj, "timeRemaining", battery->timeRemaining);
     }
 
     FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
@@ -241,7 +267,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 
 void ffPrintBatteryHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BATTERY_MODULE_NAME, "{4}, {5}", FF_BATTERY_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BATTERY_MODULE_NAME, "{4} ({12} hours {13} mins) [{5}]", FF_BATTERY_NUM_FORMAT_ARGS, ((const char* []) {
         "Battery manufacturer - manufacturer",
         "Battery model name - model-name",
         "Battery technology - technology",
@@ -252,6 +278,10 @@ void ffPrintBatteryHelpFormat(void)
         "Battery serial number - serial",
         "Battery manufactor date - manufacture-date",
         "Battery capacity (percentage bar) - capacity-bar",
+        "Battery time remaining days - time-days",
+        "Battery time remaining hours - time-hours",
+        "Battery time remaining minutes - time-minutes",
+        "Battery time remaining seconds - time-seconds",
     }));
 }
 

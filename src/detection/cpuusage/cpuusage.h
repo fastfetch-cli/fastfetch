@@ -8,4 +8,4 @@ typedef struct FFCpuUsageInfo {
 } FFCpuUsageInfo;
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes);
 
-const char* ffGetCpuUsageResult(FFlist* result); // list of double
+const char* ffGetCpuUsageResult(FFCPUUsageOptions* options, FFlist* result); // list of double

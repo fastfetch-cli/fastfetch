@@ -72,19 +72,21 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
 
 static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mnttab* device)
 {
-    if(ffStrContains(device->mnt_mntopts, MNTOPT_NOBROWSE))
+    if(hasmntopt(device, MNTOPT_NOBROWSE))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     else
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+    if (hasmntopt(device, MNTOPT_RO))
+        currentDisk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 }
 
 static void detectStats(FFDisk* disk)
 {
     struct statvfs fs;
     if(statvfs(disk->mountpoint.chars, &fs) != 0)
-        memset(&fs, 0, sizeof(struct statvfs));
+        memset(&fs, 0, sizeof(fs));
 
     disk->bytesTotal = fs.f_blocks * fs.f_frsize;
     disk->bytesFree = fs.f_bfree * fs.f_frsize;
@@ -93,9 +95,6 @@ static void detectStats(FFDisk* disk)
 
     disk->filesTotal = (uint32_t) fs.f_files;
     disk->filesUsed = (uint32_t) (disk->filesTotal - fs.f_ffree);
-
-    if(fs.f_flag & ST_RDONLY)
-        disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 
     ffStrbufSetS(&disk->name, fs.f_fstr);
 

@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_FFCHECKMACROS
-#define FASTFETCH_INCLUDED_FFCHECKMACROS
-
 #ifdef _MSC_VER
     #include <sal.h>
 #endif
@@ -25,6 +22,4 @@
     #define FF_C_SCANF(formatStrIndex, argsStartIndex) __attribute__((__format__ (scanf, formatStrIndex, argsStartIndex)))
 #else
     #define FF_C_SCANF(formatStrIndex, argsStartIndex)
-#endif
-
 #endif

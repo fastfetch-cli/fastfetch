@@ -521,7 +521,7 @@ static bool getTerminalVersionScreen(FFstrbuf* exe, FFstrbuf* version)
 {
     if(!getExeVersionRaw(exe, version)) return false;
     // Screen version 4.09.01 (GNU) 20-Aug-23
-    ffStrbufSubstrAfter(version, strlen("Screen version ") - 1);
+    ffStrbufSubstrAfter(version, (uint32_t) strlen("Screen version ") - 1);
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return version->length > 0;
 }
@@ -579,16 +579,16 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
     char buffer[1024] = {};
     if (
         #ifdef __linux__
-        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer) ||
-        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer)
+        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib64/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer) ||
+        ffReadFileData(FASTFETCH_TARGET_DIR_USR "/lib/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
         #else
-        ffReadFileData(_PATH_LOCALBASE "/share/kitty/kitty/constants.py", sizeof(buffer) - 1, buffer)
+        ffReadFileData(_PATH_LOCALBASE "/share/kitty/kitty/constants.py", ARRAY_SIZE(buffer) - 1, buffer)
         #endif
     )
     {
         // Starts from version 0.17.0
         // https://github.com/kovidgoyal/kitty/blob/master/kitty/constants.py#L25
-        const char* p = memmem(buffer, sizeof(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
+        const char* p = memmem(buffer, ARRAY_SIZE(buffer) - 1, "version: Version = Version(", strlen("version: Version = Version("));
         if (p)
         {
             p += strlen("version: Version = Version(");

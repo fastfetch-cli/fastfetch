@@ -13,7 +13,8 @@ FFDisplayResult* ffdsAppendDisplay(
     bool primary,
     uint64_t id,
     uint32_t physicalWidth,
-    uint32_t physicalHeight)
+    uint32_t physicalHeight,
+    const char* platformApi)
 {
     if(width == 0 || height == 0)
         return NULL;
@@ -31,6 +32,7 @@ FFDisplayResult* ffdsAppendDisplay(
     display->physicalWidth = physicalWidth;
     display->physicalHeight = physicalHeight;
     display->primary = primary;
+    display->platformApi = platformApi;
 
     display->bitDepth = 0;
     display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;

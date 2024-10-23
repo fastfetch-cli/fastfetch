@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_SMBIOSVALUEHELPER
-#define FASTFETCH_INCLUDED_SMBIOSVALUEHELPER
-
 #include "util/FFstrbuf.h"
 
 bool ffIsSmbiosValueSet(FFstrbuf* value);
@@ -94,6 +91,4 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable();
 
 #ifdef __linux__
 bool ffGetSmbiosValue(const char* devicesPath, const char* classPath, FFstrbuf* buffer);
-#endif
-
 #endif

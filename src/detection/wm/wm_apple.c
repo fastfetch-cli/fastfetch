@@ -9,7 +9,7 @@
 const char* ffDetectWMPlugin(FFstrbuf* pluginName)
 {
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
-    u_int requestLength = sizeof(request) / sizeof(*request);
+    u_int requestLength = ARRAY_SIZE(request);
 
     size_t length = 0;
     FF_AUTO_FREE struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);

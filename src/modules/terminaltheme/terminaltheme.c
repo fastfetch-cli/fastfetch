@@ -32,8 +32,8 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
             char fg[32], bg[32];
             const char* fgType = result.fg.dark ? "Dark" : "Light";
             const char* bgType = result.bg.dark ? "Dark" : "Light";
-            snprintf(fg, sizeof(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
-            snprintf(bg, sizeof(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
+            snprintf(fg, ARRAY_SIZE(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
+            snprintf(bg, ARRAY_SIZE(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
             FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 FF_FORMAT_ARG(fg, "fg-color"),
                 FF_FORMAT_ARG(fgType, "fg-type"),

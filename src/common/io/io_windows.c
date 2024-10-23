@@ -3,6 +3,8 @@
 #include "util/stringUtils.h"
 
 #include <windows.h>
+#include <ntstatus.h>
+#include <winternl.h>
 
 static void createSubfolders(const char* fileName)
 {
@@ -38,7 +40,7 @@ bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data)
 
 static inline void readWithLength(HANDLE handle, FFstrbuf* buffer, uint32_t length)
 {
-    ffStrbufEnsureFixedLengthFree(buffer, length);
+    ffStrbufEnsureFree(buffer, length);
     DWORD bytesRead = 0;
     while(
         length > 0 &&
@@ -98,6 +100,49 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
         return false;
 
     return ffAppendFDBuffer(handle, buffer);
+}
+
+HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
+{
+    NTSTATUS ret;
+    UNICODE_STRING fileNameW;
+    ret = RtlAnsiStringToUnicodeString(&fileNameW, &(ANSI_STRING) {
+        .Length = (USHORT) strlen(fileName),
+        .Buffer = (PCHAR) fileName
+    }, TRUE);
+    if (!NT_SUCCESS(ret)) return INVALID_HANDLE_VALUE;
+
+    FF_AUTO_CLOSE_FD HANDLE hFile;
+    IO_STATUS_BLOCK iosb = {};
+    ret = NtOpenFile(&hFile, FILE_READ_DATA | SYNCHRONIZE, &(OBJECT_ATTRIBUTES) {
+        .Length = sizeof(OBJECT_ATTRIBUTES),
+        .RootDirectory = dfd,
+        .ObjectName = &fileNameW,
+    }, &iosb, FILE_SHARE_READ, FILE_SYNCHRONOUS_IO_NONALERT | (directory ? FILE_DIRECTORY_FILE : FILE_NON_DIRECTORY_FILE));
+    RtlFreeUnicodeString(&fileNameW);
+
+    if(!NT_SUCCESS(ret) || iosb.Information != FILE_OPENED)
+        return INVALID_HANDLE_VALUE;
+
+    return hFile;
+}
+
+bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
+{
+    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, false);
+    if(fd == INVALID_HANDLE_VALUE)
+        return false;
+
+    return ffAppendFDBuffer(fd, buffer);
+}
+
+ssize_t ffReadFileDataRelative(HANDLE dfd, const char* fileName, size_t dataSize, void* data)
+{
+    HANDLE FF_AUTO_CLOSE_FD fd = openat(dfd, fileName, false);
+    if(fd == INVALID_HANDLE_VALUE)
+        return -1;
+
+    return ffReadFDData(fd, dataSize, data);
 }
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)

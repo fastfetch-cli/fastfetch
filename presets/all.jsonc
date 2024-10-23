@@ -74,7 +74,8 @@
             "showSpeed": true,
             "showMtu": true,
             "showLoop": true,
-            "showFlags": true
+            "showFlags": true,
+            "showAllIps": true
         },
         "dns",
         "wifi",

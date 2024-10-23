@@ -6,7 +6,7 @@
 const char* ffDetectSwap(FFSwapResult* swap)
 {
     int mib[16];
-    size_t mibsize = sizeof(mib) / sizeof(*mib);
+    size_t mibsize = ARRAY_SIZE(mib);
     if (sysctlnametomib("vm.swap_info", mib, &mibsize) < 0)
         return "sysctlnametomib(\"vm.swap_info\") failed";
 

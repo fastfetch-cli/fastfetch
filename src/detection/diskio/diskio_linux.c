@@ -6,6 +6,71 @@
 #include <ctype.h>
 #include <limits.h>
 #include <inttypes.h>
+#include <fcntl.h>
+
+static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FFDiskIOOptions* options)
+{
+    FF_AUTO_CLOSE_FD int devfd = openat(dfd, "device", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+    if (devfd < 0) return; // virtual device
+
+    FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
+
+    {
+        if (ffAppendFileBufferRelative(devfd, "vendor", &name))
+        {
+            ffStrbufTrimRightSpace(&name);
+            if (name.length > 0)
+                ffStrbufAppendC(&name, ' ');
+        }
+
+        if (ffAppendFileBufferRelative(devfd, "model", &name))
+            ffStrbufTrimRightSpace(&name);
+
+        if (name.length == 0)
+            ffStrbufSetS(&name, devName);
+        else if (ffStrStartsWith(devName, "nvme"))
+        {
+            int devid, nsid;
+            if (sscanf(devName, "nvme%dn%d", &devid, &nsid) == 2)
+            {
+                bool multiNs = nsid > 1;
+                if (!multiNs)
+                {
+                    char pathSysBlock[16];
+                    snprintf(pathSysBlock, ARRAY_SIZE(pathSysBlock), "nvme%dn2", devid);
+                    multiNs = faccessat(devfd, pathSysBlock, F_OK, 0) == 0;
+                }
+                if (multiNs)
+                {
+                    // In Asahi Linux, there are multiple namespaces for the same NVMe drive.
+                    ffStrbufAppendF(&name, " - %d", nsid);
+                }
+            }
+        }
+
+        if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
+            return;
+    }
+
+    // I/Os merges sectors ticks ...
+    uint64_t nRead, sectorRead, nWritten, sectorWritten;
+    {
+        char sysBlockStat[PROC_FILE_BUFFSIZ];
+        ssize_t fileSize = ffReadFileDataRelative(dfd, "stat", ARRAY_SIZE(sysBlockStat) - 1, sysBlockStat);
+        if (fileSize <= 0) return;
+        sysBlockStat[fileSize] = '\0';
+        if (sscanf(sysBlockStat, "%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)
+            return;
+    }
+
+    FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
+    ffStrbufInitMove(&device->name, &name);
+    ffStrbufInitF(&device->devPath, "/dev/%s", devName);
+    device->bytesRead = sectorRead * 512;
+    device->bytesWritten = sectorWritten * 512;
+    device->readCount = nRead;
+    device->writeCount = nWritten;
+}
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 {
@@ -18,84 +83,10 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
     {
         const char* const devName = sysBlockEntry->d_name;
 
-        if (devName[0] == '.')
-            continue;
+        if (devName[0] == '.') continue;;
 
-        char pathSysBlock[PATH_MAX];
-        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s", devName);
-
-        char pathSysDeviceReal[PATH_MAX];
-        ssize_t pathLength = readlink(pathSysBlock, pathSysDeviceReal, sizeof(pathSysDeviceReal) - 1);
-        if (pathLength < 0)
-            continue;
-        pathSysDeviceReal[pathLength] = '\0';
-
-        if (strstr(pathSysDeviceReal, "/virtual/")) // virtual device
-            continue;
-
-        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device", devName);
-        if (!ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY))
-            continue;
-
-        FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
-
-        {
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/vendor", devName);
-            if (ffAppendFileBuffer(pathSysBlock, &name))
-            {
-                ffStrbufTrimRightSpace(&name);
-                if (name.length > 0)
-                    ffStrbufAppendC(&name, ' ');
-            }
-
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/model", devName);
-            ffAppendFileBuffer(pathSysBlock, &name);
-            ffStrbufTrimRightSpace(&name);
-
-            if (name.length == 0)
-                ffStrbufSetS(&name, devName);
-            else if (ffStrStartsWith(devName, "nvme"))
-            {
-                int devid, nsid;
-                if (sscanf(devName, "nvme%dn%d", &devid, &nsid) == 2)
-                {
-                    bool multiNs = nsid > 1;
-                    if (!multiNs)
-                    {
-                        snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/device/nvme%dn2", devName, devid);
-                        multiNs = ffPathExists(pathSysBlock, FF_PATHTYPE_DIRECTORY);
-                    }
-                    if (multiNs)
-                    {
-                        // In Asahi Linux, there are multiple namespaces for the same NVMe drive.
-                        ffStrbufAppendF(&name, " - %d", nsid);
-                    }
-                }
-            }
-
-            if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
-                continue;
-        }
-
-        // I/Os merges sectors ticks ...
-        uint64_t nRead, sectorRead, nWritten, sectorWritten;
-        {
-            char sysBlockStat[PROC_FILE_BUFFSIZ];
-            snprintf(pathSysBlock, PATH_MAX, "/sys/block/%s/stat", devName);
-            ssize_t fileSize = ffReadFileData(pathSysBlock, sizeof(sysBlockStat) - 1, sysBlockStat);
-            if (fileSize <= 0) continue;
-            sysBlockStat[fileSize] = '\0';
-            if (sscanf(sysBlockStat, "%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)
-                continue;
-        }
-
-        FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInitMove(&device->name, &name);
-        ffStrbufInitF(&device->devPath, "/dev/%s", devName);
-        device->bytesRead = sectorRead * 512;
-        device->bytesWritten = sectorWritten * 512;
-        device->readCount = nRead;
-        device->writeCount = nWritten;
+        FF_AUTO_CLOSE_FD int dfd = openat(dirfd(sysBlockDirp), devName, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+        if (dfd > 0) parseDiskIOCounters(dfd, devName, result, options);
     }
 
     return NULL;

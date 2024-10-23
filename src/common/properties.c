@@ -100,7 +100,7 @@ bool ffParsePropFileValues(const char* filename, uint32_t numQueries, FFpropquer
     bool valueStorage[32];
     bool* unsetValues = valueStorage;
 
-    if (numQueries > sizeof(valueStorage) / sizeof(valueStorage[0]))
+    if (numQueries > ARRAY_SIZE(valueStorage))
         unsetValues = malloc(sizeof(bool) * numQueries);
 
     bool allSet = true;

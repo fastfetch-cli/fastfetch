@@ -22,7 +22,7 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIO
         },
         sizeof(STORAGE_PROPERTY_QUERY),
         &sddBuffer,
-        sizeof(sddBuffer),
+        ARRAY_SIZE(sddBuffer),
         &retSize,
         NULL
     ) || retSize == 0)

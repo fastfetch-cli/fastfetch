@@ -122,6 +122,13 @@ static const char* detectWithSetupApi(FFBatteryOptions* options, FFlist* results
         }
 
         {
+            bqi.InformationLevel = BatteryEstimatedTime;
+            ULONG time;
+            if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_INFORMATION, &bqi, sizeof(bqi), &time, sizeof(time), &dwOut, NULL))
+                battery->timeRemaining = time == BATTERY_UNKNOWN_TIME ? -1 : (int32_t) time;
+        }
+
+        {
             BATTERY_STATUS bs;
             BATTERY_WAIT_STATUS bws = { .BatteryTag = bqi.BatteryTag };
             if(DeviceIoControl(hBattery, IOCTL_BATTERY_QUERY_STATUS, &bws, sizeof(bws), &bs, sizeof(bs), &dwOut, NULL) && bs.Capacity != BATTERY_UNKNOWN_CAPACITY)
@@ -241,6 +248,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         ffStrbufInit(&battery->serial);
         battery->temperature = FF_BATTERY_TEMP_UNSET;
         battery->cycleCount = 0;
+        battery->timeRemaining = info.EstimatedTime == BATTERY_UNKNOWN_TIME ? -1 : (int32_t) info.EstimatedTime;
 
         battery->capacity = info.RemainingCapacity * 100.0 / info.MaxCapacity;
         if(info.AcOnLine)
@@ -251,6 +259,7 @@ static const char* detectWithNtApi(FF_MAYBE_UNUSED FFBatteryOptions* options, FF
         }
         else if(info.Discharging)
             ffStrbufAppendS(&battery->status, "Discharging");
+
 
         detectBySmbios(battery);
 

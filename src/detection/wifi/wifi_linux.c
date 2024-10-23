@@ -190,7 +190,7 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
         return "socket() failed";
 
     struct iwreq iwr;
-    strncpy(iwr.ifr_name, item->inf.description.chars, IFNAMSIZ);
+    ffStrCopyN(iwr.ifr_name, item->inf.description.chars, IFNAMSIZ);
     ffStrbufEnsureFree(&item->conn.ssid, IW_ESSID_MAX_SIZE);
     iwr.u.essid.pointer = (caddr_t) item->conn.ssid.chars;
     iwr.u.essid.length = IW_ESSID_MAX_SIZE + 1;
@@ -274,7 +274,7 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
 
     for(struct if_nameindex* i = infs; !(i->if_index == 0 && i->if_name == NULL); ++i)
     {
-        ffStrbufSetF(&buffer, "/sys/class/net/%s/phy80211", i->if_name);
+        ffStrbufSetF(&buffer, "/sys/class/net/%s/phy80211/", i->if_name);
         if(!ffPathExists(buffer.chars, FF_PATHTYPE_DIRECTORY))
             continue;
 

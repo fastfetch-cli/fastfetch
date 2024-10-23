@@ -22,7 +22,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&drmDir, entry->d_name);
@@ -58,7 +58,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
         }
 
         uint8_t edidData[512];
-        ssize_t edidLength = ffReadFileData(drmDir.chars, sizeof(edidData), edidData);
+        ssize_t edidLength = ffReadFileData(drmDir.chars, ARRAY_SIZE(edidData), edidData);
         if(edidLength <= 0 || edidLength % 128 != 0)
         {
             edidLength = 0;
@@ -66,7 +66,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             ffStrbufAppendS(&drmDir, "/modes");
 
             char modes[32];
-            if (ffReadFileData(drmDir.chars, sizeof(modes), modes) >= 3)
+            if (ffReadFileData(drmDir.chars, ARRAY_SIZE(modes), modes) >= 3)
             {
                 sscanf(modes, "%ux%u", &width, &height);
                 ffStrbufAppendS(&name, plainName);
@@ -90,7 +90,8 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             false,
             0,
             physicalWidth,
-            physicalHeight
+            physicalHeight,
+            "sysfs-drm"
         );
         if (item && edidLength)
         {
@@ -184,7 +185,7 @@ FF_MAYBE_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&drmDir, entry->d_name);
@@ -193,7 +194,7 @@ FF_MAYBE_UNUSED static const char* drmGetEdidByConnId(uint32_t connId, uint8_t* 
         char connectorId[16] = {};
 
         ffStrbufAppendS(&drmDir, "/connector_id");
-        ffReadFileData(drmDir.chars, sizeof(connectorId), connectorId);
+        ffReadFileData(drmDir.chars, ARRAY_SIZE(connectorId), connectorId);
         if (strtoul(connectorId, NULL, 10) != connId)
         {
             ffStrbufSubstrBefore(&drmDir, drmDirLength);
@@ -228,7 +229,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
 
     drmDevice* devices[64];
-    int nDevices = ffdrmGetDevices(devices, sizeof(devices) / sizeof(devices[0]));
+    int nDevices = ffdrmGetDevices(devices, ARRAY_SIZE(devices));
     if (nDevices <= 0)
         return "drmGetDevices() failed";
 
@@ -390,7 +391,8 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     false,
                     conn->connector_id,
                     conn->mmWidth,
-                    conn->mmHeight
+                    conn->mmHeight,
+                    "libdrm"
                 );
 
                 if (item)

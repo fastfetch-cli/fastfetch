@@ -58,8 +58,8 @@ static void detectChoco(FF_MAYBE_UNUSED FFPackagesResult* result)
         return;
 
     char chocoPath[MAX_PATH + 3];
-    strcpy(chocoPath, chocoInstall);
-    strncat(chocoPath, "/lib/*", sizeof(chocoPath) - 1 - strlen(chocoPath));
+    char* pend = ffStrCopyN(chocoPath, chocoInstall, ARRAY_SIZE(chocoPath));
+    ffStrCopyN(pend, "/lib/*", ARRAY_SIZE(chocoPath) - (size_t) (pend - chocoPath));
     result->choco = getNumElements(chocoPath, FILE_ATTRIBUTE_DIRECTORY, "choco");
 }
 
@@ -71,8 +71,8 @@ static void detectPacman(FFPackagesResult* result)
 
     // MSYS2
     char pacmanPath[MAX_PATH + 3];
-    strcpy(pacmanPath, msystemPrefix);
-    strncat(pacmanPath, "/../var/lib/pacman/local/*", sizeof(pacmanPath) - 1 - strlen(pacmanPath));
+    char* pend = ffStrCopyN(pacmanPath, msystemPrefix, ARRAY_SIZE(pacmanPath));
+    ffStrCopyN(pend, "/../var/lib/pacman/local/*", ARRAY_SIZE(pacmanPath) - (size_t) (pend - pacmanPath));
     result->pacman = getNumElements(pacmanPath, FILE_ATTRIBUTE_DIRECTORY, NULL);
 }
 

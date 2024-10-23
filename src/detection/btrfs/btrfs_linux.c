@@ -1,16 +1,18 @@
 #include "btrfs.h"
 
 #include "common/io/io.h"
+#include <fcntl.h>
 
 enum { uuidLen = (uint32_t) __builtin_strlen("00000000-0000-0000-0000-000000000000") };
 
-static const char* enumerateDevices(FFBtrfsResult* item, FFstrbuf* path, FFstrbuf* buffer)
+static const char* enumerateDevices(FFBtrfsResult* item, int dfd, FFstrbuf* buffer)
 {
-    ffStrbufAppendS(path, "devices/");
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(path->chars);
+    int subfd = openat(dfd, "devices", O_RDONLY | O_CLOEXEC | O_DIRECTORY);
+    if (subfd < 0) return "openat(\"/sys/fs/btrfs/UUID/devices\") == -1";
+
+    FF_AUTO_CLOSE_DIR DIR* dirp = fdopendir(subfd);
     if(dirp == NULL)
-        return "opendir(\"/sys/fs/btrfs/UUID/devices\") == NULL";
-    const uint32_t devicesPathLen = path->length;
+        return "fdopendir(\"/sys/fs/btrfs/UUID/devices\") == NULL";
 
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL)
@@ -21,25 +23,25 @@ static const char* enumerateDevices(FFBtrfsResult* item, FFstrbuf* path, FFstrbu
         if (item->devices.length)
             ffStrbufAppendC(&item->devices, ',');
         ffStrbufAppendS(&item->devices, entry->d_name);
-        ffStrbufAppendS(path, entry->d_name);
-        ffStrbufAppendS(path, "/size");
 
-        if (ffReadFileBuffer(path->chars, buffer))
+        char path[ARRAY_SIZE(entry->d_name) + ARRAY_SIZE("/size") + 1];
+        snprintf(path, ARRAY_SIZE(path), "%s/size", entry->d_name);
+
+        if (ffReadFileBufferRelative(subfd, path, buffer))
             item->totalSize += ffStrbufToUInt(buffer, 0) * 512;
-
-        ffStrbufSubstrBefore(path, devicesPathLen);
     }
 
     return NULL;
 }
 
-static const char* enumerateFeatures(FFBtrfsResult* item, FFstrbuf* path)
+static const char* enumerateFeatures(FFBtrfsResult* item, int dfd)
 {
-    ffStrbufAppendS(path, "features/");
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(path->chars);
+    int subfd = openat(dfd, "features", O_RDONLY | O_CLOEXEC | O_DIRECTORY);
+    if (subfd < 0) return "openat(\"/sys/fs/btrfs/UUID/features\") == -1";
+
+    FF_AUTO_CLOSE_DIR DIR* dirp = fdopendir(subfd);
     if(dirp == NULL)
-        return "opendir(\"/sys/fs/btrfs/UUID/features\") == NULL";
-    const uint32_t featuresPathLen = path->length;
+        return "fdopendir(\"/sys/fs/btrfs/UUID/features\") == NULL";
 
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL)
@@ -49,45 +51,33 @@ static const char* enumerateFeatures(FFBtrfsResult* item, FFstrbuf* path)
         if (item->features.length)
             ffStrbufAppendC(&item->features, ',');
         ffStrbufAppendS(&item->features, entry->d_name);
-
-        ffStrbufSubstrBefore(path, featuresPathLen);
     }
 
     return NULL;
 }
 
-static const char* detectAllocation(FFBtrfsResult* item, FFstrbuf* path, FFstrbuf* buffer)
+static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buffer)
 {
-    ffStrbufAppendS(path, "allocation/");
-    const uint32_t AllocationPathLen = path->length;
+    FF_AUTO_CLOSE_FD int subfd = openat(dfd, "allocation", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+    if (subfd < 0) return "openat(\"/sys/fs/btrfs/UUID/allocation\") == -1";
 
-    ffStrbufAppendS(path, "global_rsv_size");
-    if (ffReadFileBuffer(path->chars, buffer))
+    if (ffReadFileBufferRelative(subfd, "global_rsv_size", buffer))
         item->globalReservationTotal = ffStrbufToUInt(buffer, 0);
     else
         return "ffReadFileBuffer(\"/sys/fs/btrfs/UUID/allocation/global_rsv_size\") == NULL";
-    ffStrbufSubstrBefore(path, AllocationPathLen);
 
-    ffStrbufAppendS(path, "global_rsv_reserved");
-    if (ffReadFileBuffer(path->chars, buffer))
+    if (ffReadFileBufferRelative(subfd, "global_rsv_reserved", buffer))
         item->globalReservationUsed = ffStrbufToUInt(buffer, 0);
-    ffStrbufSubstrBefore(path, AllocationPathLen);
     item->globalReservationUsed = item->globalReservationTotal - item->globalReservationUsed;
 
     #define FF_BTRFS_DETECT_TYPE(index, _type) \
-    ffStrbufAppendS(path, #_type "/total_bytes"); \
-    if (ffReadFileBuffer(path->chars, buffer)) \
+    if (ffReadFileBufferRelative(subfd, #_type "/total_bytes", buffer)) \
         item->allocation[index].total = ffStrbufToUInt(buffer, 0); \
-    ffStrbufSubstrBefore(path, AllocationPathLen); \
     \
-    ffStrbufAppendS(path, #_type "/bytes_used"); \
-    if (ffReadFileBuffer(path->chars, buffer)) \
+    if (ffReadFileBufferRelative(subfd, #_type "/bytes_used", buffer)) \
         item->allocation[index].used = ffStrbufToUInt(buffer, 0); \
-    ffStrbufSubstrBefore(path, AllocationPathLen); \
     \
-    ffStrbufAppendS(path, #_type "/dup"); \
-    item->allocation[index].dup = ffPathExists(path->chars, FF_PATHTYPE_DIRECTORY); \
-    ffStrbufSubstrBefore(path, AllocationPathLen); \
+    item->allocation[index].dup = faccessat(subfd, #_type "/dup/", F_OK, 0) == 0; \
     \
     item->allocation[index].type = #_type;
 
@@ -102,10 +92,7 @@ static const char* detectAllocation(FFBtrfsResult* item, FFstrbuf* path, FFstrbu
 
 const char* ffDetectBtrfs(FFlist* result)
 {
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateS("/sys/fs/btrfs/");
-    const uint32_t basePathLen = path.length;
-
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(path.chars);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/fs/btrfs/");
     if(dirp == NULL)
         return "opendir(\"/sys/fs/btrfs\") == NULL";
 
@@ -120,46 +107,33 @@ const char* ffDetectBtrfs(FFlist* result)
             continue;
 
         FFBtrfsResult* item = ffListAdd(result);
-        (*item) = (FFBtrfsResult){};
-        ffStrbufInitNS(&item->uuid, uuidLen, entry->d_name);
-        ffStrbufInit(&item->name);
-        ffStrbufInit(&item->devices);
-        ffStrbufInit(&item->features);
+        (*item) = (FFBtrfsResult){
+            .uuid = ffStrbufCreateNS(uuidLen, entry->d_name),
+            .name = ffStrbufCreate(),
+            .devices = ffStrbufCreate(),
+            .features = ffStrbufCreate(),
+        };
 
-        ffStrbufAppendNS(&path, uuidLen, entry->d_name);
-        ffStrbufAppendC(&path, '/');
-        const uint32_t itemPathLen = path.length;
+        FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+        if (dfd < 0) continue;
 
-        ffStrbufAppendS(&path, "label");
-        if (ffAppendFileBuffer(path.chars, &item->name))
+        if (ffAppendFileBufferRelative(dfd, "label", &item->name))
             ffStrbufTrimRightSpace(&item->name);
-        ffStrbufSubstrBefore(&path, itemPathLen);
 
-        enumerateDevices(item, &path, &buffer);
-        ffStrbufSubstrBefore(&path, itemPathLen);
+        enumerateDevices(item, dfd, &buffer);
 
-        enumerateFeatures(item, &path);
-        ffStrbufSubstrBefore(&path, itemPathLen);
+        enumerateFeatures(item, dfd);
 
-        ffStrbufAppendS(&path, "generation");
-        if (ffReadFileBuffer(path.chars, &buffer))
+        if (ffReadFileBufferRelative(dfd, "generation", &buffer))
             item->generation = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrBefore(&path, itemPathLen);
 
-        ffStrbufAppendS(&path, "nodesize");
-        if (ffReadFileBuffer(path.chars, &buffer))
+        if (ffReadFileBufferRelative(dfd, "nodesize", &buffer))
             item->nodeSize = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrBefore(&path, itemPathLen);
 
-        ffStrbufAppendS(&path, "sectorsize");
-        if (ffReadFileBuffer(path.chars, &buffer))
+        if (ffReadFileBufferRelative(dfd, "sectorsize", &buffer))
             item->sectorSize = (uint32_t) ffStrbufToUInt(&buffer, 0);
-        ffStrbufSubstrBefore(&path, itemPathLen);
 
-        detectAllocation(item, &path, &buffer);
-
-        // finally
-        ffStrbufSubstrBefore(&path, basePathLen);
+        detectAllocation(item, dfd, &buffer);
     }
 
     return NULL;

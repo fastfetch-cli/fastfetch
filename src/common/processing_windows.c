@@ -49,8 +49,11 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 {
     int timeout = instance.config.general.processingTimeout;
 
+    wchar_t pipeName[32];
+    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u", GetCurrentProcessId());
+
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = CreateNamedPipeW(
-        L"\\\\.\\pipe\\LOCAL\\",
+        pipeName,
         PIPE_ACCESS_INBOUND | FILE_FLAG_FIRST_PIPE_INSTANCE | (timeout < 0 ? 0 : FILE_FLAG_OVERLAPPED),
         0,
         1,
@@ -60,10 +63,10 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         NULL
     );
     if (hChildPipeRead == INVALID_HANDLE_VALUE)
-        return "CreateNamedPipeW(L\"\\\\.\\pipe\\LOCAL\\\") failed";
+        return "CreateNamedPipeW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
 
     HANDLE hChildPipeWrite = CreateFileW(
-        L"\\\\.\\pipe\\LOCAL\\",
+        pipeName,
         GENERIC_WRITE,
         0,
         &(SECURITY_ATTRIBUTES){
@@ -76,7 +79,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         NULL
     );
     if (hChildPipeWrite == INVALID_HANDLE_VALUE)
-        return "CreateFileW(L\"\\\\.\\pipe\\LOCAL\\\") failed";
+        return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
 
     PROCESS_INFORMATION piProcInfo = {0};
 

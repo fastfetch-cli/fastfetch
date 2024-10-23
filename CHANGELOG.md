@@ -1,3 +1,24 @@
+# 2.28.0
+
+Features:
+* Add new module `Mouse` and `Keyboard` which display connected mice and keyboards
+* Support remaining time detection (Battery)
+* Report if AC is connected (Battery, Linux)
+* Report platform API used for display detection for debugging (Display)
+* Report Wine version when running in Wine (Kernel, Windows)
+* Add option `waitTime` in modules `CPUUsage`, `DiskIO` and `NetIO`
+
+Bugfixes:
+* Fix used memory size detection (Memory, OpenBSD)
+* Don't report invalid fragmentation percentage when fails to detect it (Zpool)
+* Fix unexpected errors when running fastfetch in parallel (#1346, Windows)
+* Don't report obviously invalid temperature values (PhysicalDisk, Linux)
+
+Logos:
+* Add eweOS
+* Add MidOS
+* Update XeroArch
+
 # 2.27.1
 
 Bugfixes:
@@ -8,7 +29,7 @@ Bugfixes:
 Changes:
 * We now print `"` instead of `″` when displaying diagonal length in inches, so that the character can be correctly displayed in Linux console (Display)
 * All detection code of `monitor` module is merged into `display` module. Now `monitor` just prints the same information as `display` with different format. Notably:
-    * The resolution reported by `monitor` module is now current resolution instead of native / maximum resolution. PPI is calcuated based on current resolution too.
+    * The resolution reported by `monitor` module is now current resolution instead of native / maximum resolution. PPI is calculated based on current resolution too.
     * The refresh rate reported by `monitor` module is the current refresh rate.
 
 Features:
@@ -24,7 +45,7 @@ Bugfixes:
 * Remove trailing newline in GPU name for Raspberry pi (#1303, GPU, Linux)
 * Fix a possible buffer overflow (GPU, Linux)
 * Fix CPU temp incorrectly reported as 0 celsius (#1308, CPU, Linux)
-* Corrently report `TPM device is not found` error (#1314, TPM, Windows)
+* Correctly report `TPM device is not found` error (#1314, TPM, Windows)
 * Fix errors when triggering shell completion with python3 uninstalled (#1310)
     * To package managers: as shell completion scripts of fastfetch use python3, it should be added as an optional dependency of fastfetch
 * Fix possible crashes when detecting term font of kitty (#1321, TerminalFont, Linux)

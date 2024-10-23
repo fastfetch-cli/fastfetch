@@ -118,7 +118,8 @@ const char* ffdsConnectXcb(FFDisplayServerResult* result)
             false,
             0,
             (uint32_t) screen->width_in_millimeters,
-            (uint32_t) screen->height_in_millimeters
+            (uint32_t) screen->height_in_millimeters,
+            "xcb"
         );
         ffxcb_screen_next(&iterator);
     }
@@ -239,7 +240,8 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
         primary,
         0,
         (uint32_t) output->mm_width,
-        (uint32_t) output->mm_height
+        (uint32_t) output->mm_height,
+        "xcb-randr-crtc"
     );
     if (item && edidLength)
     {
@@ -327,7 +329,8 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         !!monitor->primary,
         0,
         (uint32_t) monitor->width_in_millimeters,
-        (uint32_t) monitor->height_in_millimeters
+        (uint32_t) monitor->height_in_millimeters,
+        "xcb-randr-monitor"
     );
 }
 
@@ -381,7 +384,8 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         false,
         0,
         (uint32_t) screen->width_in_millimeters,
-        (uint32_t) screen->height_in_millimeters
+        (uint32_t) screen->height_in_millimeters,
+        "xcb-randr-screen"
     );
 }
 

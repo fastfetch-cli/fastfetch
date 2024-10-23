@@ -1,5 +1,5 @@
 #include "packages.h"
 
-void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
+void ffDetectPackagesImpl(FF_MAYBE_UNUSED FFPackagesResult* result, FF_MAYBE_UNUSED FFPackagesOptions* options)
 {
 }

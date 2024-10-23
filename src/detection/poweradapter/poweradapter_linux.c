@@ -3,46 +3,37 @@
 #include "util/stringUtils.h"
 
 #include <dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
 
-static void parsePowerAdapter(FFstrbuf* dir, FF_MAYBE_UNUSED const char* id, FFlist* results)
+static void parsePowerAdapter(int dfd, FF_MAYBE_UNUSED const char* id, FFlist* results)
 {
-    uint32_t dirLength = dir->length;
-
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
 
     //type must exist and be "Mains"
-    ffStrbufAppendS(dir, "/type");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+    if (ffReadFileBufferRelative(dfd, "type", &tmpBuffer))
         ffStrbufTrimRightSpace(&tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
 
     if(!ffStrbufIgnCaseEqualS(&tmpBuffer, "Mains"))
         return;
 
     //scope may not exist or must not be "Device" (?)
-    ffStrbufAppendS(dir, "/scope");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+    if (ffReadFileBufferRelative(dfd, "scope", &tmpBuffer))
         ffStrbufTrimRightSpace(&tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseEqualS(&tmpBuffer, "Device"))
         return;
 
-    ffStrbufAppendS(dir, "/online");
-    char online = '1';
-    ffReadFileData(dir->chars, sizeof(online), &online);
-    ffStrbufSubstrBefore(dir, dirLength);
+    char online = '\0';
+    ffReadFileDataRelative(dfd, "online", sizeof(online), &online);
 
-    if (online == '0')
+    if (online != '1')
         return;
 
     //input_power_limit must exist and be not empty
-    ffStrbufAppendS(dir, "/input_power_limit");
-    bool available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if (!available)
+    if (!ffReadFileBufferRelative(dfd, "input_power_limit", &tmpBuffer))
         return;
+
     FFPowerAdapterResult* result = ffListAdd(results);
     ffStrbufInit(&result->name);
     ffStrbufInit(&result->description);
@@ -51,44 +42,32 @@ static void parsePowerAdapter(FFstrbuf* dir, FF_MAYBE_UNUSED const char* id, FFl
     ffStrbufInit(&result->modelName);
     ffStrbufInit(&result->serial);
 
-    ffStrbufAppendS(dir, "/manufacturer");
-    if (ffReadFileBuffer(dir->chars, &result->manufacturer))
+    if (ffReadFileBufferRelative(dfd, "manufacturer", &result->manufacturer))
         ffStrbufTrimRightSpace(&result->manufacturer);
     else if (ffStrEquals(id, "macsmc-ac")) // asahi
         ffStrbufSetStatic(&result->manufacturer, "Apple Inc.");
-    ffStrbufSubstrBefore(dir, dirLength);
 
-    ffStrbufAppendS(dir, "/model_name");
-    if (ffReadFileBuffer(dir->chars, &result->modelName))
+    if (ffReadFileBufferRelative(dfd, "model_name", &result->modelName))
         ffStrbufTrimRightSpace(&result->modelName);
-    ffStrbufSubstrBefore(dir, dirLength);
 
-    ffStrbufAppendS(dir, "/serial_number");
-    if (ffReadFileBuffer(dir->chars, &result->serial))
+    if (ffReadFileBufferRelative(dfd, "serial_number", &result->serial))
         ffStrbufTrimRightSpace(&result->serial);
-    ffStrbufSubstrBefore(dir, dirLength);
 }
 
 const char* ffDetectPowerAdapter(FFlist* results)
 {
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-    ffStrbufAppendS(&baseDir, "/sys/class/power_supply/");
-
-    uint32_t baseDirLength = baseDir.length;
-
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/power_supply/");
     if(dirp == NULL)
         return "opendir(\"/sys/class/power_supply/\") == NULL";
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
-        ffStrbufAppendS(&baseDir, entry->d_name);
-        parsePowerAdapter(&baseDir, entry->d_name, results);
-        ffStrbufSubstrBefore(&baseDir, baseDirLength);
+        FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC);
+        if (dfd > 0) parsePowerAdapter(dfd, entry->d_name, results);
     }
 
     return NULL;

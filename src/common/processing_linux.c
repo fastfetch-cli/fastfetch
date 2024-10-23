@@ -139,12 +139,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (exePath)
     {
         snprintf(filePath, sizeof(filePath), "/proc/%d/exe", (int)pid);
-        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        char buf[PATH_MAX];
+        ssize_t length = readlink(filePath, buf, PATH_MAX - 1);
         if (length > 0) // doesn't contain trailing NUL
         {
-            exePath->chars[length] = '\0';
-            exePath->length = (uint32_t) length;
+            buf[length] = '\0';
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
 
@@ -152,14 +153,14 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     size_t len = 0;
     int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
-    if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), NULL, &len, NULL, 0) == 0)
+    if (sysctl(mibs, ARRAY_SIZE(mibs), NULL, &len, NULL, 0) == 0)
     {// try get arg0
         #ifndef MAC_OS_X_VERSION_10_15
         //don't know why if don't let len longer, proArgs2 and len will change during the following sysctl() in old MacOS version.
         len++;
         #endif
         FF_AUTO_FREE char* const procArgs2 = malloc(len);
-        if (sysctl(mibs, sizeof(mibs) / sizeof(*mibs), procArgs2, &len, NULL, 0) == 0)
+        if (sysctl(mibs, ARRAY_SIZE(mibs), procArgs2, &len, NULL, 0) == 0)
         {
             // https://gist.github.com/nonowarn/770696#file-getargv-c-L46
             uint32_t argc = *(uint32_t*) procArgs2;
@@ -242,7 +243,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     #elif defined(__sun)
 
-    char filePath[PATH_MAX];
+    char filePath[128];
     snprintf(filePath, sizeof(filePath), "/proc/%d/psinfo", (int) pid);
     psinfo_t proc;
     if (ffReadFileData(filePath, sizeof(proc), &proc) == sizeof(proc))
@@ -254,12 +255,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (exePath)
     {
         snprintf(filePath, sizeof(filePath), "/proc/%d/path/a.out", (int) pid);
-        ffStrbufEnsureFixedLengthFree(exePath, PATH_MAX);
-        ssize_t length = readlink(filePath, exePath->chars, exePath->allocated - 1);
+        char buf[PATH_MAX];
+        ssize_t length = readlink(filePath, buf, PATH_MAX - 1);
         if (length > 0) // doesn't contain trailing NUL
         {
-            exePath->chars[length] = '\0';
-            exePath->length = (uint32_t) length;
+            buf[length] = '\0';
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
 

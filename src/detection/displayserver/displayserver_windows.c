@@ -36,9 +36,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
     EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM) &monitors);
 
     DISPLAYCONFIG_PATH_INFO paths[128];
-    uint32_t pathCount = sizeof(paths) / sizeof(paths[0]);
+    uint32_t pathCount = ARRAY_SIZE(paths);
     DISPLAYCONFIG_MODE_INFO modes[256];
-    uint32_t modeCount = sizeof(modes) / sizeof(modes[0]);
+    uint32_t modeCount = ARRAY_SIZE(modes);
 
     if (QueryDisplayConfig(
         QDC_ONLY_ACTIVE_PATHS,
@@ -66,7 +66,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             {
                 FF_LIST_FOR_EACH(FFMonitorInfo, item, monitors)
                 {
-                    if (wcsncmp(item->info.szDevice, sourceName.viewGdiDeviceName, sizeof(sourceName.viewGdiDeviceName) / sizeof(wchar_t)) == 0)
+                    if (wcsncmp(item->info.szDevice, sourceName.viewGdiDeviceName, ARRAY_SIZE(sourceName.viewGdiDeviceName)) == 0)
                     {
                         monitorInfo = item;
                         break;
@@ -102,11 +102,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
                         *pRegPath = *pDevPath;
                     ++pRegPath;
                     ++pDevPath;
-                    assert(pRegPath < regPath + sizeof(regPath) / sizeof(wchar_t) + strlen("Device Parameters"));
+                    assert(pRegPath < regPath + ARRAY_SIZE(regPath) + strlen("Device Parameters"));
                 }
                 wcscpy(pRegPath, L"Device Parameters");
 
-                edidLength = sizeof(edidData);
+                edidLength = ARRAY_SIZE(edidData);
                 if (RegGetValueW(HKEY_LOCAL_MACHINE, regPath, L"EDID", RRF_RT_REG_BINARY, NULL, edidData, &edidLength) == ERROR_SUCCESS &&
                     edidLength > 0 && edidLength % 128 == 0)
                 {
@@ -165,7 +165,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 !!(monitorInfo->info.dwFlags & MONITORINFOF_PRIMARY),
                 (uint64_t)(uintptr_t) monitorInfo->handle,
                 physicalWidth,
-                physicalHeight
+                physicalHeight,
+                "GDI"
             );
 
             if (display)

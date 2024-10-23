@@ -13,6 +13,8 @@
     #include <unistd.h>
     #include <dirent.h>
     #include <sys/stat.h>
+    #include <errno.h>
+    #include <limits.h>
     typedef int FFNativeFD;
     #define FF_INVALID_FD (-1)
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
@@ -66,14 +68,22 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
 }
 
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
+ssize_t ffReadFileDataRelative(FFNativeFD dfd, const char* fileName, size_t dataSize, void* data);
 
 bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
+bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
 
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
     return ffAppendFileBuffer(fileName, buffer);
+}
+
+static inline bool ffReadFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer)
+{
+    ffStrbufClear(buffer);
+    return ffAppendFileBufferRelative(dfd, fileName, buffer);
 }
 
 //Bit flags, combine with |
@@ -108,17 +118,22 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
     }
     else
     {
-        struct stat fileStat;
-        if(stat(path, &fileStat) != 0)
-            return false;
+        size_t len = strlen(path);
+        assert(len < PATH_MAX);
+        if (len == 0) return false;
 
-        unsigned int mode = fileStat.st_mode & S_IFMT;
-
-        if(pathType & FF_PATHTYPE_FILE && mode != S_IFDIR)
-            return true;
-
-        if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
-            return true;
+        int ret;
+        if (path[len - 1] != '/')
+        {
+            char buf[PATH_MAX + 1];
+            memcpy(buf, path, len);
+            buf[len] = '/';
+            buf[len + 1] = 0;
+            ret = access(buf, F_OK);
+        }
+        else
+            ret = access(path, F_OK);
+        return pathType == FF_PATHTYPE_DIRECTORY ? ret == 0 : ret == -1 && errno == ENOTDIR;
     }
 
     #endif
@@ -211,3 +226,8 @@ static inline bool ffSearchUserConfigFile(const FFlist* configDirs, const char* 
 
     return false;
 }
+
+#ifdef _WIN32
+// Only O_RDONLY is supported
+HANDLE openat(HANDLE dfd, const char* fileName, bool directory);
+#endif

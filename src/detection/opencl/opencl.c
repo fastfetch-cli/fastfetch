@@ -15,8 +15,10 @@
 #define CL_TARGET_OPENCL_VERSION 110
 #ifndef __APPLE__
     #include <CL/cl.h>
+    #include <CL/cl_ext.h>
 #else
     #include <OpenCL/cl.h>
+    #include <OpenCL/cl_ext.h>
 #endif
 
 typedef struct OpenCLData
@@ -31,8 +33,23 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
 {
     cl_platform_id platforms[32];
     cl_uint numPlatforms = 0;
-    if (data->ffclGetPlatformIDs(sizeof(platforms) / sizeof(platforms[0]), platforms, &numPlatforms) != CL_SUCCESS)
-        return "clGetPlatformIDs() failed";
+    cl_int ret = data->ffclGetPlatformIDs(ARRAY_SIZE(platforms), platforms, &numPlatforms);
+    if (ret != CL_SUCCESS)
+    {
+        switch (ret)
+        {
+            #ifdef CL_PLATFORM_NOT_FOUND_KHR // not available on macOS
+            case CL_PLATFORM_NOT_FOUND_KHR:
+                return "clGetPlatformIDs() failed: CL_PLATFORM_NOT_FOUND_KHR";
+            #endif
+            case CL_INVALID_VALUE:
+                return "clGetPlatformIDs() failed: CL_INVALID_VALUE";
+            case CL_OUT_OF_HOST_MEMORY:
+                return "clGetPlatformIDs() failed: CL_OUT_OF_HOST_MEMORY";
+            default:
+                return "clGetPlatformIDs() failed: unknown error";
+        }
+    }
 
     if (numPlatforms == 0)
         return "clGetPlatformIDs returned 0 platforms";
@@ -60,7 +77,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
         }
 
         cl_device_id deviceIDs[32];
-        cl_uint numDevices = (cl_uint) (sizeof(deviceIDs) / sizeof(deviceIDs[0]));
+        cl_uint numDevices = (cl_uint) ARRAY_SIZE(deviceIDs);
         if (data->ffclGetDeviceIDs(platforms[iplat], CL_DEVICE_TYPE_GPU, numDevices, deviceIDs, &numDevices) != CL_SUCCESS)
             continue;
 

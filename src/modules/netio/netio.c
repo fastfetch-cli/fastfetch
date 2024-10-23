@@ -129,6 +129,12 @@ bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const 
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "wait-time"))
+    {
+        options->waitTime = ffOptionParseUInt32(key, value);
+        return true;
+    }
+
     return false;
 }
 
@@ -160,6 +166,12 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "detectTotal"))
         {
             options->detectTotal = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "waitTime"))
+        {
+            options->waitTime = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
@@ -259,6 +271,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
         #endif
     ;
     options->detectTotal = false;
+    options->waitTime = 1000;
 }
 
 void ffDestroyNetIOOptions(FFNetIOOptions* options)

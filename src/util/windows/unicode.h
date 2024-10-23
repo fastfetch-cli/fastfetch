@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_UNICODE_H
-#define FASTFETCH_INCLUDED_UNICODE_H
-
 #include "util/FFstrbuf.h"
 #include <wchar.h>
 
@@ -34,5 +31,3 @@ static inline FFstrbuf ffStrbufCreateWS(const wchar_t* source)
     if (!source) return ffStrbufCreate();
     return ffStrbufCreateNWS((uint32_t)wcslen(source), source);
 }
-
-#endif

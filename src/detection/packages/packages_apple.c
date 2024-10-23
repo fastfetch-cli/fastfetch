@@ -66,7 +66,7 @@ static uint32_t getMacPortsPackages()
     return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT "/opt/local");
 }
 
-static uint32_t getNixPackagesImpl(char* path)
+static uint32_t getNixPackagesImpl(const char* path)
 {
     //Nix detection is kinda slow, so we only do it if the dir exists
     if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
@@ -87,7 +87,7 @@ static uint32_t getNixPackagesImpl(char* path)
         NULL
     });
 
-    return (uint32_t) strtol(output.chars, NULL, 10);
+    return (uint32_t) strtoul(output.chars, NULL, 10);
 }
 
 static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)

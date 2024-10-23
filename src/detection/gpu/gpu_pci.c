@@ -55,7 +55,7 @@ static void parsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t 
         char buffer[32];
 
         // Search for vendor
-        uint32_t len = (uint32_t) snprintf(buffer, sizeof(buffer), "\n%04x  ", vendor);
+        uint32_t len = (uint32_t) snprintf(buffer, ARRAY_SIZE(buffer), "\n%04x  ", vendor);
         char* start = (char*) memmem(content->chars, content->length, buffer, len);
         char* end = content->chars + content->length;
         if (start)
@@ -83,7 +83,7 @@ static void parsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t 
             }
 
             // Search for device
-            len = (uint32_t) snprintf(buffer, sizeof(buffer), "\n\t%04x  ", device);
+            len = (uint32_t) snprintf(buffer, ARRAY_SIZE(buffer), "\n\t%04x  ", device);
             start = memmem(start, (size_t) (end - start), buffer, len);
             if (start)
             {
@@ -138,7 +138,7 @@ static bool loadPciidsInc(uint8_t subclass, uint16_t vendor, uint16_t device, FF
         if (!gpu->vendor.length)
             ffStrbufSetS(&gpu->vendor, pvendor->name);
 
-        const FFPciDevice* pdevice = (const FFPciDevice*) bsearch(&device, pvendor->devices, pvendor->nDevices, sizeof(FFPciDevice), (void*) pciDeviceCmp);
+        const FFPciDevice* pdevice = (const FFPciDevice*) bsearch(&device, pvendor->devices, pvendor->nDevices, sizeof(*pdevice), (void*) pciDeviceCmp);
 
         if (pdevice)
         {

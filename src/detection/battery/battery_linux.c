@@ -3,39 +3,45 @@
 #include "util/stringUtils.h"
 
 #include <dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 // https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-power
 
-static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* options, FFlist* results)
+static bool checkAc(const char* id, FFstrbuf* tmpBuffer)
 {
-    uint32_t dirLength = dir->length;
+    if (ffStrStartsWith(id, "BAT"))
+        ffStrbufSetS(tmpBuffer, "/sys/class/power_supply/ADP1/online");
+    else if (ffStrStartsWith(id, "macsmc-battery"))
+        ffStrbufSetS(tmpBuffer, "/sys/class/power_supply/macsmc-ac/online");
+    else
+        ffStrbufClear(tmpBuffer);
 
+    char online = '\0';
+    return ffReadFileData(tmpBuffer->chars, 1, &online) == 1 && online == '1';
+}
+
+static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFlist* results)
+{
     FF_STRBUF_AUTO_DESTROY tmpBuffer = ffStrbufCreate();
 
-    //type must exist and be "Battery"
-    ffStrbufAppendS(dir, "/type");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
-        ffStrbufTrimRightSpace(&tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-
+    // type must exist and be "Battery"
+    if (!ffReadFileBufferRelative(dfd, "type", &tmpBuffer))
+        return;
+    ffStrbufTrimRightSpace(&tmpBuffer);
     if(!ffStrbufIgnCaseEqualS(&tmpBuffer, "Battery"))
         return;
 
-    //scope may not exist or must not be "Device"
-    ffStrbufAppendS(dir, "/scope");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+    // scope may not exist or must not be "Device"
+    if (ffReadFileBufferRelative(dfd, "scope", &tmpBuffer))
         ffStrbufTrimRightSpace(&tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
 
     if(ffStrbufIgnCaseEqualS(&tmpBuffer, "Device"))
         return;
 
-    //capacity must exist and be not empty
-    ffStrbufAppendS(dir, "/capacity");
-    bool available = ffReadFileBuffer(dir->chars, &tmpBuffer); // This is expensive in my laptop
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    if (!available)
+    // capacity must exist and be not empty
+    // This is expensive in my laptop
+    if (!ffReadFileBufferRelative(dfd, "capacity", &tmpBuffer))
         return;
 
     FFBatteryResult* result = ffListAdd(results);
@@ -44,39 +50,63 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     //At this point, we have a battery. Try to get as much values as possible.
 
     ffStrbufInit(&result->manufacturer);
-    ffStrbufAppendS(dir, "/manufacturer");
-    if (ffReadFileBuffer(dir->chars, &result->manufacturer))
+    if (ffReadFileBufferRelative(dfd, "manufacturer", &result->manufacturer))
         ffStrbufTrimRightSpace(&result->manufacturer);
     else if (ffStrEquals(id, "macsmc-battery")) // asahi
         ffStrbufSetStatic(&result->manufacturer, "Apple Inc.");
-    ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->modelName);
-    ffStrbufAppendS(dir, "/model_name");
-    if (ffReadFileBuffer(dir->chars, &result->modelName))
+    if (ffReadFileBufferRelative(dfd, "model_name", &result->modelName))
         ffStrbufTrimRightSpace(&result->modelName);
-    ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->technology);
-    ffStrbufAppendS(dir, "/technology");
-    if (ffReadFileBuffer(dir->chars, &result->technology))
+    if (ffReadFileBufferRelative(dfd, "technology", &result->technology))
         ffStrbufTrimRightSpace(&result->technology);
-    ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->status);
-    ffStrbufAppendS(dir, "/status");
-    if (ffReadFileBuffer(dir->chars, &result->status))
+    if (ffReadFileBufferRelative(dfd, "status", &result->status))
         ffStrbufTrimRightSpace(&result->status);
-    ffStrbufSubstrBefore(dir, dirLength);
 
     // Unknown, Charging, Discharging, Not charging, Full
-    if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full"))
-        ffStrbufSetStatic(&result->status, "AC Connected");
-    else if (ffStrbufEqualS(&result->status, "Unknown"))
-        ffStrbufClear(&result->status);
 
-    ffStrbufAppendS(dir, "/capacity_level");
-    if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+    result->timeRemaining = -1;
+    if (ffStrbufEqualS(&result->status, "Discharging"))
+    {
+        if (ffReadFileBufferRelative(dfd, "time_to_empty_now", &tmpBuffer))
+            result->timeRemaining = (int32_t) ffStrbufToSInt(&tmpBuffer, 0);
+        else
+        {
+            if (ffReadFileBufferRelative(dfd, "charge_now", &tmpBuffer))
+            {
+                int64_t chargeNow = ffStrbufToSInt(&tmpBuffer, 0);
+                if (chargeNow > 0)
+                {
+                    if (ffReadFileBufferRelative(dfd, "current_now", &tmpBuffer))
+                    {
+                        int64_t currentNow = ffStrbufToSInt(&tmpBuffer, INT64_MIN);
+                        if (currentNow < 0) currentNow = -currentNow;
+                        if (currentNow > 0)
+                            result->timeRemaining = (int32_t) ((chargeNow * 3600) / currentNow);
+                    }
+                }
+            }
+        }
+
+        if (checkAc(id, &tmpBuffer))
+            ffStrbufAppendS(&result->status, ", AC Connected");
+    }
+    else if (ffStrbufEqualS(&result->status, "Not charging") || ffStrbufEqualS(&result->status, "Full"))
+        ffStrbufSetStatic(&result->status, "AC Connected");
+    else if (ffStrbufEqualS(&result->status, "Charging"))
+        ffStrbufAppendS(&result->status, ", AC Connected");
+    else if (ffStrbufEqualS(&result->status, "Unknown"))
+    {
+        ffStrbufClear(&result->status);
+        if (checkAc(id, &tmpBuffer))
+            ffStrbufAppendS(&result->status, "AC Connected");
+    }
+
+    if (ffReadFileBufferRelative(dfd, "capacity_level", &tmpBuffer))
     {
         ffStrbufTrimRightSpace(&result->manufacturer);
         if (ffStrbufEqualS(&tmpBuffer, "Critical"))
@@ -87,50 +117,33 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
                 ffStrbufSetStatic(&result->status, "Critical");
         }
     }
-    ffStrbufSubstrBefore(dir, dirLength);
 
     ffStrbufInit(&result->serial);
-    ffStrbufAppendS(dir, "/serial_number");
-    if (ffReadFileBuffer(dir->chars, &result->serial))
+    if (ffReadFileBufferRelative(dfd, "serial_number", &result->serial))
         ffStrbufTrimRightSpace(&result->serial);
-    ffStrbufSubstrBefore(dir, dirLength);
 
-    ffStrbufAppendS(dir, "/cycle_count");
-    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-    if (available)
+    if (ffReadFileBufferRelative(dfd, "cycle_count", &tmpBuffer))
     {
         int64_t cycleCount = ffStrbufToSInt(&tmpBuffer, 0);
         result->cycleCount = cycleCount < 0 || cycleCount > UINT32_MAX ? 0 : (uint32_t) cycleCount;
     }
 
     ffStrbufInit(&result->manufactureDate);
-    ffStrbufAppendS(dir, "/manufacture_year");
-    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-    ffStrbufSubstrBefore(dir, dirLength);
-    if (available)
+    if (ffReadFileBufferRelative(dfd, "manufacture_year", &tmpBuffer))
     {
         int year = (int) ffStrbufToSInt(&tmpBuffer, 0);
         if (year > 0)
         {
-            ffStrbufAppendS(dir, "/manufacture_month");
-            available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-            ffStrbufSubstrBefore(dir, dirLength);
-            if (available)
+            if (ffReadFileBufferRelative(dfd, "manufacture_month", &tmpBuffer))
             {
                 int month = (int) ffStrbufToSInt(&tmpBuffer, 0);
                 if (month > 0)
                 {
-                    ffStrbufAppendS(dir, "/manufacture_day");
-                    available = ffReadFileBuffer(dir->chars, &tmpBuffer);
-                    ffStrbufSubstrBefore(dir, dirLength);
-                    if (available)
+                    if (ffReadFileBufferRelative(dfd, "manufacture_day", &tmpBuffer))
                     {
                         int day = (int) ffStrbufToSInt(&tmpBuffer, 0);
                         if (day > 0)
-                        {
                             ffStrbufSetF(&result->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
-                        }
                     }
                 }
             }
@@ -140,33 +153,25 @@ static void parseBattery(FFstrbuf* dir, const char* id, FFBatteryOptions* option
     result->temperature = FF_BATTERY_TEMP_UNSET;
     if (options->temp)
     {
-        ffStrbufAppendS(dir, "/temp");
-        if (ffReadFileBuffer(dir->chars, &tmpBuffer))
+        if (ffReadFileBufferRelative(dfd, "temp", &tmpBuffer))
             result->temperature = ffStrbufToDouble(&tmpBuffer) / 10;
-        ffStrbufSubstrBefore(dir, dirLength);
     }
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
 {
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-    ffStrbufAppendS(&baseDir, "/sys/class/power_supply/");
-
-    uint32_t baseDirLength = baseDir.length;
-
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/power_supply/");
     if(dirp == NULL)
         return "opendir(\"/sys/class/power_supply/\") == NULL";
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
-        ffStrbufAppendS(&baseDir, entry->d_name);
-        parseBattery(&baseDir, entry->d_name, options, results);
-        ffStrbufSubstrBefore(&baseDir, baseDirLength);
+        FF_AUTO_CLOSE_FD int dfd = openat(dirfd(dirp), entry->d_name, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
+        if (dfd > 0) parseBattery(dfd, entry->d_name, options, results);
     }
 
     return NULL;

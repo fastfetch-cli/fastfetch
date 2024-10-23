@@ -1,5 +1,6 @@
 #include "FFPlatform_private.h"
 #include "common/io/io.h"
+#include "common/library.h"
 #include "util/stringUtils.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
@@ -138,7 +139,7 @@ static void getUserName(FFPlatform* platform)
     else
     {
         wchar_t buffer[128];
-        DWORD len = sizeof(buffer) / sizeof(*buffer);
+        DWORD len = ARRAY_SIZE(buffer);
         if(GetUserNameW(buffer, &len))
             ffStrbufSetWS(&platform->userName, buffer);
     }
@@ -147,7 +148,7 @@ static void getUserName(FFPlatform* platform)
 static void getHostName(FFPlatform* platform)
 {
     wchar_t buffer[128];
-    DWORD len = sizeof(buffer) / sizeof(*buffer);
+    DWORD len = ARRAY_SIZE(buffer);
     if(GetComputerNameExW(ComputerNameDnsHostname, buffer, &len))
         ffStrbufSetWS(&platform->hostName, buffer);
 }
@@ -157,6 +158,17 @@ static void getUserShell(FFPlatform* platform)
     // Works in MSYS2
     ffStrbufAppendS(&platform->userShell, getenv("SHELL"));
     ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
+}
+
+static void detectWine(FFstrbuf* buf)
+{
+    static const char *(__cdecl *pwine_get_version)(void);
+    HMODULE hntdll = GetModuleHandleW(L"ntdll.dll");
+    if (!hntdll) return;
+    pwine_get_version = (void *)GetProcAddress(hntdll, "wine_get_version");
+    if (!pwine_get_version) return;
+    ffStrbufAppendS(buf, buf->length ? " - wine " : "wine ");
+    ffStrbufAppendS(buf, pwine_get_version());
 }
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
@@ -187,6 +199,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
         else
             ffRegReadStrbuf(hKey, L"ReleaseId", &info->displayVersion, NULL); // For old Windows 10
     }
+    detectWine(&info->displayVersion);
 
     ffRegReadStrbuf(hKey, L"BuildLabEx", &info->version, NULL);
 

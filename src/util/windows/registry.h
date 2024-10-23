@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_REGISTER_H
-#define FASTFETCH_INCLUDED_REGISTER_H
-
 #include "fastfetch.h"
 
 #include <windows.h>
@@ -22,5 +19,3 @@ bool ffRegReadUint(HKEY hKey, const wchar_t* valueNameW, uint32_t* result, FFstr
 bool ffRegReadUint64(HKEY hKey, const wchar_t* valueNameW, uint64_t* result, FFstrbuf* error);
 bool ffRegGetSubKey(HKEY hKey, uint32_t index, FFstrbuf* result, FFstrbuf* error);
 bool ffRegGetNSubKeys(HKEY hKey, uint32_t* result, FFstrbuf* error);
-
-#endif

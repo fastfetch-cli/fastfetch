@@ -25,7 +25,7 @@ static const char* detectWithBacklight(FFlist* result)
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
     {
-        if(ffStrEquals(entry->d_name, ".") || ffStrEquals(entry->d_name, ".."))
+        if(entry->d_name[0] == '.')
             continue;
 
         ffStrbufAppendS(&backlightDir, entry->d_name);
@@ -48,7 +48,7 @@ static const char* detectWithBacklight(FFlist* result)
                     // if we managed to get edid, use it
                     ffStrbufAppendS(&brightness->name, "/edid");
                     uint8_t edidData[128];
-                    if(ffReadFileData(brightness->name.chars, sizeof(edidData), edidData) == sizeof(edidData))
+                    if(ffReadFileData(brightness->name.chars, ARRAY_SIZE(edidData), edidData) == ARRAY_SIZE(edidData))
                     {
                         ffStrbufClear(&brightness->name);
                         ffEdidGetName(edidData, &brightness->name);

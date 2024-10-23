@@ -47,7 +47,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
             continue;
 
         char name[128];
-        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, sizeof(name), NULL, NULL);
+        WideCharToMultiByte(CP_UTF8, 0, adapter->FriendlyName, -1, name, ARRAY_SIZE(name), NULL, NULL);
         if (options->namePrefix.length && strncmp(name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 

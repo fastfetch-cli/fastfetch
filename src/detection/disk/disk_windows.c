@@ -22,9 +22,9 @@ static unsigned __stdcall testRemoteVolumeAccessible(void* mountpoint)
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
     wchar_t buf[MAX_PATH + 1];
-    uint32_t length = GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf);
-    if (length == 0 || length >= sizeof(buf) / sizeof(*buf))
-        return "GetLogicalDriveStringsW(sizeof(buf) / sizeof(*buf), buf) failed";
+    uint32_t length = GetLogicalDriveStringsW(ARRAY_SIZE(buf), buf);
+    if (length == 0 || length >= ARRAY_SIZE(buf))
+        return "GetLogicalDriveStringsW(ARRAY_SIZE(buf), buf) failed";
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
@@ -32,7 +32,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     if (__builtin_expect(options->folders.length == 1 && options->folders.chars[0] == '/', 0))
     {
         wchar_t path[MAX_PATH + 1];
-        GetSystemWindowsDirectoryW(path, sizeof(path) / sizeof(*path));
+        GetSystemWindowsDirectoryW(path, ARRAY_SIZE(path));
         ffStrbufSetF(&options->folders, "%c:\\", (char) path[0]);
     }
 
@@ -76,7 +76,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         {
             wchar_t volumeName[MAX_PATH + 1];
             mountpoint[2] = L'\0';
-            if(QueryDosDeviceW(mountpoint, volumeName, sizeof(volumeName) / sizeof(*volumeName)))
+            if(QueryDosDeviceW(mountpoint, volumeName, ARRAY_SIZE(volumeName)))
                 ffStrbufSetWS(&disk->mountFrom, volumeName);
             mountpoint[2] = L'\\';
         }
@@ -104,11 +104,11 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         DWORD diskFlags;
         BOOL result = GetVolumeInformationW(mountpoint,
-            diskName, sizeof(diskName) / sizeof(*diskName), //Volume name
+            diskName, ARRAY_SIZE(diskName), //Volume name
             NULL, //Serial number
             NULL, //Max component length
             &diskFlags, //File system flags
-            diskFileSystem, sizeof(diskFileSystem) / sizeof(*diskFileSystem)
+            diskFileSystem, ARRAY_SIZE(diskFileSystem)
         );
         SetErrorMode(errorMode);
 

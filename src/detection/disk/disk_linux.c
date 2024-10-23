@@ -149,7 +149,7 @@ static void detectName(FFDisk* disk)
 
 #ifdef __ANDROID__
 
-static void detectType(FF_MAYBE_UNUSED const FFlist* disks, FFDisk* currentDisk)
+static void detectType(FF_MAYBE_UNUSED const FFlist* disks, FFDisk* currentDisk, FF_MAYBE_UNUSED struct mntent* device)
 {
     if(ffStrbufEqualS(&currentDisk->mountpoint, "/") || ffStrbufEqualS(&currentDisk->mountpoint, "/storage/emulated"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
@@ -204,7 +204,7 @@ static bool isRemovable(FFDisk* currentDisk)
         return false;
 
     char sysBlockPartition[64];
-    snprintf(sysBlockPartition, sizeof(sysBlockPartition), "/sys/class/block/%s", currentDisk->mountFrom.chars + strlen("/dev/"));
+    snprintf(sysBlockPartition, ARRAY_SIZE(sysBlockPartition), "/sys/class/block/%s", currentDisk->mountFrom.chars + strlen("/dev/"));
 
     char sysBlockVolume[PATH_MAX]; // /sys/devices/pci0000:00/0000:00:14.0/usb4/4-3/4-3:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
     if (realpath(sysBlockPartition, sysBlockVolume) == NULL)
@@ -215,7 +215,7 @@ static bool isRemovable(FFDisk* currentDisk)
     return ffReadFileData(sysBlockVolume, 1, &removableChar) > 0 && removableChar == '1';
 }
 
-static void detectType(const FFlist* disks, FFDisk* currentDisk)
+static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mntent* device)
 {
     if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
@@ -225,6 +225,8 @@ static void detectType(const FFlist* disks, FFDisk* currentDisk)
         currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+    if (hasmntopt(device, MNTOPT_RO))
+        currentDisk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 }
 
 #endif
@@ -233,7 +235,7 @@ static void detectStats(FFDisk* disk)
 {
     struct statvfs fs;
     if(statvfs(disk->mountpoint.chars, &fs) != 0)
-        memset(&fs, 0, sizeof(struct statvfs)); //Set all values to 0, so our values get initialized to 0 too
+        memset(&fs, 0, sizeof(fs)); //Set all values to 0, so our values get initialized to 0 too
 
     disk->bytesTotal = fs.f_blocks * fs.f_frsize;
     disk->bytesFree = fs.f_bfree * fs.f_frsize;
@@ -251,14 +253,16 @@ static void detectStats(FFDisk* disk)
         disk->filesTotal = disk->filesUsed = 0;
     }
 
-    if(fs.f_flag & ST_RDONLY)
-        disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
-
     disk->createTime = 0;
     #ifdef FF_HAVE_STATX
     struct statx stx;
     if (statx(0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME))
         disk->createTime = (uint64_t)((stx.stx_btime.tv_sec * 1000) + (stx.stx_btime.tv_nsec / 1000000));
+    #endif
+
+    #ifdef __ANDROID__ // hasmntopt requires a higher Android API level
+    if(fs.f_flag & ST_RDONLY)
+        disk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
     #endif
 }
 
@@ -298,7 +302,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         detectName(disk); // Also detects external devices
 
         //detect type
-        detectType(disks, disk);
+        detectType(disks, disk, device);
 
         //Detects stats
         detectStats(disk);

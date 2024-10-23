@@ -266,10 +266,13 @@ static void listAvailablePresets(bool pretty)
         ffListFilesRecursively(path->chars, pretty);
     }
 
-    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateCopy(&instance.state.platform.exePath);
-    ffStrbufSubstrBeforeLastC(&absolutePath, '/');
-    ffStrbufAppendS(&absolutePath, "/presets/");
-    ffListFilesRecursively(absolutePath.chars, pretty);
+    if (instance.state.platform.exePath.length)
+    {
+        FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateCopy(&instance.state.platform.exePath);
+        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+        ffStrbufAppendS(&absolutePath, "/presets/");
+        ffListFilesRecursively(absolutePath.chars, pretty);
+    }
 }
 
 static void listAvailableLogos(void)

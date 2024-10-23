@@ -1,8 +1,5 @@
 #pragma once
 
-#ifndef FASTFETCH_INCLUDED_UNICODE_HPP
-#define FASTFETCH_INCLUDED_UNICODE_HPP
-
 #ifdef __cplusplus
 
 extern "C" {
@@ -24,7 +21,5 @@ static inline void ffStrbufSetWSV(FFstrbuf* result, const std::wstring_view sour
 #else
 
     #error Must be included in C++ source file
-
-#endif
 
 #endif
