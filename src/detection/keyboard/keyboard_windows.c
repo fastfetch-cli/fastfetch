@@ -11,15 +11,6 @@
 #include <cfgmgr32.h>
 #include <devpkey.h>
 
-WINAPI CMAPI CONFIGRET CM_Get_Device_Interface_PropertyW(
-  _In_      LPCWSTR          pszDeviceInterface,
-  _In_      const DEVPROPKEY *PropertyKey,
-  _Out_     DEVPROPTYPE      *PropertyType,
-  _Out_     PBYTE            PropertyBuffer,
-  _Inout_   PULONG           PropertyBufferSize,
-  _In_      ULONG            ulFlags
-);
-
 const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
 {
     UINT nDevices = 0;
