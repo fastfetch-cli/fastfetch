@@ -134,24 +134,14 @@ const char* ffDetectEditor(FFEditorResult* result)
         return NULL;
 
     ffStrbufSubstrBeforeFirstC(&result->version, '\n');
-    for (uint32_t iStart = 0; iStart < result->version.length; ++iStart)
-    {
-        char c = result->version.chars[iStart];
-        if (ffCharIsDigit(c))
-        {
-            for (uint32_t iEnd = iStart + 1; iEnd < result->version.length; ++iEnd)
-            {
-                char c = result->version.chars[iEnd];
-                if (isspace(c))
-                {
-                    ffStrbufSubstrBefore(&result->version, iEnd);
-                    break;
-                }
-            }
-            if (iStart > 0)
-                ffStrbufSubstrAfter(&result->version, iStart - 1);
-            break;
-        }
+    const char* versionStart = strpbrk(result->version.chars, "0123456789");
+    if (versionStart != NULL) {
+        const char* versionEnd = strpbrk(versionStart, " \t\v\f\r");
+        if (versionEnd != NULL)
+            ffStrbufSubstrBefore(&result->version, (uint32_t)(versionEnd - result->version.chars));
+
+        if (versionStart != result->version.chars)
+            ffStrbufSubstrAfter(&result->version, (uint32_t)(versionStart - result->version.chars - 1));
     }
 
     return NULL;
