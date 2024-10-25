@@ -95,7 +95,7 @@ const char* ffDetectEditor(FFEditorResult* result)
 
     if (ffStrbufEqualS(&result->exe, "nvim"))
         ffBinaryExtractStrings(result->path.chars, extractNvimVersionFromBinary, &result->version, (uint32_t) strlen("NVIM v0.0.0"));
-    else if (ffStrbufEqualS(&result->exe, "vim"))
+    else if (ffStrbufEqualS(&result->exe, "vim") || ffStrbufStartsWithS(&result->exe, "vim."))
         ffBinaryExtractStrings(result->path.chars, extractVimVersionFromBinary, &result->version, (uint32_t) strlen("VIM - Vi IMproved 0.0"));
     else if (ffStrbufEqualS(&result->exe, "nano"))
         ffBinaryExtractStrings(result->path.chars, extractNanoVersionFromBinary, &result->version, (uint32_t) strlen("GNU nano 0.0"));
@@ -106,6 +106,7 @@ const char* ffDetectEditor(FFEditorResult* result)
     if (
         ffStrbufEqualS(&result->exe, "nano") ||
         ffStrbufEqualS(&result->exe, "vim") ||
+        ffStrbufStartsWithS(&result->exe, "vim.") || // vim.basic/vim.tiny
         ffStrbufEqualS(&result->exe, "nvim") ||
         ffStrbufEqualS(&result->exe, "micro") ||
         ffStrbufEqualS(&result->exe, "emacs") ||
