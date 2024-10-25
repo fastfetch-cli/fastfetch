@@ -74,7 +74,7 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
         for(uint32_t i = 0; i < filtered.length; i++)
         {
             uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
-            printDevice(options, *(FFBluetoothResult**)ffListGet(&filtered, i), index);
+            printDevice(options, *FF_LIST_GET(FFBluetoothResult*, filtered, i), index);
         }
     }
 

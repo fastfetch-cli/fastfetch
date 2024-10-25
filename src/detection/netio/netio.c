@@ -56,8 +56,8 @@ const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options)
 
     for (uint32_t i = 0; i < result->length; ++i)
     {
-        FFNetIOResult* icPrev = (FFNetIOResult*)ffListGet(&ioCounters1, i);
-        FFNetIOResult* icCurr = (FFNetIOResult*)ffListGet(result, i);
+        FFNetIOResult* icPrev = FF_LIST_GET(FFNetIOResult, ioCounters1, i);
+        FFNetIOResult* icCurr = FF_LIST_GET(FFNetIOResult, *result, i);
         if (!ffStrbufEqual(&icPrev->name, &icCurr->name))
             return "Network interface name changed";
 

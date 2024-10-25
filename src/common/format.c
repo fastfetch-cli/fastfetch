@@ -42,10 +42,10 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
             break;
         case FF_FORMAT_ARG_TYPE_LIST:
         {
-            const FFlist* list = formatarg->value;
+            const FFlist* list = (const FFlist*) formatarg->value;
             for(uint32_t i = 0; i < list->length; i++)
             {
-                ffStrbufAppend(buffer, ffListGet(list, i));
+                ffStrbufAppend(buffer, FF_LIST_GET(FFstrbuf, *list, i));
                 if(i < list->length - 1)
                     ffStrbufAppendS(buffer, ", ");
             }
@@ -110,7 +110,7 @@ static inline bool formatArgSet(const FFformatarg* arg)
         (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0.0) || //Also is false for NaN
         (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
-        (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet(arg->value)) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet((char*)arg->value)) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT8 && *(uint8_t*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT16 && *(uint16_t*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_UINT && *(uint32_t*)arg->value > 0) ||

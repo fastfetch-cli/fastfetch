@@ -51,7 +51,7 @@ static void fontInitPretty(FFfont* font)
 
     for(uint32_t i = 0; i < font->styles.length; i++)
     {
-        ffStrbufAppend(&font->pretty, ffListGet(&font->styles, i));
+        ffStrbufAppend(&font->pretty, FF_LIST_GET(FFstrbuf, font->styles, i));
 
         if(i < font->styles.length - 1)
             ffStrbufAppendS(&font->pretty, ", ");
@@ -86,7 +86,7 @@ void ffFontInitQt(FFfont* font, const char* data)
     {
         do
         {
-            FFstrbuf* style = ffListAdd(&font->styles);
+            FFstrbuf* style = (FFstrbuf*) ffListAdd(&font->styles);
             ffStrbufInit(style);
             data = ffStrbufAppendSUntilC(style, data, ' ');
             if (data) data++;
@@ -142,7 +142,7 @@ static void fontPangoParseWord(const char** data, FFfont* font, FFstrbuf* altern
     ) {
         if(alternativeBuffer == NULL)
         {
-            alternativeBuffer = ffListAdd(&font->styles);
+            alternativeBuffer = (FFstrbuf*) ffListAdd(&font->styles);
             ffStrbufInit(alternativeBuffer);
         }
 
@@ -215,7 +215,7 @@ void ffFontDestroy(FFfont* font)
     ffStrbufDestroy(&font->name);
     ffStrbufDestroy(&font->size);
 
-    for(uint32_t i = 0; i < font->styles.length; i++)
-        ffStrbufDestroy(ffListGet(&font->styles, i));
+    FF_LIST_FOR_EACH(FFstrbuf, str, font->styles)
+        ffStrbufDestroy(str);
     ffListDestroy(&font->styles);
 }

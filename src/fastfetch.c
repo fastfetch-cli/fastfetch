@@ -370,7 +370,7 @@ static void generateConfigFile(bool force, const char* filePath)
 {
     if (!filePath)
     {
-        ffStrbufSet(&instance.state.genConfigPath, (FFstrbuf*) ffListGet(&instance.state.platform.configDirs, 0));
+        ffStrbufSet(&instance.state.genConfigPath, FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0));
         ffStrbufAppendS(&instance.state.genConfigPath, "fastfetch/config.jsonc");
     }
     else

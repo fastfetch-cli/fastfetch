@@ -48,7 +48,7 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
         FF_STRBUF_AUTO_DESTROY zpoolName = ffStrbufCreateNS(index, currentDisk->mountFrom.chars);
         for(uint32_t i = 0; i < disks->length - 1; i++)
         {
-            const FFDisk* otherDevice = ffListGet(disks, i);
+            const FFDisk* otherDevice = FF_LIST_GET(FFDisk, *disks, i);
             if(ffStrbufEqualS(&otherDevice->filesystem, "zfs") && ffStrbufStartsWith(&otherDevice->mountFrom, &zpoolName))
                 return true;
         }
@@ -60,7 +60,7 @@ static bool isSubvolume(const FFlist* disks, FFDisk* currentDisk)
         //Filter all disks which device was already found. This catches BTRFS subvolumes.
         for(uint32_t i = 0; i < disks->length - 1; i++)
         {
-            const FFDisk* otherDevice = ffListGet(disks, i);
+            const FFDisk* otherDevice = FF_LIST_GET(FFDisk, *disks, i);
 
             if(ffStrbufEqual(&currentDisk->mountFrom, &otherDevice->mountFrom))
                 return true;

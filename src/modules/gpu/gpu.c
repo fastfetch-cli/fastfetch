@@ -133,7 +133,7 @@ void ffPrintGPU(FFGPUOptions* options)
     }
 
     for(uint32_t i = 0; i < selectedGPUs.length; i++)
-        printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), * (const FFGPUResult**) ffListGet(&selectedGPUs, i));
+        printGPUResult(options, selectedGPUs.length == 1 ? 0 : (uint8_t) (i + 1), *FF_LIST_GET(const FFGPUResult*, selectedGPUs, i));
 
     if(selectedGPUs.length == 0)
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No GPUs found");

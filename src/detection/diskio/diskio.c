@@ -56,8 +56,8 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options)
 
     for (uint32_t i = 0; i < result->length; ++i)
     {
-        FFDiskIOResult* icPrev = (FFDiskIOResult*)ffListGet(&ioCounters1, i);
-        FFDiskIOResult* icCurr = (FFDiskIOResult*)ffListGet(result, i);
+        FFDiskIOResult* icPrev = FF_LIST_GET(FFDiskIOResult, ioCounters1, i);
+        FFDiskIOResult* icCurr = FF_LIST_GET(FFDiskIOResult, *result, i);
         if (!ffStrbufEqual(&icPrev->devPath, &icCurr->devPath))
             return "Physical disk device path changed";
 

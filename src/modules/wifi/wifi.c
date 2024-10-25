@@ -24,7 +24,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
     for(uint32_t index = 0; index < result.length; ++index)
     {
-        FFWifiResult* item = (FFWifiResult*)ffListGet(&result, index);
+        FFWifiResult* item = FF_LIST_GET(FFWifiResult, result, index);
         uint8_t moduleIndex = result.length == 1 ? 0 : (uint8_t)(index + 1);
 
         if(options->moduleArgs.outputFormat.length == 0)
