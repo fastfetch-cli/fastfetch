@@ -4821,6 +4821,19 @@ static const FFlogo X[] = {
             FF_COLOR_FG_RED,
         }
     },
+    // XCP-ng
+    {
+        .names = {"XCP-ng", "xenenterprise"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XCP_NG,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_YELLOW,
+        }
+    },
     // Xferience
     {
         .names = {"Xferience"},
