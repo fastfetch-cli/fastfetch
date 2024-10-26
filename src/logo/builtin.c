@@ -4262,6 +4262,16 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // SummitOS
+    {
+        .names = {"SummitOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SUMMITOS,
+        .colors = {
+            FF_COLOR_FG_RGB "143;191;80",
+            FF_COLOR_FG_RGB "160;205;102",
+            FF_COLOR_FG_RGB "181;225;102",
+        },
+    },
     // Suse
     {
         .names = {"suse", "suse-linux"},
