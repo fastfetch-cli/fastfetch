@@ -466,7 +466,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-openbsd-amd64
+          name: fastfetch-netbsd-amd64
           path: ./fastfetch-*.*
 
   windows-amd64:
