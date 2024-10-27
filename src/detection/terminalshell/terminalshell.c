@@ -10,6 +10,8 @@
     #include <paths.h>
 #elif __OpenBSD__
     #define _PATH_LOCALBASE "/usr/local"
+#elif __NetBSD__
+    #define _PATH_LOCALBASE "/usr/pkg"
 #endif
 
 #ifdef _WIN32
@@ -121,7 +123,7 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 
 static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
 {
-#if __OpenBSD__
+#if __OpenBSD__ || __NetBSD__
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-c",
@@ -575,7 +577,7 @@ static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     char buffer[1024] = {};
     if (
         #ifdef __linux__
@@ -678,7 +680,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #endif
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun) || defined(__NetBSD__)
 
     if(ffStrbufStartsWithIgnCaseS(processName, "gnome-terminal"))
         return getTerminalVersionGnome(exe, version);

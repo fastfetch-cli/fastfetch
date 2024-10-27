@@ -25,8 +25,13 @@ static const char* detectThermalTemp(double* current)
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    if (ffSysctlGetString("hw.model", &cpu->name))
+    #if __NetBSD__
+    if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != NULL)
+        return "sysctlbyname(machdep.cpu_brand) failed";
+    #else
+    if (ffSysctlGetString("hw.model", &cpu->name) != NULL)
         return "sysctlbyname(hw.model) failed";
+    #endif
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
     cpu->coresLogical = cpu->coresPhysical;

@@ -236,7 +236,7 @@ static void getTerminalFromEnv(FFTerminalResult* result)
     }
     #endif
 
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
     //Konsole
     else if(
         getenv("KONSOLE_VERSION") != NULL
@@ -329,7 +329,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufEqualS(&result->processName, "com.termux"))
         ffStrbufInitStatic(&result->prettyName, "Termux");
 
-    #elif defined(__linux__) || defined(__FreeBSD__)
+    #elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
 
     else if(ffStrbufStartsWithS(&result->processName, "gnome-terminal"))
         ffStrbufInitStatic(&result->prettyName, "GNOME Terminal");

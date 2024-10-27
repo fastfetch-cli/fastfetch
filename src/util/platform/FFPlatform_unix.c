@@ -12,7 +12,7 @@
 #ifdef __APPLE__
     #include <libproc.h>
     #include <sys/sysctl.h>
-#elif defined(__FreeBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     #include <sys/sysctl.h>
 #endif
 
@@ -24,10 +24,16 @@ static void getExePath(FFPlatform* platform)
         exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
         int exePathLen = proc_pidpath((int) getpid(), exePath, sizeof(exePath));
-    #elif defined(__FreeBSD__)
+    #elif defined(__FreeBSD__) || defined(__NetBSD__)
         size_t exePathLen = sizeof(exePath);
         if(sysctl(
-            (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()}, 4,
+            (int[]){CTL_KERN,
+            #ifdef __FreeBSD__
+                KERN_PROC,
+            #else
+                KERN_PROC_ARGS,
+            #endif
+            KERN_PROC_PATHNAME, (int) getpid()}, 4,
             exePath, &exePathLen,
             NULL, 0
         ) < 0)
