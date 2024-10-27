@@ -433,6 +433,42 @@ jobs:
           name: fastfetch-openbsd-amd64
           path: ./fastfetch-*.*
 
+  netbsd-amd64:
+    name: NetBSD-amd64
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: netbsd
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          version: '10.0'
+          run: |
+            uname -a
+            sudo pkgin -y install cmake git pkgconf
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-openbsd-amd64
+          path: ./fastfetch-*.*
+
   windows-amd64:
     name: Windows-amd64
     runs-on: windows-latest

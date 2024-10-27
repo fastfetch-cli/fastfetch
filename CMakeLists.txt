@@ -1417,6 +1417,10 @@ elseif(OpenBSD)
         PRIVATE "m"
         PRIVATE "kvm"
     )
+elseif(NetBSD)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+    )
 elseif(SunOS)
     target_link_libraries(libfastfetch
         PRIVATE "m"
