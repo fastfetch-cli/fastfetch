@@ -5,6 +5,14 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 
+#ifdef __NetBSD__
+#include <sys/types.h>
+#include <sys/statvfs.h>
+#define getfsstat(...) getvfsstat(__VA_ARGS__)
+#define statfs statvfs
+#define f_flags f_flag
+#endif
+
 #ifdef __FreeBSD__
 #include <libgeom.h>
 
@@ -51,7 +59,7 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
             ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
             : FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     }
-    else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
+    else if(fs->f_flags & MNT_IGNORE)
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(!(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
@@ -95,7 +103,12 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 #else
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
-    FF_UNUSED(fs, disk);
+    if(fs->f_flags & MNT_IGNORE)
+        disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+    else if(!(fs->f_flags & MNT_LOCAL))
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    else
+        disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
 #endif
 
