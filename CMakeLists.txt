@@ -685,7 +685,7 @@ elseif(NetBSD)
         src/detection/chassis/chassis_nbsd.c
         src/detection/cpu/cpu_bsd.c
         src/detection/cpucache/cpucache_nosupport.c
-        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_nosupport.c
         src/detection/dns/dns_linux.c
@@ -720,7 +720,7 @@ elseif(NetBSD)
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
-        src/detection/memory/memory_bsd.c
+        src/detection/memory/memory_obsd.c
         src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
@@ -730,7 +730,7 @@ elseif(NetBSD)
         src/detection/processes/processes_nosupport.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_nosupport.c
-        src/detection/swap/swap_nosupport.c
+        src/detection/swap/swap_obsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c

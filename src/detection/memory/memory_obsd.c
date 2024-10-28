@@ -3,6 +3,10 @@
 
 #include <sys/param.h>
 
+#if __NetBSD__
+    #include <uvm/uvm_extern.h>
+#endif
+
 const char* ffDetectMemory(FFMemoryResult* ram)
 {
     struct uvmexp buf;
