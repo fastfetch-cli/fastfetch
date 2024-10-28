@@ -9,6 +9,8 @@
     #include <sysinfoapi.h>
 #endif
 
+#include "util/stb_printf.h"
+
 static inline double ffTimeGetTick(void) //In msec
 {
     #ifdef _WIN32

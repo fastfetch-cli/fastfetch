@@ -18,6 +18,8 @@
 
 #define FASTFETCH_STRBUF_DEFAULT_ALLOC 32
 
+#include "stb_printf.h"
+
 typedef struct FFstrbuf
 {
     uint32_t allocated;

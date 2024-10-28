@@ -591,7 +591,7 @@ STBSP__PUBLICDEF int STB_SPRINTF_DECORATE(vsprintfcb)(STBSP_SPRINTFCB *callback,
             s = (char *)"null";
          // get the length, limited to desired precision
          // always limit to ~0u chars since our counts are 32b
-         l = stbsp__strlen_limited(s, (pr >= 0) ? pr : ~0u);
+         l = stbsp__strlen_limited(s, (pr >= 0) ? (unsigned) pr : ~0u);
          lead[0] = 0;
          tail[0] = 0;
          pr = 0;
@@ -695,7 +695,7 @@ STBSP__PUBLICDEF int STB_SPRINTF_DECORATE(vsprintfcb)(STBSP_SPRINTFCB *callback,
          n = (dp >= 1000) ? 6 : ((dp >= 100) ? 5 : ((dp >= 10) ? 4 : 3));
          tail[0] = (char)n;
          for (;;) {
-            tail[n] = '0' + dp % 10;
+            tail[n] = (char)('0' + dp % 10);
             if (n <= 3)
                break;
             --n;
@@ -793,7 +793,7 @@ STBSP__PUBLICDEF int STB_SPRINTF_DECORATE(vsprintfcb)(STBSP_SPRINTFCB *callback,
 #endif
          tail[0] = (char)n;
          for (;;) {
-            tail[n] = '0' + dp % 10;
+            tail[n] = (char)('0' + dp % 10);
             if (n <= 3)
                break;
             --n;
@@ -1431,7 +1431,7 @@ STBSP__PUBLICDEF int STB_SPRINTF_DECORATE( vsnprintf )( char * buf, int count, c
 {
    stbsp__context c;
 
-   if ( (count == 0) && !buf )
+   if ( count == 0 )
    {
       c.length = 0;
 
