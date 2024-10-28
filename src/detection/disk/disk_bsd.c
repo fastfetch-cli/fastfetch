@@ -103,9 +103,12 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 #else
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
+    #ifdef MNT_IGNORE
     if(fs->f_flags & MNT_IGNORE)
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-    else if(!(fs->f_flags & MNT_LOCAL))
+    else
+    #endif
+    if(!(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
