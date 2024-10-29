@@ -453,7 +453,7 @@ jobs:
           version: '10.0'
           run: |
             uname -a
-            sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick chafa pulseaudio opencl-headers ocl-icd libv4l py312-requests
+            sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick pulseaudio opencl-headers ocl-icd libv4l py312-requests
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
