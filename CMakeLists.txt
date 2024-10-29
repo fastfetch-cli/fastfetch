@@ -828,7 +828,7 @@ elseif(OpenBSD)
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
-        src/detection/camera/camera_nosupport.c
+        src/detection/camera/camera_linux.c
         src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
