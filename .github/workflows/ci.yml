@@ -417,7 +417,7 @@ jobs:
           version: '7.5'
           run: |
             uname -a
-            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio
+            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio libv4l
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
