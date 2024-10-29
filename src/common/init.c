@@ -266,9 +266,6 @@ void ffListFeatures(void)
         #if FF_HAVE_EMBEDDED_PCIIDS
             "Embedded pciids\n"
         #endif
-        #if FF_USE_STBPRINTF
-            "stb_printf\n"
-        #endif
         ""
     , stdout);
 }

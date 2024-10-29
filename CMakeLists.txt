@@ -81,7 +81,6 @@ cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR Sun
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_LTO "Enable link-time optimization in release mode if supported" ON)
-option(ENABLE_STBPRINTF "Enable stb_printf" OFF)
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -1053,10 +1052,6 @@ elseif(SunOS)
     )
 endif()
 
-if(ENABLE_STBPRINTF)
-    list(APPEND LIBFASTFETCH_SRC src/util/stb_printf.c)
-endif()
-
 if(ENABLE_DIRECTX_HEADERS)
     message(STATUS "Enabling DirectX headers for WSL")
     list(APPEND LIBFASTFETCH_SRC src/detection/gpu/gpu_wsl.cpp)
@@ -1096,10 +1091,6 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
-
-if(ENABLE_STBPRINTF)
-    target_compile_definitions(libfastfetch PUBLIC FF_USE_STBPRINTF)
-endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)

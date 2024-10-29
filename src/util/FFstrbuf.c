@@ -20,15 +20,8 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 {
     assert(format != NULL);
 
-    #ifndef FF_USE_STBPRINTF
     int len = vasprintf(&strbuf->chars, format, arguments);
     assert(len >= 0);
-    #else
-    int len = vsnprintf(NULL, 0, format, arguments);
-    assert(len >= 0);
-    strbuf->chars = (char*) malloc(sizeof(char) * (len + 1));
-    vsnprintf(strbuf->chars, len + 1, format, arguments);
-    #endif
 
     strbuf->allocated = (uint32_t)(len + 1);
     strbuf->length = (uint32_t)len;

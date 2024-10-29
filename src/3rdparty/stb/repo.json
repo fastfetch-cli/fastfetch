@@ -1,9 +1,0 @@
-{
-    "home": "https://github.com/nothings/stb/blob/master/stb_sprintf.h",
-    "license": "MIT or Public domain (embed in source)",
-    "version": "v1.10",
-    "author": "nothings",
-    "patches": [
-        "https://github.com/nothings/stb/pull/1695"
-    ]
-}
