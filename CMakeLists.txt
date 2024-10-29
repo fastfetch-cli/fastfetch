@@ -1286,7 +1286,7 @@ ff_lib_enable(EGL
     "egl"
     "EGL"
 )
-if(NOT OpenBSD)
+if(NOT OpenBSD AND NOT NetBSD)
     ff_lib_enable(GLX
         "glx"
         "GLX"
