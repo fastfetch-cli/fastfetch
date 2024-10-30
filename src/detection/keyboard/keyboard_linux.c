@@ -31,9 +31,9 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
         if (pend == eventid) continue;
 
         // Ignore duplicate entries
-        if (flags & (1 << index))
+        if (flags & (1UL << index))
             continue;
-        flags |= (1 << index);
+        flags |= (1UL << index);
 
         ffStrbufSetF(&path, "/sys/class/input/event%s/device/name", eventid);
 
