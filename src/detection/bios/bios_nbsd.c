@@ -10,6 +10,6 @@ const char* ffDetectBios(FFBiosResult* bios)
         ffCleanUpSmbiosValue(&bios->version);
     if (ffSysctlGetString("machdep.dmi.bios-vendor", &bios->vendor) == NULL)
         ffCleanUpSmbiosValue(&bios->vendor);
-
+    ffSysctlGetString("machdep.bootmethod", &bios->type);
     return NULL;
 }
