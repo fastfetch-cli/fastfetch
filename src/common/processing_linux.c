@@ -215,11 +215,11 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if(exePath && sysctl(
         (int[]){CTL_KERN,
         #if __FreeBSD__
-            KERN_PROC,
+            KERN_PROC, KERN_PROC_PATHNAME, pid
         #else
-            KERN_PROC_ARGS,
+            KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME
         #endif
-    KERN_PROC_PATHNAME, pid}, 4,
+        }, 4,
         args, &size,
         NULL, 0
     ) == 0)
@@ -229,11 +229,11 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if(sysctl(
         (int[]){CTL_KERN,
             #if __FreeBSD__
-                KERN_PROC, KERN_PROC_ARGS,
+                KERN_PROC, KERN_PROC_ARGS, pid
             #else
-                KERN_PROC_ARGS, KERN_PROC_ARGV,
+                KERN_PROC_ARGS, pid, KERN_PROC_ARGV,
             #endif
-        pid}, 4,
+        }, 4,
         args, &size,
         NULL, 0
     ) == 0)
@@ -398,10 +398,10 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     struct kinfo_proc2 proc;
     size_t size = sizeof(proc);
     if(sysctl(
-        (int[]){CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid}, 4,
+        (int[]){CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid, sizeof(proc), 1}, 6,
         &proc, &size,
         NULL, 0
-    ))
+    ) != 0)
         return "sysctl(KERN_PROC_PID) failed";
 
     ffStrbufSetS(name, proc.p_comm);
