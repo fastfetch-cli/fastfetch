@@ -682,7 +682,7 @@ elseif(NetBSD)
         src/detection/brightness/brightness_bsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
-        src/detection/cpu/cpu_bsd.c
+        src/detection/cpu/cpu_nbsd.c
         src/detection/cpucache/cpucache_nosupport.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
