@@ -11,6 +11,7 @@
 #define getfsstat(...) getvfsstat(__VA_ARGS__)
 #define statfs statvfs
 #define f_flags f_flag
+#define f_bsize f_frsize
 #endif
 
 #ifdef __FreeBSD__
