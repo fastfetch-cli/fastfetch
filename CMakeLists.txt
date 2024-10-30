@@ -724,7 +724,7 @@ elseif(NetBSD)
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_nbsd.c
-        src/detection/packages/packages_nosupport.c
+        src/detection/packages/packages_obsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_nosupport.c
         src/detection/gtk_qt/qt.c
