@@ -29,11 +29,11 @@ static void getExePath(FFPlatform* platform)
         if(sysctl(
             (int[]){CTL_KERN,
             #ifdef __FreeBSD__
-                KERN_PROC,
+                KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()
             #else
-                KERN_PROC_ARGS,
+                KERN_PROC_ARGS, (int) getpid(), KERN_PROC_PATHNAME
             #endif
-            KERN_PROC_PATHNAME, (int) getpid()}, 4,
+            }, 4,
             exePath, &exePathLen,
             NULL, 0
         ) < 0)
@@ -185,7 +185,7 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     ffStrbufAppendS(&info->architecture, uts->machine);
     ffStrbufInit(&info->displayVersion);
 
-    #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
+    #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     size_t length = sizeof(info->pageSize);
     sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, NULL, 0);
     #else
