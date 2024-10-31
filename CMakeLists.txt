@@ -727,7 +727,7 @@ elseif(NetBSD)
         src/detection/os/os_nbsd.c
         src/detection/packages/packages_obsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
-        src/detection/processes/processes_nosupport.c
+        src/detection/processes/processes_nbsd.c
         src/detection/gtk_qt/qt.c
         src/detection/sound/sound_linux.c
         src/detection/swap/swap_obsd.c
