@@ -417,8 +417,8 @@ jobs:
           version: '7.5'
           run: |
             uname -a
-            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio libv4l
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio libv4l py3-requests
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=ON .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -454,7 +454,7 @@ jobs:
           run: |
             uname -a
             sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick pulseaudio opencl-headers ocl-icd libv4l py312-requests
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=ON .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
