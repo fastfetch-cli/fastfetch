@@ -41,6 +41,10 @@ static const FFstrbuf* loadPciIds()
             ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/pciids/pci.ids", &pciids);
         #elif __sun
         ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
+        #elif __OpenBSD__
+        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/local/share/pci.ids", &pciids);
+        #elif __NetBSD__
+        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/pkg/share/pciutils/pci.ids", &pciids);
         #endif
 
     #endif // FF_CUSTOM_PCI_IDS_PATH
