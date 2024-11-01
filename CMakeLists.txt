@@ -722,7 +722,7 @@ elseif(NetBSD)
         src/detection/media/media_linux.c
         src/detection/memory/memory_obsd.c
         src/detection/mouse/mouse_nosupport.c
-        src/detection/netio/netio_nosupport.c
+        src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_nbsd.c
         src/detection/packages/packages_obsd.c
@@ -804,7 +804,7 @@ elseif(OpenBSD)
         src/detection/media/media_linux.c
         src/detection/memory/memory_obsd.c
         src/detection/mouse/mouse_nosupport.c
-        src/detection/netio/netio_nosupport.c
+        src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_obsd.c
         src/detection/packages/packages_obsd.c

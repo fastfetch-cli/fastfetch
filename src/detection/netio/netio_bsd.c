@@ -48,7 +48,11 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
             .rxPackets = ifm->ifm_data.ifi_ipackets,
             .txErrors = ifm->ifm_data.ifi_oerrors,
             .rxErrors = ifm->ifm_data.ifi_ierrors,
+            #ifdef _IFI_OQDROPS
+            .txDrops = if2m->ifm_data.ifi_oqdrops,
+            #else
             .txDrops = 0, // unsupported
+            #endif
             .rxDrops = ifm->ifm_data.ifi_iqdrops,
             .defaultRoute = sdl->sdl_index == defaultRouteIfIndex,
         };

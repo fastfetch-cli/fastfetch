@@ -264,7 +264,7 @@ void ffInitNetIOOptions(FFNetIOOptions* options)
 
     ffStrbufInit(&options->namePrefix);
     options->defaultRouteOnly =
-        #ifdef __ANDROID__
+        #if __ANDROID__ || __OpenBSD__
             false
         #else
             true
