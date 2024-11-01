@@ -773,7 +773,7 @@ elseif(OpenBSD)
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
-        src/detection/diskio/diskio_nosupport.c
+        src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
