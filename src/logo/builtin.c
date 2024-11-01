@@ -3203,8 +3203,19 @@ static const FFlogo O[] = {
     },
     // OpenSuseLeap
     {
-        .names = {"opensuse_leap", "open_suse_leap", "opensuse-leap", "open-suse-leap", "suse_leap", "suse-leap", "opensuseleap"},
+        .names = {"opensuse_leap", "opensuse leap"},
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // OpenSuseLeapOld
+    {
+        .names = {"opensuse_leap_old", "opensuse leap_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_LEAP_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_WHITE,
         },
