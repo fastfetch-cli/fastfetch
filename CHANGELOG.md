@@ -1,3 +1,21 @@
+# 2.29.0
+
+Features:
+* Port to NetBSD
+* Support DiskIO, NetIO, GPU and Users module on OpenBSD
+* Report SD8E (CPU, Android)
+
+Bugfixes:
+* Fix the VIM version detection on Ubuntu (Editor, Linux)
+
+Logo:
+* Update OpenSuse Tumbleweed
+* Add XCP-ng
+* Add SummitOS
+* Update PikaOS
+* Update OpenSUSE Leap
+* Update aperture
+
 # 2.28.0
 
 Features:
