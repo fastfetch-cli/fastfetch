@@ -258,6 +258,13 @@ static const FFlogo A[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_APERTURE,
         .colors = {
             FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
         },
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_WHITE,
