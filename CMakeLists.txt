@@ -819,7 +819,7 @@ elseif(OpenBSD)
         src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_bsd.c
-        src/detection/users/users_nosupport.c
+        src/detection/users/users_obsd.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_nosupport.c
         src/detection/wm/wm_nosupport.c
