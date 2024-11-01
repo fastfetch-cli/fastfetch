@@ -617,6 +617,7 @@ jobs:
       - macos-universal
       - freebsd-amd64
       - openbsd-amd64
+      - netbsd-amd64
       - sunos-amd64
       - windows-amd64
       - windows-i686
