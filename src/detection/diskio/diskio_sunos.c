@@ -27,12 +27,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInitS(&device->devPath, ks->ks_name);
+        ffStrbufInit(&device->devPath);
+        ffStrbufInitS(&device->name, ks->ks_name);
         device->bytesRead = kio.nread;
         device->readCount = kio.reads;
         device->bytesWritten = kio.nwritten;
         device->writeCount = kio.writes;
-        ffStrbufInitS(&device->name, ks->ks_name);
     }
 
     return NULL;
