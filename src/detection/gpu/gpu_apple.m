@@ -33,6 +33,42 @@ const char* ffGpuDetectDriverVersion(FFlist* gpus)
     return "Unsupported macOS version";
 }
 
+static void setMetalPlatformApi(id<MTLDevice> device, FFGPUResult* gpu) {
+     #ifndef MAC_OS_X_VERSION_10_15
+     if (@available(macOS 10.14, *)) {
+         if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1]) {
+             ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 2");
+             return;
+         }
+     }
+     if (@available(macOS 10.11, *)) {
+        if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1]) {
+            ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 1");
+            return;
+        }
+     }
+     #else // MAC_OS_X_VERSION_10_15
+     if (@available(macOS 13.0, *)) {
+         if ([device supportsFamily:MTLGPUFamilyMetal3]) {
+             ffStrbufSetStatic(&gpu->platformApi, "Metal 3");
+             return;
+         }
+     }
+     if ([device supportsFamily:MTLGPUFamilyCommon3]) {
+         ffStrbufSetStatic(&gpu->platformApi, "Metal Common 3");
+         return;
+     }
+     if ([device supportsFamily:MTLGPUFamilyCommon2]) {
+         ffStrbufSetStatic(&gpu->platformApi, "Metal Common 2");
+         return;
+     }
+     if ([device supportsFamily:MTLGPUFamilyCommon1]) {
+         ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
+         return;
+     }
+     #endif
+}
+
 const char* ffGpuDetectMetal(FFlist* gpus)
 {
     if (@available(macOS 10.13, *))
@@ -50,21 +86,9 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             }
             if (!gpu) continue;
 
-            #ifndef MAC_OS_X_VERSION_10_15
-            if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily2_v1])
-                ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 2");
-            else if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1])
-                ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 1");
-            #else // MAC_OS_X_VERSION_10_15
-            if ([device supportsFamily:MTLGPUFamilyMetal3])
-                ffStrbufSetStatic(&gpu->platformApi, "Metal 3");
-            else if ([device supportsFamily:MTLGPUFamilyCommon3])
-                ffStrbufSetStatic(&gpu->platformApi, "Metal Common 3");
-            else if ([device supportsFamily:MTLGPUFamilyCommon2])
-                ffStrbufSetStatic(&gpu->platformApi, "Metal Common 2");
-            else if ([device supportsFamily:MTLGPUFamilyCommon1])
-                ffStrbufSetStatic(&gpu->platformApi, "Metal Common 1");
+            setMetalPlatformApi(device, gpu);
 
+            #ifdef MAC_OS_X_VERSION_10_15
             gpu->type = device.location == MTLDeviceLocationBuiltIn ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
             gpu->index = (uint32_t) device.locationNumber;
             #endif
