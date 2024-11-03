@@ -381,7 +381,7 @@ jobs:
           run: |
             uname -a
             sudo pkg update
-            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py311-requests
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py311-requests chafa
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
@@ -395,6 +395,41 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-freebsd-amd64
+          path: ./fastfetch-*.*
+
+  dragonfly-amd64:
+    name: DragonFly-amd64
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: vmactions/dragonflybsd-vm@v1
+        with:
+          usesh: yes
+          prepare: |
+            uname -a
+            pkg update
+            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py39-requests
+
+          run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-dragonfly-amd64
           path: ./fastfetch-*.*
 
   openbsd-amd64:
@@ -618,6 +653,7 @@ jobs:
       - freebsd-amd64
       - openbsd-amd64
       - netbsd-amd64
+      - dragonfly-amd64
       - sunos-amd64
       - windows-amd64
       - windows-i686
