@@ -1428,6 +1428,10 @@ elseif(FreeBSD)
         target_link_libraries(libfastfetch
             PRIVATE "geom"
         )
+    else()
+        target_link_libraries(libfastfetch
+            PRIVATE "devstat"
+        )
     endif()
 elseif(OpenBSD)
     target_link_libraries(libfastfetch
