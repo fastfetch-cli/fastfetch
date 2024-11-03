@@ -414,7 +414,7 @@ jobs:
           prepare: |
             uname -a
             pkg update
-            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py39-requests
+            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py39-requests chafa libelf
 
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
