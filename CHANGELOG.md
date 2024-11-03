@@ -3,10 +3,11 @@
 Features:
 * Port to NetBSD
 * Support DiskIO, NetIO, GPU and Users module on OpenBSD
-* Report SD8E (CPU, Android)
+* Report SD8E SOC name (CPU, Android)
 
 Bugfixes:
 * Fix the VIM version detection on Ubuntu (Editor, Linux)
+* Improve performance of OS version detection on Proxmox (#1370, OS, Linux)
 
 Logo:
 * Update OpenSuse Tumbleweed
