@@ -26,8 +26,7 @@ const char* ffDetectSound(FFlist* devices)
             continue;
 
         uint32_t mutemask = 0;
-        if (ioctl(fd, SOUND_MIXER_READ_MUTE, &mutemask) < 0)
-            continue;
+        ioctl(fd, SOUND_MIXER_READ_MUTE, &mutemask); // doesn't seem to be available on DragonFly
 
         struct oss_card_info ci = { .card = idev };
         if (ioctl(fd, SNDCTL_CARDINFO, &ci) < 0)
