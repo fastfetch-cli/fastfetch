@@ -186,13 +186,13 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetS(&result->name, "Proxmox VE");
         ffStrbufClear(&result->versionID);
         if (ffProcessAppendStdOut(&result->versionID, (char* const[]) {
-            "/usr/bin/pveversion",
+            "/usr/bin/dpkg-query",
+            "--showformat=${version}",
+            "--show",
+            "pve-manager",
             NULL,
-        }) == NULL) // pve-manager/8.2.2/9355359cd7afbae4 (running kernel: 6.8.4-2-pve)
-        {
-            ffStrbufSubstrBeforeLastC(&result->versionID, '/');
-            ffStrbufSubstrAfterFirstC(&result->versionID, '/');
-        }
+        }) == NULL) // 8.2.2
+            ffStrbufTrimRightSpace(&result->versionID);
         ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
         return true;
     }
