@@ -15,6 +15,7 @@
 #endif
 
 #ifdef __FreeBSD__
+#if __has_include(<libgeom.h>)
 #include <libgeom.h>
 
 static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
@@ -51,6 +52,12 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
 
     return NULL;
 }
+#else
+static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
+{
+    return "Fastfetch was compiled without libgeom support";
+}
+#endif
 
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
@@ -134,7 +141,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             if(!ffDiskMatchMountpoint(options, fs->f_mntonname))
                 continue;
         }
-        else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
+        else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
             continue;
 
         #ifdef __FreeBSD__
@@ -168,10 +175,11 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         #ifdef __OpenBSD__
         #define st_birthtimespec __st_birthtim
         #endif
-
+        #ifndef __DragonFly__
         struct stat st;
         if(stat(fs->f_mntonname, &st) == 0 && st.st_birthtimespec.tv_sec > 0)
             disk->createTime = (uint64_t)((st.st_birthtimespec.tv_sec * 1000) + (st.st_birthtimespec.tv_nsec / 1000000));
+        #endif
     }
 
     return NULL;

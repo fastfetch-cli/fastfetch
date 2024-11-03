@@ -91,7 +91,7 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
         if (rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == pid)
         {
             struct sockaddr_dl* sdl = (struct sockaddr_dl *)get_rt_address(&rtmsg.hdr, RTA_IFP);
-            if (sdl)
+            if (sdl && sdl->sdl_len)
             {
                 assert(sdl->sdl_nlen <= IF_NAMESIZE);
                 memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);

@@ -10,6 +10,9 @@ const char* ffDetectSound(FFlist* devices)
     char path[] = "/dev/mixer0";
     int defaultDev = ffSysctlGetInt("hw.snd.default_unit", -1);
 
+    if (defaultDev == -1)
+        return "sysctl(hw.snd.default_unit) failed";
+
     for (int idev = 0; idev <= 9; ++idev)
     {
         path[strlen("/dev/mixer")] = (char) ('0' + idev);

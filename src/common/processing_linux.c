@@ -367,6 +367,13 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 
     #elif defined(__FreeBSD__)
 
+    #ifdef __DragonFly__
+        #define ki_comm kp_comm
+        #define ki_ppid kp_ppid
+        #define ki_tdev kp_tdev
+        #define ki_flag kp_flags
+    #endif
+
     struct kinfo_proc proc;
     size_t size = sizeof(proc);
     if(sysctl(

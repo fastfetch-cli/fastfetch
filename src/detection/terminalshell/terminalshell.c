@@ -8,6 +8,9 @@
 #include <ctype.h>
 #ifdef __FreeBSD__
     #include <paths.h>
+    #ifndef _PATH_LOCALBASE
+        #define _PATH_LOCALBASE "/usr/local"
+    #endif
 #elif __OpenBSD__
     #define _PATH_LOCALBASE "/usr/local"
 #elif __NetBSD__

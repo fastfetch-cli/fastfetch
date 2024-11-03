@@ -4,7 +4,12 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <usbhid.h>
-#include <dev/usb/usb_ioctl.h>
+
+#if __has_include(<dev/usb/usb_ioctl.h>)
+#include <dev/usb/usb_ioctl.h> // FreeBSD
+#else
+#include <bus/u4b/usb_ioctl.h> // DragonFly
+#endif
 
 #define MAX_UHID_JOYS 64
 

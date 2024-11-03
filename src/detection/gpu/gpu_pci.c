@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #ifdef __FreeBSD__
 #include <paths.h>
+    #ifndef _PATH_LOCALBASE
+        #define _PATH_LOCALBASE "/usr/local"
+    #endif
 #endif
 
 #if FF_HAVE_EMBEDDED_PCIIDS

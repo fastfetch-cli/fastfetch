@@ -530,7 +530,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰩟");
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT
-        #if !__ANDROID__ /*Permission denied*/ && !__OpenBSD__ /*Report invalid argument for some reason*/
+        #if !__ANDROID__ /*Permission denied*/ && !__OpenBSD__ /*Report invalid argument for some reason*/ && !__DragonFly__ /*Doesn't work*/
             | FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT
         #endif
     ;

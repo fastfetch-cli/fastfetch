@@ -1,4 +1,7 @@
 #include "diskio.h"
+
+#if __has_include(<libgeom.h>)
+
 #include "util/stringUtils.h"
 
 #include <devstat.h>
@@ -58,3 +61,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 
     return NULL;
 }
+#else
+const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
+{
+    return "Fastfetch was compiled without libgeom support";
+}
+#endif

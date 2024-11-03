@@ -257,6 +257,10 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
     uint32_t userId = getuid();
 
 #if __FreeBSD__
+    #ifdef __DragonFly__
+        #define ki_comm kp_comm
+    #endif
+
     int request[] = {CTL_KERN, KERN_PROC, KERN_PROC_UID, (int) userId};
     size_t length = 0;
 

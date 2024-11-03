@@ -39,7 +39,7 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     { IFF_PROMISC, "PROMISC" },
     { IFF_ALLMULTI, "ALLMULTI" },
     { IFF_MULTICAST, "MULTICAST" },
-#if defined(__linux__) || defined(__APPLE__) || defined(__sun)
+#ifdef IFF_NOTRAILERS
     { IFF_NOTRAILERS, "NOTRAILERS" },
 #endif
 #ifdef __linux__
@@ -59,10 +59,10 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     { IFF_LINK1, "LINK1" },
     { IFF_LINK2, "LINK2" },
 #endif
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#ifdef IFF_ALTPHYS
     { IFF_ALTPHYS, "ALTPHYS" },
 #endif
-#ifdef __FreeBSD__
+#ifdef IFF_CANTCONFIG
     { IFF_CANTCONFIG, "CANTCONFIG" },
 #endif
     // sentinel
