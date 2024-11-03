@@ -1,7 +1,8 @@
 # 2.29.0
 
 Features:
-* Port to NetBSD
+* Port to NetBSD and DragonFly BSD
+    * Fastfetch now supports all major BSD variants
 * Support DiskIO, NetIO, GPU and Users module on OpenBSD
 * Report SD8E SOC name (CPU, Android)
 
