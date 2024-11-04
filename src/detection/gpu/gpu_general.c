@@ -60,4 +60,9 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 }
 
 #else
+
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FF_MAYBE_UNUSED FFlist* gpus)
+{
+    return "Fastfetch was built without libpciaccess support";
+}
 #endif
