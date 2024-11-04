@@ -18,6 +18,7 @@ Logo:
 * Update OpenSuse Tumbleweed
 * Add XCP-ng
 * Add SummitOS
+* Add Lilidog
 * Update PikaOS
 * Update OpenSUSE Leap
 * Update aperture

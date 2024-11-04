@@ -2389,6 +2389,16 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_YELLOW,
     },
+    // Lilidog
+    {
+        .names = {"Lilidog"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LIBREELEC,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Lingmo OS
     {
         .names = {"Lingmo", "lingmo", "LingmoOS", "lingmoos"},
