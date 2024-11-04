@@ -179,7 +179,7 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetS(&result->idLike, "debian");
         return true;
     }
-    else if (ffStrbufStartsWith(&result->name, "Lilidog GNU/Linux"))
+    else if (ffStrbufStartsWithS(&result->name, "Lilidog GNU/Linux"))
     {
         // https://github.com/fastfetch-cli/fastfetch/issues/1373
         ffStrbufSetS(&result->id, "lilidog");
