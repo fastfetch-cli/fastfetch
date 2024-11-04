@@ -46,7 +46,7 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
     });
 }
 
-static void getUbuntuFlavour(FFOSResult* result)
+FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
 {
     const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
     if(!ffStrSet(xdgConfigDirs))
@@ -143,7 +143,7 @@ static void getUbuntuFlavour(FFOSResult* result)
     }
 }
 
-static void getDebianVersion(FFOSResult* result)
+FF_MAYBE_UNUSED static void getDebianVersion(FFOSResult* result)
 {
     FF_STRBUF_AUTO_DESTROY debianVersion = ffStrbufCreate();
     ffAppendFileBuffer("/etc/debian_version", &debianVersion);
@@ -153,7 +153,7 @@ static void getDebianVersion(FFOSResult* result)
     ffStrbufSet(&result->versionID, &debianVersion);
 }
 
-static bool detectDebianDerived(FFOSResult* result)
+FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
 {
     if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Armbian 24.2.1 bookworm
     {
@@ -265,6 +265,7 @@ void ffDetectOSImpl(FFOSResult* os)
 {
     detectOS(os);
 
+    #ifdef __linux__
     if(ffStrbufIgnCaseEqualS(&os->id, "ubuntu"))
         getUbuntuFlavour(os);
     else if(ffStrbufIgnCaseEqualS(&os->id, "debian"))
@@ -272,4 +273,5 @@ void ffDetectOSImpl(FFOSResult* os)
         if (!detectDebianDerived(os))
             getDebianVersion(os);
     }
+    #endif
 }
