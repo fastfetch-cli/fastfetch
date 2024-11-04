@@ -38,7 +38,7 @@ void ffPrintUsers(FFUsersOptions* options)
             {
                 if(i > 0)
                     ffStrbufAppendS(&result, ", ");
-                FFUserResult* user = (FFUserResult*)ffListGet(&users, i);
+                FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
                 ffStrbufAppend(&result, &user->name);
             }
             ffStrbufPutTo(&result, stdout);
@@ -47,7 +47,7 @@ void ffPrintUsers(FFUsersOptions* options)
         {
             for(uint32_t i = 0; i < users.length; ++i)
             {
-                FFUserResult* user = (FFUserResult*)ffListGet(&users, i);
+                FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
 
                 ffPrintLogoAndKey(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
@@ -66,7 +66,7 @@ void ffPrintUsers(FFUsersOptions* options)
     {
         for(uint32_t i = 0; i < users.length; ++i)
         {
-            FFUserResult* user = (FFUserResult*)ffListGet(&users, i);
+            FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
 
             FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_USERS_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 FF_FORMAT_ARG(user->name, "name"),

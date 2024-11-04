@@ -19,7 +19,7 @@ FFDisplayResult* ffdsAppendDisplay(
     if(width == 0 || height == 0)
         return NULL;
 
-    FFDisplayResult* display = ffListAdd(&result->displays);
+    FFDisplayResult* display = (FFDisplayResult*) ffListAdd(&result->displays);
     display->width = width;
     display->height = height;
     display->refreshRate = refreshRate;

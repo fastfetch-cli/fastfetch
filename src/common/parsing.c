@@ -72,7 +72,7 @@ static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
     }
 
     if(counter == 0)
-        ffStrbufAppendF(result, "%"PRIu64" %s", bytes, prefixes[0]);
+        ffStrbufAppendF(result, "%" PRIu64 " %s", bytes, prefixes[0]);
     else
         ffStrbufAppendF(result, "%.*f %s", instance.config.display.sizeNdigits, size, prefixes[counter]);
 }

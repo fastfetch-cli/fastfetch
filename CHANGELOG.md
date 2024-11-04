@@ -1,3 +1,30 @@
+# 2.29.0
+
+Changes:
+* Due to [the upstream removal of MSYS2 CLANG32 environment](https://www.msys2.org/news/#2024-09-23-starting-to-drop-the-clang32-environment), we dropped fastfetch-windows-i686 support. v2.27.1 was the last version supporting it.
+    * Note: fastfetch built with MSVCRT has known bug that DateTime module doesn't work because of its bad support of [strftime](https://en.cppreference.com/w/c/chrono/strftime). Don't use it.
+
+Features:
+* Port to NetBSD and DragonFly BSD
+    * Fastfetch now supports all major BSD variants
+* Support DiskIO, NetIO, GPU and Users module on OpenBSD
+* Report SD8E SOC name (CPU, Android)
+* On Windows, try loading dlls from current exe path (Windows)
+    * Fix Media module when installed with winget
+
+Bugfixes:
+* Fix the VIM version detection on Ubuntu (Editor, Linux)
+* Improve performance of OS version detection on Proxmox (#1370, OS, Linux)
+
+Logo:
+* Update OpenSuse Tumbleweed
+* Add XCP-ng
+* Add SummitOS
+* Add Lilidog
+* Update PikaOS
+* Update OpenSUSE Leap
+* Update aperture
+
 # 2.28.0
 
 Features:

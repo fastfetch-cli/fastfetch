@@ -18,7 +18,7 @@
 #include <linux/if.h>
 #endif
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
 #else
@@ -39,7 +39,7 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     { IFF_PROMISC, "PROMISC" },
     { IFF_ALLMULTI, "ALLMULTI" },
     { IFF_MULTICAST, "MULTICAST" },
-#if defined(__linux__) || defined(__APPLE__) || defined(__sun)
+#ifdef IFF_NOTRAILERS
     { IFF_NOTRAILERS, "NOTRAILERS" },
 #endif
 #ifdef __linux__
@@ -52,17 +52,17 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     { IFF_DORMANT, "DORMANT" },
     { IFF_ECHO, "ECHO" },
 #endif
-#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     { IFF_OACTIVE, "OACTIVE" },
     { IFF_SIMPLEX, "SIMPLEX" },
     { IFF_LINK0, "LINK0" },
     { IFF_LINK1, "LINK1" },
     { IFF_LINK2, "LINK2" },
 #endif
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#ifdef IFF_ALTPHYS
     { IFF_ALTPHYS, "ALTPHYS" },
 #endif
-#ifdef __FreeBSD__
+#ifdef IFF_CANTCONFIG
     { IFF_CANTCONFIG, "CANTCONFIG" },
 #endif
     // sentinel
@@ -190,7 +190,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
-        #if __FreeBSD__ || __OpenBSD__ || __APPLE__
+        #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT))
@@ -246,7 +246,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     ifr.ifr_data = (void*) &edata;
                     if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0)
                         iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
-                    #elif __FreeBSD__ || __APPLE__ || __OpenBSD__
+                    #elif __FreeBSD__ || __APPLE__ || __OpenBSD__ || __NetBSD__
                     struct ifmediareq ifmr = {};
                     ffStrCopyN(ifmr.ifm_name, iface->name.chars, IFNAMSIZ);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))

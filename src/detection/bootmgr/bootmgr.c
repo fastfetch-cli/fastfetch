@@ -34,9 +34,9 @@ bool ffEfiFillLoadOption(const FFEfiLoadOption* efiOption, FFBootmgrResult* resu
         ffEfiUcs2ToUtf8(efiOption->Description, &result->name);
 
     for (
-        ffEfiDevicePathProtocol* filePathList = (void*) &efiOption->Description[descLen + 1];
+        ffEfiDevicePathProtocol* filePathList = (ffEfiDevicePathProtocol*) &efiOption->Description[descLen + 1];
         filePathList->Type != 0x7F; // End of Hardware Device Path
-        filePathList = (void*) ((uint8_t*) filePathList + filePathList->Length))
+        filePathList = (ffEfiDevicePathProtocol*) ((uint8_t*) filePathList + filePathList->Length))
     {
         if (filePathList->Type == 4 && filePathList->SubType == 4)
         {

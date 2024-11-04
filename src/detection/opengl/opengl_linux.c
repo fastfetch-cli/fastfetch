@@ -120,7 +120,7 @@ static const char* detectByGlx(FFOpenGLResult* result)
     GLXData data;
 
     FF_LIBRARY_LOAD(glx, "dlopen glx failed",
-        #if !__OpenBSD__
+        #if !__OpenBSD__ && !__NetBSD__
             "libGLX"
         #else
             "libGL"

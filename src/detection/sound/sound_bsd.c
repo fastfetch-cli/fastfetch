@@ -10,6 +10,9 @@ const char* ffDetectSound(FFlist* devices)
     char path[] = "/dev/mixer0";
     int defaultDev = ffSysctlGetInt("hw.snd.default_unit", -1);
 
+    if (defaultDev == -1)
+        return "sysctl(hw.snd.default_unit) failed";
+
     for (int idev = 0; idev <= 9; ++idev)
     {
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
@@ -23,8 +26,7 @@ const char* ffDetectSound(FFlist* devices)
             continue;
 
         uint32_t mutemask = 0;
-        if (ioctl(fd, SOUND_MIXER_READ_MUTE, &mutemask) < 0)
-            continue;
+        ioctl(fd, SOUND_MIXER_READ_MUTE, &mutemask); // doesn't seem to be available on DragonFly
 
         struct oss_card_info ci = { .card = idev };
         if (ioctl(fd, SNDCTL_CARDINFO, &ci) < 0)

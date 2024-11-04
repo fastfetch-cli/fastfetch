@@ -46,7 +46,7 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
     });
 }
 
-static void getUbuntuFlavour(FFOSResult* result)
+FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
 {
     const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
     if(!ffStrSet(xdgConfigDirs))
@@ -143,7 +143,7 @@ static void getUbuntuFlavour(FFOSResult* result)
     }
 }
 
-static void getDebianVersion(FFOSResult* result)
+FF_MAYBE_UNUSED static void getDebianVersion(FFOSResult* result)
 {
     FF_STRBUF_AUTO_DESTROY debianVersion = ffStrbufCreate();
     ffAppendFileBuffer("/etc/debian_version", &debianVersion);
@@ -153,7 +153,7 @@ static void getDebianVersion(FFOSResult* result)
     ffStrbufSet(&result->versionID, &debianVersion);
 }
 
-static bool detectDebianDerived(FFOSResult* result)
+FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
 {
     if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Armbian 24.2.1 bookworm
     {
@@ -179,6 +179,13 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetS(&result->idLike, "debian");
         return true;
     }
+    else if (ffStrbufStartsWithS(&result->name, "Lilidog GNU/Linux"))
+    {
+        // https://github.com/fastfetch-cli/fastfetch/issues/1373
+        ffStrbufSetS(&result->id, "lilidog");
+        ffStrbufSetS(&result->idLike, "debian");
+        return true;
+    }
     else if (access("/usr/bin/pveversion", X_OK) == 0)
     {
         ffStrbufSetS(&result->id, "pve");
@@ -186,13 +193,13 @@ static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetS(&result->name, "Proxmox VE");
         ffStrbufClear(&result->versionID);
         if (ffProcessAppendStdOut(&result->versionID, (char* const[]) {
-            "/usr/bin/pveversion",
+            "/usr/bin/dpkg-query",
+            "--showformat=${version}",
+            "--show",
+            "pve-manager",
             NULL,
-        }) == NULL) // pve-manager/8.2.2/9355359cd7afbae4 (running kernel: 6.8.4-2-pve)
-        {
-            ffStrbufSubstrBeforeLastC(&result->versionID, '/');
-            ffStrbufSubstrAfterFirstC(&result->versionID, '/');
-        }
+        }) == NULL) // 8.2.2
+            ffStrbufTrimRightSpace(&result->versionID);
         ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
         return true;
     }
@@ -258,6 +265,7 @@ void ffDetectOSImpl(FFOSResult* os)
 {
     detectOS(os);
 
+    #ifdef __linux__
     if(ffStrbufIgnCaseEqualS(&os->id, "ubuntu"))
         getUbuntuFlavour(os);
     else if(ffStrbufIgnCaseEqualS(&os->id, "debian"))
@@ -265,4 +273,5 @@ void ffDetectOSImpl(FFOSResult* os)
         if (!detectDebianDerived(os))
             getDebianVersion(os);
     }
+    #endif
 }

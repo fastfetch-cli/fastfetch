@@ -12,7 +12,7 @@
 #ifdef __APPLE__
     #include <libproc.h>
     #include <sys/sysctl.h>
-#elif defined(__FreeBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     #include <sys/sysctl.h>
 #endif
 
@@ -24,10 +24,16 @@ static void getExePath(FFPlatform* platform)
         exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
         int exePathLen = proc_pidpath((int) getpid(), exePath, sizeof(exePath));
-    #elif defined(__FreeBSD__)
+    #elif defined(__FreeBSD__) || defined(__NetBSD__)
         size_t exePathLen = sizeof(exePath);
         if(sysctl(
-            (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()}, 4,
+            (int[]){CTL_KERN,
+            #ifdef __FreeBSD__
+                KERN_PROC, KERN_PROC_PATHNAME, (int) getpid()
+            #else
+                KERN_PROC_ARGS, (int) getpid(), KERN_PROC_PATHNAME
+            #endif
+            }, 4,
             exePath, &exePathLen,
             NULL, 0
         ) < 0)
@@ -179,7 +185,7 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     ffStrbufAppendS(&info->architecture, uts->machine);
     ffStrbufInit(&info->displayVersion);
 
-    #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__)
+    #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     size_t length = sizeof(info->pageSize);
     sysctl((int[]){ CTL_HW, HW_PAGESIZE }, 2, &info->pageSize, &length, NULL, 0);
     #else

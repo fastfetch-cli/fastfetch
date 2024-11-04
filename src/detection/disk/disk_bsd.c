@@ -5,7 +5,17 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 
+#ifdef __NetBSD__
+#include <sys/types.h>
+#include <sys/statvfs.h>
+#define getfsstat(...) getvfsstat(__VA_ARGS__)
+#define statfs statvfs
+#define f_flags f_flag
+#define f_bsize f_frsize
+#endif
+
 #ifdef __FreeBSD__
+#if __has_include(<libgeom.h>)
 #include <libgeom.h>
 
 static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
@@ -42,6 +52,12 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
 
     return NULL;
 }
+#else
+static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
+{
+    return "Fastfetch was compiled without libgeom support";
+}
+#endif
 
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
@@ -51,7 +67,7 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
             ? FF_DISK_VOLUME_TYPE_REGULAR_BIT
             : FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
     }
-    else if(ffStrbufStartsWithS(&disk->mountpoint, "/boot") || ffStrbufStartsWithS(&disk->mountpoint, "/efi"))
+    else if(fs->f_flags & MNT_IGNORE)
         disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(!(fs->f_flags & MNT_LOCAL))
         disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
@@ -95,7 +111,15 @@ void detectFsInfo(struct statfs* fs, FFDisk* disk)
 #else
 static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 {
-    FF_UNUSED(fs, disk);
+    #ifdef MNT_IGNORE
+    if(fs->f_flags & MNT_IGNORE)
+        disk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
+    else
+    #endif
+    if(!(fs->f_flags & MNT_LOCAL))
+        disk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
+    else
+        disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
 }
 #endif
 
@@ -117,7 +141,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             if(!ffDiskMatchMountpoint(options, fs->f_mntonname))
                 continue;
         }
-        else if(!ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
+        else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
             continue;
 
         #ifdef __FreeBSD__
@@ -151,10 +175,11 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         #ifdef __OpenBSD__
         #define st_birthtimespec __st_birthtim
         #endif
-
+        #ifndef __DragonFly__
         struct stat st;
         if(stat(fs->f_mntonname, &st) == 0 && st.st_birthtimespec.tv_sec > 0)
             disk->createTime = (uint64_t)((st.st_birthtimespec.tv_sec * 1000) + (st.st_birthtimespec.tv_nsec / 1000000));
+        #endif
     }
 
     return NULL;

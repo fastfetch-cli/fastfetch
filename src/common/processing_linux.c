@@ -23,9 +23,12 @@
 #elif defined(__sun)
     #include <procfs.h>
 #elif defined(__OpenBSD__)
-#include <sys/param.h>
-#include <sys/sysctl.h>
-#include <kvm.h>
+    #include <sys/param.h>
+    #include <sys/sysctl.h>
+    #include <kvm.h>
+#elif defined(__NetBSD__)
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -202,7 +205,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         }
     }
 
-    #elif defined(__FreeBSD__)
+    #elif defined(__FreeBSD__) || defined(__NetBSD__)
 
     size_t size = ARG_MAX;
     FF_AUTO_FREE char* args = malloc(size);
@@ -210,7 +213,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     static_assert(ARG_MAX > PATH_MAX, "");
 
     if(exePath && sysctl(
-        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, pid}, 4,
+        (int[]){CTL_KERN,
+        #if __FreeBSD__
+            KERN_PROC, KERN_PROC_PATHNAME, pid
+        #else
+            KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME
+        #endif
+        }, 4,
         args, &size,
         NULL, 0
     ) == 0)
@@ -218,7 +227,13 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     size = ARG_MAX;
     if(sysctl(
-        (int[]){CTL_KERN, KERN_PROC, KERN_PROC_ARGS, pid}, 4,
+        (int[]){CTL_KERN,
+            #if __FreeBSD__
+                KERN_PROC, KERN_PROC_ARGS, pid
+            #else
+                KERN_PROC_ARGS, pid, KERN_PROC_ARGV,
+            #endif
+        }, 4,
         args, &size,
         NULL, 0
     ) == 0)
@@ -352,6 +367,13 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
 
     #elif defined(__FreeBSD__)
 
+    #ifdef __DragonFly__
+        #define ki_comm kp_comm
+        #define ki_ppid kp_ppid
+        #define ki_tdev kp_tdev
+        #define ki_flag kp_flags
+    #endif
+
     struct kinfo_proc proc;
     size_t size = sizeof(proc);
     if(sysctl(
@@ -369,6 +391,34 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         if (proc.ki_tdev != NODEV && proc.ki_flag & P_CONTROLT)
         {
             const char* ttyName = devname(proc.ki_tdev, S_IFCHR);
+            if (ffStrStartsWith(ttyName, "pts/"))
+                *tty = (int32_t) strtol(ttyName + strlen("pts/"), NULL, 10);
+            else
+                *tty = -1;
+        }
+        else
+            *tty = -1;
+    }
+
+    #elif defined(__NetBSD__)
+
+    struct kinfo_proc2 proc;
+    size_t size = sizeof(proc);
+    if(sysctl(
+        (int[]){CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid, sizeof(proc), 1}, 6,
+        &proc, &size,
+        NULL, 0
+    ) != 0)
+        return "sysctl(KERN_PROC_PID) failed";
+
+    ffStrbufSetS(name, proc.p_comm);
+    if (ppid)
+        *ppid = (pid_t)proc.p_ppid;
+    if (tty)
+    {
+        if (proc.p_flag & P_CONTROLT)
+        {
+            const char* ttyName = devname(proc.p_tdev, S_IFCHR);
             if (ffStrStartsWith(ttyName, "pts/"))
                 *tty = (int32_t) strtol(ttyName + strlen("pts/"), NULL, 10);
             else

@@ -381,7 +381,7 @@ jobs:
           run: |
             uname -a
             sudo pkg update
-            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm libelf glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py311-requests
+            sudo pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py311-requests chafa
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
@@ -395,6 +395,41 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-freebsd-amd64
+          path: ./fastfetch-*.*
+
+  dragonfly-amd64:
+    name: DragonFly-amd64
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: vmactions/dragonflybsd-vm@v1
+        with:
+          usesh: yes
+          prepare: |
+            uname -a
+            pkg update
+            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl libosmesa opencl ocl-icd v4l_compat py39-requests chafa libelf
+
+          run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-dragonfly-amd64
           path: ./fastfetch-*.*
 
   openbsd-amd64:
@@ -417,8 +452,8 @@ jobs:
           version: '7.5'
           run: |
             uname -a
-            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+            sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio py3-requests
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=ON .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
             time ./fastfetch -c presets/ci.jsonc --stat false
@@ -431,6 +466,42 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-openbsd-amd64
+          path: ./fastfetch-*.*
+
+  netbsd-amd64:
+    name: NetBSD-amd64
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: netbsd
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          version: '10.0'
+          run: |
+            uname -a
+            sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick pulseaudio opencl-headers ocl-icd py312-requests
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=ON .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-netbsd-amd64
           path: ./fastfetch-*.*
 
   windows-amd64:
@@ -498,76 +569,6 @@ jobs:
           name: fastfetch-windows-amd64
           path: ./fastfetch-windows-amd64.*
 
-  windows-i686:
-    name: Windows-i686
-    runs-on: windows-latest
-    permissions:
-      security-events: write
-      contents: read
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: setup-msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW32
-          update: true
-          install: git p7zip mingw-w64-i686-cmake mingw-w64-i686-clang mingw-w64-i686-vulkan-loader mingw-w64-i686-vulkan-headers mingw-w64-i686-opencl-icd mingw-w64-i686-opencl-headers
-
-      - name: print msys version
-        run: uname -a
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: c, cpp
-
-      - name: configure project
-        run: env PKG_CONFIG_PATH=/mingw32/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-
-      - name: build project
-        run: cmake --build . --verbose -j4
-
-      - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-
-      - name: copy necessary dlls
-        run: cp /mingw32/bin/{OpenCL,vulkan-1}.dll .
-
-      - name: download amd_ags
-        run: curl -LO https://github.com/GPUOpen-LibrariesAndSDKs/AGS_SDK/raw/master/ags_lib/lib/amd_ags_x86.dll
-
-      - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --stat false
-
-      - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
-
-      - name: run flashfetch
-        run: time ./flashfetch
-
-      - name: print dependencies
-        run: ldd fastfetch
-
-      - name: run tests
-        run: ctest
-
-      - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-i686.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
-
-      - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-i686.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-windows-i686
-          path: ./fastfetch-windows-i686.*
-
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
@@ -581,9 +582,10 @@ jobs:
       - macos-universal
       - freebsd-amd64
       - openbsd-amd64
+      - netbsd-amd64
+      - dragonfly-amd64
       - sunos-amd64
       - windows-amd64
-      - windows-i686
     permissions:
       contents: write
     steps:

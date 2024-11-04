@@ -25,7 +25,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
     {
         for(uint8_t i = 0; i < (uint8_t) results.length; i++)
         {
-            FFPowerAdapterResult* result = ffListGet(&results, i);
+            FFPowerAdapterResult* result = FF_LIST_GET(FFPowerAdapterResult, results, i);
 
             if(options->moduleArgs.outputFormat.length == 0)
             {

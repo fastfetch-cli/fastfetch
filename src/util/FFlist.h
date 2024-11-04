@@ -17,11 +17,7 @@ typedef struct FFlist
     uint32_t capacity;
 } FFlist;
 
-void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity);
-
 void* ffListAdd(FFlist* list);
-
-FF_C_NODISCARD uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*));
 
 // Removes the first element, and copy its value to `*result`
 bool ffListShift(FFlist* list, void* result);
@@ -37,6 +33,13 @@ static inline void ffListInit(FFlist* list, uint32_t elementSize)
     list->data = NULL;
 }
 
+static inline void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
+{
+    ffListInit(list, elementSize);
+    list->capacity = capacity;
+    list->data = __builtin_expect(capacity == 0, 0) ? NULL : (char*) malloc((size_t)list->capacity * list->elementSize);
+}
+
 static inline FFlist ffListCreate(uint32_t elementSize)
 {
     FFlist result;
@@ -48,6 +51,17 @@ static inline void* ffListGet(const FFlist* list, uint32_t index)
 {
     assert(list->capacity > index);
     return list->data + (index * list->elementSize);
+}
+
+FF_C_NODISCARD static inline uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
+{
+    for(uint32_t i = 0; i < list->length; i++)
+    {
+        if(compFunc(ffListGet(list, i), compElement))
+            return i;
+    }
+
+    return list->length;
 }
 
 static inline bool ffListContains(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))

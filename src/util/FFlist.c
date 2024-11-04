@@ -3,14 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capacity)
-{
-    list->elementSize = elementSize;
-    list->capacity = capacity;
-    list->length = 0;
-    list->data = capacity == 0 ? NULL : malloc((size_t)list->capacity * list->elementSize);
-}
-
 void* ffListAdd(FFlist* list)
 {
     if(list->length == list->capacity)
@@ -22,17 +14,6 @@ void* ffListAdd(FFlist* list)
 
     ++list->length;
     return ffListGet(list, list->length - 1);
-}
-
-uint32_t ffListFirstIndexComp(const FFlist* list, void* compElement, bool(*compFunc)(const void*, const void*))
-{
-    for(uint32_t i = 0; i < list->length; i++)
-    {
-        if(compFunc(ffListGet(list, i), compElement))
-            return i;
-    }
-
-    return list->length;
 }
 
 bool ffListShift(FFlist* list, void* result)
