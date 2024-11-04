@@ -761,8 +761,8 @@ elseif(OpenBSD)
         src/common/sysctl.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_nosupport.c
-        src/detection/bluetooth/bluetooth_nosupport.c
-        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/bluetooth/bluetooth_linux.c
+        src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/board/board_nosupport.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
