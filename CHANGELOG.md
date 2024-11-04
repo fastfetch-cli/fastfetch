@@ -9,6 +9,8 @@ Features:
     * Fastfetch now supports all major BSD variants
 * Support DiskIO, NetIO, GPU and Users module on OpenBSD
 * Report SD8E SOC name (CPU, Android)
+* On Windows, try loading dlls from current exe path (Windows)
+    * Fix Media module when installed with winget
 
 Bugfixes:
 * Fix the VIM version detection on Ubuntu (Editor, Linux)
