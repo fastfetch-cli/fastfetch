@@ -28,6 +28,8 @@
     #define FF_SYSNAME "Linux"
 #elif defined(__DragonFly__) // We define `__FreeBSD__` on DragonFly BSD for simplification
     #define FF_SYSNAME "DragonFly"
+#elif defined(__MidnightBSD__)
+    #define FF_SYSNAME "MidnightBSD"
 #elif defined(__FreeBSD__)
     #define FF_SYSNAME "FreeBSD"
 #elif defined(__APPLE__)
