@@ -21,6 +21,8 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
         FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInitS(&device->name, ioDevice.name.UTF8String);
         ffStrbufInitS(&device->address, ioDevice.addressString.UTF8String);
+        ffStrbufReplaceAllC(&device->address, '-', ':');
+        ffStrbufUpperCase(&device->address);
         ffStrbufInit(&device->type);
 
         if (ioDevice.batteryPercentSingle)
