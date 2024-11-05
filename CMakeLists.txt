@@ -915,6 +915,7 @@ elseif(WIN32)
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
+        src/detection/bluetooth/bluetooth_windows.cpp
         src/detection/bluetoothradio/bluetoothradio_windows.c
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_windows.c
@@ -1428,6 +1429,7 @@ elseif(WIN32)
         PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
+        PRIVATE "propsys"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch
