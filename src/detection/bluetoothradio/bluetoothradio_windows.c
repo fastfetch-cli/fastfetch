@@ -84,12 +84,12 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 
         BLUETOOTH_ADDRESS_STRUCT addr = { .ullLong = blri.localInfo.address };
         ffStrbufInitF(&device->address, "%02x:%02x:%02x:%02x:%02x:%02x",
-            addr.rgBytes[0],
-            addr.rgBytes[1],
-            addr.rgBytes[2],
-            addr.rgBytes[3],
+            addr.rgBytes[5],
             addr.rgBytes[4],
-            addr.rgBytes[5]);
+            addr.rgBytes[3],
+            addr.rgBytes[2],
+            addr.rgBytes[1],
+            addr.rgBytes[0]);
 
         device->lmpVersion = blri.radioInfo.lmpVersion;
         device->lmpSubversion = blri.radioInfo.lmpSubversion;
