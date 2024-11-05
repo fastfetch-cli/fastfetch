@@ -29,7 +29,9 @@ void ffPrintMonitor(FFMonitorOptions* options)
         ffStrbufClear(&key);
         if(options->moduleArgs.key.length == 0)
         {
-            ffStrbufAppendF(&key, "%s (%s)", FF_MONITOR_MODULE_NAME, display->name.chars);
+            ffStrbufAppendS(&key, FF_MONITOR_MODULE_NAME);
+            if (display->name.length > 0)
+                ffStrbufAppendF(&key, " (%s)", display->name.chars);
         }
         else
         {
