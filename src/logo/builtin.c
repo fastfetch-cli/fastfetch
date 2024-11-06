@@ -2392,7 +2392,7 @@ static const FFlogo L[] = {
     // Lilidog
     {
         .names = {"Lilidog"},
-        .lines = FASTFETCH_DATATEXT_LOGO_LIBREELEC,
+        .lines = FASTFETCH_DATATEXT_LOGO_LILIDOG,
         .colors = {
             FF_COLOR_FG_BLUE,
         },
