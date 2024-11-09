@@ -121,5 +121,8 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 
     ffBluetoothFindDeviceClose(hFind);
 
+    const char* ffBluetoothDetectBattery(FFlist* result);
+    ffBluetoothDetectBattery(devices);
+
     return NULL;
 }

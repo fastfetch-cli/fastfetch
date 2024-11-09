@@ -22,13 +22,7 @@ struct FFWmiRecord
 {
     IWbemClassObject* obj = nullptr;
 
-    explicit FFWmiRecord(IEnumWbemClassObject* pEnumerator) {
-        if(!pEnumerator) return;
-
-        ULONG ret;
-        bool ok = SUCCEEDED(pEnumerator->Next(instance.config.general.wmiTimeout, 1, &obj, &ret)) && ret;
-        if(!ok) obj = nullptr;
-    }
+    explicit FFWmiRecord(IWbemClassObject* obj): obj(obj) {};
     FFWmiRecord(const FFWmiRecord&) = delete;
     FFWmiRecord(FFWmiRecord&& other) { *this = (FFWmiRecord&&)other; }
     ~FFWmiRecord() { if(obj) obj->Release(); }
@@ -71,7 +65,11 @@ struct FFWmiQuery
     }
 
     FFWmiRecord next() {
-        FFWmiRecord result(pEnumerator);
+        IWbemClassObject* obj = nullptr;
+        ULONG ret;
+        pEnumerator->Next(instance.config.general.wmiTimeout, 1, &obj, &ret);
+
+        FFWmiRecord result(obj);
         return result;
     }
 };
