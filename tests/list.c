@@ -116,7 +116,7 @@ int main(void)
 
     {
         FF_LIST_AUTO_DESTROY test = ffListCreate(1);
-        VERIFY(test.elementSize = 1);
+        VERIFY(test.elementSize == 1);
         VERIFY(test.capacity == 0);
         VERIFY(test.length == 0);
     }
