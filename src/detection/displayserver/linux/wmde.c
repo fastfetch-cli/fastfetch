@@ -8,16 +8,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef __FreeBSD__
+#if __FreeBSD__
     #include <sys/sysctl.h>
     #include <sys/types.h>
     #include <sys/user.h>
-#elif defined(__OpenBSD__)
+#elif __OpenBSD__
     #include <sys/param.h>
     #include <sys/sysctl.h>
     #include <kvm.h>
-#elif defined(__sun)
+#elif __sun
     #include <procfs.h>
+#elif __NetBSD__
+    #include <sys/types.h>
+    #include <sys/sysctl.h>
 #endif
 
 static const char* parseEnv(void)
@@ -387,6 +390,29 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 
         if(result->wmPrettyName.length == 0)
             applyNameIfWM(result, processName.chars);
+
+        if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
+            break;
+    }
+#elif __NetBSD__
+    int request[] = {CTL_KERN, KERN_PROC2, KERN_PROC_UID, (int) userId, sizeof(struct kinfo_proc2), INT_MAX};
+
+    size_t size = 0;
+    if(sysctl(request, ARRAY_SIZE(request), NULL, &size, NULL, 0) != 0)
+        return "sysctl(KERN_PROC_UID, NULL) failed";
+
+    FF_AUTO_FREE struct kinfo_proc2* procs = malloc(size);
+
+    if(sysctl(request, ARRAY_SIZE(request), procs, &size, NULL, 0) != 0)
+        return "sysctl(KERN_PROC_UID, procs) failed";
+
+    for(struct kinfo_proc2* proc = procs; proc < procs + (size / sizeof(struct kinfo_proc2)); proc++)
+    {
+        if(result->dePrettyName.length == 0)
+            applyPrettyNameIfDE(result, proc->p_comm);
+
+        if(result->wmPrettyName.length == 0)
+            applyNameIfWM(result, proc->p_comm);
 
         if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
             break;
