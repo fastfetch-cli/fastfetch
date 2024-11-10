@@ -10,7 +10,7 @@
 #define FF_DISK_NUM_FORMAT_ARGS 14
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
-static void printDisk(FFDiskOptions* options, const FFDisk* disk)
+static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index)
 {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
@@ -35,11 +35,12 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk)
     }
     else
     {
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 4, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 5, ((FFformatarg[]){
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->name, "name"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+            FF_FORMAT_ARG(index, "index"),
         }));
     }
 
@@ -150,12 +151,13 @@ void ffPrintDisk(FFDiskOptions* options)
     }
     else
     {
+        uint32_t index = 0;
         FF_LIST_FOR_EACH(FFDisk, disk, disks)
         {
             if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
                 continue;
 
-            printDisk(options, disk);
+            printDisk(options, disk, ++index);
         }
     }
 
