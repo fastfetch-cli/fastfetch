@@ -4602,6 +4602,15 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Unifi
+    {
+        .names = {"Unifi"},
+        .lines = FASTFETCH_DATATEXT_LOGO_UNIFI,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Univalent
     {
         .names = {"Univalent"},
