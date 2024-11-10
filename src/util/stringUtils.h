@@ -80,6 +80,7 @@ static inline bool ffCharIsDigit(char c)
     return '0' <= c && c <= '9';
 }
 
+// ffStrCopyN copies at most (nDst - 1) bytes from src to dst
 static inline char* ffStrCopyN(char* __restrict__ dst, const char* __restrict__ src, size_t nDst)
 {
     assert(dst != NULL);

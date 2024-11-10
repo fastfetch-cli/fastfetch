@@ -14,7 +14,7 @@ static void createSubfolders(const char* fileName)
     while((token = strchr(fileName, '/')) != NULL)
     {
         uint32_t length = (uint32_t)(token - fileName + 1);
-        pathTail = ffStrCopyN(pathTail, fileName, length);
+        pathTail = ffStrCopyN(pathTail, fileName, length + 1);
         CreateDirectoryA(path, NULL);
         fileName = token + 1;
     }
