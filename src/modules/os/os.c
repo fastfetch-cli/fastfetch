@@ -224,10 +224,10 @@ void ffInitOSOptions(FFOSOptions* options)
             ""
         #elif __FreeBSD__
             "󰣠"
-        #elif __linux__
-            ""
         #elif __ANDROID__
             ""
+        #elif __linux__
+            ""
         #elif __sun
             ""
         #elif __OpenBSD__
