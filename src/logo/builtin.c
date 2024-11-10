@@ -2809,6 +2809,16 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // MidnightBSD
+    {
+        .names = {"MidnightBSD"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MIDNIGHTBSD,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // MidOS
     {
         .names = {"MidOS"},
