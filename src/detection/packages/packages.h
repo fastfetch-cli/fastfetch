@@ -25,17 +25,18 @@ typedef struct FFPackagesResult
     uint32_t nixUser;
     uint32_t opkg;
     uint32_t pacman;
+    uint32_t pacstall;
     uint32_t paludis;
     uint32_t pkg;
     uint32_t pkgtool;
     uint32_t macports;
+    uint32_t mport;
     uint32_t rpm;
     uint32_t scoop;
     uint32_t snap;
     uint32_t sorcery;
     uint32_t winget;
     uint32_t xbps;
-    uint32_t pacstall;
 
     uint32_t all; //Make sure this goes last
 

@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 38
+#define FF_PACKAGES_NUM_FORMAT_ARGS 39
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -73,6 +73,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE_NAME(guixHome, "guix-home")
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(pacstall)
+        FF_PRINT_PACKAGE(mport)
 
         putchar('\n');
     }
@@ -117,6 +118,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.guixHome, "guix-home"),
             FF_FORMAT_ARG(counts.linglong, "linglong"),
             FF_FORMAT_ARG(counts.pacstall, "pacstall"),
+            FF_FORMAT_ARG(counts.mport, "mport"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -179,6 +181,7 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     break;
                 case 'M': if (false);
                     FF_TEST_PACKAGE_NAME(MACPORTS)
+                    FF_TEST_PACKAGE_NAME(MPORT)
                     break;
                 case 'N': if (false);
                     FF_TEST_PACKAGE_NAME(NIX)
@@ -279,7 +282,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'F': if (false);
                             FF_TEST_PACKAGE_NAME(FLATPAK)
                             break;
-                       case 'G': if (false);
+                        case 'G': if (false);
                             FF_TEST_PACKAGE_NAME(GUIX)
                             break;
                         case 'L': if (false);
@@ -289,6 +292,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             break;
                         case 'M': if (false);
                             FF_TEST_PACKAGE_NAME(MACPORTS)
+                            FF_TEST_PACKAGE_NAME(MPORT)
                             break;
                         case 'N': if (false);
                             FF_TEST_PACKAGE_NAME(NIX)
@@ -353,6 +357,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(LPKG)
         FF_TEST_PACKAGE_NAME(LPKGBUILD)
         FF_TEST_PACKAGE_NAME(MACPORTS)
+        FF_TEST_PACKAGE_NAME(MPORT)
         FF_TEST_PACKAGE_NAME(NIX)
         FF_TEST_PACKAGE_NAME(OPKG)
         FF_TEST_PACKAGE_NAME(PACMAN)
@@ -418,6 +423,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(guixHome)
     FF_APPEND_PACKAGE_COUNT(linglong)
     FF_APPEND_PACKAGE_COUNT(pacstall)
+    FF_APPEND_PACKAGE_COUNT(mport)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
@@ -458,6 +464,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of guix-home packages - guix-home",
         "Number of linglong packages - linglong",
         "Number of pacstall packages - pacstall",
+        "Number of mport packages - mport",
         "Total number of all nix packages - nix-all",
         "Total number of all flatpak app packages - flatpak-all",
         "Total number of all brew packages - brew-all",
