@@ -1070,6 +1070,14 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Cosmic DE
+    {
+        .names = {"Cosmic"},
+        .lines = FASTFETCH_DATATEXT_LOGO_COSMIC,
+        .colors = {FF_COLOR_FG_WHITE, FF_COLOR_FG_LIGHT_YELLOW, FF_COLOR_FG_YELLOW, FF_COLOR_FG_LIGHT_RED, FF_COLOR_FG_RED},
+        .colorKeys = FF_COLOR_FG_LIGHT_RED,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // CRUX
     {
         .names = {"CRUX"},
