@@ -8,12 +8,14 @@
 
 static void createSubfolders(const char* fileName)
 {
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    char path[MAX_PATH];
     char *token = NULL;
+    char *pathTail = path;
     while((token = strchr(fileName, '/')) != NULL)
     {
-        ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);
-        CreateDirectoryA(path.chars, NULL);
+        uint32_t length = (uint32_t)(token - fileName + 1);
+        pathTail = ffStrCopyN(pathTail, fileName, length);
+        CreateDirectoryA(path, NULL);
         fileName = token + 1;
     }
 }
