@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 39
+#define FF_PACKAGES_NUM_FORMAT_ARGS 40
 
 void ffPrintPackages(FFPackagesOptions* options)
 {
@@ -74,6 +74,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(pacstall)
         FF_PRINT_PACKAGE(mport)
+        FF_PRINT_PACKAGE(qi)
 
         putchar('\n');
     }
@@ -119,6 +120,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.linglong, "linglong"),
             FF_FORMAT_ARG(counts.pacstall, "pacstall"),
             FF_FORMAT_ARG(counts.mport, "mport"),
+            FF_FORMAT_ARG(counts.qi, "qi"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -195,6 +197,9 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     FF_TEST_PACKAGE_NAME(PALUDIS)
                     FF_TEST_PACKAGE_NAME(PKG)
                     FF_TEST_PACKAGE_NAME(PKGTOOL)
+                    break;
+                case 'Q': if (false);
+                    FF_TEST_PACKAGE_NAME(QI)
                     break;
                 case 'R': if (false);
                     FF_TEST_PACKAGE_NAME(RPM)
@@ -307,6 +312,9 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             FF_TEST_PACKAGE_NAME(PKG)
                             FF_TEST_PACKAGE_NAME(PKGTOOL)
                             break;
+                        case 'Q': if (false);
+                            FF_TEST_PACKAGE_NAME(QI)
+                            break;
                         case 'R': if (false);
                             FF_TEST_PACKAGE_NAME(RPM)
                             break;
@@ -365,6 +373,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(PALUDIS)
         FF_TEST_PACKAGE_NAME(PKG)
         FF_TEST_PACKAGE_NAME(PKGTOOL)
+        FF_TEST_PACKAGE_NAME(QI)
         FF_TEST_PACKAGE_NAME(RPM)
         FF_TEST_PACKAGE_NAME(SCOOP)
         FF_TEST_PACKAGE_NAME(SNAP)
@@ -393,6 +402,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     #define FF_APPEND_PACKAGE_COUNT(name) yyjson_mut_obj_add_uint(doc, obj, #name, counts.name);
 
     FF_APPEND_PACKAGE_COUNT(all)
+    FF_APPEND_PACKAGE_COUNT(am)
     FF_APPEND_PACKAGE_COUNT(apk)
     FF_APPEND_PACKAGE_COUNT(brew)
     FF_APPEND_PACKAGE_COUNT(brewCask)
@@ -402,34 +412,34 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(eopkg)
     FF_APPEND_PACKAGE_COUNT(flatpakSystem)
     FF_APPEND_PACKAGE_COUNT(flatpakUser)
-    FF_APPEND_PACKAGE_COUNT(nixDefault)
-    FF_APPEND_PACKAGE_COUNT(nixSystem)
-    FF_APPEND_PACKAGE_COUNT(nixUser)
-    FF_APPEND_PACKAGE_COUNT(pacman)
-    FF_APPEND_PACKAGE_COUNT(paludis)
-    FF_APPEND_PACKAGE_COUNT(pkg)
-    FF_APPEND_PACKAGE_COUNT(pkgtool)
-    FF_APPEND_PACKAGE_COUNT(macports)
-    FF_APPEND_PACKAGE_COUNT(rpm)
-    FF_APPEND_PACKAGE_COUNT(scoop)
-    FF_APPEND_PACKAGE_COUNT(snap)
-    FF_APPEND_PACKAGE_COUNT(winget)
-    FF_APPEND_PACKAGE_COUNT(xbps)
-    FF_APPEND_PACKAGE_COUNT(opkg)
-    FF_APPEND_PACKAGE_COUNT(am)
-    FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(guixSystem)
     FF_APPEND_PACKAGE_COUNT(guixUser)
     FF_APPEND_PACKAGE_COUNT(guixHome)
     FF_APPEND_PACKAGE_COUNT(linglong)
-    FF_APPEND_PACKAGE_COUNT(pacstall)
     FF_APPEND_PACKAGE_COUNT(mport)
+    FF_APPEND_PACKAGE_COUNT(nixDefault)
+    FF_APPEND_PACKAGE_COUNT(nixSystem)
+    FF_APPEND_PACKAGE_COUNT(nixUser)
+    FF_APPEND_PACKAGE_COUNT(opkg)
+    FF_APPEND_PACKAGE_COUNT(pacman)
+    FF_APPEND_PACKAGE_COUNT(pacstall)
+    FF_APPEND_PACKAGE_COUNT(paludis)
+    FF_APPEND_PACKAGE_COUNT(pkg)
+    FF_APPEND_PACKAGE_COUNT(pkgtool)
+    FF_APPEND_PACKAGE_COUNT(qi)
+    FF_APPEND_PACKAGE_COUNT(macports)
+    FF_APPEND_PACKAGE_COUNT(rpm)
+    FF_APPEND_PACKAGE_COUNT(scoop)
+    FF_APPEND_PACKAGE_COUNT(snap)
+    FF_APPEND_PACKAGE_COUNT(sorcery)
+    FF_APPEND_PACKAGE_COUNT(winget)
+    FF_APPEND_PACKAGE_COUNT(xbps)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
 void ffPrintPackagesHelpFormat(void)
 {
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home), {33} (linglong)", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
+    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home), {33} (linglong), {34} (pacstall), {35} (mport), {36} qi", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
         "Number of all packages - all",
         "Number of pacman packages - pacman",
         "Pacman branch on manjaro - pacman-branch",
@@ -465,6 +475,7 @@ void ffPrintPackagesHelpFormat(void)
         "Number of linglong packages - linglong",
         "Number of pacstall packages - pacstall",
         "Number of mport packages - mport",
+        "Number of qi packages - qi",
         "Total number of all nix packages - nix-all",
         "Total number of all flatpak app packages - flatpak-all",
         "Total number of all brew packages - brew-all",

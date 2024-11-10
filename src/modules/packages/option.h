@@ -34,6 +34,7 @@ typedef enum FFPackagesFlags
     FF_PACKAGES_FLAG_LINGLONG_BIT = 1 << 24,
     FF_PACKAGES_FLAG_PACSTALL_BIT = 1 << 25,
     FF_PACKAGES_FLAG_MPORT_BIT = 1 << 26,
+    FF_PACKAGES_FLAG_QI_BIT = 1 << 27,
 } FFPackagesFlags;
 
 typedef struct FFPackagesOptions
