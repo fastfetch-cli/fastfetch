@@ -194,7 +194,7 @@ See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
 
 Neofetch incorrectly counts `rc` packages ( the package has been removed, but that the configuration files remain ). Bug https://github.com/dylanaraps/neofetch/issues/2278
 
-### Q: I use Debian / Ubuntu / Debian deserved distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is it a bug?
+### Q: I use Debian / Ubuntu / Debian derived distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is it a bug?
 
 Try upgrading `pci.ids`: Download <https://pci-ids.ucw.cz/v2.2/pci.ids> and overwrite file `/usr/share/hwdata/pci.ids`. For AMD GPUs, you should also upgrade `amdgpu.ids`: Download <https://gitlab.freedesktop.org/mesa/drm/-/raw/main/data/amdgpu.ids> and overwrite file `/usr/share/libdrm/amdgpu.ids`
 
