@@ -23,14 +23,13 @@
 
 static void createSubfolders(const char* fileName)
 {
-    char path[PATH_MAX];
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+
     char *token = NULL;
-    char *pathTail = path;
     while((token = strchr(fileName, '/')) != NULL)
     {
-        uint32_t length = (uint32_t)(token - fileName + 1);
-        pathTail = ffStrCopyN(pathTail, fileName, length);
-        mkdir(path, S_IRWXU | S_IRGRP | S_IROTH);
+        ffStrbufAppendNS(&path, (uint32_t)(token - fileName + 1), fileName);
+        mkdir(path.chars, S_IRWXU | S_IRGRP | S_IROTH);
         fileName = token + 1;
     }
 }
