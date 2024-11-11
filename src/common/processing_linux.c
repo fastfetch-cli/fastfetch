@@ -158,10 +158,8 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
     if (sysctl(mibs, ARRAY_SIZE(mibs), NULL, &len, NULL, 0) == 0)
     {// try get arg0
-        #ifndef MAC_OS_X_VERSION_10_15
         //don't know why if don't let len longer, proArgs2 and len will change during the following sysctl() in old MacOS version.
         len++;
-        #endif
         FF_AUTO_FREE char* const procArgs2 = malloc(len);
         if (sysctl(mibs, ARRAY_SIZE(mibs), procArgs2, &len, NULL, 0) == 0)
         {
