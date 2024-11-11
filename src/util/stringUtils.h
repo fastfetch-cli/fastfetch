@@ -80,12 +80,12 @@ static inline bool ffCharIsDigit(char c)
     return '0' <= c && c <= '9';
 }
 
-static inline char* ffStrCopyN(char* __restrict__ dst, const char* __restrict__ src, size_t nDst)
+// Copies at most (dstBufSiz - 1) bytes from src to dst; dst is always null-terminated
+static inline char* ffStrCopy(char* __restrict__ dst, const char* __restrict__ src, size_t dstBufSiz)
 {
-    assert(dst != NULL);
     if (__builtin_expect(dst == NULL, false)) return dst;
 
-    size_t len = strnlen(src, nDst - 1);
+    size_t len = strnlen(src, dstBufSiz - 1);
     memcpy(dst, src, len);
     dst[len] = '\0';
     return dst + len;
