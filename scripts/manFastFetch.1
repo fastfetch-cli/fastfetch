@@ -1,0 +1,712 @@
+.TH man 1 "Nov 11 2024" "Fastfetch 1.0" "Fastfetch man page"
+.SH NAME
+\fifastfetch\fp - a neofetch-like tool for fetching system information and displaying them in a pretty way
+.SH SYNOPSIS
+.B fastfetch
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+A maintained, feature-rich and performance oriented, neofetch like system information tool.
+.SH OPTIONS
+.SS Informative:
+.TP
+\fB\-h, \-\-help\fR [\fI?command\fP]
+ Show this message, or help for a specific command 
+
+.TP
+\fB\-v, \-\-version\fR 
+ Show the full version of fastfetch 
+
+.TP
+\fB\-\-version-raw\fR 
+ Show the raw version string (major.minor.patch) 
+
+.TP
+\fB\-\-list-config-paths\fR 
+ List search paths of config files 
+
+.TP
+\fB\-\-list-data-paths\fR 
+ List search paths of presets and logos 
+
+.TP
+\fB\-\-list-logos\fR 
+ List available logos 
+
+.TP
+\fB\-\-list-modules\fR 
+ List available modules 
+
+.TP
+\fB\-\-list-presets\fR 
+ List presets fastfetch knows about 
+
+.TP
+\fB\-\-list-features\fR 
+ List the supported features fastfetch was compiled with 
+
+.TP
+\fB\-\-print-logos\fR 
+ Print available logos 
+
+.TP
+\fB\-\-print-structure\fR 
+ Print the default structure 
+
+.TP
+\fB\-\-format\fR enum
+ Set output format 
+
+.SS Config:
+.TP
+\fB\-c, \-\-config\fR config
+ Specify the config file or preset to be loaded 
+
+.TP
+\fB\-\-gen-config\fR [\fI?path\fP]
+ Generate a config file to specified path with options specified in the command line (if any) 
+
+.TP
+\fB\-\-gen-config-force\fR [\fI?path\fP]
+ Generate a config file to specified path. Overwrite the existing one 
+
+.SS General:
+.TP
+\fB\-\-thread\fR [\fI?bool\fP]
+ Use separate threads to send HTTP requests 
+
+.TP
+\fB\-\-escape-bedrock\fR [\fI?bool\fP]
+ On Bedrock Linux, whether to escape the bedrock jail 
+
+.TP
+\fB\-\-wmi-timeout\fR num
+ Set the timeout (ms) for WMI queries 
+
+.TP
+\fB\-\-processing-timeout\fR num
+ Set the timeout (ms) when waiting for child processes 
+
+.TP
+\fB\-\-ds-force-drm\fR [\fI?enum\fP]
+ Set if only DRM should be used to detect displays 
+
+.TP
+\fB\-\-detect-version\fR [\fI?bool\fP]
+ Whether to detect and display the version of terminal, shell and editor 
+
+.SS Logo:
+.TP
+\fB\-l, \-\-logo\fR logo
+ Set the logo source. Use "none" to disable the logo 
+
+.TP
+\fB\-\-logo-type\fR enum
+ Set the type of the logo given in "--logo" 
+
+.TP
+\fB\-\-logo-width\fR num
+ Set the width of the logo (in characters), if it is an image 
+
+.TP
+\fB\-\-logo-height\fR num
+ Set the height of the logo (in characters), if it is an image 
+
+.TP
+\fB\-\-logo-preserve-aspect-ratio\fR [\fI?bool\fP]
+ Set if the logo should fill the specified width and height as much as possible without stretching 
+
+.TP
+\fB\-\-logo-color-[1-9]\fR color
+ Overwrite a color in the logo 
+
+.TP
+\fB\-\-logo-padding\fR num
+ Set the padding on the left and the right of the logo 
+
+.TP
+\fB\-\-logo-padding-left\fR num
+ Set the padding on the left of the logo 
+
+.TP
+\fB\-\-logo-padding-right\fR num
+ Set the padding on the right of the logo 
+
+.TP
+\fB\-\-logo-padding-top\fR num
+ Set the padding on the top of the logo 
+
+.TP
+\fB\-\-logo-print-remaining\fR [\fI?bool\fP]
+ Whether to print the remaining logo, if it has more lines than modules to display 
+
+.TP
+\fB\-\-logo-position\fR enum
+ Set the position of the logo should be displayed 
+
+.TP
+\fB\-\-logo-recache\fR [\fI?bool\fP]
+ If true, regenerate image logo cache 
+
+.TP
+\fB\-\-file\fR path
+ Short for --logo-type file --logo <path> 
+
+.TP
+\fB\-\-file-raw\fR path
+ Short for --logo-type file-raw --logo <path> 
+
+.TP
+\fB\-\-data\fR data
+ Short for --logo-type data --logo <data> 
+
+.TP
+\fB\-\-data-raw\fR data
+ Short for --logo-type data-raw --logo <data> 
+
+.TP
+\fB\-\-raw\fR path
+ Short for --logo-type raw --logo <path> 
+
+.TP
+\fB\-\-sixel\fR path
+ Short for --logo-type sixel --logo <path> 
+
+.TP
+\fB\-\-kitty\fR path
+ Short for --logo-type kitty --logo <path> 
+
+.TP
+\fB\-\-kitty-direct\fR path
+ Short for --logo-type kitty-direct --logo <path> 
+
+.TP
+\fB\-\-iterm\fR path
+ Short for --logo-type iterm --logo <path> 
+
+.TP
+\fB\-\-chafa\fR path
+ Short for --logo-type chafa --logo <path> 
+
+.TP
+\fB\-\-chafa-fg-only\fR [\fI?bool\fP]
+ Produce character-cell output using foreground colors only 
+
+.TP
+\fB\-\-chafa-symbols\fR str
+ Specify character symbols to employ in final output 
+
+.TP
+\fB\-\-chafa-canvas-mode\fR enum
+ Determine how colors are used in the output 
+
+.TP
+\fB\-\-chafa-color-space\fR enum
+ Set color space used for quantization 
+
+.TP
+\fB\-\-chafa-dither-mode\fR enum
+ Set output dither mode (No effect with 24-bit color) 
+
+.SS Display:
+.TP
+\fB\-s, \-\-structure\fR structure
+ Set the structure of the fetch 
+
+.TP
+\fB\-\-stat\fR [\fI?bool\fP]
+ Show time usage (in ms) for individual modules 
+
+.TP
+\fB\-\-pipe\fR [\fI?bool\fP]
+ Disable colors 
+
+.TP
+\fB\-\-color-keys\fR color
+ Set the color of the keys 
+
+.TP
+\fB\-\-color-title\fR color
+ Set the color of the title 
+
+.TP
+\fB\-\-color-output\fR color
+ Set the color of module output 
+
+.TP
+\fB\-\-color-separator\fR color
+ Set the color of the key-value separator 
+
+.TP
+\fB\-\-color\fR color
+ Set the color of both the keys and title 
+
+.TP
+\fB\-\-key-width\fR num
+ Align the width of keys to <num> characters 
+
+.TP
+\fB\-\-key-padding-left\fR num
+ Set the left padding of keys to <num> characters 
+
+.TP
+\fB\-\-key-type\fR enum
+ Set whether to show icon before string keys 
+
+.TP
+\fB\-\-bright-color\fR [\fI?bool\fP]
+ Set if the keys, title and ASCII logo should be printed in bright color 
+
+.TP
+\fB\-\-separator\fR str
+ Set the separator between key and value 
+
+.TP
+\fB\-\-show-errors\fR [\fI?bool\fP]
+ Print occurring errors 
+
+.TP
+\fB\-\-disable-linewrap\fR [\fI?bool\fP]
+ Whether to disable line wrap during the run 
+
+.TP
+\fB\-\-hide-cursor\fR [\fI?bool\fP]
+ Whether to hide the cursor during the run 
+
+.TP
+\fB\-\-percent-type\fR num
+ Set the percentage output type 
+
+.TP
+\fB\-\-percent-ndigits\fR num
+ Set the number of digits to keep after the decimal point when formatting percentage numbers 
+
+.TP
+\fB\-\-percent-color-green\fR color
+ Set color used in green state of percentage bars and numbers 
+
+.TP
+\fB\-\-percent-color-yellow\fR color
+ Set color used in yellow state of percentage bars and numbers 
+
+.TP
+\fB\-\-percent-color-red\fR color
+ Set color used in red state of percentage bars and numbers 
+
+.TP
+\fB\-\-bar-char-elapsed\fR str
+ Set the character to use in elapsed part of percentage bars 
+
+.TP
+\fB\-\-bar-char-total\fR str
+ Set the character to use in total part of percentage bars 
+
+.TP
+\fB\-\-bar-border-left\fR string
+ Set the string to use at left border of percentage bars 
+
+.TP
+\fB\-\-bar-border-right\fR string
+ Set the string to use at right border of percentage bars 
+
+.TP
+\fB\-\-bar-width\fR num
+ Set the width of percentage bars, in number of characters 
+
+.TP
+\fB\-\-no-buffer\fR [\fI?bool\fP]
+ Set if the stdout application buffer should be disabled 
+
+.TP
+\fB\-\-size-ndigits\fR num
+ Set the number of digits to keep after the decimal point when formatting sizes 
+
+.TP
+\fB\-\-size-binary-prefix\fR enum
+ Set the binary prefix to used when formatting sizes 
+
+.TP
+\fB\-\-size-max-prefix\fR enum
+ Set the largest binary prefix to use when formatting sizes 
+
+.TP
+\fB\-\-freq-ndigits\fR num
+ Set the number of digits to keep after the decimal point when printing CPU / GPU frequency in GHz 
+
+.TP
+\fB\-\-temp-unit\fR enum
+ Set the unit of the temperature 
+
+.TP
+\fB\-\-temp-ndigits\fR num
+ Set the number of digits to keep after the decimal point when printing temperature 
+
+.TP
+\fB\-\-temp-color-green\fR color
+ Set color used in green state of temperature values 
+
+.TP
+\fB\-\-temp-color-yellow\fR color
+ Set color used in yellow state of temperature values 
+
+.TP
+\fB\-\-temp-color-red\fR color
+ Set color used in red state of temperature values 
+
+.SS Module specific:
+.TP
+\fB\-\-title-fqdn\fR [\fI?bool\fP]
+ Set if the title should use fully qualified domain name 
+
+.TP
+\fB\-\-title-color-user\fR color
+ Set color of the user name (left part) 
+
+.TP
+\fB\-\-title-color-at\fR color
+ Set color of the @ symbol (middle part) 
+
+.TP
+\fB\-\-title-color-host\fR color
+ Set color of the host name (right part) 
+
+.TP
+\fB\-\-separator-string\fR str
+ Set the string to be printed by the separator line 
+
+.TP
+\fB\-\-separator-output-color\fR color
+ Set the color of the separator line 
+
+.TP
+\fB\-\-separator-length\fR num
+ Set the length of the separator line 
+
+.TP
+\fB\-\-disk-folders\fR path
+ A colon (semicolon on Windows) separated list of folder paths to be detected 
+
+.TP
+\fB\-\-disk-show-regular\fR [\fI?bool\fP]
+ Set if regular volume should be printed 
+
+.TP
+\fB\-\-disk-show-external\fR [\fI?bool\fP]
+ Set if external volume should be printed 
+
+.TP
+\fB\-\-disk-show-hidden\fR [\fI?bool\fP]
+ Set if hidden volumes should be printed 
+
+.TP
+\fB\-\-disk-show-subvolumes\fR [\fI?bool\fP]
+ Set if subvolumes should be printed 
+
+.TP
+\fB\-\-disk-show-readonly\fR [\fI?bool\fP]
+ Set if read only volumes should be printed 
+
+.TP
+\fB\-\-disk-show-unknown\fR [\fI?bool\fP]
+ Set if unknown (unable to detect sizes) volumes should be printed 
+
+.TP
+\fB\-\-disk-use-available\fR [\fI?bool\fP]
+ Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes 
+
+.TP
+\fB\-\-diskio-detect-total\fR bool
+ Detect total bytes instead of current rate 
+
+.TP
+\fB\-\-diskio-name-prefix\fR str
+ Show disks with given name prefix only 
+
+.TP
+\fB\-\-diskio-wait-time\fR num
+ Set the wait time (in ms) when detecting disk usage 
+
+.TP
+\fB\-\-physicaldisk-name-prefix\fR str
+ Show disks with given name prefix only 
+
+.TP
+\fB\-\-physicaldisk-temp\fR [\fI?bool\fP]
+ Detect and display SSD temperature if supported 
+
+.TP
+\fB\-\-bluetooth-show-disconnected\fR [\fI?bool\fP]
+ Set if disconnected bluetooth devices should be printed 
+
+.TP
+\fB\-\-packages-disabled\fR string
+ A colon separated list of package managers to be disabled when detecting 
+
+.TP
+\fB\-\-display-compact-type\fR enum
+ Set if all displays should be printed in one line 
+
+.TP
+\fB\-\-display-precise-refresh-rate\fR [\fI?bool\fP]
+ Set if decimal refresh rates should not be rounded into integers when printing 
+
+.TP
+\fB\-\-display-order\fR enum
+ Set the order should be used when printing displays 
+
+.TP
+\fB\-\-brightness-ddcci-sleep\fR num
+ Set the sleep times (in ms) when sending DDC/CI requests 
+
+.TP
+\fB\-\-brightness-compact\fR bool
+ Set if multiple results should be printed in one line 
+
+.TP
+\fB\-\-sound-type\fR enum
+ Set what type of sound devices should be printed 
+
+.TP
+\fB\-\-battery-use-setup-api\fR [\fI?bool\fP]
+ Set if "SetupAPI" should be used on Windows to detect battery info 
+
+.TP
+\fB\-\-cpu-temp\fR [\fI?bool\fP]
+ Detect and display CPU temperature if supported 
+
+.TP
+\fB\-\-cpu-show-pe-core-count\fR [\fI?bool\fP]
+ Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported 
+
+.TP
+\fB\-\-cpucache-compact\fR [\fI?bool\fP]
+ Show all CPU caches in one line 
+
+.TP
+\fB\-\-cpuusage-separate\fR [\fI?bool\fP]
+ Display CPU usage per CPU logical core, instead of an average result 
+
+.TP
+\fB\-\-cpuusage-wait-time\fR num
+ Set the wait time (in ms) when detecting CPU usage 
+
+.TP
+\fB\-\-de-slow-version-detection\fR [\fI?bool\fP]
+ Set if DE version should be detected with slow operations 
+
+.TP
+\fB\-\-gpu-temp\fR [\fI?bool\fP]
+ Detect and display GPU temperature if supported 
+
+.TP
+\fB\-\-gpu-driver-specific\fR [\fI?bool\fP]
+ Use driver specific method to detect more detailed GPU information (memory usage, core count, etc) 
+
+.TP
+\fB\-\-gpu-detection-method\fR enum
+ Force using a specified method to detect GPUs 
+
+.TP
+\fB\-\-gpu-hide-type\fR enum
+ Specify the type of GPUs should not be printed 
+
+.TP
+\fB\-\-battery-temp\fR [\fI?bool\fP]
+ Detect and display Battery temperature if supported 
+
+.TP
+\fB\-\-loadavg-ndigits\fR num
+ Set the number of digits to keep after the decimal point when printing load average 
+
+.TP
+\fB\-\-loadavg-compact\fR [\fI?bool\fP]
+ Show load average values in one line 
+
+.TP
+\fB\-\-localip-show-ipv4\fR [\fI?bool\fP]
+ Show IPv4 addresses in local ip module 
+
+.TP
+\fB\-\-localip-show-ipv6\fR [\fI?bool\fP]
+ Show IPv6 addresses in local ip module 
+
+.TP
+\fB\-\-localip-show-mac\fR [\fI?bool\fP]
+ Show mac addresses in local ip module 
+
+.TP
+\fB\-\-localip-show-loop\fR [\fI?bool\fP]
+ Show loop back addresses (127.0.0.1) in local ip module 
+
+.TP
+\fB\-\-localip-show-mtu\fR [\fI?bool\fP]
+ Show net interface's MTU (Maximum Transmission Unit) size in bytes 
+
+.TP
+\fB\-\-localip-show-speed\fR [\fI?bool\fP]
+ Show net interface's link speed with human-readable format (or an 1Mb units integer in JSON format) 
+
+.TP
+\fB\-\-localip-show-prefix-len\fR [\fI?bool\fP]
+ Show network prefix length (/N) in local ip module 
+
+.TP
+\fB\-\-localip-name-prefix\fR str
+ Show interfaces with given interface name prefix only 
+
+.TP
+\fB\-\-localip-default-route-only\fR [\fI?bool\fP]
+ Show the interface that is used for default routing only 
+
+.TP
+\fB\-\-localip-show-all-ips\fR [\fI?bool\fP]
+ Show all IPs bound to the same interface. By default only the first IP is shown 
+
+.TP
+\fB\-\-localip-show-flags\fR [\fI?bool\fP]
+ Show net interface flags in local ip module 
+
+.TP
+\fB\-\-localip-compact\fR [\fI?bool\fP]
+ Show all IPs in one line 
+
+.TP
+\fB\-\-dns-show-type\fR enum
+ Specify the type of DNS servers should be detected 
+
+.TP
+\fB\-\-netio-name-prefix\fR str
+ Show interfaces with given name prefix only 
+
+.TP
+\fB\-\-netio-default-route-only\fR [\fI?bool\fP]
+ Show the interfac that is used for default routing only 
+
+.TP
+\fB\-\-netio-detect-total\fR bool
+ Detect total bytes instead of current rate 
+
+.TP
+\fB\-\-netio-wait-time\fR num
+ Set the wait time (in ms) when detecting network usage 
+
+.TP
+\fB\-\-publicip-timeout\fR num
+ Time in milliseconds to wait for the public ip server to respond 
+
+.TP
+\fB\-\-publicip-url\fR str
+ The URL of public IP detection server to be used 
+
+.TP
+\fB\-\-publicip-ipv6\fR bool
+ Whether to use IPv6 for public IP detection server 
+
+.TP
+\fB\-\-weather-location\fR str
+ Set the location to be used 
+
+.TP
+\fB\-\-weather-timeout\fR num
+ Time in milliseconds to wait for the weather server to respond 
+
+.TP
+\fB\-\-weather-output-format\fR str
+ The output weather format to be used 
+
+.TP
+\fB\-\-wm-detect-plugin\fR [\fI?bool\fP]
+ Set if window manager plugin should be detected on supported platforms 
+
+.TP
+\fB\-\-users-compact\fR [\fI?bool\fP]
+ Show all active users in one line 
+
+.TP
+\fB\-\-users-myself-only\fR [\fI?bool\fP]
+ Show only current user 
+
+.TP
+\fB\-\-player-name\fR str
+ The name of the player to use for module Media and Player 
+
+.TP
+\fB\-\-opengl-library\fR enum
+ Set the OpenGL context creation library to use 
+
+.TP
+\fB\-\-command-shell\fR str
+ Set the shell program to execute the command text 
+
+.TP
+\fB\-\-command-param\fR str
+ Set the parameter used when starting the shell 
+
+.TP
+\fB\-\-command-key\fR str
+ Set the module key to display 
+
+.TP
+\fB\-\-command-text\fR str
+ Set the command text to be executed 
+
+.TP
+\fB\-\-colors-symbol\fR enum
+ Set the symbol to be printed by Colors module 
+
+.TP
+\fB\-\-colors-padding-left\fR num
+ Set the number of white spaces to print before the symbol 
+
+.TP
+\fB\-\-colors-block-width\fR num
+ Set the block width in spaces 
+
+.TP
+\fB\-\-colors-block-range-start\fR num
+ Set the start range of colors in the blocks to print 
+
+.TP
+\fB\-\-colors-block-range-end\fR num
+ Set the end range of colors in the blocks to print 
+
+.SS General module:
+.TP
+\fB\-\-<module>-format\fR format
+ ['Set the format string to use for each specific module', 'To see how a format string works, use "fastfetch -h format".', 'To see help about a specific format string, use "fastfetch -h <module>-format"'] 
+
+.TP
+\fB\-\-<module>-key\fR key
+ ['Set the key to use for each specific module.', 'For modules which print multiple lines, the string is parsed', 'as a format string with the index as first character'] 
+
+.TP
+\fB\-\-<module>-key-color\fR color
+ Override the global "--color-keys" option for each specific module 
+
+.TP
+\fB\-\-<module>-key-icon\fR string
+ Set the icon to be displayed by "--key-type icon" 
+
+.TP
+\fB\-\-<module>-output-color\fR color
+ Override the global "--color-output" option for each specific module 
+
+.TP
+\fB\-\-<module>-key-width\fR num
+ Override the global "--key-width" option for each specific module 
+
+.TP
+\fB\-\-<module>-percent-green\fR num
+ ['Threshold of percentage colors', 'Value less then percent-green will be shown in green'] 
+
+.TP
+\fB\-\-<module>-percent-yellow\fR num
+ ['Threshold of percentage colors', 'Value greater than percent-green and less then yellow will be shown in yellow', 'Value greater than percent-yellow will be shown in red'] 
+
+.TP
+\fB\-\-<module>-temp-green\fR num
+ ['Threshold of temperature colors', 'Value less then temp-green will be shown in green'] 
+
+.TP
+\fB\-\-<module>-temp-yellow\fR num
+ ['Threshold of temperature colors', 'Value greater than temp-green and less then yellow will be shown in yellow', 'Value greater than temp-yellow will be shown in red'] 
+
