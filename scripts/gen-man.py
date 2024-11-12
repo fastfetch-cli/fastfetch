@@ -63,9 +63,6 @@ endUnderline = "\\fR" # end underline text tag
 startBold = "\\fB" # start bold text tag
 endBold = "\\fR" # end bold text tag
 
-startItalic = "\\fI" # start italic text tag
-endItalic = "\\fP" # end italic text tag
-
 
 ###### Argument decoration ######
 
@@ -73,10 +70,10 @@ endItalic = "\\fP" # end italic text tag
 
 # if an optional argument is displayed as [?optArg] (with "optArg" underlined)
 # this value should be f"[?{startUnderline}"
-startOptionalArgument = f"[{startItalic}?"
+startOptionalArgument = f"[{startUnderline}?"
 # if an optional argument is displayed as [?optArg] (with "optArg underlined")
 # this value should be f"{endUnderline}]"
-endOptionalArgument = f"{endItalic}]" 
+endOptionalArgument = f"{endUnderline}]" 
 
 ### mandatory arguments tags ###
 startMandatoryArgument = f"{startUnderline}" 
