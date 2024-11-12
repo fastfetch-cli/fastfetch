@@ -126,7 +126,18 @@ def generateManPage():
 
             print(endBold, end=" ")
             
+            # arguments
+            if "arg" in keyList:
+                # if argument is optional, print "[arg]"
+                if "optional" in option["arg"].keys() and option["arg"]["optional"]:
+                    print(startOptionalArgument + option['arg']['type'] + endOptionalArgument, end="")
+
+                # if argument is mandatory, print "arg"
+                else:
+                    print(startMandatoryArgument + option['arg']['type'] + endMandatoryArgument, end="")
             
+            # description
+            print(f"\n {option['desc']} \n")
 
 
 
