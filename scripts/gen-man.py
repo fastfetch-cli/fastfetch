@@ -11,6 +11,16 @@ from json import load
 from datetime import date
 from re import search
 
+
+###### Text Decorations Tags ######
+
+startUnderline = "\\fI" # start underline text tag
+endUnderline = "\\fR" # end underline text tag
+
+startBold = "\\fB" # start bold text tag
+endBold = "\\fR" # end bold text tag
+
+
 ###### Parameters ######
 
 # path to the JSON option file
@@ -24,6 +34,8 @@ todayDate = date.today().strftime("%b %d %Y") # format : "Month (abbreviation) D
 # file to fastfetch version (left footer)
 pathToVersionFile = "../CMakeLists.txt"
 
+
+###### Sections Text ######
 
 # text displayed in the "NAME" section
 nameSection = "\
@@ -51,18 +63,60 @@ All options can be made permanent with command \
 \\fBfastfetch <options> --gen-config\\fR. \
 "
 
+# text displayed in the "CONFIGURATION"
+configurationSection = f"\
+.SS Fetch Structure \n\
+The structure of a fetch describes the modules that should \
+be included in the output. It consists of a string of modules, \
+separated by a colon (:).  To list all available modules, \
+use --list-modules \
+\n\n\
+.SS Config Files \n\
+Fastfetch uses JSONC based format for configuration. \
+Fastfetch doesn't generate config file automatically; \
+it should be generated manually by {startBold}--gen-config.{endBold} \
+The config file will be saved in \
+{startBold}~/.config/fastfetch/config.jsonc{endBold} by default. \
+\n\n\
+A JSONC config file is a JSON file that also supports comments \
+with (// and /* */).  Those files must have the extension '.jsonc'. \
+\n\n\
+The specified configuration/preset files are searched in the following order: \
+\n\n\
+{startBold}1.{endBold} relative to the current working directory \
+\n\n\
+{startBold}2.{endBold} relative to ~/.local/share/fastfetch/presets/ \
+\n\n\
+{startBold}3.{endBold} relative to /usr/share/fastfetch/presets/ \
+\n\n\
+Fastfetch provides some default presets. List them with --list-presets. \
+"
+
+# text displayed in the "EXAMPLE" section
+exampleSection = "\
+.SS Config files:\n\
+.nf \
+// ~/.config/fastfetch/config.jsonc \n\
+{\n\
+    \"$schema\": \"https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json\",\n\
+    \"modules\": [ \n\
+        \"title\", \n\
+        \"separator\", \n\
+        \"module1\", \n\
+        { \n\
+            \"type\": \"module2\", \n\
+            \"module2-option\": \"value\" \n\
+        } \n\
+    ]\n\
+} \n\
+.fi"
+
 # text displayed in the "BUGS" section
 bugSection = "Please report bugs to : \
 https://github.com/fastfetch-cli/fastfetch/issues"
 
-
-###### Text Decorations Tags ######
-
-startUnderline = "\\fI" # start underline text tag
-endUnderline = "\\fR" # end underline text tag
-
-startBold = "\\fB" # start bold text tag
-endBold = "\\fR" # end bold text tag
+# text displayed in the "WIKI" section
+wikiSection = "Fastfetch github wiki : https://github.com/fastfetch-cli/fastfetch/wiki/Configuration"
 
 
 ###### Argument decoration ######
@@ -108,7 +162,8 @@ def generateManPage():
             for line in versionFile:
                 researchVersion = search("^\s*VERSION (\d+\.\d+\.\d+)$", line) # re.search()
                 if (researchVersion != None):
-                    versionNumber = line[researchVersion.start():researchVersion.end()]
+                    versionNumber = "".join(line[researchVersion.start():researchVersion.end()].split(" "))
+                    versionNumber = versionNumber[:7] + " " + versionNumber[7:]
                     break
 
             versionFile.close()
@@ -137,6 +192,18 @@ def generateManPage():
 
     print(".SH DESCRIPTION")
     print(descriptionSection)
+
+
+    ###### Wiki ######
+
+    print(".SH WIKI")
+    print(wikiSection)
+
+
+    ###### Configuration ######
+
+    print(".SH CONFIGURATION")
+    print(configurationSection)
 
 
     ###### Options ######
@@ -185,11 +252,19 @@ def generateManPage():
             
             # description
             print(f"\n {option['desc']} \n")
+    
+
+    ###### Examples ######
+
+    print(".SH EXAMPLES")
+    print(exampleSection)
+
 
     ###### Bugs ######
 
     print(".SH BUGS")
     print(bugSection)
+
 
 
 
