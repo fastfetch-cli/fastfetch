@@ -21,7 +21,7 @@ versionNumber = "Fastfetch 1.0"
 # title (center header)
 titlePage = "Fastfetch man page" 
 # date (center footer)
-todayDate = date.today().strftime("%b %d %Y") # format : "Month (abreviation) Day Year"
+todayDate = date.today().strftime("%b %d %Y") # format : "Month (abbreviation) Day Year"
 
 
 # text displayed in the "NAME" section
