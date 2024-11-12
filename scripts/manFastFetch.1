@@ -1,12 +1,20 @@
 .TH man 1 "Nov 11 2024" "Fastfetch 1.0" "Fastfetch man page"
 .SH NAME
-\fifastfetch\fp - a neofetch-like tool for fetching system information and displaying them in a pretty way
+fastfetch - a neofetch-like tool for fetching system information and displaying them in a pretty way
 .SH SYNOPSIS
 .B fastfetch
 [\fIOPTIONS\fR]
 .SH DESCRIPTION
 A maintained, feature-rich and performance oriented, neofetch like system information tool.
 .SH OPTIONS
+Parsing is not case sensitive. E.g. \fB--lib-PCI\fR is equal to \fB--Lib-Pci\fR.     
+
+If a value is between square brakets, it is optional. An optional boolean value defaults to true if not specified.     
+
+More detailed help messages for each options can be printed with \fB-h <option_without_dash_prefix>\fR.     
+
+All options can be made permanent with command \fBfastfetch <options> --gen-config\fR. 
+
 .SS Informative:
 .TP
 \fB\-h, \-\-help\fR [\fI?command\fP]
@@ -53,12 +61,12 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Print the default structure 
 
 .TP
-\fB\-\-format\fR enum
+\fB\-\-format\fR \fIenum\fR
  Set output format 
 
 .SS Config:
 .TP
-\fB\-c, \-\-config\fR config
+\fB\-c, \-\-config\fR \fIconfig\fR
  Specify the config file or preset to be loaded 
 
 .TP
@@ -79,11 +87,11 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  On Bedrock Linux, whether to escape the bedrock jail 
 
 .TP
-\fB\-\-wmi-timeout\fR num
+\fB\-\-wmi-timeout\fR \fInum\fR
  Set the timeout (ms) for WMI queries 
 
 .TP
-\fB\-\-processing-timeout\fR num
+\fB\-\-processing-timeout\fR \fInum\fR
  Set the timeout (ms) when waiting for child processes 
 
 .TP
@@ -96,19 +104,19 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
 
 .SS Logo:
 .TP
-\fB\-l, \-\-logo\fR logo
+\fB\-l, \-\-logo\fR \fIlogo\fR
  Set the logo source. Use "none" to disable the logo 
 
 .TP
-\fB\-\-logo-type\fR enum
+\fB\-\-logo-type\fR \fIenum\fR
  Set the type of the logo given in "--logo" 
 
 .TP
-\fB\-\-logo-width\fR num
+\fB\-\-logo-width\fR \fInum\fR
  Set the width of the logo (in characters), if it is an image 
 
 .TP
-\fB\-\-logo-height\fR num
+\fB\-\-logo-height\fR \fInum\fR
  Set the height of the logo (in characters), if it is an image 
 
 .TP
@@ -116,23 +124,23 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Set if the logo should fill the specified width and height as much as possible without stretching 
 
 .TP
-\fB\-\-logo-color-[1-9]\fR color
+\fB\-\-logo-color-[1-9]\fR \fIcolor\fR
  Overwrite a color in the logo 
 
 .TP
-\fB\-\-logo-padding\fR num
+\fB\-\-logo-padding\fR \fInum\fR
  Set the padding on the left and the right of the logo 
 
 .TP
-\fB\-\-logo-padding-left\fR num
+\fB\-\-logo-padding-left\fR \fInum\fR
  Set the padding on the left of the logo 
 
 .TP
-\fB\-\-logo-padding-right\fR num
+\fB\-\-logo-padding-right\fR \fInum\fR
  Set the padding on the right of the logo 
 
 .TP
-\fB\-\-logo-padding-top\fR num
+\fB\-\-logo-padding-top\fR \fInum\fR
  Set the padding on the top of the logo 
 
 .TP
@@ -140,7 +148,7 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Whether to print the remaining logo, if it has more lines than modules to display 
 
 .TP
-\fB\-\-logo-position\fR enum
+\fB\-\-logo-position\fR \fIenum\fR
  Set the position of the logo should be displayed 
 
 .TP
@@ -148,43 +156,43 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  If true, regenerate image logo cache 
 
 .TP
-\fB\-\-file\fR path
+\fB\-\-file\fR \fIpath\fR
  Short for --logo-type file --logo <path> 
 
 .TP
-\fB\-\-file-raw\fR path
+\fB\-\-file-raw\fR \fIpath\fR
  Short for --logo-type file-raw --logo <path> 
 
 .TP
-\fB\-\-data\fR data
+\fB\-\-data\fR \fIdata\fR
  Short for --logo-type data --logo <data> 
 
 .TP
-\fB\-\-data-raw\fR data
+\fB\-\-data-raw\fR \fIdata\fR
  Short for --logo-type data-raw --logo <data> 
 
 .TP
-\fB\-\-raw\fR path
+\fB\-\-raw\fR \fIpath\fR
  Short for --logo-type raw --logo <path> 
 
 .TP
-\fB\-\-sixel\fR path
+\fB\-\-sixel\fR \fIpath\fR
  Short for --logo-type sixel --logo <path> 
 
 .TP
-\fB\-\-kitty\fR path
+\fB\-\-kitty\fR \fIpath\fR
  Short for --logo-type kitty --logo <path> 
 
 .TP
-\fB\-\-kitty-direct\fR path
+\fB\-\-kitty-direct\fR \fIpath\fR
  Short for --logo-type kitty-direct --logo <path> 
 
 .TP
-\fB\-\-iterm\fR path
+\fB\-\-iterm\fR \fIpath\fR
  Short for --logo-type iterm --logo <path> 
 
 .TP
-\fB\-\-chafa\fR path
+\fB\-\-chafa\fR \fIpath\fR
  Short for --logo-type chafa --logo <path> 
 
 .TP
@@ -192,24 +200,24 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Produce character-cell output using foreground colors only 
 
 .TP
-\fB\-\-chafa-symbols\fR str
+\fB\-\-chafa-symbols\fR \fIstr\fR
  Specify character symbols to employ in final output 
 
 .TP
-\fB\-\-chafa-canvas-mode\fR enum
+\fB\-\-chafa-canvas-mode\fR \fIenum\fR
  Determine how colors are used in the output 
 
 .TP
-\fB\-\-chafa-color-space\fR enum
+\fB\-\-chafa-color-space\fR \fIenum\fR
  Set color space used for quantization 
 
 .TP
-\fB\-\-chafa-dither-mode\fR enum
+\fB\-\-chafa-dither-mode\fR \fIenum\fR
  Set output dither mode (No effect with 24-bit color) 
 
 .SS Display:
 .TP
-\fB\-s, \-\-structure\fR structure
+\fB\-s, \-\-structure\fR \fIstructure\fR
  Set the structure of the fetch 
 
 .TP
@@ -221,35 +229,35 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Disable colors 
 
 .TP
-\fB\-\-color-keys\fR color
+\fB\-\-color-keys\fR \fIcolor\fR
  Set the color of the keys 
 
 .TP
-\fB\-\-color-title\fR color
+\fB\-\-color-title\fR \fIcolor\fR
  Set the color of the title 
 
 .TP
-\fB\-\-color-output\fR color
+\fB\-\-color-output\fR \fIcolor\fR
  Set the color of module output 
 
 .TP
-\fB\-\-color-separator\fR color
+\fB\-\-color-separator\fR \fIcolor\fR
  Set the color of the key-value separator 
 
 .TP
-\fB\-\-color\fR color
+\fB\-\-color\fR \fIcolor\fR
  Set the color of both the keys and title 
 
 .TP
-\fB\-\-key-width\fR num
+\fB\-\-key-width\fR \fInum\fR
  Align the width of keys to <num> characters 
 
 .TP
-\fB\-\-key-padding-left\fR num
+\fB\-\-key-padding-left\fR \fInum\fR
  Set the left padding of keys to <num> characters 
 
 .TP
-\fB\-\-key-type\fR enum
+\fB\-\-key-type\fR \fIenum\fR
  Set whether to show icon before string keys 
 
 .TP
@@ -257,7 +265,7 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Set if the keys, title and ASCII logo should be printed in bright color 
 
 .TP
-\fB\-\-separator\fR str
+\fB\-\-separator\fR \fIstr\fR
  Set the separator between key and value 
 
 .TP
@@ -273,43 +281,43 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Whether to hide the cursor during the run 
 
 .TP
-\fB\-\-percent-type\fR num
+\fB\-\-percent-type\fR \fInum\fR
  Set the percentage output type 
 
 .TP
-\fB\-\-percent-ndigits\fR num
+\fB\-\-percent-ndigits\fR \fInum\fR
  Set the number of digits to keep after the decimal point when formatting percentage numbers 
 
 .TP
-\fB\-\-percent-color-green\fR color
+\fB\-\-percent-color-green\fR \fIcolor\fR
  Set color used in green state of percentage bars and numbers 
 
 .TP
-\fB\-\-percent-color-yellow\fR color
+\fB\-\-percent-color-yellow\fR \fIcolor\fR
  Set color used in yellow state of percentage bars and numbers 
 
 .TP
-\fB\-\-percent-color-red\fR color
+\fB\-\-percent-color-red\fR \fIcolor\fR
  Set color used in red state of percentage bars and numbers 
 
 .TP
-\fB\-\-bar-char-elapsed\fR str
+\fB\-\-bar-char-elapsed\fR \fIstr\fR
  Set the character to use in elapsed part of percentage bars 
 
 .TP
-\fB\-\-bar-char-total\fR str
+\fB\-\-bar-char-total\fR \fIstr\fR
  Set the character to use in total part of percentage bars 
 
 .TP
-\fB\-\-bar-border-left\fR string
+\fB\-\-bar-border-left\fR \fIstring\fR
  Set the string to use at left border of percentage bars 
 
 .TP
-\fB\-\-bar-border-right\fR string
+\fB\-\-bar-border-right\fR \fIstring\fR
  Set the string to use at right border of percentage bars 
 
 .TP
-\fB\-\-bar-width\fR num
+\fB\-\-bar-width\fR \fInum\fR
  Set the width of percentage bars, in number of characters 
 
 .TP
@@ -317,39 +325,39 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Set if the stdout application buffer should be disabled 
 
 .TP
-\fB\-\-size-ndigits\fR num
+\fB\-\-size-ndigits\fR \fInum\fR
  Set the number of digits to keep after the decimal point when formatting sizes 
 
 .TP
-\fB\-\-size-binary-prefix\fR enum
+\fB\-\-size-binary-prefix\fR \fIenum\fR
  Set the binary prefix to used when formatting sizes 
 
 .TP
-\fB\-\-size-max-prefix\fR enum
+\fB\-\-size-max-prefix\fR \fIenum\fR
  Set the largest binary prefix to use when formatting sizes 
 
 .TP
-\fB\-\-freq-ndigits\fR num
+\fB\-\-freq-ndigits\fR \fInum\fR
  Set the number of digits to keep after the decimal point when printing CPU / GPU frequency in GHz 
 
 .TP
-\fB\-\-temp-unit\fR enum
+\fB\-\-temp-unit\fR \fIenum\fR
  Set the unit of the temperature 
 
 .TP
-\fB\-\-temp-ndigits\fR num
+\fB\-\-temp-ndigits\fR \fInum\fR
  Set the number of digits to keep after the decimal point when printing temperature 
 
 .TP
-\fB\-\-temp-color-green\fR color
+\fB\-\-temp-color-green\fR \fIcolor\fR
  Set color used in green state of temperature values 
 
 .TP
-\fB\-\-temp-color-yellow\fR color
+\fB\-\-temp-color-yellow\fR \fIcolor\fR
  Set color used in yellow state of temperature values 
 
 .TP
-\fB\-\-temp-color-red\fR color
+\fB\-\-temp-color-red\fR \fIcolor\fR
  Set color used in red state of temperature values 
 
 .SS Module specific:
@@ -358,31 +366,31 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Set if the title should use fully qualified domain name 
 
 .TP
-\fB\-\-title-color-user\fR color
+\fB\-\-title-color-user\fR \fIcolor\fR
  Set color of the user name (left part) 
 
 .TP
-\fB\-\-title-color-at\fR color
+\fB\-\-title-color-at\fR \fIcolor\fR
  Set color of the @ symbol (middle part) 
 
 .TP
-\fB\-\-title-color-host\fR color
+\fB\-\-title-color-host\fR \fIcolor\fR
  Set color of the host name (right part) 
 
 .TP
-\fB\-\-separator-string\fR str
+\fB\-\-separator-string\fR \fIstr\fR
  Set the string to be printed by the separator line 
 
 .TP
-\fB\-\-separator-output-color\fR color
+\fB\-\-separator-output-color\fR \fIcolor\fR
  Set the color of the separator line 
 
 .TP
-\fB\-\-separator-length\fR num
+\fB\-\-separator-length\fR \fInum\fR
  Set the length of the separator line 
 
 .TP
-\fB\-\-disk-folders\fR path
+\fB\-\-disk-folders\fR \fIpath\fR
  A colon (semicolon on Windows) separated list of folder paths to be detected 
 
 .TP
@@ -414,19 +422,19 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes 
 
 .TP
-\fB\-\-diskio-detect-total\fR bool
+\fB\-\-diskio-detect-total\fR \fIbool\fR
  Detect total bytes instead of current rate 
 
 .TP
-\fB\-\-diskio-name-prefix\fR str
+\fB\-\-diskio-name-prefix\fR \fIstr\fR
  Show disks with given name prefix only 
 
 .TP
-\fB\-\-diskio-wait-time\fR num
+\fB\-\-diskio-wait-time\fR \fInum\fR
  Set the wait time (in ms) when detecting disk usage 
 
 .TP
-\fB\-\-physicaldisk-name-prefix\fR str
+\fB\-\-physicaldisk-name-prefix\fR \fIstr\fR
  Show disks with given name prefix only 
 
 .TP
@@ -438,11 +446,11 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Set if disconnected bluetooth devices should be printed 
 
 .TP
-\fB\-\-packages-disabled\fR string
+\fB\-\-packages-disabled\fR \fIstring\fR
  A colon separated list of package managers to be disabled when detecting 
 
 .TP
-\fB\-\-display-compact-type\fR enum
+\fB\-\-display-compact-type\fR \fIenum\fR
  Set if all displays should be printed in one line 
 
 .TP
@@ -450,19 +458,19 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Set if decimal refresh rates should not be rounded into integers when printing 
 
 .TP
-\fB\-\-display-order\fR enum
+\fB\-\-display-order\fR \fIenum\fR
  Set the order should be used when printing displays 
 
 .TP
-\fB\-\-brightness-ddcci-sleep\fR num
+\fB\-\-brightness-ddcci-sleep\fR \fInum\fR
  Set the sleep times (in ms) when sending DDC/CI requests 
 
 .TP
-\fB\-\-brightness-compact\fR bool
+\fB\-\-brightness-compact\fR \fIbool\fR
  Set if multiple results should be printed in one line 
 
 .TP
-\fB\-\-sound-type\fR enum
+\fB\-\-sound-type\fR \fIenum\fR
  Set what type of sound devices should be printed 
 
 .TP
@@ -486,7 +494,7 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Display CPU usage per CPU logical core, instead of an average result 
 
 .TP
-\fB\-\-cpuusage-wait-time\fR num
+\fB\-\-cpuusage-wait-time\fR \fInum\fR
  Set the wait time (in ms) when detecting CPU usage 
 
 .TP
@@ -502,11 +510,11 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Use driver specific method to detect more detailed GPU information (memory usage, core count, etc) 
 
 .TP
-\fB\-\-gpu-detection-method\fR enum
+\fB\-\-gpu-detection-method\fR \fIenum\fR
  Force using a specified method to detect GPUs 
 
 .TP
-\fB\-\-gpu-hide-type\fR enum
+\fB\-\-gpu-hide-type\fR \fIenum\fR
  Specify the type of GPUs should not be printed 
 
 .TP
@@ -514,7 +522,7 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Detect and display Battery temperature if supported 
 
 .TP
-\fB\-\-loadavg-ndigits\fR num
+\fB\-\-loadavg-ndigits\fR \fInum\fR
  Set the number of digits to keep after the decimal point when printing load average 
 
 .TP
@@ -550,7 +558,7 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Show network prefix length (/N) in local ip module 
 
 .TP
-\fB\-\-localip-name-prefix\fR str
+\fB\-\-localip-name-prefix\fR \fIstr\fR
  Show interfaces with given interface name prefix only 
 
 .TP
@@ -570,11 +578,11 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Show all IPs in one line 
 
 .TP
-\fB\-\-dns-show-type\fR enum
+\fB\-\-dns-show-type\fR \fIenum\fR
  Specify the type of DNS servers should be detected 
 
 .TP
-\fB\-\-netio-name-prefix\fR str
+\fB\-\-netio-name-prefix\fR \fIstr\fR
  Show interfaces with given name prefix only 
 
 .TP
@@ -582,35 +590,35 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Show the interfac that is used for default routing only 
 
 .TP
-\fB\-\-netio-detect-total\fR bool
+\fB\-\-netio-detect-total\fR \fIbool\fR
  Detect total bytes instead of current rate 
 
 .TP
-\fB\-\-netio-wait-time\fR num
+\fB\-\-netio-wait-time\fR \fInum\fR
  Set the wait time (in ms) when detecting network usage 
 
 .TP
-\fB\-\-publicip-timeout\fR num
+\fB\-\-publicip-timeout\fR \fInum\fR
  Time in milliseconds to wait for the public ip server to respond 
 
 .TP
-\fB\-\-publicip-url\fR str
+\fB\-\-publicip-url\fR \fIstr\fR
  The URL of public IP detection server to be used 
 
 .TP
-\fB\-\-publicip-ipv6\fR bool
+\fB\-\-publicip-ipv6\fR \fIbool\fR
  Whether to use IPv6 for public IP detection server 
 
 .TP
-\fB\-\-weather-location\fR str
+\fB\-\-weather-location\fR \fIstr\fR
  Set the location to be used 
 
 .TP
-\fB\-\-weather-timeout\fR num
+\fB\-\-weather-timeout\fR \fInum\fR
  Time in milliseconds to wait for the weather server to respond 
 
 .TP
-\fB\-\-weather-output-format\fR str
+\fB\-\-weather-output-format\fR \fIstr\fR
  The output weather format to be used 
 
 .TP
@@ -626,87 +634,89 @@ A maintained, feature-rich and performance oriented, neofetch like system inform
  Show only current user 
 
 .TP
-\fB\-\-player-name\fR str
+\fB\-\-player-name\fR \fIstr\fR
  The name of the player to use for module Media and Player 
 
 .TP
-\fB\-\-opengl-library\fR enum
+\fB\-\-opengl-library\fR \fIenum\fR
  Set the OpenGL context creation library to use 
 
 .TP
-\fB\-\-command-shell\fR str
+\fB\-\-command-shell\fR \fIstr\fR
  Set the shell program to execute the command text 
 
 .TP
-\fB\-\-command-param\fR str
+\fB\-\-command-param\fR \fIstr\fR
  Set the parameter used when starting the shell 
 
 .TP
-\fB\-\-command-key\fR str
+\fB\-\-command-key\fR \fIstr\fR
  Set the module key to display 
 
 .TP
-\fB\-\-command-text\fR str
+\fB\-\-command-text\fR \fIstr\fR
  Set the command text to be executed 
 
 .TP
-\fB\-\-colors-symbol\fR enum
+\fB\-\-colors-symbol\fR \fIenum\fR
  Set the symbol to be printed by Colors module 
 
 .TP
-\fB\-\-colors-padding-left\fR num
+\fB\-\-colors-padding-left\fR \fInum\fR
  Set the number of white spaces to print before the symbol 
 
 .TP
-\fB\-\-colors-block-width\fR num
+\fB\-\-colors-block-width\fR \fInum\fR
  Set the block width in spaces 
 
 .TP
-\fB\-\-colors-block-range-start\fR num
+\fB\-\-colors-block-range-start\fR \fInum\fR
  Set the start range of colors in the blocks to print 
 
 .TP
-\fB\-\-colors-block-range-end\fR num
+\fB\-\-colors-block-range-end\fR \fInum\fR
  Set the end range of colors in the blocks to print 
 
 .SS General module:
 .TP
-\fB\-\-<module>-format\fR format
+\fB\-\-<module>-format\fR \fIformat\fR
  ['Set the format string to use for each specific module', 'To see how a format string works, use "fastfetch -h format".', 'To see help about a specific format string, use "fastfetch -h <module>-format"'] 
 
 .TP
-\fB\-\-<module>-key\fR key
+\fB\-\-<module>-key\fR \fIkey\fR
  ['Set the key to use for each specific module.', 'For modules which print multiple lines, the string is parsed', 'as a format string with the index as first character'] 
 
 .TP
-\fB\-\-<module>-key-color\fR color
+\fB\-\-<module>-key-color\fR \fIcolor\fR
  Override the global "--color-keys" option for each specific module 
 
 .TP
-\fB\-\-<module>-key-icon\fR string
+\fB\-\-<module>-key-icon\fR \fIstring\fR
  Set the icon to be displayed by "--key-type icon" 
 
 .TP
-\fB\-\-<module>-output-color\fR color
+\fB\-\-<module>-output-color\fR \fIcolor\fR
  Override the global "--color-output" option for each specific module 
 
 .TP
-\fB\-\-<module>-key-width\fR num
+\fB\-\-<module>-key-width\fR \fInum\fR
  Override the global "--key-width" option for each specific module 
 
 .TP
-\fB\-\-<module>-percent-green\fR num
+\fB\-\-<module>-percent-green\fR \fInum\fR
  ['Threshold of percentage colors', 'Value less then percent-green will be shown in green'] 
 
 .TP
-\fB\-\-<module>-percent-yellow\fR num
+\fB\-\-<module>-percent-yellow\fR \fInum\fR
  ['Threshold of percentage colors', 'Value greater than percent-green and less then yellow will be shown in yellow', 'Value greater than percent-yellow will be shown in red'] 
 
 .TP
-\fB\-\-<module>-temp-green\fR num
+\fB\-\-<module>-temp-green\fR \fInum\fR
  ['Threshold of temperature colors', 'Value less then temp-green will be shown in green'] 
 
 .TP
-\fB\-\-<module>-temp-yellow\fR num
+\fB\-\-<module>-temp-yellow\fR \fInum\fR
  ['Threshold of temperature colors', 'Value greater than temp-green and less then yellow will be shown in yellow', 'Value greater than temp-yellow will be shown in red'] 
 
+.SH BUGS
+Please report bugs to : https://github.com/fastfetch-cli/fastfetch/issues

@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
+"""
+Python script to generate a man page for the command `fastfetch`.
+The man content will be printed to stdout so you will need to 
+pipe it to a file if you want to save it.
+The command options will be generated using a JSON file.
+For the format of the JSON file, see https://github.com/fastfetch-cli/fastfetch/blob/dev/src/data/help.json
+"""
+
 from json import load
 from datetime import date
 
-
 ###### Parameters ######
 
-# path to the help.json file
+# path to the JSON option file
 pathToHelpFile = "../src/data/help.json"
 # man page section
 manSection = 1  
@@ -18,15 +25,34 @@ todayDate = date.today().strftime("%b %d %Y") # format : "Month (abreviation) Da
 
 
 # text displayed in the "NAME" section
-nameSection = "fastfetch - a neofetch-like tool for fetching system \
+nameSection = "\
+fastfetch - a neofetch-like tool for fetching system \
 information and displaying them in a pretty way"    
 
 # text displayed in the "DESCRIPTION" section
-descriptionSection = "A maintained, feature-rich and performance \
+descriptionSection = "\
+A maintained, feature-rich and performance \
 oriented, neofetch like system information tool."   
 
+# text displayed at the beginning of the "OPTIONS" section
+optionSection = "\
+Parsing is not case sensitive. E.g. \\fB--lib-PCI\\fR \
+is equal to \\fB--Lib-Pci\\fR. \
+    \n\n\
+If a value is between square brakets, it is optional. \
+An optional boolean value defaults to true if not \
+specified. \
+    \n\n\
+More detailed help messages for each options can be \
+printed with \\fB-h <option_without_dash_prefix>\\fR. \
+    \n\n\
+All options can be made permanent with command \
+\\fBfastfetch <options> --gen-config\\fR. \
+"
+
 # text displayed in the "BUGS" section
-bugSection = "Please report bugs to : https://github.com/fastfetch-cli/fastfetch/issues"
+bugSection = "Please report bugs to : \
+https://github.com/fastfetch-cli/fastfetch/issues"
 
 
 ###### Text Decorations Tags ######
@@ -45,14 +71,16 @@ endItalic = "\\fP" # end italic text tag
 
 ### optional arguments tags ###
 
-# if an optional argument is displayed as [?optArg] (with "optArg" underlined), this value should be f"[?{startUnderline}"
+# if an optional argument is displayed as [?optArg] (with "optArg" underlined)
+# this value should be f"[?{startUnderline}"
 startOptionalArgument = f"[{startItalic}?"
-# if an optional argument is displayed as [?optArg] (with "optArg underlined"), this value should be f"{endUnderline}]"
+# if an optional argument is displayed as [?optArg] (with "optArg underlined")
+# this value should be f"{endUnderline}]"
 endOptionalArgument = f"{endItalic}]" 
 
-# mandatory arguments tags
-startMandatoryArgument = "" 
-endMandatoryArgument = ""
+### mandatory arguments tags ###
+startMandatoryArgument = f"{startUnderline}" 
+endMandatoryArgument = f"{endUnderline}"
 
 def generateManPage():
 
@@ -98,6 +126,8 @@ def generateManPage():
     ###### Options ######
 
     print(".SH OPTIONS")
+    print(optionSection)
+    print()
 
     # loop through every options sections
     for key, value in helpFileData.items():
@@ -140,7 +170,10 @@ def generateManPage():
             # description
             print(f"\n {option['desc']} \n")
 
+    ###### Bugs ######
 
+    print(".SH BUGS")
+    print(bugSection)
 
 
 
