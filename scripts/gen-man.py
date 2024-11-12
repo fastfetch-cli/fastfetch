@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from json import load
 from datetime import date
 
