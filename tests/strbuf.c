@@ -381,6 +381,9 @@ int main(void)
     ffStrbufEnsureFixedLengthFree(&strbuf, 10);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 11);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 12);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 13);
     ffStrbufDestroy(&strbuf);
 
     //ffStrbufEnsureFixedLengthFree / empty buffer with zero free length
