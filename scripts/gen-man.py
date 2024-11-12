@@ -9,19 +9,20 @@ For the format of the JSON file, see https://github.com/fastfetch-cli/fastfetch/
 
 from json import load
 from datetime import date
+from re import search
 
 ###### Parameters ######
 
 # path to the JSON option file
 pathToHelpFile = "../src/data/help.json"
 # man page section
-manSection = 1  
-# version (left footer)
-versionNumber = "Fastfetch 1.0" 
+manSection = 1
 # title (center header)
 titlePage = "Fastfetch man page" 
 # date (center footer)
 todayDate = date.today().strftime("%b %d %Y") # format : "Month (abbreviation) Day Year"
+# file to fastfetch version (left footer)
+pathToVersionFile = "../CMakeLists.txt"
 
 
 # text displayed in the "NAME" section
@@ -85,6 +86,7 @@ def generateManPage():
     try:
         with open(pathToHelpFile, 'r') as jsonFile:
             helpFileData = load(jsonFile) # json.load
+            jsonFile.close()
     except IOError as error:
         print("Error with file", pathToHelpFile, ":", error)
         return
@@ -97,7 +99,24 @@ def generateManPage():
 
     print(f".TH man {manSection}", end=" ")
     print(f"\"{todayDate}\"", end=" ")
-    print(f"\"{versionNumber}\"", end=" ")
+
+    # version number
+    try:
+        with open(pathToVersionFile, 'r') as versionFile:
+
+            # research version number in file with regex
+            for line in versionFile:
+                researchVersion = search("^\s*VERSION (\d+\.\d+\.\d+)$", line) # re.search()
+                if (researchVersion != None):
+                    versionNumber = line[researchVersion.start():researchVersion.end()]
+                    break
+
+            versionFile.close()
+    except IOError as error:
+        print("Error with file", pathToHelpFile, ":", error)
+        return
+    
+    print(f"\"{versionNumber}\"", end=" ")     
     print(f"\"{titlePage}\"")
 
 
