@@ -60,7 +60,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
 
     if (pMax > 0)
     {
-        if (pMax > 100000000) // Assume that pMax is in MHz, M1~M3
+        if (pMax > 100000000) // Assume that pMax is in Hz, M1~M3
             cpu->frequencyMax = pMax / 1000 / 1000;
         else // Assume that pMax is in kHz, M4 and later (#1394)
             cpu->frequencyMax = pMax / 1000;

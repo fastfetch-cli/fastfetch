@@ -68,7 +68,13 @@ static const char* detectFrequency(FFGPUResult* gpu)
         pMax = pMax > pStart[i] ? pMax : pStart[i];
 
     if (pMax > 0)
-        gpu->frequency = pMax / 1000 / 1000;
+    {
+        // While this is not necessary for now (seems), we add this logic just in case. See cpu_apple.c
+        if (pMax > 100000000) // Assume that pMax is in Hz
+            gpu->frequency = pMax / 1000 / 1000;
+        else // Assume that pMax is in kHz
+            gpu->frequency = pMax / 1000;
+    }
 
     return NULL;
 }
