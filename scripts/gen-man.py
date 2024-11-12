@@ -143,14 +143,14 @@ def generateManPage():
 
             # short option (-opt)
             if "short" in keyList:
-                print(f"\-{ option['short'] }", end="")
+                print(f"\\-{ option['short'] }", end="")
                 # if also have a long option, print a comma
                 if "long" in keyList:
                     print(", ", end="")
 
             # long option (--option)
             if "long" in keyList:
-                print(f"\-\-{ option['long'] }", end="")
+                print(f"\\-\\-{ option['long'] }", end="")
 
             print(endBold, end=" ")
             
