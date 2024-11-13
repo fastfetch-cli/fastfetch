@@ -52,22 +52,17 @@ const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result)
 
         const char* cstr = CFStringGetCStringPtr(cfStr, kCFStringEncodingUTF8);
         if (cstr)
-        {
             ffStrbufSetS(result, cstr);
-            return NULL;
-        }
         else
         {
-            uint32_t length = CFStringGetLength(cfStr);
-            uint32_t maxLength = (uint32_t) CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
-            ffStrbufEnsureFixedLengthFree(result, maxLength);
+            uint32_t length = (uint32_t) CFStringGetLength(cfStr);
+            ffStrbufEnsureFixedLengthFree(result, (uint32_t) CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8));
             if(!CFStringGetCString(cfStr, result->chars, result->allocated, kCFStringEncodingUTF8))
                 return "CFStringGetCString() failed";
+            // CFStringGetCString ensures the buffer is NUL terminated
+            // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
+            result->length = (uint32_t) strnlen(result->chars, (uint32_t)result->allocated);
         }
-
-        // CFStringGetCString ensures the buffer is NUL terminated
-        // https://developer.apple.com/documentation/corefoundation/1542721-cfstringgetcstring
-        result->length = (uint32_t) strnlen(result->chars, (uint32_t)result->allocated);
     }
     else if (CFGetTypeID(cf) == CFDataGetTypeID())
     {
