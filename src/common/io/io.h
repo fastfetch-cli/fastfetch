@@ -118,6 +118,19 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
     }
     else
     {
+        #if __APPLE__ // #1395
+        struct stat fileStat;
+        if(stat(path, &fileStat) != 0)
+            return false;
+
+        unsigned int mode = fileStat.st_mode & S_IFMT;
+
+        if(pathType & FF_PATHTYPE_FILE && mode != S_IFDIR)
+            return true;
+
+        if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
+            return true;
+        #else
         size_t len = strlen(path);
         assert(len < PATH_MAX);
         if (len == 0) return false;
@@ -134,6 +147,7 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
         else
             ret = access(path, F_OK);
         return pathType == FF_PATHTYPE_DIRECTORY ? ret == 0 : ret == -1 && errno == ENOTDIR;
+        #endif
     }
 
     #endif
