@@ -147,7 +147,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
             ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
@@ -193,11 +193,12 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     }
     else
     {
-        ffStrbufEnsureFixedLengthFree(exe, PATH_MAX);
-        int length = proc_pidpath(pid, exe->chars, exe->allocated);
+        char buf[PROC_PIDPATHINFO_MAXSIZE];
+        int length = proc_pidpath(pid, buf, ARRAY_SIZE(buf));
         if (length > 0)
         {
-            exe->length = (uint32_t) length;
+            ffStrbufEnsureFixedLengthFree(exe, (uint32_t) length);
+            ffStrbufAppendNS(exe, (uint32_t) length, buf);
             if (exePath)
                 ffStrbufSet(exePath, exe);
         }
@@ -273,7 +274,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
             ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
