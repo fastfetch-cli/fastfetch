@@ -256,6 +256,7 @@ endfunction(fastfetch_load_text)
 
 find_package(Python)
 if(Python_FOUND)
+    message(STATUS "Minifying 'help.json'")
     execute_process(COMMAND ${Python_EXECUTABLE} -c "import json,sys;json.dump(json.load(sys.stdin),sys.stdout,separators=(',',':'))"
                     INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
                     OUTPUT_VARIABLE DATATEXT_JSON_HELP)
@@ -263,18 +264,29 @@ if(Python_FOUND)
         message(ERROR "DATATEXT_JSON_HELP is empty, which should not happen!")
     endif()
 else()
-    message(STATUS "Python3 is not found, 'help.json' will not be minified")
+    message(WARNING "Python3 is not found, 'help.json' will not be minified")
     file(READ "src/data/help.json" DATATEXT_JSON_HELP)
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "fastfetch_pciids.c.inc")
     if(Python_FOUND)
+        message(STATUS "Generating 'fastfetch_pciids.c.inc'")
         execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
                         OUTPUT_FILE "fastfetch_pciids.c.inc")
     else()
-        message(STATUS "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
+        message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
         set(ENABLE_EMBEDDED_PCIIDS OFF)
     endif()
+endif()
+
+if(Python_FOUND)
+    message(STATUS "Generating 'fastfetch.1'")
+    execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-man.py"
+                    OUTPUT_FILE "fastfetch.1")
+else()
+    message(WARNING "Python3 is not found, use basic 'fastfetch.1.in' instead")
+    string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
+    configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 endif()
 
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
@@ -288,9 +300,6 @@ configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
     configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
 endif()
-
-string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
-configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 
 ####################
 # Ascii image data #
