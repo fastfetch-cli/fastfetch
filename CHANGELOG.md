@@ -1,3 +1,50 @@
+# 2.30.0
+
+Changes:
+* Percent: bar type must be enabled in `percent.type` before using percent bar in custom format
+
+Features:
+* Port to MidnightBSD; add mport package manager support
+* Support bluetooth battery detection for macOS and Windows (Bluetooth, macOS / Windows)
+* Support M4 model detection (Host, macOS)
+* Support CPU temperature detection on OpenBSD (CPU, OpenBSD)
+* Display Android icon in Android devices (OS, Android)
+* Support qi package manager detection (Packages, Linux)
+* Detect WM / DE by enumerating running processes (WM / DE, NetBSD)
+* Generate manual pages from `help.json` (Doc)
+* Detect marketing name of vivo smartphone (Host, Android)
+* Support percent type config in module level. Example: 
+
+```json
+{
+    "type": "memory",
+    "percent": {
+        "green": 20, // [0%, 20%) will be displayed in green
+        "yellow": 40, // [20, 40) will be displayed in yellow and [40, 100] will be displayed in red
+        "type": [ // Display percent value in monochrome bar, same as 10
+            "bar",
+            "bar-monochrome"
+        ]
+    }
+}
+```
+
+Bugfixes:
+* Don't display `()` in key if display name is not available (Display)
+* Fix & normalize bluetooth mac address detection (Bluetooth, macOS / Windows)
+* Don't print index in multi-battery devices (Battery)
+* Fix segfault in macOS (#1388, macOS)
+* Fix `CFStringGetCString() failed` errors (#1394, Media, macOS)
+* Fix CPU frequency detection on Apple M4 (#1394, CPU, macOS)
+* Fix exe path detection on macOS (Shell / Terminal, macOS)
+* Fix logo fails to load from symlinked files on macOS (#1395, Logo, macOS)
+
+Logos:
+* Fix Lilidog
+* Add MidnightBSD
+* Add Unifi
+* Add Cosmic DE
+
 # 2.29.0
 
 Changes:
