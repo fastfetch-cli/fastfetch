@@ -97,11 +97,14 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     else
     {
         FF_STRBUF_AUTO_DESTROY capacityNum = ffStrbufCreate();
-        ffPercentAppendNum(&capacityNum, result->capacity, options->percent, false, &options->moduleArgs);
+        if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&capacityNum, result->capacity, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY capacityBar = ffStrbufCreate();
-        ffPercentAppendBar(&capacityBar, result->capacity, options->percent, &options->moduleArgs);
+        if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&capacityBar, result->capacity, options->percent, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
+
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
             FF_FORMAT_ARG(result->modelName, "model-name"),

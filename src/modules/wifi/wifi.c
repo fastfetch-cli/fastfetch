@@ -79,9 +79,12 @@ void ffPrintWifi(FFWifiOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY percentNum = ffStrbufCreate();
-            ffPercentAppendNum(&percentNum, item->conn.signalQuality, options->percent, false, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffPercentAppendNum(&percentNum, item->conn.signalQuality, options->percent, false, &options->moduleArgs);
             FF_STRBUF_AUTO_DESTROY percentBar = ffStrbufCreate();
-            ffPercentAppendBar(&percentBar, item->conn.signalQuality, options->percent, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                ffPercentAppendBar(&percentBar, item->conn.signalQuality, options->percent, &options->moduleArgs);
+
             FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WIFI_NUM_FORMAT_ARGS, ((FFformatarg[]){
                 FF_FORMAT_ARG(item->inf.description, "inf-desc"),
                 FF_FORMAT_ARG(item->inf.status, "inf-status"),

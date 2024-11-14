@@ -108,15 +108,19 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
     else
     {
         FF_STRBUF_AUTO_DESTROY bytesPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&bytesPercentageNum, bytesPercentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&bytesPercentageNum, bytesPercentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY bytesPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&bytesPercentageBar, bytesPercentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&bytesPercentageBar, bytesPercentage, options->percent, &options->moduleArgs);
 
         double filesPercentage = disk->filesTotal > 0 ? ((double) disk->filesUsed / (double) disk->filesTotal) * 100.0 : 0;
         FF_STRBUF_AUTO_DESTROY filesPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&filesPercentageNum, filesPercentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&filesPercentageNum, filesPercentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY filesPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&filesPercentageBar, filesPercentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&filesPercentageBar, filesPercentage, options->percent, &options->moduleArgs);
 
         bool isExternal = !!(disk->type & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);

@@ -9,10 +9,10 @@
 
 static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, uint8_t index)
 {
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
@@ -48,9 +48,11 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&percentageNum, device->volume, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&percentageNum, device->volume, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&percentageBar, device->volume, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&percentageBar, device->volume, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SOUND_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->main, "is-main"),

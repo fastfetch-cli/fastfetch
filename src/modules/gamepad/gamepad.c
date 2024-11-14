@@ -9,13 +9,13 @@
 
 static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device, uint8_t index)
 {
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         bool showBatteryLevel = device->battery > 0 && device->battery <= 100;
-        FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
         if (showBatteryLevel && (percentType & FF_PERCENTAGE_TYPE_BAR_BIT))
         {
@@ -37,9 +37,11 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&percentageNum, device->battery, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&percentageNum, device->battery, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GAMEPAD_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->name, "name"),

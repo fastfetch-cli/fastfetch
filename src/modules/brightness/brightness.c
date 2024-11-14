@@ -89,16 +89,19 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY valueNum = ffStrbufCreate();
-            ffPercentAppendNum(&valueNum, percent, options->percent, false, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffPercentAppendNum(&valueNum, percent, options->percent, false, &options->moduleArgs);
             FF_STRBUF_AUTO_DESTROY valueBar = ffStrbufCreate();
-            ffPercentAppendBar(&valueBar, percent, options->percent, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                ffPercentAppendBar(&valueBar, percent, options->percent, &options->moduleArgs);
+
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BRIGHTNESS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 FF_FORMAT_ARG(valueNum, "percentage"),
                 FF_FORMAT_ARG(item->name, "name"),
                 FF_FORMAT_ARG(item->max, "max"),
                 FF_FORMAT_ARG(item->min, "min"),
                 FF_FORMAT_ARG(item->current, "current"),
-                FF_FORMAT_ARG(item->current, "percentage-bar"),
+                FF_FORMAT_ARG(valueBar, "percentage-bar"),
             }));
         }
 

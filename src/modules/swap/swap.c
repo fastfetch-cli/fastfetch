@@ -29,11 +29,11 @@ void ffPrintSwap(FFSwapOptions* options)
         ? 0
         : (double) storage.bytesUsed / (double) storage.bytesTotal * 100.0;
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-        FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
         if (storage.bytesTotal == 0)
         {
@@ -68,9 +68,11 @@ void ffPrintSwap(FFSwapOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&percentageNum, percentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&percentageNum, percentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SWAP_NUM_FORMAT_ARGS, ((FFformatarg[]){
             FF_FORMAT_ARG(usedPretty, "used"),
             FF_FORMAT_ARG(totalPretty, "total"),
