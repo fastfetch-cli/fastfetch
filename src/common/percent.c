@@ -14,6 +14,45 @@ static void appendOutputColor(FFstrbuf* buffer, const FFModuleArgs* module)
         ffStrbufAppendF(buffer, "\e[%sm", instance.config.display.colorOutput.chars);
 }
 
+const char* ffPercentParseTypeJsonConfig(yyjson_val* jsonVal, FFPercentageTypeFlags* result)
+{
+    if (yyjson_is_uint(jsonVal))
+    {
+        *result = (FFPercentageTypeFlags) yyjson_get_uint(jsonVal);
+        return NULL;
+    }
+    if (yyjson_is_arr(jsonVal))
+    {
+        FFPercentageTypeFlags flags = 0;
+
+        yyjson_val* item;
+        size_t idx, max;
+        yyjson_arr_foreach(jsonVal, idx, max, item)
+        {
+            const char* flag = yyjson_get_str(item);
+            if (!flag)
+                return "Error: percent.type: invalid flag string";
+            if (ffStrEqualsIgnCase(flag, "num"))
+                flags |= FF_PERCENTAGE_TYPE_NUM_BIT;
+            else if (ffStrEqualsIgnCase(flag, "bar"))
+                flags |= FF_PERCENTAGE_TYPE_BAR_BIT;
+            else if (ffStrEqualsIgnCase(flag, "hide-others"))
+                flags |= FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT;
+            else if (ffStrEqualsIgnCase(flag, "num-color"))
+                flags |= FF_PERCENTAGE_TYPE_NUM_COLOR_BIT;
+            else if (ffStrEqualsIgnCase(flag, "bar-monochrome"))
+                flags |= FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT;
+            else
+                return "Error: percent.type: unknown flag string";
+        }
+
+        *result = flags;
+        return NULL;
+    }
+
+    return "Error: usage: percent.type must be a number or an array of strings";
+}
+
 void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConfig config, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
@@ -238,7 +277,12 @@ bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentageMo
     yyjson_val* typeVal = yyjson_obj_get(value, "type");
     if (typeVal)
     {
-        config->type = (FFPercentageTypeFlags) yyjson_get_int(typeVal);
+        const char* error = ffPercentParseTypeJsonConfig(typeVal, &config->type);
+        if (error)
+        {
+            fputs(error, stderr);
+            exit(480);
+        }
     }
 
     return true;
