@@ -204,7 +204,7 @@ void ffInitLoadavgOptions(FFLoadavgOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80 };
     options->ndigits = 2;
     options->compact = true;
 }

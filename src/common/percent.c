@@ -14,7 +14,7 @@ static void appendOutputColor(FFstrbuf* buffer, const FFModuleArgs* module)
         ffStrbufAppendF(buffer, "\e[%sm", instance.config.display.colorOutput.chars);
 }
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config, const FFModuleArgs* module)
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConfig config, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -104,7 +104,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
     }
 }
 
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses, const FFModuleArgs* module)
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConfig config, bool parentheses, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -156,7 +156,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig con
         ffStrbufAppendC(buffer, ')');
 }
 
-bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFColorRangeConfig* config)
+bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentageModuleConfig* config)
 {
     if (!ffStrStartsWithIgnCase(subkey, "percent-"))
         return false;
@@ -190,7 +190,7 @@ bool ffPercentParseCommandOptions(const char* key, const char* subkey, const cha
     return false;
 }
 
-bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFColorRangeConfig* config)
+bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentageModuleConfig* config)
 {
     if (!ffStrEqualsIgnCase(key, "percent"))
         return false;
@@ -228,7 +228,7 @@ bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFColorRangeCo
     return true;
 }
 
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFColorRangeConfig defaultConfig, FFColorRangeConfig config)
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig defaultConfig, FFPercentageModuleConfig config)
 {
     if (config.green == defaultConfig.green && config.yellow == defaultConfig.yellow)
         return;

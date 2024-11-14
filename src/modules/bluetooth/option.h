@@ -11,5 +11,5 @@ typedef struct FFBluetoothOptions
     FFModuleArgs moduleArgs;
 
     bool showDisconnected;
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
 } FFBluetoothOptions;

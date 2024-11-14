@@ -87,11 +87,12 @@ static inline bool ffReadFileBufferRelative(FFNativeFD dfd, const char* fileName
 }
 
 //Bit flags, combine with |
-typedef enum FFPathType
+typedef enum __attribute__((__packed__)) FFPathType
 {
     FF_PATHTYPE_FILE = 1 << 0,
     FF_PATHTYPE_DIRECTORY = 1 << 1,
     FF_PATHTYPE_ANY = FF_PATHTYPE_FILE | FF_PATHTYPE_DIRECTORY,
+    FF_PATHTYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFPathType;
 
 static inline bool ffPathExists(const char* path, FFPathType pathType)

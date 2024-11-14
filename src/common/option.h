@@ -45,12 +45,13 @@ static inline void ffOptionInitModuleBaseInfo(
     baseInfo->generateJsonConfig = (__typeof__(baseInfo->generateJsonConfig)) generateJsonConfig;
 }
 
-typedef enum FFModuleKeyType
+typedef enum __attribute__((__packed__)) FFModuleKeyType
 {
     FF_MODULE_KEY_TYPE_NONE = 0,
     FF_MODULE_KEY_TYPE_STRING = 1 << 0,
     FF_MODULE_KEY_TYPE_ICON = 1 << 1,
     FF_MODULE_KEY_TYPE_BOTH = FF_MODULE_KEY_TYPE_STRING | FF_MODULE_KEY_TYPE_ICON,
+    FF_MODULE_KEY_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFModuleKeyType;
 
 typedef struct FFModuleArgs

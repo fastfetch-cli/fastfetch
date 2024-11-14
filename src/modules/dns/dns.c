@@ -122,6 +122,8 @@ void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_
 
     if (defaultOptions.showType != options->showType)
     {
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wswitch" // FF_DNS_TYPE_FORCE_UNSIGNED
         switch (options->showType)
         {
             case FF_DNS_TYPE_IPV4_BIT:
@@ -134,6 +136,7 @@ void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_
                 yyjson_mut_obj_add_str(doc, module, "showType", "both");
                 break;
         }
+        #pragma GCC diagnostic pop
     }
 }
 

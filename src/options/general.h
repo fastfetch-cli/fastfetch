@@ -2,7 +2,7 @@
 
 #include "util/FFstrbuf.h"
 
-typedef enum FFDsForceDrmType
+typedef enum __attribute__((__packed__)) FFDsForceDrmType
 {
     FF_DS_FORCE_DRM_TYPE_FALSE = 0,   // Disable
     FF_DS_FORCE_DRM_TYPE_TRUE = 1,    // Try `libdrm`, then `sysfs` if libdrm failed

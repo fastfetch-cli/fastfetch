@@ -152,7 +152,7 @@ void ffInitMemoryOptions(FFMemoryOptions* options)
         ffGenerateMemoryJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80 };
 }
 
 void ffDestroyMemoryOptions(FFMemoryOptions* options)

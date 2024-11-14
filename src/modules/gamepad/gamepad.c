@@ -160,7 +160,7 @@ void ffInitGamepadOptions(FFGamepadOptions* options)
         ffGenerateGamepadJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
-    options->percent = (FFColorRangeConfig) { 50, 20 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20 };
 }
 
 void ffDestroyGamepadOptions(FFGamepadOptions* options)

@@ -5,7 +5,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum FFSoundType
+typedef enum __attribute__((__packed__)) FFSoundType
 {
     FF_SOUND_TYPE_MAIN,
     FF_SOUND_TYPE_ACTIVE,
@@ -18,5 +18,5 @@ typedef struct FFSoundOptions
     FFModuleArgs moduleArgs;
 
     FFSoundType soundType;
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
 } FFSoundOptions;

@@ -253,7 +253,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->soundType = FF_SOUND_TYPE_MAIN;
-    options->percent = (FFColorRangeConfig) { 80, 90 };
+    options->percent = (FFPercentageModuleConfig) { 80, 90 };
 }
 
 void ffDestroySoundOptions(FFSoundOptions* options)

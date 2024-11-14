@@ -4,7 +4,7 @@
 
 #if defined(FF_HAVE_IMAGEMAGICK7) || defined(FF_HAVE_IMAGEMAGICK6)
 
-typedef enum FFLogoImageResult
+typedef enum __attribute__((__packed__)) FFLogoImageResult
 {
     FF_LOGO_IMAGE_RESULT_SUCCESS,    //Logo printed
     FF_LOGO_IMAGE_RESULT_INIT_ERROR, //Failed to load library, try again with next IM version

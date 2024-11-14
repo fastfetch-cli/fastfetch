@@ -5,7 +5,7 @@
 #include "common/option.h"
 #include "common/percent.h"
 
-typedef enum FFDiskVolumeType
+typedef enum __attribute__((__packed__)) FFDiskVolumeType
 {
     FF_DISK_VOLUME_TYPE_NONE = 0,
     FF_DISK_VOLUME_TYPE_REGULAR_BIT = 1 << 0,
@@ -14,9 +14,10 @@ typedef enum FFDiskVolumeType
     FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT = 1 << 3,
     FF_DISK_VOLUME_TYPE_UNKNOWN_BIT = 1 << 4,
     FF_DISK_VOLUME_TYPE_READONLY_BIT = 1 << 5,
+    FF_DISK_VOLUME_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFDiskVolumeType;
 
-typedef enum FFDiskCalcType
+typedef enum __attribute__((__packed__)) FFDiskCalcType
 {
     FF_DISK_CALC_TYPE_FREE,
     FF_DISK_CALC_TYPE_AVAILABLE,
@@ -30,5 +31,5 @@ typedef struct FFDiskOptions
     FFstrbuf folders;
     FFDiskVolumeType showTypes;
     FFDiskCalcType calcType;
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
 } FFDiskOptions;

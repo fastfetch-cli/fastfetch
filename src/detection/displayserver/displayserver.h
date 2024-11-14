@@ -42,13 +42,13 @@
 #define FF_WM_PROTOCOL_X11 "X11"
 #define FF_WM_PROTOCOL_WAYLAND "Wayland"
 
-typedef enum FFDisplayType {
+typedef enum __attribute__((__packed__)) FFDisplayType {
     FF_DISPLAY_TYPE_UNKNOWN,
     FF_DISPLAY_TYPE_BUILTIN,
     FF_DISPLAY_TYPE_EXTERNAL,
 } FFDisplayType;
 
-typedef enum FFDisplayHdrStatus
+typedef enum __attribute__((__packed__)) FFDisplayHdrStatus
 {
     FF_DISPLAY_HDR_STATUS_UNKNOWN,
     FF_DISPLAY_HDR_STATUS_UNSUPPORTED,

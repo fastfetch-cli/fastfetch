@@ -301,7 +301,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFColorRangeConfig) { 50, 20 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20 };
 
     #ifdef _WIN32
         options->useSetupApi = false;

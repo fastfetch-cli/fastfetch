@@ -222,7 +222,7 @@ void ffInitWifiOptions(FFWifiOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFColorRangeConfig) { 50, 20 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20 };
 }
 
 void ffDestroyWifiOptions(FFWifiOptions* options)

@@ -11,6 +11,6 @@ typedef struct FFBrightnessOptions
     FFModuleArgs moduleArgs;
 
     uint32_t ddcciSleep; // ms
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
     bool compact;
 } FFBrightnessOptions;

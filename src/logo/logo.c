@@ -9,7 +9,7 @@
 #include <ctype.h>
 #include <string.h>
 
-typedef enum FFLogoSize
+typedef enum __attribute__((__packed__)) FFLogoSize
 {
     FF_LOGO_SIZE_UNKNOWN,
     FF_LOGO_SIZE_NORMAL,

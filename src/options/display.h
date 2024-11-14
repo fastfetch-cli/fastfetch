@@ -2,14 +2,14 @@
 
 #include "util/FFstrbuf.h"
 
-typedef enum FFSizeBinaryPrefixType
+typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
 {
     FF_SIZE_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
     FF_SIZE_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 KB, 1000 KB = 1 MB, ...
     FF_SIZE_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 kB, 1024 kB = 1 MB, ...
 } FFSizeBinaryPrefixType;
 
-typedef enum FFTemperatureUnit
+typedef enum __attribute__((__packed__)) FFTemperatureUnit
 {
     FF_TEMPERATURE_UNIT_CELSIUS,
     FF_TEMPERATURE_UNIT_FAHRENHEIT,
@@ -46,7 +46,7 @@ typedef struct FFOptionsDisplay
     FFstrbuf barBorderLeft;
     FFstrbuf barBorderRight;
     uint8_t barWidth;
-    uint8_t percentType;
+    FFPercentageTypeFlags percentType;
     uint8_t percentNdigits;
     FFstrbuf percentColorGreen;
     FFstrbuf percentColorYellow;

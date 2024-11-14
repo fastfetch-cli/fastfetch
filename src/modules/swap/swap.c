@@ -161,7 +161,7 @@ void ffInitSwapOptions(FFSwapOptions* options)
         ffGenerateSwapJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80 };
 }
 
 void ffDestroySwapOptions(FFSwapOptions* options)
