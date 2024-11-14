@@ -13,9 +13,20 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
     {
         ffPrintLogoAndKey(FF_BLUETOOTH_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateCopy(&device->name);
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        bool showBatteryLevel = device->battery > 0 && device->battery <= 100;
+        FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
-        if (device->battery > 0 && device->battery <= 100)
+        if (showBatteryLevel && (percentType & FF_PERCENTAGE_TYPE_BAR_BIT))
+        {
+            ffPercentAppendBar(&buffer, device->battery, options->percent, &options->moduleArgs);
+            ffStrbufAppendC(&buffer, ' ');
+        }
+
+        if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            ffStrbufAppend(&buffer, &device->name);
+
+        if (showBatteryLevel && (percentType & FF_PERCENTAGE_TYPE_NUM_BIT))
         {
             if (buffer.length)
                 ffStrbufAppendC(&buffer, ' ');
@@ -202,7 +213,7 @@ void ffInitBluetoothOptions(FFBluetoothOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->showDisconnected = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 20 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }
 
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options)

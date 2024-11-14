@@ -39,24 +39,26 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     timeRemaining /= 24;
     uint32_t days = timeRemaining;
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         bool showStatus =
-            !(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
+            !(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT) &&
             result->status.length > 0 &&
             ffStrbufIgnCaseCompS(&result->status, "Unknown") != 0;
 
         if(result->capacity >= 0)
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, result->capacity, options->percent, &options->moduleArgs);
             }
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -301,7 +303,7 @@ void ffInitBatteryOptions(FFBatteryOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFPercentageModuleConfig) { 50, 20 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 
     #ifdef _WIN32
         options->useSetupApi = false;

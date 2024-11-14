@@ -44,6 +44,8 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
     double avgValue = sumValue / (double) valueCount;
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -51,9 +53,9 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (!options->separate)
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                 ffPercentAppendBar(&str, avgValue, options->percent, &options->moduleArgs);
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -214,7 +216,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
     options->separate = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
     options->waitTime = 200;
 }
 

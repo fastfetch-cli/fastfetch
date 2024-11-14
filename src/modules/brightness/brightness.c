@@ -25,6 +25,8 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         return;
     }
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if (options->compact)
     {
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
@@ -48,7 +50,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     uint32_t index = 0;
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
     {
-        if(options->moduleArgs.key.length == 0)
+        if (options->moduleArgs.key.length == 0)
         {
             ffStrbufAppendF(&key, "%s (%s)", FF_BRIGHTNESS_MODULE_NAME, item->name.chars);
         }
@@ -64,17 +66,17 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         const double percent = (item->current - item->min) / (item->max - item->min) * 100;
 
-        if(options->moduleArgs.outputFormat.length == 0)
+        if (options->moduleArgs.outputFormat.length == 0)
         {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, percent, options->percent, &options->moduleArgs);
             }
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -237,7 +239,7 @@ void ffInitBrightnessOptions(FFBrightnessOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
 
     options->ddcciSleep = 10;
-    options->percent = (FFPercentageModuleConfig) { 100, 100 };
+    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
     options->compact = false;
 }
 

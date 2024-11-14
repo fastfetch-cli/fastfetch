@@ -51,6 +51,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
     ffParseSize(disk->bytesTotal, &totalPretty);
 
     double bytesPercentage = disk->bytesTotal > 0 ? (double) disk->bytesUsed / (double) disk->bytesTotal * 100.0 : 0;
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -60,16 +61,16 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
 
         if(disk->bytesTotal > 0)
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, bytesPercentage, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 ffPercentAppendNum(&str, bytesPercentage, options->percent, str.length > 0, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
@@ -78,7 +79,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         else
             ffStrbufAppendS(&str, "Unknown ");
 
-        if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
         {
             if(disk->filesystem.length)
                 ffStrbufAppendF(&str, "- %s ", disk->filesystem.chars);
@@ -473,7 +474,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     ffStrbufInit(&options->folders);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyDiskOptions(FFDiskOptions* options)

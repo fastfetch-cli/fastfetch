@@ -20,6 +20,7 @@ typedef struct FFPercentageModuleConfig
 {
     uint8_t green;
     uint8_t yellow;
+    FFPercentageTypeFlags type;
 } FFPercentageModuleConfig;
 
 // if (green <= yellow)

@@ -59,18 +59,19 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
 
                 ffStrbufClear(&buffer);
                 double percent = result[index] * 100 / cpu.coresOnline;
+                FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
-                if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                     ffPercentAppendBar(&buffer, percent, options->percent, &options->moduleArgs);
 
-                if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 {
                     if (buffer.length > 0)
                         ffStrbufAppendC(&buffer, ' ');
                     ffStrbufAppendF(&buffer, "%.*f", options->ndigits, result[index]);
                 }
 
-                if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 {
                     if (buffer.length > 0)
                         ffStrbufAppendC(&buffer, ' ');
@@ -204,7 +205,7 @@ void ffInitLoadavgOptions(FFLoadavgOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
     options->ndigits = 2;
     options->compact = true;
 }

@@ -245,7 +245,7 @@ void ffInitBtrfsOptions(FFBtrfsOptions* options)
         ffGenerateBtrfsJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyBtrfsOptions(FFBtrfsOptions* options)

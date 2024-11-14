@@ -22,6 +22,8 @@ void ffPrintWifi(FFWifiOptions* options)
         return;
     }
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     for(uint32_t index = 0; index < result.length; ++index)
     {
         FFWifiResult* item = FF_LIST_GET(FFWifiResult, result, index);
@@ -36,14 +38,14 @@ void ffPrintWifi(FFWifiOptions* options)
             {
                 if(item->conn.signalQuality == item->conn.signalQuality)
                 {
-                    if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                    if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                     {
                         ffPercentAppendBar(&buffer, item->conn.signalQuality, options->percent, &options->moduleArgs);
                         ffStrbufAppendC(&buffer, ' ');
                     }
                 }
 
-                if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+                if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 {
                     ffStrbufAppend(&buffer, &item->conn.ssid);
 
@@ -62,7 +64,7 @@ void ffPrintWifi(FFWifiOptions* options)
 
                 if(item->conn.signalQuality == item->conn.signalQuality)
                 {
-                    if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                    if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                         ffPercentAppendNum(&buffer, item->conn.signalQuality, options->percent, buffer.length > 0, &options->moduleArgs);
                 }
 
@@ -222,7 +224,7 @@ void ffInitWifiOptions(FFWifiOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFPercentageModuleConfig) { 50, 20 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }
 
 void ffDestroyWifiOptions(FFWifiOptions* options)

@@ -12,14 +12,15 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-        if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
             ffStrbufAppend(&str, &device->name);
 
         if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
         {
-            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 if (str.length)
                     ffStrbufAppendC(&str, ' ');
@@ -27,7 +28,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
                 ffPercentAppendBar(&str, device->volume, options->percent, &options->moduleArgs);
             }
 
-            if (instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if (str.length)
                     ffStrbufAppendC(&str, ' ');
@@ -36,7 +37,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
             }
         }
 
-        if (!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+        if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
         {
             if (device->main && index > 0)
                 ffStrbufAppendS(&str, " (*)");
@@ -253,7 +254,7 @@ void ffInitSoundOptions(FFSoundOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->soundType = FF_SOUND_TYPE_MAIN;
-    options->percent = (FFPercentageModuleConfig) { 80, 90 };
+    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
 }
 
 void ffDestroySoundOptions(FFSoundOptions* options)

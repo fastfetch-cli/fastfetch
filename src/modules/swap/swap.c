@@ -33,30 +33,32 @@ void ffPrintSwap(FFSwapOptions* options)
     {
         ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+        FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
         if (storage.bytesTotal == 0)
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, 0, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
-            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendS(&str, "Disabled");
             else
                 ffPercentAppendNum(&str, 0, options->percent, str.length > 0, &options->moduleArgs);
         }
         else
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, percentage, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffPercentAppendNum(&str, percentage, options->percent, str.length > 0, &options->moduleArgs);
         }
 
@@ -161,7 +163,7 @@ void ffInitSwapOptions(FFSwapOptions* options)
         ffGenerateSwapJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroySwapOptions(FFSwapOptions* options)

@@ -37,17 +37,18 @@ void ffPrintMemory(FFMemoryOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+            FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, percentage, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffPercentAppendNum(&str, percentage, options->percent, str.length > 0, &options->moduleArgs);
 
             ffStrbufTrimRight(&str, ' ');
@@ -152,7 +153,7 @@ void ffInitMemoryOptions(FFMemoryOptions* options)
         ffGenerateMemoryJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyMemoryOptions(FFMemoryOptions* options)

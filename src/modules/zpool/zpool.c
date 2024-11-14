@@ -205,7 +205,7 @@ void ffInitZpoolOptions(FFZpoolOptions* options)
         ffGenerateZpoolJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyZpoolOptions(FFZpoolOptions* options)

@@ -41,15 +41,18 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
     }
     else
     {
-        const char* colorGreen = instance.config.display.percentColorGreen.chars;
-        const char* colorYellow = instance.config.display.percentColorYellow.chars;
-        const char* colorRed = instance.config.display.percentColorRed.chars;
+        const char* colorGreen = options->percentColorGreen.chars;
+        const char* colorYellow = options->percentColorYellow.chars;
+        const char* colorRed = options->percentColorRed.chars;
+
+        FFPercentageTypeFlags percentType = config.type == 0 ? options->percentType : config.type;
+        bool monochrome = !!(percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT);
 
         for (uint32_t i = 0; i < blocksPercent; ++i)
         {
             if(!options->pipe)
             {
-                if (options->percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT)
+                if (monochrome)
                 {
                     const char* color = NULL;
                     if (green <= yellow)
@@ -110,8 +113,9 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConf
     assert(green <= 100 && yellow <= 100);
 
     const FFOptionsDisplay* options = &instance.config.display;
+    FFPercentageTypeFlags percentType = config.type == 0 ? options->percentType : config.type;
 
-    bool colored = !!(options->percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT);
+    bool colored = !!(percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT);
 
     if (parentheses)
         ffStrbufAppendC(buffer, '(');
@@ -187,6 +191,12 @@ bool ffPercentParseCommandOptions(const char* key, const char* subkey, const cha
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subkey, "type"))
+    {
+        config->type = (FFPercentageTypeFlags) ffOptionParseUInt32(key, value);
+        return true;
+    }
+
     return false;
 }
 
@@ -225,6 +235,12 @@ bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentageMo
         config->yellow = (uint8_t) num;
     }
 
+    yyjson_val* typeVal = yyjson_obj_get(value, "type");
+    if (typeVal)
+    {
+        config->type = (FFPercentageTypeFlags) yyjson_get_int(typeVal);
+    }
+
     return true;
 }
 
@@ -238,4 +254,6 @@ void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FF
         yyjson_mut_obj_add_uint(doc, percent, "green", config.green);
     if (config.yellow != defaultConfig.yellow)
         yyjson_mut_obj_add_uint(doc, percent, "yellow", config.yellow);
+    if (config.type != defaultConfig.type)
+        yyjson_mut_obj_add_uint(doc, percent, "type", config.type);
 }
