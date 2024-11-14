@@ -1603,6 +1603,24 @@
             "pseudo": true
         },
         {
+            "long": "<module>-percent-type",
+            "desc": "Set the percentage output type",
+            "remark": [
+                "0 for use global `--percent-type` value",
+                "1 for percentage number",
+                "2 for multi-color bar",
+                "3 for both",
+                "6 for bar only",
+                "9 for colored number",
+                "10 for monochrome bar"
+            ],
+            "arg": {
+                "type": "num",
+                "default": 0
+            },
+            "pseudo": true
+        },
+        {
             "long": "<module>-temp-green",
             "desc": [
                 "Threshold of temperature colors",
