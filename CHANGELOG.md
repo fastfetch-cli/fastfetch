@@ -44,6 +44,7 @@ Logos:
 * Add MidnightBSD
 * Add Unifi
 * Add Cosmic DE
+* Update openSUSE Tumbleweed
 
 # 2.29.0
 
