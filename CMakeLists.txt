@@ -1180,6 +1180,16 @@ elseif(NetBSD)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/usr/X11R7/lib -Wl,-rpath,/usr/pkg/lib") # ditto
 endif()
 
+if(FreeBSD OR OpenBSD OR NetBSD)
+    include(CheckStructHasMember)
+    set(CMAKE_REQUIRED_DEFINITIONS "-D_IFI_OQDROPS=1")
+    CHECK_STRUCT_HAS_MEMBER("struct if_data" ifi_oqdrops net/if.h HAVE_IFI_OQDROPS LANGUAGE C)
+    if(HAVE_IFI_OQDROPS)
+    target_compile_definitions(libfastfetch PUBLIC _IFI_OQDROPS FF_HAVE_IFI_OQDROPS)
+    endif()
+    unset(CMAKE_REQUIRED_DEFINITIONS)
+endif()
+
 if(HAVE_STATX)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_STATX)
 endif()

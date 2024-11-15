@@ -13,6 +13,7 @@ Features:
 * Detect WM / DE by enumerating running processes (WM / DE, NetBSD)
 * Generate manual pages from `help.json` (Doc)
 * Detect marketing name of vivo smartphone (Host, Android)
+* Add txDrops detection if supported (NetIO, *BSD)
 * Support percent type config in module level. Example: 
 
 ```json
