@@ -124,11 +124,21 @@ void ffPrintDisplay(FFDisplayOptions* options)
             if (inch > 1)
                 ffStrbufAppendF(&buffer, " in %i\"", (uint32_t) (inch + 0.5));
 
-            if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
-                ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");
+            bool flag = false;
+            if (result->type != FF_DISPLAY_TYPE_UNKNOWN)
+            {
+                ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in" : " [External");
+                flag = true;
+            }
 
             if (result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED)
-                ffStrbufAppendS(&buffer, " [HDR]");
+            {
+                ffStrbufAppendS(&buffer, flag ? ", HDR" : " [HDR");
+                flag = true;
+            }
+
+            if (flag)
+                ffStrbufAppendS(&buffer, "]");
 
             if(moduleIndex > 0 && result->primary)
                 ffStrbufAppendS(&buffer, " *");
