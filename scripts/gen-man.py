@@ -10,8 +10,9 @@ For the format of the JSON file, see https://github.com/fastfetch-cli/fastfetch/
 
 from json import load
 from datetime import date
+from time import time
 from re import search
-from os import path
+from os import environ, path
 
 
 ###### Text Decorations Tags ######
@@ -34,7 +35,9 @@ manSection = 1
 # title (center header)
 titlePage = "Fastfetch man page"
 # date (center footer)
-todayDate = date.today().strftime("%b %d %Y") # format : "Month (abbreviation) Day Year"
+# format : "Month (abbreviation) Day Year"
+todayDate = date.fromtimestamp(
+    int(environ.get("SOURCE_DATE_EPOCH", time()))).strftime("%b %d %Y")
 # file to fastfetch version (left footer)
 pathToVersionFile = path.join(pathToCurrentDir, "../CMakeLists.txt")
 
