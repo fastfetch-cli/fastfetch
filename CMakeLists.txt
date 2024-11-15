@@ -887,7 +887,7 @@ elseif(APPLE)
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/mouse/mouse_apple.c
-        src/detection/netio/netio_bsd.c
+        src/detection/netio/netio_apple.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c

@@ -38,6 +38,7 @@ Bugfixes:
 * Fix CPU frequency detection on Apple M4 (#1394, CPU, macOS)
 * Fix exe path detection on macOS (Shell / Terminal, macOS)
 * Fix logo fails to load from symlinked files on macOS (#1395, Logo, macOS)
+* Fix 32-bit truncation (NetIO, macOS)
 
 Logos:
 * Fix Lilidog
