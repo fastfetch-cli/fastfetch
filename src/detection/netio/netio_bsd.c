@@ -30,7 +30,6 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 
         struct sockaddr_dl* sdl = (struct sockaddr_dl*) (ifm + 1);
         assert(sdl->sdl_family == AF_LINK);
-        if (sdl->sdl_type != IFT_ETHER && !(ifm->ifm_flags & IFF_LOOPBACK)) continue;
 
         sdl->sdl_data[sdl->sdl_nlen] = 0;
 
