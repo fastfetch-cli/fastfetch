@@ -40,7 +40,6 @@ Some distros package an outdated fastfetch version. Older versions receive no su
 * openSUSE: `zypper install fastfetch`
 * ALT Linux: `apt-get install fastfetch`
 * Exherbo: `cave resolve --execute app-misc/fastfetch`
-* GNU Guix: `guix install fastfetch`
 * Solus: `eopkg install fastfetch`
 * Slackware: `sbopkg -i fastfetch`
 * Void Linux: `xbps-install fastfetch`
