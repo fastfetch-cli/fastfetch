@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.30.0
+    VERSION 2.30.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -268,11 +268,15 @@ else()
     file(READ "src/data/help.json" DATATEXT_JSON_HELP)
 endif()
 
-if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "fastfetch_pciids.c.inc")
+if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
     if(Python_FOUND)
         message(STATUS "Generating 'fastfetch_pciids.c.inc'")
         execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
-                        OUTPUT_FILE "fastfetch_pciids.c.inc")
+                        OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc"
+                        RESULT_VARIABLE PYTHON_PCIIDS_RETCODE)
+        if(NOT PYTHON_PCIIDS_RETCODE EQUAL 0)
+            message(FATAL_ERROR "Failed to generate 'fastfetch_pciids.c.inc'")
+        endif()
     else()
         message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
         set(ENABLE_EMBEDDED_PCIIDS OFF)
@@ -282,7 +286,11 @@ endif()
 if(Python_FOUND)
     message(STATUS "Generating 'fastfetch.1'")
     execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-man.py"
-                    OUTPUT_FILE "fastfetch.1")
+                    OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch.1"
+                    RESULT_VARIABLE PYTHON_MANPAGE_RETCODE)
+        if(NOT PYTHON_MANPAGE_RETCODE EQUAL 0)
+            message(FATAL_ERROR "Failed to generate 'fastfetch.1'")
+        endif()
 else()
     message(WARNING "Python3 is not found, use basic 'fastfetch.1.in' instead")
     string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
