@@ -282,7 +282,7 @@ endif()
 if(Python_FOUND)
     message(STATUS "Generating 'fastfetch.1'")
     execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-man.py"
-                    OUTPUT_FILE "fastfetch.1")
+                    OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch.1")
 else()
     message(WARNING "Python3 is not found, use basic 'fastfetch.1.in' instead")
     string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
