@@ -268,11 +268,11 @@ else()
     file(READ "src/data/help.json" DATATEXT_JSON_HELP)
 endif()
 
-if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "fastfetch_pciids.c.inc")
+if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
     if(Python_FOUND)
         message(STATUS "Generating 'fastfetch_pciids.c.inc'")
         execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
-                        OUTPUT_FILE "fastfetch_pciids.c.inc")
+                        OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
     else()
         message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
         set(ENABLE_EMBEDDED_PCIIDS OFF)
