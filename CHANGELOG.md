@@ -1,3 +1,8 @@
+# 2.30.1
+
+Bugfixes:
+* Fix the destination where `fastfetch.1` is generated (#1403)
+
 # 2.30.0
 
 Changes:
