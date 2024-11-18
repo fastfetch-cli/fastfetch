@@ -1,8 +1,6 @@
 #include "netio.h"
 
-#include "common/io/io.h"
 #include "common/netif/netif.h"
-#include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 
 #include <net/if.h>
@@ -32,7 +30,6 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 
         struct sockaddr_dl* sdl = (struct sockaddr_dl*) (ifm + 1);
         assert(sdl->sdl_family == AF_LINK);
-        if (sdl->sdl_type != IFT_ETHER && !(ifm->ifm_flags & IFF_LOOPBACK)) continue;
 
         sdl->sdl_data[sdl->sdl_nlen] = 0;
 
@@ -48,8 +45,8 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
             .rxPackets = ifm->ifm_data.ifi_ipackets,
             .txErrors = ifm->ifm_data.ifi_oerrors,
             .rxErrors = ifm->ifm_data.ifi_ierrors,
-            #ifdef _IFI_OQDROPS
-            .txDrops = if2m->ifm_data.ifi_oqdrops,
+            #ifdef FF_HAVE_IFI_OQDROPS
+            .txDrops = ifm->ifm_data.ifi_oqdrops,
             #else
             .txDrops = 0, // unsupported
             #endif

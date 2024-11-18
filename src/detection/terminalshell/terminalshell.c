@@ -641,6 +641,26 @@ FF_MAYBE_UNUSED static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* e
     ffStrbufSubstrAfterFirstC(version, ' ');
     return true;
 }
+
+FF_MAYBE_UNUSED static bool getTerminalVersionTilix(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL)
+        return false;
+
+    uint32_t index = ffStrbufFirstIndexS(version, "Tilix version: ");
+    if (index == version->length) return false;
+
+    index += (uint32_t) strlen("Tilix version:");
+    uint32_t end = ffStrbufNextIndexC(version, index, '\n');
+
+    ffStrbufSubstrBefore(version, end);
+    ffStrbufSubstrAfter(version, index);
+    return true;
+}
 #endif
 
 #ifdef _WIN32
@@ -739,6 +759,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "ptyxis-agent"))
         return getTerminalVersionPtyxis(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "tilix"))
+        return getTerminalVersionTilix(exe, version);
 
     #endif
 

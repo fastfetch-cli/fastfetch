@@ -44,6 +44,8 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
     double avgValue = sumValue / (double) valueCount;
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -51,9 +53,9 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         if (!options->separate)
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                 ffPercentAppendBar(&str, avgValue, options->percent, &options->moduleArgs);
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             {
                 if(str.length > 0)
                     ffStrbufAppendC(&str, ' ');
@@ -74,17 +76,24 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY avgNum = ffStrbufCreate();
-        ffPercentAppendNum(&avgNum, avgValue, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&avgNum, avgValue, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY avgBar = ffStrbufCreate();
-        ffPercentAppendBar(&avgBar, avgValue, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&avgBar, avgValue, options->percent, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY minNum = ffStrbufCreate();
-        ffPercentAppendNum(&minNum, minValue, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&minNum, minValue, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY minBar = ffStrbufCreate();
-        ffPercentAppendBar(&minBar, minValue, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&minBar, minValue, options->percent, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY maxNum = ffStrbufCreate();
-        ffPercentAppendNum(&maxNum, maxValue, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&maxNum, maxValue, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY maxBar = ffStrbufCreate();
-        ffPercentAppendBar(&maxBar, maxValue, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&maxBar, maxValue, options->percent, &options->moduleArgs);
+
         FF_PRINT_FORMAT_CHECKED(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPUUSAGE_NUM_FORMAT_ARGS, ((FFformatarg[]){
             FF_FORMAT_ARG(avgNum, "avg"),
             FF_FORMAT_ARG(maxNum, "max"),
@@ -214,7 +223,7 @@ void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
     options->separate = false;
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
     options->waitTime = 200;
 }
 

@@ -39,6 +39,7 @@ const char* ffDetectSound(FFlist* devices)
         FFSoundDevice* device = ffListAdd(devices);
         ffStrbufInitS(&device->identifier, path);
         ffStrbufInitF(&device->name, "%s %s", ci.longname, ci.hw_info);
+	ffStrbufTrimRightSpace(&device->name);
         device->volume = mutemask & SOUND_MASK_VOLUME
             ? 0
             : ((uint8_t) volume /*left*/ + (uint8_t) (volume >> 8) /*right*/) / 2;

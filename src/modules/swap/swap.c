@@ -29,34 +29,36 @@ void ffPrintSwap(FFSwapOptions* options)
         ? 0
         : (double) storage.bytesUsed / (double) storage.bytesTotal * 100.0;
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
+
         if (storage.bytesTotal == 0)
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, 0, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
-            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendS(&str, "Disabled");
             else
                 ffPercentAppendNum(&str, 0, options->percent, str.length > 0, &options->moduleArgs);
         }
         else
         {
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             {
                 ffPercentAppendBar(&str, percentage, options->percent, &options->moduleArgs);
                 ffStrbufAppendC(&str, ' ');
             }
 
-            if(!(instance.config.display.percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
+            if(!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
                 ffStrbufAppendF(&str, "%s / %s ", usedPretty.chars, totalPretty.chars);
 
-            if(instance.config.display.percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffPercentAppendNum(&str, percentage, options->percent, str.length > 0, &options->moduleArgs);
         }
 
@@ -66,9 +68,11 @@ void ffPrintSwap(FFSwapOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&percentageNum, percentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&percentageNum, percentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
         FF_PRINT_FORMAT_CHECKED(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SWAP_NUM_FORMAT_ARGS, ((FFformatarg[]){
             FF_FORMAT_ARG(usedPretty, "used"),
             FF_FORMAT_ARG(totalPretty, "total"),
@@ -161,7 +165,7 @@ void ffInitSwapOptions(FFSwapOptions* options)
         ffGenerateSwapJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroySwapOptions(FFSwapOptions* options)

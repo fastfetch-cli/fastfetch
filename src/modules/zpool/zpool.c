@@ -34,6 +34,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     ffParseSize(result->total, &totalPretty);
 
     double bytesPercentage = result->total > 0 ? (double) result->used / (double) result->total * 100.0 : 0;
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -50,14 +51,18 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     else
     {
         FF_STRBUF_AUTO_DESTROY bytesPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&bytesPercentageNum, bytesPercentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&bytesPercentageNum, bytesPercentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY bytesPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&bytesPercentageBar, bytesPercentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&bytesPercentageBar, bytesPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY fragPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&fragPercentageNum, result->fragmentation, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&fragPercentageNum, result->fragmentation, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY fragPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&fragPercentageBar, result->fragmentation, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&fragPercentageBar, result->fragmentation, options->percent, &options->moduleArgs);
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_ZPOOL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),
@@ -205,7 +210,7 @@ void ffInitZpoolOptions(FFZpoolOptions* options)
         ffGenerateZpoolJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyZpoolOptions(FFZpoolOptions* options)

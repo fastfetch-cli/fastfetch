@@ -10,5 +10,7 @@
 	<string>@PROJECT_VERSION@</string>
     <key>CFBundleDevelopmentRegion</key>
     <string>English</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>For detecting Bluetooth devices</string>
   </dict>
 </plist>

@@ -9,7 +9,7 @@
 
 #include "../displayserver_linux.h"
 
-typedef enum WaylandProtocolType
+typedef enum __attribute__((__packed__)) WaylandProtocolType
 {
     FF_WAYLAND_PROTOCOL_TYPE_NONE,
     FF_WAYLAND_PROTOCOL_TYPE_GLOBAL,

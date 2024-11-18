@@ -147,7 +147,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
             ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }
@@ -158,10 +158,8 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     int mibs[] = { CTL_KERN, KERN_PROCARGS2, pid };
     if (sysctl(mibs, ARRAY_SIZE(mibs), NULL, &len, NULL, 0) == 0)
     {// try get arg0
-        #ifndef MAC_OS_X_VERSION_10_15
         //don't know why if don't let len longer, proArgs2 and len will change during the following sysctl() in old MacOS version.
         len++;
-        #endif
         FF_AUTO_FREE char* const procArgs2 = malloc(len);
         if (sysctl(mibs, ARRAY_SIZE(mibs), procArgs2, &len, NULL, 0) == 0)
         {
@@ -195,11 +193,12 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     }
     else
     {
-        ffStrbufEnsureFixedLengthFree(exe, PATH_MAX);
-        int length = proc_pidpath(pid, exe->chars, exe->allocated);
+        char buf[PROC_PIDPATHINFO_MAXSIZE];
+        int length = proc_pidpath(pid, buf, ARRAY_SIZE(buf));
         if (length > 0)
         {
-            exe->length = (uint32_t) length;
+            ffStrbufEnsureFixedLengthFree(exe, (uint32_t) length);
+            ffStrbufAppendNS(exe, (uint32_t) length, buf);
             if (exePath)
                 ffStrbufSet(exePath, exe);
         }
@@ -275,7 +274,7 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         if (length > 0) // doesn't contain trailing NUL
         {
             buf[length] = '\0';
-            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length + 1); // +1 for the NUL
+            ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
             ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
     }

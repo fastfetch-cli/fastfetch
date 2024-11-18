@@ -33,13 +33,13 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
     do {
         FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInitWS(&device->name, btdi.szName);
-        ffStrbufInitF(&device->address, "%02x:%02x:%02x:%02x:%02x:%02x",
-            btdi.Address.rgBytes[0],
-            btdi.Address.rgBytes[1],
-            btdi.Address.rgBytes[2],
-            btdi.Address.rgBytes[3],
+        ffStrbufInitF(&device->address, "%02X:%02X:%02X:%02X:%02X:%02X",
+            btdi.Address.rgBytes[5],
             btdi.Address.rgBytes[4],
-            btdi.Address.rgBytes[5]);
+            btdi.Address.rgBytes[3],
+            btdi.Address.rgBytes[2],
+            btdi.Address.rgBytes[1],
+            btdi.Address.rgBytes[0]);
         ffStrbufInit(&device->type);
         device->battery = 0;
         device->connected = !!btdi.fConnected;
@@ -120,6 +120,9 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
     } while (ffBluetoothFindNextDevice(hFind, &btdi));
 
     ffBluetoothFindDeviceClose(hFind);
+
+    const char* ffBluetoothDetectBattery(FFlist* result);
+    ffBluetoothDetectBattery(devices);
 
     return NULL;
 }

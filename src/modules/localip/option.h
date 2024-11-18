@@ -4,7 +4,7 @@
 
 #include "common/option.h"
 
-typedef enum FFLocalIpType
+typedef enum __attribute__((__packed__)) FFLocalIpType
 {
     FF_LOCALIP_TYPE_NONE,
     FF_LOCALIP_TYPE_LOOP_BIT        = 1 << 0,
@@ -19,7 +19,9 @@ typedef enum FFLocalIpType
     FF_LOCALIP_TYPE_COMPACT_BIT            = 1 << 10,
     FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT = 1 << 11,
     FF_LOCALIP_TYPE_ALL_IPS_BIT            = 1 << 12,
+    FF_LOCALIP_TYPE_FORCE_UNSIGNED         = UINT16_MAX,
 } FFLocalIpType;
+static_assert(sizeof(FFLocalIpType) == sizeof(uint16_t), "");
 
 typedef struct FFLocalIpOptions
 {

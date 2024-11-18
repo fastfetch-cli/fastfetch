@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.29.0
+    VERSION 2.30.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -20,6 +20,9 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "FreeBSD")
     set(FreeBSD TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "OpenBSD")
     set(OpenBSD TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "MidnightBSD")
+    set(FreeBSD TRUE CACHE BOOL "..." FORCE)
+    set(MidnightBSD TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "NetBSD")
     set(NetBSD TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "DragonFly")
@@ -253,6 +256,7 @@ endfunction(fastfetch_load_text)
 
 find_package(Python)
 if(Python_FOUND)
+    message(STATUS "Minifying 'help.json'")
     execute_process(COMMAND ${Python_EXECUTABLE} -c "import json,sys;json.dump(json.load(sys.stdin),sys.stdout,separators=(',',':'))"
                     INPUT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/data/help.json"
                     OUTPUT_VARIABLE DATATEXT_JSON_HELP)
@@ -260,18 +264,29 @@ if(Python_FOUND)
         message(ERROR "DATATEXT_JSON_HELP is empty, which should not happen!")
     endif()
 else()
-    message(STATUS "Python3 is not found, 'help.json' will not be minified")
+    message(WARNING "Python3 is not found, 'help.json' will not be minified")
     file(READ "src/data/help.json" DATATEXT_JSON_HELP)
 endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "fastfetch_pciids.c.inc")
     if(Python_FOUND)
+        message(STATUS "Generating 'fastfetch_pciids.c.inc'")
         execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
                         OUTPUT_FILE "fastfetch_pciids.c.inc")
     else()
-        message(STATUS "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
+        message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
         set(ENABLE_EMBEDDED_PCIIDS OFF)
     endif()
+endif()
+
+if(Python_FOUND)
+    message(STATUS "Generating 'fastfetch.1'")
+    execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-man.py"
+                    OUTPUT_FILE "fastfetch.1")
+else()
+    message(WARNING "Python3 is not found, use basic 'fastfetch.1.in' instead")
+    string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
+    configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 endif()
 
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
@@ -285,9 +300,6 @@ configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
     configure_file(src/util/apple/Info.plist.in Info.plist @ONLY)
 endif()
-
-string(TIMESTAMP FASTFETCH_BUILD_DATE "%d %B %Y" UTC)
-configure_file(doc/fastfetch.1.in fastfetch.1 @ONLY)
 
 ####################
 # Ascii image data #
@@ -875,7 +887,7 @@ elseif(APPLE)
         src/detection/media/media_apple.m
         src/detection/memory/memory_apple.c
         src/detection/mouse/mouse_apple.c
-        src/detection/netio/netio_bsd.c
+        src/detection/netio/netio_apple.c
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
@@ -912,6 +924,7 @@ elseif(WIN32)
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_windows.c
+        src/detection/bluetooth/bluetooth_windows.cpp
         src/detection/bluetoothradio/bluetoothradio_windows.c
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_windows.c
@@ -1123,17 +1136,25 @@ if(APPLE AND EXISTS "/usr/bin/otool")
         target_compile_definitions(libfastfetch PUBLIC FF_LIBSYSTEM_VERSION="${CMAKE_MATCH_1}")
     endif()
 endif()
-if(FreeBSD AND EXISTS "/usr/local/bin/objdump")
+if(MidnightBSD AND EXISTS "/usr/bin/objdump")
+    execute_process(COMMAND /bin/sh -c "/usr/bin/objdump -T /lib/libc.so.* | grep 'FBSD_[0-9][0-9]*\\.[0-9][0-9]*' -o | sort -Vru | head -1"
+                    OUTPUT_VARIABLE OBJDUMP_T_RESULT)
+    if("${OBJDUMP_T_RESULT}" MATCHES "FBSD_([0-9]+\\.[0-9]+)")
+        message(STATUS "Found FBSD ${CMAKE_MATCH_1}")
+        target_compile_definitions(libfastfetch PUBLIC FF_FBSD_VERSION="${CMAKE_MATCH_1}")
+    endif()
+elseif(FreeBSD AND EXISTS "/usr/local/bin/objdump")
     execute_process(COMMAND /bin/sh -c "/usr/local/bin/objdump -T /lib/libc.so.* | grep 'FBSD_[0-9][0-9]*\\.[0-9][0-9]*' -o | sort -Vru | head -1"
                     OUTPUT_VARIABLE OBJDUMP_T_RESULT)
     if("${OBJDUMP_T_RESULT}" MATCHES "FBSD_([0-9]+\\.[0-9]+)")
+        message(STATUS "Found FBSD ${CMAKE_MATCH_1}")
         target_compile_definitions(libfastfetch PUBLIC FF_FBSD_VERSION="${CMAKE_MATCH_1}")
     endif()
-endif()
-if(DragonFly AND EXISTS "/usr/local/bin/objdump")
+elseif(DragonFly AND EXISTS "/usr/local/bin/objdump")
     execute_process(COMMAND /bin/sh -c "/usr/local/bin/objdump -T /lib/libc.so.* | grep 'DF[0-9][0-9]*\\.[0-9][0-9]*' -o | sort -Vru | head -1"
                     OUTPUT_VARIABLE OBJDUMP_T_RESULT)
     if("${OBJDUMP_T_RESULT}" MATCHES "DF([0-9]+\\.[0-9]+)")
+        message(STATUS "Found DF ${CMAKE_MATCH_1}")
         target_compile_definitions(libfastfetch PUBLIC FF_DF_VERSION="${CMAKE_MATCH_1}")
     endif()
 endif()
@@ -1143,7 +1164,7 @@ if(LINUX)
 elseif(ANDROID)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE _FILE_OFFSET_BITS=64 "$<$<CONFIG:DEBUG>:__BIONIC_FORTIFY>" "$<$<CONFIG:DEBUG>:__BIONIC_FORTIFY_RUNTIME_CHECKS_ENABLED>")
 elseif(WIN32)
-    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN=1 _WIN32_WINNT=0x0A00 NOMINMAX) # "$<$<CONFIG:Release>:_FORTIFY_SOURCE=3>"
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0A00 NOMINMAX UNICODE) # "$<$<CONFIG:Release>:_FORTIFY_SOURCE=3>"
 elseif(APPLE)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE _XOPEN_SOURCE __STDC_WANT_LIB_EXT1__ _FILE_OFFSET_BITS=64 _DARWIN_C_SOURCE)
 elseif(OpenBSD)
@@ -1157,6 +1178,16 @@ elseif(NetBSD)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-char-subscripts")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/usr/X11R7/lib -Wl,-rpath,/usr/pkg/lib") # ditto
+endif()
+
+if(FreeBSD OR OpenBSD OR NetBSD)
+    include(CheckStructHasMember)
+    set(CMAKE_REQUIRED_DEFINITIONS "-D_IFI_OQDROPS=1")
+    CHECK_STRUCT_HAS_MEMBER("struct if_data" ifi_oqdrops net/if.h HAVE_IFI_OQDROPS LANGUAGE C)
+    if(HAVE_IFI_OQDROPS)
+    target_compile_definitions(libfastfetch PUBLIC _IFI_OQDROPS FF_HAVE_IFI_OQDROPS)
+    endif()
+    unset(CMAKE_REQUIRED_DEFINITIONS)
 endif()
 
 if(HAVE_STATX)
@@ -1425,6 +1456,7 @@ elseif(WIN32)
         PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
+        PRIVATE "propsys"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch

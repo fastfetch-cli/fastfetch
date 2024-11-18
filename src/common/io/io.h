@@ -87,11 +87,12 @@ static inline bool ffReadFileBufferRelative(FFNativeFD dfd, const char* fileName
 }
 
 //Bit flags, combine with |
-typedef enum FFPathType
+typedef enum __attribute__((__packed__)) FFPathType
 {
     FF_PATHTYPE_FILE = 1 << 0,
     FF_PATHTYPE_DIRECTORY = 1 << 1,
     FF_PATHTYPE_ANY = FF_PATHTYPE_FILE | FF_PATHTYPE_DIRECTORY,
+    FF_PATHTYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFPathType;
 
 static inline bool ffPathExists(const char* path, FFPathType pathType)
@@ -118,6 +119,19 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
     }
     else
     {
+        #if __APPLE__ // #1395
+        struct stat fileStat;
+        if(stat(path, &fileStat) != 0)
+            return false;
+
+        unsigned int mode = fileStat.st_mode & S_IFMT;
+
+        if(pathType & FF_PATHTYPE_FILE && mode != S_IFDIR)
+            return true;
+
+        if(pathType & FF_PATHTYPE_DIRECTORY && mode == S_IFDIR)
+            return true;
+        #else
         size_t len = strlen(path);
         assert(len < PATH_MAX);
         if (len == 0) return false;
@@ -134,6 +148,7 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
         else
             ret = access(path, F_OK);
         return pathType == FF_PATHTYPE_DIRECTORY ? ret == 0 : ret == -1 && errno == ENOTDIR;
+        #endif
     }
 
     #endif

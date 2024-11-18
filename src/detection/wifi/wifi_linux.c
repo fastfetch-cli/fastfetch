@@ -190,7 +190,7 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
         return "socket() failed";
 
     struct iwreq iwr;
-    ffStrCopyN(iwr.ifr_name, item->inf.description.chars, IFNAMSIZ);
+    ffStrCopy(iwr.ifr_name, item->inf.description.chars, IFNAMSIZ);
     ffStrbufEnsureFree(&item->conn.ssid, IW_ESSID_MAX_SIZE);
     iwr.u.essid.pointer = (caddr_t) item->conn.ssid.chars;
     iwr.u.essid.length = IW_ESSID_MAX_SIZE + 1;

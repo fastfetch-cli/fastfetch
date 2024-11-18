@@ -10,5 +10,5 @@ typedef struct FFZpoolOptions
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
 } FFZpoolOptions;

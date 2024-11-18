@@ -45,6 +45,8 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     double usedPercentage = total > 0 ? (double) used / (double) total * 100.0 : 0;
     double allocatedPercentage = total > 0 ? (double) allocated / (double) total * 100.0 : 0;
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(buffer.chars, index, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
@@ -60,14 +62,18 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     else
     {
         FF_STRBUF_AUTO_DESTROY usedPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&usedPercentageNum, usedPercentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&usedPercentageNum, usedPercentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY usedPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&usedPercentageBar, usedPercentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&usedPercentageBar, usedPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY allocatedPercentageNum = ffStrbufCreate();
-        ffPercentAppendNum(&allocatedPercentageNum, allocatedPercentage, options->percent, false, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&allocatedPercentageNum, allocatedPercentage, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY allocatedPercentageBar = ffStrbufCreate();
-        ffPercentAppendBar(&allocatedPercentageBar, allocatedPercentage, options->percent, &options->moduleArgs);
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&allocatedPercentageBar, allocatedPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY nodeSizePretty = ffStrbufCreate();
         ffParseSize(result->nodeSize, &nodeSizePretty);
@@ -245,7 +251,7 @@ void ffInitBtrfsOptions(FFBtrfsOptions* options)
         ffGenerateBtrfsJsonConfig
     );
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyBtrfsOptions(FFBtrfsOptions* options)

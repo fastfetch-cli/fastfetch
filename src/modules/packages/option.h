@@ -4,7 +4,7 @@
 
 #include "common/option.h"
 
-typedef enum FFPackagesFlags
+typedef enum __attribute__((__packed__)) FFPackagesFlags
 {
     FF_PACKAGES_FLAG_NONE = 0,
     FF_PACKAGES_FLAG_APK_BIT = 1 << 0,
@@ -33,7 +33,11 @@ typedef enum FFPackagesFlags
     FF_PACKAGES_FLAG_GUIX_BIT = 1 << 23,
     FF_PACKAGES_FLAG_LINGLONG_BIT = 1 << 24,
     FF_PACKAGES_FLAG_PACSTALL_BIT = 1 << 25,
+    FF_PACKAGES_FLAG_MPORT_BIT = 1 << 26,
+    FF_PACKAGES_FLAG_QI_BIT = 1 << 27,
+    FF_PACKAGES_FLAG_FORCE_UNSIGNED = UINT32_MAX,
 } FFPackagesFlags;
+static_assert(sizeof(FFPackagesFlags) == sizeof(uint32_t), "");
 
 typedef struct FFPackagesOptions
 {

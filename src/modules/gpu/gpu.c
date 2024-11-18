@@ -439,7 +439,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
     options->temp = false;
     options->hideType = FF_GPU_TYPE_UNKNOWN;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFColorRangeConfig) { 50, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
 
 void ffDestroyGPUOptions(FFGPUOptions* options)

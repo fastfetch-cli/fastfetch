@@ -381,6 +381,9 @@ int main(void)
     ffStrbufEnsureFixedLengthFree(&strbuf, 10);
     VERIFY(strbuf.length == 0);
     VERIFY(strbuf.allocated == 11);
+    ffStrbufEnsureFixedLengthFree(&strbuf, 12);
+    VERIFY(strbuf.length == 0);
+    VERIFY(strbuf.allocated == 13);
     ffStrbufDestroy(&strbuf);
 
     //ffStrbufEnsureFixedLengthFree / empty buffer with zero free length
@@ -441,6 +444,19 @@ int main(void)
     ffStrbufInsertNC(&strbuf, 999, 2, 'D');
     VERIFY(ffStrbufEqualS(&strbuf, "AA12BB3456CCDD"));
     ffStrbufDestroy(&strbuf);
+
+    // smallest allocation test
+    {
+        FF_STRBUF_AUTO_DESTROY strbuf1 = ffStrbufCreateA(10);
+        VERIFY(strbuf1.allocated == 10);
+        ffStrbufEnsureFree(&strbuf1, 16);
+        VERIFY(strbuf1.allocated == 32);
+
+        FF_STRBUF_AUTO_DESTROY strbuf2 = ffStrbufCreate();
+        VERIFY(strbuf2.allocated == 0);
+        ffStrbufEnsureFree(&strbuf2, 16);
+        VERIFY(strbuf2.allocated == 32);
+    }
 
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);

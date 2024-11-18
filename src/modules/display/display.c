@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 19
+#define FF_DISPLAY_NUM_FORMAT_ARGS 20
 
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
@@ -124,11 +124,21 @@ void ffPrintDisplay(FFDisplayOptions* options)
             if (inch > 1)
                 ffStrbufAppendF(&buffer, " in %i\"", (uint32_t) (inch + 0.5));
 
-            if(result->type != FF_DISPLAY_TYPE_UNKNOWN)
-                ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in]" : " [External]");
+            bool flag = false;
+            if (result->type != FF_DISPLAY_TYPE_UNKNOWN)
+            {
+                ffStrbufAppendS(&buffer, result->type == FF_DISPLAY_TYPE_BUILTIN ? " [Built-in" : " [External");
+                flag = true;
+            }
 
             if (result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED)
-                ffStrbufAppendS(&buffer, " [HDR]");
+            {
+                ffStrbufAppendS(&buffer, flag ? ", HDR" : " [HDR");
+                flag = true;
+            }
+
+            if (flag)
+                ffStrbufAppendS(&buffer, "]");
 
             if(moduleIndex > 0 && result->primary)
                 ffStrbufAppendS(&buffer, " *");
@@ -140,6 +150,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         {
             double ppi = sqrt(result->width * result->width + result->height * result->height) / inch;
             bool hdrEnabled = result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
+            bool hdrCompatible = result->hdrStatus == FF_DISPLAY_HDR_STATUS_SUPPORTED || result->hdrStatus == FF_DISPLAY_HDR_STATUS_ENABLED;
             uint32_t iInch = (uint32_t) (inch + 0.5), iPpi = (uint32_t) (ppi + 0.5);
 
             char refreshRate[16];
@@ -182,6 +193,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 FF_FORMAT_ARG(result->manufactureWeek, "manufacture-week"),
                 FF_FORMAT_ARG(buf, "serial"),
                 FF_FORMAT_ARG(result->platformApi, "platform-api"),
+                FF_FORMAT_ARG(hdrCompatible, "hdr-compatible"),
             }));
         }
     }
@@ -423,6 +435,7 @@ void ffPrintDisplayHelpFormat(void)
         "Nth week of manufacturing in the year - manufacture-week",
         "Serial number - serial",
         "The platform API used when detecting the display - platform-api",
+        "True if the display is HDR compatible - hdr-compatible",
     }));
 }
 

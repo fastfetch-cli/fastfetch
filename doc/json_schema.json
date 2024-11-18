@@ -34,6 +34,35 @@
             "description": "Output color of the module. Left empty to use `display.color.output`",
             "$ref": "#/$defs/colors"
         },
+        "percentType": {
+            "description": "Set the percentage output type",
+            "oneOf": [
+                {
+                    "type": "number",
+                    "description": "1 for percentage number, 2 for multi-color bar, 3 for both, 6 for bar only, 9 for colored number, 10 for monochrome bar",
+                    "minimum": 0,
+                    "maximum": 255,
+                    "default": 9
+                },
+                {
+                    "type": "array",
+                    "description": "array of string flags",
+                    "items": {
+                        "enum": [
+                            "num",
+                            "bar",
+                            "hide-others",
+                            "num-color",
+                            "bar-monochrome"
+                        ]
+                    },
+                    "default": [
+                        "num",
+                        "num-color"
+                    ]
+                }
+            ]
+        },
         "percent": {
             "description": "Threshold of percentage colors",
             "type": "object",
@@ -50,6 +79,9 @@
                     "minimum": 0,
                     "maximum": 100,
                     "description": "Value greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
+                },
+                "type": {
+                    "$ref": "#/$defs/percentType"
                 }
             }
         },
@@ -576,11 +608,7 @@
                     "description": "Set how a percentage value should be displayed",
                     "properties": {
                         "type": {
-                            "type": "number",
-                            "description": "Set the percentage output type. 1 for percentage number, 2 for multi-color bar, 3 for both, 6 for bar only, 9 for colored number, 10 for monochrome bar",
-                            "minimum": 0,
-                            "maximum": 255,
-                            "default": 9
+                            "$ref": "#/$defs/percentType"
                         },
                         "ndigits": {
                             "type": "number",
@@ -1942,15 +1970,19 @@
                                                 "eopkg",
                                                 "flatpak",
                                                 "guix",
+                                                "linglong",
                                                 "lpkg",
                                                 "lpkgbuild",
                                                 "macports",
+                                                "mport",
                                                 "nix",
                                                 "opkg",
                                                 "pacman",
+                                                "pacstall",
                                                 "paludis",
                                                 "pkg",
                                                 "pkgtool",
+                                                "qi",
                                                 "rpm",
                                                 "scoop",
                                                 "snap",

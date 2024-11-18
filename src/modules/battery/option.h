@@ -12,7 +12,7 @@ typedef struct FFBatteryOptions
 
     bool temp;
     FFColorRangeConfig tempConfig;
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
 
     #ifdef _WIN32
         bool useSetupApi;

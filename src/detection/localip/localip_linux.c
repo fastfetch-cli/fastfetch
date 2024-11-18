@@ -231,7 +231,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             FF_LIST_FOR_EACH(FFLocalIpResult, iface, *results)
             {
                 struct ifreq ifr;
-                ffStrCopyN(ifr.ifr_name, iface->name.chars, IFNAMSIZ);
+                ffStrCopy(ifr.ifr_name, iface->name.chars, IFNAMSIZ);
 
                 if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
                 {
@@ -248,7 +248,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                         iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
                     #elif __FreeBSD__ || __APPLE__ || __OpenBSD__ || __NetBSD__
                     struct ifmediareq ifmr = {};
-                    ffStrCopyN(ifmr.ifm_name, iface->name.chars, IFNAMSIZ);
+                    ffStrCopy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))
                     {
                         switch (IFM_SUBTYPE(ifmr.ifm_active))

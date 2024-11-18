@@ -14,7 +14,46 @@ static void appendOutputColor(FFstrbuf* buffer, const FFModuleArgs* module)
         ffStrbufAppendF(buffer, "\e[%sm", instance.config.display.colorOutput.chars);
 }
 
-void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig config, const FFModuleArgs* module)
+const char* ffPercentParseTypeJsonConfig(yyjson_val* jsonVal, FFPercentageTypeFlags* result)
+{
+    if (yyjson_is_uint(jsonVal))
+    {
+        *result = (FFPercentageTypeFlags) yyjson_get_uint(jsonVal);
+        return NULL;
+    }
+    if (yyjson_is_arr(jsonVal))
+    {
+        FFPercentageTypeFlags flags = 0;
+
+        yyjson_val* item;
+        size_t idx, max;
+        yyjson_arr_foreach(jsonVal, idx, max, item)
+        {
+            const char* flag = yyjson_get_str(item);
+            if (!flag)
+                return "Error: percent.type: invalid flag string";
+            if (ffStrEqualsIgnCase(flag, "num"))
+                flags |= FF_PERCENTAGE_TYPE_NUM_BIT;
+            else if (ffStrEqualsIgnCase(flag, "bar"))
+                flags |= FF_PERCENTAGE_TYPE_BAR_BIT;
+            else if (ffStrEqualsIgnCase(flag, "hide-others"))
+                flags |= FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT;
+            else if (ffStrEqualsIgnCase(flag, "num-color"))
+                flags |= FF_PERCENTAGE_TYPE_NUM_COLOR_BIT;
+            else if (ffStrEqualsIgnCase(flag, "bar-monochrome"))
+                flags |= FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT;
+            else
+                return "Error: percent.type: unknown flag string";
+        }
+
+        *result = flags;
+        return NULL;
+    }
+
+    return "Error: usage: percent.type must be a number or an array of strings";
+}
+
+void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConfig config, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
@@ -41,15 +80,18 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
     }
     else
     {
-        const char* colorGreen = instance.config.display.percentColorGreen.chars;
-        const char* colorYellow = instance.config.display.percentColorYellow.chars;
-        const char* colorRed = instance.config.display.percentColorRed.chars;
+        const char* colorGreen = options->percentColorGreen.chars;
+        const char* colorYellow = options->percentColorYellow.chars;
+        const char* colorRed = options->percentColorRed.chars;
+
+        FFPercentageTypeFlags percentType = config.type == 0 ? options->percentType : config.type;
+        bool monochrome = !!(percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT);
 
         for (uint32_t i = 0; i < blocksPercent; ++i)
         {
             if(!options->pipe)
             {
-                if (options->percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT)
+                if (monochrome)
                 {
                     const char* color = NULL;
                     if (green <= yellow)
@@ -104,14 +146,15 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFColorRangeConfig con
     }
 }
 
-void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig config, bool parentheses, const FFModuleArgs* module)
+void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConfig config, bool parentheses, const FFModuleArgs* module)
 {
     uint8_t green = config.green, yellow = config.yellow;
     assert(green <= 100 && yellow <= 100);
 
     const FFOptionsDisplay* options = &instance.config.display;
+    FFPercentageTypeFlags percentType = config.type == 0 ? options->percentType : config.type;
 
-    bool colored = !!(options->percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT);
+    bool colored = !!(percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT);
 
     if (parentheses)
         ffStrbufAppendC(buffer, '(');
@@ -156,7 +199,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFColorRangeConfig con
         ffStrbufAppendC(buffer, ')');
 }
 
-bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFColorRangeConfig* config)
+bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentageModuleConfig* config)
 {
     if (!ffStrStartsWithIgnCase(subkey, "percent-"))
         return false;
@@ -187,10 +230,16 @@ bool ffPercentParseCommandOptions(const char* key, const char* subkey, const cha
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subkey, "type"))
+    {
+        config->type = (FFPercentageTypeFlags) ffOptionParseUInt32(key, value);
+        return true;
+    }
+
     return false;
 }
 
-bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFColorRangeConfig* config)
+bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentageModuleConfig* config)
 {
     if (!ffStrEqualsIgnCase(key, "percent"))
         return false;
@@ -225,10 +274,21 @@ bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFColorRangeCo
         config->yellow = (uint8_t) num;
     }
 
+    yyjson_val* typeVal = yyjson_obj_get(value, "type");
+    if (typeVal)
+    {
+        const char* error = ffPercentParseTypeJsonConfig(typeVal, &config->type);
+        if (error)
+        {
+            fputs(error, stderr);
+            exit(480);
+        }
+    }
+
     return true;
 }
 
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFColorRangeConfig defaultConfig, FFColorRangeConfig config)
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig defaultConfig, FFPercentageModuleConfig config)
 {
     if (config.green == defaultConfig.green && config.yellow == defaultConfig.yellow)
         return;
@@ -238,4 +298,6 @@ void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FF
         yyjson_mut_obj_add_uint(doc, percent, "green", config.green);
     if (config.yellow != defaultConfig.yellow)
         yyjson_mut_obj_add_uint(doc, percent, "yellow", config.yellow);
+    if (config.type != defaultConfig.type)
+        yyjson_mut_obj_add_uint(doc, percent, "type", config.type);
 }

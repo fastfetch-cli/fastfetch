@@ -2,7 +2,7 @@
 
 #include "util/FFstrbuf.h"
 
-typedef enum FFformatArgType
+typedef enum __attribute__((__packed__)) FFformatArgType
 {
     FF_FORMAT_ARG_TYPE_NULL = 0,
     FF_FORMAT_ARG_TYPE_UINT,

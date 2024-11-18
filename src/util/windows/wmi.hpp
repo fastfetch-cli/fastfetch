@@ -20,15 +20,9 @@ enum class FFWmiNamespace {
 
 struct FFWmiRecord
 {
-    IWbemClassObject* obj;
+    IWbemClassObject* obj = nullptr;
 
-    explicit FFWmiRecord(IEnumWbemClassObject* pEnumerator): obj(nullptr) {
-        if(!pEnumerator) return;
-
-        ULONG ret;
-        bool ok = SUCCEEDED(pEnumerator->Next(instance.config.general.wmiTimeout, 1, &obj, &ret)) && ret;
-        if(!ok) obj = nullptr;
-    }
+    explicit FFWmiRecord(IWbemClassObject* obj): obj(obj) {};
     FFWmiRecord(const FFWmiRecord&) = delete;
     FFWmiRecord(FFWmiRecord&& other) { *this = (FFWmiRecord&&)other; }
     ~FFWmiRecord() { if(obj) obj->Release(); }
@@ -53,6 +47,7 @@ struct FFWmiRecord
 
 struct FFWmiQuery
 {
+    IWbemServices* pService = nullptr;
     IEnumWbemClassObject* pEnumerator = nullptr;
 
     FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error = nullptr, FFWmiNamespace wmiNs = FFWmiNamespace::CIMV2);
@@ -70,10 +65,29 @@ struct FFWmiQuery
     }
 
     FFWmiRecord next() {
-        FFWmiRecord result(pEnumerator);
+        IWbemClassObject* obj = nullptr;
+        ULONG ret;
+        pEnumerator->Next(instance.config.general.wmiTimeout, 1, &obj, &ret);
+
+        FFWmiRecord result(obj);
         return result;
     }
 };
+
+namespace
+{
+    // Provide our bstr_t to avoid libstdc++ dependency
+    struct bstr_t
+    {
+        explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
+        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
+        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
+        operator BSTR(void) const noexcept { return _bstr; }
+
+        private:
+            BSTR _bstr;
+    };
+}
 
 #else
     // Win32 COM headers requires C++ compiler

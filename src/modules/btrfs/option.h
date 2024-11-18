@@ -10,5 +10,5 @@ typedef struct FFBtrfsOptions
     FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    FFColorRangeConfig percent;
+    FFPercentageModuleConfig percent;
 } FFBtrfsOptions;

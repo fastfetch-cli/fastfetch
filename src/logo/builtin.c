@@ -1070,6 +1070,20 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Cosmic DE
+    {
+        .names = {"Cosmic"},
+        .lines = FASTFETCH_DATATEXT_LOGO_COSMIC,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_YELLOW,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_LIGHT_RED,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_RED,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // CRUX
     {
         .names = {"CRUX"},
@@ -2392,7 +2406,7 @@ static const FFlogo L[] = {
     // Lilidog
     {
         .names = {"Lilidog"},
-        .lines = FASTFETCH_DATATEXT_LOGO_LIBREELEC,
+        .lines = FASTFETCH_DATATEXT_LOGO_LILIDOG,
         .colors = {
             FF_COLOR_FG_BLUE,
         },
@@ -2807,6 +2821,16 @@ static const FFlogo M[] = {
             FF_COLOR_FG_BLUE,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // MidnightBSD
+    {
+        .names = {"MidnightBSD"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MIDNIGHTBSD,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
     // MidOS
@@ -4589,6 +4613,15 @@ static const FFlogo U[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_ULTRAMARINE,
         .colors = {
             FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    // Unifi
+    {
+        .names = {"Unifi"},
+        .lines = FASTFETCH_DATATEXT_LOGO_UNIFI,
+        .colors = {
+            FF_COLOR_FG_WHITE,
             FF_COLOR_FG_WHITE,
         },
     },

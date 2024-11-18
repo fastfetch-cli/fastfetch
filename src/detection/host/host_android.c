@@ -9,11 +9,12 @@ const char* ffDetectHost(FFHostResult* host)
 
     ffSettingsGetAndroidProperty("ro.product.marketname", &host->name)
         || ffSettingsGetAndroidProperty("ro.vendor.product.display", &host->name)
+        || ffSettingsGetAndroidProperty("ro.vivo.market.name", &host->name)
+        || ffSettingsGetAndroidProperty("ro.product.oppo_model", &host->name)
+        || ffSettingsGetAndroidProperty("ro.oppo.market.name", &host->name)
         || ffSettingsGetAndroidProperty("ro.config.devicename", &host->name)
         || ffSettingsGetAndroidProperty("ro.config.marketing_name", &host->name)
         || ffSettingsGetAndroidProperty("ro.product.vendor.model", &host->name)
-        || ffSettingsGetAndroidProperty("ro.product.oppo_model", &host->name)
-        || ffSettingsGetAndroidProperty("ro.oppo.market.name", &host->name)
         || ffSettingsGetAndroidProperty("ro.product.brand", &host->name);
 
     if (ffSettingsGetAndroidProperty("ro.product.model", &host->version))

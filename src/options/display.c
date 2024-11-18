@@ -1,6 +1,7 @@
 #include "fastfetch.h"
 #include "common/color.h"
 #include "common/jsonconfig.h"
+#include "common/percent.h"
 #include "util/stringUtils.h"
 #include "options/display.h"
 
@@ -166,7 +167,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 return "display.percent must be an object";
 
             yyjson_val* type = yyjson_obj_get(val, "type");
-            if (type) options->percentType = (uint8_t) yyjson_get_uint(type);
+            if (type)
+            {
+                const char* error = ffPercentParseTypeJsonConfig(type, &options->percentType);
+                if (error) return error;
+            }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);

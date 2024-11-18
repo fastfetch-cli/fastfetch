@@ -36,6 +36,8 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             if (refreshRate == 0)
             {
+                #pragma clang diagnostic push
+                #pragma clang diagnostic ignored "-Wdeprecated-declarations"
                 CVDisplayLinkRef link;
                 if(CVDisplayLinkCreateWithCGDisplay(screen, &link) == kCVReturnSuccess)
                 {
@@ -44,6 +46,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                         refreshRate = time.timeScale / (double) time.timeValue; //59.97...
                     CVDisplayLinkRelease(link);
                 }
+                #pragma clang diagnostic pop
             }
 
             ffStrbufClear(&buffer);
@@ -99,6 +102,10 @@ static void detectDisplays(FFDisplayServerResult* ds)
             );
             if (display)
             {
+                #ifndef MAC_OS_X_VERSION_10_11
+                FF_CFTYPE_AUTO_RELEASE CFStringRef pe = CGDisplayModeCopyPixelEncoding(mode);
+                if (pe) display->bitDepth = (uint8_t) (CFStringGetLength(pe) - CFStringFind(pe, CFSTR("B"), 0).location);
+                #else
                 // https://stackoverflow.com/a/33519316/9976392
                 // Also shitty, but better than parsing `CFCopyDescription(mode)`
                 CFDictionaryRef dict = (CFDictionaryRef) *((int64_t *)mode + 2);
@@ -108,6 +115,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     ffCfDictGetInt(dict, kCGDisplayBitsPerSample, &bitDepth);
                     display->bitDepth = (uint8_t) bitDepth;
                 }
+                #endif
 
                 if (display->type == FF_DISPLAY_TYPE_BUILTIN)
                     display->hdrStatus = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance"))

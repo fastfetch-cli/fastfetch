@@ -6,21 +6,6 @@
 #include <wchar.h>
 #include <math.h>
 
-namespace
-{
-    // Provide our bstr_t to avoid libstdc++ dependency
-    struct bstr_t
-    {
-        explicit bstr_t(const wchar_t* str) noexcept: _bstr(SysAllocString(str)) {}
-        ~bstr_t(void) noexcept { SysFreeString(_bstr); }
-        explicit operator const wchar_t*(void) const noexcept { return _bstr; }
-        operator BSTR(void) const noexcept { return _bstr; }
-
-        private:
-            BSTR _bstr;
-    };
-}
-
 static const char* doInitService(const wchar_t* networkResource, IWbemServices** result)
 {
     HRESULT hres;
@@ -59,30 +44,11 @@ static const char* doInitService(const wchar_t* networkResource, IWbemServices**
     if (FAILED(hres))
         return "Could not connect WMI server";
 
-    // Set security levels on the proxy -------------------------
-    hres = CoSetProxyBlanket(
-       pSvc,                        // Indicates the proxy to set
-       RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
-       RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
-       nullptr,                     // Server principal name
-       RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
-       RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
-       nullptr,                     // client identity
-       EOAC_NONE                    // proxy capabilities
-    );
-
-    if (FAILED(hres))
-    {
-        pSvc->Release();
-        return "Could not set proxy blanket";
-    }
-
     *result = pSvc;
     return NULL;
 }
 
 FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace wmiNs)
-    : pEnumerator(nullptr)
 {
     const char* errStr;
     if ((errStr = ffInitCom()))
@@ -95,7 +61,7 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace 
     static IWbemServices* contexts[(int) FFWmiNamespace::LAST];
 
     IWbemServices* context = contexts[(int)wmiNs];
-    if (!contexts[(int)wmiNs])
+    if (!context)
     {
         if ((errStr = doInitService(wmiNs == FFWmiNamespace::CIMV2 ? L"ROOT\\CIMV2" : L"ROOT\\WMI", &context)))
         {
@@ -106,13 +72,15 @@ FFWmiQuery::FFWmiQuery(const wchar_t* queryStr, FFstrbuf* error, FFWmiNamespace 
         contexts[(int)wmiNs] = context;
     }
 
+    this->pService = context;
+
     // Use the IWbemServices pointer to make requests of WMI
     HRESULT hres = context->ExecQuery(
         bstr_t(L"WQL"),
         bstr_t(queryStr),
         WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
         nullptr,
-        &pEnumerator);
+        &this->pEnumerator);
 
     if (FAILED(hres))
     {
