@@ -6,8 +6,6 @@
 #include "util/FFstrbuf.h"
 #include "common/library.h"
 
-#define FF_DBUS_TIMEOUT_MILLISECONDS 100
-
 typedef struct FFDBusLibrary
 {
     FF_LIBRARY_SYMBOL(dbus_bus_get)

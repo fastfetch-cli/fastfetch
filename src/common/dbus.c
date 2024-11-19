@@ -171,7 +171,7 @@ DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const c
     if (arg)
         dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg, DBUS_TYPE_INVALID);
 
-    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, FF_DBUS_TIMEOUT_MILLISECONDS, NULL);
+    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, NULL);
 
     dbus->lib->ffdbus_message_unref(message);
 
@@ -189,7 +189,7 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
         DBUS_TYPE_STRING, &property,
         DBUS_TYPE_INVALID);
 
-    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, FF_DBUS_TIMEOUT_MILLISECONDS, NULL);
+    DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, NULL);
 
     dbus->lib->ffdbus_message_unref(message);
 
