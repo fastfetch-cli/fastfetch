@@ -38,4 +38,9 @@ DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
 bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint32_t* result);
 
+static inline DBusMessage* ffDBusGetAllProperties(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface)
+{
+    return ffDBusGetMethodReply(dbus, busName, objectPath, "org.freedesktop.DBus.Properties", "GetAll", interface);
+}
+
 #endif // FF_HAVE_DBUS
