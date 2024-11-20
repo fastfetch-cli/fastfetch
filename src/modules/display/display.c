@@ -6,7 +6,7 @@
 
 #include <math.h>
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 20
+#define FF_DISPLAY_NUM_FORMAT_ARGS 21
 
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
@@ -173,6 +173,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
             else
                 buf[0] = '\0';
 
+            double scaleFactor = (double) result->width / (double) result->scaledWidth;
+
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result->width, "width"),
                 FF_FORMAT_ARG(result->height, "height"),
@@ -194,6 +196,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
                 FF_FORMAT_ARG(buf, "serial"),
                 FF_FORMAT_ARG(result->platformApi, "platform-api"),
                 FF_FORMAT_ARG(hdrCompatible, "hdr-compatible"),
+                FF_FORMAT_ARG(scaleFactor, "scale-factor"),
             }));
         }
     }
@@ -441,6 +444,7 @@ void ffPrintDisplayHelpFormat(void)
         "Serial number - serial",
         "The platform API used when detecting the display - platform-api",
         "True if the display is HDR compatible - hdr-compatible",
+        "HiDPI scale factor - scale-factor",
     }));
 }
 
