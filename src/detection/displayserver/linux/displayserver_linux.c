@@ -79,7 +79,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
                 if (ffSettingsGetFreeBSDKenv("screen.height", &buf))
                 {
                     uint32_t height = (uint32_t) ffStrbufToUInt(&buf, 0);
-                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, NULL, FF_DISPLAY_TYPE_UNKNOWN, false, 0, 0, 0, "kenv");
+                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, 0, 0, 0, NULL, FF_DISPLAY_TYPE_UNKNOWN, false, 0, 0, 0, "kenv");
                 }
             }
         }
