@@ -149,12 +149,30 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 default: rotation = 0; break;
             }
 
+            DISPLAYCONFIG_TARGET_PREFERRED_MODE preferredMode = {
+                .header = {
+                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_PREFERRED_MODE,
+                    .size = sizeof(preferredMode),
+                    .adapterId = path->targetInfo.adapterId,
+                    .id = path->targetInfo.id,
+                }
+            };
+            double preferredRefreshRate = 0;
+            if (DisplayConfigGetDeviceInfo(&preferredMode.header) == ERROR_SUCCESS)
+            {
+                DISPLAYCONFIG_RATIONAL freq = preferredMode.targetMode.targetVideoSignalInfo.vSyncFreq;
+                preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
+            }
+
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left),
                 (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top),
+                preferredMode.width,
+                preferredMode.height,
+                preferredRefreshRate,
                 rotation,
                 &name,
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER ? FF_DISPLAY_TYPE_UNKNOWN :
