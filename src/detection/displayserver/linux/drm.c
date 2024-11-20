@@ -84,6 +84,8 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             width, height,
             refreshRate,
             0, 0,
+            0, 0,
+            0,
             0,
             &name,
             ffdsGetDisplayType(plainName),
@@ -298,22 +300,28 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     ffdrmModeFreeEncoder(encoder);
                 }
 
+                uint32_t preferredWidth = 0, preferredHeight = 0, preferredRefreshRate = 0;
+
+                for (int iMode = 0; iMode < conn->count_modes; ++iMode)
+                {
+                    drmModeModeInfo* mode = &conn->modes[iMode];
+
+                    if (mode->type & DRM_MODE_TYPE_PREFERRED)
+                    {
+                        preferredWidth = mode->hdisplay;
+                        preferredHeight = mode->vdisplay;
+                        preferredRefreshRate = mode->vrefresh;
+                        break;
+                    }
+                }
+
+                // NVIDIA DRM driver seems incomplete and conn->encoder_id == 0
+                // Assume preferred resolution is used as what we do in drmParseSys
                 if (width == 0 || height == 0)
                 {
-                    // NVIDIA DRM driver seems incomplete and conn->encoder_id == 0
-                    // Assume preferred resolution is used as what we do in drmParseSys
-                    for (int iMode = 0; iMode < conn->count_modes; ++iMode)
-                    {
-                        drmModeModeInfo* mode = &conn->modes[iMode];
-
-                        if (mode->type & DRM_MODE_TYPE_PREFERRED)
-                        {
-                            width = mode->hdisplay;
-                            height = mode->vdisplay;
-                            refreshRate = mode->vrefresh;
-                            break;
-                        }
-                    }
+                    width = preferredWidth;
+                    height = preferredHeight;
+                    refreshRate = preferredRefreshRate;
                 }
 
 
@@ -382,6 +390,9 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     refreshRate,
                     0,
                     0,
+                    preferredWidth,
+                    preferredHeight,
+                    preferredRefreshRate,
                     0,
                     &name,
                     conn->connector_type == DRM_MODE_CONNECTOR_eDP || conn->connector_type == DRM_MODE_CONNECTOR_LVDS

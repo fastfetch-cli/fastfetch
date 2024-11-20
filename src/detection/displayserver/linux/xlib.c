@@ -85,19 +85,6 @@ typedef struct XrandrData
     XRRScreenResources* screenResources;
 } XrandrData;
 
-static double xrandrHandleMode(XrandrData* data, RRMode mode)
-{
-    for(int i = 0; i < data->screenResources->nmode; i++)
-    {
-        if(data->screenResources->modes[i].id == mode)
-        {
-            XRRModeInfo* modeInfo = &data->screenResources->modes[i];
-            return (double) modeInfo->dotClock / (double) (modeInfo->hTotal * modeInfo->vTotal);
-        }
-    }
-    return 0;
-}
-
 static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength)
 {
     //We do the check here, because we want the best fallback display if this call failed
@@ -125,13 +112,31 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
             break;
     }
 
+    XRRModeInfo* currentMode = NULL;
+    if (data->screenResources)
+    {
+        for(int i = 0; i < data->screenResources->nmode; i++)
+        {
+            if(data->screenResources->modes[i].id == crtcInfo->mode)
+            {
+                currentMode = &data->screenResources->modes[i];
+                break;
+            }
+        }
+    }
+
+    XRRModeInfo* preferredMode = data->screenResources && output->npreferred > 0 ? &data->screenResources->modes[0] : NULL;
+
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
-        xrandrHandleMode(data, crtcInfo->mode),
+        currentMode ? (double) currentMode->dotClock / (double) ((uint32_t) currentMode->hTotal * currentMode->vTotal) : 0,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
+        preferredMode ? (uint32_t) preferredMode->width : 0,
+        preferredMode ? (uint32_t) preferredMode->height : 0,
+        preferredMode ? (double) preferredMode->dotClock / (double) ((uint32_t) preferredMode->hTotal * preferredMode->vTotal) : 0,
         rotation,
         name,
         displayType,
@@ -208,6 +213,7 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         0,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
+        0, 0, 0,
         0,
         &name,
         displayType,
@@ -259,6 +265,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         0,
         (uint32_t) WidthOfScreen(screen),
         (uint32_t) HeightOfScreen(screen),
+        0, 0, 0,
         0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,

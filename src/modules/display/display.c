@@ -350,16 +350,21 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_val* output = yyjson_mut_obj_add_obj(doc, obj, "output");
         yyjson_mut_obj_add_uint(doc, output, "width", item->width);
         yyjson_mut_obj_add_uint(doc, output, "height", item->height);
+        yyjson_mut_obj_add_real(doc, output, "refreshRate", item->refreshRate);
 
         yyjson_mut_val* scaled = yyjson_mut_obj_add_obj(doc, obj, "scaled");
         yyjson_mut_obj_add_uint(doc, scaled, "width", item->scaledWidth);
         yyjson_mut_obj_add_uint(doc, scaled, "height", item->scaledHeight);
 
+        yyjson_mut_val* preferred = yyjson_mut_obj_add_obj(doc, obj, "preferred");
+        yyjson_mut_obj_add_uint(doc, preferred, "width", item->preferredWidth);
+        yyjson_mut_obj_add_uint(doc, preferred, "height", item->preferredHeight);
+        yyjson_mut_obj_add_real(doc, preferred, "refreshRate", item->preferredRefreshRate);
+
         yyjson_mut_val* physical = yyjson_mut_obj_add_obj(doc, obj, "physical");
         yyjson_mut_obj_add_uint(doc, physical, "width", item->physicalWidth);
         yyjson_mut_obj_add_uint(doc, physical, "height", item->physicalHeight);
 
-        yyjson_mut_obj_add_real(doc, obj, "refreshRate", item->refreshRate);
         yyjson_mut_obj_add_uint(doc, obj, "rotation", item->rotation);
         yyjson_mut_obj_add_uint(doc, obj, "bitDepth", item->bitDepth);
         if (item->hdrStatus == FF_DISPLAY_HDR_STATUS_UNKNOWN)

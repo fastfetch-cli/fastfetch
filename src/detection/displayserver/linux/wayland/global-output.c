@@ -6,13 +6,20 @@
 
 static void waylandOutputModeListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, uint32_t flags, int32_t width, int32_t height, int32_t refreshRate)
 {
-    if(!(flags & WL_OUTPUT_MODE_CURRENT))
-        return;
-
     WaylandDisplay* display = data;
-    display->width = width;
-    display->height = height;
-    display->refreshRate = refreshRate;
+
+    if (flags & WL_OUTPUT_MODE_CURRENT)
+    {
+        display->width = width;
+        display->height = height;
+        display->refreshRate = refreshRate;
+    }
+    if (flags & WL_OUTPUT_MODE_PREFERRED)
+    {
+        display->preferredWidth = width;
+        display->preferredHeight = height;
+        display->preferredRefreshRate = refreshRate;
+    }
 }
 
 static void waylandOutputScaleListener(void* data, FF_MAYBE_UNUSED struct wl_output* output, int32_t scale)
@@ -79,9 +86,6 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
 
     WaylandDisplay display = {
         .parent = wldata,
-        .width = 0,
-        .height = 0,
-        .refreshRate = 0,
         .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
         .type = FF_DISPLAY_TYPE_UNKNOWN,
@@ -118,6 +122,9 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
+        (uint32_t) display.preferredWidth,
+        (uint32_t) display.preferredHeight,
+        display.preferredRefreshRate / 1000.0,
         rotation,
         display.edidName.length
             ? &display.edidName
