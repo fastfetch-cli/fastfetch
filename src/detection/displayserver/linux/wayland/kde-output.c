@@ -69,7 +69,7 @@ static void waylandKdeCurrentModeListener(void* data, FF_MAYBE_UNUSED struct kde
             wldata->refreshRate = m->refreshRate;
             if (++set == 2) break;
         }
-        else if (m->preferred)
+        if (m->preferred)
         {
             wldata->preferredWidth = m->width;
             wldata->preferredHeight = m->height;
