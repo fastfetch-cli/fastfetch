@@ -57,9 +57,7 @@ include(CMakeDependentOption)
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_XCB "Enable xcb" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_X11 "Enable x11" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
@@ -1277,17 +1275,9 @@ ff_lib_enable(XCB_RANDR
     "xcb-randr"
     "XcbRandr"
 )
-ff_lib_enable(XCB
-    "xcb"
-    "Xcb"
-)
 ff_lib_enable(XRANDR
     "xrandr"
     "XRandr"
-)
-ff_lib_enable(X11
-    "x11"
-    "X11"
 )
 ff_lib_enable(DRM
     "libdrm"

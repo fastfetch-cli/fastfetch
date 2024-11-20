@@ -1,11 +1,15 @@
 #include "displayserver_linux.h"
-#include "util/mallocHelper.h"
-#include "common/time.h"
 
-#ifdef FF_HAVE_XCB
+#ifdef FF_HAVE_XCB_RANDR
+
 #include "common/library.h"
+#include "common/time.h"
+#include "util/edidHelper.h"
+#include "util/mallocHelper.h"
+
 #include <stdlib.h>
 #include <string.h>
+#include <xcb/randr.h>
 #include <xcb/xcb.h>
 
 typedef struct XcbPropertyData
@@ -81,72 +85,6 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
 
     ffStrbufSetS(&result->wmProcessName, wmName);
 }
-
-const char* ffdsConnectXcb(FFDisplayServerResult* result)
-{
-    FF_LIBRARY_LOAD(xcb, "dlopen lbxcb failed", "libxcb" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_connect)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_get_setup)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_setup_roots_iterator)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_screen_next)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_disconnect)
-
-    XcbPropertyData propertyData;
-    bool propertyDataInitialized = xcbInitPropertyData(xcb, &propertyData);
-
-    xcb_connection_t* connection = ffxcb_connect(NULL, NULL);
-    if(connection == NULL)
-        return "xcb_connect failed";
-
-    xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(connection));
-
-    if(iterator.rem > 0 && propertyDataInitialized)
-        xcbDetectWMfromEWMH(&propertyData, connection, iterator.data->root, result);
-
-    while(iterator.rem > 0)
-    {
-        xcb_screen_t* screen = iterator.data;
-        ffdsAppendDisplay(result,
-            (uint32_t) screen->width_in_pixels,
-            (uint32_t) screen->height_in_pixels,
-            0,
-            (uint32_t) screen->width_in_pixels,
-            (uint32_t) screen->height_in_pixels,
-            0,
-            NULL,
-            FF_DISPLAY_TYPE_UNKNOWN,
-            false,
-            0,
-            (uint32_t) screen->width_in_millimeters,
-            (uint32_t) screen->height_in_millimeters,
-            "xcb"
-        );
-        ffxcb_screen_next(&iterator);
-    }
-
-    ffxcb_disconnect(connection);
-
-    //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
-    if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
-
-    return NULL;
-}
-
-#else
-
-const char* ffdsConnectXcb(FFDisplayServerResult* result)
-{
-    //Do nothing. There are other implementations coming
-    FF_UNUSED(result)
-    return "Fastfetch was compiled without XCB support";
-}
-
-#endif
-
-#ifdef FF_HAVE_XCB_RANDR
-#include "util/edidHelper.h"
-#include <xcb/randr.h>
 
 typedef struct XcbRandrData
 {

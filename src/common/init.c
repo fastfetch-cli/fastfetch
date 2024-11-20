@@ -179,14 +179,8 @@ void ffListFeatures(void)
         #if FF_HAVE_XCB_RANDR
             "xcb-randr\n"
         #endif
-        #if FF_HAVE_XCB
-            "xcb\n"
-        #endif
         #if FF_HAVE_XRANDR
             "xrandr\n"
-        #endif
-        #if FF_HAVE_X11
-            "x11\n"
         #endif
         #if FF_HAVE_DRM
             "drm\n"

@@ -1,9 +1,13 @@
 #include "displayserver_linux.h"
 
-#ifdef FF_HAVE_X11
+#ifdef FF_HAVE_XRANDR
+
 #include "common/library.h"
 #include "common/parsing.h"
+#include "util/edidHelper.h"
 #include "util/stringUtils.h"
+
+#include <X11/extensions/Xrandr.h>
 #include <X11/Xlib.h>
 
 typedef struct X11PropertyData
@@ -57,66 +61,6 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     data->ffXFree(wmName);
     data->ffXFree(wmWindow);
 }
-
-const char* ffdsConnectXlib(FFDisplayServerResult* result)
-{
-    FF_LIBRARY_LOAD(x11, "dlopen libX11 failed", "libX11" FF_LIBRARY_EXTENSION, 7, "libX11-xcb" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(x11, XOpenDisplay)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(x11, XCloseDisplay)
-
-    X11PropertyData propertyData;
-    bool propertyDataInitialized = x11InitPropertyData(x11, &propertyData);
-
-    Display* display = ffXOpenDisplay(x11);
-    if(display == NULL)
-        return "XOpenDisplay failed";
-
-    if(propertyDataInitialized && ScreenCount(display) > 0)
-        x11DetectWMFromEWMH(&propertyData, display, result);
-
-    for(int i = 0; i < ScreenCount(display); i++)
-    {
-        Screen* screen = ScreenOfDisplay(display, i);
-        ffdsAppendDisplay(result,
-            (uint32_t) WidthOfScreen(screen),
-            (uint32_t) HeightOfScreen(screen),
-            0,
-            (uint32_t) WidthOfScreen(screen),
-            (uint32_t) HeightOfScreen(screen),
-            0,
-            NULL,
-            FF_DISPLAY_TYPE_UNKNOWN,
-            false,
-            0,
-            (uint32_t) WidthMMOfScreen(screen),
-            (uint32_t) HeightMMOfScreen(screen),
-            "xlib"
-        );
-    }
-
-    ffXCloseDisplay(display);
-
-    //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
-    if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
-
-    return NULL;
-}
-
-#else
-
-const char* ffdsConnectXlib(FFDisplayServerResult* result)
-{
-    //Do nothing. WM / DE detection will use environment vars to detect as much as possible.
-    FF_UNUSED(result);
-    return "Fastfetch was compiled without libX11 support";
-}
-
-#endif //FF_HAVE_X11
-
-#ifdef FF_HAVE_XRANDR
-#include "util/edidHelper.h"
-#include <X11/extensions/Xrandr.h>
 
 typedef struct XrandrData
 {
