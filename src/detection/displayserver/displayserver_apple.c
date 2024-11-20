@@ -60,7 +60,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 displayInfo = IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
             }
             #endif
+
             uint32_t physicalWidth = 0, physicalHeight = 0;
+            uint32_t preferredWidth = 0, preferredHeight = 0;
+            double preferredRefreshRate = 0;
+
             if(displayInfo)
             {
                 CFDictionaryRef productNames;
@@ -75,6 +79,32 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     uint32_t edidLength = (uint32_t) CFDataGetLength(edidRef);
                     if (edidLength >= 128)
                         ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
+                }
+
+                if (!physicalWidth || !physicalHeight)
+                {
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayHorizontalImageSize), (int*) &physicalWidth) == NULL)
+                        ffCfDictGetInt(displayInfo, CFSTR(kDisplayVerticalImageSize), (int*) &physicalHeight);
+                }
+
+                ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelWidth"), (int*) &preferredWidth);
+                ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelHeight"), (int*) &preferredHeight);
+                if (preferredWidth && preferredHeight)
+                {
+                    FF_CFTYPE_AUTO_RELEASE CFArrayRef allModes = CGDisplayCopyAllDisplayModes(screen, NULL);
+                    if (allModes)
+                    {
+                        for (CFIndex i = 0, count = CFArrayGetCount(allModes); i < count; i++)
+                        {
+                            CGDisplayModeRef modeInfo = (CGDisplayModeRef) CFArrayGetValueAtIndex(allModes, i);
+                            if (CGDisplayModeGetPixelWidth(modeInfo) == preferredWidth && CGDisplayModeGetPixelHeight(modeInfo) == preferredHeight)
+                            {
+                                double rr = CGDisplayModeGetRefreshRate(modeInfo);
+                                if (rr > preferredRefreshRate) preferredRefreshRate = rr;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -91,6 +121,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
+                preferredWidth,
+                preferredHeight,
+                preferredRefreshRate,
                 (uint32_t)CGDisplayRotation(screen),
                 &buffer,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
