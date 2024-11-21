@@ -108,7 +108,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
             }
 
-            if (!physicalWidth || !physicalHeight)
+            if ((!physicalWidth || !physicalHeight) && CGDisplayPrimaryDisplay(screen) == screen) // #1406
             {
                 CGSize size = CGDisplayScreenSize(screen);
                 physicalWidth = (uint32_t) (size.width + 0.5);
