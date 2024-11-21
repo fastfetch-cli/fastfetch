@@ -181,6 +181,8 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
         yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
         yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
         yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
+        yyjson_mut_obj_add_uint(doc, conn, "channel", wifi->conn.channel);
+        yyjson_mut_obj_add_uint(doc, conn, "frequency", wifi->conn.frequency);
     }
 
     FF_LIST_FOR_EACH(FFWifiResult, item, result)

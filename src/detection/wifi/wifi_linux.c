@@ -339,6 +339,8 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
+        item->conn.channel = 0;
+        item->conn.frequency = 0;
 
         ffStrbufSetF(&buffer, "/sys/class/net/%s/operstate", i->if_name);
         if (!ffAppendFileBuffer(buffer.chars, &item->inf.status))

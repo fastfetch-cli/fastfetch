@@ -34,6 +34,8 @@ const char* ffDetectWifi(FFlist* result)
             item->conn.signalQuality = 0.0/0.0;
             item->conn.rxRate = 0.0/0.0;
             item->conn.txRate = 0.0/0.0;
+            item->conn.channel = 0;
+            item->conn.frequency = 0;
 
             ffParsePropLines(ifconfig.chars, "ssid ", &item->conn.ssid);
             if (item->conn.ssid.length)

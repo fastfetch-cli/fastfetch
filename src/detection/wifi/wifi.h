@@ -18,6 +18,8 @@ struct FFWifiConnection
     double signalQuality; // Percentage
     double rxRate;
     double txRate;
+    uint16_t channel;
+    uint16_t frequency; // MHz
 };
 
 typedef struct FFWifiResult
