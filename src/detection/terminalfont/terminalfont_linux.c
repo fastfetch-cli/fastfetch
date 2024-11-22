@@ -250,7 +250,7 @@ static void detectFootTerminal(FFTerminalFontResult* terminalFont)
         ffFontInitValues(&terminalFont->font, font.chars, "8");
         return;
     }
-    uint32_t size = equal + strlen("size=");
+    uint32_t size = equal + (uint32_t) strlen("size=");
     uint32_t comma = ffStrbufNextIndexC(&font, size, ',');
     if (comma < font.length)
         font.chars[comma] = '\0';

@@ -73,7 +73,7 @@ void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial
 {
     if (edid[17] > 0 && edid[17] < 0xFF)
     {
-        *year = (uint16_t) edid[17] + 1990;
+        *year = (uint16_t) (edid[17] + 1990);
         *week = (uint16_t) edid[16];
         if (*week == 0xFF) *week = 0;
     }

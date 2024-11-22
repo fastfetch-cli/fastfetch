@@ -37,7 +37,7 @@ static inline uint16_t ffWifiFreqToChannel(uint16_t frequency)
     if (frequency == 2484)
         return 14;
     else if (frequency < 2484)
-        return (uint16_t) (frequency - 2407) / 5;
+        return (uint16_t) ((frequency - 2407) / 5);
     else
-        return (frequency / 5) - 1000;
+        return (uint16_t) ((frequency / 5) - 1000);
 }
