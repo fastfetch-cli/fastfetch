@@ -4,7 +4,7 @@
 #include "modules/wifi/wifi.h"
 #include "util/stringUtils.h"
 
-#define FF_WIFI_NUM_FORMAT_ARGS 11
+#define FF_WIFI_NUM_FORMAT_ARGS 13
 
 void ffPrintWifi(FFWifiOptions* options)
 {
@@ -28,6 +28,27 @@ void ffPrintWifi(FFWifiOptions* options)
     {
         FFWifiResult* item = FF_LIST_GET(FFWifiResult, result, index);
         uint8_t moduleIndex = result.length == 1 ? 0 : (uint8_t)(index + 1);
+
+        // https://en.wikipedia.org/wiki/List_of_WLAN_channels
+        char bandStr[8];
+        if (item->conn.frequency > 58000)
+            strcpy(bandStr, "60");
+        if (item->conn.frequency > 40000)
+            strcpy(bandStr, "45");
+        else if (item->conn.frequency > 5900)
+            strcpy(bandStr, "6");
+        else if (item->conn.frequency > 5100)
+            strcpy(bandStr, "5");
+        else if (item->conn.frequency > 4900)
+            strcpy(bandStr, "4.9");
+        else if (item->conn.frequency > 3600)
+            strcpy(bandStr, "3.65");
+        else if (item->conn.frequency > 2000)
+            strcpy(bandStr, "2.4");
+        else if (item->conn.frequency > 800)
+            strcpy(bandStr, "0.9");
+        else
+            bandStr[0] = '\0';
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -54,6 +75,8 @@ void ffPrintWifi(FFWifiOptions* options)
                         ffStrbufAppendS(&buffer, " - ");
                         ffStrbufAppend(&buffer, &item->conn.protocol);
                     }
+                    if (bandStr[0])
+                        ffStrbufAppendF(&buffer, " - %s GHz", bandStr);
                     if(item->conn.security.length)
                     {
                         ffStrbufAppendS(&buffer, " - ");
@@ -97,6 +120,8 @@ void ffPrintWifi(FFWifiOptions* options)
                 FF_FORMAT_ARG(item->conn.txRate, "tx-rate"),
                 FF_FORMAT_ARG(item->conn.security, "security"),
                 FF_FORMAT_ARG(percentBar, "signal-quality-bar"),
+                FF_FORMAT_ARG(item->conn.channel, "channel"),
+                FF_FORMAT_ARG(bandStr, "band"),
             }));
         }
 
@@ -211,6 +236,8 @@ void ffPrintWifiHelpFormat(void)
         "Connection TX rate - tx-rate",
         "Connection Security algorithm - security",
         "Connection signal quality (percentage bar) - signal-quality-bar",
+        "Connection channel number - channel",
+        "Connection channel band in GHz - band",
     }));
 }
 

@@ -296,8 +296,8 @@ const char* ffDetectWifi(FFlist* result)
         switch (inf.wlanChannel.channelBand)
         {
             case kCWChannelBand2GHz: item->conn.frequency = 2400; break;
-            case kCWChannelBand5GHz: item->conn.frequency = 5000; break;
-            case 3 /*kCWChannelBand6GHz*/: item->conn.frequency = 6000; break;
+            case kCWChannelBand5GHz: item->conn.frequency = 5400; break;
+            case 3 /*kCWChannelBand6GHz*/: item->conn.frequency = 6400; break;
             default: item->conn.frequency = 0; break;
         }
     }
