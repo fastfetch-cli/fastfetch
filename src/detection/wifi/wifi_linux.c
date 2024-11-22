@@ -43,6 +43,18 @@ typedef enum {
         continue; \
     }
 
+static uint16_t freq2channel(uint16_t frequency)
+{
+    // https://github.com/opetryna/win32wifi/blob/master/win32wifi/Win32Wifi.py#L140
+    // FIXME: Does it work for 6 GHz?
+    if (frequency == 2484)
+        return 14;
+    else if (frequency < 2484)
+        return (uint16_t) (frequency - 2407) / 5;
+    else
+        return (frequency / 5) - 1000;
+}
+
 static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 {
     FFDBusData dbus;
@@ -128,6 +140,19 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
                 uint32_t strengthPercent;
                 if (ffDBusGetUint(&dbus, &dictIterator, &strengthPercent))
                     item->conn.signalQuality = strengthPercent;
+            }
+        }
+        else if (ffStrEquals(key, "Frequency"))
+        {
+            if (item->conn.frequency == 0)
+            {
+                uint32_t frequency;
+                if (ffDBusGetUint(&dbus, &dictIterator, &frequency))
+                {
+                    item->conn.frequency = (uint16_t) frequency;
+                    if (item->conn.channel == 0)
+                        item->conn.channel = freq2channel(item->conn.frequency);
+                }
             }
         }
         else if ((ffStrEquals(key, "Flags") && ffDBusGetUint(&dbus, &dictIterator, &flags)) ||
@@ -224,6 +249,13 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
             ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
     }
 
+    ffStrbufClear(buffer);
+    if(ffParsePropLines(output.chars, "freq: ", buffer))
+    {
+        item->conn.frequency = (uint16_t) ffStrbufToUInt(buffer, 0);
+        item->conn.channel = freq2channel(item->conn.frequency);
+    }
+
     return NULL;
 }
 
@@ -268,6 +300,30 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
 
     if(ioctl(sock, SIOCGIWRATE, &iwr) >= 0)
         item->conn.txRate = iwr.u.bitrate.value / 1000000.;
+
+    if(ioctl(sock, SIOCGIWFREQ, &iwr) >= 0)
+    {
+        if (iwr.u.freq.e == 0 && iwr.u.freq.m <= 1000)
+        {
+            item->conn.channel = (uint16_t) iwr.u.freq.m;
+        }
+        else
+        {
+            // convert it to MHz
+            while (iwr.u.freq.e < 6)
+            {
+                iwr.u.freq.m /= 10;
+                iwr.u.freq.e++;
+            }
+            while (iwr.u.freq.e > 6)
+            {
+                iwr.u.freq.m *= 10;
+                iwr.u.freq.e--;
+            }
+            item->conn.frequency = (uint16_t) iwr.u.freq.m;
+            item->conn.channel = freq2channel(item->conn.frequency);
+        }
+    }
 
     struct iw_statistics stats;
     iwr.u.data.pointer = &stats;
