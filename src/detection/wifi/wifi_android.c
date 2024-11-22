@@ -62,7 +62,7 @@ const char* ffDetectWifi(FFlist* result)
     ffStrbufAppendS(&item->inf.description, yyjson_get_str(yyjson_obj_get(root, "ip")));
     ffStrbufAppendS(&item->conn.bssid, yyjson_get_str(yyjson_obj_get(root, "bssid")));
     ffStrbufAppendS(&item->conn.ssid, yyjson_get_str(yyjson_obj_get(root, "ssid")));
-    item->conn.frequency = yyjson_get_int(yyjson_obj_get(root, "frequency_mhz"));
+    item->conn.frequency = (uint16_t) yyjson_get_int(yyjson_obj_get(root, "frequency_mhz"));
     item->conn.txRate = yyjson_get_num(yyjson_obj_get(root, "link_speed_mbps"));
     item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
 
