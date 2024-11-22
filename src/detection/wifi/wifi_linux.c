@@ -43,18 +43,6 @@ typedef enum {
         continue; \
     }
 
-static uint16_t freq2channel(uint16_t frequency)
-{
-    // https://github.com/opetryna/win32wifi/blob/master/win32wifi/Win32Wifi.py#L140
-    // FIXME: Does it work for 6 GHz?
-    if (frequency == 2484)
-        return 14;
-    else if (frequency < 2484)
-        return (uint16_t) (frequency - 2407) / 5;
-    else
-        return (frequency / 5) - 1000;
-}
-
 static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 {
     FFDBusData dbus;
@@ -151,7 +139,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
                 {
                     item->conn.frequency = (uint16_t) frequency;
                     if (item->conn.channel == 0)
-                        item->conn.channel = freq2channel(item->conn.frequency);
+                        item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
                 }
             }
         }
@@ -253,7 +241,7 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
     if(ffParsePropLines(output.chars, "freq: ", buffer))
     {
         item->conn.frequency = (uint16_t) ffStrbufToUInt(buffer, 0);
-        item->conn.channel = freq2channel(item->conn.frequency);
+        item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
     }
 
     return NULL;
@@ -321,7 +309,7 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
                 iwr.u.freq.e--;
             }
             item->conn.frequency = (uint16_t) iwr.u.freq.m;
-            item->conn.channel = freq2channel(item->conn.frequency);
+            item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
         }
     }
 
