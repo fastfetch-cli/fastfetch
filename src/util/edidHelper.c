@@ -65,8 +65,8 @@ bool ffEdidGetName(const uint8_t edid[128], FFstrbuf* name)
 
 void ffEdidGetPhysicalSize(const uint8_t edid[128], uint32_t* width, uint32_t* height)
 {
-    *width = (((uint32_t) edid[68] & 0xF0) << 4) + edid[66];
-    *height = (((uint32_t) edid[68] & 0x0F) << 8) + edid[67];
+    *width = edid[21] * 10;
+    *height = edid[22] * 10;
 }
 
 void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial, uint16_t* year, uint16_t* week)
