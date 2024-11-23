@@ -40,14 +40,21 @@ const char* ffDetectWifi(FFlist* result)
             ffParsePropLines(ifconfig.chars, "ssid ", &item->conn.ssid);
             if (item->conn.ssid.length)
             {
-                uint32_t ibssid = ffStrbufFirstIndexS(&item->conn.ssid, " bssid ");
-                if (ibssid < item->conn.ssid.length)
+                uint32_t idx = ffStrbufFirstIndexS(&item->conn.ssid, " bssid ");
+                if (idx < item->conn.ssid.length)
                 {
-                    ibssid += (uint32_t) strlen(" bssid ");
-                    ffStrbufSetS(&item->conn.bssid, item->conn.ssid.chars + ibssid);
+                    ffStrbufSetS(&item->conn.bssid, item->conn.ssid.chars + idx + (uint32_t) strlen(" bssid "));
+                    ffStrbufSubstrBefore(&item->conn.ssid, idx);
                 }
 
-                ffStrbufSubstrBeforeFirstC(&item->conn.ssid, ' ');
+                idx = ffStrbufFirstIndexS(&item->conn.ssid, " channel ");
+                if (idx < item->conn.ssid.length)
+                {
+                    const char* pchannel = item->conn.ssid.chars + idx + strlen(" channel ");
+                    sscanf(pchannel, "%hu (%hu MHz %*s)", &item->conn.channel, &item->conn.frequency);
+                }
+
+                ffStrbufSubstrBefore(&item->conn.ssid, idx);
             }
 
             ffParsePropLines(ifconfig.chars, "media: ", &item->conn.protocol);
