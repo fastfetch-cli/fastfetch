@@ -55,6 +55,9 @@ void ffPrintCPU(FFCPUOptions* options)
 
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
+            if(cpu.cpuCount > 1)
+                ffStrbufAppendF(&str, "%u x ", cpu.cpuCount);
+
             if(cpu.name.length > 0)
                 ffStrbufAppend(&str, &cpu.name);
             else if(cpu.vendor.length > 0)
