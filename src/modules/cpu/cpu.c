@@ -71,7 +71,12 @@ void ffPrintCPU(FFCPUOptions* options)
             if(coreTypes.length > 0)
                 ffStrbufAppendF(&str, " (%s)", coreTypes.chars);
             else if(cpu.coresOnline > 1)
-                ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
+            {
+                if(cpu.cpuCount > 1)
+                    ffStrbufAppendF(&str, " (%u)", cpu.coresOnline / 2);
+                else
+                    ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
+            }
 
             uint32_t freq = cpu.frequencyMax;
             if(freq == 0)
