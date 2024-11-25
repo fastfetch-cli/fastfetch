@@ -2839,6 +2839,17 @@ static const FFlogo M[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_MIDOS,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // MidOSOld
+    {
+        .names = {"MidOS_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MIDOS_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLACK,
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,

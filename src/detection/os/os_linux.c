@@ -273,5 +273,13 @@ void ffDetectOSImpl(FFOSResult* os)
         if (!detectDebianDerived(os))
             getDebianVersion(os);
     }
+    else if(ffStrbufEqualS(&os->id, "linuxmint"))
+    {
+        if (ffStrbufEqualS(&os->name, "LMDE"))
+        {
+            ffStrbufSetS(&os->id, "lmde");
+            ffStrbufSetS(&os->idLike, "linuxmint");
+        }
+    }
     #endif
 }
