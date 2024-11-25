@@ -110,6 +110,10 @@ static const char* detectNCores(FFCPUResult* cpu)
                 cpu->coresLogical += ptr->Group.GroupInfo[index].MaximumProcessorCount;
             }
         }
+
+        if (ptr->Relationship == RelationProcessorPackage) {
+            cpu->cpuCount++;
+        }
     }
 
     return NULL;
