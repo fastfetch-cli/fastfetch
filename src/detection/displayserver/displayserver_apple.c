@@ -150,7 +150,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 #endif
 
-                if (display->type == FF_DISPLAY_TYPE_BUILTIN)
+                if (display->type == FF_DISPLAY_TYPE_BUILTIN && displayInfo)
                     display->hdrStatus = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance"))
                         ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
                 #ifdef MAC_OS_X_VERSION_10_15
@@ -168,11 +168,15 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 #endif
 
                 display->serial = CGDisplaySerialNumber(screen);
-                int value;
-                if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == NULL)
-                    display->manufactureYear = (uint16_t) value;
-                if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == NULL)
-                    display->manufactureWeek = (uint16_t) value;
+
+                if (displayInfo)
+                {
+                    int value;
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == NULL)
+                        display->manufactureYear = (uint16_t) value;
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == NULL)
+                        display->manufactureWeek = (uint16_t) value;
+                }
             }
             CGDisplayModeRelease(mode);
         }
