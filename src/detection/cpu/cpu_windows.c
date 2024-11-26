@@ -112,7 +112,7 @@ static const char* detectNCores(FFCPUResult* cpu)
         }
 
         if (ptr->Relationship == RelationProcessorPackage) {
-            cpu->cpuCount++;
+            cpu->packages++;
         }
     }
 

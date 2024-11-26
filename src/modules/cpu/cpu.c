@@ -6,7 +6,7 @@
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
 
-#define FF_CPU_NUM_FORMAT_ARGS 9
+#define FF_CPU_NUM_FORMAT_ARGS 10
 
 static int sortCores(const FFCPUCore* a, const FFCPUCore* b)
 {
@@ -55,8 +55,8 @@ void ffPrintCPU(FFCPUOptions* options)
 
             FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
 
-            if(cpu.cpuCount > 1)
-                ffStrbufAppendF(&str, "%u x ", cpu.cpuCount);
+            if(cpu.packages > 1)
+                ffStrbufAppendF(&str, "%u x ", cpu.packages);
 
             if(cpu.name.length > 0)
                 ffStrbufAppend(&str, &cpu.name);
@@ -72,7 +72,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 ffStrbufAppendF(&str, " (%s)", coreTypes.chars);
             else if(cpu.coresOnline > 1)
             {
-                if(cpu.cpuCount > 1)
+                if(cpu.packages > 1)
                     ffStrbufAppendF(&str, " (%u)", cpu.coresOnline / 2);
                 else
                     ffStrbufAppendF(&str, " (%u)", cpu.coresOnline);
@@ -114,6 +114,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 FF_FORMAT_ARG(freqMax, "freq-max"),
                 FF_FORMAT_ARG(tempStr, "temperature"),
                 FF_FORMAT_ARG(coreTypes, "core-types"),
+                FF_FORMAT_ARG(cpu.packages, "packages"),
             }));
         }
     }
@@ -211,6 +212,10 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
         yyjson_mut_obj_add_strbuf(doc, obj, "cpu", &cpu.name);
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &cpu.vendor);
+        if (cpu.packages == 0)
+            yyjson_mut_obj_add_null(doc, obj, "packages");
+        else
+            yyjson_mut_obj_add_uint(doc, obj, "packages", cpu.packages);
 
         yyjson_mut_val* cores = yyjson_mut_obj_add_obj(doc, obj, "cores");
         yyjson_mut_obj_add_uint(doc, cores, "physical", cpu.coresPhysical);
@@ -248,6 +253,7 @@ void ffPrintCPUHelpFormat(void)
         "Max frequency (formatted) - freq-max",
         "Temperature (formatted) - temperature",
         "Logical core count grouped by frequency - core-types",
+        "Processor package count - packages",
     }));
 }
 

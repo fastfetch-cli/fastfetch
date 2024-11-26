@@ -464,7 +464,7 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
     }
 }
 
-FF_MAYBE_UNUSED static uint16_t getCPUCount(FFstrbuf* cpuinfo)
+FF_MAYBE_UNUSED static uint16_t getPackageCount(FFstrbuf* cpuinfo)
 {
     const char* p = cpuinfo->chars;
     uint64_t bits = 0;
@@ -502,7 +502,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
-    cpu->cpuCount = getCPUCount(&cpuinfo);
+    #if __x86_64__ || __i386__
+    cpu->packages = getPackageCount(&cpuinfo);
+    #endif
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
     ffCPUDetectSpeedByCpuid(cpu);
