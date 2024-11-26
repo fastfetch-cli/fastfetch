@@ -467,19 +467,22 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
 FF_MAYBE_UNUSED static uint16_t getPackageCount(FFstrbuf* cpuinfo)
 {
     const char* p = cpuinfo->chars;
-    uint64_t bits = 0;
+    uint64_t low = 0, high = 0;
 
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:"))))
     {
         if (!p) break;
         p += strlen("\nphysical id\t:");
         char* pend;
-        uint32_t id = (uint32_t) strtoul(p, &pend, 10);
+        unsigned long id = strtoul(p, &pend, 10);
+        if (__builtin_expect(id > 64, false)) // Do 129-socket boards exist?
+            high |= 1 << (id - 64);
+        else
+            low |= 1 << id;
         p = pend;
-        bits |= 1 << id;
     }
 
-    return (uint16_t) __builtin_popcountll(bits);
+    return (uint16_t) (__builtin_popcountll(low) + __builtin_popcountll(high));
 }
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
