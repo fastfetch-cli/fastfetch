@@ -16,6 +16,7 @@ const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu)
     ffStrbufRemoveStrings(&cpu->name, ARRAY_SIZE(removeStrings), removeStrings);
     ffStrbufSubstrBeforeFirstC(&cpu->name, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&cpu->name, ' '); //If we removed the @ in previous step there was most likely a space before it
+    ffStrbufRemoveDupWhitespaces(&cpu->name);
     return NULL;
 }
 

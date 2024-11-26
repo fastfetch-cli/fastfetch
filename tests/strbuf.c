@@ -565,6 +565,34 @@ int main(void)
         VERIFY(i == 0);
     }
 
+    ffStrbufSetS(&strbuf, "Hello World");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
+    VERIFY(strcmp(strbuf.chars, "Hello World") == 0);
+
+    ffStrbufSetS(&strbuf, "Hello   World");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, "Hello World") == 0);
+
+    ffStrbufSetS(&strbuf, "   Hello World   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, " Hello World ") == 0);
+
+    ffStrbufSetS(&strbuf, "   Hello   World   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, " Hello World ") == 0);
+
+    ffStrbufSetS(&strbuf, "   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, " ") == 0);
+
+    ffStrbufClear(&strbuf);
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
+    VERIFY(strcmp(strbuf.chars, "") == 0);
+
+    ffStrbufSetStatic(&strbuf, "   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
+    VERIFY(strcmp(strbuf.chars, "   ") == 0);
+
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

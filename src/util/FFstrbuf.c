@@ -575,3 +575,25 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
         *n = remaining;
     return true;
 }
+
+bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
+{
+    if (strbuf->allocated == 0) return false; // Doesn't work with static strings
+
+    bool changed = false;
+    for (uint32_t i = 0; i < strbuf->length; i++)
+    {
+        if (strbuf->chars[i] != ' ') continue;
+
+        i++;
+        uint32_t j = i;
+        for (; j < strbuf->length && strbuf->chars[j] == ' '; j++);
+
+        if (j == i) continue;
+        memmove(&strbuf->chars[i], &strbuf->chars[j], strbuf->length - j + 1);
+        strbuf->length -= j - i;
+        changed = true;
+    }
+
+    return changed;
+}
