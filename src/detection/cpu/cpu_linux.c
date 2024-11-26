@@ -222,6 +222,7 @@ static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
 static const char* parseCpuInfo(
     FF_MAYBE_UNUSED FILE* cpuinfo,
     FF_MAYBE_UNUSED FFCPUResult* cpu,
+    FF_MAYBE_UNUSED FFstrbuf* cpuPhysicalId,
     FF_MAYBE_UNUSED FFstrbuf* physicalCoresBuffer,
     FF_MAYBE_UNUSED FFstrbuf* cpuMHz,
     FF_MAYBE_UNUSED FFstrbuf* cpuIsa,
@@ -247,6 +248,9 @@ static const char* parseCpuInfo(
             #if !(__arm__ || __aarch64__)
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor_id :", &cpu->vendor)) ||
+            //Is it cheaper to just parse every physical id or to check if it's already set to the parsed value?
+            (cpuPhysicalId->length == 0 && ffParsePropLine(line, "physical id:", cpuPhysicalId)) ||
+            (cpuPhysicalId->length > 0 && ffParsePropLine(line, "physical id:", cpuPhysicalId)) ||
             (physicalCoresBuffer->length == 0 && ffParsePropLine(line, "cpu cores :", physicalCoresBuffer)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz :", cpuMHz)) ||
             #endif
@@ -473,18 +477,20 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
 
+    FF_STRBUF_AUTO_DESTROY cpuPhysicalId= ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuIsa = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuUarch = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuImplementerStr = ffStrbufCreate();
 
-    const char* error = parseCpuInfo(cpuinfo, cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch, &cpuImplementerStr);
+    const char* error = parseCpuInfo(cpuinfo, cpu, &cpuPhysicalId, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch, &cpuImplementerStr);
     if (error) return error;
 
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
+    cpu->cpuCount = (uint16_t) ffStrbufToUInt(&cpuPhysicalId, 1) +1; //Assuming at least 1 CPU is present otherwise we wouldn't get this far
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
     ffCPUDetectSpeedByCpuid(cpu);
