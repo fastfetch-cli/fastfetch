@@ -236,19 +236,24 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
     const FFOSResult* os = ffDetectOS();
-    if(
-        ffStrbufEqualS(&os->version, "11") ||
-        ffStrbufEqualS(&os->version, "10") ||
-        ffStrbufEqualS(&os->version, "2022") ||
-        ffStrbufEqualS(&os->version, "2019") ||
-        ffStrbufEqualS(&os->version, "2016")
-    ) ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-    else if(
-        ffStrbufEqualS(&os->version, "8") ||
-        ffStrbufEqualS(&os->version, "8.1") ||
-        ffStrbufEqualS(&os->version, "2012 R2") ||
-        ffStrbufEqualS(&os->version, "2012")
-    ) ffStrbufSetStatic(&ds->dePrettyName, "Metro");
+    uint32_t ver = (uint32_t) ffStrbufToUInt(&os->version, 0);
+    if (ver > 1000)
+    {
+        // Windows Server
+        if (ver >= 2016)
+            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
+        else if (ver >= 2012)
+            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
+        else
+            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
+    }
     else
-        ffStrbufSetStatic(&ds->dePrettyName, "Aero");
+    {
+        if (ver >= 10)
+            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
+        else if (ver >= 8)
+            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
+        else
+            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
+    }
 }

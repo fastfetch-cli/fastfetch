@@ -4820,6 +4820,19 @@ static const FFlogo W[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Windows2025
+    {
+        .names = {"Windows Server 2025"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_2025,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_CYAN,
+    },
     // Windows11
     {
         .names = {"Windows 11", "Windows Server 2022"},
