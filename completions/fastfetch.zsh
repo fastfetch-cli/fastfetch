@@ -26,7 +26,7 @@ def main():
         for flag in data[key]:
             if flag["long"] == "logo-color-[1-9]":
                 for i in range(1, 10):
-                    command_prefix = f"--logo-color-{i}[{flag["desc"]} ({i})]"
+                    command_prefix = f"--logo-color-{i}[{flag['desc']} ({i})]"
                     print_command(command_prefix, flag)
                 continue
 
@@ -34,11 +34,11 @@ def main():
                 continue
 
             if "short" in flag:
-                command_prefix = f"-{flag["short"]}[{flag["desc"]}]"
+                command_prefix = f"-{flag['short']}[{flag['desc']}]"
                 print_command(command_prefix, flag)
 
             if "long" in flag:
-                command_prefix = f"--{flag["long"]}[{flag["desc"]}]"
+                command_prefix = f"--{flag['long']}[{flag['desc']}]"
                 print_command(command_prefix, flag)
 
 
