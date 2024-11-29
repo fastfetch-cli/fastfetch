@@ -39,7 +39,7 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
         filename = result->wmProcessName.chars;
 
     if (ffStrEquals(filename, "wl-restart"))
-        ffStrbufSubstrAfterFirstC(&result->wmProcessName, '\0');
+        ffStrbufSubstrAfterLastC(&result->wmProcessName, '\0');
 
     ffStrbufSubstrBeforeFirstC(&result->wmProcessName, '\0'); //Trim the arguments
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
