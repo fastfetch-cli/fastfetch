@@ -154,8 +154,8 @@ const char* ffDetectWifi(FFlist* result)
         }
 
         item->conn.signalQuality = connInfo->wlanAssociationAttributes.wlanSignalQuality;
-        item->conn.rxRate = connInfo->wlanAssociationAttributes.ulRxRate;
-        item->conn.txRate = connInfo->wlanAssociationAttributes.ulTxRate;
+        item->conn.rxRate = connInfo->wlanAssociationAttributes.ulRxRate / 1000.;
+        item->conn.txRate = connInfo->wlanAssociationAttributes.ulTxRate / 1000.;
 
         if(connInfo->wlanSecurityAttributes.bSecurityEnabled)
         {
@@ -192,7 +192,7 @@ const char* ffDetectWifi(FFlist* result)
                     ffStrbufAppendS(&item->conn.security, "OWE");
                     break;
                 case 11 /* DOT11_AUTH_ALGO_WPA3_ENT */:
-                    ffStrbufAppendS(&item->conn.security, "OWE-ENT");
+                    ffStrbufAppendS(&item->conn.security, "WPA3-ENT");
                     break;
                 default:
                     ffStrbufAppendF(&item->conn.security, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11AuthAlgorithm);
