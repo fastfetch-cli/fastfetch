@@ -229,7 +229,9 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
     {
         item->conn.txRate = ffStrbufToDouble(buffer);
 
-        if(ffStrbufContainS(buffer, " HE-MCS "))
+        if(ffStrbufContainS(buffer, " EHT-MCS "))
+            ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
+        else if(ffStrbufContainS(buffer, " HE-MCS "))
             ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
         else if(ffStrbufContainS(buffer, " VHT-MCS "))
             ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
