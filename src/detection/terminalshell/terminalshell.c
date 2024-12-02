@@ -661,6 +661,19 @@ FF_MAYBE_UNUSED static bool getTerminalVersionTilix(FFstrbuf* exe, FFstrbuf* ver
     ffStrbufSubstrAfter(version, index);
     return true;
 }
+
+FF_MAYBE_UNUSED static bool getTerminalVersionSakura(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL) // sakura version is 3.8.8
+        return false;
+
+    ffStrbufSubstrAfterLastC(version, ' ');
+    return true;
+}
 #endif
 
 #ifdef _WIN32
@@ -762,6 +775,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "tilix"))
         return getTerminalVersionTilix(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "sakura"))
+        return getTerminalVersionSakura(exe, version);
 
     #endif
 

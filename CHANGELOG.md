@@ -21,6 +21,7 @@ Features:
 * Detect current Wi-Fi channel and maximum frequency (Wifi)
 * Report processor package count (#1413, CPU)
 * Remove duplicate whitespaces in CPU name
+* Support sakura terminal version & font detection (Terminal / TerminalFont, Linux)
 
 Logo:
 * Fix LMDE

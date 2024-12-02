@@ -454,4 +454,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectWestonTerminal(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "terminator"))
         detectTerminator(terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "sakura"))
+        detectFromConfigFile("sakura/sakura.conf", "font=", terminalFont);;
 }
