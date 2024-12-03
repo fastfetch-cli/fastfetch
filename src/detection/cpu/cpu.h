@@ -15,6 +15,7 @@ typedef struct FFCPUResult
     FFstrbuf name;
     FFstrbuf vendor;
 
+    uint16_t packages;
     uint16_t coresPhysical;
     uint16_t coresLogical;
     uint16_t coresOnline;

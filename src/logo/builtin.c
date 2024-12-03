@@ -2839,6 +2839,17 @@ static const FFlogo M[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_MIDOS,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // MidOSOld
+    {
+        .names = {"MidOS_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MIDOS_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLACK,
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
@@ -4808,6 +4819,19 @@ static const FFlogo W[] = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,
         },
+    },
+    // Windows2025
+    {
+        .names = {"Windows Server 2025"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WINDOWS_2025,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_CYAN,
     },
     // Windows11
     {

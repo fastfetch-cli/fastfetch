@@ -80,6 +80,8 @@ const char* ffDetectWifi(FFlist* result)
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
+        item->conn.channel = 0;
+        item->conn.frequency = 0;
 
         ffStrbufAppendS(&item->inf.description, inf.interfaceName.UTF8String);
         ffStrbufSetStatic(&item->inf.status, inf.powerOn ? "Power On" : "Power Off");
@@ -288,6 +290,15 @@ const char* ffDetectWifi(FFlist* result)
             default:
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);
                 break;
+        }
+
+        item->conn.channel = (uint16_t) inf.wlanChannel.channelNumber;
+        switch (inf.wlanChannel.channelBand)
+        {
+            case kCWChannelBand2GHz: item->conn.frequency = 2400; break;
+            case kCWChannelBand5GHz: item->conn.frequency = 5400; break;
+            case 3 /*kCWChannelBand6GHz*/: item->conn.frequency = 6400; break;
+            default: item->conn.frequency = 0; break;
         }
     }
     return NULL;

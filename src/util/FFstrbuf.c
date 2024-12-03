@@ -531,3 +531,69 @@ void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c)
     memset(&strbuf->chars[index], c, num);
     strbuf->length += num;
 }
+
+/**
+ * @brief Read a line from a FFstrbuf.
+ *
+ * @details Behaves like getline(3) but reads from a FFstrbuf.
+ *
+ * @param[in,out] lineptr The pointer to a pointer that will be set to the start of the line.
+ *                         Can be NULL for the first call.
+ * @param[in,out] n The pointer to the size of the buffer of lineptr.
+ * @param[in] buffer The buffer to read from. The buffer must not be a string literal.
+ *
+ * @return true if a line has been read, false if the end of the buffer has been reached.
+ */
+bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    assert(lineptr && n && buffer);
+    assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
+    assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
+
+    const char* pBufferEnd = buffer->chars + buffer->length;
+    if (!*lineptr)
+        *lineptr = buffer->chars;
+    else
+    {
+        *lineptr += *n;
+        if (*lineptr >= pBufferEnd) // non-empty last line
+            return false;
+        **lineptr = '\n';
+        ++*lineptr;
+    }
+    if (*lineptr >= pBufferEnd) // empty last line
+        return false;
+
+    size_t remaining = (size_t) (pBufferEnd - *lineptr);
+    char* ending = memchr(*lineptr, '\n', remaining);
+    if (ending)
+    {
+        *n = (size_t) (ending - *lineptr);
+        *ending = '\0';
+    }
+    else
+        *n = remaining;
+    return true;
+}
+
+bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
+{
+    if (strbuf->allocated == 0) return false; // Doesn't work with static strings
+
+    bool changed = false;
+    for (uint32_t i = 0; i < strbuf->length; i++)
+    {
+        if (strbuf->chars[i] != ' ') continue;
+
+        i++;
+        uint32_t j = i;
+        for (; j < strbuf->length && strbuf->chars[j] == ' '; j++);
+
+        if (j == i) continue;
+        memmove(&strbuf->chars[i], &strbuf->chars[j], strbuf->length - j + 1);
+        strbuf->length -= j - i;
+        changed = true;
+    }
+
+    return changed;
+}

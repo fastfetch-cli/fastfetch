@@ -191,7 +191,7 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
 void ffPrintUsersHelpFormat(void)
 {
     FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_USERS_MODULE_NAME, "{1}@{2} - login time {5}", FF_USERS_NUM_FORMAT_ARGS, ((const char* []) {
-        "User name - user-name",
+        "User name - name",
         "Host name - host-name",
         "Session name - session",
         "Client IP - client-ip",

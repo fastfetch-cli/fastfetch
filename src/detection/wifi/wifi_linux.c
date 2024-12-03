@@ -36,6 +36,13 @@ typedef enum {
     NM_802_11_AP_SEC_KEY_MGMT_EAP_SUITE_B_192 = 0x00002000,
 } NM80211ApSecurityFlags;
 
+#define FF_DBUS_ITER_CONTINUE(dbus, iterator) \
+    { \
+        if(!(dbus).lib->ffdbus_message_iter_next(iterator)) \
+            break; \
+        continue; \
+    }
+
 static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 {
     FFDBusData dbus;
@@ -72,24 +79,80 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
     if (!item->conn.status.length)
         ffStrbufSetStatic(&item->conn.status, "connected");
 
-    if (!item->conn.ssid.length)
-        ffDBusGetPropertyString(&dbus, "org.freedesktop.NetworkManager", apPath.chars, "org.freedesktop.NetworkManager.AccessPoint", "Ssid", &item->conn.ssid);
+    DBusMessage* reply = ffDBusGetAllProperties(&dbus, "org.freedesktop.NetworkManager", apPath.chars, "org.freedesktop.NetworkManager.AccessPoint");
+    if(reply == NULL)
+        return "Failed to get access point properties";
 
-    if (!item->conn.bssid.length)
-        ffDBusGetPropertyString(&dbus, "org.freedesktop.NetworkManager", apPath.chars, "org.freedesktop.NetworkManager.AccessPoint", "HwAddress", &item->conn.bssid);
-
-    if (item->conn.signalQuality != item->conn.signalQuality)
+    DBusMessageIter rootIterator;
+    if(!dbus.lib->ffdbus_message_iter_init(reply, &rootIterator) &&
+        dbus.lib->ffdbus_message_iter_get_arg_type(&rootIterator) != DBUS_TYPE_ARRAY)
     {
-        uint32_t strengthPercent;
-        if (ffDBusGetPropertyUint(&dbus, "org.freedesktop.NetworkManager", apPath.chars, "org.freedesktop.NetworkManager.AccessPoint", "Strength", &strengthPercent))
-            item->conn.signalQuality = strengthPercent;
+        dbus.lib->ffdbus_message_unref(reply);
+        return "Invalid type of access point properties";
     }
+
+    DBusMessageIter arrayIterator;
+    dbus.lib->ffdbus_message_iter_recurse(&rootIterator, &arrayIterator);
 
     NM80211ApFlags flags;
     NM80211ApSecurityFlags wpaFlags, rsnFlags;
-    if (ffDBusGetPropertyUint(&dbus, "org.freedesktop.NetworkManager", apPath.chars, "org.freedesktop.NetworkManager.AccessPoint", "Flags", &flags) &&
-        ffDBusGetPropertyUint(&dbus, "org.freedesktop.NetworkManager", apPath.chars, "org.freedesktop.NetworkManager.AccessPoint", "WpaFlags", &wpaFlags) &&
-        ffDBusGetPropertyUint(&dbus, "org.freedesktop.NetworkManager", apPath.chars , "org.freedesktop.NetworkManager.AccessPoint", "RsnFlags", &rsnFlags))
+    int flagCount = 0;
+
+    while(true)
+    {
+        if(dbus.lib->ffdbus_message_iter_get_arg_type(&arrayIterator) != DBUS_TYPE_DICT_ENTRY)
+            FF_DBUS_ITER_CONTINUE(dbus, &arrayIterator)
+
+        DBusMessageIter dictIterator;
+        dbus.lib->ffdbus_message_iter_recurse(&arrayIterator, &dictIterator);
+
+        const char* key;
+        dbus.lib->ffdbus_message_iter_get_basic(&dictIterator, &key);
+
+        dbus.lib->ffdbus_message_iter_next(&dictIterator);
+
+        if (ffStrEquals(key, "Ssid"))
+        {
+            if (!item->conn.ssid.length)
+                ffDBusGetString(&dbus, &dictIterator, &item->conn.ssid);
+        }
+        else if (ffStrEquals(key, "HwAddress"))
+        {
+            if (!item->conn.bssid.length)
+                ffDBusGetString(&dbus, &dictIterator, &item->conn.bssid);
+        }
+        else if (ffStrEquals(key, "Strength"))
+        {
+            if (item->conn.signalQuality != item->conn.signalQuality)
+            {
+                uint32_t strengthPercent;
+                if (ffDBusGetUint(&dbus, &dictIterator, &strengthPercent))
+                    item->conn.signalQuality = strengthPercent;
+            }
+        }
+        else if (ffStrEquals(key, "Frequency"))
+        {
+            if (item->conn.frequency == 0)
+            {
+                uint32_t frequency;
+                if (ffDBusGetUint(&dbus, &dictIterator, &frequency))
+                {
+                    item->conn.frequency = (uint16_t) frequency;
+                    if (item->conn.channel == 0)
+                        item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
+                }
+            }
+        }
+        else if ((ffStrEquals(key, "Flags") && ffDBusGetUint(&dbus, &dictIterator, &flags)) ||
+            (ffStrEquals(key, "WpaFlags") && ffDBusGetUint(&dbus, &dictIterator, &wpaFlags)) ||
+            (ffStrEquals(key, "RsnFlags") && ffDBusGetUint(&dbus, &dictIterator, &rsnFlags))
+        )
+            ++flagCount;
+
+        FF_DBUS_ITER_CONTINUE(dbus, &arrayIterator)
+    }
+
+    if (flagCount == 3)
     {
         if ((flags & NM_802_11_AP_FLAGS_PRIVACY) && (wpaFlags == NM_802_11_AP_SEC_NONE)
             && (rsnFlags == NM_802_11_AP_SEC_NONE))
@@ -166,12 +229,21 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
     {
         item->conn.txRate = ffStrbufToDouble(buffer);
 
-        if(ffStrbufContainS(buffer, " HE-MCS "))
+        if(ffStrbufContainS(buffer, " EHT-MCS "))
+            ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
+        else if(ffStrbufContainS(buffer, " HE-MCS "))
             ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
         else if(ffStrbufContainS(buffer, " VHT-MCS "))
             ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
         else if(ffStrbufContainS(buffer, " MCS "))
             ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+    }
+
+    ffStrbufClear(buffer);
+    if(ffParsePropLines(output.chars, "freq: ", buffer))
+    {
+        item->conn.frequency = (uint16_t) ffStrbufToUInt(buffer, 0);
+        item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
     }
 
     return NULL;
@@ -218,6 +290,30 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
 
     if(ioctl(sock, SIOCGIWRATE, &iwr) >= 0)
         item->conn.txRate = iwr.u.bitrate.value / 1000000.;
+
+    if(ioctl(sock, SIOCGIWFREQ, &iwr) >= 0)
+    {
+        if (iwr.u.freq.e == 0 && iwr.u.freq.m <= 1000)
+        {
+            item->conn.channel = (uint16_t) iwr.u.freq.m;
+        }
+        else
+        {
+            // convert it to MHz
+            while (iwr.u.freq.e < 6)
+            {
+                iwr.u.freq.m /= 10;
+                iwr.u.freq.e++;
+            }
+            while (iwr.u.freq.e > 6)
+            {
+                iwr.u.freq.m *= 10;
+                iwr.u.freq.e--;
+            }
+            item->conn.frequency = (uint16_t) iwr.u.freq.m;
+            item->conn.channel = ffWifiFreqToChannel(item->conn.frequency);
+        }
+    }
 
     struct iw_statistics stats;
     iwr.u.data.pointer = &stats;
@@ -289,6 +385,8 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
+        item->conn.channel = 0;
+        item->conn.frequency = 0;
 
         ffStrbufSetF(&buffer, "/sys/class/net/%s/operstate", i->if_name);
         if (!ffAppendFileBuffer(buffer.chars, &item->inf.status))

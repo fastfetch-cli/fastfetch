@@ -7,6 +7,9 @@ FFDisplayResult* ffdsAppendDisplay(
     double refreshRate,
     uint32_t scaledWidth,
     uint32_t scaledHeight,
+    uint32_t preferredWidth,
+    uint32_t preferredHeight,
+    double preferredRefreshRate,
     uint32_t rotation,
     FFstrbuf* name,
     FFDisplayType type,
@@ -25,6 +28,9 @@ FFDisplayResult* ffdsAppendDisplay(
     display->refreshRate = refreshRate;
     display->scaledWidth = scaledWidth;
     display->scaledHeight = scaledHeight;
+    display->preferredWidth = preferredWidth;
+    display->preferredHeight = preferredHeight;
+    display->preferredRefreshRate = preferredRefreshRate;
     display->rotation = rotation;
     ffStrbufInitMove(&display->name, name);
     display->type = type;

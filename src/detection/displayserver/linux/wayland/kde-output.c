@@ -11,26 +11,33 @@ typedef struct WaylandKdeMode
     int32_t width;
     int32_t height;
     int32_t refreshRate;
+    bool preferred;
     struct kde_output_device_mode_v2* pMode;
 } WaylandKdeMode;
 
-static void waylandKdeSizeListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_mode_v2 *_, int32_t width, int32_t height)
+static void waylandKdeModeSizeListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_mode_v2 *_, int32_t width, int32_t height)
 {
     WaylandKdeMode* mode = (WaylandKdeMode*) data;
     mode->width = width;
     mode->height = height;
 }
 
-static void waylandKdeRefreshListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_mode_v2 *_, int32_t rate)
+static void waylandKdeModeRefreshListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_mode_v2 *_, int32_t rate)
 {
     WaylandKdeMode* mode = (WaylandKdeMode*) data;
     mode->refreshRate = rate;
 }
 
+static void waylandKdeModePreferredListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_mode_v2 *_)
+{
+    WaylandKdeMode* mode = (WaylandKdeMode*) data;
+    mode->preferred = true;
+}
+
 static const struct kde_output_device_mode_v2_listener modeListener = {
-    .size = waylandKdeSizeListener,
-    .refresh = waylandKdeRefreshListener,
-    .preferred = (void*) stubListener,
+    .size = waylandKdeModeSizeListener,
+    .refresh = waylandKdeModeRefreshListener,
+    .preferred = waylandKdeModePreferredListener,
     .removed = (void*) stubListener,
 };
 
@@ -40,7 +47,7 @@ static void waylandKdeModeListener(void* data, FF_MAYBE_UNUSED struct kde_output
     if (!wldata->internal) return;
 
     WaylandKdeMode* newMode = ffListAdd((FFlist*) wldata->internal);
-    newMode->pMode = mode;
+    *newMode = (WaylandKdeMode) { .pMode = mode };
 
     // Strangely, the listener is called only in this function, but not in `waylandKdeCurrentModeListener`
     wldata->parent->ffwl_proxy_add_listener((struct wl_proxy *) mode, (void (**)(void)) &modeListener, newMode);
@@ -52,18 +59,24 @@ static void waylandKdeCurrentModeListener(void* data, FF_MAYBE_UNUSED struct kde
     WaylandDisplay* wldata = (WaylandDisplay*) data;
     if (!wldata->internal) return;
 
-    WaylandKdeMode* current = NULL;
+    int set = 0;
     FF_LIST_FOR_EACH(WaylandKdeMode, m, *(FFlist*) wldata->internal)
     {
         if (m->pMode == mode)
         {
-            current = m;
-            break;
+            wldata->width = m->width;
+            wldata->height = m->height;
+            wldata->refreshRate = m->refreshRate;
+            if (++set == 2) break;
+        }
+        if (m->preferred)
+        {
+            wldata->preferredWidth = m->width;
+            wldata->preferredHeight = m->height;
+            wldata->preferredRefreshRate = m->refreshRate;
+            if (++set == 2) break;
         }
     }
-    wldata->width = current->width;
-    wldata->height = current->height;
-    wldata->refreshRate = current->refreshRate;
 }
 
 static void waylandKdeScaleListener(void* data, FF_MAYBE_UNUSED struct kde_output_device_v2* _, wl_fixed_t scale)
@@ -164,9 +177,6 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
     FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandKdeMode));
     WaylandDisplay display = {
         .parent = wldata,
-        .width = 0,
-        .height = 0,
-        .refreshRate = 0,
         .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
         .type = FF_DISPLAY_TYPE_UNKNOWN,
@@ -191,6 +201,9 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale),
         (uint32_t) (display.height / display.scale),
+        (uint32_t) display.preferredWidth,
+        (uint32_t) display.preferredHeight,
+        display.preferredRefreshRate / 1000.0,
         rotation,
         display.edidName.length
             ? &display.edidName

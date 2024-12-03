@@ -109,6 +109,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         return "sysctlbyname(machdep.cpu.brand_string) failed";
 
     ffSysctlGetString("machdep.cpu.vendor", &cpu->vendor);
+    cpu->packages = (uint16_t) ffSysctlGetInt("hw.packages", 1);
     if (cpu->vendor.length == 0 && ffStrbufStartsWithS(&cpu->name, "Apple "))
         ffStrbufAppendS(&cpu->vendor, "Apple");
 

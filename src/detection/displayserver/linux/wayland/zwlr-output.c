@@ -20,34 +20,43 @@ typedef struct WaylandZwlrMode
     int32_t width;
     int32_t height;
     int32_t refreshRate;
+    bool preferred;
     struct zwlr_output_mode_v1* pMode;
 } WaylandZwlrMode;
 
-static void waylandZwlrSizeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_mode_v1 *zwlr_output_mode_v1, int32_t width, int32_t height)
+static void waylandZwlrModeSizeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_mode_v1 *zwlr_output_mode_v1, int32_t width, int32_t height)
 {
     WaylandZwlrMode* mode = (WaylandZwlrMode*) data;
     mode->width = width;
     mode->height = height;
 }
 
-static void waylandZwlrRefreshListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_mode_v1 *zwlr_output_mode_v1, int32_t rate)
+static void waylandZwlrModeRefreshListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_mode_v1 *zwlr_output_mode_v1, int32_t rate)
 {
     WaylandZwlrMode* mode = (WaylandZwlrMode*) data;
     mode->refreshRate = rate;
 }
 
+static void waylandZwlrModePreferredListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_mode_v1 *zwlr_output_mode_v1)
+{
+    WaylandZwlrMode* mode = (WaylandZwlrMode*) data;
+    mode->preferred = true;
+}
+
 static const struct zwlr_output_mode_v1_listener modeListener = {
-    .size = waylandZwlrSizeListener,
-    .refresh = waylandZwlrRefreshListener,
-    .preferred = (void*) stubListener,
+    .size = waylandZwlrModeSizeListener,
+    .refresh = waylandZwlrModeRefreshListener,
+    .preferred = waylandZwlrModePreferredListener,
     .finished = (void*) stubListener,
 };
 
 static void waylandZwlrModeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, struct zwlr_output_mode_v1 *mode)
 {
     WaylandDisplay* wldata = (WaylandDisplay*) data;
+    if (!wldata->internal) return;
+
     WaylandZwlrMode* newMode = ffListAdd((FFlist*) wldata->internal);
-    newMode->pMode = mode;
+    *newMode = (WaylandZwlrMode) { .pMode = mode };
 
     // Strangely, the listener is called only in this function, but not in `waylandZwlrCurrentModeListener`
     wldata->parent->ffwl_proxy_add_listener((struct wl_proxy *) mode, (void (**)(void)) &modeListener, newMode);
@@ -57,18 +66,26 @@ static void waylandZwlrCurrentModeListener(void* data, FF_MAYBE_UNUSED struct zw
 {
     // waylandZwlrModeListener is always run before this
     WaylandDisplay* wldata = (WaylandDisplay*) data;
-    WaylandZwlrMode* current = NULL;
+    if (!wldata->internal) return;
+
+    int set = 0;
     FF_LIST_FOR_EACH(WaylandZwlrMode, m, *(FFlist*) wldata->internal)
     {
         if (m->pMode == mode)
         {
-            current = m;
-            break;
+            wldata->width = m->width;
+            wldata->height = m->height;
+            wldata->refreshRate = m->refreshRate;
+            if (++set == 2) break;
+        }
+        if (m->preferred)
+        {
+            wldata->preferredWidth = m->width;
+            wldata->preferredHeight = m->height;
+            wldata->preferredRefreshRate = m->refreshRate;
+            if (++set == 2) break;
         }
     }
-    wldata->width = current->width;
-    wldata->height = current->height;
-    wldata->refreshRate = current->refreshRate;
 }
 
 static void waylandZwlrPhysicalSizeListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, int32_t width, int32_t height)
@@ -78,12 +95,18 @@ static void waylandZwlrPhysicalSizeListener(void* data, FF_MAYBE_UNUSED struct z
     wldata->physicalHeight = height;
 }
 
+static void waylandZwlrEnabledListener(void* data, FF_MAYBE_UNUSED struct zwlr_output_head_v1 *zwlr_output_head_v1, bool enabled)
+{
+    WaylandDisplay* wldata = (WaylandDisplay*) data;
+    if (!enabled) wldata->internal = NULL;
+}
+
 static const struct zwlr_output_head_v1_listener headListener = {
     .name = (void*) ffWaylandOutputNameListener,
     .description = (void*) ffWaylandOutputDescriptionListener,
     .physical_size = waylandZwlrPhysicalSizeListener,
     .mode = waylandZwlrModeListener,
-    .enabled = (void*) stubListener,
+    .enabled = (void*) waylandZwlrEnabledListener,
     .current_mode = waylandZwlrCurrentModeListener,
     .position = (void*) stubListener,
     .transform = waylandZwlrTransformListener,
@@ -102,9 +125,6 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
     FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandZwlrMode));
     WaylandDisplay display = {
         .parent = wldata,
-        .width = 0,
-        .height = 0,
-        .refreshRate = 0,
         .scale = 1,
         .transform = WL_OUTPUT_TRANSFORM_NORMAL,
         .type = FF_DISPLAY_TYPE_UNKNOWN,
@@ -117,7 +137,7 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
     wldata->ffwl_proxy_add_listener((struct wl_proxy*) head, (void(**)(void)) &headListener, &display);
     wldata->ffwl_display_roundtrip(wldata->display);
 
-    if(display.width <= 0 || display.height <= 0)
+    if(display.width <= 0 || display.height <= 0 || !display.internal)
         return;
 
     uint32_t rotation = ffWaylandHandleRotation(&display);
@@ -128,6 +148,9 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
         display.refreshRate / 1000.0,
         (uint32_t) (display.width / display.scale + 0.5),
         (uint32_t) (display.height / display.scale + 0.5),
+        (uint32_t) display.preferredWidth,
+        (uint32_t) display.preferredHeight,
+        display.preferredRefreshRate / 1000.0,
         rotation,
         display.edidName.length
             ? &display.edidName

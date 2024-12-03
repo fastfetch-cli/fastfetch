@@ -84,6 +84,8 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
             width, height,
             refreshRate,
             0, 0,
+            0, 0,
+            0,
             0,
             &name,
             ffdsGetDisplayType(plainName),
@@ -218,12 +220,14 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetConnectorCurrent)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetCrtc)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetEncoder)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetFB)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetProperty)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeGetPropertyBlob)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeResources)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeCrtc)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeEncoder)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeConnector)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeEncoder)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeFB)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreeProperty)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmModeFreePropertyBlob)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
@@ -252,28 +256,29 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
             continue;
         #endif
 
-        FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
-        if (fd < 0)
+        FF_AUTO_CLOSE_FD int primaryFd = open(path, O_RDWR | O_CLOEXEC);
+        if (primaryFd < 0)
             continue;
 
-        drmModeRes* res = ffdrmModeGetResources(fd);
+        drmModeRes* res = ffdrmModeGetResources(primaryFd);
         if (!res)
             continue;
 
         for (int iConn = 0; iConn < res->count_connectors; ++iConn)
         {
-            drmModeConnector* conn = ffdrmModeGetConnectorCurrent(fd, res->connectors[iConn]);
+            drmModeConnector* conn = ffdrmModeGetConnectorCurrent(primaryFd, res->connectors[iConn]);
             if (!conn)
                 continue;
 
             if (conn->connection != DRM_MODE_DISCONNECTED)
             {
-                drmModeEncoder* encoder = ffdrmModeGetEncoder(fd, conn->encoder_id);
+                drmModeEncoder* encoder = ffdrmModeGetEncoder(primaryFd, conn->encoder_id);
                 uint32_t width = 0, height = 0, refreshRate = 0;
+                uint8_t bitDepth = 0;
 
                 if (encoder)
                 {
-                    drmModeCrtc* crtc = ffdrmModeGetCrtc(fd, encoder->crtc_id);
+                    drmModeCrtc* crtc = ffdrmModeGetCrtc(primaryFd, encoder->crtc_id);
                     if (crtc)
                     {
                         width = crtc->mode.hdisplay;
@@ -292,28 +297,42 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                                 }
                             }
                         }
+
+                        drmModeFBPtr fb = ffdrmModeGetFB(primaryFd, crtc->buffer_id);
+                        if (fb)
+                        {
+                            bitDepth = (uint8_t) (fb->depth / 3);
+                            ffdrmModeFreeFB(fb);
+                        }
+
                         ffdrmModeFreeCrtc(crtc);
                     }
 
                     ffdrmModeFreeEncoder(encoder);
                 }
 
+                uint32_t preferredWidth = 0, preferredHeight = 0, preferredRefreshRate = 0;
+
+                for (int iMode = 0; iMode < conn->count_modes; ++iMode)
+                {
+                    drmModeModeInfo* mode = &conn->modes[iMode];
+
+                    if (mode->type & DRM_MODE_TYPE_PREFERRED)
+                    {
+                        preferredWidth = mode->hdisplay;
+                        preferredHeight = mode->vdisplay;
+                        preferredRefreshRate = mode->vrefresh;
+                        break;
+                    }
+                }
+
+                // NVIDIA DRM driver seems incomplete and conn->encoder_id == 0
+                // Assume preferred resolution is used as what we do in drmParseSys
                 if (width == 0 || height == 0)
                 {
-                    // NVIDIA DRM driver seems incomplete and conn->encoder_id == 0
-                    // Assume preferred resolution is used as what we do in drmParseSys
-                    for (int iMode = 0; iMode < conn->count_modes; ++iMode)
-                    {
-                        drmModeModeInfo* mode = &conn->modes[iMode];
-
-                        if (mode->type & DRM_MODE_TYPE_PREFERRED)
-                        {
-                            width = mode->hdisplay;
-                            height = mode->vdisplay;
-                            refreshRate = mode->vrefresh;
-                            break;
-                        }
-                    }
+                    width = preferredWidth;
+                    height = preferredHeight;
+                    refreshRate = preferredRefreshRate;
                 }
 
 
@@ -324,7 +343,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
 
                 for (int iProp = 0; iProp < conn->count_props; ++iProp)
                 {
-                    drmModePropertyRes *prop = ffdrmModeGetProperty(fd, conn->props[iProp]);
+                    drmModePropertyRes *prop = ffdrmModeGetProperty(primaryFd, conn->props[iProp]);
                     if (!prop)
                         continue;
 
@@ -334,9 +353,9 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                         drmModePropertyBlobPtr blob = NULL;
 
                         if (prop->count_blobs > 0 && prop->blob_ids != NULL)
-                            blob = ffdrmModeGetPropertyBlob(fd, prop->blob_ids[0]);
+                            blob = ffdrmModeGetPropertyBlob(primaryFd, prop->blob_ids[0]);
                         else
-                            blob = ffdrmModeGetPropertyBlob(fd, (uint32_t) conn->prop_values[iProp]);
+                            blob = ffdrmModeGetPropertyBlob(primaryFd, (uint32_t) conn->prop_values[iProp]);
 
                         if (blob)
                         {
@@ -382,6 +401,9 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     refreshRate,
                     0,
                     0,
+                    preferredWidth,
+                    preferredHeight,
+                    preferredRefreshRate,
                     0,
                     &name,
                     conn->connector_type == DRM_MODE_CONNECTOR_eDP || conn->connector_type == DRM_MODE_CONNECTOR_LVDS
@@ -401,6 +423,7 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                     item->serial = serial;
                     item->manufactureYear = myear;
                     item->manufactureWeek = mweak;
+                    item->bitDepth = bitDepth;
                 }
             }
 

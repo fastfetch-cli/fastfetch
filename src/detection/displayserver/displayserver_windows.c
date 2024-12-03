@@ -149,12 +149,30 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 default: rotation = 0; break;
             }
 
+            DISPLAYCONFIG_TARGET_PREFERRED_MODE preferredMode = {
+                .header = {
+                    .type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_PREFERRED_MODE,
+                    .size = sizeof(preferredMode),
+                    .adapterId = path->targetInfo.adapterId,
+                    .id = path->targetInfo.id,
+                }
+            };
+            double preferredRefreshRate = 0;
+            if (DisplayConfigGetDeviceInfo(&preferredMode.header) == ERROR_SUCCESS)
+            {
+                DISPLAYCONFIG_RATIONAL freq = preferredMode.targetMode.targetVideoSignalInfo.vSyncFreq;
+                preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
+            }
+
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
                 path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left),
                 (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top),
+                preferredMode.width,
+                preferredMode.height,
+                preferredRefreshRate,
                 rotation,
                 &name,
                 path->targetInfo.outputTechnology == DISPLAYCONFIG_OUTPUT_TECHNOLOGY_OTHER ? FF_DISPLAY_TYPE_UNKNOWN :
@@ -218,19 +236,24 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 
     //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
     const FFOSResult* os = ffDetectOS();
-    if(
-        ffStrbufEqualS(&os->version, "11") ||
-        ffStrbufEqualS(&os->version, "10") ||
-        ffStrbufEqualS(&os->version, "2022") ||
-        ffStrbufEqualS(&os->version, "2019") ||
-        ffStrbufEqualS(&os->version, "2016")
-    ) ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-    else if(
-        ffStrbufEqualS(&os->version, "8") ||
-        ffStrbufEqualS(&os->version, "8.1") ||
-        ffStrbufEqualS(&os->version, "2012 R2") ||
-        ffStrbufEqualS(&os->version, "2012")
-    ) ffStrbufSetStatic(&ds->dePrettyName, "Metro");
+    uint32_t ver = (uint32_t) ffStrbufToUInt(&os->version, 0);
+    if (ver > 1000)
+    {
+        // Windows Server
+        if (ver >= 2016)
+            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
+        else if (ver >= 2012)
+            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
+        else
+            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
+    }
     else
-        ffStrbufSetStatic(&ds->dePrettyName, "Aero");
+    {
+        if (ver >= 10)
+            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
+        else if (ver >= 8)
+            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
+        else
+            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
+    }
 }

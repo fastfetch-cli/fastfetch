@@ -536,26 +536,26 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 .name = &gpu->name,
             }, soName);
         }
-
-        if (gpu->type == FF_GPU_TYPE_UNKNOWN)
-        {
-            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
-            {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
-                    ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
-                    gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
-            else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
-            {
-                if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
-                    gpu->type = FF_GPU_TYPE_DISCRETE;
-            }
-        }
     }
 
     if (gpu->name.length == 0)
         ffGPUFillVendorAndName(subclassId, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
+
+    if (gpu->type == FF_GPU_TYPE_UNKNOWN)
+    {
+        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA)
+        {
+            if (ffStrbufStartsWithIgnCaseS(&gpu->name, "GeForce") ||
+                ffStrbufStartsWithIgnCaseS(&gpu->name, "Quadro") ||
+                ffStrbufStartsWithIgnCaseS(&gpu->name, "Tesla"))
+                gpu->type = FF_GPU_TYPE_DISCRETE;
+        }
+        else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_MTHREADS)
+        {
+            if (ffStrbufStartsWithIgnCaseS(&gpu->name, "MTT "))
+                gpu->type = FF_GPU_TYPE_DISCRETE;
+        }
+    }
 
     return NULL;
 }

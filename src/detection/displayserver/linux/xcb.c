@@ -1,11 +1,15 @@
 #include "displayserver_linux.h"
-#include "util/mallocHelper.h"
-#include "common/time.h"
 
-#ifdef FF_HAVE_XCB
+#ifdef FF_HAVE_XCB_RANDR
+
 #include "common/library.h"
+#include "common/time.h"
+#include "util/edidHelper.h"
+#include "util/mallocHelper.h"
+
 #include <stdlib.h>
 #include <string.h>
+#include <xcb/randr.h>
 #include <xcb/xcb.h>
 
 typedef struct XcbPropertyData
@@ -82,72 +86,6 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
     ffStrbufSetS(&result->wmProcessName, wmName);
 }
 
-const char* ffdsConnectXcb(FFDisplayServerResult* result)
-{
-    FF_LIBRARY_LOAD(xcb, "dlopen lbxcb failed", "libxcb" FF_LIBRARY_EXTENSION, 2)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_connect)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_get_setup)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_setup_roots_iterator)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_screen_next)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcb, xcb_disconnect)
-
-    XcbPropertyData propertyData;
-    bool propertyDataInitialized = xcbInitPropertyData(xcb, &propertyData);
-
-    xcb_connection_t* connection = ffxcb_connect(NULL, NULL);
-    if(connection == NULL)
-        return "xcb_connect failed";
-
-    xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(connection));
-
-    if(iterator.rem > 0 && propertyDataInitialized)
-        xcbDetectWMfromEWMH(&propertyData, connection, iterator.data->root, result);
-
-    while(iterator.rem > 0)
-    {
-        xcb_screen_t* screen = iterator.data;
-        ffdsAppendDisplay(result,
-            (uint32_t) screen->width_in_pixels,
-            (uint32_t) screen->height_in_pixels,
-            0,
-            (uint32_t) screen->width_in_pixels,
-            (uint32_t) screen->height_in_pixels,
-            0,
-            NULL,
-            FF_DISPLAY_TYPE_UNKNOWN,
-            false,
-            0,
-            (uint32_t) screen->width_in_millimeters,
-            (uint32_t) screen->height_in_millimeters,
-            "xcb"
-        );
-        ffxcb_screen_next(&iterator);
-    }
-
-    ffxcb_disconnect(connection);
-
-    //If wayland hasn't set this, connection failed for it. So we are running only a X Server, not XWayland.
-    if(result->wmProtocolName.length == 0)
-        ffStrbufSetS(&result->wmProtocolName, FF_WM_PROTOCOL_X11);
-
-    return NULL;
-}
-
-#else
-
-const char* ffdsConnectXcb(FFDisplayServerResult* result)
-{
-    //Do nothing. There are other implementations coming
-    FF_UNUSED(result)
-    return "Fastfetch was compiled without XCB support";
-}
-
-#endif
-
-#ifdef FF_HAVE_XCB_RANDR
-#include "util/edidHelper.h"
-#include <xcb/randr.h>
-
 typedef struct XcbRandrData
 {
     FF_LIBRARY_SYMBOL(xcb_randr_get_screen_resources_current)
@@ -181,28 +119,6 @@ typedef struct XcbRandrData
     xcb_randr_get_screen_resources_current_reply_t* screenResources;
 } XcbRandrData;
 
-static double xcbRandrHandleMode(XcbRandrData* data, xcb_randr_mode_t mode)
-{
-    //We do the check here, because we want the best fallback display if this call failed
-    if(data->screenResources == NULL)
-        return 0;
-
-    xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(data->screenResources);
-
-    while(modesIterator.rem > 0)
-    {
-        if(modesIterator.data->id == mode)
-        {
-            xcb_randr_mode_info_t* modeInfo = modesIterator.data;
-            return (double) modeInfo->dot_clock / (double) (modeInfo->htotal * modeInfo->vtotal);
-        }
-
-        data->ffxcb_randr_mode_info_next(&modesIterator);
-    }
-
-    return 0;
-}
-
 static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength)
 {
     xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, crtc, XCB_CURRENT_TIME);
@@ -227,13 +143,38 @@ static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrb
             break;
     }
 
+    xcb_randr_mode_info_t* currentMode = NULL;
+    xcb_randr_mode_info_t* preferredMode = NULL;
+
+    if(data->screenResources)
+    {
+        xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(data->screenResources);
+
+        if (output->num_preferred > 0)
+            preferredMode = modesIterator.data;
+
+        while (modesIterator.rem > 0)
+        {
+            if (modesIterator.data->id == crtcInfoReply->mode)
+            {
+                currentMode = modesIterator.data;
+                break;
+            }
+
+            data->ffxcb_randr_mode_info_next(&modesIterator);
+        }
+    }
+
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
-        xcbRandrHandleMode(data, crtcInfoReply->mode),
+        currentMode ? (double) currentMode->dot_clock / (double) ((uint32_t) currentMode->htotal * currentMode->vtotal) : 0,
         (uint32_t) crtcInfoReply->width,
         (uint32_t) crtcInfoReply->height,
+        preferredMode ? (uint32_t) preferredMode->width : 0,
+        preferredMode ? (uint32_t) preferredMode->height : 0,
+        preferredMode ? (double) preferredMode->dot_clock / (double) ((uint32_t) preferredMode->htotal * preferredMode->vtotal) : 0,
         rotation,
         name,
         displayType,
@@ -323,6 +264,7 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         0,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
+        0, 0, 0,
         0,
         &name,
         displayType,
@@ -378,6 +320,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         0,
         (uint32_t) screen->width_in_pixels,
         (uint32_t) screen->height_in_pixels,
+        0, 0, 0,
         0,
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,

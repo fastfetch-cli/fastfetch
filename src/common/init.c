@@ -76,18 +76,20 @@ static void resetConsole(void)
 }
 
 #ifdef _WIN32
-BOOL WINAPI consoleHandler(DWORD signal)
+BOOL WINAPI consoleHandler(FF_MAYBE_UNUSED DWORD signal)
 {
-    FF_UNUSED(signal);
     resetConsole();
     exit(0);
 }
 #else
-static void exitSignalHandler(int signal)
+static void exitSignalHandler(FF_MAYBE_UNUSED int signal)
 {
-    FF_UNUSED(signal);
     resetConsole();
     exit(0);
+}
+static void chldSignalHandler(FF_MAYBE_UNUSED int signal)
+{
+    // empty; used to interrupt the poll and read syscalls
 }
 #endif
 
@@ -118,6 +120,7 @@ void ffStart(void)
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
+    sigaction(SIGCHLD, &(struct sigaction) { .sa_handler = chldSignalHandler }, NULL);
     #endif
 
     //reset everything to default before we start printing
@@ -179,14 +182,8 @@ void ffListFeatures(void)
         #if FF_HAVE_XCB_RANDR
             "xcb-randr\n"
         #endif
-        #if FF_HAVE_XCB
-            "xcb\n"
-        #endif
         #if FF_HAVE_XRANDR
             "xrandr\n"
-        #endif
-        #if FF_HAVE_X11
-            "x11\n"
         #endif
         #if FF_HAVE_DRM
             "drm\n"

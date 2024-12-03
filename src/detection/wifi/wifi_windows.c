@@ -49,6 +49,7 @@ const char* ffDetectWifi(FFlist* result)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanQueryInterface)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanFreeMemory)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanCloseHandle)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(wlanapi, WlanGetNetworkBssList)
 
     DWORD curVersion;
     HANDLE hClient = NULL;
@@ -82,21 +83,23 @@ const char* ffDetectWifi(FFlist* result)
         item->conn.signalQuality = 0.0/0.0;
         item->conn.rxRate = 0.0/0.0;
         item->conn.txRate = 0.0/0.0;
+        item->conn.channel = 0;
+        item->conn.frequency = 0;
 
         convertIfStateToString(ifInfo->isState, &item->inf.status);
 
         if(ifInfo->isState != wlan_interface_state_connected)
             continue;
 
-        DWORD connectInfoSize = sizeof(WLAN_CONNECTION_ATTRIBUTES);
-        WLAN_OPCODE_VALUE_TYPE opCode = wlan_opcode_value_type_invalid;
         WLAN_CONNECTION_ATTRIBUTES* connInfo = NULL;
+        DWORD bufSize = sizeof(*connInfo);
+        WLAN_OPCODE_VALUE_TYPE opCode = wlan_opcode_value_type_query_only;
 
         if(ffWlanQueryInterface(hClient,
             &ifInfo->InterfaceGuid,
             wlan_intf_opcode_current_connection,
             NULL,
-            &connectInfoSize,
+            &bufSize,
             (PVOID*)&connInfo,
             &opCode) != ERROR_SUCCESS
         ) continue;
@@ -107,8 +110,8 @@ const char* ffDetectWifi(FFlist* result)
             (const char *)connInfo->wlanAssociationAttributes.dot11Ssid.ucSSID);
 
         for (size_t i = 0; i < sizeof(connInfo->wlanAssociationAttributes.dot11Bssid); i++)
-            ffStrbufAppendF(&item->conn.bssid, "%.2X-", connInfo->wlanAssociationAttributes.dot11Bssid[i]);
-        ffStrbufTrimRight(&item->conn.bssid, '-');
+            ffStrbufAppendF(&item->conn.bssid, "%.2X:", connInfo->wlanAssociationAttributes.dot11Bssid[i]);
+        ffStrbufTrimRight(&item->conn.bssid, ':');
 
         switch (connInfo->wlanAssociationAttributes.dot11PhyType)
         {
@@ -151,8 +154,8 @@ const char* ffDetectWifi(FFlist* result)
         }
 
         item->conn.signalQuality = connInfo->wlanAssociationAttributes.wlanSignalQuality;
-        item->conn.rxRate = connInfo->wlanAssociationAttributes.ulRxRate;
-        item->conn.txRate = connInfo->wlanAssociationAttributes.ulTxRate;
+        item->conn.rxRate = connInfo->wlanAssociationAttributes.ulRxRate / 1000.;
+        item->conn.txRate = connInfo->wlanAssociationAttributes.ulTxRate / 1000.;
 
         if(connInfo->wlanSecurityAttributes.bSecurityEnabled)
         {
@@ -189,7 +192,7 @@ const char* ffDetectWifi(FFlist* result)
                     ffStrbufAppendS(&item->conn.security, "OWE");
                     break;
                 case 11 /* DOT11_AUTH_ALGO_WPA3_ENT */:
-                    ffStrbufAppendS(&item->conn.security, "OWE-ENT");
+                    ffStrbufAppendS(&item->conn.security, "WPA3-ENT");
                     break;
                 default:
                     ffStrbufAppendF(&item->conn.security, "Unknown (%u)", (unsigned)connInfo->wlanSecurityAttributes.dot11AuthAlgorithm);
@@ -201,7 +204,34 @@ const char* ffDetectWifi(FFlist* result)
         else
             ffStrbufAppendS(&item->conn.security, "Insecure");
 
+        WLAN_BSS_LIST* bssList = NULL;
+        if (ffWlanGetNetworkBssList(hClient,
+            &ifInfo->InterfaceGuid,
+            &connInfo->wlanAssociationAttributes.dot11Ssid,
+            connInfo->wlanAssociationAttributes.dot11BssType,
+            connInfo->wlanSecurityAttributes.bSecurityEnabled,
+            NULL,
+            &bssList) == ERROR_SUCCESS && bssList->dwNumberOfItems > 0
+        ) {
+            item->conn.frequency = (uint16_t) (bssList->wlanBssEntries[0].ulChCenterFrequency / 1000);
+            ffWlanFreeMemory(bssList);
+        }
+
         ffWlanFreeMemory(connInfo);
+
+        ULONG* channelNumber = 0;
+        bufSize = sizeof(*channelNumber);
+        if(ffWlanQueryInterface(hClient,
+            &ifInfo->InterfaceGuid,
+            wlan_intf_opcode_channel_number,
+            NULL,
+            &bufSize,
+            (PVOID*)&channelNumber,
+            &opCode) == ERROR_SUCCESS
+        ) {
+            item->conn.channel = (uint16_t) *channelNumber;
+            ffWlanFreeMemory(channelNumber);
+        }
     }
 
 exit:

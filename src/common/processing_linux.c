@@ -1,7 +1,6 @@
 #include "fastfetch.h"
 #include "common/processing.h"
 #include "common/io/io.h"
-#include "common/time.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 
@@ -90,6 +89,16 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 waitpid(childPid, NULL, 0);
                 return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
             }
+            else if (errno == EINTR)
+            {
+                // The child process has been terminated. See `chldSignalHandler` in `common/init.c`
+                if (waitpid(childPid, NULL, WNOHANG) == childPid)
+                {
+                    // Read remaining data from the pipe
+                    fcntl(childPipeFd, F_SETFL, O_CLOEXEC | O_NONBLOCK);
+                    childPid = -1;
+                }
+            }
             else if (pollfd.revents & POLLERR)
             {
                 kill(childPid, SIGTERM);
@@ -104,7 +113,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         else if (nRead == 0)
         {
             int stat_loc = 0;
-            if (waitpid(childPid, &stat_loc, 0) == childPid)
+            if (childPid > 0 && waitpid(childPid, &stat_loc, 0) == childPid)
             {
                 if (!WIFEXITED(stat_loc))
                     return "child process exited abnormally";
@@ -113,10 +122,15 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
                 return NULL;
             }
-            return "waitpid() failed";
+            return NULL;
         }
         else if (nRead < 0)
-            break;
+        {
+            if (errno == EAGAIN)
+                return NULL;
+            else
+                break;
+        }
     };
 
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";

@@ -58,17 +58,20 @@ typedef enum __attribute__((__packed__)) FFDisplayHdrStatus
 
 typedef struct FFDisplayResult
 {
-    uint32_t width;
-    uint32_t height;
-    double refreshRate;
-    uint32_t scaledWidth;
-    uint32_t scaledHeight;
+    uint32_t width; // in px
+    uint32_t height; // in px
+    double refreshRate; // in Hz
+    uint32_t scaledWidth; // in px
+    uint32_t scaledHeight; // in px
+    uint32_t preferredWidth; // in px
+    uint32_t preferredHeight; // in px
+    double preferredRefreshRate; // in Hz
     FFstrbuf name;
     FFDisplayType type;
     uint32_t rotation;
     uint64_t id; // platform dependent
-    uint32_t physicalWidth;
-    uint32_t physicalHeight;
+    uint32_t physicalWidth; // in mm
+    uint32_t physicalHeight; // in mm
     bool primary;
     const char* platformApi;
     uint8_t bitDepth;
@@ -97,6 +100,9 @@ FFDisplayResult* ffdsAppendDisplay(
     double refreshRate,
     uint32_t scaledWidth,
     uint32_t scaledHeight,
+    uint32_t preferredWidth,
+    uint32_t preferredHeight,
+    double preferredRefreshRate,
     uint32_t rotation,
     FFstrbuf* name,
     FFDisplayType type,

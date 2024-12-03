@@ -6,8 +6,6 @@
 #include "util/FFstrbuf.h"
 #include "common/library.h"
 
-#define FF_DBUS_TIMEOUT_MILLISECONDS 100
-
 typedef struct FFDBusLibrary
 {
     FF_LIBRARY_SYMBOL(dbus_bus_get)
@@ -37,5 +35,10 @@ DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const c
 DBusMessage* ffDBusGetProperty(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property);
 bool ffDBusGetPropertyString(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, FFstrbuf* result);
 bool ffDBusGetPropertyUint(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* property, uint32_t* result);
+
+static inline DBusMessage* ffDBusGetAllProperties(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface)
+{
+    return ffDBusGetMethodReply(dbus, busName, objectPath, "org.freedesktop.DBus.Properties", "GetAll", interface);
+}
 
 #endif // FF_HAVE_DBUS

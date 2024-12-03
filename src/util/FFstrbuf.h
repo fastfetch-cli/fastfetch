@@ -90,6 +90,9 @@ FF_C_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultV
 void ffStrbufUpperCase(FFstrbuf* strbuf);
 void ffStrbufLowerCase(FFstrbuf* strbuf);
 
+bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
+bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
+
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 {
     FFstrbuf strbuf;

@@ -159,14 +159,13 @@ static void detectAndroid(FFCPUResult* cpu)
 #if __arm__ || __aarch64__
 #include "cpu_arm.h"
 
-static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
+static void detectArmName(FFstrbuf* cpuinfo, FFCPUResult* cpu, uint32_t implId)
 {
-    FF_AUTO_FREE char* line = NULL;
-    rewind(cpuinfo);
+    char* line = NULL;
     size_t len = 0;
     uint32_t lastPartId = UINT32_MAX;
     uint32_t num = 0;
-    while(getline(&line, &len, cpuinfo) != -1)
+    while(ffStrbufGetline(&line, &len, cpuinfo))
     {
         if (!ffStrStartsWith(line, "CPU part\t: ")) continue;
         uint32_t partId = (uint32_t) strtoul(line + strlen("CPU part\t: "), NULL, 16);
@@ -220,18 +219,18 @@ static void detectArmName(FILE* cpuinfo, FFCPUResult* cpu, uint32_t implId)
 #endif
 
 static const char* parseCpuInfo(
-    FF_MAYBE_UNUSED FILE* cpuinfo,
-    FF_MAYBE_UNUSED FFCPUResult* cpu,
+    FFstrbuf* cpuinfo,
+    FFCPUResult* cpu,
     FF_MAYBE_UNUSED FFstrbuf* physicalCoresBuffer,
     FF_MAYBE_UNUSED FFstrbuf* cpuMHz,
     FF_MAYBE_UNUSED FFstrbuf* cpuIsa,
     FF_MAYBE_UNUSED FFstrbuf* cpuUarch,
     FF_MAYBE_UNUSED FFstrbuf* cpuImplementer)
 {
-    FF_AUTO_FREE char* line = NULL;
+    char* line = NULL;
     size_t len = 0;
 
-    while(getline(&line, &len, cpuinfo) != -1)
+    while(ffStrbufGetline(&line, &len, cpuinfo))
     {
         //Stop after reasonable information is acquired
         if((*line == '\0' || *line == '\n')
@@ -465,11 +464,32 @@ FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
     }
 }
 
+FF_MAYBE_UNUSED static uint16_t getPackageCount(FFstrbuf* cpuinfo)
+{
+    const char* p = cpuinfo->chars;
+    uint64_t low = 0, high = 0;
+
+    while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:"))))
+    {
+        if (!p) break;
+        p += strlen("\nphysical id\t:");
+        char* pend;
+        unsigned long id = strtoul(p, &pend, 10);
+        if (__builtin_expect(id > 64, false)) // Do 129-socket boards exist?
+            high |= 1 << (id - 64);
+        else
+            low |= 1 << id;
+        p = pend;
+    }
+
+    return (uint16_t) (__builtin_popcountll(low) + __builtin_popcountll(high));
+}
+
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    FF_AUTO_CLOSE_FILE FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
-    if(cpuinfo == NULL)
-        return "fopen(\"/proc/cpuinfo\", \"r\") failed";
+    FF_STRBUF_AUTO_DESTROY cpuinfo = ffStrbufCreateA(PROC_FILE_BUFFSIZ);
+    if (!ffReadFileBuffer("/proc/cpuinfo", &cpuinfo) || cpuinfo.length == 0)
+        return "ffReadFileBuffer(\"/proc/cpuinfo\") failed";
 
     cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
 
@@ -479,12 +499,15 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     FF_STRBUF_AUTO_DESTROY cpuUarch = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuImplementerStr = ffStrbufCreate();
 
-    const char* error = parseCpuInfo(cpuinfo, cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch, &cpuImplementerStr);
+    const char* error = parseCpuInfo(&cpuinfo, cpu, &physicalCoresBuffer, &cpuMHz, &cpuIsa, &cpuUarch, &cpuImplementerStr);
     if (error) return error;
 
     cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
+    #if __x86_64__ || __i386__
+    cpu->packages = getPackageCount(&cpuinfo);
+    #endif
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
     ffCPUDetectSpeedByCpuid(cpu);
@@ -519,7 +542,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     #endif
 
     if (cpu->name.length == 0)
-        detectArmName(cpuinfo, cpu, cpuImplementer);
+        detectArmName(&cpuinfo, cpu, cpuImplementer);
     #endif
 
     return NULL;

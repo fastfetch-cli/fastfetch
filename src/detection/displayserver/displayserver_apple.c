@@ -60,7 +60,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 displayInfo = IODisplayCreateInfoDictionary(servicePort, kIODisplayOnlyPreferredName);
             }
             #endif
+
             uint32_t physicalWidth = 0, physicalHeight = 0;
+            uint32_t preferredWidth = 0, preferredHeight = 0;
+            double preferredRefreshRate = 0;
+
             if(displayInfo)
             {
                 CFDictionaryRef productNames;
@@ -76,9 +80,35 @@ static void detectDisplays(FFDisplayServerResult* ds)
                     if (edidLength >= 128)
                         ffEdidGetPhysicalSize(edidData, &physicalWidth, &physicalHeight);
                 }
+
+                if (!physicalWidth || !physicalHeight)
+                {
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayHorizontalImageSize), (int*) &physicalWidth) == NULL)
+                        ffCfDictGetInt(displayInfo, CFSTR(kDisplayVerticalImageSize), (int*) &physicalHeight);
+                }
+
+                ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelWidth"), (int*) &preferredWidth);
+                ffCfDictGetInt(displayInfo, CFSTR("kCGDisplayPixelHeight"), (int*) &preferredHeight);
+                if (preferredWidth && preferredHeight)
+                {
+                    FF_CFTYPE_AUTO_RELEASE CFArrayRef allModes = CGDisplayCopyAllDisplayModes(screen, NULL);
+                    if (allModes)
+                    {
+                        for (CFIndex i = 0, count = CFArrayGetCount(allModes); i < count; i++)
+                        {
+                            CGDisplayModeRef modeInfo = (CGDisplayModeRef) CFArrayGetValueAtIndex(allModes, i);
+                            if (CGDisplayModeGetPixelWidth(modeInfo) == preferredWidth && CGDisplayModeGetPixelHeight(modeInfo) == preferredHeight)
+                            {
+                                double rr = CGDisplayModeGetRefreshRate(modeInfo);
+                                if (rr > preferredRefreshRate) preferredRefreshRate = rr;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
-            if (!physicalWidth || !physicalHeight)
+            if ((!physicalWidth || !physicalHeight) && CGDisplayPrimaryDisplay(screen) == screen) // #1406
             {
                 CGSize size = CGDisplayScreenSize(screen);
                 physicalWidth = (uint32_t) (size.width + 0.5);
@@ -91,6 +121,9 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 refreshRate,
                 (uint32_t)CGDisplayModeGetWidth(mode),
                 (uint32_t)CGDisplayModeGetHeight(mode),
+                preferredWidth,
+                preferredHeight,
+                preferredRefreshRate,
                 (uint32_t)CGDisplayRotation(screen),
                 &buffer,
                 CGDisplayIsBuiltin(screen) ? FF_DISPLAY_TYPE_BUILTIN : FF_DISPLAY_TYPE_EXTERNAL,
@@ -117,7 +150,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 #endif
 
-                if (display->type == FF_DISPLAY_TYPE_BUILTIN)
+                if (display->type == FF_DISPLAY_TYPE_BUILTIN && displayInfo)
                     display->hdrStatus = CFDictionaryContainsKey(displayInfo, CFSTR("ReferencePeakHDRLuminance"))
                         ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
                 #ifdef MAC_OS_X_VERSION_10_15
@@ -135,11 +168,15 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 #endif
 
                 display->serial = CGDisplaySerialNumber(screen);
-                int value;
-                if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == NULL)
-                    display->manufactureYear = (uint16_t) value;
-                if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == NULL)
-                    display->manufactureWeek = (uint16_t) value;
+
+                if (displayInfo)
+                {
+                    int value;
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayYearOfManufacture), &value) == NULL)
+                        display->manufactureYear = (uint16_t) value;
+                    if (ffCfDictGetInt(displayInfo, CFSTR(kDisplayWeekOfManufacture), &value) == NULL)
+                        display->manufactureWeek = (uint16_t) value;
+                }
             }
             CGDisplayModeRelease(mode);
         }

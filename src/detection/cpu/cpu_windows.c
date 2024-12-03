@@ -100,9 +100,7 @@ static const char* detectNCores(FFCPUResult* cpu)
         ptr = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(((uint8_t*)ptr) + ptr->Size)
     )
     {
-        if (ptr->Relationship == RelationProcessorCore)
-            ++cpu->coresPhysical;
-        else if (ptr->Relationship == RelationGroup)
+        if (ptr->Relationship == RelationGroup)
         {
             for (uint32_t index = 0; index < ptr->Group.ActiveGroupCount; ++index)
             {
@@ -110,6 +108,10 @@ static const char* detectNCores(FFCPUResult* cpu)
                 cpu->coresLogical += ptr->Group.GroupInfo[index].MaximumProcessorCount;
             }
         }
+        else if (ptr->Relationship == RelationProcessorCore)
+            ++cpu->coresPhysical;
+        else if (ptr->Relationship == RelationProcessorPackage)
+            cpu->packages++;
     }
 
     return NULL;

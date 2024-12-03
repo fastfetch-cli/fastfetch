@@ -458,6 +458,141 @@ int main(void)
         VERIFY(strbuf2.allocated == 32);
     }
 
+    {
+        int i = 0;
+        char* lineptr = NULL;
+        size_t n = 0;
+        const char* text = "Processor\t: ARMv7\nprocessor\t: 0\nBogoMIPS\t: 38.00\n\nprocessor\t: 1\nBogoMIPS\t: 38.00";
+        ffStrbufSetS(&strbuf, text);
+
+        while (ffStrbufGetline(&lineptr, &n, &strbuf))
+        {
+            ++i;
+            switch (i)
+            {
+                case 1:
+                    VERIFY(strcmp(lineptr, "Processor\t: ARMv7") == 0);
+                    VERIFY(n == strlen("Processor\t: ARMv7"));
+                    break;
+                case 2:
+                    VERIFY(strcmp(lineptr, "processor\t: 0") == 0);
+                    VERIFY(n == strlen("processor\t: 0"));
+                    break;
+                case 3:
+                    VERIFY(strcmp(lineptr, "BogoMIPS\t: 38.00") == 0);
+                    VERIFY(n == strlen("BogoMIPS\t: 38.00"));
+                    break;
+                case 4:
+                    VERIFY(strcmp(lineptr, "") == 0);
+                    VERIFY(n == 0);
+                    break;
+                case 5:
+                    VERIFY(strcmp(lineptr, "processor\t: 1") == 0);
+                    VERIFY(n == strlen("processor\t: 1"));
+                    break;
+                case 6:
+                    VERIFY(strcmp(lineptr, "BogoMIPS\t: 38.00") == 0);
+                    VERIFY(n == strlen("BogoMIPS\t: 38.00"));
+                    break;
+                default:
+                    VERIFY(false);
+                    break;
+            }
+        }
+        VERIFY(ffStrbufEqualS(&strbuf, text));
+        VERIFY(*lineptr == '\0');
+        VERIFY(i == 6);
+
+        lineptr = NULL;
+        n = 0;
+        i = 0;
+        text = "\n";
+        ffStrbufSetS(&strbuf, text);
+        while (ffStrbufGetline(&lineptr, &n, &strbuf))
+        {
+            ++i;
+            switch (i)
+            {
+                case 1:
+                    VERIFY(strcmp(lineptr, "") == 0);
+                    VERIFY(n == 0);
+                    break;
+                default:
+                    VERIFY(false);
+                    break;
+            }
+        }
+        VERIFY(ffStrbufEqualS(&strbuf, text));
+        VERIFY(*lineptr == '\0');
+        VERIFY(i == 1);
+
+        lineptr = NULL;
+        n = 0;
+        i = 0;
+        text = "abcd";
+        ffStrbufSetS(&strbuf, text);
+        while (ffStrbufGetline(&lineptr, &n, &strbuf))
+        {
+            ++i;
+            switch (i)
+            {
+                case 1:
+                    VERIFY(strcmp(lineptr, "abcd") == 0);
+                    VERIFY(n == strlen("abcd"));
+                    break;
+                default:
+                    VERIFY(false);
+                    break;
+            }
+        }
+        VERIFY(ffStrbufEqualS(&strbuf, text));
+        VERIFY(*lineptr == '\0');
+        VERIFY(i == 1);
+
+        lineptr = NULL;
+        n = 0;
+        i = 0;
+        text = "";
+        ffStrbufSetS(&strbuf, text);
+        while (ffStrbufGetline(&lineptr, &n, &strbuf))
+        {
+            ++i;
+            VERIFY(false);
+        }
+
+        VERIFY(ffStrbufEqualS(&strbuf, text));
+        VERIFY(*lineptr == '\0');
+        VERIFY(i == 0);
+    }
+
+    ffStrbufSetS(&strbuf, "Hello World");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
+    VERIFY(strcmp(strbuf.chars, "Hello World") == 0);
+
+    ffStrbufSetS(&strbuf, "Hello   World");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, "Hello World") == 0);
+
+    ffStrbufSetS(&strbuf, "   Hello World   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, " Hello World ") == 0);
+
+    ffStrbufSetS(&strbuf, "   Hello   World   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, " Hello World ") == 0);
+
+    ffStrbufSetS(&strbuf, "   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == true);
+    VERIFY(strcmp(strbuf.chars, " ") == 0);
+
+    ffStrbufClear(&strbuf);
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
+    VERIFY(strcmp(strbuf.chars, "") == 0);
+
+    ffStrbufSetStatic(&strbuf, "   ");
+    VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
+    VERIFY(strcmp(strbuf.chars, "   ") == 0);
+
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

@@ -54,18 +54,11 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
         //Try the x11 libs, from most feature rich to least.
         //We use the display list to detect if a connection is needed.
         //They respect wmProtocolName, and only detect display if it is set.
-
         if(ds->displays.length == 0)
             ffdsConnectXcbRandr(ds);
 
         if(ds->displays.length == 0)
             ffdsConnectXrandr(ds);
-
-        if(ds->displays.length == 0)
-            ffdsConnectXcb(ds);
-
-        if(ds->displays.length == 0)
-            ffdsConnectXlib(ds);
     }
 
     //This display detection method is display server independent.
@@ -86,7 +79,7 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
                 if (ffSettingsGetFreeBSDKenv("screen.height", &buf))
                 {
                     uint32_t height = (uint32_t) ffStrbufToUInt(&buf, 0);
-                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, NULL, FF_DISPLAY_TYPE_UNKNOWN, false, 0, 0, 0, "kenv");
+                    ffdsAppendDisplay(ds, width, height, 0, 0, 0, 0, 0, 0, 0, NULL, FF_DISPLAY_TYPE_UNKNOWN, false, 0, 0, 0, "kenv");
                 }
             }
         }
