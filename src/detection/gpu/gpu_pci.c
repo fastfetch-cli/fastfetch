@@ -3,10 +3,14 @@
 
 #include <stdlib.h>
 #ifdef __FreeBSD__
-#include <paths.h>
+    #include <paths.h>
     #ifndef _PATH_LOCALBASE
         #define _PATH_LOCALBASE "/usr/local"
     #endif
+#elif __OpenBSD__
+    #define _PATH_LOCALBASE "/usr/local"
+#elif __NetBSD__
+    #define _PATH_LOCALBASE "/usr/pkg"
 #endif
 
 #if FF_HAVE_EMBEDDED_PCIIDS
@@ -37,17 +41,10 @@ static const FFstrbuf* loadPciIds()
             if (pciids.length == 0)
                 ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/local/share/hwdata/pci.ids", &pciids);
         }
-        #elif __FreeBSD__
-        // https://github.com/freebsd/freebsd-src/blob/main/usr.sbin/pciconf/pathnames.h
+        #elif __FreeBSD__ || __OpenBSD__ || __NetBSD__
         ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", &pciids);
-        if (pciids.length == 0)
-            ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/share/pciids/pci.ids", &pciids);
         #elif __sun
         ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
-        #elif __OpenBSD__
-        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/local/share/pci.ids", &pciids);
-        #elif __NetBSD__
-        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/pkg/share/pciutils/pci.ids", &pciids);
         #endif
 
     #endif // FF_CUSTOM_PCI_IDS_PATH
