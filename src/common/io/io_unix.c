@@ -1,6 +1,7 @@
 #include "io.h"
 #include "fastfetch.h"
 #include "util/stringUtils.h"
+#include "common/time.h"
 
 #include <fcntl.h>
 #include <termios.h>
@@ -145,10 +146,10 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
     if (wordexp(in, &exp, 0) != 0)
         return false;
 
-    if (exp.we_wordc == 1)
+    if (exp.we_wordc >= 1)
     {
         result = true;
-        ffStrbufSetS(out, exp.we_wordv[0]);
+        ffStrbufSetS(out, exp.we_wordv[exp.we_wordc > 1 ? ffTimeGetNow() % exp.we_wordc : 0]);
     }
 
     wordfree(&exp);
@@ -159,10 +160,10 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
     if (glob(in, GLOB_NOSORT | GLOB_TILDE, NULL, &gb) != 0)
         return false;
 
-    if (gb.gl_matchc == 1)
+    if (gb.gl_matchc >= 1)
     {
         result = true;
-        ffStrbufSetS(out, gb.gl_pathv[0]);
+        ffStrbufSetS(out, gb.gl_pathv[gb.gl_matchc > 1 ? ffTimeGetNow() % gb.gl_matchc : 0]);
     }
 
     globfree(&gb);
