@@ -91,6 +91,7 @@ option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by gith
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_FRAME_POINTERS "Build fastfetch with frame pointers" OFF) # For Fedora/Ubuntu/Arch Linux packagers
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -137,6 +138,10 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
+
+if(LINUX AND ENABLE_FRAME_POINTERS AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer")
+endif()
 
 if(WIN32 OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
