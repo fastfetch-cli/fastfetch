@@ -39,8 +39,6 @@ const char* getOthersByIokit(FFHostResult* host)
     return NULL;
 }
 
-const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel);
-
 const char* ffDetectHost(FFHostResult* host)
 {
     const char* error = ffSysctlGetString("hw.model", &host->family);

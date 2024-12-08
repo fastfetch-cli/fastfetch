@@ -1,4 +1,4 @@
-#include "util/FFstrbuf.h"
+#include "host.h"
 #include "util/stringUtils.h"
 
 const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
@@ -172,4 +172,22 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
         if(ffStrEquals(version, "9,1"))         return "iMac (24/20-inch, Early 2009)";
     }
     return NULL;
+}
+
+bool ffHostDetectMac(FFHostResult* host)
+{
+    #ifdef __x86_64__
+    if (ffStrbufEqualS(&host->family, "Mac") && ffStrbufEqualS(&host->vendor, "Apple Inc."))
+    {
+        const char* productName = ffHostGetMacProductNameWithHwModel(&host->name);
+        if (productName)
+        {
+            ffStrbufDestroy(&host->family);
+            ffStrbufInitMove(&host->family, &host->name);
+            ffStrbufSetStatic(&host->name, productName);
+            return true;
+        }
+    }
+    #endif
+    return false;
 }

@@ -19,5 +19,9 @@ const char* ffDetectHost(FFHostResult* host)
     ffSettingsGetFreeBSDKenv("smbios.system.maker", &host->vendor);
     ffCleanUpSmbiosValue(&host->vendor);
 
+    #ifdef __x86_64__
+    ffHostDetectMac(host);
+    #endif
+
     return NULL;
 }

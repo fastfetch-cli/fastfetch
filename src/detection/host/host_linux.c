@@ -5,8 +5,6 @@
 
 #include <stdlib.h>
 
-const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel);
-
 static void getHostProductName(FFstrbuf* name)
 {
     if (ffReadFileBuffer("/sys/firmware/devicetree/base/model", name))
@@ -64,17 +62,9 @@ const char* ffDetectHost(FFHostResult* host)
         if (ffStrbufStartsWithS(&host->name, "Apple "))
             ffStrbufSetStatic(&host->vendor, "Apple Inc.");
     }
+
     #ifdef __x86_64__
-    else if (ffStrbufEqualS(&host->family, "Mac") && ffStrbufEqualS(&host->vendor, "Apple Inc."))
-    {
-        const char* productName = ffHostGetMacProductNameWithHwModel(&host->name);
-        if (productName)
-        {
-            ffStrbufDestroy(&host->family);
-            ffStrbufInitMove(&host->family, &host->name);
-            ffStrbufSetStatic(&host->name, productName);
-        }
-    }
+    ffHostDetectMac(host);
     #endif
 
     //KVM/Qemu virtual machine

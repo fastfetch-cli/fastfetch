@@ -650,6 +650,7 @@ elseif(FreeBSD)
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
+        src/detection/host/host_mac.c
         src/detection/lm/lm_linux.c
         src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
@@ -951,6 +952,7 @@ elseif(WIN32)
         src/detection/dns/dns_windows.c
         src/detection/font/font_windows.c
         src/detection/gpu/gpu_windows.c
+        src/detection/host/host_mac.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_windows.c
         src/detection/initsystem/initsystem_nosupport.c
