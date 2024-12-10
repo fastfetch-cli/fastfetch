@@ -174,9 +174,9 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
     return NULL;
 }
 
+#ifdef __x86_64__
 bool ffHostDetectMac(FFHostResult* host)
 {
-    #ifdef __x86_64__
     if (ffStrbufEqualS(&host->family, "Mac") && ffStrbufEqualS(&host->vendor, "Apple Inc."))
     {
         const char* productName = ffHostGetMacProductNameWithHwModel(&host->name);
@@ -188,6 +188,6 @@ bool ffHostDetectMac(FFHostResult* host)
             return true;
         }
     }
-    #endif
     return false;
 }
+#endif

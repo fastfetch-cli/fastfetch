@@ -14,5 +14,7 @@ typedef struct FFHostResult
 } FFHostResult;
 
 const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel);
+#ifdef __x86_64__
 bool ffHostDetectMac(FFHostResult* host);
+#endif
 const char* ffDetectHost(FFHostResult* host);
