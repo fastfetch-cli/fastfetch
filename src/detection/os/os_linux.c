@@ -52,6 +52,15 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(!ffStrSet(xdgConfigDirs))
         return;
 
+    if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
+    {
+        ffStrbufSetS(&result->name, "Linux Lite");
+        ffStrbufSetS(&result->id, "linuxlite");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Linux Lite "));
+        return;
+    }
+
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetS(&result->name, "Kubuntu");
