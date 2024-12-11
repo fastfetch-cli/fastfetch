@@ -2448,7 +2448,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "monitor",
-                                        "description": "Alias of Display module (for backwords compatibility, deprecated)"
+                                        "description": "Alias of Display module (for backwards compatibility, deprecated)"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
