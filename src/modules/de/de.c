@@ -5,8 +5,6 @@
 #include "modules/de/de.h"
 #include "util/stringUtils.h"
 
-#define FF_DE_NUM_FORMAT_ARGS 3
-
 void ffPrintDE(FFDEOptions* options)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
@@ -36,7 +34,7 @@ void ffPrintDE(FFDEOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DE_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result->deProcessName, "process-name"),
             FF_FORMAT_ARG(result->dePrettyName, "pretty-name"),
             FF_FORMAT_ARG(version, "version")
@@ -113,28 +111,24 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &version);
 }
 
-void ffPrintDEHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DE_MODULE_NAME, "{2} {3}", FF_DE_NUM_FORMAT_ARGS, ((const char* []) {
-        "DE process name - process-name",
-        "DE pretty name - pretty-name",
-        "DE version - version"
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_DE_MODULE_NAME,
+    .description = "Print desktop environment name",
+    .parseCommandOptions = (void*) ffParseDECommandOptions,
+    .parseJsonObject = (void*) ffParseDEJsonObject,
+    .printModule = (void*) ffPrintDE,
+    .generateJsonResult = (void*) ffGenerateDEJsonResult,
+    .generateJsonConfig = (void*) ffGenerateDEJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"DE process name", "process-name"},
+        {"DE pretty name", "pretty-name"},
+        {"DE version", "version"},
+    }))
+};
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_DE_MODULE_NAME,
-        "Print desktop environment name",
-        ffParseDECommandOptions,
-        ffParseDEJsonObject,
-        ffPrintDE,
-        ffGenerateDEJsonResult,
-        ffPrintDEHelpFormat,
-        ffGenerateDEJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->slowVersionDetection = false;

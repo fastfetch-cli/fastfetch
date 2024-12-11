@@ -6,8 +6,6 @@
 #include "modules/swap/swap.h"
 #include "util/stringUtils.h"
 
-#define FF_SWAP_NUM_FORMAT_ARGS 4
-
 void ffPrintSwap(FFSwapOptions* options)
 {
     FFSwapResult storage = {};
@@ -73,7 +71,7 @@ void ffPrintSwap(FFSwapOptions* options)
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
-        FF_PRINT_FORMAT_CHECKED(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SWAP_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(usedPretty, "used"),
             FF_FORMAT_ARG(totalPretty, "total"),
             FF_FORMAT_ARG(percentageNum, "percentage"),
@@ -141,29 +139,25 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }
 
-void ffPrintSwapHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SWAP_MODULE_NAME, "{1} / {2} ({3})", FF_SWAP_NUM_FORMAT_ARGS, ((const char* []) {
-        "Used size - used",
-        "Total size - total",
-        "Percentage used (num) - percentage",
-        "Percentage used (bar) - percentage-bar",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_SWAP_MODULE_NAME,
+    .description = "Print swap (paging file) space usage",
+    .parseCommandOptions = (void*) ffParseSwapCommandOptions,
+    .parseJsonObject = (void*) ffParseSwapJsonObject,
+    .printModule = (void*) ffPrintSwap,
+    .generateJsonResult = (void*) ffGenerateSwapJsonResult,
+    .generateJsonConfig = (void*) ffGenerateSwapJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Used size", "used"},
+        {"Total size", "total"},
+        {"Percentage used (num)", "percentage"},
+        {"Percentage used (bar)", "percentage-bar"},
+    }))
+};
 
 void ffInitSwapOptions(FFSwapOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_SWAP_MODULE_NAME,
-        "Print swap (paging file) space usage",
-        ffParseSwapCommandOptions,
-        ffParseSwapJsonObject,
-        ffPrintSwap,
-        ffGenerateSwapJsonResult,
-        ffPrintSwapHelpFormat,
-        ffGenerateSwapJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

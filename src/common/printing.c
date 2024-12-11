@@ -50,7 +50,7 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
             else
             {
                 FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
-                FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, 2, ((FFformatarg[]){
+                FF_PARSE_FORMAT_STRING_CHECKED(&key, &moduleArgs->key, ((FFformatarg[]) {
                     FF_FORMAT_ARG(moduleIndex, "index"),
                     FF_FORMAT_ARG(moduleArgs->keyIcon, "icon"),
                 }));
@@ -147,19 +147,4 @@ void ffPrintCharTimes(char c, uint32_t times)
     uint32_t remaining = times % sizeof(str);
     if(remaining > 0)
         fwrite(str, 1, remaining, stdout);
-}
-
-void ffPrintModuleFormatHelp(const char* name, const char* def, uint32_t numArgs, const char* args[])
-{
-    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateS(name);
-    ffStrbufLowerCase(&buffer);
-    printf("--%s-format:\n", buffer.chars);
-    printf("Sets the format string for %s output.\n", name);
-    puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
-    puts("The following values are passed:");
-
-    for(unsigned i = 0; i < numArgs; i++)
-        printf("        {%u}: %s\n", i + 1, args[i]);
-
-    printf("The default is something similar to \"%s\".\n", def);
 }

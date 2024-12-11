@@ -5,8 +5,6 @@
 #include "modules/opencl/opencl.h"
 #include "util/stringUtils.h"
 
-#define FF_OPENCL_NUM_FORMAT_ARGS 3
-
 void ffPrintOpenCL(FFOpenCLOptions* options)
 {
     FFOpenCLResult* result = ffDetectOpenCL();
@@ -24,7 +22,7 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OPENCL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->version, "version"),
             FF_FORMAT_ARG(result->name, "name"),
             FF_FORMAT_ARG(result->vendor, "vendor"),
@@ -130,28 +128,24 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
     }
 }
 
-void ffPrintOpenCLHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OPENCL_MODULE_NAME, "{1}", FF_OPENCL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Platform version - version",
-        "Platform name - name",
-        "Platform vendor - vendor",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_OPENCL_MODULE_NAME,
+    .description = "Print highest OpenCL version supported by the GPU",
+    .parseCommandOptions = (void*) ffParseOpenCLCommandOptions,
+    .parseJsonObject = (void*) ffParseOpenCLJsonObject,
+    .printModule = (void*) ffPrintOpenCL,
+    .generateJsonResult = (void*) ffGenerateOpenCLJsonResult,
+    .generateJsonConfig = (void*) ffGenerateOpenCLJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Platform version", "version"},
+        {"Platform name", "name"},
+        {"Platform vendor", "vendor"},
+    }))
+};
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_OPENCL_MODULE_NAME,
-        "Print highest OpenCL version supported by the GPU",
-        ffParseOpenCLCommandOptions,
-        ffParseOpenCLJsonObject,
-        ffPrintOpenCL,
-        ffGenerateOpenCLJsonResult,
-        ffPrintOpenCLHelpFormat,
-        ffGenerateOpenCLJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

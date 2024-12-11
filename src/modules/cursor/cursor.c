@@ -4,8 +4,6 @@
 #include "modules/cursor/cursor.h"
 #include "util/stringUtils.h"
 
-#define FF_CURSOR_NUM_FORMAT_ARGS 2
-
 void ffPrintCursor(FFCursorOptions* options)
 {
     FFCursorResult result;
@@ -38,7 +36,7 @@ void ffPrintCursor(FFCursorOptions* options)
         }
         else
         {
-            FF_PRINT_FORMAT_CHECKED(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CURSOR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result.theme, "theme"),
                 FF_FORMAT_ARG(result.size, "size"),
             }));
@@ -110,27 +108,23 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
     ffStrbufDestroy(&result.size);
 }
 
-void ffPrintCursorHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CURSOR_MODULE_NAME, "{1} ({2}px)", FF_CURSOR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Cursor theme - theme",
-        "Cursor size - size"
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_CURSOR_MODULE_NAME,
+    .description = "Print cursor style name",
+    .parseCommandOptions = (void*) ffParseCursorCommandOptions,
+    .parseJsonObject = (void*) ffParseCursorJsonObject,
+    .printModule = (void*) ffPrintCursor,
+    .generateJsonResult = (void*) ffGenerateCursorJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCursorJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Cursor theme", "theme"},
+        {"Cursor size", "size"},
+    })),
+};
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_CURSOR_MODULE_NAME,
-        "Print cursor style name",
-        ffParseCursorCommandOptions,
-        ffParseCursorJsonObject,
-        ffPrintCursor,
-        ffGenerateCursorJsonResult,
-        ffPrintCursorHelpFormat,
-        ffGenerateCursorJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
 }
 

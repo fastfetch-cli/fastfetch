@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_TERMINALFONT_DISPLAY_NAME "Terminal Font"
-#define FF_TERMINALFONT_NUM_FORMAT_ARGS 4
 
 void ffPrintTerminalFont(FFTerminalFontOptions* options)
 {
@@ -33,7 +32,7 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
         }
         else
         {
-            FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALFONT_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_TERMINALFONT_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(terminalFont.font.pretty, "combined"),
                 FF_FORMAT_ARG(terminalFont.font.name, "name"),
                 FF_FORMAT_ARG(terminalFont.font.size, "size"),
@@ -121,29 +120,25 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     ffFontDestroy(&result.fallback);
 }
 
-void ffPrintTerminalFontHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALFONT_MODULE_NAME, "{1}", FF_TERMINALFONT_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal font combined - combined",
-        "Terminal font name - name",
-        "Terminal font size - size",
-        "Terminal font styles - styles",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_TERMINALFONT_MODULE_NAME,
+    .description = "Print font name and size used by current terminal",
+    .parseCommandOptions = (void*) ffParseTerminalFontCommandOptions,
+    .parseJsonObject = (void*) ffParseTerminalFontJsonObject,
+    .printModule = (void*) ffPrintTerminalFont,
+    .generateJsonResult = (void*) ffGenerateTerminalFontJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTerminalFontJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Terminal font combined", "combined"},
+        {"Terminal font name", "name"},
+        {"Terminal font size", "size"},
+        {"Terminal font styles", "styles"},
+    })),
+};
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_TERMINALFONT_MODULE_NAME,
-        "Print font name and size used by current terminal",
-        ffParseTerminalFontCommandOptions,
-        ffParseTerminalFontJsonObject,
-        ffPrintTerminalFont,
-        ffGenerateTerminalFontJsonResult,
-        ffPrintTerminalFontHelpFormat,
-        ffGenerateTerminalFontJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

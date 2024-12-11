@@ -44,19 +44,18 @@ void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)
     }
 }
 
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_CUSTOM_MODULE_NAME,
+    .description = "Print a custom string, with or without key",
+    .parseCommandOptions = (void*) ffParseCustomCommandOptions,
+    .parseJsonObject = (void*) ffParseCustomJsonObject,
+    .printModule = (void*) ffPrintCustom,
+    .generateJsonConfig = (void*) ffGenerateCustomJsonConfig,
+};
+
 void ffInitCustomOptions(FFCustomOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_CUSTOM_MODULE_NAME,
-        "Print a custom string, with or without key",
-        ffParseCustomCommandOptions,
-        ffParseCustomJsonObject,
-        ffPrintCustom,
-        NULL,
-        NULL,
-        ffGenerateCustomJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 }

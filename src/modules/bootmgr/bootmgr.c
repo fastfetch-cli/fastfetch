@@ -4,8 +4,6 @@
 #include "modules/bootmgr/bootmgr.h"
 #include "util/stringUtils.h"
 
-#define FF_BOOTMGR_NUM_FORMAT_ARGS 4
-
 void ffPrintBootmgr(FFBootmgrOptions* options)
 {
     FFBootmgrResult bootmgr = {
@@ -39,7 +37,7 @@ void ffPrintBootmgr(FFBootmgrOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BOOTMGR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(bootmgr.name, "name"),
             FF_FORMAT_ARG(bootmgr.firmware, "firmware-path"),
             FF_FORMAT_ARG(firmwareName, "firmware-name"),
@@ -111,29 +109,25 @@ exit:
     ffStrbufDestroy(&bootmgr.firmware);
 }
 
-void ffPrintBootmgrHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BOOTMGR_MODULE_NAME, "{4} ({2})", FF_BOOTMGR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name / description - name",
-        "Firmware file path - firmware-path",
-        "Firmware file name - firmware-name",
-        "Is secure boot enabled - secure-boot",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_BOOTMGR_MODULE_NAME,
+    .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
+    .parseCommandOptions = (void*) ffParseBootmgrCommandOptions,
+    .parseJsonObject = (void*) ffParseBootmgrJsonObject,
+    .printModule = (void*) ffPrintBootmgr,
+    .generateJsonResult = (void*) ffGenerateBootmgrJsonResult,
+    .generateJsonConfig = (void*) ffGenerateBootmgrJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Name / description", "name"},
+        {"Firmware file path", "firmware-path"},
+        {"Firmware file name", "firmware-name"},
+        {"Is secure boot enabled", "secure-boot"},
+    }))
+};
 
 void ffInitBootmgrOptions(FFBootmgrOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_BOOTMGR_MODULE_NAME,
-        "Print information of 2nd-stage bootloader (name, firmware, etc)",
-        ffParseBootmgrCommandOptions,
-        ffParseBootmgrJsonObject,
-        ffPrintBootmgr,
-        ffGenerateBootmgrJsonResult,
-        ffPrintBootmgrHelpFormat,
-        ffGenerateBootmgrJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

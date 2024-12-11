@@ -4,8 +4,6 @@
 #include "modules/command/command.h"
 #include "util/stringUtils.h"
 
-#define FF_COMMAND_NUM_FORMAT_ARGS 1
-
 void ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
@@ -39,7 +37,7 @@ void ffPrintCommand(FFCommandOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_COMMAND_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result, "result")
         }));
     }
@@ -154,26 +152,22 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
 
-void ffPrintCommandHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_COMMAND_MODULE_NAME, "{1}", FF_COMMAND_NUM_FORMAT_ARGS, ((const char* []) {
-        "Command result - result"
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_COMMAND_MODULE_NAME,
+    .description = "Run custom shell scripts",
+    .parseCommandOptions = (void*) ffParseCommandCommandOptions,
+    .parseJsonObject = (void*) ffParseCommandJsonObject,
+    .printModule = (void*) ffPrintCommand,
+    .generateJsonResult = (void*) ffGenerateCommandJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Command result", "result"},
+    }))
+};
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_COMMAND_MODULE_NAME,
-        "Running custom shell scripts",
-        ffParseCommandCommandOptions,
-        ffParseCommandJsonObject,
-        ffPrintCommand,
-        ffGenerateCommandJsonResult,
-        ffPrintCommandHelpFormat,
-        ffGenerateCommandJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInitStatic(&options->shell,

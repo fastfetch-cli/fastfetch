@@ -7,7 +7,6 @@
 #include <ctype.h>
 
 #define FF_PLAYER_DISPLAY_NAME "Media Player"
-#define FF_PLAYER_NUM_FORMAT_ARGS 4
 
 void ffPrintPlayer(FFPlayerOptions* options)
 {
@@ -73,7 +72,7 @@ void ffPrintPlayer(FFPlayerOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PLAYER_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(playerPretty, "player"),
             FF_FORMAT_ARG(media->player, "name"),
             FF_FORMAT_ARG(media->playerId, "id"),
@@ -133,29 +132,25 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
     yyjson_mut_obj_add_strbuf(doc, obj, "url", &media->url);
 }
 
-void ffPrintPlayerHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PLAYER_MODULE_NAME, "{1}", FF_PLAYER_NUM_FORMAT_ARGS, ((const char* []) {
-        "Pretty player name - player",
-        "Player name - name",
-        "Player Identifier - id",
-        "URL name - url",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_PLAYER_MODULE_NAME,
+    .description = "Print music player name",
+    .parseCommandOptions = (void*) ffParsePlayerCommandOptions,
+    .parseJsonObject = (void*) ffParsePlayerJsonObject,
+    .printModule = (void*) ffPrintPlayer,
+    .generateJsonResult = (void*) ffGeneratePlayerJsonResult,
+    .generateJsonConfig = (void*) ffGeneratePlayerJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Pretty player name", "player"},
+        {"Player name", "name"},
+        {"Player Identifier", "id"},
+        {"URL name", "url"},
+    }))
+};
 
 void ffInitPlayerOptions(FFPlayerOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_PLAYER_MODULE_NAME,
-        "Print music player name",
-        ffParsePlayerCommandOptions,
-        ffParsePlayerJsonObject,
-        ffPrintPlayer,
-        ffGeneratePlayerJsonResult,
-        ffPrintPlayerHelpFormat,
-        ffGeneratePlayerJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰥠");
 }
 

@@ -4,8 +4,6 @@
 #include "modules/locale/locale.h"
 #include "util/stringUtils.h"
 
-#define FF_LOCALE_NUM_FORMAT_ARGS 1
-
 void ffPrintLocale(FFLocaleOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
@@ -24,7 +22,7 @@ void ffPrintLocale(FFLocaleOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LOCALE_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(locale, "result")
         }));
     }
@@ -79,26 +77,22 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
     yyjson_mut_obj_add_strbuf(doc, module, "result", &locale);
 }
 
-void ffPrintLocaleHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LOCALE_MODULE_NAME, "{1}", FF_LOCALE_NUM_FORMAT_ARGS, ((const char* []) {
-        "Locale code - result"
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_LOCALE_MODULE_NAME,
+    .description = "Print system locale name",
+    .parseCommandOptions = (void*) ffParseLocaleCommandOptions,
+    .parseJsonObject = (void*) ffParseLocaleJsonObject,
+    .printModule = (void*) ffPrintLocale,
+    .generateJsonResult = (void*) ffGenerateLocaleJsonResult,
+    .generateJsonConfig = (void*) ffGenerateLocaleJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Locale code", "result"},
+    }))
+};
 
 void ffInitLocaleOptions(FFLocaleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_LOCALE_MODULE_NAME,
-        "Print system locale name",
-        ffParseLocaleCommandOptions,
-        ffParseLocaleJsonObject,
-        ffPrintLocale,
-        ffGenerateLocaleJsonResult,
-        ffPrintLocaleHelpFormat,
-        ffGenerateLocaleJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

@@ -5,8 +5,6 @@
 #include "modules/gamepad/gamepad.h"
 #include "util/stringUtils.h"
 
-#define FF_GAMEPAD_NUM_FORMAT_ARGS 4
-
 static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device, uint8_t index)
 {
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -43,7 +41,7 @@ static void printDevice(FFGamepadOptions* options, const FFGamepadDevice* device
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffPercentAppendBar(&percentageBar, device->battery, options->percent, &options->moduleArgs);
 
-        FF_PRINT_FORMAT_CHECKED(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GAMEPAD_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_GAMEPAD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->name, "name"),
             FF_FORMAT_ARG(device->serial, "serial"),
             FF_FORMAT_ARG(percentageNum, "battery-percentage"),
@@ -149,29 +147,25 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
     }
 }
 
-void ffPrintGamepadHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_GAMEPAD_MODULE_NAME, "{1} ({3})", FF_GAMEPAD_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name - name",
-        "Serial number - serial",
-        "Battery percentage num - battery-percentage",
-        "Battery percentage bar - battery-percentage-bar",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_GAMEPAD_MODULE_NAME,
+    .description = "List (connected) gamepads",
+    .parseCommandOptions = (void*) ffParseGamepadCommandOptions,
+    .parseJsonObject = (void*) ffParseGamepadJsonObject,
+    .printModule = (void*) ffPrintGamepad,
+    .generateJsonResult = (void*) ffGenerateGamepadJsonResult,
+    .generateJsonConfig = (void*) ffGenerateGamepadJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Name", "name"},
+        {"Serial number", "serial"},
+        {"Battery percentage num", "battery-percentage"},
+        {"Battery percentage bar", "battery-percentage-bar"},
+    }))
+};
 
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_GAMEPAD_MODULE_NAME,
-        "List connected gamepads",
-        ffParseGamepadCommandOptions,
-        ffParseGamepadJsonObject,
-        ffPrintGamepad,
-        ffGenerateGamepadJsonResult,
-        ffPrintGamepadHelpFormat,
-        ffGenerateGamepadJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }

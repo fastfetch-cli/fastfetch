@@ -4,8 +4,6 @@
 #include "modules/shell/shell.h"
 #include "util/stringUtils.h"
 
-#define FF_SHELL_NUM_FORMAT_ARGS 8
-
 void ffPrintShell(FFShellOptions* options)
 {
     const FFShellResult* result = ffDetectShell();
@@ -31,7 +29,7 @@ void ffPrintShell(FFShellOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SHELL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->processName, "process-name"),
             FF_FORMAT_ARG(result->exe, "exe"),
             FF_FORMAT_ARG(result->exeName, "exe-name"),
@@ -104,33 +102,29 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
         yyjson_mut_obj_add_null(doc, obj, "tty");
 }
 
-void ffPrintShellHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SHELL_MODULE_NAME, "{3} {4}", FF_SHELL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Shell process name - process-name",
-        "The first argument of the command line when running the shell - exe",
-        "Shell base name of arg0 - exe-name",
-        "Shell version - version",
-        "Shell pid - pid",
-        "Shell pretty name - pretty-name",
-        "Shell full exe path - exe-path",
-        "Shell tty used - tty",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_SHELL_MODULE_NAME,
+    .description = "Print current shell name and version",
+    .parseCommandOptions = (void*) ffParseShellCommandOptions,
+    .parseJsonObject = (void*) ffParseShellJsonObject,
+    .printModule = (void*) ffPrintShell,
+    .generateJsonResult = (void*) ffGenerateShellJsonResult,
+    .generateJsonConfig = (void*) ffGenerateShellJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Shell process name", "process-name"},
+        {"The first argument of the command line when running the shell", "exe"},
+        {"Shell base name of arg0", "exe-name"},
+        {"Shell version", "version"},
+        {"Shell pid", "pid"},
+        {"Shell pretty name", "pretty-name"},
+        {"Shell full exe path", "exe-path"},
+        {"Shell tty used", "tty"},
+    }))
+};
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_SHELL_MODULE_NAME,
-        "Print current shell name and version",
-        ffParseShellCommandOptions,
-        ffParseShellJsonObject,
-        ffPrintShell,
-        ffGenerateShellJsonResult,
-        ffPrintShellHelpFormat,
-        ffGenerateShellJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

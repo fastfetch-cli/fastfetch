@@ -6,8 +6,6 @@
 #include "modules/memory/memory.h"
 #include "util/stringUtils.h"
 
-#define FF_MEMORY_NUM_FORMAT_ARGS 4
-
 void ffPrintMemory(FFMemoryOptions* options)
 {
     FFMemoryResult storage = {};
@@ -64,7 +62,7 @@ void ffPrintMemory(FFMemoryOptions* options)
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffPercentAppendBar(&percentageBar, percentage, options->percent, &options->moduleArgs);
 
-        FF_PRINT_FORMAT_CHECKED(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_MEMORY_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(usedPretty, "used"),
             FF_FORMAT_ARG(totalPretty, "total"),
             FF_FORMAT_ARG(percentageNum, "percentage"),
@@ -132,29 +130,25 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }
 
-void ffPrintMemoryHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MEMORY_MODULE_NAME, "{1} / {2} ({3})", FF_MEMORY_NUM_FORMAT_ARGS, ((const char* []) {
-        "Used size - used",
-        "Total size - total",
-        "Percentage used (num) - percentage",
-        "Percentage used (bar) - percentage-bar",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_MEMORY_MODULE_NAME,
+    .description = "Print system memory usage info",
+    .parseCommandOptions = (void*) ffParseMemoryCommandOptions,
+    .parseJsonObject = (void*) ffParseMemoryJsonObject,
+    .printModule = (void*) ffPrintMemory,
+    .generateJsonResult = (void*) ffGenerateMemoryJsonResult,
+    .generateJsonConfig = (void*) ffGenerateMemoryJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Used size", "used"},
+        {"Total size", "total"},
+        {"Percentage used (num)", "percentage"},
+        {"Percentage used (bar)", "percentage-bar"},
+    }))
+};
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_MEMORY_MODULE_NAME,
-        "Print system memory usage info",
-        ffParseMemoryCommandOptions,
-        ffParseMemoryJsonObject,
-        ffPrintMemory,
-        ffGenerateMemoryJsonResult,
-        ffPrintMemoryHelpFormat,
-        ffGenerateMemoryJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

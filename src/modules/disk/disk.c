@@ -7,7 +7,6 @@
 #include "modules/disk/disk.h"
 #include "util/stringUtils.h"
 
-#define FF_DISK_NUM_FORMAT_ARGS 14
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index)
@@ -35,7 +34,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
     }
     else
     {
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 5, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->name, "name"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
@@ -126,7 +125,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
-        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISK_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(usedPretty, "size-used"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
             FF_FORMAT_ARG(bytesPercentageNum, "size-percentage"),
@@ -440,39 +439,36 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     }
 }
 
-void ffPrintDiskHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DISK_MODULE_NAME, "{1} / {2} ({3}) - {9}", FF_DISK_NUM_FORMAT_ARGS, ((const char* []) {
-        "Size used - size-used",
-        "Size total - size-total",
-        "Size percentage num - size-percentage",
-        "Files used - files-used",
-        "Files total - files-total",
-        "Files percentage num - files-percentage",
-        "True if external volume - is-external",
-        "True if hidden volume - is-hidden",
-        "Filesystem - filesystem",
-        "Label / name - name",
-        "True if read-only - is-readonly",
-        "Create time in local timezone - create-time",
-        "Size percentage bar - size-percentage-bar",
-        "Files percentage bar - files-percentage-bar",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_DISK_MODULE_NAME,
+    .description = "Print partitions, space usage, file system, etc",
+    .parseCommandOptions = (void*) ffParseDiskCommandOptions,
+    .parseJsonObject = (void*) ffParseDiskJsonObject,
+    .printModule = (void*) ffPrintDisk,
+    .generateJsonResult = (void*) ffGenerateDiskJsonResult,
+    .generateJsonConfig = (void*) ffGenerateDiskJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Size used", "size-used"},
+        {"Size total", "size-total"},
+        {"Size percentage num", "size-percentage"},
+        {"Files used", "files-used"},
+        {"Files total", "files-total"},
+        {"Files percentage num", "files-percentage"},
+        {"True if external volume", "is-external"},
+        {"True if hidden volume", "is-hidden"},
+        {"Filesystem", "filesystem"},
+        {"Label / name", "name"},
+        {"True if read-only", "is-readonly"},
+        {"Create time in local timezone", "create-time"},
+        {"Size percentage bar", "size-percentage-bar"},
+        {"Files percentage bar", "files-percentage-bar"},
+        {},
+    }))
+};
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_DISK_MODULE_NAME,
-        "Print partitions, space usage, file system, etc",
-        ffParseDiskCommandOptions,
-        ffParseDiskJsonObject,
-        ffPrintDisk,
-        ffGenerateDiskJsonResult,
-        ffPrintDiskHelpFormat,
-        ffGenerateDiskJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInit(&options->folders);

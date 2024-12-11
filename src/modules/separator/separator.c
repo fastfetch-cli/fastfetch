@@ -178,19 +178,23 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
         yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
 }
 
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_SEPARATOR_MODULE_NAME,
+    .description = "Print a separator line",
+    .parseCommandOptions = (void*) ffParseSeparatorCommandOptions,
+    .parseJsonObject = (void*) ffParseSeparatorJsonObject,
+    .printModule = (void*) ffPrintSeparator,
+    .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Separator string", "string"},
+        {"Output color", "outputColor"},
+        {"Length", "length"},
+    }))
+};
+
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_SEPARATOR_MODULE_NAME,
-        "Print a separator line",
-        ffParseSeparatorCommandOptions,
-        ffParseSeparatorJsonObject,
-        ffPrintSeparator,
-        NULL,
-        NULL,
-        ffGenerateSeparatorJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffStrbufInitStatic(&options->string, "-");
     ffStrbufInit(&options->outputColor);
     options->length = 0;

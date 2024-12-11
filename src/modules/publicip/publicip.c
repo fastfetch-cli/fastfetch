@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_PUBLICIP_DISPLAY_NAME "Public IP"
-#define FF_PUBLICIP_NUM_FORMAT_ARGS 2
 
 void ffPrintPublicIp(FFPublicIpOptions* options)
 {
@@ -30,7 +29,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PUBLICIP_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(result.ip, "ip"),
             FF_FORMAT_ARG(result.location, "location"),
         }));
@@ -141,27 +140,23 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
     ffStrbufDestroy(&result.location);
 }
 
-void ffPrintPublicIpHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PUBLICIP_MODULE_NAME, "{1} ({2})", FF_PUBLICIP_NUM_FORMAT_ARGS, ((const char* []) {
-        "Public IP address - ip",
-        "Location - location",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_PUBLICIP_MODULE_NAME,
+    .description = "Print your public IP address, etc",
+    .parseCommandOptions = (void*) ffParsePublicIpCommandOptions,
+    .parseJsonObject = (void*) ffParsePublicIpJsonObject,
+    .printModule = (void*) ffPrintPublicIp,
+    .generateJsonResult = (void*) ffGeneratePublicIpJsonResult,
+    .generateJsonConfig = (void*) ffGeneratePublicIpJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Public IP address", "ip"},
+        {"Location", "location"},
+    }))
+};
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_PUBLICIP_MODULE_NAME,
-        "Print your public IP address, etc",
-        ffParsePublicIpCommandOptions,
-        ffParsePublicIpJsonObject,
-        ffPrintPublicIp,
-        ffGeneratePublicIpJsonResult,
-        ffPrintPublicIpHelpFormat,
-        ffGeneratePublicIpJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰩠");
 
     ffStrbufInit(&options->url);

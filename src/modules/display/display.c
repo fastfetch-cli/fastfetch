@@ -6,8 +6,6 @@
 
 #include <math.h>
 
-#define FF_DISPLAY_NUM_FORMAT_ARGS 24
-
 static int sortByNameAsc(FFDisplayResult* a, FFDisplayResult* b)
 {
     return ffStrbufComp(&a->name, &b->name);
@@ -91,7 +89,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         }
         else
         {
-            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 4, ((FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                 FF_FORMAT_ARG(moduleIndex, "index"),
                 FF_FORMAT_ARG(result->name, "name"),
                 FF_FORMAT_ARG(displayType, "type"),
@@ -186,7 +184,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
             double scaleFactor = (double) result->width / (double) result->scaledWidth;
 
-            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_DISPLAY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result->width, "width"),
                 FF_FORMAT_ARG(result->height, "height"),
                 FF_FORMAT_ARG(refreshRate, "refresh-rate"),
@@ -435,49 +433,45 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
     }
 }
 
-void ffPrintDisplayHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DISPLAY_MODULE_NAME, "{1}x{2} @ {3}Hz (as {4}x{5}) [{7}]", FF_DISPLAY_NUM_FORMAT_ARGS, ((const char* []) {
-        "Screen configured width (in pixels) - width",
-        "Screen configured height (in pixels) - height",
-        "Screen configured refresh rate (in Hz) - refresh-rate",
-        "Screen scaled width (in pixels) - scaled-width",
-        "Screen scaled height (in pixels) - scaled-height",
-        "Screen name - name",
-        "Screen type (builtin, external or unknown) - type",
-        "Screen rotation (in degrees) - rotation",
-        "True if being the primary screen - is-primary",
-        "Screen physical width (in millimeters) - physical-width",
-        "Screen physical height (in millimeters) - physical-height",
-        "Physical diagonal length in inches - inch",
-        "Pixels per inch (PPI) - ppi",
-        "Bits per color channel - bit-depth",
-        "True if high dynamic range (HDR) mode is enabled - hdr-enabled",
-        "Year of manufacturing - manufacture-year",
-        "Nth week of manufacturing in the year - manufacture-week",
-        "Serial number - serial",
-        "The platform API used when detecting the display - platform-api",
-        "True if the display is HDR compatible - hdr-compatible",
-        "HiDPI scale factor - scale-factor",
-        "Screen preferred width (in pixels) - preferred-width",
-        "Screen preferred height (in pixels) - preferred-height",
-        "Screen preferred refresh rate (in Hz) - preferred-refresh-rate",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_DISPLAY_MODULE_NAME,
+    .description = "Print resolutions, refresh rates, etc",
+    .parseCommandOptions = (void*) ffParseDisplayCommandOptions,
+    .parseJsonObject = (void*) ffParseDisplayJsonObject,
+    .printModule = (void*) ffPrintDisplay,
+    .generateJsonResult = (void*) ffGenerateDisplayJsonResult,
+    .generateJsonConfig = (void*) ffGenerateDisplayJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Screen configured width (in pixels)", "width"},
+        {"Screen configured height (in pixels)", "height"},
+        {"Screen configured refresh rate (in Hz)", "refresh-rate"},
+        {"Screen scaled width (in pixels)", "scaled-width"},
+        {"Screen scaled height (in pixels)", "scaled-height"},
+        {"Screen name", "name"},
+        {"Screen type (builtin, external or unknown)", "type"},
+        {"Screen rotation (in degrees)", "rotation"},
+        {"True if being the primary screen", "is-primary"},
+        {"Screen physical width (in millimeters)", "physical-width"},
+        {"Screen physical height (in millimeters)", "physical-height"},
+        {"Physical diagonal length in inches", "inch"},
+        {"Pixels per inch (PPI)", "ppi"},
+        {"Bits per color channel", "bit-depth"},
+        {"True if high dynamic range (HDR) mode is enabled", "hdr-enabled"},
+        {"Year of manufacturing", "manufacture-year"},
+        {"Nth week of manufacturing in the year", "manufacture-week"},
+        {"Serial number", "serial"},
+        {"The platform API used when detecting the display", "platform-api"},
+        {"True if the display is HDR compatible", "hdr-compatible"},
+        {"HiDPI scale factor", "scale-factor"},
+        {"Screen preferred width (in pixels)", "preferred-width"},
+        {"Screen preferred height (in pixels)", "preferred-height"},
+        {"Screen preferred refresh rate (in Hz)", "preferred-refresh-rate"},
+    }))
+};
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_DISPLAY_MODULE_NAME,
-        "Print resolutions, refresh rates, etc",
-        ffParseDisplayCommandOptions,
-        ffParseDisplayJsonObject,
-        ffPrintDisplay,
-        ffGenerateDisplayJsonResult,
-        ffPrintDisplayHelpFormat,
-        ffGenerateDisplayJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;

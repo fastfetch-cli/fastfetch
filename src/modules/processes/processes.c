@@ -4,8 +4,6 @@
 #include "modules/processes/processes.h"
 #include "util/stringUtils.h"
 
-#define FF_PROCESSES_NUM_FORMAT_ARGS 1
-
 void ffPrintProcesses(FFProcessesOptions* options)
 {
     uint32_t numProcesses = 0;
@@ -25,7 +23,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PROCESSES_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(numProcesses, "result")
         }));
     }
@@ -80,26 +78,22 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
     yyjson_mut_obj_add_uint(doc, module, "result", result);
 }
 
-void ffPrintProcessesHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PROCESSES_MODULE_NAME, "{1}", FF_PROCESSES_NUM_FORMAT_ARGS, (const char* []) {
-        "Proecess count - result"
-    });
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_PROCESSES_MODULE_NAME,
+    .description = "Print number of running processes",
+    .parseCommandOptions = (void*) ffParseProcessesCommandOptions,
+    .parseJsonObject = (void*) ffParseProcessesJsonObject,
+    .printModule = (void*) ffPrintProcesses,
+    .generateJsonResult = (void*) ffGenerateProcessesJsonResult,
+    .generateJsonConfig = (void*) ffGenerateProcessesJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Process count", "result"}
+    }))
+};
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_PROCESSES_MODULE_NAME,
-        "Count running processes",
-        ffParseProcessesCommandOptions,
-        ffParseProcessesJsonObject,
-        ffPrintProcesses,
-        ffGenerateProcessesJsonResult,
-        ffPrintProcessesHelpFormat,
-        ffGenerateProcessesJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

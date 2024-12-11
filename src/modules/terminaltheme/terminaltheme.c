@@ -7,7 +7,6 @@
 #include <inttypes.h>
 
 #define FF_TERMINALTHEME_DISPLAY_NAME "Terminal Theme"
-#define FF_TERMINALTHEME_NUM_FORMAT_ARGS 4
 
 void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
 {
@@ -34,7 +33,7 @@ void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
             const char* bgType = result.bg.dark ? "Dark" : "Light";
             snprintf(fg, ARRAY_SIZE(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
             snprintf(bg, ARRAY_SIZE(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
-            FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(fg, "fg-color"),
                 FF_FORMAT_ARG(fgType, "fg-type"),
                 FF_FORMAT_ARG(bg, "bg-color"),
@@ -104,29 +103,25 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* option
     yyjson_mut_obj_add_bool(doc, bg, "dark", result.bg.dark);
 }
 
-void ffPrintTerminalThemeHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALTHEME_MODULE_NAME, "{1} (FG) {3} (BG) [{4}]", FF_TERMINALTHEME_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal foreground color - fg-color",
-        "Terminal foreground type (Dark / Light) - fg-type",
-        "Terminal background color - bg-color",
-        "Terminal background type (Dark / Light) - bg-type",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_TERMINALTHEME_MODULE_NAME,
+    .description = "Print current terminal theme (foreground and background colors)",
+    .parseCommandOptions = (void*) ffParseTerminalThemeCommandOptions,
+    .parseJsonObject = (void*) ffParseTerminalThemeJsonObject,
+    .printModule = (void*) ffPrintTerminalTheme,
+    .generateJsonResult = (void*) ffGenerateTerminalThemeJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTerminalThemeJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Terminal foreground color", "fg-color"},
+        {"Terminal foreground type (Dark / Light)", "fg-type"},
+        {"Terminal background color", "bg-color"},
+        {"Terminal background type (Dark / Light)", "bg-type"},
+    }))
+};
 
 void ffInitTerminalThemeOptions(FFTerminalThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_TERMINALTHEME_MODULE_NAME,
-        "Print current terminal theme (foreground and background colors)",
-        ffParseTerminalThemeCommandOptions,
-        ffParseTerminalThemeJsonObject,
-        ffPrintTerminalTheme,
-        ffGenerateTerminalThemeJsonResult,
-        ffPrintTerminalThemeHelpFormat,
-        ffGenerateTerminalThemeJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰔎");
 }
 

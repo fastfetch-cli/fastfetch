@@ -2,6 +2,7 @@
 #include "common/commandoption.h"
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
+#include "common/printing.h"
 #include "detection/version/version.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
@@ -18,13 +19,25 @@
 static void printCommandFormatHelp(const char* command)
 {
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateNS((uint32_t) (strlen(command) - strlen("-format")), command);
+    ffStrbufLowerCase(&type);
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(command[0]) - 'A']; *modules; ++modules)
     {
         FFModuleBaseInfo* baseInfo = *modules;
         if (ffStrbufIgnCaseEqualS(&type, baseInfo->name))
         {
-            if (baseInfo->printHelpFormat)
-                baseInfo->printHelpFormat();
+            if (baseInfo->formatArgs.count > 0)
+            {
+                printf("--%s-format:\n", type.chars);
+                printf("Sets the format string for %s output.\n", baseInfo->name);
+                puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
+                puts("The following values are passed:");
+
+                for (unsigned i = 0; i < baseInfo->formatArgs.count; i++)
+                {
+                    const FFModuleFormatArg* arg = &baseInfo->formatArgs.args[i];
+                    printf("%16s {%u}: %s\n", arg->name, i + 1, arg->desc);
+                }
+            }
             else
                 fprintf(stderr, "Error: Module '%s' doesn't support output formatting\n", baseInfo->name);
             return;

@@ -4,8 +4,6 @@
 #include "modules/host/host.h"
 #include "util/stringUtils.h"
 
-#define FF_HOST_NUM_FORMAT_ARGS 7
-
 void ffPrintHost(FFHostOptions* options)
 {
     FFHostResult host;
@@ -48,7 +46,7 @@ void ffPrintHost(FFHostOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_HOST_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(host.family, "family"),
             FF_FORMAT_ARG(host.name, "name"),
             FF_FORMAT_ARG(host.version, "version"),
@@ -147,32 +145,28 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-void ffPrintHostHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_HOST_MODULE_NAME, "{2} {3}", FF_HOST_NUM_FORMAT_ARGS, ((const char* []) {
-        "product family - family",
-        "product name - name",
-        "product version - version",
-        "product sku - sku",
-        "product vendor - vendor",
-        "product serial number - serial",
-        "product uuid - uuid",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_HOST_MODULE_NAME,
+    .description = "Print product name of your computer",
+    .parseCommandOptions = (void*) ffParseHostCommandOptions,
+    .parseJsonObject = (void*) ffParseHostJsonObject,
+    .printModule = (void*) ffPrintHost,
+    .generateJsonResult = (void*) ffGenerateHostJsonResult,
+    .generateJsonConfig = (void*) ffGenerateHostJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Product family", "family"},
+        {"Product name", "name"},
+        {"Product version", "version"},
+        {"Product sku", "sku"},
+        {"Product vendor", "vendor"},
+        {"Product serial number", "serial"},
+        {"Product uuid", "uuid"},
+    }))
+};
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_HOST_MODULE_NAME,
-        "Print product name of your computer",
-        ffParseHostCommandOptions,
-        ffParseHostJsonObject,
-        ffPrintHost,
-        ffGenerateHostJsonResult,
-        ffPrintHostHelpFormat,
-        ffGenerateHostJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
 }
 

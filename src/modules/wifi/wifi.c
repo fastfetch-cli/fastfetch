@@ -4,8 +4,6 @@
 #include "modules/wifi/wifi.h"
 #include "util/stringUtils.h"
 
-#define FF_WIFI_NUM_FORMAT_ARGS 13
-
 void ffPrintWifi(FFWifiOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
@@ -108,7 +106,7 @@ void ffPrintWifi(FFWifiOptions* options)
             if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                 ffPercentAppendBar(&percentBar, item->conn.signalQuality, options->percent, &options->moduleArgs);
 
-            FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WIFI_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_WIFI_MODULE_NAME, moduleIndex, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(item->inf.description, "inf-desc"),
                 FF_FORMAT_ARG(item->inf.status, "inf-status"),
                 FF_FORMAT_ARG(item->conn.status, "status"),
@@ -222,38 +220,34 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
     }
 }
 
-void ffPrintWifiHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WIFI_MODULE_NAME, "{4} - {10}", FF_WIFI_NUM_FORMAT_ARGS, ((const char* []) {
-        "Interface description - inf-desc",
-        "Interface status - inf-status",
-        "Connection status - status",
-        "Connection SSID - ssid",
-        "Connection BSSID - bssid",
-        "Connection protocol - protocol",
-        "Connection signal quality (percentage num) - signal-quality",
-        "Connection RX rate - rx-rate",
-        "Connection TX rate - tx-rate",
-        "Connection Security algorithm - security",
-        "Connection signal quality (percentage bar) - signal-quality-bar",
-        "Connection channel number - channel",
-        "Connection channel band in GHz - band",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_WIFI_MODULE_NAME,
+    .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
+    .parseCommandOptions = (void*) ffParseWifiCommandOptions,
+    .parseJsonObject = (void*) ffParseWifiJsonObject,
+    .printModule = (void*) ffPrintWifi,
+    .generateJsonResult = (void*) ffGenerateWifiJsonResult,
+    .generateJsonConfig = (void*) ffGenerateWifiJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Interface description", "inf-desc"},
+        {"Interface status", "inf-status"},
+        {"Connection status", "status"},
+        {"Connection SSID", "ssid"},
+        {"Connection BSSID", "bssid"},
+        {"Connection protocol", "protocol"},
+        {"Connection signal quality (percentage num)", "signal-quality"},
+        {"Connection RX rate", "rx-rate"},
+        {"Connection TX rate", "tx-rate"},
+        {"Connection Security algorithm", "security"},
+        {"Connection signal quality (percentage bar)", "signal-quality-bar"},
+        {"Connection channel number", "channel"},
+        {"Connection channel band in GHz", "band"},
+    }))
+};
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_WIFI_MODULE_NAME,
-        "Print connected Wi-Fi info (SSID, connection and security protocol)",
-        ffParseWifiCommandOptions,
-        ffParseWifiJsonObject,
-        ffPrintWifi,
-        ffGenerateWifiJsonResult,
-        ffPrintWifiHelpFormat,
-        ffGenerateWifiJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };

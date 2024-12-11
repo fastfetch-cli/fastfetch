@@ -4,8 +4,6 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-#define FF_TITLE_NUM_FORMAT_ARGS 8
-
 static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
 {
     if (!instance.config.display.pipe)
@@ -56,7 +54,7 @@ void ffPrintTitle(FFTitleOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TITLE_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_TITLE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(instance.state.platform.userName, "user-name"),
             FF_FORMAT_ARG(hostName, "host-name"),
             FF_FORMAT_ARG(instance.state.platform.homeDir, "home-dir"),
@@ -178,33 +176,29 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }
 
-void ffPrintTitleHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TITLE_MODULE_NAME, "{6}{7}{8}", FF_TITLE_NUM_FORMAT_ARGS, ((const char* []) {
-        "User name - user-name",
-        "Host name - host-name",
-        "Home directory - home-dir",
-        "Executable path of current process - exe-path",
-        "User's default shell - user-shell",
-        "User name (colored) - user-name-colored",
-        "@ symbol (colored) - at-symbol-colored",
-        "Host name (colored) - host-name-colored",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_TITLE_MODULE_NAME,
+    .description = "Print title, which contains your user name, hostname",
+    .parseCommandOptions = (void*) ffParseTitleCommandOptions,
+    .parseJsonObject = (void*) ffParseTitleJsonObject,
+    .printModule = (void*) ffPrintTitle,
+    .generateJsonResult = (void*) ffGenerateTitleJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTitleJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"User name", "user-name"},
+        {"Host name", "host-name"},
+        {"Home directory", "home-dir"},
+        {"Executable path of current process", "exe-path"},
+        {"User's default shell", "user-shell"},
+        {"User name (colored)", "user-name-colored"},
+        {"@ symbol (colored)", "at-symbol-colored"},
+        {"Host name (colored)", "host-name-colored"},
+    }))
+};
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_TITLE_MODULE_NAME,
-        "Print title, which contains your user name, hostname",
-        ffParseTitleCommandOptions,
-        ffParseTitleJsonObject,
-        ffPrintTitle,
-        ffGenerateTitleJsonResult,
-        ffPrintTitleHelpFormat,
-        ffGenerateTitleJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 

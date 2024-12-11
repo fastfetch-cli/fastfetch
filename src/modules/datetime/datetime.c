@@ -9,7 +9,6 @@
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
 #define FF_DATETIME_DISPLAY_NAME "Date & Time"
-#define FF_DATETIME_NUM_FORMAT_ARGS 23
 
 typedef struct FFDateTimeResult
 {
@@ -67,7 +66,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     strftime(result.offsetFromUtc, sizeof(result.offsetFromUtc), "%z", tm);
     strftime(result.timezoneName, sizeof(result.timezoneName), "%Z", tm);
 
-    FF_PRINT_FORMAT_CHECKED(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DATETIME_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+    FF_PRINT_FORMAT_CHECKED(FF_DATETIME_DISPLAY_NAME, 0, moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
         FF_FORMAT_ARG(result.year, "year"), // 1
         FF_FORMAT_ARG(result.yearShort, "year-short"), // 2
         FF_FORMAT_ARG(result.month, "month"), // 3
@@ -158,48 +157,44 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
     yyjson_mut_obj_add_strcpy(doc, module, "result", ffTimeToFullStr(ffTimeGetNow()));
 }
 
-void ffPrintDateTimeHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DATETIME_MODULE_NAME, "{1}-{4}-{23} {14}:{18}:{20}", FF_DATETIME_NUM_FORMAT_ARGS, ((const char* []) {
-        "year - year",
-        "last two digits of year - year-short",
-        "month - month",
-        "month with leading zero - month-pretty",
-        "month name - month-name",
-        "month name short - month-name-short",
-        "week number on year - week",
-        "weekday - weekday",
-        "weekday short - weekday-short",
-        "day in year - day-in-year",
-        "day in month - day-in-month",
-        "day in week - day-in-week",
-        "hour - hour",
-        "hour with leading zero - hour-pretty",
-        "hour 12h format - hour-12",
-        "hour 12h format with leading zero - hour-12-pretty",
-        "minute - minute",
-        "minute with leading zero - minute-pretty",
-        "second - second",
-        "second with leading zero - second-pretty",
-        "offset from UTC in the ISO 8601 format - offset-from-utc",
-        "locale-dependent timezone name or abbreviation - timezone-name",
-        "day in month with leading zero - day-pretty",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_DATETIME_MODULE_NAME,
+    .description = "Print current date and time",
+    .parseCommandOptions = (void*) ffParseDateTimeCommandOptions,
+    .parseJsonObject = (void*) ffParseDateTimeJsonObject,
+    .printModule = (void*) ffPrintDateTime,
+    .generateJsonResult = (void*) ffGenerateDateTimeJsonResult,
+    .generateJsonConfig = (void*) ffGenerateDateTimeJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Year", "year"},
+        {"Last two digits of year", "year-short"},
+        {"Month", "month"},
+        {"Month with leading zero", "month-pretty"},
+        {"Month name", "month-name"},
+        {"Month name short", "month-name-short"},
+        {"Week number on year", "week"},
+        {"Weekday", "weekday"},
+        {"Weekday short", "weekday-short"},
+        {"Day in year", "day-in-year"},
+        {"Day in month", "day-in-month"},
+        {"Day in week", "day-in-week"},
+        {"Hour", "hour"},
+        {"Hour with leading zero", "hour-pretty"},
+        {"Hour 12h format", "hour-12"},
+        {"Hour 12h format with leading zero", "hour-12-pretty"},
+        {"Minute", "minute"},
+        {"Minute with leading zero", "minute-pretty"},
+        {"Second", "second"},
+        {"Second with leading zero", "second-pretty"},
+        {"Offset from UTC in the ISO 8601 format", "offset-from-utc"},
+        {"Locale-dependent timezone name or abbreviation", "timezone-name"},
+        {"Day in month with leading zero", "day-pretty"},
+    }))
+};
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_DATETIME_MODULE_NAME,
-        "Print current date and time",
-        ffParseDateTimeCommandOptions,
-        ffParseDateTimeJsonObject,
-        ffPrintDateTime,
-        ffGenerateDateTimeJsonResult,
-        ffPrintDateTimeHelpFormat,
-        ffGenerateDateTimeJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

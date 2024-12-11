@@ -5,7 +5,6 @@
 #include "modules/bluetoothradio/bluetoothradio.h"
 #include "util/stringUtils.h"
 
-#define FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS 8
 #define FF_BLUETOOTHRADIO_DISPLAY_NAME "Bluetooth Radio"
 
 static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadioResult* radio, uint8_t index)
@@ -17,7 +16,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
     }
     else
     {
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(radio->name, "name"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -55,7 +54,7 @@ static void printDevice(FFBluetoothRadioOptions* options, const FFBluetoothRadio
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(radio->name, "name"),
             FF_FORMAT_ARG(radio->address, "address"),
             FF_FORMAT_ARG(radio->lmpVersion, "lmp-version"),
@@ -181,33 +180,29 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
     }
 }
 
-void ffPrintBluetoothRadioHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BLUETOOTHRADIO_MODULE_NAME, "Bluetooth {5} ({6})", FF_BLUETOOTHRADIO_NUM_FORMAT_ARGS, ((const char* []) {
-        "Radio name for discovering - name",
-        "Address - local radio address",
-        "LMP version - lmp-version",
-        "LMP subversion - lmp-subversion",
-        "Bluetooth version - version",
-        "Vendor - vendor",
-        "Discoverable - discoverable",
-        "Connectable / Pairable - connectable",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_BLUETOOTHRADIO_MODULE_NAME,
+    .description = "List bluetooth radios width supported version and vendor",
+    .parseCommandOptions = (void*) ffParseBluetoothRadioCommandOptions,
+    .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,
+    .printModule = (void*) ffPrintBluetoothRadio,
+    .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,
+    .generateJsonConfig = (void*) ffGenerateBluetoothRadioJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Radio name for discovering", "name"},
+        {"Address", "address"},
+        {"LMP version", "lmp-version"},
+        {"LMP subversion", "lmp-subversion"},
+        {"Bluetooth version", "version"},
+        {"Vendor", "vendor"},
+        {"Discoverable", "discoverable"},
+        {"Connectable / Pairable", "connectable"},
+    }))
+};
 
 void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_BLUETOOTHRADIO_MODULE_NAME,
-        "List bluetooth radios width supported version and vendor",
-        ffParseBluetoothRadioCommandOptions,
-        ffParseBluetoothRadioJsonObject,
-        ffPrintBluetoothRadio,
-        ffGenerateBluetoothRadioJsonResult,
-        ffPrintBluetoothRadioHelpFormat,
-        ffGenerateBluetoothRadioJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
 }
 

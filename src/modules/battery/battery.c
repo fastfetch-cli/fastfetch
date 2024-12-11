@@ -7,8 +7,6 @@
 #include "modules/battery/battery.h"
 #include "util/stringUtils.h"
 
-#define FF_BATTERY_NUM_FORMAT_ARGS 14
-
 static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uint8_t index)
 {
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -22,7 +20,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     else
     {
         ffStrbufClear(&key);
-        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 2, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(result->modelName, "name"),
         }));
@@ -105,7 +103,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
 
-        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BATTERY_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
             FF_FORMAT_ARG(result->modelName, "model-name"),
             FF_FORMAT_ARG(result->technology, "technology"),
@@ -270,39 +268,35 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
     }
 }
 
-void ffPrintBatteryHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BATTERY_MODULE_NAME, "{4} ({12} hours {13} mins) [{5}]", FF_BATTERY_NUM_FORMAT_ARGS, ((const char* []) {
-        "Battery manufacturer - manufacturer",
-        "Battery model name - model-name",
-        "Battery technology - technology",
-        "Battery capacity (percentage num) - capacity",
-        "Battery status - status",
-        "Battery temperature (formatted) - temperature",
-        "Battery cycle count - cycle-count",
-        "Battery serial number - serial",
-        "Battery manufactor date - manufacture-date",
-        "Battery capacity (percentage bar) - capacity-bar",
-        "Battery time remaining days - time-days",
-        "Battery time remaining hours - time-hours",
-        "Battery time remaining minutes - time-minutes",
-        "Battery time remaining seconds - time-seconds",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_BATTERY_MODULE_NAME,
+    .description = "Print battery capacity, status, etc",
+    .parseCommandOptions = (void*) ffParseBatteryCommandOptions,
+    .parseJsonObject = (void*) ffParseBatteryJsonObject,
+    .printModule = (void*) ffPrintBattery,
+    .generateJsonResult = (void*) ffGenerateBatteryJsonResult,
+    .generateJsonConfig = (void*) ffGenerateBatteryJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Battery manufacturer", "manufacturer"},
+        {"Battery model name", "model-name"},
+        {"Battery technology", "technology"},
+        {"Battery capacity (percentage num)", "capacity"},
+        {"Battery status", "status"},
+        {"Battery temperature (formatted)", "temperature"},
+        {"Battery cycle count", "cycle-count"},
+        {"Battery serial number", "serial"},
+        {"Battery manufactor date", "manufacture-date"},
+        {"Battery capacity (percentage bar)", "capacity-bar"},
+        {"Battery time remaining days", "time-days"},
+        {"Battery time remaining hours", "time-hours"},
+        {"Battery time remaining minutes", "time-minutes"},
+        {"Battery time remaining seconds", "time-seconds"},
+    }))
+};
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_BATTERY_MODULE_NAME,
-        "Print battery capacity, status, etc",
-        ffParseBatteryCommandOptions,
-        ffParseBatteryJsonObject,
-        ffPrintBattery,
-        ffGenerateBatteryJsonResult,
-        ffPrintBatteryHelpFormat,
-        ffGenerateBatteryJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
