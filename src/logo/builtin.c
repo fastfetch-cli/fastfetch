@@ -4052,6 +4052,14 @@ static const FFlogo S[] = {
             FF_COLOR_FG_RED,
         },
     },
+    // Serpent OS
+    {
+        .names = {"Serpent OS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SERPENT_OS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Semc
     {
         .names = {"semc"},
