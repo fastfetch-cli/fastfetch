@@ -175,6 +175,17 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
         return true;
     }
+    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
+    {
+        ffStrbufSetS(&result->name, "Armbian (custom build)");
+        ffStrbufSetS(&result->id, "armbian");
+        ffStrbufSetS(&result->idLike, "debian");
+        ffStrbufClear(&result->versionID);
+        uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
+        uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
+        ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+        return true;
+    }
     else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
     {
         ffStrbufSetS(&result->id, "locos");
