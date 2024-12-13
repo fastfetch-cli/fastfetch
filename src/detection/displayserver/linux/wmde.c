@@ -126,6 +126,10 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
     else if(ffStrEqualsIgnCase(name, "dtwm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DTWM);
+    else if(ffStrEqualsIgnCase(name, "fvwm"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_FVWM);
+    else if(ffStrEqualsIgnCase(name, "ctwm"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_CTWM);
     else if(ffStrEqualsIgnCase(name, "hyprland"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HYPRLAND);
 }
