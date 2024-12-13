@@ -168,7 +168,8 @@ static const char* qcomPartId2name(uint32_t partId)
 {
     switch (partId)
     {
-    case 0x001: return "Oryon";
+    case 0x001: return "Oryon 1";
+    case 0x002: return "Oryon 2";
     case 0x00f: return "Scorpion";
     case 0x02d: return "Scorpion";
     case 0x04d: return "Krait";
@@ -262,6 +263,9 @@ static const char* applePartId2name(uint32_t partId)
     case 0x037: return "Everest-A16";
     case 0x038: return "Blizzard-M2-Max";
     case 0x039: return "Avalanche-M2-Max";
+    case 0x046: return "Sawtooth-M11";
+    case 0x048: return "Sawtooth-M3-Max";
+    case 0x049: return "Everest-M3-Max";
     default: return NULL;
     }
 }
