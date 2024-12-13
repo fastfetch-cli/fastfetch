@@ -300,10 +300,10 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
         for (int i = 0; i < count; ++i)
         {
             if(result->dePrettyName.length == 0)
-                applyPrettyNameIfDE(result, proc->p_comm);
+                applyPrettyNameIfDE(result, proc[i].p_comm);
 
             if(result->wmPrettyName.length == 0)
-                applyNameIfWM(result, proc->p_comm);
+                applyNameIfWM(result, proc[i].p_comm);
 
             if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
                 break;
