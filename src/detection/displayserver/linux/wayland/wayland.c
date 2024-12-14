@@ -18,10 +18,18 @@
 #include "kde-output-order-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
 
-#ifdef __linux__
+#if __FreeBSD__
+#include <sys/un.h>
+#include <sys/ucred.h>
+#include <sys/sysctl.h>
+#endif
+
 static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
-    struct ucred ucred;
+#if __linux__ || (__FreeBSD__ && !__DragonFly__)
+
+#if __linux
+    struct ucred ucred = {};
     socklen_t len = sizeof(ucred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1 || ucred.pid <= 0)
         return false;
@@ -30,6 +38,19 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
     ffStrbufAppendF(&procPath, "/proc/%d/cmdline", ucred.pid); //We check the cmdline for the process name, because it is not trimmed.
     if (!ffReadFileBuffer(procPath.chars, &result->wmProcessName))
         return false;
+#else
+    struct xucred ucred = {};
+    socklen_t len = sizeof(ucred);
+    if (getsockopt(fd, AF_UNSPEC, LOCAL_PEERCRED, &ucred, &len) == -1 || ucred.cr_pid <= 0)
+        return false;
+
+    size_t size = 4096;
+    ffStrbufEnsureFixedLengthFree(&result->wmProcessName, (uint32_t) size);
+
+    if(sysctl((int[]){CTL_KERN, KERN_PROC, KERN_PROC_ARGS, ucred.cr_pid}, 4, result->wmProcessName.chars, &size, NULL, 0 ) != 0)
+        return false;
+    result->wmProcessName.length = (uint32_t) size - 1;
+#endif
 
     // #1135: wl-restart is a special case
     const char* filename = strrchr(result->wmProcessName.chars, '/');
@@ -45,14 +66,12 @@ static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
     ffStrbufSubstrAfterLastC(&result->wmProcessName, '/'); //Trim the path
 
     return true;
-}
+
 #else
-static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
-{
     FF_UNUSED(fd, result);
     return false;
-}
 #endif
+}
 
 static void waylandGlobalAddListener(void* data, struct wl_registry* registry, uint32_t name, const char* interface, uint32_t version)
 {
