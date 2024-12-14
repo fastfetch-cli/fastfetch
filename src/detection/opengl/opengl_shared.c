@@ -27,7 +27,10 @@ void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglG
 #if defined(FF_HAVE_EGL) || __has_include(<EGL/egl.h>)
 #include "common/io/io.h"
 
+#define EGL_EGL_PROTOTYPES 1
+#define EGL_EGLEXT_PROTOTYPES 1
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 typedef struct EGLData
 {
@@ -102,9 +105,20 @@ static const char* eglHandleData(FFOpenGLResult* result, EGLData* data)
     if(!data->ffglGetString)
         return "eglGetProcAddress(glGetString) returned NULL";
 
-    data->display = data->ffeglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if(data->display == EGL_NO_DISPLAY)
-        return "eglGetDisplay returned EGL_NO_DISPLAY";
+    #ifdef EGL_PLATFORM_SURFACELESS_MESA
+    PFNEGLGETPLATFORMDISPLAYPROC ffeglGetPlatformDisplay = (PFNEGLGETPLATFORMDISPLAYPROC) data->ffeglGetProcAddress("eglGetPlatformDisplay");
+    if (ffeglGetPlatformDisplay)
+        data->display = ffeglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, NULL, NULL);
+
+    if(!ffeglGetPlatformDisplay || data->display == EGL_NO_DISPLAY)
+    #endif
+
+    {
+        data->display = data->ffeglGetDisplay(EGL_DEFAULT_DISPLAY);
+        if(data->display == EGL_NO_DISPLAY)
+            return "eglGetDisplay returned EGL_NO_DISPLAY";
+    }
+
 
     EGLint major, minor;
     if(data->ffeglInitialize(data->display, &major, &minor) == EGL_FALSE)
