@@ -102,7 +102,7 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     }
 }
 
-static bool matchDrmConnector(const char* connName, WaylandDisplay* wldata)
+static FF_MAYBE_UNUSED bool matchDrmConnector(const char* connName, WaylandDisplay* wldata)
 {
     // https://wayland.freedesktop.org/docs/html/apa.html#protocol-spec-wl_output-event-name
     // The doc says that "do not assume that the name is a reflection of an underlying DRM connector, X11 connection, etc."
@@ -148,8 +148,10 @@ void ffWaylandOutputNameListener(void* data, FF_MAYBE_UNUSED void* output, const
     if (display->id) return;
 
     display->type = ffdsGetDisplayType(name);
+    #if __linux__
     if (!display->edidName.length)
         matchDrmConnector(name, display);
+    #endif
     display->id = ffWaylandGenerateIdFromName(name);
     ffStrbufAppendS(&display->name, name);
 }
