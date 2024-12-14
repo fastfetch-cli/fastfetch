@@ -105,7 +105,7 @@ static const char* eglHandleData(FFOpenGLResult* result, EGLData* data)
     if(!data->ffglGetString)
         return "eglGetProcAddress(glGetString) returned NULL";
 
-    #ifdef EGL_PLATFORM_SURFACELESS_MESA
+    #if EGL_VERSION_1_5
     PFNEGLGETPLATFORMDISPLAYPROC ffeglGetPlatformDisplay = (PFNEGLGETPLATFORMDISPLAYPROC) data->ffeglGetProcAddress("eglGetPlatformDisplay");
     if (ffeglGetPlatformDisplay)
         data->display = ffeglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, NULL, NULL);
