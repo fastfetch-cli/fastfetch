@@ -4635,6 +4635,15 @@ static const FFlogo U[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Ultramarine Small
+    {
+        .names = {"Ultramarine_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ULTRAMARINE_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Unifi
     {
         .names = {"Unifi"},
