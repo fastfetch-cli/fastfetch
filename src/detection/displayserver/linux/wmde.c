@@ -132,6 +132,8 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_CTWM);
     else if(ffStrEqualsIgnCase(name, "hyprland"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HYPRLAND);
+    else if(ffStrEqualsIgnCase(name, "ratpoison"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_RATPOISON);
 }
 
 static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)
