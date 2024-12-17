@@ -39,7 +39,7 @@ void ffPrintVersion(FFVersionOptions* options)
             FF_FORMAT_ARG(result->cmakeBuiltType, "cmake-built-type"),
             FF_FORMAT_ARG(result->compileTime, "compile-time"),
             FF_FORMAT_ARG(result->compiler, "compiler"),
-            FF_FORMAT_ARG(buf, "libc-used"),
+            FF_FORMAT_ARG(buf, "libc"),
         }));
     }
 }
