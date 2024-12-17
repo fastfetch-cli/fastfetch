@@ -37,9 +37,14 @@ const char* ffDetectWifi(FFlist* result)
             item->conn.channel = 0;
             item->conn.frequency = 0;
 
+            ffParsePropLines(ifconfig.chars, "status: ", &item->conn.status);
+            if (!ffStrbufEqualS(&item->conn.status, "associated"))
+                continue;
+
             ffParsePropLines(ifconfig.chars, "ssid ", &item->conn.ssid);
             if (item->conn.ssid.length)
             {
+                // This doesn't work for quoted SSID values
                 uint32_t idx = ffStrbufFirstIndexS(&item->conn.ssid, " bssid ");
                 if (idx < item->conn.ssid.length)
                 {
@@ -69,8 +74,6 @@ const char* ffDetectWifi(FFlist* result)
                     ffStrbufPrependS(&item->conn.protocol, "802.");
                 }
             }
-
-            ffParsePropLines(ifconfig.chars, "status: ", &item->conn.status);
         }
     }
 
