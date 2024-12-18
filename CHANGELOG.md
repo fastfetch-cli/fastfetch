@@ -5,15 +5,28 @@ Bugfixes:
     * It's normally unused because enumerating PCI devices on OpenBSD requires root privileges
 * Fix bssid formatting (Wifi, Linux)
 * Fix Linux Lite distro detection (#1434, OS, Linux)
+* Suppress XE driver warnings from Mesa (#1435, OpenGL, Linux)
+* Fix format parameter name (#1443, Version)
+* Don't report useless information when Wifi is disabled (Wifi, FreeBSD)
+    * Currently there are issues when the SSID contains whitespaces. More fixes are expected in the future.
+* Always use physical size reported by X11 server to avoid inconsistent results (#1444, Display, Linux)
 
 Features:
 * Randomly select one if the logo source expands to multiple files (#1426, Logo)
 * Report mac product name when running Linux in MacBook (Host, Linux / FreeBSD)
 * Use screen size reported in DTD if make sense (Display)
+* Detect Virtualized Apple Silicon CPUs (CPU, Linux)
+* Add detection support for fvwm and ctwm (WM, OpenBSD / NetBSD)
+* Add Armbian-unofficial detection (OS, Linux)
+* Prefer surfaceless display when connect EGL (OpenGL)
+* Improve accuracy of WM detection on FreeBSD (WM, FreeBSD)
+* Add ratpoison window manager (WM, Linux)
 
 Logo:
 * Update Linux Lite
 * Add Serpent OS
+* Add Ultramarine Small
+* Update Debian
 
 # 2.31.0
 
