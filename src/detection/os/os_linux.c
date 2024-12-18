@@ -52,7 +52,29 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(!ffStrSet(xdgConfigDirs))
         return;
 
-    if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
+    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Armbian 24.11 noble
+    {
+        ffStrbufSetS(&result->name, "Armbian");
+        ffStrbufSetS(&result->id, "armbian");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        ffStrbufClear(&result->versionID);
+        uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
+        uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
+        ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+        return;
+    }
+    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
+    {
+        ffStrbufSetS(&result->name, "Armbian (custom build)");
+        ffStrbufSetS(&result->id, "armbian");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        ffStrbufClear(&result->versionID);
+        uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
+        uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
+        ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+        return;
+    }
+    else if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
     {
         ffStrbufSetS(&result->name, "Linux Lite");
         ffStrbufSetS(&result->id, "linuxlite");
