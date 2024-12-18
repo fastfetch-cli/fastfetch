@@ -151,7 +151,6 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
     {
         item->hdrStatus = ffEdidGetHdrCompatible(edidData, edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
         ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
-        ffEdidGetPhysicalSize(edidData, &item->physicalWidth, &item->physicalHeight);
     }
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
