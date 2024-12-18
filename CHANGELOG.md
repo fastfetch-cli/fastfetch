@@ -1,3 +1,10 @@
+# 2.32.1
+
+A hotfix for OpenBSD. No changes to other platforms.
+
+Bugfixes:
+* Fix package count detection on OpenBSD (Packages, OpenBSD)
+
 # 2.32.0
 
 Bugfixes:
