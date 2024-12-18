@@ -27,7 +27,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
     if (!(options->disabled & FF_PACKAGES_FLAG_PKG_BIT))
     {
         result->pkg = getNumElementsImpl(FASTFETCH_TARGET_DIR_ROOT
-        #if __OpenBSD
+        #if __OpenBSD__
             "/var/db/pkg"
         #else
             "/usr/pkg/pkgdb"
