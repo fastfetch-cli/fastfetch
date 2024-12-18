@@ -6,7 +6,6 @@
 #include "util/stringUtils.h"
 
 #define FF_NETIO_DISPLAY_NAME "Network IO"
-#define FF_NETIO_NUM_FORMAT_ARGS 12
 
 static int sortInfs(const FFNetIOResult* left, const FFNetIOResult* right)
 {
@@ -25,7 +24,7 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
     else
     {
         ffStrbufClear(key);
-        FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, 3, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]){
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(inf->name, "name"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -80,7 +79,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
             ffParseSize(inf->txBytes, &buffer2);
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
-            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_NETIO_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
                 FF_FORMAT_ARG(buffer, "rx-size"),
                 FF_FORMAT_ARG(buffer2, "tx-size"),
                 FF_FORMAT_ARG(inf->name, "ifname"),
@@ -229,37 +228,33 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-void ffPrintNetIOHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_NETIO_MODULE_NAME, "{1} (IN) - {2} (OUT)", FF_NETIO_NUM_FORMAT_ARGS, ((const char* []) {
-        "Size of data received [per second] (formatted) - rx-size",
-        "Size of data sent [per second] (formatted) - tx-size",
-        "Interface name - ifname",
-        "Is default route - is-default-route",
-        "Size of data received [per second] (in bytes) - rx-bytes",
-        "Size of data sent [per second] (in bytes) - tx-bytes",
-        "Number of packets received [per second] - rx-packets",
-        "Number of packets sent [per second] - tx-packets",
-        "Number of errors received [per second] - rx-errors",
-        "Number of errors sent [per second] - tx-errors",
-        "Number of packets dropped when receiving [per second] - rx-drops",
-        "Number of packets dropped when sending [per second] - tx-drops",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_NETIO_MODULE_NAME,
+    .description = "Print network I/O throughput",
+    .parseCommandOptions = (void*) ffParseNetIOCommandOptions,
+    .parseJsonObject = (void*) ffParseNetIOJsonObject,
+    .printModule = (void*) ffPrintNetIO,
+    .generateJsonResult = (void*) ffGenerateNetIOJsonResult,
+    .generateJsonConfig = (void*) ffGenerateNetIOJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Size of data received [per second] (formatted)", "rx-size"},
+        {"Size of data sent [per second] (formatted)", "tx-size"},
+        {"Interface name", "ifname"},
+        {"Is default route", "is-default-route"},
+        {"Size of data received [per second] (in bytes)", "rx-bytes"},
+        {"Size of data sent [per second] (in bytes)", "tx-bytes"},
+        {"Number of packets received [per second]", "rx-packets"},
+        {"Number of packets sent [per second]", "tx-packets"},
+        {"Number of errors received [per second]", "rx-errors"},
+        {"Number of errors sent [per second]", "tx-errors"},
+        {"Number of packets dropped when receiving [per second]", "rx-drops"},
+        {"Number of packets dropped when sending [per second]", "tx-drops"},
+    }))
+};
 
 void ffInitNetIOOptions(FFNetIOOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_NETIO_MODULE_NAME,
-        "Print network I/O throughput",
-        ffParseNetIOCommandOptions,
-        ffParseNetIOJsonObject,
-        ffPrintNetIO,
-        ffGenerateNetIOJsonResult,
-        ffPrintNetIOHelpFormat,
-        ffGenerateNetIOJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰾆");
 
     ffStrbufInit(&options->namePrefix);

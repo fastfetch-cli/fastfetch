@@ -4,8 +4,6 @@
 #include "modules/font/font.h"
 #include "util/stringUtils.h"
 
-#define FF_FONT_NUM_FORMAT_ARGS (FF_DETECT_FONT_NUM_FONTS + 1)
-
 void ffPrintFont(FFFontOptions* options)
 {
     FFFontResult font;
@@ -28,7 +26,7 @@ void ffPrintFont(FFFontOptions* options)
         }
         else
         {
-            FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_FONT_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
                 FF_FORMAT_ARG(font.fonts[0], "font1"),
                 FF_FORMAT_ARG(font.fonts[1], "font2"),
                 FF_FORMAT_ARG(font.fonts[2], "font3"),
@@ -104,30 +102,26 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
         ffStrbufDestroy(&font.fonts[i]);
 }
 
-void ffPrintFontHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_FONT_MODULE_NAME, "{5}", FF_FONT_NUM_FORMAT_ARGS, ((const char* []) {
-        "Font 1 - font1",
-        "Font 2 - font2",
-        "Font 3 - font3",
-        "Font 4 - font4",
-        "Combined fonts for display - combined"
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_FONT_MODULE_NAME,
+    .description = "Print system font names",
+    .parseCommandOptions = (void*) ffParseFontCommandOptions,
+    .parseJsonObject = (void*) ffParseFontJsonObject,
+    .printModule = (void*) ffPrintFont,
+    .generateJsonResult = (void*) ffGenerateFontJsonResult,
+    .generateJsonConfig = (void*) ffGenerateFontJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Font 1", "font1"},
+        {"Font 2", "font2"},
+        {"Font 3", "font3"},
+        {"Font 4", "font4"},
+        {"Combined fonts for display", "combined"},
+    }))
+};
 
 void ffInitFontOptions(FFFontOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_FONT_MODULE_NAME,
-        "Print system font name",
-        ffParseFontCommandOptions,
-        ffParseFontJsonObject,
-        ffPrintFont,
-        ffGenerateFontJsonResult,
-        ffPrintFontHelpFormat,
-        ffGenerateFontJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

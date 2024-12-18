@@ -65,8 +65,25 @@ bool ffEdidGetName(const uint8_t edid[128], FFstrbuf* name)
 
 void ffEdidGetPhysicalSize(const uint8_t edid[128], uint32_t* width, uint32_t* height)
 {
-    *width = edid[21] * 10;
-    *height = edid[22] * 10;
+    // Detailed Timing Descriptors
+    uint32_t dw = (((uint32_t) edid[68] & 0xF0) << 4) + edid[66];
+    uint32_t dh = (((uint32_t) edid[68] & 0x0F) << 8) + edid[67];
+
+    // Basic Display Parameters
+    uint32_t bw = edid[21] * 10;
+    uint32_t bh = edid[22] * 10;
+
+    // Some monitors report invalid data in DTD. See #1406
+    if (abs((int)dw - (int)bw) < 10 && abs((int)dh - (int)bh) < 10)
+    {
+        *width = dw;
+        *height = dh;
+    }
+    else
+    {
+        *width = bw;
+        *height = bh;
+    }
 }
 
 void ffEdidGetSerialAndManufactureDate(const uint8_t edid[128], uint32_t* serial, uint16_t* year, uint16_t* week)

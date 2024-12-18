@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_TERMINALSIZE_DISPLAY_NAME "Terminal Size"
-#define FF_TERMINALSIZE_NUM_FORMAT_ARGS 4
 
 void ffPrintTerminalSize(FFTerminalSizeOptions* options)
 {
@@ -29,7 +28,7 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
         }
         else
         {
-            FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINALSIZE_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(result.rows, "rows"),
                 FF_FORMAT_ARG(result.columns, "columns"),
                 FF_FORMAT_ARG(result.width, "width"),
@@ -91,29 +90,25 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     yyjson_mut_obj_add_uint(doc, obj, "height", result.height);
 }
 
-void ffPrintTerminalSizeHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINALSIZE_MODULE_NAME, "{1} columns x {2} rows ({3}px x {4}px)", FF_TERMINALSIZE_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal rows - rows",
-        "Terminal columns - columns",
-        "Terminal width (in pixels) - width",
-        "Terminal height (in pixels) - height",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_TERMINALSIZE_MODULE_NAME,
+    .description = "Print current terminal size",
+    .parseCommandOptions = (void*) ffParseTerminalSizeCommandOptions,
+    .parseJsonObject = (void*) ffParseTerminalSizeJsonObject,
+    .printModule = (void*) ffPrintTerminalSize,
+    .generateJsonResult = (void*) ffGenerateTerminalSizeJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTerminalSizeJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Terminal rows", "rows"},
+        {"Terminal columns", "columns"},
+        {"Terminal width (in pixels)", "width"},
+        {"Terminal height (in pixels)", "height"},
+    })),
+};
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_TERMINALSIZE_MODULE_NAME,
-        "Print current terminal size",
-        ffParseTerminalSizeCommandOptions,
-        ffParseTerminalSizeJsonObject,
-        ffPrintTerminalSize,
-        ffGenerateTerminalSizeJsonResult,
-        ffPrintTerminalSizeHelpFormat,
-        ffGenerateTerminalSizeJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰲎");
 }
 

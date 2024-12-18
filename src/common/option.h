@@ -6,6 +6,20 @@ struct yyjson_val;
 struct yyjson_mut_doc;
 struct yyjson_mut_val;
 
+typedef struct FFModuleFormatArg
+{
+    const char* desc;
+    const char* name;
+} FFModuleFormatArg;
+
+typedef struct FFModuleFormatArgList
+{
+    FFModuleFormatArg* args;
+    uint32_t count;
+} FFModuleFormatArgList;
+
+#define FF_FORMAT_ARG_LIST(list) { .args = list, .count = sizeof(list) / sizeof(FFModuleFormatArg) }
+
 // Must be the first field of FFModuleOptions
 typedef struct FFModuleBaseInfo
 {
@@ -19,31 +33,9 @@ typedef struct FFModuleBaseInfo
     void (*parseJsonObject)(void* options, struct yyjson_val *module);
     void (*printModule)(void* options);
     void (*generateJsonResult)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* module);
-    void (*printHelpFormat)(void);
     void (*generateJsonConfig)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* obj);
+    FFModuleFormatArgList formatArgs;
 } FFModuleBaseInfo;
-
-static inline void ffOptionInitModuleBaseInfo(
-    FFModuleBaseInfo* baseInfo,
-    const char* name,
-    const char* description,
-    void* parseCommandOptions, // bool (*const parseCommandOptions)(void* options, const char* key, const char* value)
-    void* parseJsonObject, // void (*const parseJsonObject)(void* options, yyjson_val *module)
-    void* printModule, // void (*const printModule)(void* options)
-    void* generateJsonResult, // void (*const generateJsonResult)(void* options, yyjson_mut_doc* doc, yyjson_mut_val* obj)
-    void (*printHelpFormat)(void),
-    void* generateJsonConfig // void (*const generateJsonConfig)(void* options, yyjson_mut_doc* doc, yyjson_mut_val* obj)
-)
-{
-    baseInfo->name = name;
-    baseInfo->description = description;
-    baseInfo->parseCommandOptions = (__typeof__(baseInfo->parseCommandOptions)) parseCommandOptions;
-    baseInfo->parseJsonObject = (__typeof__(baseInfo->parseJsonObject)) parseJsonObject;
-    baseInfo->printModule = (__typeof__(baseInfo->printModule)) printModule;
-    baseInfo->generateJsonResult = (__typeof__(baseInfo->generateJsonResult)) generateJsonResult;
-    baseInfo->printHelpFormat = printHelpFormat;
-    baseInfo->generateJsonConfig = (__typeof__(baseInfo->generateJsonConfig)) generateJsonConfig;
-}
 
 typedef enum __attribute__((__packed__)) FFModuleKeyType
 {

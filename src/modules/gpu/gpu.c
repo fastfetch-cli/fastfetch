@@ -10,8 +10,6 @@
 
 #include <stdlib.h>
 
-#define FF_GPU_NUM_FORMAT_ARGS 13
-
 static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResult* gpu)
 {
     const char* type;
@@ -90,7 +88,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY frequency = ffStrbufCreate();
         ffParseFrequency(gpu->frequency, &frequency);
 
-        FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_GPU_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(gpu->vendor, "vendor"),
             FF_FORMAT_ARG(gpu->name, "name"),
             FF_FORMAT_ARG(gpu->driver, "driver"),
@@ -394,38 +392,34 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     }
 }
 
-void ffPrintGPUHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_GPU_MODULE_NAME, "{1} {2}", FF_GPU_NUM_FORMAT_ARGS, ((const char* []) {
-        "GPU vendor - vendor",
-        "GPU name - name",
-        "GPU driver - driver",
-        "GPU temperature - temperature",
-        "GPU core count - core-count",
-        "GPU type - type",
-        "GPU total dedicated memory - dedicated-total",
-        "GPU used dedicated memory - dedicated-used",
-        "GPU total shared memory - shared-total",
-        "GPU used shared memory - shared-used",
-        "The platform API used when detecting the GPU - platform-api",
-        "Current frequency in GHz - frequency",
-        "GPU vendor specific index - index",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_GPU_MODULE_NAME,
+    .description = "Print GPU names, graphic memory size, type, etc",
+    .parseCommandOptions = (void*) ffParseGPUCommandOptions,
+    .parseJsonObject = (void*) ffParseGPUJsonObject,
+    .printModule = (void*) ffPrintGPU,
+    .generateJsonResult = (void*) ffGenerateGPUJsonResult,
+    .generateJsonConfig = (void*) ffGenerateGPUJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"GPU vendor", "vendor"},
+        {"GPU name", "name"},
+        {"GPU driver", "driver"},
+        {"GPU temperature", "temperature"},
+        {"GPU core count", "core-count"},
+        {"GPU type", "type"},
+        {"GPU total dedicated memory", "dedicated-total"},
+        {"GPU used dedicated memory", "dedicated-used"},
+        {"GPU total shared memory", "shared-total"},
+        {"GPU used shared memory", "shared-used"},
+        {"The platform API used when detecting the GPU", "platform-api"},
+        {"Current frequency in GHz", "frequency"},
+        {"GPU vendor specific index", "index"},
+    })),
+};
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_GPU_MODULE_NAME,
-        "Print GPU names, graphic memory size, type, etc",
-        ffParseGPUCommandOptions,
-        ffParseGPUJsonObject,
-        ffPrintGPU,
-        ffGenerateGPUJsonResult,
-        ffPrintGPUHelpFormat,
-        ffGenerateGPUJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
 
     options->driverSpecific = false;

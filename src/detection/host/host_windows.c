@@ -72,5 +72,9 @@ const char* ffDetectHost(FFHostResult* host)
         ffCleanUpSmbiosValue(&host->family);
     }
 
+    #if _WIN32 && __x86_64__
+    ffHostDetectMac(host);
+    #endif
+
     return NULL;
 }

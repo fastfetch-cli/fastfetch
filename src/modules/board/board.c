@@ -4,8 +4,6 @@
 #include "modules/board/board.h"
 #include "util/stringUtils.h"
 
-#define FF_BOARD_NUM_FORMAT_ARGS 4
-
 void ffPrintBoard(FFBoardOptions* options)
 {
     FFBoardResult result;
@@ -37,7 +35,7 @@ void ffPrintBoard(FFBoardOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_BOARD_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(result.name, "name"),
             FF_FORMAT_ARG(result.vendor, "vendor"),
             FF_FORMAT_ARG(result.version, "version"),
@@ -122,29 +120,25 @@ exit:
     ffStrbufDestroy(&board.serial);
 }
 
-void ffPrintBoardHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BOARD_MODULE_NAME, "{1} ({3})", FF_BOARD_NUM_FORMAT_ARGS, ((const char* []) {
-        "board name - name",
-        "board vendor - vendor",
-        "board version - version",
-        "board serial number - serial",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_BOARD_MODULE_NAME,
+    .description = "Print motherboard name and other info",
+    .parseCommandOptions = (void*) ffParseBoardCommandOptions,
+    .parseJsonObject = (void*) ffParseBoardJsonObject,
+    .printModule = (void*) ffPrintBoard,
+    .generateJsonResult = (void*) ffGenerateBoardJsonResult,
+    .generateJsonConfig = (void*) ffGenerateBoardJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Board name", "name"},
+        {"Board vendor", "vendor"},
+        {"Board version", "version"},
+        {"Board serial number", "serial"},
+    }))
+};
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_BOARD_MODULE_NAME,
-        "Print motherboard name and other info",
-        ffParseBoardCommandOptions,
-        ffParseBoardJsonObject,
-        ffPrintBoard,
-        ffGenerateBoardJsonResult,
-        ffPrintBoardHelpFormat,
-        ffGenerateBoardJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

@@ -7,8 +7,6 @@
 
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
-#define FF_USERS_NUM_FORMAT_ARGS 5
-
 void ffPrintUsers(FFUsersOptions* options)
 {
     FF_LIST_AUTO_DESTROY users = ffListCreate(sizeof(FFUserResult));
@@ -68,7 +66,7 @@ void ffPrintUsers(FFUsersOptions* options)
         {
             FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
 
-            FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_USERS_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(user->name, "name"),
                 FF_FORMAT_ARG(user->hostName, "host-name"),
                 FF_FORMAT_ARG(user->sessionName, "session-name"),
@@ -188,30 +186,26 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-void ffPrintUsersHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_USERS_MODULE_NAME, "{1}@{2} - login time {5}", FF_USERS_NUM_FORMAT_ARGS, ((const char* []) {
-        "User name - name",
-        "Host name - host-name",
-        "Session name - session",
-        "Client IP - client-ip",
-        "Login Time in local timezone - login-time",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_USERS_MODULE_NAME,
+    .description = "Print users currently logged in",
+    .parseCommandOptions = (void*) ffParseUsersCommandOptions,
+    .parseJsonObject = (void*) ffParseUsersJsonObject,
+    .printModule = (void*) ffPrintUsers,
+    .generateJsonResult = (void*) ffGenerateUsersJsonResult,
+    .generateJsonConfig = (void*) ffGenerateUsersJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"User name", "name"},
+        {"Host name", "host-name"},
+        {"Session name", "session"},
+        {"Client IP", "client-ip"},
+        {"Login Time in local timezone", "login-time"},
+    }))
+};
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_USERS_MODULE_NAME,
-        "Print users currently logged in",
-        ffParseUsersCommandOptions,
-        ffParseUsersJsonObject,
-        ffPrintUsers,
-        ffGenerateUsersJsonResult,
-        ffPrintUsersHelpFormat,
-        ffGenerateUsersJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;

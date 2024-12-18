@@ -2,6 +2,7 @@
 #include "common/commandoption.h"
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
+#include "common/printing.h"
 #include "detection/version/version.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
@@ -15,16 +16,65 @@
     #include "util/windows/getline.h"
 #endif
 
+static void printCommandFormatHelpJson(void)
+{
+    yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
+    yyjson_mut_val* root = yyjson_mut_obj(doc);
+    yyjson_mut_doc_set_root(doc, root);
+
+    for (uint32_t i = 0; i <= 'Z' - 'A'; ++i)
+    {
+        for (FFModuleBaseInfo** modules = ffModuleInfos[i]; *modules; ++modules)
+        {
+            FFModuleBaseInfo* baseInfo = *modules;
+            if (!baseInfo->formatArgs.count) continue;
+
+            FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateS(baseInfo->name);
+            ffStrbufLowerCase(&type);
+            ffStrbufAppendS(&type, "Format");
+
+            yyjson_mut_val* obj = yyjson_mut_obj(doc);
+            if (yyjson_mut_obj_add(root, yyjson_mut_strbuf(doc, &type), obj))
+            {
+                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreateF("Output format of the module `%s`. See `-h format` for formatting syntax\n", baseInfo->name);
+                for (unsigned i = 0; i < baseInfo->formatArgs.count; i++)
+                {
+                    const FFModuleFormatArg* arg = &baseInfo->formatArgs.args[i];
+                    ffStrbufAppendF(&content, "    %u. {%s}: %s\n", i + 1, arg->name, arg->desc);
+                }
+                ffStrbufTrimRight(&content, '\n');
+                yyjson_mut_obj_add_strbuf(doc, obj, "description", &content);
+                yyjson_mut_obj_add_str(doc, obj, "type", "string");
+            }
+        }
+    }
+    yyjson_mut_write_fp(stdout, doc, YYJSON_WRITE_PRETTY, NULL, NULL);
+    putchar('\n');
+    yyjson_mut_doc_free(doc);
+}
+
 static void printCommandFormatHelp(const char* command)
 {
     FF_STRBUF_AUTO_DESTROY type = ffStrbufCreateNS((uint32_t) (strlen(command) - strlen("-format")), command);
+    ffStrbufLowerCase(&type);
     for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(command[0]) - 'A']; *modules; ++modules)
     {
         FFModuleBaseInfo* baseInfo = *modules;
         if (ffStrbufIgnCaseEqualS(&type, baseInfo->name))
         {
-            if (baseInfo->printHelpFormat)
-                baseInfo->printHelpFormat();
+            if (baseInfo->formatArgs.count > 0)
+            {
+                printf("--%s-format:\n", type.chars);
+                printf("Sets the format string for %s output.\n", baseInfo->name);
+                puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
+                puts("The following values are passed:");
+
+                for (unsigned i = 0; i < baseInfo->formatArgs.count; i++)
+                {
+                    const FFModuleFormatArg* arg = &baseInfo->formatArgs.args[i];
+                    printf("%16s {%u}: %s\n", arg->name, i + 1, arg->desc);
+                }
+            }
             else
                 fprintf(stderr, "Error: Module '%s' doesn't support output formatting\n", baseInfo->name);
             return;
@@ -252,6 +302,8 @@ static void printCommandHelp(const char* command)
         puts(FASTFETCH_DATATEXT_HELP_COLOR);
     else if(ffStrEqualsIgnCase(command, "format"))
         puts(FASTFETCH_DATATEXT_HELP_FORMAT);
+    else if(ffStrEqualsIgnCase(command, "format-json"))
+        printCommandFormatHelpJson();
     else if(ffCharIsEnglishAlphabet(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
         printCommandFormatHelp(command);
     else if(!printSpecificCommandHelp(command))

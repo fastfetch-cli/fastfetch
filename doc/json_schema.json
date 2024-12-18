@@ -26,10 +26,6 @@
             "description": "Set the icon to be displayed by `display.keyType: \"icon\"`",
             "type": "string"
         },
-        "format": {
-            "description": "Output format of the module. See `-h <module>-format` for detail. I.e: fastfetch -h disk-format",
-            "type": "string"
-        },
         "outputColor": {
             "description": "Output color of the module. Left empty to use `display.color.output`",
             "$ref": "#/$defs/colors"
@@ -111,6 +107,288 @@
                     }
                 }
             ]
+        },
+
+
+        "batteryFormat": {
+            "description": "Output format of the module `Battery`. See `-h format` for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds",
+            "type": "string"
+        },
+        "biosFormat": {
+            "description": "Output format of the module `Bios`. See `-h format` for formatting syntax\n    1. {date}: Bios date\n    2. {release}: Bios release\n    3. {vendor}: Bios vendor\n    4. {version}: Bios version\n    5. {type}: Firmware type",
+            "type": "string"
+        },
+        "bluetoothFormat": {
+            "description": "Output format of the module `Bluetooth`. See `-h format` for formatting syntax\n    1. {name}: Name\n    2. {address}: Address\n    3. {type}: Type\n    4. {battery-percentage}: Battery percentage number\n    5. {connected}: Is connected\n    6. {battery-percentage-bar}: Battery percentage bar",
+            "type": "string"
+        },
+        "bluetoothradioFormat": {
+            "description": "Output format of the module `BluetoothRadio`. See `-h format` for formatting syntax\n    1. {name}: Radio name for discovering\n    2. {address}: Address\n    3. {lmp-version}: LMP version\n    4. {lmp-subversion}: LMP subversion\n    5. {version}: Bluetooth version\n    6. {vendor}: Vendor\n    7. {discoverable}: Discoverable\n    8. {connectable}: Connectable / Pairable",
+            "type": "string"
+        },
+        "boardFormat": {
+            "description": "Output format of the module `Board`. See `-h format` for formatting syntax\n    1. {name}: Board name\n    2. {vendor}: Board vendor\n    3. {version}: Board version\n    4. {serial}: Board serial number",
+            "type": "string"
+        },
+        "bootmgrFormat": {
+            "description": "Output format of the module `Bootmgr`. See `-h format` for formatting syntax\n    1. {name}: Name / description\n    2. {firmware-path}: Firmware file path\n    3. {firmware-name}: Firmware file name\n    4. {secure-boot}: Is secure boot enabled",
+            "type": "string"
+        },
+        "brightnessFormat": {
+            "description": "Output format of the module `Brightness`. See `-h format` for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)",
+            "type": "string"
+        },
+        "btrfsFormat": {
+            "description": "Output format of the module `Btrfs`. See `-h format` for formatting syntax\n    1. {name}: Name / Label\n    2. {uuid}: UUID\n    3. {devices}: Associated devices\n    4. {features}: Enabled features\n    5. {used}: Size used\n    6. {allocated}: Size allocated\n    7. {total}: Size total\n    8. {used-percentage}: Used percentage num\n    9. {allocated-percentage}: Allocated percentage num\n    10. {used-percentage-bar}: Used percentage bar\n    11. {allocated-percentage-bar}: Allocated percentage bar\n    12. {node-size}: Node size\n    13. {sector-size}: Sector size",
+            "type": "string"
+        },
+        "cameraFormat": {
+            "description": "Output format of the module `Camera`. See `-h format` for formatting syntax\n    1. {name}: Device name\n    2. {vendor}: Vendor\n    3. {colorspace}: Color space\n    4. {id}: Identifier\n    5. {width}: Width (in px)\n    6. {height}: Height (in px)",
+            "type": "string"
+        },
+        "chassisFormat": {
+            "description": "Output format of the module `Chassis`. See `-h format` for formatting syntax\n    1. {type}: Chassis type\n    2. {vendor}: Chassis vendor\n    3. {version}: Chassis version\n    4. {serial}: Chassis serial number",
+            "type": "string"
+        },
+        "commandFormat": {
+            "description": "Output format of the module `Command`. See `-h format` for formatting syntax\n    1. {result}: Command result",
+            "type": "string"
+        },
+        "cpuFormat": {
+            "description": "Output format of the module `CPU`. See `-h format` for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count",
+            "type": "string"
+        },
+        "cpucacheFormat": {
+            "description": "Output format of the module `CPUCache`. See `-h format` for formatting syntax\n    1. {result}: Separate result\n    2. {sum}: Sum result",
+            "type": "string"
+        },
+        "cpuusageFormat": {
+            "description": "Output format of the module `CPUUsage`. See `-h format` for formatting syntax\n    1. {avg}: CPU usage (percentage num, average)\n    2. {max}: CPU usage (percentage num, maximum)\n    3. {max-index}: CPU core index of maximum usage\n    4. {min}: CPU usage (percentage num, minimum)\n    5. {min-index}: CPU core index of minimum usage\n    6. {avg-bar}: CPU usage (percentage bar, average)\n    7. {max-bar}: CPU usage (percentage bar, maximum)\n    8. {min-bar}: CPU usage (percentage bar, minimum)",
+            "type": "string"
+        },
+        "cursorFormat": {
+            "description": "Output format of the module `Cursor`. See `-h format` for formatting syntax\n    1. {theme}: Cursor theme\n    2. {size}: Cursor size",
+            "type": "string"
+        },
+        "datetimeFormat": {
+            "description": "Output format of the module `DateTime`. See `-h format` for formatting syntax\n    1. {year}: Year\n    2. {year-short}: Last two digits of year\n    3. {month}: Month\n    4. {month-pretty}: Month with leading zero\n    5. {month-name}: Month name\n    6. {month-name-short}: Month name short\n    7. {week}: Week number on year\n    8. {weekday}: Weekday\n    9. {weekday-short}: Weekday short\n    10. {day-in-year}: Day in year\n    11. {day-in-month}: Day in month\n    12. {day-in-week}: Day in week\n    13. {hour}: Hour\n    14. {hour-pretty}: Hour with leading zero\n    15. {hour-12}: Hour 12h format\n    16. {hour-12-pretty}: Hour 12h format with leading zero\n    17. {minute}: Minute\n    18. {minute-pretty}: Minute with leading zero\n    19. {second}: Second\n    20. {second-pretty}: Second with leading zero\n    21. {offset-from-utc}: Offset from UTC in the ISO 8601 format\n    22. {timezone-name}: Locale-dependent timezone name or abbreviation\n    23. {day-pretty}: Day in month with leading zero",
+            "type": "string"
+        },
+        "deFormat": {
+            "description": "Output format of the module `DE`. See `-h format` for formatting syntax\n    1. {process-name}: DE process name\n    2. {pretty-name}: DE pretty name\n    3. {version}: DE version",
+            "type": "string"
+        },
+        "displayFormat": {
+            "description": "Output format of the module `Display`. See `-h format` for formatting syntax\n    1. {width}: Screen configured width (in pixels)\n    2. {height}: Screen configured height (in pixels)\n    3. {refresh-rate}: Screen configured refresh rate (in Hz)\n    4. {scaled-width}: Screen scaled width (in pixels)\n    5. {scaled-height}: Screen scaled height (in pixels)\n    6. {name}: Screen name\n    7. {type}: Screen type (builtin, external or unknown)\n    8. {rotation}: Screen rotation (in degrees)\n    9. {is-primary}: True if being the primary screen\n    10. {physical-width}: Screen physical width (in millimeters)\n    11. {physical-height}: Screen physical height (in millimeters)\n    12. {inch}: Physical diagonal length in inches\n    13. {ppi}: Pixels per inch (PPI)\n    14. {bit-depth}: Bits per color channel\n    15. {hdr-enabled}: True if high dynamic range (HDR) mode is enabled\n    16. {manufacture-year}: Year of manufacturing\n    17. {manufacture-week}: Nth week of manufacturing in the year\n    18. {serial}: Serial number\n    19. {platform-api}: The platform API used when detecting the display\n    20. {hdr-compatible}: True if the display is HDR compatible\n    21. {scale-factor}: HiDPI scale factor\n    22. {preferred-width}: Screen preferred width (in pixels)\n    23. {preferred-height}: Screen preferred height (in pixels)\n    24. {preferred-refresh-rate}: Screen preferred refresh rate (in Hz)",
+            "type": "string"
+        },
+        "diskFormat": {
+            "description": "Output format of the module `Disk`. See `-h format` for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {(null)}: (null)",
+            "type": "string"
+        },
+        "diskioFormat": {
+            "description": "Output format of the module `DiskIO`. See `-h format` for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name\n    4. {dev-path}: Device raw file path\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
+            "type": "string"
+        },
+        "dnsFormat": {
+            "description": "Output format of the module `DNS`. See `-h format` for formatting syntax\n    1. {result}: DNS result",
+            "type": "string"
+        },
+        "editorFormat": {
+            "description": "Output format of the module `Editor`. See `-h format` for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {full-path}: Full path of real path\n    5. {version}: Version",
+            "type": "string"
+        },
+        "fontFormat": {
+            "description": "Output format of the module `Font`. See `-h format` for formatting syntax\n    1. {font1}: Font 1\n    2. {font2}: Font 2\n    3. {font3}: Font 3\n    4. {font4}: Font 4\n    5. {combined}: Combined fonts for display",
+            "type": "string"
+        },
+        "gamepadFormat": {
+            "description": "Output format of the module `Gamepad`. See `-h format` for formatting syntax\n    1. {name}: Name\n    2. {serial}: Serial number\n    3. {battery-percentage}: Battery percentage num\n    4. {battery-percentage-bar}: Battery percentage bar",
+            "type": "string"
+        },
+        "gpuFormat": {
+            "description": "Output format of the module `GPU`. See `-h format` for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index",
+            "type": "string"
+        },
+        "hostFormat": {
+            "description": "Output format of the module `Host`. See `-h format` for formatting syntax\n    1. {family}: Product family\n    2. {name}: Product name\n    3. {version}: Product version\n    4. {sku}: Product sku\n    5. {vendor}: Product vendor\n    6. {serial}: Product serial number\n    7. {uuid}: Product uuid",
+            "type": "string"
+        },
+        "iconsFormat": {
+            "description": "Output format of the module `Icons`. See `-h format` for formatting syntax\n    1. {icons1}: Icons part 1\n    2. {icons2}: Icons part 2",
+            "type": "string"
+        },
+        "initsystemFormat": {
+            "description": "Output format of the module `InitSystem`. See `-h format` for formatting syntax\n    1. {name}: Init system name\n    2. {exe}: Init system exe path\n    3. {version}: Init system version path\n    4. {pid}: Init system pid",
+            "type": "string"
+        },
+        "kernelFormat": {
+            "description": "Output format of the module `Kernel`. See `-h format` for formatting syntax\n    1. {sysname}: Sysname\n    2. {release}: Release\n    3. {version}: Version\n    4. {arch}: Architecture\n    5. {display-version}: Display version\n    6. {page-size}: Page size",
+            "type": "string"
+        },
+        "keyboardFormat": {
+            "description": "Output format of the module `Keyboard`. See `-h format` for formatting syntax\n    1. {name}: Name\n    2. {serial}: Serial number",
+            "type": "string"
+        },
+        "lmFormat": {
+            "description": "Output format of the module `LM`. See `-h format` for formatting syntax\n    1. {service}: LM service\n    2. {type}: LM type\n    3. {version}: LM version",
+            "type": "string"
+        },
+        "loadavgFormat": {
+            "description": "Output format of the module `Loadavg`. See `-h format` for formatting syntax\n    1. {loadavg1}: Load average over 1min\n    2. {loadavg2}: Load average over 5min\n    3. {loadavg3}: Load average over 15min",
+            "type": "string"
+        },
+        "localeFormat": {
+            "description": "Output format of the module `Locale`. See `-h format` for formatting syntax\n    1. {result}: Locale code",
+            "type": "string"
+        },
+        "localipFormat": {
+            "description": "Output format of the module `LocalIp`. See `-h format` for formatting syntax\n    1. {ipv4}: IPv4 address\n    2. {ipv6}: IPv6 address\n    3. {mac}: MAC address\n    4. {ifname}: Interface name\n    5. {is-default-route}: Is default route\n    6. {mtu}: MTU size in bytes\n    7. {speed}: Link speed (formatted)\n    8. {flags}: Interface flags",
+            "type": "string"
+        },
+        "mediaFormat": {
+            "description": "Output format of the module `Media`. See `-h format` for formatting syntax\n    1. {combined}: Pretty media name\n    2. {title}: Media name\n    3. {artist}: Artist name\n    4. {album}: Album name\n    5. {status}: Status",
+            "type": "string"
+        },
+        "memoryFormat": {
+            "description": "Output format of the module `Memory`. See `-h format` for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)",
+            "type": "string"
+        },
+        "monitorFormat": {
+            "description": "Output format of the module `Monitor`. See `-h format` for formatting syntax\n    1. {name}: Display name\n    2. {width}: Native resolution width in pixels\n    3. {height}: Native resolution height in pixels\n    4. {physical-width}: Physical width in millimeters\n    5. {physical-height}: Physical height in millimeters\n    6. {inch}: Physical diagonal length in inches\n    7. {ppi}: Pixels per inch (PPI)\n    8. {manufacture-year}: Year of manufacturing\n    9. {manufacture-week}: Nth week of manufacturing in the year\n    10. {serial}: Serial number\n    11. {refresh-rate}: Maximum refresh rate in Hz\n    12. {hdr-compatible}: True if the display is HDR compatible",
+            "type": "string"
+        },
+        "mouseFormat": {
+            "description": "Output format of the module `Mouse`. See `-h format` for formatting syntax\n    1. {name}: Mouse name\n    2. {serial}: Mouse serial number",
+            "type": "string"
+        },
+        "netioFormat": {
+            "description": "Output format of the module `NetIO`. See `-h format` for formatting syntax\n    1. {rx-size}: Size of data received [per second] (formatted)\n    2. {tx-size}: Size of data sent [per second] (formatted)\n    3. {ifname}: Interface name\n    4. {is-default-route}: Is default route\n    5. {rx-bytes}: Size of data received [per second] (in bytes)\n    6. {tx-bytes}: Size of data sent [per second] (in bytes)\n    7. {rx-packets}: Number of packets received [per second]\n    8. {tx-packets}: Number of packets sent [per second]\n    9. {rx-errors}: Number of errors received [per second]\n    10. {tx-errors}: Number of errors sent [per second]\n    11. {rx-drops}: Number of packets dropped when receiving [per second]\n    12. {tx-drops}: Number of packets dropped when sending [per second]",
+            "type": "string"
+        },
+        "openclFormat": {
+            "description": "Output format of the module `OpenCL`. See `-h format` for formatting syntax\n    1. {version}: Platform version\n    2. {name}: Platform name\n    3. {vendor}: Platform vendor",
+            "type": "string"
+        },
+        "openglFormat": {
+            "description": "Output format of the module `OpenGL`. See `-h format` for formatting syntax\n    1. {version}: OpenGL version\n    2. {renderer}: OpenGL renderer\n    3. {vendor}: OpenGL vendor\n    4. {slv}: OpenGL shading language version\n    5. {library}: OpenGL library used",
+            "type": "string"
+        },
+        "osFormat": {
+            "description": "Output format of the module `OS`. See `-h format` for formatting syntax\n    1. {sysname}: Name of the kernel\n    2. {name}: Name of the OS\n    3. {pretty-name}: Pretty name of the OS\n    4. {id}: ID of the OS\n    5. {id-like}: ID like of the OS\n    6. {variant}: Variant of the OS\n    7. {variant-id}: Variant ID of the OS\n    8. {version}: Version of the OS\n    9. {version-id}: Version ID of the OS\n    10. {codename}: Version codename of the OS\n    11. {build-id}: Build ID of the OS\n    12. {arch}: Architecture of the OS",
+            "type": "string"
+        },
+        "packagesFormat": {
+            "description": "Output format of the module `Packages`. See `-h format` for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop}: Number of scoop packages\n    21. {choco}: Number of choco packages\n    22. {pkgtool}: Number of pkgtool packages\n    23. {paludis}: Number of paludis packages\n    24. {winget}: Number of winget packages\n    25. {opkg}: Number of opkg packages\n    26. {am}: Number of am packages\n    27. {sorcery}: Number of sorcery packages\n    28. {lpkg}: Number of lpkg packages\n    29. {lpkgbuild}: Number of lpkgbuild packages\n    30. {guix-system}: Number of guix-system packages\n    31. {guix-user}: Number of guix-user packages\n    32. {guix-home}: Number of guix-home packages\n    33. {linglong}: Number of linglong packages\n    34. {pacstall}: Number of pacstall packages\n    35. {mport}: Number of mport packages\n    36. {qi}: Number of qi packages\n    37. {nix-all}: Total number of all nix packages\n    38. {flatpak-all}: Total number of all flatpak app packages\n    39. {brew-all}: Total number of all brew packages\n    40. {guix-all}: Total number of all guix packages",
+            "type": "string"
+        },
+        "physicaldiskFormat": {
+            "description": "Output format of the module `PhysicalDisk`. See `-h format` for formatting syntax\n    1. {size}: Device size (formatted)\n    2. {name}: Device name\n    3. {interconnect}: Device interconnect type\n    4. {dev-path}: Device raw file path\n    5. {serial}: Serial number\n    6. {physical-type}: Device kind (SSD or HDD)\n    7. {removable-type}: Device kind (Removable or Fixed)\n    8. {readonly-type}: Device kind (Read-only or Read-write)\n    9. {revision}: Product revision\n    10. {temperature}: Device temperature (formatted)",
+            "type": "string"
+        },
+        "physicalmemoryFormat": {
+            "description": "Output format of the module `PhysicalMemory`. See `-h format` for formatting syntax\n    1. {bytes}: Size (in bytes)\n    2. {size}: Size formatted\n    3. {max-speed}: Max speed (in MT/s)\n    4. {running-speed}: Running speed (in MT/s)\n    5. {type}: Type (DDR4, DDR5, etc.)\n    6. {form-factor}: Form factor (SODIMM, DIMM, etc.)\n    7. {locator}: Bank/Device Locator (BANK0/SIMM0, BANK0/SIMM1, etc.)\n    8. {vendor}: Vendor\n    9. {serial}: Serial number\n    10. {part-number}: Part number\n    11. {is-ecc-enabled}: True if ECC enabled",
+            "type": "string"
+        },
+        "playerFormat": {
+            "description": "Output format of the module `Player`. See `-h format` for formatting syntax\n    1. {player}: Pretty player name\n    2. {name}: Player name\n    3. {id}: Player Identifier\n    4. {url}: URL name",
+            "type": "string"
+        },
+        "poweradapterFormat": {
+            "description": "Output format of the module `PowerAdapter`. See `-h format` for formatting syntax\n    1. {watts}: Power adapter watts\n    2. {name}: Power adapter name\n    3. {manufacturer}: Power adapter manufacturer\n    4. {model}: Power adapter model\n    5. {description}: Power adapter description\n    6. {serial}: Power adapter serial number",
+            "type": "string"
+        },
+        "processesFormat": {
+            "description": "Output format of the module `Processes`. See `-h format` for formatting syntax\n    1. {result}: Process count",
+            "type": "string"
+        },
+        "publicipFormat": {
+            "description": "Output format of the module `PublicIp`. See `-h format` for formatting syntax\n    1. {ip}: Public IP address\n    2. {location}: Location",
+            "type": "string"
+        },
+        "separatorFormat": {
+            "description": "Output format of the module `Separator`. See `-h format` for formatting syntax\n    1. {string}: Separator string\n    2. {outputColor}: Output color\n    3. {length}: Length",
+            "type": "string"
+        },
+        "shellFormat": {
+            "description": "Output format of the module `Shell`. See `-h format` for formatting syntax\n    1. {process-name}: Shell process name\n    2. {exe}: The first argument of the command line when running the shell\n    3. {exe-name}: Shell base name of arg0\n    4. {version}: Shell version\n    5. {pid}: Shell pid\n    6. {pretty-name}: Shell pretty name\n    7. {exe-path}: Shell full exe path\n    8. {tty}: Shell tty used",
+            "type": "string"
+        },
+        "soundFormat": {
+            "description": "Output format of the module `Sound`. See `-h format` for formatting syntax\n    1. {is-main}: Is main sound device\n    2. {name}: Device name\n    3. {volume-percentage}: Volume (in percentage num)\n    4. {identifier}: Identifier\n    5. {volume-percentage-bar}: Volume (in percentage bar)",
+            "type": "string"
+        },
+        "swapFormat": {
+            "description": "Output format of the module `Swap`. See `-h format` for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)",
+            "type": "string"
+        },
+        "terminalFormat": {
+            "description": "Output format of the module `Terminal`. See `-h format` for formatting syntax\n    1. {process-name}: Terminal process name\n    2. {exe}: The first argument of the command line when running the terminal\n    3. {exe-name}: Terminal base name of arg0\n    4. {pid}: Terminal pid\n    5. {pretty-name}: Terminal pretty name\n    6. {version}: Terminal version\n    7. {exe-path}: Terminal full exe path\n    8. {tty}: Terminal tty / pts used",
+            "type": "string"
+        },
+        "terminalfontFormat": {
+            "description": "Output format of the module `TerminalFont`. See `-h format` for formatting syntax\n    1. {combined}: Terminal font combined\n    2. {name}: Terminal font name\n    3. {size}: Terminal font size\n    4. {styles}: Terminal font styles",
+            "type": "string"
+        },
+        "terminalsizeFormat": {
+            "description": "Output format of the module `TerminalSize`. See `-h format` for formatting syntax\n    1. {rows}: Terminal rows\n    2. {columns}: Terminal columns\n    3. {width}: Terminal width (in pixels)\n    4. {height}: Terminal height (in pixels)",
+            "type": "string"
+        },
+        "terminalthemeFormat": {
+            "description": "Output format of the module `TerminalTheme`. See `-h format` for formatting syntax\n    1. {fg-color}: Terminal foreground color\n    2. {fg-type}: Terminal foreground type (Dark / Light)\n    3. {bg-color}: Terminal background color\n    4. {bg-type}: Terminal background type (Dark / Light)",
+            "type": "string"
+        },
+        "titleFormat": {
+            "description": "Output format of the module `Title`. See `-h format` for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)",
+            "type": "string"
+        },
+        "themeFormat": {
+            "description": "Output format of the module `Theme`. See `-h format` for formatting syntax\n    1. {theme1}: Theme part 1\n    2. {theme2}: Theme part 2",
+            "type": "string"
+        },
+        "tpmFormat": {
+            "description": "Output format of the module `TPM`. See `-h format` for formatting syntax\n    1. {version}: TPM device version\n    2. {description}: TPM general description",
+            "type": "string"
+        },
+        "uptimeFormat": {
+            "description": "Output format of the module `Uptime`. See `-h format` for formatting syntax\n    1. {days}: Days\n    2. {hours}: Hours\n    3. {minutes}: Minutes\n    4. {seconds}: Seconds\n    5. {milliseconds}: Milliseconds\n    6. {boot-time}: Boot time in local timezone",
+            "type": "string"
+        },
+        "usersFormat": {
+            "description": "Output format of the module `Users`. See `-h format` for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone",
+            "type": "string"
+        },
+        "versionFormat": {
+            "description": "Output format of the module `Version`. See `-h format` for formatting syntax\n    1. {name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
+            "type": "string"
+        },
+        "vulkanFormat": {
+            "description": "Output format of the module `Vulkan`. See `-h format` for formatting syntax\n    1. {driver}: Driver name\n    2. {api-version}: API version\n    3. {conformance-version}: Conformance version\n    4. {instance-version}: Instance version",
+            "type": "string"
+        },
+        "wallpaperFormat": {
+            "description": "Output format of the module `Wallpaper`. See `-h format` for formatting syntax\n    1. {file-name}: File name\n    2. {full-path}: Full path",
+            "type": "string"
+        },
+        "weatherFormat": {
+            "description": "Output format of the module `Weather`. See `-h format` for formatting syntax\n    1. {result}: Weather result",
+            "type": "string"
+        },
+        "wmFormat": {
+            "description": "Output format of the module `WM`. See `-h format` for formatting syntax\n    1. {process-name}: WM process name\n    2. {pretty-name}: WM pretty name\n    3. {protocol-name}: WM protocol name\n    4. {plugin-name}: WM plugin name",
+            "type": "string"
+        },
+        "wifiFormat": {
+            "description": "Output format of the module `Wifi`. See `-h format` for formatting syntax\n    1. {inf-desc}: Interface description\n    2. {inf-status}: Interface status\n    3. {status}: Connection status\n    4. {ssid}: Connection SSID\n    5. {bssid}: Connection BSSID\n    6. {protocol}: Connection protocol\n    7. {signal-quality}: Connection signal quality (percentage num)\n    8. {rx-rate}: Connection RX rate\n    9. {tx-rate}: Connection TX rate\n    10. {security}: Connection Security algorithm\n    11. {signal-quality-bar}: Connection signal quality (percentage bar)\n    12. {channel}: Connection channel number\n    13. {band}: Connection channel band in GHz",
+            "type": "string"
+        },
+        "wmthemeFormat": {
+            "description": "Output format of the module `WMTheme`. See `-h format` for formatting syntax\n    1. {result}: WM theme",
+            "type": "string"
+        },
+        "zpoolFormat": {
+            "description": "Output format of the module `Zpool`. See `-h format` for formatting syntax\n    1. {name}: Zpool name\n    2. {state}: Zpool state\n    3. {used}: Size used\n    4. {total}: Size total\n    5. {used-percentage}: Size percentage num\n    6. {fragmentation-percentage}: Fragmentation percentage num\n    7. {used-percentage-bar}: Size percentage bar\n    8. {fragmentation-percentage-bar}: Fragmentation percentage bar",
+            "type": "string"
         }
     },
     "type": "object",
@@ -771,180 +1049,6 @@
                                 }
                             },
                             {
-                                "title": "module",
-                                "description": "No additional properties",
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "type": {
-                                        "anyOf": [
-                                            {
-                                                "const": "bios",
-                                                "description": "Print information of 1st-stage bootloader (name, version, release date, etc)"
-                                            },
-                                            {
-                                                "const": "board",
-                                                "description": "Print motherboard name and other info"
-                                            },
-                                            {
-                                                "const": "bootmgr",
-                                                "description": "Print information of 2nd-stage bootloader (name, firmware, etc)"
-                                            },
-                                            {
-                                                "const": "camera",
-                                                "description": "Print available cameras"
-                                            },
-                                            {
-                                                "const": "cpucache",
-                                                "description": "Print CPU cache sizes"
-                                            },
-                                            {
-                                                "const": "cursor",
-                                                "description": "Print cursor style name"
-                                            },
-                                            {
-                                                "const": "datetime",
-                                                "description": "Print current date and time"
-                                            },
-                                            {
-                                                "const": "editor",
-                                                "description": "Print information of the default editor ($VISUAL or $EDITOR)"
-                                            },
-                                            {
-                                                "const": "font",
-                                                "description": "Print system font name"
-                                            },
-                                            {
-                                                "const": "host",
-                                                "description": "Print product name of your computer"
-                                            },
-                                            {
-                                                "const": "icons",
-                                                "description": "Print icon style name"
-                                            },
-                                            {
-                                                "const": "initsystem",
-                                                "description": "Print init system (pid 1) name and version"
-                                            },
-                                            {
-                                                "const": "kernel",
-                                                "description": "Print system kernel version"
-                                            },
-                                            {
-                                                "const": "lm",
-                                                "description": "Print login manager (desktop manager) name and version"
-                                            },
-                                            {
-                                                "const": "locale",
-                                                "description": "Print system locale name"
-                                            },
-                                            {
-                                                "const": "media",
-                                                "description": "Print playing song name"
-                                            },
-                                            {
-                                                "const": "monitor",
-                                                "description": "Alias of Display module"
-                                            },
-                                            {
-                                                "const": "opencl",
-                                                "description": "Print highest OpenCL version supported by the GPU"
-                                            },
-                                            {
-                                                "const": "os",
-                                                "description": "Print operating system name and version"
-                                            },
-                                            {
-                                                "const": "physicalmemory",
-                                                "description": "Print system physical memory devices"
-                                            },
-                                            {
-                                                "const": "player",
-                                                "description": "Print music player name"
-                                            },
-                                            {
-                                                "const": "poweradapter",
-                                                "description": "Print power adapter name and charging watts"
-                                            },
-                                            {
-                                                "const": "processes",
-                                                "description": "Count running processes"
-                                            },
-                                            {
-                                                "const": "shell",
-                                                "description": "Print current shell name and version"
-                                            },
-                                            {
-                                                "const": "terminal",
-                                                "description": "Print current terminal name and version"
-                                            },
-                                            {
-                                                "const": "terminalfont",
-                                                "description": "Print font name and size used by current terminal"
-                                            },
-                                            {
-                                                "const": "terminalsize",
-                                                "description": "Print current terminal size"
-                                            },
-                                            {
-                                                "const": "terminaltheme",
-                                                "description": "Print current terminal theme (foreground and background colors)"
-                                            },
-                                            {
-                                                "const": "theme",
-                                                "description": "Print current theme of desktop environment"
-                                            },
-                                            {
-                                                "const": "tpm",
-                                                "description": "Print info of Trusted Platform Module (TPM) Security Device"
-                                            },
-                                            {
-                                                "const": "uptime",
-                                                "description": "Print how long system has been running"
-                                            },
-                                            {
-                                                "const": "version",
-                                                "description": "Print Fastfetch version"
-                                            },
-                                            {
-                                                "const": "vulkan",
-                                                "description": "Print highest Vulkan version supported by the GPU"
-                                            },
-                                            {
-                                                "const": "wallpaper",
-                                                "description": "Print image file path of current wallpaper"
-                                            },
-                                            {
-                                                "const": "wifi",
-                                                "description": "Print connected Wi-Fi info (SSID, connection and security protocol)"
-                                            },
-                                            {
-                                                "const": "wmtheme",
-                                                "description": "Print current theme of window manager"
-                                            }
-                                        ]
-                                    },
-                                    "key": {
-                                        "$ref": "#/$defs/key"
-                                    },
-                                    "keyColor": {
-                                        "$ref": "#/$defs/keyColor"
-                                    },
-                                    "keyIcon": {
-                                        "$ref": "#/$defs/keyIcon"
-                                    },
-                                    "keyWidth": {
-                                        "$ref": "#/$defs/keyWidth"
-                                    },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
-                                    },
-                                    "format": {
-                                        "$ref": "#/$defs/format"
-                                    }
-                                }
-                            },
-                            {
                                 "title": "Battery",
                                 "type": "object",
                                 "additionalProperties": false,
@@ -980,7 +1084,36 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/batteryFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "BIOS",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "description": "Print information of 1st-stage bootloader (name, version, release date, etc)",
+                                        "const": "bios"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/biosFormat"
                                     }
                                 }
                             },
@@ -1017,7 +1150,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/bluetoothFormat"
                                     }
                                 }
                             },
@@ -1046,7 +1179,65 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/bluetoothradioFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Board",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "description": "Print motherboard name and other info",
+                                        "const": "board"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/boardFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Boot Manager",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "description": "Print information of 2nd-stage bootloader (name, firmware, etc)",
+                                        "const": "bootmgr"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/bootmgrFormat"
                                     }
                                 }
                             },
@@ -1090,7 +1281,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/brightnessFormat"
                                     }
                                 }
                             },
@@ -1101,7 +1292,7 @@
                                 "properties": {
                                     "type": {
                                         "const": "btrfs",
-                                        "description": "Print Btrfs volumes"
+                                        "description": "Print Linux BTRFS volumes"
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -1122,7 +1313,36 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/btrfsFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Camera",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "description": "Print available cameras",
+                                        "const": "camera"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/cameraFormat"
                                     }
                                 }
                             },
@@ -1151,7 +1371,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/chassisFormat"
                                     }
                                 }
                             },
@@ -1188,7 +1408,39 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/cpuFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "CPU Cache",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "cpucache",
+                                        "description": "Print CPU cache sizes"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/cpucacheFormat"
                                     }
                                 }
                             },
@@ -1231,7 +1483,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/cpuusageFormat"
                                     }
                                 }
                             },
@@ -1333,7 +1585,39 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/commandFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Cursor",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "cursor",
+                                        "description": "Print cursor style name"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/cursorFormat"
                                     }
                                 }
                             },
@@ -1365,6 +1649,38 @@
                                     "format": {
                                         "description": "Text to print",
                                         "type": "string"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Date Time",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "datetime",
+                                        "description": "Print current date and time"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/datetimeFormat"
                                     }
                                 }
                             },
@@ -1418,7 +1734,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/displayFormat"
                                     }
                                 }
                             },
@@ -1484,7 +1800,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/diskFormat"
                                     }
                                 }
                             },
@@ -1528,12 +1844,12 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/diskioFormat"
                                     }
                                 }
                             },
                             {
-                                "title": "DE",
+                                "title": "Desktop Environment",
                                 "type": "object",
                                 "additionalProperties": false,
                                 "properties": {
@@ -1562,7 +1878,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/deFormat"
                                     }
                                 }
                             },
@@ -1600,7 +1916,71 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/dnsFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Editor",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "editor",
+                                        "description": "Print information of the default editor ($VISUAL or $EDITOR)"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/editorFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Font",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "font",
+                                        "description": "Print system font names"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/fontFormat"
                                     }
                                 }
                             },
@@ -1632,7 +2012,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/gamepadFormat"
                                     }
                                 }
                             },
@@ -1690,7 +2070,152 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/gpuFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Host",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "host",
+                                        "description": "Print product name of your computer"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/hostFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Icons",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "icons",
+                                        "description": "Print icon style name"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/iconsFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Init System",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "initsystem",
+                                        "description": "Print init system (pid 1) name and version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/initsystemFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Kernel",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "kernel",
+                                        "description": "Print system kernel version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/kernelFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Login Manager",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "lm",
+                                        "description": "Print login manager (desktop manager) name and version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/lmFormat"
                                     }
                                 }
                             },
@@ -1778,39 +2303,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
-                                    }
-                                }
-                            },
-                            {
-                                "title": "Memory",
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "type": {
-                                        "const": "memory",
-                                        "description": "Print system memory usage info"
-                                    },
-                                    "percent": {
-                                        "$ref": "#/$defs/percent"
-                                    },
-                                    "key": {
-                                        "$ref": "#/$defs/key"
-                                    },
-                                    "keyColor": {
-                                        "$ref": "#/$defs/keyColor"
-                                    },
-                                    "keyIcon": {
-                                        "$ref": "#/$defs/keyIcon"
-                                    },
-                                    "keyWidth": {
-                                        "$ref": "#/$defs/keyWidth"
-                                    },
-                                    "outputColor": {
-                                        "$ref": "#/$defs/outputColor"
-                                    },
-                                    "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/localipFormat"
                                     }
                                 }
                             },
@@ -1854,7 +2347,126 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/loadavgFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Locale",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "locale",
+                                        "description": "Print system locale name"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/localeFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Media",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "media",
+                                        "description": "Print song name of currently playing"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/mediaFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Memory",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "memory",
+                                        "description": "Print system memory usage info"
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/memoryFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Monitor",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "monitor",
+                                        "description": "Alias of Display module (for backwards compatibility, deprecated)"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/monitorFormat"
                                     }
                                 }
                             },
@@ -1903,7 +2515,36 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/netioFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "OpenCL",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "opencl",
+                                        "description": "Print highest OpenCL version supported by the GPU"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/openclFormat"
                                     }
                                 }
                             },
@@ -1942,7 +2583,36 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/openglFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Operating System",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "os",
+                                        "description": "Print OS / or Linux distro name and version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/osFormat"
                                     }
                                 }
                             },
@@ -2010,7 +2680,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/packagesFormat"
                                     }
                                 }
                             },
@@ -2046,7 +2716,123 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/physicaldiskFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Physical Memory",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "physicalmemory",
+                                        "description": "Print system physical memory devices"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/physicalmemoryFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Player",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "player",
+                                        "description": "Print music player name"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/playerFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Power Adapter",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "poweradapter",
+                                        "description": "Print power adapter name and charging watts"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/poweradapterFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Processes",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "processes",
+                                        "description": "Count running processes"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/processesFormat"
                                     }
                                 }
                             },
@@ -2092,7 +2878,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/publicipFormat"
                                     }
                                 }
                             },
@@ -2119,6 +2905,35 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Shell",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "shell",
+                                        "description": "Print current shell name and version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/shellFormat"
                                     }
                                 }
                             },
@@ -2160,7 +2975,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/soundFormat"
                                     }
                                 }
                             },
@@ -2192,7 +3007,152 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/swapFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Terminal",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "terminal",
+                                        "description": "Print current terminal name and version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/terminalFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Terminal Font",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "terminalfont",
+                                        "description": "Print font name and size used by current terminal"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/terminalfontFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Terminal Size",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "terminalsize",
+                                        "description": "Print current terminal size"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/terminalsizeFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Terminal Theme",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "terminaltheme",
+                                        "description": "Print current terminal theme (foreground and background colors)"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/terminalthemeFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Theme",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "theme",
+                                        "description": "Print current theme of desktop environment"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/themeFormat"
                                     }
                                 }
                             },
@@ -2245,7 +3205,36 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/titleFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "TPM",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "tpm",
+                                        "description": "Print info of Trusted Platform Module (TPM) Security Device"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/tpmFormat"
                                     }
                                 }
                             },
@@ -2284,7 +3273,123 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/usersFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Uptime",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "uptime",
+                                        "description": "Print how long system has been running"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/uptimeFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Version",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "version",
+                                        "description": "Print Fastfetch version"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/versionFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Vulkan",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "vulkan",
+                                        "description": "Print highest Vulkan version supported by the GPU"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/vulkanFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Wallpaper",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "wallpaper",
+                                        "description": "Print image file path of current wallpaper"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/wallpaperFormat"
                                     }
                                 }
                             },
@@ -2328,12 +3433,41 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/weatherFormat"
                                     }
                                 }
                             },
                             {
-                                "title": "WM",
+                                "title": "Wi-Fi",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "wifi",
+                                        "description": "Print connected Wi-Fi info (SSID, connection and security protocol)"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/wifiFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Window Manager",
                                 "type": "object",
                                 "additionalProperties": false,
                                 "properties": {
@@ -2362,7 +3496,36 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/wmFormat"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "WM Theme",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "wmtheme",
+                                        "description": "Print current theme of window manager"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/wmthemeFormat"
                                     }
                                 }
                             },
@@ -2394,7 +3557,7 @@
                                         "$ref": "#/$defs/outputColor"
                                     },
                                     "format": {
-                                        "$ref": "#/$defs/format"
+                                        "$ref": "#/$defs/zpoolFormat"
                                     }
                                 }
                             }

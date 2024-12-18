@@ -7,8 +7,6 @@
 
 #include <ctype.h>
 
-#define FF_OS_NUM_FORMAT_ARGS 12
-
 static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
 {
     //Create the basic output
@@ -111,7 +109,7 @@ void ffPrintOS(FFOSOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_OS_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(instance.state.platform.sysinfo.name, "sysname"),
             FF_FORMAT_ARG(os->name, "name"),
             FF_FORMAT_ARG(os->prettyName, "pretty-name"),
@@ -186,37 +184,33 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "versionID", &os->versionID);
 }
 
-void ffPrintOSHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_OS_MODULE_NAME, "{3} {10} {12}", FF_OS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name of the kernel (Linux, WIN32_NT, Darwin, FreeBSD) - sysname",
-        "Name of the OS - name",
-        "Pretty name of the OS - pretty-name",
-        "ID of the OS - id",
-        "ID like of the OS - id-like",
-        "Variant of the OS - variant",
-        "Variant ID of the OS - variant-id",
-        "Version of the OS - version",
-        "Version ID of the OS - version-id",
-        "Version codename of the OS - codename",
-        "Build ID of the OS - build-id",
-        "Architecture of the OS - arch",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_OS_MODULE_NAME,
+    .description = "Print operating system name and version",
+    .parseCommandOptions = (void*) ffParseOSCommandOptions,
+    .parseJsonObject = (void*) ffParseOSJsonObject,
+    .printModule = (void*) ffPrintOS,
+    .generateJsonResult = (void*) ffGenerateOSJsonResult,
+    .generateJsonConfig = (void*) ffGenerateOSJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Name of the kernel", "sysname"},
+        {"Name of the OS", "name"},
+        {"Pretty name of the OS", "pretty-name"},
+        {"ID of the OS", "id"},
+        {"ID like of the OS", "id-like"},
+        {"Variant of the OS", "variant"},
+        {"Variant ID of the OS", "variant-id"},
+        {"Version of the OS", "version"},
+        {"Version ID of the OS", "version-id"},
+        {"Version codename of the OS", "codename"},
+        {"Build ID of the OS", "build-id"},
+        {"Architecture of the OS", "arch"},
+    }))
+};
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_OS_MODULE_NAME,
-        "Print operating system name and version",
-        ffParseOSCommandOptions,
-        ffParseOSJsonObject,
-        ffPrintOS,
-        ffGenerateOSJsonResult,
-        ffPrintOSHelpFormat,
-        ffGenerateOSJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs,
         #ifdef _WIN32
             ""

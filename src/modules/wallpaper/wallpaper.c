@@ -4,8 +4,6 @@
 #include "modules/wallpaper/wallpaper.h"
 #include "util/stringUtils.h"
 
-#define FF_WALLPAPER_NUM_FORMAT_ARGS 2
-
 void ffPrintWallpaper(FFWallpaperOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
@@ -35,7 +33,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WALLPAPER_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(filename, "file-name"),
             FF_FORMAT_ARG(fullpath, "full-path"),
         }));
@@ -89,27 +87,23 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
 }
 
-void ffPrintWallpaperHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WALLPAPER_MODULE_NAME, "{1}", FF_WALLPAPER_NUM_FORMAT_ARGS, ((const char* []) {
-        "File name - file-name",
-        "Full path - full-path",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_WALLPAPER_MODULE_NAME,
+    .description = "Print image file path of current wallpaper",
+    .parseCommandOptions = (void*) ffParseWallpaperCommandOptions,
+    .parseJsonObject = (void*) ffParseWallpaperJsonObject,
+    .printModule = (void*) ffPrintWallpaper,
+    .generateJsonResult = (void*) ffGenerateWallpaperJsonResult,
+    .generateJsonConfig = (void*) ffGenerateWallpaperJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"File name", "file-name"},
+        {"Full path", "full-path"},
+    }))
+};
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_WALLPAPER_MODULE_NAME,
-        "Print image file path of current wallpaper",
-        ffParseWallpaperCommandOptions,
-        ffParseWallpaperJsonObject,
-        ffPrintWallpaper,
-        ffGenerateWallpaperJsonResult,
-        ffPrintWallpaperHelpFormat,
-        ffGenerateWallpaperJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
 }
 

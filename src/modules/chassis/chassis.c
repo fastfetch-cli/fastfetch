@@ -4,8 +4,6 @@
 #include "modules/chassis/chassis.h"
 #include "util/stringUtils.h"
 
-#define FF_CHASSIS_NUM_FORMAT_ARGS 4
-
 void ffPrintChassis(FFChassisOptions* options)
 {
     FFChassisResult result;
@@ -38,7 +36,7 @@ void ffPrintChassis(FFChassisOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CHASSIS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_CHASSIS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(result.type, "type"),
             FF_FORMAT_ARG(result.vendor, "vendor"),
             FF_FORMAT_ARG(result.version, "version"),
@@ -123,29 +121,25 @@ exit:
     ffStrbufDestroy(&result.serial);
 }
 
-void ffPrintChassisHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CHASSIS_MODULE_NAME, "{1}", FF_CHASSIS_NUM_FORMAT_ARGS, ((const char* []) {
-        "chassis type - type",
-        "chassis vendor - vendor",
-        "chassis version - version",
-        "chassis serial number - serial",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_CHASSIS_MODULE_NAME,
+    .description = "Print chassis type (desktop, laptop, etc)",
+    .parseCommandOptions = (void*) ffParseChassisCommandOptions,
+    .parseJsonObject = (void*) ffParseChassisJsonObject,
+    .printModule = (void*) ffPrintChassis,
+    .generateJsonResult = (void*) ffGenerateChassisJsonResult,
+    .generateJsonConfig = (void*) ffGenerateChassisJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Chassis type", "type"},
+        {"Chassis vendor", "vendor"},
+        {"Chassis version", "version"},
+        {"Chassis serial number", "serial"},
+    })),
+};
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_CHASSIS_MODULE_NAME,
-        "Print chassis type (desktop, laptop, etc)",
-        ffParseChassisCommandOptions,
-        ffParseChassisJsonObject,
-        ffPrintChassis,
-        ffGenerateChassisJsonResult,
-        ffPrintChassisHelpFormat,
-        ffGenerateChassisJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

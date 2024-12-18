@@ -63,6 +63,10 @@ const char* ffDetectHost(FFHostResult* host)
             ffStrbufSetStatic(&host->vendor, "Apple Inc.");
     }
 
+    #ifdef __x86_64__
+    ffHostDetectMac(host);
+    #endif
+
     //KVM/Qemu virtual machine
     if(ffStrbufStartsWithS(&host->name, "Standard PC"))
         ffStrbufPrependS(&host->name, "KVM/QEMU ");

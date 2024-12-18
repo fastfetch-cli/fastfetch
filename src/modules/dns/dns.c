@@ -4,8 +4,6 @@
 #include "modules/dns/dns.h"
 #include "util/stringUtils.h"
 
-#define FF_DNS_NUM_FORMAT_ARGS 1
-
 void ffPrintDNS(FFDNSOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
@@ -48,7 +46,7 @@ void ffPrintDNS(FFDNSOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_DNS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(buf, "result"),
         }));
     }
@@ -166,26 +164,22 @@ exit:
     }
 }
 
-void ffPrintDNSHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_DNS_MODULE_NAME, "{1}", FF_DNS_NUM_FORMAT_ARGS, ((const char* []) {
-        "DNS result - result",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_DNS_MODULE_NAME,
+    .description = "Print configured DNS servers",
+    .parseCommandOptions = (void*) ffParseDNSCommandOptions,
+    .parseJsonObject = (void*) ffParseDNSJsonObject,
+    .printModule = (void*) ffPrintDNS,
+    .generateJsonResult = (void*) ffGenerateDNSJsonResult,
+    .generateJsonConfig = (void*) ffGenerateDNSJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"DNS result", "result"},
+    }))
+};
 
 void ffInitDNSOptions(FFDNSOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_DNS_MODULE_NAME,
-        "Print configured DNS servers",
-        ffParseDNSCommandOptions,
-        ffParseDNSJsonObject,
-        ffPrintDNS,
-        ffGenerateDNSJsonResult,
-        ffPrintDNSHelpFormat,
-        ffGenerateDNSJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰇖");
 
     options->showType = FF_DNS_TYPE_BOTH;

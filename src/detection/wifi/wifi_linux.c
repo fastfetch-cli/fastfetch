@@ -285,7 +285,7 @@ static const char* detectWifiWithIoctls(FFWifiResult* item)
     {
         for(int i = 0; i < 6; ++i)
             ffStrbufAppendF(&item->conn.bssid, "%.2X:", (uint8_t) iwr.u.ap_addr.sa_data[i]);
-        ffStrbufTrimRight(&item->conn.bssid, '-');
+        ffStrbufTrimRight(&item->conn.bssid, ':');
     }
 
     if(ioctl(sock, SIOCGIWRATE, &iwr) >= 0)

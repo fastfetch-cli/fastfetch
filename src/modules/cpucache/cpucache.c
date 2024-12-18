@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_CPUCACHE_DISPLAY_NAME "CPU Cache"
-#define FF_CPUCACHE_NUM_FORMAT_ARGS 2
 
 static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOptions* options)
 {
@@ -22,7 +21,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
         else
         {
             uint32_t index = i + 1;
-            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                 FF_FORMAT_ARG(index, "index"),
                 FF_FORMAT_ARG(levelStr, "level"),
                 FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -61,7 +60,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
         {
             FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
             ffParseSize(sum, &buffer2);
-            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_CPUCACHE_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                 FF_FORMAT_ARG(buffer, "result"),
                 FF_FORMAT_ARG(buffer2, "sum"),
             }));
@@ -94,7 +93,7 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
     {
         FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
         ffParseSize(sum, &buffer2);
-        FF_PRINT_FORMAT_CHECKED(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CPUCACHE_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(buffer, "result"),
             FF_FORMAT_ARG(buffer2, "sum"),
         }));
@@ -228,27 +227,23 @@ exit:
     ffListDestroy(&result.caches[3]);
 }
 
-void ffPrintCPUCacheHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CPUCACHE_DISPLAY_NAME, "{1}", FF_CPUCACHE_NUM_FORMAT_ARGS, ((const char* []) {
-        "Separate result - result",
-        "Sum result - sum",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_CPUCACHE_MODULE_NAME,
+    .description = "Print CPU cache sizes",
+    .parseCommandOptions = (void*) ffParseCPUCacheCommandOptions,
+    .parseJsonObject = (void*) ffParseCPUCacheJsonObject,
+    .printModule = (void*) ffPrintCPUCache,
+    .generateJsonResult = (void*) ffGenerateCPUCacheJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCPUCacheJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Separate result", "result"},
+        {"Sum result", "sum"},
+    }))
+};
 
 void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_CPUCACHE_MODULE_NAME,
-        "Print CPU cache sizes",
-        ffParseCPUCacheCommandOptions,
-        ffParseCPUCacheJsonObject,
-        ffPrintCPUCache,
-        ffGenerateCPUCacheJsonResult,
-        ffPrintCPUCacheHelpFormat,
-        ffGenerateCPUCacheJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;

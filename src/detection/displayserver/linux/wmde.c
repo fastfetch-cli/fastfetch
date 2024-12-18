@@ -126,8 +126,14 @@ static void applyPrettyNameIfWM(FFDisplayServerResult* result, const char* name)
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_ICEWM);
     else if(ffStrEqualsIgnCase(name, "dtwm"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_DTWM);
+    else if(ffStrEqualsIgnCase(name, "fvwm"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_FVWM);
+    else if(ffStrEqualsIgnCase(name, "ctwm"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_CTWM);
     else if(ffStrEqualsIgnCase(name, "hyprland"))
         ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_HYPRLAND);
+    else if(ffStrEqualsIgnCase(name, "ratpoison"))
+        ffStrbufSetS(&result->wmPrettyName, FF_WM_PRETTY_RATPOISON);
 }
 
 static void applyNameIfWM(FFDisplayServerResult* result, const char* processName)
@@ -296,10 +302,10 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
         for (int i = 0; i < count; ++i)
         {
             if(result->dePrettyName.length == 0)
-                applyPrettyNameIfDE(result, proc->p_comm);
+                applyPrettyNameIfDE(result, proc[i].p_comm);
 
             if(result->wmPrettyName.length == 0)
-                applyNameIfWM(result, proc->p_comm);
+                applyNameIfWM(result, proc[i].p_comm);
 
             if(result->dePrettyName.length > 0 && result->wmPrettyName.length > 0)
                 break;

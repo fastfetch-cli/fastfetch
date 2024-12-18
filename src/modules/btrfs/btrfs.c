@@ -5,8 +5,6 @@
 #include "modules/btrfs/btrfs.h"
 #include "util/stringUtils.h"
 
-#define FF_BTRFS_NUM_FORMAT_ARGS 13
-
 static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t index)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -20,7 +18,7 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     else
     {
         ffStrbufClear(&buffer);
-        FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 3, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(result->name, "name"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -80,7 +78,7 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
         FF_STRBUF_AUTO_DESTROY sectorSizePretty = ffStrbufCreate();
         ffParseSize(result->sectorSize, &sectorSizePretty);
 
-        FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_BTRFS_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),
             FF_FORMAT_ARG(result->uuid, "uuid"),
             FF_FORMAT_ARG(result->devices, "devices"),
@@ -218,38 +216,34 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
     }
 }
 
-void ffPrintBtrfsHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_BTRFS_MODULE_NAME, "{5} / {7} ({8}, {9} allocated)", FF_BTRFS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name / Label - name",
-        "UUID - uuid",
-        "Associated devices - devices",
-        "Enabled features - features",
-        "Size used - used",
-        "Size allocated - allocated",
-        "Size total - total",
-        "Used percentage num - used-percentage",
-        "Allocated percentage num - allocated-percentage",
-        "Used percentage bar - used-percentage-bar",
-        "Allocated percentage bar - allocated-percentage-bar",
-        "Node size - node-size",
-        "Sector size - sector-size",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_BTRFS_MODULE_NAME,
+    .description = "Print Linux BTRFS volumes",
+    .parseCommandOptions = (void*) ffParseBtrfsCommandOptions,
+    .parseJsonObject = (void*) ffParseBtrfsJsonObject,
+    .printModule = (void*) ffPrintBtrfs,
+    .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,
+    .generateJsonConfig = (void*) ffGenerateBtrfsJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Name / Label", "name"},
+        {"UUID", "uuid"},
+        {"Associated devices", "devices"},
+        {"Enabled features", "features"},
+        {"Size used", "used"},
+        {"Size allocated", "allocated"},
+        {"Size total", "total"},
+        {"Used percentage num", "used-percentage"},
+        {"Allocated percentage num", "allocated-percentage"},
+        {"Used percentage bar", "used-percentage-bar"},
+        {"Allocated percentage bar", "allocated-percentage-bar"},
+        {"Node size", "node-size"},
+        {"Sector size", "sector-size"},
+    }))
+};
 
 void ffInitBtrfsOptions(FFBtrfsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_BTRFS_MODULE_NAME,
-        "Print BTRFS volumes",
-        ffParseBtrfsCommandOptions,
-        ffParseBtrfsJsonObject,
-        ffPrintBtrfs,
-        ffGenerateBtrfsJsonResult,
-        ffPrintBtrfsHelpFormat,
-        ffGenerateBtrfsJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

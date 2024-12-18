@@ -5,8 +5,6 @@
 #include "modules/camera/camera.h"
 #include "util/stringUtils.h"
 
-#define FF_CAMERA_NUM_FORMAT_ARGS 6
-
 static void printDevice(FFCameraOptions* options, const FFCameraResult* device, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
@@ -27,7 +25,7 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_CAMERA_NUM_FORMAT_ARGS, (((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_CAMERA_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, (((FFformatarg[]) {
             FF_FORMAT_ARG(device->name, "name"),
             FF_FORMAT_ARG(device->vendor, "vendor"),
             FF_FORMAT_ARG(device->colorspace, "colorspace"),
@@ -136,31 +134,27 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     }
 }
 
-void ffPrintCameraHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_CAMERA_MODULE_NAME, "{1} ({4}px x {5}px)", FF_CAMERA_NUM_FORMAT_ARGS, ((const char* []) {
-        "Device name - name",
-        "Vendor - vendor",
-        "Color space - colorspace",
-        "Identifier - id",
-        "Width (in px) - width",
-        "Height (in px) - height",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_CAMERA_MODULE_NAME,
+    .description = "Print available cameras",
+    .parseCommandOptions = (void*) ffParseCameraCommandOptions,
+    .parseJsonObject = (void*) ffParseCameraJsonObject,
+    .printModule = (void*) ffPrintCamera,
+    .generateJsonResult = (void*) ffGenerateCameraJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCameraJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Device name", "name"},
+        {"Vendor", "vendor"},
+        {"Color space", "colorspace"},
+        {"Identifier", "id"},
+        {"Width (in px)", "width"},
+        {"Height (in px)", "height"},
+    }))
+};
 
 void ffInitCameraOptions(FFCameraOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_CAMERA_MODULE_NAME,
-        "Print available cameras",
-        ffParseCameraCommandOptions,
-        ffParseCameraJsonObject,
-        ffPrintCamera,
-        ffGenerateCameraJsonResult,
-        ffPrintCameraHelpFormat,
-        ffGenerateCameraJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
 }
 

@@ -5,8 +5,6 @@
 #include "modules/zpool/zpool.h"
 #include "util/stringUtils.h"
 
-#define FF_ZPOOL_NUM_FORMAT_ARGS 8
-
 static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t index)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -20,7 +18,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     else
     {
         ffStrbufClear(&buffer);
-        FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 3, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(result->name, "name"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -64,7 +62,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffPercentAppendBar(&fragPercentageBar, result->fragmentation, options->percent, &options->moduleArgs);
 
-        FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_ZPOOL_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),
             FF_FORMAT_ARG(result->state, "state"),
             FF_FORMAT_ARG(usedPretty, "size-used"),
@@ -182,33 +180,29 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
     }
 }
 
-void ffPrintZpoolHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_ZPOOL_MODULE_NAME, "{3} / {4} ({5}, {6} frag)", FF_ZPOOL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Zpool name - name",
-        "Zpool state - state",
-        "Size used - size-used",
-        "Size total - size-total",
-        "Size percentage num - size-percentage",
-        "Fragmentation percentage num - frag-percentage",
-        "Size percentage bar - size-percentage-bar",
-        "Fragmentation percentage bar - frag-percentage-bar",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_ZPOOL_MODULE_NAME,
+    .description = "Print ZFS storage pools",
+    .parseCommandOptions = (void*) ffParseZpoolCommandOptions,
+    .parseJsonObject = (void*) ffParseZpoolJsonObject,
+    .printModule = (void*) ffPrintZpool,
+    .generateJsonResult = (void*) ffGenerateZpoolJsonResult,
+    .generateJsonConfig = (void*) ffGenerateZpoolJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Zpool name", "name"},
+        {"Zpool state", "state"},
+        {"Size used", "used"},
+        {"Size total", "total"},
+        {"Size percentage num", "used-percentage"},
+        {"Fragmentation percentage num", "fragmentation-percentage"},
+        {"Size percentage bar", "used-percentage-bar"},
+        {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
+    }))
+};
 
 void ffInitZpoolOptions(FFZpoolOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_ZPOOL_MODULE_NAME,
-        "Print ZFS storage pools",
-        ffParseZpoolCommandOptions,
-        ffParseZpoolJsonObject,
-        ffPrintZpool,
-        ffGenerateZpoolJsonResult,
-        ffPrintZpoolHelpFormat,
-        ffGenerateZpoolJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

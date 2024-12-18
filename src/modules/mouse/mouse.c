@@ -5,8 +5,6 @@
 #include "modules/mouse/mouse.h"
 #include "util/stringUtils.h"
 
-#define FF_MOUSE_NUM_FORMAT_ARGS 2
-
 static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
@@ -16,7 +14,7 @@ static void printDevice(FFMouseOptions* options, const FFMouseDevice* device, ui
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_MOUSE_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_MOUSE_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_MOUSE_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->name, "name"),
             FF_FORMAT_ARG(device->serial, "serial"),
         }));
@@ -112,27 +110,23 @@ void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_m
     }
 }
 
-void ffPrintMouseHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MOUSE_MODULE_NAME, "{1} ({3})", FF_MOUSE_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name - name",
-        "Serial number - serial",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_MOUSE_MODULE_NAME,
+    .description = "List connected mouses",
+    .parseCommandOptions = (void*) ffParseMouseCommandOptions,
+    .parseJsonObject = (void*) ffParseMouseJsonObject,
+    .printModule = (void*) ffPrintMouse,
+    .generateJsonResult = (void*) ffGenerateMouseJsonResult,
+    .generateJsonConfig = (void*) ffGenerateMouseJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Mouse name", "name"},
+        {"Mouse serial number", "serial"},
+    }))
+};
 
 void ffInitMouseOptions(FFMouseOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_MOUSE_MODULE_NAME,
-        "List connected mouses",
-        ffParseMouseCommandOptions,
-        ffParseMouseJsonObject,
-        ffPrintMouse,
-        ffGenerateMouseJsonResult,
-        ffPrintMouseHelpFormat,
-        ffGenerateMouseJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
 }
 

@@ -5,8 +5,6 @@
 #include "modules/sound/sound.h"
 #include "util/stringUtils.h"
 
-#define FF_SOUND_NUM_FORMAT_ARGS 5
-
 static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, uint8_t index)
 {
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -54,7 +52,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
             ffPercentAppendBar(&percentageBar, device->volume, options->percent, &options->moduleArgs);
 
-        FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_SOUND_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->main, "is-main"),
             FF_FORMAT_ARG(device->name, "name"),
             FF_FORMAT_ARG(percentageNum, "volume-percentage"),
@@ -229,30 +227,26 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     }
 }
 
-void ffPrintSoundHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_SOUND_MODULE_NAME, "{2} ({3}%)", FF_SOUND_NUM_FORMAT_ARGS, ((const char* []) {
-        "Is main sound device - is-main",
-        "Device name - name",
-        "Volume (in percentage num) - volume-percentage",
-        "Identifier - identifier",
-        "Volume (in percentage bar) - volume-percentage-bar",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_SOUND_MODULE_NAME,
+    .description = "Print sound devices, volume, etc",
+    .parseCommandOptions = (void*) ffParseSoundCommandOptions,
+    .parseJsonObject = (void*) ffParseSoundJsonObject,
+    .printModule = (void*) ffPrintSound,
+    .generateJsonResult = (void*) ffGenerateSoundJsonResult,
+    .generateJsonConfig = (void*) ffGenerateSoundJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Is main sound device", "is-main"},
+        {"Device name", "name"},
+        {"Volume (in percentage num)", "volume-percentage"},
+        {"Identifier", "identifier"},
+        {"Volume (in percentage bar)", "volume-percentage-bar"},
+    }))
+};
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_SOUND_MODULE_NAME,
-        "Print sound devices, volume, etc",
-        ffParseSoundCommandOptions,
-        ffParseSoundJsonObject,
-        ffPrintSound,
-        ffGenerateSoundJsonResult,
-        ffPrintSoundHelpFormat,
-        ffGenerateSoundJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->soundType = FF_SOUND_TYPE_MAIN;

@@ -5,8 +5,6 @@
 #include "modules/uptime/uptime.h"
 #include "util/stringUtils.h"
 
-#define FF_UPTIME_NUM_FORMAT_ARGS 6
-
 void ffPrintUptime(FFUptimeOptions* options)
 {
     FFUptimeResult result;
@@ -41,7 +39,7 @@ void ffPrintUptime(FFUptimeOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_UPTIME_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(days, "days"),
             FF_FORMAT_ARG(hours, "hours"),
             FF_FORMAT_ARG(minutes, "minutes"),
@@ -103,31 +101,27 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
     yyjson_mut_obj_add_strcpy(doc, obj, "bootTime", ffTimeToFullStr(result.bootTime));
 }
 
-void ffPrintUptimeHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_UPTIME_MODULE_NAME, "{1} days {2} hours {3} mins", FF_UPTIME_NUM_FORMAT_ARGS, ((const char* []) {
-        "Days - days",
-        "Hours - hours",
-        "Minutes - minutes",
-        "Seconds - seconds",
-        "Milliseconds - milliseconds",
-        "Boot time in local timezone - boot-time",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_UPTIME_MODULE_NAME,
+    .description = "Print how long system has been running",
+    .parseCommandOptions = (void*) ffParseUptimeCommandOptions,
+    .parseJsonObject = (void*) ffParseUptimeJsonObject,
+    .printModule = (void*) ffPrintUptime,
+    .generateJsonResult = (void*) ffGenerateUptimeJsonResult,
+    .generateJsonConfig = (void*) ffGenerateUptimeJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Days", "days"},
+        {"Hours", "hours"},
+        {"Minutes", "minutes"},
+        {"Seconds", "seconds"},
+        {"Milliseconds", "milliseconds"},
+        {"Boot time in local timezone", "boot-time"},
+    }))
+};
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_UPTIME_MODULE_NAME,
-        "Print how long system has been running",
-        ffParseUptimeCommandOptions,
-        ffParseUptimeJsonObject,
-        ffPrintUptime,
-        ffGenerateUptimeJsonResult,
-        ffPrintUptimeHelpFormat,
-        ffGenerateUptimeJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

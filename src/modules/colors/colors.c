@@ -291,19 +291,18 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
     }
 }
 
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_COLORS_MODULE_NAME,
+    .description = "Print some colored blocks",
+    .parseCommandOptions = (void*) ffParseColorsCommandOptions,
+    .parseJsonObject = (void*) ffParseColorsJsonObject,
+    .printModule = (void*) ffPrintColors,
+    .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,
+};
+
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_COLORS_MODULE_NAME,
-        "Print some colored blocks",
-        ffParseColorsCommandOptions,
-        ffParseColorsJsonObject,
-        ffPrintColors,
-        NULL,
-        NULL,
-        ffGenerateColorsJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
     options->symbol = FF_COLORS_SYMBOL_BACKGROUND;

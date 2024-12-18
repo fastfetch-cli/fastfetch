@@ -3,8 +3,6 @@
 #include "modules/kernel/kernel.h"
 #include "util/stringUtils.h"
 
-#define FF_KERNEL_NUM_FORMAT_ARGS 6
-
 void ffPrintKernel(FFKernelOptions* options)
 {
     const FFPlatformSysinfo* info = &instance.state.platform.sysinfo;
@@ -22,7 +20,7 @@ void ffPrintKernel(FFKernelOptions* options)
     {
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
         ffParseSize(info->pageSize, &str);
-        FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_KERNEL_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(info->name, "sysname"),
             FF_FORMAT_ARG(info->release, "release"),
             FF_FORMAT_ARG(info->version, "version"),
@@ -81,31 +79,27 @@ void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "pageSize", info->pageSize);
 }
 
-void ffPrintKernelHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_KERNEL_MODULE_NAME, "{1} {2}", FF_KERNEL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Sysname - sysname",
-        "Release - release",
-        "Version - version",
-        "Architecture - arch",
-        "Display version - display-version",
-        "Page size - page-size",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_KERNEL_MODULE_NAME,
+    .description = "Print system kernel version",
+    .parseCommandOptions = (void*) ffParseKernelCommandOptions,
+    .parseJsonObject = (void*) ffParseKernelJsonObject,
+    .printModule = (void*) ffPrintKernel,
+    .generateJsonResult = (void*) ffGenerateKernelJsonResult,
+    .generateJsonConfig = (void*) ffGenerateKernelJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Sysname", "sysname"},
+        {"Release", "release"},
+        {"Version", "version"},
+        {"Architecture", "arch"},
+        {"Display version", "display-version"},
+        {"Page size", "page-size"},
+    }))
+};
 
 void ffInitKernelOptions(FFKernelOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_KERNEL_MODULE_NAME,
-        "Print system kernel version",
-        ffParseKernelCommandOptions,
-        ffParseKernelJsonObject,
-        ffPrintKernel,
-        ffGenerateKernelJsonResult,
-        ffPrintKernelHelpFormat,
-        ffGenerateKernelJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

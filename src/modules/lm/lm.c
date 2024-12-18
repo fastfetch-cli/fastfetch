@@ -4,8 +4,6 @@
 #include "modules/lm/lm.h"
 #include "util/stringUtils.h"
 
-#define FF_LM_NUM_FORMAT_ARGS 3
-
 void ffPrintLM(FFLMOptions* options)
 {
     FFLMResult result;
@@ -38,7 +36,7 @@ void ffPrintLM(FFLMOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LM_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result.service, "service"),
             FF_FORMAT_ARG(result.type, "type"),
             FF_FORMAT_ARG(result.version, "version"),
@@ -115,28 +113,24 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-void ffPrintLMHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LM_MODULE_NAME, "{1} {3} ({2})", FF_LM_NUM_FORMAT_ARGS, ((const char* []) {
-        "LM service - service",
-        "LM type - type",
-        "LM version - version"
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_LM_MODULE_NAME,
+    .description = "Print login manager (desktop manager) name and version",
+    .parseCommandOptions = (void*) ffParseLMCommandOptions,
+    .parseJsonObject = (void*) ffParseLMJsonObject,
+    .printModule = (void*) ffPrintLM,
+    .generateJsonResult = (void*) ffGenerateLMJsonResult,
+    .generateJsonConfig = (void*) ffGenerateLMJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"LM service", "service"},
+        {"LM type", "type"},
+        {"LM version", "version"},
+    }))
+};
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_LM_MODULE_NAME,
-        "Print login manager (desktop manager) name and version",
-        ffParseLMCommandOptions,
-        ffParseLMJsonObject,
-        ffPrintLM,
-        ffGenerateLMJsonResult,
-        ffPrintLMHelpFormat,
-        ffGenerateLMJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
 }
 

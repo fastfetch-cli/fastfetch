@@ -4,8 +4,6 @@
 #include "modules/tpm/tpm.h"
 #include "util/stringUtils.h"
 
-#define FF_TPM_NUM_FORMAT_ARGS 2
-
 void ffPrintTPM(FFTPMOptions* options)
 {
     FFTPMResult result = {
@@ -30,7 +28,7 @@ void ffPrintTPM(FFTPMOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TPM_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result.version, "version"),
             FF_FORMAT_ARG(result.description, "description"),
         }));
@@ -97,27 +95,23 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
     ffStrbufDestroy(&result.description);
 }
 
-void ffPrintTPMHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TPM_MODULE_NAME, "{2}", FF_TPM_NUM_FORMAT_ARGS, ((const char* []) {
-        "TPM device version - version",
-        "TPM general description - description",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_TPM_MODULE_NAME,
+    .description = "Print info of Trusted Platform Module (TPM) Security Device",
+    .parseCommandOptions = (void*) ffParseTPMCommandOptions,
+    .parseJsonObject = (void*) ffParseTPMJsonObject,
+    .printModule = (void*) ffPrintTPM,
+    .generateJsonResult = (void*) ffGenerateTPMJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTPMJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"TPM device version", "version"},
+        {"TPM general description", "description"},
+    }))
+};
 
 void ffInitTPMOptions(FFTPMOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_TPM_MODULE_NAME,
-        "Print info of Trusted Platform Module (TPM) Security Device",
-        ffParseTPMCommandOptions,
-        ffParseTPMJsonObject,
-        ffPrintTPM,
-        ffGenerateTPMJsonResult,
-        ffPrintTPMHelpFormat,
-        ffGenerateTPMJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

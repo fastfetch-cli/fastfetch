@@ -5,8 +5,6 @@
 #include "modules/keyboard/keyboard.h"
 #include "util/stringUtils.h"
 
-#define FF_KEYBOARD_NUM_FORMAT_ARGS 2
-
 static void printDevice(FFKeyboardOptions* options, const FFKeyboardDevice* device, uint8_t index)
 {
     if(options->moduleArgs.outputFormat.length == 0)
@@ -16,7 +14,7 @@ static void printDevice(FFKeyboardOptions* options, const FFKeyboardDevice* devi
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_KEYBOARD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_KEYBOARD_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_KEYBOARD_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->name, "name"),
             FF_FORMAT_ARG(device->serial, "serial"),
         }));
@@ -112,27 +110,23 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
     }
 }
 
-void ffPrintKeyboardHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_KEYBOARD_MODULE_NAME, "{1} ({3})", FF_KEYBOARD_NUM_FORMAT_ARGS, ((const char* []) {
-        "Name - name",
-        "Serial number - serial",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_KEYBOARD_MODULE_NAME,
+    .description = "List (connected) keyboards",
+    .parseCommandOptions = (void*) ffParseKeyboardCommandOptions,
+    .parseJsonObject = (void*) ffParseKeyboardJsonObject,
+    .printModule = (void*) ffPrintKeyboard,
+    .generateJsonResult = (void*) ffGenerateKeyboardJsonResult,
+    .generateJsonConfig = (void*) ffGenerateKeyboardJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Name", "name"},
+        {"Serial number", "serial"},
+    }))
+};
 
 void ffInitKeyboardOptions(FFKeyboardOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_KEYBOARD_MODULE_NAME,
-        "List connected keyboards",
-        ffParseKeyboardCommandOptions,
-        ffParseKeyboardJsonObject,
-        ffPrintKeyboard,
-        ffGenerateKeyboardJsonResult,
-        ffPrintKeyboardHelpFormat,
-        ffGenerateKeyboardJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

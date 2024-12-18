@@ -126,10 +126,7 @@ static void waylandKdeNameListener(void* data, FF_MAYBE_UNUSED struct kde_output
     WaylandDisplay* display = data;
     display->type = ffdsGetDisplayType(name);
     // As display->id is used as an internal identifier, we don't need it to be NUL terminated
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstringop-truncation"
     strncpy((char*) &display->id, name, sizeof(display->id));
-    #pragma GCC diagnostic pop
 
     ffStrbufAppendS(&display->name, name);
 }

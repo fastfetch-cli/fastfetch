@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_POWERADAPTER_DISPLAY_NAME "Power Adapter"
-#define FF_POWERADAPTER_NUM_FORMAT_ARGS 6
 
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
 {
@@ -38,7 +37,7 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
             }
             else
             {
-                FF_PRINT_FORMAT_CHECKED(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_POWERADAPTER_NUM_FORMAT_ARGS, ((FFformatarg[]){
+                FF_PRINT_FORMAT_CHECKED(FF_POWERADAPTER_DISPLAY_NAME, i, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                     FF_FORMAT_ARG(result->watts, "watts"),
                     FF_FORMAT_ARG(result->name, "name"),
                     FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
@@ -126,31 +125,27 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
     }
 }
 
-void ffPrintPowerAdapterHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_POWERADAPTER_MODULE_NAME, "{1}W", FF_POWERADAPTER_NUM_FORMAT_ARGS, ((const char* []) {
-        "PowerAdapter watts - watts",
-        "PowerAdapter name - name",
-        "PowerAdapter manufacturer - manufacturer",
-        "PowerAdapter model - model",
-        "PowerAdapter description - description",
-        "PowerAdapter serial number - serial",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_POWERADAPTER_MODULE_NAME,
+    .description = "Print power adapter name and charging watts",
+    .parseCommandOptions = (void*) ffParsePowerAdapterCommandOptions,
+    .parseJsonObject = (void*) ffParsePowerAdapterJsonObject,
+    .printModule = (void*) ffPrintPowerAdapter,
+    .generateJsonResult = (void*) ffGeneratePowerAdapterJsonResult,
+    .generateJsonConfig = (void*) ffGeneratePowerAdapterJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Power adapter watts", "watts"},
+        {"Power adapter name", "name"},
+        {"Power adapter manufacturer", "manufacturer"},
+        {"Power adapter model", "model"},
+        {"Power adapter description", "description"},
+        {"Power adapter serial number", "serial"},
+    }))
+};
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_POWERADAPTER_MODULE_NAME,
-        "Print power adapter name and charging watts",
-        ffParsePowerAdapterCommandOptions,
-        ffParsePowerAdapterJsonObject,
-        ffPrintPowerAdapter,
-        ffGeneratePowerAdapterJsonResult,
-        ffPrintPowerAdapterHelpFormat,
-        ffGeneratePowerAdapterJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
 }
 

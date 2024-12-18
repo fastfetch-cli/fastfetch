@@ -54,7 +54,7 @@ optionSection = r"""
 Parsing is not case sensitive. E.g. \fB--logo-type\fR is
 equal to \fB--LOGO-TYPE\fR.
 
-If a value is between square brakets, it is optional.
+If a value is between square brackets, it is optional.
 An optional boolean value defaults to true if not specified.
 
 More detailed help messages for each options can be printed

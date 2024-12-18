@@ -4,8 +4,6 @@
 #include "modules/icons/icons.h"
 #include "util/stringUtils.h"
 
-#define FF_ICONS_NUM_FORMAT_ARGS 2
-
 void ffPrintIcons(FFIconsOptions* options)
 {
     FFIconsResult result = {
@@ -35,7 +33,7 @@ void ffPrintIcons(FFIconsOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_ICONS_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_ICONS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result.icons1, "icons1"),
             FF_FORMAT_ARG(result.icons2, "icons2"),
         }));
@@ -102,27 +100,23 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
     ffStrbufDestroy(&result.icons2);
 }
 
-void ffPrintIconsHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_ICONS_MODULE_NAME, "{1}, {2}", FF_ICONS_NUM_FORMAT_ARGS, ((const char* []) {
-        "Icons part 1 - icons1",
-        "Icons part 2 - icons2",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_ICONS_MODULE_NAME,
+    .description = "Print icon style name",
+    .parseCommandOptions = (void*) ffParseIconsCommandOptions,
+    .parseJsonObject = (void*) ffParseIconsJsonObject,
+    .printModule = (void*) ffPrintIcons,
+    .generateJsonResult = (void*) ffGenerateIconsJsonResult,
+    .generateJsonConfig = (void*) ffGenerateIconsJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Icons part 1", "icons1"},
+        {"Icons part 2", "icons2"},
+    }))
+};
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_ICONS_MODULE_NAME,
-        "Print icon style name",
-        ffParseIconsCommandOptions,
-        ffParseIconsJsonObject,
-        ffPrintIcons,
-        ffGenerateIconsJsonResult,
-        ffPrintIconsHelpFormat,
-        ffGenerateIconsJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

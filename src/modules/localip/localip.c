@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_LOCALIP_DISPLAY_NAME "Local IP"
-#define FF_LOCALIP_NUM_FORMAT_ARGS 8
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
 static int sortIps(const FFLocalIpResult* left, const FFLocalIpResult* right)
@@ -25,7 +24,7 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
     else
     {
         ffStrbufClear(key);
-        FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, 4, ((FFformatarg[]){
+        FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(ip->name, "name"),
             FF_FORMAT_ARG(ip->mac, "mac"),
@@ -149,7 +148,7 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
                     else
                         ffStrbufSetF(&speedStr, "%u Mbps", (unsigned) ip->speed);
                 }
-                FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_LOCALIP_NUM_FORMAT_ARGS, ((FFformatarg[]){
+                FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
                     FF_FORMAT_ARG(ip->ipv4, "ipv4"),
                     FF_FORMAT_ARG(ip->ipv6, "ipv6"),
                     FF_FORMAT_ARG(ip->mac, "mac"),
@@ -500,33 +499,29 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     }
 }
 
-void ffPrintLocalIpHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LOCALIP_MODULE_NAME, "{1}", FF_LOCALIP_NUM_FORMAT_ARGS, ((const char* []) {
-        "Local IPv4 address - ipv4",
-        "Local IPv6 address - ipv6",
-        "Physical (MAC) address - mac",
-        "Interface name - ifname",
-        "Is default route - is-default-route",
-        "MTU size in bytes - mtu",
-        "Link speed (formatted) - speed",
-        "Interface flags - flags",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_LOCALIP_MODULE_NAME,
+    .description = "List local IP addresses (v4 or v6), MAC addresses, etc",
+    .parseCommandOptions = (void*) ffParseLocalIpCommandOptions,
+    .parseJsonObject = (void*) ffParseLocalIpJsonObject,
+    .printModule = (void*) ffPrintLocalIp,
+    .generateJsonResult = (void*) ffGenerateLocalIpJsonResult,
+    .generateJsonConfig = (void*) ffGenerateLocalIpJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"IPv4 address", "ipv4"},
+        {"IPv6 address", "ipv6"},
+        {"MAC address", "mac"},
+        {"Interface name", "ifname"},
+        {"Is default route", "is-default-route"},
+        {"MTU size in bytes", "mtu"},
+        {"Link speed (formatted)", "speed"},
+        {"Interface flags", "flags"},
+    }))
+};
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_LOCALIP_MODULE_NAME,
-        "List local IP addresses (v4 or v6), MAC addresses, etc",
-        ffParseLocalIpCommandOptions,
-        ffParseLocalIpJsonObject,
-        ffPrintLocalIp,
-        ffGenerateLocalIpJsonResult,
-        ffPrintLocalIpHelpFormat,
-        ffGenerateLocalIpJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰩟");
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT

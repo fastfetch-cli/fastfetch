@@ -5,7 +5,6 @@
 #include "util/stringUtils.h"
 
 #define FF_WMTHEME_DISPLAY_NAME "WM Theme"
-#define FF_WMTHEME_NUM_FORMAT_ARGS 1
 
 void ffPrintWMTheme(FFWMThemeOptions* options)
 {
@@ -19,7 +18,7 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
         }
         else
         {
-            FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WMTHEME_NUM_FORMAT_ARGS, ((FFformatarg[]){
+            FF_PRINT_FORMAT_CHECKED(FF_WMTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(themeOrError, "result"),
             }));
         }
@@ -77,26 +76,22 @@ void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, module, "result", &themeOrError);
 }
 
-void ffPrintWMthemeHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WMTHEME_MODULE_NAME, "{1}", FF_WMTHEME_NUM_FORMAT_ARGS, ((const char* []) {
-        "WM theme - result",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_WMTHEME_MODULE_NAME,
+    .description = "Print current theme of window manager",
+    .parseCommandOptions = (void*) ffParseWMThemeCommandOptions,
+    .parseJsonObject = (void*) ffParseWMThemeJsonObject,
+    .printModule = (void*) ffPrintWMTheme,
+    .generateJsonResult = (void*) ffGenerateWMThemeJsonResult,
+    .generateJsonConfig = (void*) ffGenerateWMThemeJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"WM theme", "result"},
+    }))
+};
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_WMTHEME_MODULE_NAME,
-        "Print current theme of window manager",
-        ffParseWMThemeCommandOptions,
-        ffParseWMThemeJsonObject,
-        ffPrintWMTheme,
-        ffGenerateWMThemeJsonResult,
-        ffPrintWMthemeHelpFormat,
-        ffGenerateWMThemeJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰓸");
 }
 

@@ -6,8 +6,6 @@
 #include "modules/loadavg/loadavg.h"
 #include "util/stringUtils.h"
 
-#define FF_LOADAVG_NUM_FORMAT_ARGS 3
-
 void ffPrintLoadavg(FFLoadavgOptions* options)
 {
     double result[3] = { 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0 };
@@ -48,7 +46,7 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
                 else
                 {
                     ffStrbufClear(&buffer);
-                    FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, 3, ((FFformatarg[]){
+                    FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, ((FFformatarg[]) {
                         FF_FORMAT_ARG(index, "index"),
                         FF_FORMAT_ARG(duration, "duration"),
                         FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -84,7 +82,7 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_LOADAVG_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result[0], "loadavg1"),
             FF_FORMAT_ARG(result[1], "loadavg2"),
             FF_FORMAT_ARG(result[2], "loadavg3"),
@@ -181,28 +179,24 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
         yyjson_mut_arr_add_real(doc, arr, result[i]);
 }
 
-void ffPrintLoadavgHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_LOADAVG_MODULE_NAME, "{1}, {2}, {3}", FF_LOADAVG_NUM_FORMAT_ARGS, ((const char* []) {
-        "Load average over 1min - loadavg1",
-        "Load average over 5min - loadavg2",
-        "Load average over 15min - loadavg3",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_LOADAVG_MODULE_NAME,
+    .description = "Print system load averages",
+    .parseCommandOptions = (void*) ffParseLoadavgCommandOptions,
+    .parseJsonObject = (void*) ffParseLoadavgJsonObject,
+    .printModule = (void*) ffPrintLoadavg,
+    .generateJsonResult = (void*) ffGenerateLoadavgJsonResult,
+    .generateJsonConfig = (void*) ffGenerateLoadavgJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Load average over 1min", "loadavg1"},
+        {"Load average over 5min", "loadavg2"},
+        {"Load average over 15min", "loadavg3"},
+    }))
+};
 
 void ffInitLoadavgOptions(FFLoadavgOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_LOADAVG_MODULE_NAME,
-        "Print system load averages",
-        ffParseLoadavgCommandOptions,
-        ffParseLoadavgJsonObject,
-        ffPrintLoadavg,
-        ffGenerateLoadavgJsonResult,
-        ffPrintLoadavgHelpFormat,
-        ffGenerateLoadavgJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };

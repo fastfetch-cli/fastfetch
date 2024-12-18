@@ -4,8 +4,6 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-#define FF_PACKAGES_NUM_FORMAT_ARGS 40
-
 void ffPrintPackages(FFPackagesOptions* options)
 {
     FFPackagesResult counts = {};
@@ -84,7 +82,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
         uint32_t brewAll = counts.brew + counts.brewCask;
         uint32_t guixAll = counts.guixSystem + counts.guixUser + counts.guixHome;
-        FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_PACKAGES_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(counts.all, "all"),
             FF_FORMAT_ARG(counts.pacman, "pacman"),
             FF_FORMAT_ARG(counts.pacmanBranch, "pacman-branch"),
@@ -437,65 +435,61 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
-void ffPrintPackagesHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_PACKAGES_MODULE_NAME, "{2} (pacman){?3}[{3}]{?}, {4} (dpkg), {5} (rpm), {6} (emerge), {7} (eopkg), {8} (xbps), {9} (nix-system), {10} (nix-user), {11} (nix-default), {12} (apk), {13} (pkg), {14} (flatpak-system), {15} (flatpack-user), {16} (snap), {17} (brew), {18} (brew-cask), {19} (MacPorts), {20} (scoop), {21} (choco), {22} (pkgtool), {23} (paludis), {24} (winget), {25} (opkg), {26} (am), {27} (sorcery), {28} (lpkg), {29} (lpkgbuild), {30} (guix-system), {31} (guix-user), {32} (guix-home), {33} (linglong), {34} (pacstall), {35} (mport), {36} qi", FF_PACKAGES_NUM_FORMAT_ARGS, ((const char* []) {
-        "Number of all packages - all",
-        "Number of pacman packages - pacman",
-        "Pacman branch on manjaro - pacman-branch",
-        "Number of dpkg packages - dpkg",
-        "Number of rpm packages - rpm",
-        "Number of emerge packages - emerge",
-        "Number of eopkg packages - eopkg",
-        "Number of xbps packages - xbps",
-        "Number of nix-system packages - nix-system",
-        "Number of nix-user packages - nix-user",
-        "Number of nix-default packages - nix-default",
-        "Number of apk packages - apk",
-        "Number of pkg packages - pkg",
-        "Number of flatpak-system app packages - flatpak-system",
-        "Number of flatpak-user app packages - flatpak-user",
-        "Number of snap packages - snap",
-        "Number of brew packages - brew",
-        "Number of brew-cask packages - brew-cask",
-        "Number of macports packages - macports",
-        "Number of scoop packages - scoop",
-        "Number of choco packages - choco",
-        "Number of pkgtool packages - pkgtool",
-        "Number of paludis packages - paludis",
-        "Number of winget packages - winget",
-        "Number of opkg packages - opkg",
-        "Number of am packages - am",
-        "Number of sorcery packages - sorcery",
-        "Number of lpkg packages - lpkg",
-        "Number of lpkgbuild packages - lpkgbuild",
-        "Number of guix-system packages - guix-system",
-        "Number of guix-user packages - guix-user",
-        "Number of guix-home packages - guix-home",
-        "Number of linglong packages - linglong",
-        "Number of pacstall packages - pacstall",
-        "Number of mport packages - mport",
-        "Number of qi packages - qi",
-        "Total number of all nix packages - nix-all",
-        "Total number of all flatpak app packages - flatpak-all",
-        "Total number of all brew packages - brew-all",
-        "Total number of all guix packages - guix-all",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_PACKAGES_MODULE_NAME,
+    .description = "List installed package managers and count of installed packages",
+    .parseCommandOptions = (void*) ffParsePackagesCommandOptions,
+    .parseJsonObject = (void*) ffParsePackagesJsonObject,
+    .printModule = (void*) ffPrintPackages,
+    .generateJsonResult = (void*) ffGeneratePackagesJsonResult,
+    .generateJsonConfig = (void*) ffGeneratePackagesJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Number of all packages", "all"},
+        {"Number of pacman packages", "pacman"},
+        {"Pacman branch on manjaro", "pacman-branch"},
+        {"Number of dpkg packages", "dpkg"},
+        {"Number of rpm packages", "rpm"},
+        {"Number of emerge packages", "emerge"},
+        {"Number of eopkg packages", "eopkg"},
+        {"Number of xbps packages", "xbps"},
+        {"Number of nix-system packages", "nix-system"},
+        {"Number of nix-user packages", "nix-user"},
+        {"Number of nix-default packages", "nix-default"},
+        {"Number of apk packages", "apk"},
+        {"Number of pkg packages", "pkg"},
+        {"Number of flatpak-system app packages", "flatpak-system"},
+        {"Number of flatpak-user app packages", "flatpak-user"},
+        {"Number of snap packages", "snap"},
+        {"Number of brew packages", "brew"},
+        {"Number of brew-cask packages", "brew-cask"},
+        {"Number of macports packages", "macports"},
+        {"Number of scoop packages", "scoop"},
+        {"Number of choco packages", "choco"},
+        {"Number of pkgtool packages", "pkgtool"},
+        {"Number of paludis packages", "paludis"},
+        {"Number of winget packages", "winget"},
+        {"Number of opkg packages", "opkg"},
+        {"Number of am packages", "am"},
+        {"Number of sorcery packages", "sorcery"},
+        {"Number of lpkg packages", "lpkg"},
+        {"Number of lpkgbuild packages", "lpkgbuild"},
+        {"Number of guix-system packages", "guix-system"},
+        {"Number of guix-user packages", "guix-user"},
+        {"Number of guix-home packages", "guix-home"},
+        {"Number of linglong packages", "linglong"},
+        {"Number of pacstall packages", "pacstall"},
+        {"Number of mport packages", "mport"},
+        {"Number of qi packages", "qi"},
+        {"Total number of all nix packages", "nix-all"},
+        {"Total number of all flatpak app packages", "flatpak-all"},
+        {"Total number of all brew packages", "brew-all"},
+        {"Total number of all guix packages", "guix-all"},
+    }))
+};
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_PACKAGES_MODULE_NAME,
-        "List installed package managers and count of installed packages",
-        ffParsePackagesCommandOptions,
-        ffParsePackagesJsonObject,
-        ffPrintPackages,
-        ffGeneratePackagesJsonResult,
-        ffPrintPackagesHelpFormat,
-        ffGeneratePackagesJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
     options->disabled = FF_PACKAGES_DISABLE_LIST;

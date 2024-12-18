@@ -6,8 +6,6 @@
 
 #include <math.h>
 
-#define FF_MONITOR_NUM_FORMAT_ARGS 12
-
 void ffPrintMonitor(FFMonitorOptions* options)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
@@ -36,7 +34,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
         else
         {
             uint32_t moduleIndex = result->displays.length == 1 ? 0 : index + 1;
-            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, 3, ((FFformatarg[]){
+            FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
                 FF_FORMAT_ARG(moduleIndex, "index"),
                 FF_FORMAT_ARG(display->name, "name"),
                 FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
@@ -67,7 +65,7 @@ void ffPrintMonitor(FFMonitorOptions* options)
             else
                 buf[0] = '\0';
 
-            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, FF_MONITOR_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+            FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                 FF_FORMAT_ARG(display->name, "name"),
                 FF_FORMAT_ARG(display->width, "width"),
                 FF_FORMAT_ARG(display->height, "height"),
@@ -128,37 +126,33 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
     yyjson_mut_obj_add_str(doc, module, "error", "Monitor module is an alias of Display module");
 }
 
-void ffPrintMonitorHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_MONITOR_MODULE_NAME, "{2}x{3} px - {4}x{5} mm ({6} inches, {7} ppi)", FF_MONITOR_NUM_FORMAT_ARGS, ((const char* []) {
-        "Display name - name",
-        "Native resolution width in pixels - width",
-        "Native resolution height in pixels - height",
-        "Physical width in millimeters - physical-width",
-        "Physical height in millimeters - physical-height",
-        "Physical diagonal length in inches - inch",
-        "Pixels per inch (PPI) - ppi",
-        "Year of manufacturing - manufacture-year",
-        "Nth week of manufacturing in the year - manufacture-week",
-        "Serial number - serial",
-        "Maximum refresh rate in Hz - refresh-rate",
-        "True if the display is HDR compatible - hdr-compatible",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_MONITOR_MODULE_NAME,
+    .description = "Alias of Display module",
+    .parseCommandOptions = (void*) ffParseMonitorCommandOptions,
+    .parseJsonObject = (void*) ffParseMonitorJsonObject,
+    .printModule = (void*) ffPrintMonitor,
+    .generateJsonResult = (void*) ffGenerateMonitorJsonResult,
+    .generateJsonConfig = (void*) ffGenerateMonitorJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Display name", "name"},
+        {"Native resolution width in pixels", "width"},
+        {"Native resolution height in pixels", "height"},
+        {"Physical width in millimeters", "physical-width"},
+        {"Physical height in millimeters", "physical-height"},
+        {"Physical diagonal length in inches", "inch"},
+        {"Pixels per inch (PPI)", "ppi"},
+        {"Year of manufacturing", "manufacture-year"},
+        {"Nth week of manufacturing in the year", "manufacture-week"},
+        {"Serial number", "serial"},
+        {"Maximum refresh rate in Hz", "refresh-rate"},
+        {"True if the display is HDR compatible", "hdr-compatible"},
+    }))
+};
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_MONITOR_MODULE_NAME,
-        "Alias of Display module",
-        ffParseMonitorCommandOptions,
-        ffParseMonitorJsonObject,
-        ffPrintMonitor,
-        ffGenerateMonitorJsonResult,
-        ffPrintMonitorHelpFormat,
-        ffGenerateMonitorJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰹑");
 }
 

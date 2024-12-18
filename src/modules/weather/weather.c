@@ -4,8 +4,6 @@
 #include "modules/weather/weather.h"
 #include "util/stringUtils.h"
 
-#define FF_WEATHER_NUM_FORMAT_ARGS 1
-
 void ffPrintWeather(FFWeatherOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
@@ -25,7 +23,7 @@ void ffPrintWeather(FFWeatherOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_WEATHER_NUM_FORMAT_ARGS, ((FFformatarg[]) {
+        FF_PRINT_FORMAT_CHECKED(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(result, "result"),
         }));
     }
@@ -125,26 +123,22 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
 
-void ffPrintWeatherHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_WEATHER_MODULE_NAME, "{1}", FF_WEATHER_NUM_FORMAT_ARGS, ((const char* []) {
-        "Weather result - result",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_WEATHER_MODULE_NAME,
+    .description = "Print weather information",
+    .parseCommandOptions = (void*) ffParseWeatherCommandOptions,
+    .parseJsonObject = (void*) ffParseWeatherJsonObject,
+    .printModule = (void*) ffPrintWeather,
+    .generateJsonResult = (void*) ffGenerateWeatherJsonResult,
+    .generateJsonConfig = (void*) ffGenerateWeatherJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Weather result", "result"},
+    }))
+};
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_WEATHER_MODULE_NAME,
-        "Print weather information",
-        ffParseWeatherCommandOptions,
-        ffParseWeatherJsonObject,
-        ffPrintWeather,
-        ffGenerateWeatherJsonResult,
-        ffPrintWeatherHelpFormat,
-        ffGenerateWeatherJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰖙");
 
     ffStrbufInit(&options->location);

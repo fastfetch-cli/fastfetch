@@ -4,10 +4,6 @@
 #include "modules/terminal/terminal.h"
 #include "util/stringUtils.h"
 
-#include <string.h>
-
-#define FF_TERMINAL_NUM_FORMAT_ARGS 8
-
 void ffPrintTerminal(FFTerminalOptions* options)
 {
     const FFTerminalResult* result = ffDetectTerminal();
@@ -29,7 +25,7 @@ void ffPrintTerminal(FFTerminalOptions* options)
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, FF_TERMINAL_NUM_FORMAT_ARGS, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(result->processName, "process-name"),
             FF_FORMAT_ARG(result->exe, "exe"),
             FF_FORMAT_ARG(result->exeName, "exe-name"),
@@ -99,33 +95,29 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "tty", &result->tty);
 }
 
-void ffPrintTerminalHelpFormat(void)
-{
-    FF_PRINT_MODULE_FORMAT_HELP_CHECKED(FF_TERMINAL_MODULE_NAME, "{5} {6}", FF_TERMINAL_NUM_FORMAT_ARGS, ((const char* []) {
-        "Terminal process name - process-name",
-        "The first argument of the command line when running the terminal - exe",
-        "Terminal base name of arg0 - exe-name",
-        "Terminal pid - pid",
-        "Terminal pretty name - pretty-name",
-        "Terminal version - version",
-        "Terminal full exe path - exe-path",
-        "Terminal tty / pts used - tty",
-    }));
-}
+static FFModuleBaseInfo ffModuleInfo = {
+    .name = FF_TERMINAL_MODULE_NAME,
+    .description = "Print current terminal name and version",
+    .parseCommandOptions = (void*) ffParseTerminalCommandOptions,
+    .parseJsonObject = (void*) ffParseTerminalJsonObject,
+    .printModule = (void*) ffPrintTerminal,
+    .generateJsonResult = (void*) ffGenerateTerminalJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTerminalJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Terminal process name", "process-name"},
+        {"The first argument of the command line when running the terminal", "exe"},
+        {"Terminal base name of arg0", "exe-name"},
+        {"Terminal pid", "pid"},
+        {"Terminal pretty name", "pretty-name"},
+        {"Terminal version", "version"},
+        {"Terminal full exe path", "exe-path"},
+        {"Terminal tty / pts used", "tty"},
+    }))
+};
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    ffOptionInitModuleBaseInfo(
-        &options->moduleInfo,
-        FF_TERMINAL_MODULE_NAME,
-        "Print current terminal name and version",
-        ffParseTerminalCommandOptions,
-        ffParseTerminalJsonObject,
-        ffPrintTerminal,
-        ffGenerateTerminalJsonResult,
-        ffPrintTerminalHelpFormat,
-        ffGenerateTerminalJsonConfig
-    );
+    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 
