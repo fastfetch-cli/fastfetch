@@ -109,6 +109,15 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
 
 static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 {
+    // Requires manually setting $POWERSHELL_VERSION
+    // $env:POWERSHELL_VERSION = $PSVersionTable.PSVersion.ToString(); fastfetch.exe
+    const char* env = getenv("POWERSHELL_VERSION");
+    if (env)
+    {
+        ffStrbufSetS(version, env);
+        return true;
+    }
+
     #ifdef _WIN32
     if(getFileVersion(exe->chars, version))
     {
@@ -249,6 +258,13 @@ static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* versi
 #ifdef _WIN32
 static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 {
+    const char* env = getenv("POWERSHELL_VERSION");
+    if (env)
+    {
+        ffStrbufSetS(version, env);
+        return true;
+    }
+
     return ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-NoLogo",
