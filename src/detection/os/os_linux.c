@@ -49,10 +49,7 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
 // Get Armbian version properties and set idLike based on the Armbian image basis
 FF_MAYBE_UNUSED static void getArmbianVersion(FFOSResult* result)
 {
-    if(ffStrbufIgnCaseEqualS(&result->id, "ubuntu"))
-        ffStrbufSetS(&result->idLike, "ubuntu");
-    else if(ffStrbufIgnCaseEqualS(&result->id, "debian"))
-        ffStrbufSetS(&result->idLike, "debian");
+    ffStrbufSet(&result->idLike, &result->id);
     ffStrbufSetS(&result->id, "armbian");
     ffStrbufClear(&result->versionID);
     uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
