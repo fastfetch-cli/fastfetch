@@ -34,5 +34,5 @@ bool ffListPop(FFlist* list, void* result)
 
     memcpy(result, ffListGet(list, list->length - 1), list->elementSize);
     --list->length;
-    return result;
+    return true;
 }
