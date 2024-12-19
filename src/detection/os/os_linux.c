@@ -46,13 +46,33 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
     });
 }
 
+// Common logic for detecting Armbian image version
+FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
+{
+    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Official Armbian release images
+        ffStrbufSetS(&result->name, "Armbian");
+    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
+        ffStrbufSetS(&result->name, "Armbian (custom build)");
+    else
+        return false;
+    ffStrbufSet(&result->idLike, &result->id);
+    ffStrbufSetS(&result->id, "armbian");
+    ffStrbufClear(&result->versionID);
+    uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
+    uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
+    ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+    return true;
+}
+
 FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
 {
     const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
     if(!ffStrSet(xdgConfigDirs))
         return;
 
-    if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
+    if (detectArmbianVersion(result))
+        return;
+    else if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
     {
         ffStrbufSetS(&result->name, "Linux Lite");
         ffStrbufSetS(&result->id, "linuxlite");
@@ -164,28 +184,8 @@ FF_MAYBE_UNUSED static void getDebianVersion(FFOSResult* result)
 
 FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
 {
-    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Armbian 24.2.1 bookworm
-    {
-        ffStrbufSetS(&result->name, "Armbian");
-        ffStrbufSetS(&result->id, "armbian");
-        ffStrbufSetS(&result->idLike, "debian");
-        ffStrbufClear(&result->versionID);
-        uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
-        uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
-        ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
+    if (detectArmbianVersion(result))
         return true;
-    }
-    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
-    {
-        ffStrbufSetS(&result->name, "Armbian (custom build)");
-        ffStrbufSetS(&result->id, "armbian");
-        ffStrbufSetS(&result->idLike, "debian");
-        ffStrbufClear(&result->versionID);
-        uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
-        uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
-        ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
-        return true;
-    }
     else if (ffStrbufStartsWithS(&result->name, "Loc-OS"))
     {
         ffStrbufSetS(&result->id, "locos");
