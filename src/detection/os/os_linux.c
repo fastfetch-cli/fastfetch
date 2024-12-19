@@ -46,33 +46,22 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
     });
 }
 
-// Get Armbian version properties and set idLike based on the Armbian image basis
-FF_MAYBE_UNUSED static void getArmbianVersion(FFOSResult* result)
+// Common logic for detecting Armbian image version
+FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
 {
+    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Official Armbian release images
+        ffStrbufSetS(&result->name, "Armbian");
+    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
+        ffStrbufSetS(&result->name, "Armbian (custom build)");
+    else
+        return false;
     ffStrbufSet(&result->idLike, &result->id);
     ffStrbufSetS(&result->id, "armbian");
     ffStrbufClear(&result->versionID);
     uint32_t versionStart = ffStrbufFirstIndexC(&result->prettyName, ' ') + 1;
     uint32_t versionEnd = ffStrbufNextIndexC(&result->prettyName, versionStart, ' ');
     ffStrbufSetNS(&result->versionID, versionEnd - versionStart, result->prettyName.chars + versionStart);
-}
-
-// Common logic for detecting Armbian image version
-FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
-{
-    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Official Armbian release images
-    {
-        ffStrbufSetS(&result->name, "Armbian");
-        getArmbianVersion(result);
-        return true;
-    }
-    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
-    {
-        ffStrbufSetS(&result->name, "Armbian (custom build)");
-        getArmbianVersion(result);
-        return true;
-    }
-    return false;
+    return true;
 }
 
 FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
