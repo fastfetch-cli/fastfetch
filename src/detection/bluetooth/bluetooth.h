@@ -11,4 +11,4 @@ typedef struct FFBluetoothResult
     bool connected;
 } FFBluetoothResult;
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */);
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */);

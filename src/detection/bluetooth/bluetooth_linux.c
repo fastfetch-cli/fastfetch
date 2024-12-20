@@ -3,6 +3,7 @@
 
 #ifdef FF_HAVE_DBUS
 #include "common/dbus.h"
+#include "common/io/io.h"
 
 /* Example dbus reply, striped to only the relevant parts:
 array [                                                     //root
@@ -192,11 +193,30 @@ static const char* detectBluetooth(FFlist* devices)
     return NULL;
 }
 
+static bool hasConnectedDevices(void)
+{
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/bluetooth");
+    if(dirp == NULL)
+        return false;
+
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if (strchr(entry->d_name, ':') != NULL) // ignore connected devices
+            return true;
+    }
+
+    return false;
+}
+
 #endif
 
-const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothResult */)
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FF_MAYBE_UNUSED FFlist* devices /* FFBluetoothResult */)
 {
     #ifdef FF_HAVE_DBUS
+        if (!options->showDisconnected && !hasConnectedDevices())
+            return NULL;
+
         return detectBluetooth(devices);
     #else
         return "Fastfetch was compiled without DBus support";

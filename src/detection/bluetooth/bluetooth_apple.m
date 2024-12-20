@@ -10,7 +10,7 @@
     @property (nonatomic) uint8_t batteryPercentSingle;
 @end
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
 {
     NSArray<IOBluetoothDevice*>* ioDevices = IOBluetoothDevice.pairedDevices;
     if(!ioDevices)

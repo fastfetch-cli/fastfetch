@@ -7,7 +7,7 @@
 
 #pragma GCC diagnostic ignored "-Wpointer-sign"
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
 {
     // Actually bluetoothapis.dll, but it's missing on Windows 7
     FF_LIBRARY_LOAD(bluetoothapis, "dlopen bthprops.cpl failed", "bthprops.cpl", 1)
