@@ -786,7 +786,7 @@ elseif(OpenBSD)
         src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/board/board_nosupport.c
         src/detection/bootmgr/bootmgr_nosupport.c
-        src/detection/brightness/brightness_nosupport.c
+        src/detection/brightness/brightness_obsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_obsd.c
