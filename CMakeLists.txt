@@ -704,7 +704,7 @@ elseif(NetBSD)
         src/detection/bluetoothradio/bluetoothradio_linux.c
         src/detection/board/board_nbsd.c
         src/detection/bootmgr/bootmgr_nosupport.c
-        src/detection/brightness/brightness_nosupport.c
+        src/detection/brightness/brightness_nbsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
         src/detection/cpu/cpu_nbsd.c
