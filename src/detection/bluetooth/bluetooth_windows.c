@@ -20,13 +20,14 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
     };
     HBLUETOOTH_DEVICE_FIND hFind = ffBluetoothFindFirstDevice(&(BLUETOOTH_DEVICE_SEARCH_PARAMS) {
         .fReturnConnected = TRUE,
-        .fReturnRemembered = TRUE,
-        .fReturnAuthenticated = TRUE,
-        .fReturnUnknown = TRUE,
+        .fReturnRemembered = options->showDisconnected,
+        .fReturnAuthenticated = options->showDisconnected,
         .dwSize = sizeof(BLUETOOTH_DEVICE_SEARCH_PARAMS)
     }, &btdi);
     if(!hFind)
     {
+        if (GetLastError() == ERROR_NO_MORE_ITEMS)
+            return NULL;
         return "BluetoothFindFirstDevice() failed";
     }
 
