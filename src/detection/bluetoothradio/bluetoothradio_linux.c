@@ -3,56 +3,47 @@
 
 #ifdef FF_HAVE_DBUS
 #include "common/dbus.h"
+#include "common/io/io.h"
 
-/* Example dbus reply, striped to only the relevant parts:
-array [                                                     //root
+/* Example dbus reply:
+array [
     dict entry(
-        object path "/org/bluez/hci0"
-        array [
-            dict entry(
-                string "org.bluez.Adapter1"
-                array [
-                    dict entry(
-                        string "Address"
-                        variant string "XX:XX:XX:XX:XX:XX"
-                    )
-                    dict entry(
-                        string "Name"
-                        variant string "xxxxxxxx"
-                    )
-                    dict entry(
-                        string "Powered"
-                        variant boolean true
-                    )
-                    dict entry(
-                        string "PowerState"
-                        variant string "on"
-                    )
-                    dict entry(
-                        string "Manufacturer"
-                        variant uint16 2
-                    )
-                    dict entry(
-                        string "Version"
-                        variant byte 12
-                    )
-                ]
-            )
-        ]
+        string "Address"
+        variant string "XX:XX:XX:XX:XX:XX"
+    )
+    dict entry(
+        string "Name"
+        variant string "xxxxxxxx"
+    )
+    dict entry(
+        string "Powered"
+        variant boolean true
+    )
+    dict entry(
+        string "PowerState"
+        variant string "on"
+    )
+    dict entry(
+        string "Manufacturer"
+        variant uint16 2
+    )
+    dict entry(
+        string "Version"
+        variant byte 12
     )
 ]
 */
 
-static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothRadioResult* device)
+static const char* detectBluetoothProperty(FFBluetoothRadioResult* device, FFDBusData* dbus, DBusMessageIter* iter)
 {
     if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
-        return;
+        return "Expected dict entry";
 
     DBusMessageIter dictIter;
     dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
 
     if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING)
-        return;
+        return "Expected dict entry key to be a string";
 
     const char* deviceProperty;
     dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &deviceProperty);
@@ -77,121 +68,73 @@ static void detectBluetoothValue(FFDBusData* dbus, DBusMessageIter* iter, FFBlue
         ffDBusGetBool(dbus, &dictIter, &device->discoverable);
     else if(ffStrEquals(deviceProperty, "Pairable"))
         ffDBusGetBool(dbus, &dictIter, &device->connectable);
+
+    return NULL;
 }
 
-static void detectBluetoothProperty(FFDBusData* dbus, DBusMessageIter* iter, FFBluetoothRadioResult* device)
+static const char* detectBluetoothRoot(FFBluetoothRadioResult* device, const char* hciName, FFDBusData* dbus)
 {
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
-        return;
+    char objPath[300];
+    snprintf(objPath, sizeof(objPath), "/org/bluez/%s", hciName);
 
-    DBusMessageIter dictIter;
-    dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
+    DBusMessage* properties = ffDBusGetMethodReply(dbus, "org.bluez", objPath, "org.freedesktop.DBus.Properties", "GetAll", "org.bluez.Adapter1");
+    if(!properties)
+        return "Failed to call org.freedesktop.DBus.Properties.GetAll";
 
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_STRING)
-        return;
-
-    const char* propertyType;
-    dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &propertyType);
-
-    if(!ffStrContains(propertyType, ".Adapter"))
-        return; //We don't care about other properties
-
-    dbus->lib->ffdbus_message_iter_next(&dictIter);
-
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY)
-        return;
-
-    DBusMessageIter arrayIter;
-    dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
-
-    do
+    DBusMessageIter rootIter;
+    if(!dbus->lib->ffdbus_message_iter_init(properties, &rootIter))
     {
-        detectBluetoothValue(dbus, &arrayIter, device);
-    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
-}
-
-static void detectBluetoothObject(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
-{
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_DICT_ENTRY)
-        return;
-
-    DBusMessageIter dictIter;
-    dbus->lib->ffdbus_message_iter_recurse(iter, &dictIter);
-
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_OBJECT_PATH)
-        return;
-
-    const char* objectPath;
-    dbus->lib->ffdbus_message_iter_get_basic(&dictIter, &objectPath);
-
-    //We want adapter objects
-    if(!ffStrStartsWith(objectPath, "/org/bluez/hci") || ffStrContains(objectPath, "/dev_"))
-        return;
-
-    dbus->lib->ffdbus_message_iter_next(&dictIter);
-
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(&dictIter) != DBUS_TYPE_ARRAY)
-        return;
-
-    DBusMessageIter arrayIter;
-    dbus->lib->ffdbus_message_iter_recurse(&dictIter, &arrayIter);
-
-    FFBluetoothRadioResult* device = ffListAdd(devices);
-    ffStrbufInit(&device->name);
-    ffStrbufInit(&device->address);
-    ffStrbufInitStatic(&device->vendor, "Unknown");
-    device->lmpVersion = INT_MIN;
-    device->lmpSubversion = INT_MIN;
-    device->enabled = false;
-
-    do
-    {
-        detectBluetoothProperty(dbus, &arrayIter, device);
-    } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
-
-    if(device->name.length == 0)
-    {
-        ffStrbufDestroy(&device->name);
-        ffStrbufDestroy(&device->address);
-        --devices->length;
+        dbus->lib->ffdbus_message_unref(properties);
+        return "Failed to get root iterator of org.freedesktop.DBus.Properties.GetAll";
     }
-}
 
-static void detectBluetoothRoot(FFlist* devices, FFDBusData* dbus, DBusMessageIter* iter)
-{
-    if(dbus->lib->ffdbus_message_iter_get_arg_type(iter) != DBUS_TYPE_ARRAY)
-        return;
+    if(dbus->lib->ffdbus_message_iter_get_arg_type(&rootIter) != DBUS_TYPE_ARRAY)
+    {
+        dbus->lib->ffdbus_message_unref(properties);
+        return "Expected array";
+    }
 
     DBusMessageIter arrayIter;
-    dbus->lib->ffdbus_message_iter_recurse(iter, &arrayIter);
+    dbus->lib->ffdbus_message_iter_recurse(&rootIter, &arrayIter);
 
     do
     {
-        detectBluetoothObject(devices, dbus, &arrayIter);
+        detectBluetoothProperty(device, dbus, &arrayIter);
     } while (dbus->lib->ffdbus_message_iter_next(&arrayIter));
+
+    dbus->lib->ffdbus_message_unref(properties);
+    return NULL;
 }
 
 static const char* detectBluetooth(FFlist* devices)
 {
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/bluetooth");
+    if(dirp == NULL)
+        return "Failed to open /sys/class/bluetooth";
+
     FFDBusData dbus;
     const char* error = ffDBusLoadData(DBUS_BUS_SYSTEM, &dbus);
     if(error)
         return error;
 
-    DBusMessage* managedObjects = ffDBusGetMethodReply(&dbus, "org.bluez", "/", "org.freedesktop.DBus.ObjectManager", "GetManagedObjects", NULL);
-    if(!managedObjects)
-        return "Failed to call GetManagedObjects";
-
-    DBusMessageIter rootIter;
-    if(!dbus.lib->ffdbus_message_iter_init(managedObjects, &rootIter))
+    struct dirent* entry;
+    while ((entry = readdir(dirp)) != NULL)
     {
-        dbus.lib->ffdbus_message_unref(managedObjects);
-        return "Failed to get root iterator of GetManagedObjects";
+        if (entry->d_name[0] == '.')
+            continue;
+
+        if (strchr(entry->d_name, ':') != NULL) // ignore connected devices
+            continue;
+
+        FFBluetoothRadioResult* device = ffListAdd(devices);
+        ffStrbufInit(&device->name);
+        ffStrbufInit(&device->address);
+        ffStrbufInitStatic(&device->vendor, "Unknown");
+        device->lmpVersion = INT_MIN;
+        device->lmpSubversion = INT_MIN;
+        device->enabled = false;
+        detectBluetoothRoot(device, entry->d_name, &dbus);
     }
-
-    detectBluetoothRoot(devices, &dbus, &rootIter);
-
-    dbus.lib->ffdbus_message_unref(managedObjects);
     return NULL;
 }
 
@@ -202,7 +145,7 @@ const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
     #ifdef FF_HAVE_DBUS
         return detectBluetooth(devices);
     #else
-        FF_UNUSED(devices) 
+        FF_UNUSED(devices)
         return "Fastfetch was compiled without DBus support";
     #endif
 }
