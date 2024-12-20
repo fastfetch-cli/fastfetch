@@ -18,6 +18,9 @@ const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FF
 
     for(IOBluetoothDevice* ioDevice in ioDevices)
     {
+        if (!options->showDisconnected && !ioDevice.isConnected)
+            continue;
+
         FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInitS(&device->name, ioDevice.name.UTF8String);
         ffStrbufInitS(&device->address, ioDevice.addressString.UTF8String);
