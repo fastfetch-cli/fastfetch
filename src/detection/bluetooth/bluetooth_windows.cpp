@@ -55,7 +55,7 @@ const char* ffBluetoothDetectBattery(FFlist* devices)
         on_scope_exit releaseCallResult([&] { pCallResult && pCallResult->Release(); });
 
         IWbemClassObject* pResultObject = nullptr;
-        if (FAILED(pCallResult->GetResultObject(WBEM_INFINITE, &pResultObject)))
+        if (FAILED(pCallResult->GetResultObject((LONG) WBEM_INFINITE, &pResultObject)))
             continue;
         on_scope_exit releaseResultObject([&] { pResultObject && pResultObject->Release(); });
 
