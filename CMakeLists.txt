@@ -86,6 +86,7 @@ cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR Open
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_LTO "Enable link-time optimization in release mode if supported" ON)
+option(BUILD_FLASHFETCH "Build flashfetch" ON) # Also build the flashfetch binary
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -1611,41 +1612,52 @@ target_link_libraries(fastfetch
     PRIVATE libfastfetch
 )
 
-add_executable(flashfetch
-    src/flashfetch.c
-)
-target_compile_definitions(flashfetch
-    PRIVATE FASTFETCH_TARGET_BINARY_NAME=flashfetch
-)
-target_link_libraries(flashfetch
-    PRIVATE libfastfetch
-)
-
 # Prevent fastfetch from linking to libstdc++
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
     target_sources(fastfetch
-        PRIVATE src/util/windows/version.rc
-    )
-    target_sources(flashfetch
         PRIVATE src/util/windows/version.rc
     )
 elseif(APPLE)
     target_link_options(fastfetch
         PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
     )
-    target_link_options(flashfetch
-        PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
-    )
 endif()
 
 if(BINARY_LINK_TYPE STREQUAL "static")
     target_link_options(fastfetch PRIVATE "-static")
-    target_link_options(flashfetch PRIVATE "-static")
+endif()
+
+# Apply all above parameters to flashfetch if it is built
+if (BUILD_FLASHFETCH)
+    add_executable(flashfetch
+        src/flashfetch.c
+    )
+    target_compile_definitions(flashfetch
+        PRIVATE FASTFETCH_TARGET_BINARY_NAME=flashfetch
+    )
+    target_link_libraries(flashfetch
+        PRIVATE libfastfetch
+    )
+
+    set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
+
+    if(WIN32)
+        target_sources(flashfetch
+            PRIVATE src/util/windows/version.rc
+        )
+    elseif(APPLE)
+        target_link_options(flashfetch
+            PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+        )
+    endif()
+
+    if(BINARY_LINK_TYPE STREQUAL "static")
+        target_link_options(flashfetch PRIVATE "-static")
+    endif()
 endif()
 
 ###################
@@ -1687,9 +1699,16 @@ endif()
 include(GNUInstallDirs)
 
 install(
-    TARGETS fastfetch flashfetch
+    TARGETS fastfetch
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
+
+if (TARGET flashfetch)
+    install(
+        TARGETS flashfetch
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+endif()
 
 if (TARGET ffwinrt)
     install(
