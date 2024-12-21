@@ -12,6 +12,10 @@ const char* ffDetectHost(FFHostResult* host)
         ffCleanUpSmbiosValue(&host->vendor);
     if (ffSysctlGetString("machdep.dmi.system-version", &host->version) == NULL)
         ffCleanUpSmbiosValue(&host->version);
+    if (ffSysctlGetString("machdep.dmi.system-serial", &host->serial) == NULL)
+        ffCleanUpSmbiosValue(&host->serial);
+    if (ffSysctlGetString("machdep.dmi.system-uuid", &host->uuid) == NULL)
+        ffCleanUpSmbiosValue(&host->uuid);
 
     return NULL;
 }

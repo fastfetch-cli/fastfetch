@@ -10,6 +10,8 @@ const char* ffDetectBoard(FFBoardResult* board)
         ffCleanUpSmbiosValue(&board->version);
     if (ffSysctlGetString("machdep.dmi.board-vendor", &board->vendor) == NULL)
         ffCleanUpSmbiosValue(&board->vendor);
+    if (ffSysctlGetString("machdep.dmi.board-serial", &board->serial) == NULL)
+        ffCleanUpSmbiosValue(&board->serial);
 
     return NULL;
 }
