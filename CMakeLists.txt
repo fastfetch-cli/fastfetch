@@ -698,7 +698,7 @@ elseif(NetBSD)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/bluetoothradio/bluetoothradio_linux.c
@@ -1486,6 +1486,7 @@ elseif(OpenBSD)
 elseif(NetBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
+        PRIVATE "prop"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch
