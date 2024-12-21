@@ -617,8 +617,8 @@ elseif(FreeBSD)
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
-        src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_bsd.c
         src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_bsd.c
@@ -700,8 +700,8 @@ elseif(NetBSD)
         src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
-        src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nbsd.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nbsd.c
@@ -782,8 +782,8 @@ elseif(OpenBSD)
         src/common/sysctl.c
         src/detection/battery/battery_obsd.c
         src/detection/bios/bios_nosupport.c
-        src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_obsd.c
