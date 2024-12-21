@@ -48,7 +48,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             return "sysctlbyname(machdep.cpu_brand) failed";
     }
 
-    ffSysctlGetString("machdep.dmi.processor-vendor", &cpu->vendor);
+    if (ffSysctlGetString("machdep.dmi.processor-vendor", &cpu->vendor) == NULL)
+        ffStrbufTrimRightSpace(&cpu->vendor);
 
     cpu->coresPhysical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
     cpu->coresLogical = cpu->coresPhysical;
