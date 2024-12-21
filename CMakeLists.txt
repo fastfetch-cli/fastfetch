@@ -780,7 +780,7 @@ elseif(OpenBSD)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_obsd.c
         src/detection/bios/bios_nosupport.c
         src/detection/bluetooth/bluetooth_linux.c
         src/detection/bluetoothradio/bluetoothradio_linux.c
