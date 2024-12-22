@@ -38,7 +38,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         ffStrbufAppendS(&battery->status, "Backup In Use");
     else if (info.ac_state == APM_AC_OFF)
     {
-        battery->timeRemaining = info.minutes_left * 60
+        battery->timeRemaining = (int) info.minutes_left * 60;
         ffStrbufAppendS(&battery->status, "Discharging");
     }
 
