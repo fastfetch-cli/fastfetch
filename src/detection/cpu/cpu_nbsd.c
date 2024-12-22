@@ -25,11 +25,11 @@ static const char* detectCpuTemp(double* current)
     if (!array) return "No temp data found in root dictionary";
 
     if (prop_array_count(array) != 2)
-        return "Unexpect `xtemp0` data";
+        return "Unexpected `xtemp0` data";
 
     prop_dictionary_t dict = prop_array_get(array, 0);
     if (prop_object_type(dict) != PROP_TYPE_DICTIONARY)
-        return "Unexpect `xtemp0[0]`";
+        return "Unexpected `xtemp0[0]`";
 
     int temp = 0; // in µK
     if (!prop_dictionary_get_int(dict, "cur-value", &temp))
