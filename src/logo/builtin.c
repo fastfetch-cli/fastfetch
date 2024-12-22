@@ -3086,6 +3086,15 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // NurOS
+    {
+        .names = {"NurOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NUROS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Nurunner
     {
         .names = {"Nurunner"},
