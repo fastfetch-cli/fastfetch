@@ -1,3 +1,28 @@
+# 2.33.0
+
+Changes:
+* Introduce a new CMake flag `-DBUILD_FLASHFETCH=OFF` to disable building flashfetch binaries
+    * Package managers are encouraged to enable it. See <https://github.com/fastfetch-cli/fastfetch/discussions/627> for detail
+
+Bugfixes:
+* Fix interconnect type detection (#1453, PhysicalDisk, Linux)
+* Don't report `proot` as terminal (Terminal, Android)
+* Remove a debug output (DiskIO, OpenBSD)
+
+Features:
+* Use `$POWERSHELL_VERSION` as PowerShell version if available (Shell, Windows)
+    * Fetching Windows PowerShell version can be very slow. Add `$env:POWERSHELL_VERSION = $PSVersionTable.PSVersion.ToString()` in `$PROFILE` before running `fastfetch` to improve the performance of `Shell` module
+* Add support for ubuntu-based armbian detection (#1447, OS, Linux)
+* Improve performance of Bluetooth detection (Bluetooth)
+    * We no longer report disconnected bluetooth devices in `--format json` when `--bluetooth-show-disconnected` isn't specified
+* Support brightness level detection for builtin displays (Brightness, OpenBSD / NetBSD)
+    * Requires root permission on OpenBSD
+* Support battery level detection (Battery, OpenBSD / NetBSD)
+* Support CPU temperature detection in NetBSD (CPU, NetBSD)
+
+Logo:
+* Add NurOS
+
 # 2.32.1
 
 A hotfix for OpenBSD. No changes to other platforms.
