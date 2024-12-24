@@ -78,7 +78,7 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
 static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResult* result)
 {
     // Get all properties at once to reduce the number of IPCs
-    DBusMessage* reply = ffDBusGetAllProperties(data, busName, "/org/mpris/MediaPlayer2", "");
+    DBusMessage* reply = ffDBusGetAllProperties(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player");
     if(reply == NULL)
         return false;
 
