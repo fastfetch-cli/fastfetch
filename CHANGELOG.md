@@ -8,6 +8,7 @@ Bugfixes:
 * Fix interconnect type detection (#1453, PhysicalDisk, Linux)
 * Don't report `proot` as terminal (Terminal, Android)
 * Remove a debug output (DiskIO, OpenBSD)
+* Fix media detection for some players (#1461, Media, Linux)
 
 Features:
 * Use `$POWERSHELL_VERSION` as PowerShell version if available (Shell, Windows)
@@ -19,9 +20,12 @@ Features:
     * Requires root permission on OpenBSD
 * Support battery level detection (Battery, OpenBSD / NetBSD)
 * Support CPU temperature detection in NetBSD (CPU, NetBSD)
+* Hard code path of `libvulkan.so` for Android
+    * So that users don't need to install the vulkan-loader wrapper of termux
 
 Logo:
 * Add NurOS
+* Add GoralixOS
 
 # 2.32.1
 
