@@ -99,6 +99,9 @@ void ffPrintMedia(FFMediaOptions* options)
             FF_FORMAT_ARG(media->artist, "artist"),
             FF_FORMAT_ARG(media->album, "album"),
             FF_FORMAT_ARG(media->status, "status"),
+            FF_FORMAT_ARG(media->player, "player-name"),
+            FF_FORMAT_ARG(media->playerId, "player-id"),
+            FF_FORMAT_ARG(media->url, "url"),
         }));
     }
 }
@@ -149,10 +152,17 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "song", &media->song);
-    yyjson_mut_obj_add_strbuf(doc, obj, "artist", &media->artist);
-    yyjson_mut_obj_add_strbuf(doc, obj, "album", &media->album);
-    yyjson_mut_obj_add_strbuf(doc, obj, "status", &media->status);
+
+    yyjson_mut_val* song = yyjson_mut_obj_add_obj(doc, obj, "song");
+    yyjson_mut_obj_add_strbuf(doc, song, "name", &media->song);
+    yyjson_mut_obj_add_strbuf(doc, song, "artist", &media->artist);
+    yyjson_mut_obj_add_strbuf(doc, song, "album", &media->album);
+    yyjson_mut_obj_add_strbuf(doc, song, "status", &media->status);
+
+    yyjson_mut_val* player = yyjson_mut_obj_add_obj(doc, obj, "player");
+    yyjson_mut_obj_add_strbuf(doc, player, "name", &media->player);
+    yyjson_mut_obj_add_strbuf(doc, player, "id", &media->playerId);
+    yyjson_mut_obj_add_strbuf(doc, player, "url", &media->url);
 }
 
 static FFModuleBaseInfo ffModuleInfo = {
