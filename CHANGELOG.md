@@ -6,9 +6,11 @@ Changes:
 
 Bugfixes:
 * Fix interconnect type detection (#1453, PhysicalDisk, Linux)
+    * Regression of v2.28
 * Don't report `proot` as terminal (Terminal, Android)
 * Remove a debug output (DiskIO, OpenBSD)
 * Fix media detection for some players (#1461, Media, Linux)
+    * Regression of v2.32
 
 Features:
 * Use `$POWERSHELL_VERSION` as PowerShell version if available (Shell, Windows)
