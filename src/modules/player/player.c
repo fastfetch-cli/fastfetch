@@ -118,18 +118,7 @@ void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, y
 
 void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    const FFMediaResult* media = ffDetectMedia();
-
-    if(media->error.length > 0)
-    {
-        yyjson_mut_obj_add_strbuf(doc, module, "error", &media->error);
-        return;
-    }
-
-    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
-    yyjson_mut_obj_add_strbuf(doc, obj, "player", &media->player);
-    yyjson_mut_obj_add_strbuf(doc, obj, "playerId", &media->playerId);
-    yyjson_mut_obj_add_strbuf(doc, obj, "url", &media->url);
+    yyjson_mut_obj_add_str(doc, module, "error", "Player module is an alias of Media module");
 }
 
 static FFModuleBaseInfo ffModuleInfo = {

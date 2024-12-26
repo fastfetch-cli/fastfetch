@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.32.1
+    VERSION 2.33.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -86,6 +86,7 @@ cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR Open
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_LTO "Enable link-time optimization in release mode if supported" ON)
+option(BUILD_FLASHFETCH "Build flashfetch" ON) # Also build the flashfetch binary
 option(BUILD_TESTS "Build tests" OFF) # Also create test executables
 option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by github actions for release builds
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
@@ -616,8 +617,8 @@ elseif(FreeBSD)
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
-        src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_bsd.c
         src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_bsd.c
@@ -697,13 +698,13 @@ elseif(NetBSD)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
-        src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nbsd.c
         src/detection/bootmgr/bootmgr_nosupport.c
-        src/detection/brightness/brightness_nosupport.c
+        src/detection/brightness/brightness_nbsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
         src/detection/cpu/cpu_nbsd.c
@@ -779,13 +780,13 @@ elseif(OpenBSD)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_obsd.c
         src/detection/bios/bios_nosupport.c
-        src/detection/bluetooth/bluetooth_linux.c
-        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/bootmgr/bootmgr_nosupport.c
-        src/detection/brightness/brightness_nosupport.c
+        src/detection/brightness/brightness_obsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_obsd.c
@@ -1485,6 +1486,7 @@ elseif(OpenBSD)
 elseif(NetBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
+        PRIVATE "prop"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch
@@ -1611,41 +1613,52 @@ target_link_libraries(fastfetch
     PRIVATE libfastfetch
 )
 
-add_executable(flashfetch
-    src/flashfetch.c
-)
-target_compile_definitions(flashfetch
-    PRIVATE FASTFETCH_TARGET_BINARY_NAME=flashfetch
-)
-target_link_libraries(flashfetch
-    PRIVATE libfastfetch
-)
-
 # Prevent fastfetch from linking to libstdc++
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "")
 set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "")
 set_target_properties(fastfetch PROPERTIES LINKER_LANGUAGE C)
-set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
 
 if(WIN32)
     target_sources(fastfetch
-        PRIVATE src/util/windows/version.rc
-    )
-    target_sources(flashfetch
         PRIVATE src/util/windows/version.rc
     )
 elseif(APPLE)
     target_link_options(fastfetch
         PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
     )
-    target_link_options(flashfetch
-        PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
-    )
 endif()
 
 if(BINARY_LINK_TYPE STREQUAL "static")
     target_link_options(fastfetch PRIVATE "-static")
-    target_link_options(flashfetch PRIVATE "-static")
+endif()
+
+# Apply all above parameters to flashfetch if it is built
+if (BUILD_FLASHFETCH)
+    add_executable(flashfetch
+        src/flashfetch.c
+    )
+    target_compile_definitions(flashfetch
+        PRIVATE FASTFETCH_TARGET_BINARY_NAME=flashfetch
+    )
+    target_link_libraries(flashfetch
+        PRIVATE libfastfetch
+    )
+
+    set_target_properties(flashfetch PROPERTIES LINKER_LANGUAGE C)
+
+    if(WIN32)
+        target_sources(flashfetch
+            PRIVATE src/util/windows/version.rc
+        )
+    elseif(APPLE)
+        target_link_options(flashfetch
+            PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,Info.plist
+        )
+    endif()
+
+    if(BINARY_LINK_TYPE STREQUAL "static")
+        target_link_options(flashfetch PRIVATE "-static")
+    endif()
 endif()
 
 ###################
@@ -1687,9 +1700,16 @@ endif()
 include(GNUInstallDirs)
 
 install(
-    TARGETS fastfetch flashfetch
+    TARGETS fastfetch
     DESTINATION "${CMAKE_INSTALL_BINDIR}"
 )
+
+if (TARGET flashfetch)
+    install(
+        TARGETS flashfetch
+        DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    )
+endif()
 
 if (TARGET ffwinrt)
     install(

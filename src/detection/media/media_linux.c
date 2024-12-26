@@ -78,7 +78,7 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
 static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResult* result)
 {
     // Get all properties at once to reduce the number of IPCs
-    DBusMessage* reply = ffDBusGetAllProperties(data, busName, "/org/mpris/MediaPlayer2", "");
+    DBusMessage* reply = ffDBusGetAllProperties(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player");
     if(reply == NULL)
         return false;
 
@@ -112,10 +112,6 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
             parseMprisMetadata(data, &dictIterator, result);
         else if(ffStrEquals(key, "PlaybackStatus"))
             ffDBusGetString(data, &dictIterator, &result->status);
-        else if(ffStrEquals(key, "Identity"))
-            ffDBusGetString(data, &dictIterator, &result->player);
-        else if(ffStrEquals(key, "DesktopEntry"))
-            ffDBusGetString(data, &dictIterator, &desktopIdentity);
 
         FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
     }
@@ -128,17 +124,22 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
         return false;
     }
 
-    if (result->player.length == 0)
+    //Set short bus name
+    ffStrbufAppendS(&result->playerId, busName + sizeof(FF_DBUS_MPRIS_PREFIX) - 1);
+
+    //We found a song, get the player name
+    if (ffStrbufStartsWithS(&result->playerId, "musikcube.instance"))
     {
-        if (desktopIdentity.length > 0)
-        {
-            ffStrbufDestroy(&result->player);
-            ffStrbufInitMove(&result->player, &desktopIdentity);
-        }
-        else
-        {
+        // dbus calls are EXTREMELY slow on musikcube, so we set the player name manually
+        ffStrbufSetStatic(&result->player, "musikcube");
+    }
+    else
+    {
+        ffDBusGetPropertyString(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", "Identity", &result->player);
+        if(result->player.length == 0)
+            ffDBusGetPropertyString(data, busName, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2", "DesktopEntry", &result->player);
+        if(result->player.length == 0)
             ffStrbufAppend(&result->player, &result->playerId);
-        }
     }
 
     data->lib->ffdbus_message_unref(reply);

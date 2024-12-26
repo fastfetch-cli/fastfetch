@@ -23,6 +23,7 @@ static inline const char* getVendorString(unsigned vendorId)
 
 void FFPhysicalMemoryUpdateVendorString(FFPhysicalMemoryResult* device)
 {
+    if (device->vendor.length == 0) return;
     if (ffStrbufEqualS(&device->vendor, "Unknown"))
     {
         ffStrbufClear(&device->vendor);

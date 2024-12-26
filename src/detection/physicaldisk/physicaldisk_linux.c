@@ -80,24 +80,28 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
 
     {
         ffStrbufInit(&device->interconnect);
-        char pathSysDeviceReal[PATH_MAX];
-        ssize_t pathLength = readlinkat(dfd, "device", pathSysDeviceReal, ARRAY_SIZE(pathSysDeviceReal) - 1);
-        if (pathLength > 0)
+        if (ffStrStartsWith(devName, "nvme"))
+            ffStrbufSetStatic(&device->interconnect, "NVMe");
+        else
         {
-            pathSysDeviceReal[pathLength] = '\0';
-
-            if (strstr(pathSysDeviceReal, "/usb") != NULL)
-                ffStrbufSetS(&device->interconnect, "USB");
-            else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
-                ffStrbufSetS(&device->interconnect, "NVMe");
-            else if (strstr(pathSysDeviceReal, "/ata") != NULL)
-                ffStrbufSetS(&device->interconnect, "ATA");
-            else if (strstr(pathSysDeviceReal, "/scsi") != NULL)
-                ffStrbufSetS(&device->interconnect, "SCSI");
-            else
+            char pathSysDeviceLink[64];
+            snprintf(pathSysDeviceLink, ARRAY_SIZE(pathSysDeviceLink), "/sys/block/%s/device", devName);
+            char pathSysDeviceReal[PATH_MAX];
+            if (realpath(pathSysDeviceLink, pathSysDeviceReal))
             {
-                if (ffAppendFileBufferRelative(devfd, "transport", &device->interconnect))
-                    ffStrbufTrimRightSpace(&device->interconnect);
+                if (strstr(pathSysDeviceReal, "/usb") != NULL)
+                    ffStrbufSetStatic(&device->interconnect, "USB");
+                else if (strstr(pathSysDeviceReal, "/ata") != NULL)
+                    ffStrbufSetStatic(&device->interconnect, "ATA");
+                else if (strstr(pathSysDeviceReal, "/scsi") != NULL)
+                    ffStrbufSetStatic(&device->interconnect, "SCSI");
+                else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
+                    ffStrbufSetStatic(&device->interconnect, "NVMe");
+                else
+                {
+                    if (ffAppendFileBufferRelative(devfd, "transport", &device->interconnect))
+                        ffStrbufTrimRightSpace(&device->interconnect);
+                }
             }
         }
     }

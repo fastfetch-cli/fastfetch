@@ -13,8 +13,6 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         return "sysctl({HW_DISKSTATS}, NULL) failed";
     uint32_t nDrive = (uint32_t) (len / sizeof(struct diskstats));
 
-    printf("C: %d\n", nDrive);
-
     struct diskstats* stats = malloc(len);
 
     if (sysctl(mib, ARRAY_SIZE(mib), stats, &len, NULL, 0) < 0)

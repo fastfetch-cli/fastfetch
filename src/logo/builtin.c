@@ -1912,6 +1912,15 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // GoralixOS
+    {
+        .names = {"GoralixOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_GORALIXOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+    },
     // GrapheneOS
     {
         .names = {"GrapheneOS"},
@@ -3085,6 +3094,15 @@ static const FFlogo N[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // NurOS
+    {
+        .names = {"NurOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NUROS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
     },
     // Nurunner
     {

@@ -40,6 +40,8 @@
     #define FF_SYSNAME "SunOS"
 #elif defined(__OpenBSD__)
     #define FF_SYSNAME "OpenBSD"
+#elif defined(__NetBSD__)
+    #define FF_SYSNAME "NetBSD"
 #else
     #define FF_SYSNAME "unknown"
 #endif

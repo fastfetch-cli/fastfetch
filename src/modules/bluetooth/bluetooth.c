@@ -59,7 +59,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
 void ffPrintBluetooth(FFBluetoothOptions* options)
 {
     FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof (FFBluetoothResult));
-    const char* error = ffDetectBluetooth(&devices);
+    const char* error = ffDetectBluetooth(options, &devices);
 
     if(error)
     {
@@ -155,11 +155,11 @@ void ffGenerateBluetoothJsonConfig(FFBluetoothOptions* options, yyjson_mut_doc* 
     ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
 }
 
-void ffGenerateBluetoothJsonResult(FF_MAYBE_UNUSED FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBluetoothResult));
 
-    const char* error = ffDetectBluetooth(&results);
+    const char* error = ffDetectBluetooth(options, &results);
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);

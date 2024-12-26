@@ -199,6 +199,10 @@ Try upgrading `pci.ids`: Download <https://pci-ids.ucw.cz/v2.2/pci.ids> and over
 
 Alternatively, you may try to use `fastfetch --gpu-driver-specific`, so that `fastfetch` will try to ask the driver for GPU name if supported.
 
+### Q: I get error `Authorization required, but no authorization protocol specified` when running fastfetch in root
+
+Try `export XAUTHORITY=$HOME/.Xauthority`
+
 ### Q: Fastfetch cannot detect my awesome 3rd-party macOS window manager!
 
 Try `fastfetch --wm-detect-plugin`. See also [#984](https://github.com/fastfetch-cli/fastfetch/issues/984)

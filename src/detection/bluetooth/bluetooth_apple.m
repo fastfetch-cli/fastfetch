@@ -10,7 +10,7 @@
     @property (nonatomic) uint8_t batteryPercentSingle;
 @end
 
-const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
+const char* ffDetectBluetooth(FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
 {
     NSArray<IOBluetoothDevice*>* ioDevices = IOBluetoothDevice.pairedDevices;
     if(!ioDevices)
@@ -18,6 +18,9 @@ const char* ffDetectBluetooth(FFlist* devices /* FFBluetoothResult */)
 
     for(IOBluetoothDevice* ioDevice in ioDevices)
     {
+        if (!options->showDisconnected && !ioDevice.isConnected)
+            continue;
+
         FFBluetoothResult* device = ffListAdd(devices);
         ffStrbufInitS(&device->name, ioDevice.name.UTF8String);
         ffStrbufInitS(&device->address, ioDevice.addressString.UTF8String);
