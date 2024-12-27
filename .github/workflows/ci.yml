@@ -377,7 +377,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '14.1'
+          version: '14.2'
           run: |
             uname -a
             sudo pkg update
@@ -449,7 +449,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.5'
+          version: '7.6'
           run: |
             uname -a
             sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa pulseaudio hwdata py3-requests
