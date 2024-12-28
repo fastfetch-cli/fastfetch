@@ -38,7 +38,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         struct pci_conf* pc = &confs[i];
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(pc->pc_vendor));
+        ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(pc->pc_vendor));
         ffStrbufInit(&gpu->name);
         ffStrbufInitS(&gpu->driver, pc->pd_name);
         ffStrbufInit(&gpu->platformApi);

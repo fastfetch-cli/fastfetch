@@ -161,7 +161,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         int vendorId;
         if(ffCfDictGetInt(properties, CFSTR("vendor-id"), &vendorId) == NULL)
         {
-            const char* vendorStr = ffGetGPUVendorString((unsigned) vendorId);
+            const char* vendorStr = ffGPUGetVendorString((unsigned) vendorId);
             ffStrbufAppendS(&gpu->vendor, vendorStr);
             if (vendorStr == FF_GPU_VENDOR_NAME_APPLE || vendorStr == FF_GPU_VENDOR_NAME_INTEL)
                 gpu->type = FF_GPU_TYPE_INTEGRATED;

@@ -51,7 +51,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         uint32_t revision = (uint32_t) strtoul(pclass, NULL, 16);
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
+        ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
         ffStrbufInit(&gpu->platformApi);

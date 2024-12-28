@@ -225,7 +225,7 @@ static const char* detectVulkan(FFVulkanResult* result)
         ffStrbufInitS(&gpu->name, physicalDeviceProperties.properties.deviceName);
 
         gpu->type = physicalDeviceProperties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? FF_GPU_TYPE_DISCRETE : FF_GPU_TYPE_INTEGRATED;
-        ffStrbufInitS(&gpu->vendor, ffGetGPUVendorString(physicalDeviceProperties.properties.vendorID));
+        ffStrbufInitS(&gpu->vendor, ffGPUGetVendorString(physicalDeviceProperties.properties.vendorID));
         ffStrbufInitS(&gpu->driver, driverProperties.driverInfo);
 
         VkPhysicalDeviceMemoryProperties memoryProperties = {};

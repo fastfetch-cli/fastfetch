@@ -46,7 +46,7 @@ typedef struct FFGPUResult
 const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result);
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus);
 
-const char* ffGetGPUVendorString(unsigned vendorId);
+const char* ffGPUGetVendorString(unsigned vendorId);
 const char* ffGPUDetectByEglext(FFlist* gpus);
 
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__NetBSD__) || defined(__OpenBSD__)

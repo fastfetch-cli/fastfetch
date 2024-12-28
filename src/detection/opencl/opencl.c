@@ -112,7 +112,7 @@ static const char* openCLHandleData(OpenCLData* data, FFOpenCLResult* result)
             {
                 cl_uint vendorId;
                 if (data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR_ID, sizeof(vendorId), &vendorId, NULL) == CL_SUCCESS)
-                    ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
+                    ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
                 if (gpu->vendor.length == 0 && data->ffclGetDeviceInfo(deviceID, CL_DEVICE_VENDOR, sizeof(buffer), buffer, NULL) == CL_SUCCESS)
                     ffStrbufSetS(&gpu->vendor, buffer);
             }

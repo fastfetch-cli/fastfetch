@@ -72,7 +72,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             {
                 uint32_t vendorId = 0;
                 if(ffRegReadUint(hDirectxKey, L"VendorId", &vendorId, NULL) && vendorId)
-                    ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
+                    ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
 
                 if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
                     gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
@@ -147,7 +147,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_HARDWAREID, NULL, (PBYTE) buffer, sizeof(buffer), NULL))
             {
                 swscanf(buffer, L"PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x", &vendorId, &deviceId, &subSystemId, &revId);
-                ffStrbufSetStatic(&gpu->vendor, ffGetGPUVendorString(vendorId));
+                ffStrbufSetStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
             }
 
             detectFn(
