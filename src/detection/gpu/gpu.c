@@ -114,6 +114,11 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
             return NULL;
         }
     }
+    if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_EGLEXT)
+    {
+        if (ffGPUDetectByEglext(result) == NULL)
+            return NULL;
+    }
     if (options->detectionMethod <= FF_GPU_DETECTION_METHOD_OPENGL)
     {
         if (detectByOpenGL(result) == NULL)
