@@ -618,7 +618,6 @@ elseif(FreeBSD)
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
-        src/detection/bluetooth/bluetooth_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_bsd.c
         src/detection/bootmgr/bootmgr_bsd.c
@@ -691,6 +690,15 @@ elseif(FreeBSD)
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
+    if(DragonFly)
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bluetooth/bluetooth_nosupport.c
+        )
+    else()
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bluetooth/bluetooth_bsd.c
+        )
+    endif()
 elseif(NetBSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
