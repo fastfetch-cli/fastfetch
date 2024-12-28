@@ -48,6 +48,31 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
+static void detectGhostty(FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    FFpropquery fontQueryToml[] = {
+        {"font-family =", &fontName},
+        {"font-size =", &fontSize},
+    };
+
+    if (!ffParsePropFileConfigValues("ghostty/config", 2, fontQueryToml))
+    {
+        ffStrbufAppendS(&terminalFont->error, "Couldn't find file `ghostty/config`");
+        return;
+    }
+
+    if(fontName.length == 0)
+        ffStrbufAppendS(&fontName, "monospace");
+
+    if(fontSize.length == 0)
+        ffStrbufAppendS(&fontSize, "13");
+
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
+
 FF_MAYBE_UNUSED static void detectTTY(FFTerminalFontResult* terminalFont)
 {
     FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
@@ -230,6 +255,8 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
         detectTabby(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour"))
         detectContour(&terminal->exe, terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ghostty"))
+        detectGhostty(terminalFont);
 
     #ifndef _WIN32
     else if(ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/pts/"))
