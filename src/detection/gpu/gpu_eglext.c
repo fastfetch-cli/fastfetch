@@ -5,6 +5,13 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#ifndef EGL_RENDERER_EXT
+#define EGL_RENDERER_EXT 0x335F
+#endif
+#ifndef EGL_DRIVER_NAME_EXT
+#define EGL_DRIVER_NAME_EXT 0x335E
+#endif
+
 const char* ffGPUDetectByEglext(FFlist* gpus)
 {
     FF_LIBRARY_LOAD(egl, "dlopen libEGL" FF_LIBRARY_EXTENSION " failed", "libEGL" FF_LIBRARY_EXTENSION, 1);
