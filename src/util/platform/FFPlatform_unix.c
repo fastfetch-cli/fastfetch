@@ -21,7 +21,8 @@ static void getExePath(FFPlatform* platform)
     char exePath[PATH_MAX + 1];
     #ifdef __linux__
         ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
-        exePath[exePathLen] = '\0';
+        if (exePathLen >= 0)
+            exePath[exePathLen] = '\0';
     #elif defined(__APPLE__)
         int exePathLen = proc_pidpath((int) getpid(), exePath, sizeof(exePath));
     #elif defined(__FreeBSD__) || defined(__NetBSD__)
@@ -44,7 +45,8 @@ static void getExePath(FFPlatform* platform)
         size_t exePathLen = 0;
     #elif defined(__sun)
         ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
-        exePath[exePathLen] = '\0';
+        if (exePathLen >= 0)
+            exePath[exePathLen] = '\0';
     #endif
     if (exePathLen > 0)
     {
