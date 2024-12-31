@@ -173,6 +173,11 @@ logoType:
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_KITTY_DIRECT;
     }
+    else if(ffStrEqualsIgnCase(key, "--kitty-icat"))
+    {
+        ffOptionParseString(key, value, &options->source);
+        options->type = FF_LOGO_TYPE_IMAGE_KITTY_ICAT;
+    }
     else if(ffStrEqualsIgnCase(key, "--iterm"))
     {
         ffOptionParseString(key, value, &options->source);

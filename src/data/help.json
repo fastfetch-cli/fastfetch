@@ -353,6 +353,14 @@
             }
         },
         {
+            "long": "kitty-icat",
+            "desc": "Short for --logo-type kitty-icat --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
             "long": "iterm",
             "desc": "Short for --logo-type iterm --logo <path>",
             "remark": "See \"--help logo-type\" for more info",

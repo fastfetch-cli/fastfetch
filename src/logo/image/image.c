@@ -190,17 +190,18 @@ static bool printImageKittyIcat(bool printError)
     {
         char place[64];
         snprintf(place,
-        ARRAY_SIZE(place),
-        "--place=%ux9999@%ux%u",
-        options->width,
-        options->paddingLeft + 1,
-        options->paddingTop + 1);
+            ARRAY_SIZE(place),
+            "--place=%ux%u@%ux%u",
+            options->width,
+            options->height == 0 ? 9999 : options->height,
+            options->paddingLeft + 1,
+            options->paddingTop + 1);
 
         error = ffProcessAppendStdOut(&buf, (char* []) {
             "kitten",
             "icat",
             "-n",
-            "--align=left",
+            "--align=center",
             place,
             "--scale-up",
             options->source.chars,
