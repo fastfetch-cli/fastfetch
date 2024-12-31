@@ -17,6 +17,7 @@ typedef enum __attribute__((__packed__)) FFLogoType
     FF_LOGO_TYPE_IMAGE_SIXEL, //image file, printed as sixel codes
     FF_LOGO_TYPE_IMAGE_KITTY, //image file, printed as kitty graphics protocol
     FF_LOGO_TYPE_IMAGE_KITTY_DIRECT, //image file, tell the terminal emulator to read image data from the specified file (Supported by kitty and wezterm)
+    FF_LOGO_TYPE_IMAGE_KITTY_ICAT, //image file, use `kitten icat` to display the image. Requires binary `kitten` to be installed"
     FF_LOGO_TYPE_IMAGE_ITERM, //image file, printed as iterm graphics protocol
     FF_LOGO_TYPE_IMAGE_CHAFA, //image file, printed as ascii art using libchafa
     FF_LOGO_TYPE_IMAGE_RAW,   //image file, printed as raw binary string
