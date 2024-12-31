@@ -1132,7 +1132,6 @@
                     "pci": "Search PCI devices, which do not requires GPU driver installed. Not supported on Windows and macOS",
                     "vulkan": "Use Vulkan API. Slow and requires proper vulkan driver installed. Used for Android",
                     "opencl": "Use OpenCL API. Slow and requires proper OpenCL driver installed",
-                    "eglext": "Use extensions of EGL API. Slow but support multiple GPUs",
                     "opengl": "Use OpenGL API. Slow and only detects one GPU"
                 },
                 "default": "auto"

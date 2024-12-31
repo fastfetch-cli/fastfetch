@@ -2041,7 +2041,6 @@
                                             "pci",
                                             "vulkan",
                                             "opencl",
-                                            "eglext",
                                             "opengl"
                                         ],
                                         "default": "auto"
