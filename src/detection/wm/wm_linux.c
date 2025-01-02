@@ -1,6 +1,7 @@
 #include "wm.h"
 
 #include "common/processing.h"
+#include "common/io/io.h"
 #include "detection/displayserver/displayserver.h"
 #include "util/binary.h"
 #include "util/path.h"
@@ -22,7 +23,7 @@ static bool extractHyprlandVersion(const char* line, FF_MAYBE_UNUSED uint32_t le
     return false;
 }
 
-static const char* getHyprland(FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
+static const char* getHyprland(FFstrbuf* result)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("Hyprland", &path);
@@ -53,7 +54,7 @@ static bool extractSwayVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, v
     return false;
 }
 
-static const char* getSway(FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
+static const char* getSway(FFstrbuf* result)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
     const char* error = ffFindExecutableInPath("sway", &path);
@@ -79,16 +80,34 @@ static const char* getSway(FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* option
     return "Failed to run command `sway --version`";
 }
 
-const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FFWMOptions* options)
+static const char* getWslg(FFstrbuf* result)
+{
+    if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result))
+        return "Failed to read /mnt/wslg/versions.txt";
+
+    if (!ffStrbufStartsWithS(result, "WSLg "))
+        return "Failed to find WSLg version";
+
+    ffStrbufSubstrBeforeFirstC(result, '\n');
+    ffStrbufSubstrBeforeFirstC(result, '+');
+    ffStrbufSubstrAfterFirstC(result, ':');
+    ffStrbufTrimLeft(result, ' ');
+    return NULL;
+}
+
+const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 {
     if (!wmName)
         return "No WM detected";
 
     if (ffStrbufEqualS(wmName, "Hyprland"))
-        return getHyprland(result, options);
+        return getHyprland(result);
 
     if (ffStrbufEqualS(wmName, "sway"))
-        return getSway(result, options);
+        return getSway(result);
+
+    if (ffStrbufEqualS(wmName, "WSLg"))
+        return getWslg(result);
 
     return "Unsupported WM";
 }
