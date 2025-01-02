@@ -19,11 +19,20 @@ void ffPrintWM(FFWMOptions* options)
     if(options->detectPlugin)
         ffDetectWMPlugin(&pluginName);
 
+    FF_STRBUF_AUTO_DESTROY version = ffStrbufCreate();
+    ffDetectWMVersion(&result->wmPrettyName, &version, options);
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         ffStrbufWriteTo(&result->wmPrettyName, stdout);
+
+        if(version.length > 0)
+        {
+            putchar(' ');
+            ffStrbufWriteTo(&version, stdout);
+        }
 
         if(result->wmProtocolName.length > 0)
         {
