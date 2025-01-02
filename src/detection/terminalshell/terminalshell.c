@@ -598,6 +598,38 @@ static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
             }
         }
     }
+    #elif __APPLE__
+    if (ffStrbufEndsWithS(exe, "/kitty.app/Contents/MacOS/kitty"))
+    {
+        ffStrbufSet(version, exe);
+        ffStrbufSubstrBeforeLastC(version, '/');
+        ffStrbufSubstrBeforeLastC(version, '/');
+        ffStrbufAppendS(version, "/Info.plist");
+        char buf[4096];
+        ssize_t size = ffReadFileData(version->chars, ARRAY_SIZE(buf) - 1, buf);
+        if (size > 0)
+        {
+            buf[size] = '\0';
+
+            const char* p = strstr(buf, "<key>CFBundleShortVersionString</key>");
+            if (p)
+            {
+                p += strlen("<key>CFBundleShortVersionString</key>");
+                p = strchr(p, '>');
+                if (p)
+                {
+                    p++;
+                    const char* end = strchr(p, '<');
+                    if (end)
+                    {
+                        ffStrbufSetNS(version, (uint32_t) (end - p), p);
+                        return true;
+                    }
+                }
+            }
+        }
+        ffStrbufClear(version);
+    }
     #endif
 
     char versionHex[64];
