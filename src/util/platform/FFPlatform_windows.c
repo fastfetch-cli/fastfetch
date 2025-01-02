@@ -31,13 +31,12 @@ static void getExePath(FFPlatform* platform)
 
 static void getHomeDir(FFPlatform* platform)
 {
-    PWSTR pPath;
+    PWSTR pPath = NULL;
     if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_Profile, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
         ffStrbufSetWS(&platform->homeDir, pPath);
         ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
-        CoTaskMemFree(pPath);
     }
     else
     {
@@ -45,28 +44,29 @@ static void getHomeDir(FFPlatform* platform)
         ffStrbufReplaceAllC(&platform->homeDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->homeDir, '/');
     }
+    CoTaskMemFree(pPath);
 }
 
 static void getCacheDir(FFPlatform* platform)
 {
-    PWSTR pPath;
+    PWSTR pPath = NULL;
     if(SUCCEEDED(SHGetKnownFolderPath(&FOLDERID_LocalAppData, KF_FLAG_DEFAULT, NULL, &pPath)))
     {
         ffStrbufSetWS(&platform->cacheDir, pPath);
         ffStrbufReplaceAllC(&platform->cacheDir, '\\', '/');
         ffStrbufEnsureEndsWithC(&platform->cacheDir, '/');
-        CoTaskMemFree(pPath);
     }
     else
     {
         ffStrbufAppend(&platform->cacheDir, &platform->homeDir);
         ffStrbufAppendS(&platform->cacheDir, "AppData/Local/");
     }
+    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
 {
-    PWSTR pPath;
+    PWSTR pPath = NULL;
     if(SUCCEEDED(SHGetKnownFolderPath(folderId, 0, NULL, &pPath)))
     {
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreateWS(pPath);
@@ -74,8 +74,8 @@ static void platformPathAddKnownFolder(FFlist* dirs, REFKNOWNFOLDERID folderId)
         ffStrbufEnsureEndsWithC(&buffer, '/');
         if (!ffListContains(dirs, &buffer, (void*) ffStrbufEqual))
             ffStrbufInitMove((FFstrbuf*) ffListAdd(dirs), &buffer);
-        CoTaskMemFree(pPath);
     }
+    CoTaskMemFree(pPath);
 }
 
 static void platformPathAddEnvSuffix(FFlist* dirs, const char* env, const char* suffix)

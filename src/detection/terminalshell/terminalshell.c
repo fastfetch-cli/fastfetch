@@ -15,41 +15,18 @@
     #define _PATH_LOCALBASE "/usr/local"
 #elif __NetBSD__
     #define _PATH_LOCALBASE "/usr/pkg"
-#endif
+#elif _WIN32
 
-#ifdef _WIN32
+#include "util/windows/version.h"
+#include <windows.h>
 
-#include "util/mallocHelper.h"
-
-#include <winver.h>
-
-static bool getFileVersion(const char* exePath, FFstrbuf* version)
+static bool getFileVersion(const FFstrbuf* exePath, FFstrbuf* version)
 {
-    DWORD handle;
-    DWORD size = GetFileVersionInfoSizeA(exePath, &handle);
-    if(size > 0)
-    {
-        FF_AUTO_FREE void* versionData = malloc(size);
-        if(GetFileVersionInfoA(exePath, handle, size, versionData))
-        {
-            VS_FIXEDFILEINFO* verInfo;
-            UINT len;
-            if(VerQueryValueW(versionData, L"\\", (void**)&verInfo, &len) && len && verInfo->dwSignature == 0xFEEF04BD)
-            {
-                ffStrbufAppendF(version, "%u.%u.%u.%u",
-                    (unsigned)(( verInfo->dwFileVersionMS >> 16 ) & 0xffff),
-                    (unsigned)(( verInfo->dwFileVersionMS >>  0 ) & 0xffff),
-                    (unsigned)(( verInfo->dwFileVersionLS >> 16 ) & 0xffff),
-                    (unsigned)(( verInfo->dwFileVersionLS >>  0 ) & 0xffff)
-                );
-                return true;
-            }
-        }
-    }
-
-    return false;
+    wchar_t exePathW[PATH_MAX];
+    int len = MultiByteToWideChar(CP_UTF8, 0, exePath->chars, (int)exePath->length, exePathW, ARRAY_SIZE(exePathW));
+    if (len <= 0) return false;
+    return ffGetFileVersion(exePathW, version);
 }
-
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
@@ -119,7 +96,7 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
     }
 
     #ifdef _WIN32
-    if(getFileVersion(exe->chars, version))
+    if(getFileVersion(exe, version))
     {
         ffStrbufSubstrBeforeLastC(version, '.');
         return true;
@@ -312,7 +289,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
     if(ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise"))
         return getShellVersionWinPowerShell(exe, version);
 
-    return getFileVersion(exe->chars, version);
+    return getFileVersion(exe, version);
     #endif
 
     return false;
@@ -706,7 +683,7 @@ static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
         return true;
     }
 
-    return getFileVersion(exe->chars, version);
+    return getFileVersion(exe, version);
 }
 
 static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
@@ -716,7 +693,7 @@ static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
     if(version->length)
         return true;
 
-    return getFileVersion(exe->chars, version);
+    return getFileVersion(exe, version);
 }
 
 #endif
@@ -875,7 +852,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #ifdef _WIN32
 
-    return getFileVersion(exe->chars, version);
+    return getFileVersion(exe, version);
 
     #else
 

@@ -1003,6 +1003,7 @@ elseif(WIN32)
         src/util/windows/registry.c
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
+        src/util/windows/version.c
         src/util/platform/FFPlatform_windows.c
         src/util/binary_windows.c
     )
