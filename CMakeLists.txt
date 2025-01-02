@@ -922,7 +922,7 @@ elseif(APPLE)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.m
         src/detection/wifi/wifi_apple.m
-        src/detection/wm/wm_apple.c
+        src/detection/wm/wm_apple.m
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
