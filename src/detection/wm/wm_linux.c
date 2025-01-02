@@ -22,9 +22,13 @@ static void getHyprland(FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FFWMOptions* options)
 {
+    if (!wmName)
+        return "No WM detected";
+
     if (ffStrbufEqualS(wmName, FF_WM_PRETTY_HYPRLAND))
         getHyprland(result, options);
     else
         return "Unsupported WM";
+
     return NULL;
 }
