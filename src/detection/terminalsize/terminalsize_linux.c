@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 
 #include <sys/ioctl.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 #ifdef __sun
@@ -11,7 +12,11 @@
 bool ffDetectTerminalSize(FFTerminalSizeResult* result)
 {
     struct winsize winsize = {};
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize);
+    static int ttyfd = STDOUT_FILENO;
+    if (!isatty(ttyfd))
+        ttyfd = open("/dev/tty", O_RDWR | O_NOCTTY | O_CLOEXEC);
+
+    ioctl(ttyfd, TIOCGWINSZ, &winsize);
 
     if (winsize.ws_row == 0 || winsize.ws_col == 0)
         ffGetTerminalResponse("\e[18t", 2, "\e[8;%hu;%hut", &winsize.ws_row, &winsize.ws_col);
