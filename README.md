@@ -226,6 +226,16 @@ In JSONC, you can use:
 }
 ```
 
+### Q: How to hide a key?
+
+Set the key to a white space.
+
+```jsonc
+{
+    "key": " "
+}
+```
+
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
 Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
