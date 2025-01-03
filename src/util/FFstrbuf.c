@@ -225,12 +225,6 @@ void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     ffStrbufAppendNS(strbuf, length, value);
 }
 
-void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, value->length, value->chars);
-}
-
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 {
     if(strbuf->length == 0)
