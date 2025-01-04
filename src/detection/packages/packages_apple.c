@@ -52,7 +52,7 @@ static void getBrewPackages(FFPackagesResult* result)
 static uint32_t countMacPortsPackages(const char* dirname)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
-    ffStrbufAppendS(&baseDir, FASTFETCH_TARGET_DIR_ROOT "/var/macports/software");
+    ffStrbufAppendS(&baseDir, "/var/macports/software");
 
     return getNumElements(baseDir.chars, DT_DIR);
 }
