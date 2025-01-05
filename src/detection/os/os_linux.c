@@ -99,7 +99,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(ffStrContains(xdgConfigDirs, "lxde") || ffStrContains(xdgConfigDirs, "lubuntu"))
+    if(ffStrContains(xdgConfigDirs, "lxqt") || ffStrContains(xdgConfigDirs, "lubuntu"))
     {
         ffStrbufSetS(&result->name, "Lubuntu");
         ffStrbufSetS(&result->prettyName, "Lubuntu");

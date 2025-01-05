@@ -2582,6 +2582,15 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // Lubuntu
+    {
+        .names = {"lubuntu"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LUBUNTU,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Lunar
     {
         .names = {"Lunar"},
