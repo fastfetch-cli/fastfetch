@@ -44,9 +44,17 @@ static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
     if(
         ffStrbufContainS(buffer, "cpu") ||
         ffStrbufEqualS(buffer, "k10temp") || // AMD
+        ffStrbufEqualS(buffer, "fam15h_power") || // AMD
         ffStrbufEqualS(buffer, "coretemp") // Intel
     ) return value / 1000.;
 
+    return 0.0/0.0;
+}
+
+static double detectTZTemp(FFstrbuf* buffer)
+{
+    if (ffReadFileBuffer("/sys/class/thermal/thermal_zone0/temp", buffer))
+        return ffStrbufToDouble(buffer) / 1000.;
     return 0.0/0.0;
 }
 
@@ -79,7 +87,7 @@ static double detectCPUTemp(void)
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
 
-    return 0.0/0.0;
+    return detectTZTemp(&buffer);
 }
 
 #ifdef __ANDROID__
