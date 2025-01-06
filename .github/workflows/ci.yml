@@ -232,6 +232,41 @@ jobs:
           name: fastfetch-linux-riscv64
           path: ./fastfetch-*.*
 
+  linux-ppc64le:
+    name: Linux-ppc64le
+    runs-on: ubuntu-22.04
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: uraimo/run-on-arch-action@v2
+        id: runcmd
+        with:
+          arch: ppc64le
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          run: |
+            uname -a
+            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libchafa-dev libelf-dev directx-headers-dev rpm
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-linux-ppc64le
+          path: ./fastfetch-*.*
+
   musl-amd64:
     name: Musl-amd64
     runs-on: ubuntu-latest
@@ -578,6 +613,7 @@ jobs:
       - linux-aarch64
       - linux-armv7
       - linux-riscv64
+      - linux-ppc64le
       - musl-amd64
       - macos-universal
       - freebsd-amd64
