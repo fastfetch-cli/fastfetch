@@ -570,6 +570,22 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
     return true;
 }
 
+/// @brief Restore the end of a line that was modified by ffStrbufGetline.
+/// @warning This function should be called before breaking an ffStrbufGetline loop.
+void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    assert(buffer && lineptr && n);
+    assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
+    assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
+
+    if (!*lineptr)
+        return;
+
+    *lineptr += *n;
+    if (*lineptr < buffer->chars + buffer->length)
+        **lineptr = '\n';
+}
+
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
 {
     if (strbuf->allocated == 0) return false; // Doesn't work with static strings

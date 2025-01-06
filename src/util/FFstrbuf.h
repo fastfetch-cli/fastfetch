@@ -90,6 +90,7 @@ void ffStrbufUpperCase(FFstrbuf* strbuf);
 void ffStrbufLowerCase(FFstrbuf* strbuf);
 
 bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
+void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
