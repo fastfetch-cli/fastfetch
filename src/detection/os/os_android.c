@@ -5,8 +5,6 @@ void ffDetectOSImpl(FFOSResult* os)
 {
     ffStrbufSetStatic(&os->name, "Android");
 
-    ffStrbufSetStatic(&os->prettyName, "Android");
-
     ffStrbufSetStatic(&os->id, "android");
 
     ffSettingsGetAndroidProperty("ro.build.version.release", &os->version);
