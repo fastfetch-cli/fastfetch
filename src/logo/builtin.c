@@ -4229,6 +4229,15 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // SnigdhaOS
+    {
+        .names = {"SnigdhaOS", "Snigdha"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SMARTOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Soda
     {
         .names = {"Soda"},
