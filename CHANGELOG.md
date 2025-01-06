@@ -1,3 +1,30 @@
+# 2.34.0
+
+Changes:
+* We now print distro pretty name if available (OS)
+    * This is a long requested feature. However, it may break some distros. File a bug with the content of `/etc/os-release` if it breaks your distro.
+
+Bugfixes:
+* Fix thunderbolt version of new MBPs (#1465, Host, macOS)
+* Fix backlight name detection on FreeBSD (Brightness, FreeBSD)
+* Fix Terminal detection when running fastfetch in `pk-command-not-found` (#1467, Terminal, Linux)
+* Relax detection of terminals in NixOS (#1479, Terminal, Linux)
+    * Should fix konsole, ghostty and maybe others
+* Fix core count output in multi-package platforms (CPU)
+
+Features:
+* Support ghostty terminal font detection (TerminalFont, Linux / macOS)
+* Support `kitty-icat` image protocol, which uses `kitten icat` to generate image data
+    * Pros: support tmux; support gif animations; good performance
+    * Cons: due to the limitation of `kitten icat`, we need to clear the screen before displaying the image logo
+* Support WM version detection (WM)
+    * In Linux, Hyprland & sway are supported currently
+* Improve performance when stdout is redirected (TerminalSize)
+* Report thermal zone temp if CPU temp is not available (CPU, Linux)
+
+Logo:
+* Add Lubuntu
+
 # 2.33.0
 
 Changes:
