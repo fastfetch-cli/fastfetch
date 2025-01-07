@@ -144,6 +144,36 @@ static void detectQualcomm(FFCPUResult* cpu)
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 1 [SM4375]");
 }
 
+static void detectMediaTek(FFCPUResult* cpu)
+{
+    // https://en.wikipedia.org/wiki/List_of_MediaTek_systems_on_chips
+
+    if (ffStrbufEqualS(&cpu->name, "MT6991"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6991Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6989Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT6989Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8796Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT8796Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6989"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT6989]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8796"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT8796]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6985W"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200+ [MT6985W]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6985"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200 [MT6985]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6983W"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT6983W]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/T"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT8798Z/T]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6983Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT6983Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/C"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT8798Z/C]");
+}
+
 static void detectAndroid(FFCPUResult* cpu)
 {
     if (cpu->name.length == 0)
@@ -161,6 +191,8 @@ static void detectAndroid(FFCPUResult* cpu)
 
     if (ffStrbufEqualS(&cpu->vendor, "QTI") && ffStrbufStartsWithS(&cpu->name, "SM"))
         detectQualcomm(cpu);
+    else if (ffStrbufEqualS(&cpu->vendor, "MTK") && ffStrbufStartsWithS(&cpu->name, "MT"))
+        detectMediaTek(cpu);
 }
 #endif
 
