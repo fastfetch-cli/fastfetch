@@ -65,6 +65,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         device->volume = FF_SOUND_VOLUME_UNKNOWN;
         ffStrbufInitWS(&device->identifier, immDeviceId);
         ffStrbufInit(&device->name);
+        ffStrbufInitStatic(&device->platformApi, "Core Audio APIs");
 
         {
             PROPVARIANT __attribute__((__cleanup__(PropVariantClear))) friendlyName;

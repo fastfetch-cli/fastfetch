@@ -73,6 +73,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         device->volume = FF_SOUND_VOLUME_UNKNOWN;
         ffStrbufInitF(&device->identifier, "%u", (unsigned) deviceId);
         ffStrbufInit(&device->name);
+        ffStrbufInitStatic(&device->platformApi, "Core Audio");
         ffCfStrGetString(name, &device->name);
 
         uint32_t muted;
