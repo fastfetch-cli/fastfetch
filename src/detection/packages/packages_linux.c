@@ -437,7 +437,8 @@ static uint32_t getAMUser(void)
     uint32_t baseLen = baseDir->length;
     ffStrbufAppendS(baseDir, "appman/appman-config");
     FF_STRBUF_AUTO_DESTROY packagesPath = ffStrbufCreate();
-    ffReadFileBuffer(baseDir->chars, &packagesPath);
+    if (ffReadFileBuffer(baseDir->chars, &packagesPath))
+        ffStrbufTrimRightSpace(&packagesPath);
     ffStrbufSubstrBefore(baseDir, baseLen);
 
     return packagesPath.length > 0 ? getAMPackages(&packagesPath) : 0;
@@ -701,5 +702,4 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 
     if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT))
         result->amUser = getAMUser();
-
 }
