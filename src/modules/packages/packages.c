@@ -62,8 +62,8 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(paludis)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(opkg)
-        FF_PRINT_PACKAGE_NAME(amSystem, counts.amUser ? "am-system" : "am")
-        FF_PRINT_PACKAGE_NAME(amUser, "am-user")
+        FF_PRINT_PACKAGE_NAME(amSystem, "am")
+        FF_PRINT_PACKAGE_NAME(amUser, "appman")
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
@@ -472,7 +472,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of paludis packages", "paludis"},
         {"Number of winget packages", "winget"},
         {"Number of opkg packages", "opkg"},
-        {"Number of am packages", "am"},
+        {"Number of am-system packages", "am-system"},
         {"Number of sorcery packages", "sorcery"},
         {"Number of lpkg packages", "lpkg"},
         {"Number of lpkgbuild packages", "lpkgbuild"},
@@ -483,6 +483,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of pacstall packages", "pacstall"},
         {"Number of mport packages", "mport"},
         {"Number of qi packages", "qi"},
+        {"Number of am-user (aka appman) packages", "am-user"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
