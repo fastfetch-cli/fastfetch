@@ -67,9 +67,11 @@ static const char* eglHandleContext(FFOpenGLResult* result, EGLData* data)
 static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data, bool gles)
 {
     data->context = data->ffeglCreateContext(data->display, data->config, EGL_NO_CONTEXT, (EGLint[]){
-        EGL_CONTEXT_CLIENT_VERSION, gles ? 2 : 1,
+        EGL_CONTEXT_CLIENT_VERSION, gles ? 2 : 1, // Try GLES 2.0+ first
         EGL_NONE
     });
+    if(data->context == EGL_NO_CONTEXT && gles) // Some ANGLE builds support GLES 1.1 only
+        data->context = data->ffeglCreateContext(data->display, data->config, EGL_NO_CONTEXT, (EGLint[]){EGL_NONE});
     if(data->context == EGL_NO_CONTEXT)
         return "eglCreateContext returned EGL_NO_CONTEXT";
 
