@@ -46,7 +46,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         {
             if (prop_object_type(dict) != PROP_TYPE_DICTIONARY)
                 continue;
-        
+
             const char* desc = NULL;
             if (!prop_dictionary_get_string(dict, "description", &desc))
                 continue;
@@ -88,7 +88,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             ffStrbufInit(&battery->manufactureDate);
             battery->timeRemaining = -1;
 
-            battery->capacity = (double) curr / max;
+            battery->capacity = (double) curr / (double) max * 100.;
             if (charging)
                 ffStrbufAppendS(&battery->status, "Charging, ");
             else if (dischargeRate)
@@ -102,6 +102,6 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
         }
     }
     prop_object_iterator_release(itKey);
-    
+
     return NULL;
 }
