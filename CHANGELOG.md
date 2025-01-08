@@ -11,6 +11,8 @@ Bugfixes:
 * Relax detection of terminals in NixOS (#1479, Terminal, Linux)
     * Should fix konsole, ghostty and maybe others
 * Fix core count output in multi-package platforms (CPU)
+* Don't suppress the output of `preRun` (#1489)
+* Fix battery percentage detection (Battery, NetBSD)
 
 Features:
 * Support ghostty terminal font detection (TerminalFont, Linux / macOS)
@@ -21,9 +23,16 @@ Features:
     * In Linux, Hyprland & sway are supported currently
 * Improve performance when stdout is redirected (TerminalSize)
 * Report thermal zone temp if CPU temp is not available (CPU, Linux)
+* Report sound server (Pipewire or PulseAudio) if available (#1454, Sound, Linux)
+* Enable OpenGL & OpenCL detection on Android (OpenGL / OpenCL, Android)
+* Detect & report MediaTek Dimensity 9000+ SOC name (CPU, Android)
+* Support appman (am-user) package manager detection (Packages, Linux)
 
 Logo:
 * Add Lubuntu
+* Update Xray_os
+* Add SnigdhaOS
+* Add Rhino Linux
 
 # 2.33.0
 
