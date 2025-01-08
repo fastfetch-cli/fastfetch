@@ -24,16 +24,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->processingTimeout = (int32_t) yyjson_get_int(val);
         else if (ffStrEqualsIgnCase(key, "preRun"))
         {
-            FF_STRBUF_AUTO_DESTROY _ = ffStrbufCreate();
-            const char* error = ffProcessAppendStdOut(&_, (char* const[]) {
-                #ifdef _WIN32
-                "cmd.exe", "/C",
-                #else
-                "/bin/sh", "-c",
-                #endif
-                (char*) yyjson_get_str(val), NULL
-            });
-            if (error)
+            if (system(yyjson_get_str(val)) < 0)
                 return "Failed to execute preRun command";
         }
         else if (ffStrEqualsIgnCase(key, "detectVersion"))
