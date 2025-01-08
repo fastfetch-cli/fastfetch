@@ -109,6 +109,7 @@ static void getCacheDir(FFPlatform* platform)
 
 static void getConfigDirs(FFPlatform* platform)
 {
+    // Always make sure `${XDG_CONFIG_HOME:-$HOME/.config}` is the first entry
     platformPathAddEnv(&platform->configDirs, "XDG_CONFIG_HOME");
     ffPlatformPathAddHome(&platform->configDirs, platform, ".config/");
 

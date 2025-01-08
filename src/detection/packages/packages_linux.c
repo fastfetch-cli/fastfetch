@@ -386,7 +386,29 @@ static uint32_t getRpmFromLibrpm(void)
 
 #endif //FF_HAVE_RPM
 
-static uint32_t getAM(FFstrbuf* baseDir)
+static uint32_t getAMPackages(FFstrbuf* baseDir)
+{
+    uint32_t baseLength = baseDir->length;
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    if (!dirp) return 0;
+
+    uint32_t result = 0;
+    struct dirent *entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if (entry->d_name[0] == '.') continue;
+        if (entry->d_type == DT_DIR)
+        {
+            ffStrbufAppendF(baseDir, "/%s/remove", entry->d_name);
+            if (ffPathExists(baseDir->chars, FF_PATHTYPE_FILE))
+                ++result;
+            ffStrbufSubstrBefore(baseDir, baseLength);
+        }
+    }
+    return result;
+}
+
+static uint32_t getAMSystem(FFstrbuf* baseDir)
 {
     // #771
     uint32_t baseDirLength = baseDir->length;
@@ -401,26 +423,24 @@ static uint32_t getAM(FFstrbuf* baseDir)
     {
         ++result; // `am` itself is counted as a package too
         ffStrbufSubstrBefore(baseDir, optDirLength);
-        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
-        if(dirp)
-        {
-            struct dirent *entry;
-            while ((entry = readdir(dirp)) != NULL)
-            {
-                if (entry->d_name[0] == '.') continue;
-                if (entry->d_type == DT_DIR)
-                {
-                    ffStrbufAppendF(baseDir, "/%s/AM-updater", entry->d_name);
-                    if (ffPathExists(baseDir->chars, FF_PATHTYPE_FILE))
-                        ++result;
-                    ffStrbufSubstrBefore(baseDir, optDirLength);
-                }
-            }
-        }
+        result = getAMPackages(baseDir);
     }
 
     ffStrbufSubstrBefore(baseDir, baseDirLength);
     return result;
+}
+
+static uint32_t getAMUser(void)
+{
+    // check if $XDG_CONFIG_HOME/appman/appman-config exists
+    FFstrbuf* baseDir = FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0);
+    uint32_t baseLen = baseDir->length;
+    ffStrbufAppendS(baseDir, "appman/appman-config");
+    FF_STRBUF_AUTO_DESTROY packagesPath = ffStrbufCreate();
+    ffReadFileBuffer(baseDir->chars, &packagesPath);
+    ffStrbufSubstrBefore(baseDir, baseLen);
+
+    return packagesPath.length > 0 ? getAMPackages(&packagesPath) : 0;
 }
 
 static int compareHash(const void* a, const void* b)
@@ -565,7 +585,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
     if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:", "opkg"); // openwrt
-    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->am = getAM(baseDir);
+    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->amSystem = getAMSystem(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:", "sorcery");
     if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
     {
@@ -678,4 +698,8 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))
         result->flatpakUser = getFlatpakPackages(&baseDir, "/.local/share");
+
+    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT))
+        result->amUser = getAMUser();
+
 }
