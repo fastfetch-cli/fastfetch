@@ -49,7 +49,6 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c);
 void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c);
 
 void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value);
-void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value);
 FF_C_PRINTF(2, 3) void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
@@ -91,6 +90,7 @@ void ffStrbufUpperCase(FFstrbuf* strbuf);
 void ffStrbufLowerCase(FFstrbuf* strbuf);
 
 bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
+void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
@@ -102,8 +102,13 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 
 static inline void ffStrbufInitCopy(FFstrbuf* __restrict strbuf, const FFstrbuf* __restrict src)
 {
-    ffStrbufInitA(strbuf, src->allocated);
-    ffStrbufAppend(strbuf, src);
+    if (src->allocated == 0) // static string
+        memcpy(strbuf, src, sizeof(FFstrbuf));
+    else
+    {
+        ffStrbufInitA(strbuf, src->allocated);
+        ffStrbufAppend(strbuf, src);
+    }
 }
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateCopy(const FFstrbuf* src)
@@ -207,6 +212,17 @@ static inline void ffStrbufSetS(FFstrbuf* strbuf, const char* value)
 
     if(value != NULL)
         ffStrbufAppendNS(strbuf, (uint32_t) strlen(value), value);
+}
+
+static inline void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
+{
+    assert(value && value != strbuf);
+    if (strbuf->allocated == 0 && value->allocated == 0)
+    {
+        memcpy(strbuf, value, sizeof(FFstrbuf));
+        return;
+    }
+    ffStrbufSetNS(strbuf, value->length, value->chars);
 }
 
 static inline void ffStrbufInit(FFstrbuf* strbuf)

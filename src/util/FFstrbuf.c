@@ -225,12 +225,6 @@ void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
     ffStrbufAppendNS(strbuf, length, value);
 }
 
-void ffStrbufSet(FFstrbuf* strbuf, const FFstrbuf* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, value->length, value->chars);
-}
-
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 {
     if(strbuf->length == 0)
@@ -574,6 +568,22 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
     else
         *n = remaining;
     return true;
+}
+
+/// @brief Restore the end of a line that was modified by ffStrbufGetline.
+/// @warning This function should be called before breaking an ffStrbufGetline loop.
+void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    assert(buffer && lineptr && n);
+    assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
+    assert(!*lineptr || (*lineptr >= buffer->chars && *lineptr <= buffer->chars + buffer->length));
+
+    if (!*lineptr)
+        return;
+
+    *lineptr += *n;
+    if (*lineptr < buffer->chars + buffer->length)
+        **lineptr = '\n';
 }
 
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)

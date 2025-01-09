@@ -80,6 +80,14 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Linux Lite "));
         return;
     }
+    else if(ffStrbufStartsWithS(&result->prettyName, "Rhino Linux "))
+    {
+        ffStrbufSetS(&result->name, "Rhino Linux");
+        ffStrbufSetS(&result->id, "rhinolinux");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Rhino Linux "));
+        return;
+    }
 
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
@@ -99,7 +107,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(ffStrContains(xdgConfigDirs, "lxde") || ffStrContains(xdgConfigDirs, "lubuntu"))
+    if(ffStrContains(xdgConfigDirs, "lxqt") || ffStrContains(xdgConfigDirs, "lubuntu"))
     {
         ffStrbufSetS(&result->name, "Lubuntu");
         ffStrbufSetS(&result->prettyName, "Lubuntu");

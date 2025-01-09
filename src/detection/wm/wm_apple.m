@@ -5,6 +5,7 @@
 #include "util/stringUtils.h"
 
 #include <ctype.h>
+#import <Foundation/Foundation.h>
 
 const char* ffDetectWMPlugin(FFstrbuf* pluginName)
 {
@@ -34,6 +35,22 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
         ffStrbufAppendS(pluginName, comm);
         pluginName->chars[0] = (char) toupper(pluginName->chars[0]);
         break;
+    }
+
+    return NULL;
+}
+
+const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
+{
+    if (!wmName)
+        return "No WM detected";
+
+    if (ffStrbufEqualS(wmName, "WindowServer"))
+    {
+        NSError* error;
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:@"file:///System/Library/CoreServices/WindowManager.app/Contents/version.plist"]
+                                           error:&error];
+        ffStrbufInitS(result, ((NSString*) dict[@"CFBundleVersion"]).UTF8String);
     }
 
     return NULL;

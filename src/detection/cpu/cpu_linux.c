@@ -44,9 +44,17 @@ static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
     if(
         ffStrbufContainS(buffer, "cpu") ||
         ffStrbufEqualS(buffer, "k10temp") || // AMD
+        ffStrbufEqualS(buffer, "fam15h_power") || // AMD
         ffStrbufEqualS(buffer, "coretemp") // Intel
     ) return value / 1000.;
 
+    return 0.0/0.0;
+}
+
+static double detectTZTemp(FFstrbuf* buffer)
+{
+    if (ffReadFileBuffer("/sys/class/thermal/thermal_zone0/temp", buffer))
+        return ffStrbufToDouble(buffer) / 1000.;
     return 0.0/0.0;
 }
 
@@ -79,7 +87,7 @@ static double detectCPUTemp(void)
         ffStrbufSubstrBefore(&baseDir, baseDirLength);
     }
 
-    return 0.0/0.0;
+    return detectTZTemp(&buffer);
 }
 
 #ifdef __ANDROID__
@@ -136,6 +144,36 @@ static void detectQualcomm(FFCPUResult* cpu)
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 1 [SM4375]");
 }
 
+static void detectMediaTek(FFCPUResult* cpu)
+{
+    // https://en.wikipedia.org/wiki/List_of_MediaTek_systems_on_chips
+
+    if (ffStrbufEqualS(&cpu->name, "MT6991"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6991Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6989Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT6989Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8796Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT8796Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6989"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT6989]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8796"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT8796]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6985W"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200+ [MT6985W]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6985"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200 [MT6985]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6983W"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT6983W]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/T"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT8798Z/T]");
+    else if (ffStrbufEqualS(&cpu->name, "MT6983Z"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT6983Z]");
+    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/C"))
+        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT8798Z/C]");
+}
+
 static void detectAndroid(FFCPUResult* cpu)
 {
     if (cpu->name.length == 0)
@@ -153,6 +191,8 @@ static void detectAndroid(FFCPUResult* cpu)
 
     if (ffStrbufEqualS(&cpu->vendor, "QTI") && ffStrbufStartsWithS(&cpu->name, "SM"))
         detectQualcomm(cpu);
+    else if (ffStrbufEqualS(&cpu->vendor, "MTK") && ffStrbufStartsWithS(&cpu->name, "MT"))
+        detectMediaTek(cpu);
 }
 #endif
 
@@ -188,6 +228,7 @@ static void detectArmName(FFstrbuf* cpuinfo, FFCPUResult* cpu, uint32_t implId)
                 {
                     // https://github.com/Dr-Noob/cpufetch/issues/213#issuecomment-1927782105
                     ffStrbufSetStatic(&cpu->name, "Virtualized Apple Silicon");
+                    ffStrbufGetlineRestore(&line, &len, cpuinfo);
                     return;
                 }
                 name = applePartId2name(partId);
@@ -243,7 +284,10 @@ static const char* parseCpuInfo(
             && cpu->name.length > 0 // #1202 #1204
             #endif
         )
+        {
+            ffStrbufGetlineRestore(&line, &len, cpuinfo);
             break;
+        }
 
         (void)(
             // arm64 doesn't have "model name"; arm32 does have "model name" but its value is not useful.
@@ -512,6 +556,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, cpu->coresLogical);
     #if __x86_64__ || __i386__
     cpu->packages = getPackageCount(&cpuinfo);
+    if (cpu->packages > 1)
+        cpu->coresPhysical *= cpu->packages;
     #endif
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252

@@ -207,6 +207,35 @@ Try `export XAUTHORITY=$HOME/.Xauthority`
 
 Try `fastfetch --wm-detect-plugin`. See also [#984](https://github.com/fastfetch-cli/fastfetch/issues/984)
 
+### Q: How can I change the colors of my ASCII logo?
+
+Try `fastfetch --logo-color-[1-9] <color>`. `[1-9]` is the index of color placeholders.
+
+For example: `fastfetch --logo-color-1 red --logo-color-2 green`.
+
+In JSONC, you can use:
+
+```jsonc
+{
+    "logo": {
+        "color": {
+            "1": "red",
+            "2": "green"
+        }
+    }
+}
+```
+
+### Q: How to hide a key?
+
+Set the key to a white space.
+
+```jsonc
+{
+    "key": " "
+}
+```
+
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
 Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:

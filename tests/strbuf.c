@@ -593,6 +593,48 @@ int main(void)
     VERIFY(ffStrbufRemoveDupWhitespaces(&strbuf) == false);
     VERIFY(strcmp(strbuf.chars, "   ") == 0);
 
+    {
+        ffStrbufSetStatic(&strbuf, "abcdef");
+        FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateCopy(&strbuf);
+        VERIFY(newStr.allocated == 0);
+        VERIFY(newStr.chars == strbuf.chars);
+    }
+
+    {
+        ffStrbufSetStatic(&strbuf, "abcdef");
+        FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateS("123456");
+        ffStrbufSet(&newStr, &strbuf);
+        VERIFY(newStr.allocated > 0);
+        VERIFY(newStr.chars != strbuf.chars);
+        VERIFY(ffStrbufEqualS(&newStr, "abcdef"));
+    }
+
+    {
+        ffStrbufSetStatic(&strbuf, "abcdefghijkl");
+        FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateS("123456");
+        ffStrbufSet(&newStr, &strbuf);
+        VERIFY(newStr.allocated > 0);
+        VERIFY(newStr.chars != strbuf.chars);
+        VERIFY(ffStrbufEqualS(&newStr, "abcdefghijkl"));
+    }
+
+    {
+        ffStrbufClear(&strbuf);
+        FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateCopy(&strbuf);
+        VERIFY(newStr.allocated == 0);
+        VERIFY(newStr.chars == strbuf.chars);
+        VERIFY(newStr.chars[0] == '\0');
+    }
+
+    {
+        ffStrbufClear(&strbuf);
+        FF_STRBUF_AUTO_DESTROY newStr = ffStrbufCreateS("123456");
+        ffStrbufSet(&newStr, &strbuf);
+        VERIFY(newStr.allocated > 0);
+        VERIFY(newStr.chars != strbuf.chars);
+        VERIFY(ffStrbufEqualS(&newStr, ""));
+    }
+
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

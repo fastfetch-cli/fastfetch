@@ -93,8 +93,6 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
     DBusMessageIter arrayIterator;
     data->lib->ffdbus_message_iter_recurse(&rootIterator, &arrayIterator);
 
-    FF_STRBUF_AUTO_DESTROY desktopIdentity = ffStrbufCreate();
-
     while(true)
     {
         if(data->lib->ffdbus_message_iter_get_arg_type(&arrayIterator) != DBUS_TYPE_DICT_ENTRY)

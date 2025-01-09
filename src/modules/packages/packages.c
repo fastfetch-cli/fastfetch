@@ -62,7 +62,8 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(paludis)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(opkg)
-        FF_PRINT_PACKAGE(am)
+        FF_PRINT_PACKAGE_NAME(amSystem, "am")
+        FF_PRINT_PACKAGE_NAME(amUser, "appman")
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
@@ -108,7 +109,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.paludis, "paludis"),
             FF_FORMAT_ARG(counts.winget, "winget"),
             FF_FORMAT_ARG(counts.opkg, "opkg"),
-            FF_FORMAT_ARG(counts.am, "am"),
+            FF_FORMAT_ARG(counts.amSystem, "am-system"),
             FF_FORMAT_ARG(counts.sorcery, "sorcery"),
             FF_FORMAT_ARG(counts.lpkg, "lpkg"),
             FF_FORMAT_ARG(counts.lpkgbuild, "lpkgbuild"),
@@ -119,6 +120,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.pacstall, "pacstall"),
             FF_FORMAT_ARG(counts.mport, "mport"),
             FF_FORMAT_ARG(counts.qi, "qi"),
+            FF_FORMAT_ARG(counts.amUser, "am-user"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -400,7 +402,8 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     #define FF_APPEND_PACKAGE_COUNT(name) yyjson_mut_obj_add_uint(doc, obj, #name, counts.name);
 
     FF_APPEND_PACKAGE_COUNT(all)
-    FF_APPEND_PACKAGE_COUNT(am)
+    FF_APPEND_PACKAGE_COUNT(amSystem)
+    FF_APPEND_PACKAGE_COUNT(amUser)
     FF_APPEND_PACKAGE_COUNT(apk)
     FF_APPEND_PACKAGE_COUNT(brew)
     FF_APPEND_PACKAGE_COUNT(brewCask)
@@ -469,7 +472,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of paludis packages", "paludis"},
         {"Number of winget packages", "winget"},
         {"Number of opkg packages", "opkg"},
-        {"Number of am packages", "am"},
+        {"Number of am-system packages", "am-system"},
         {"Number of sorcery packages", "sorcery"},
         {"Number of lpkg packages", "lpkg"},
         {"Number of lpkgbuild packages", "lpkgbuild"},
@@ -480,6 +483,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of pacstall packages", "pacstall"},
         {"Number of mport packages", "mport"},
         {"Number of qi packages", "qi"},
+        {"Number of am-user (aka appman) packages", "am-user"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},

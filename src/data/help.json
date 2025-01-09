@@ -186,7 +186,8 @@
                     "data-raw": "Text data, printed as is",
                     "sixel": "Image file, printed as sixel codes",
                     "kitty": "Image file, printed as kitty graphics protocol",
-                    "kitty_direct": "Image file, tell the terminal emulator to read image data from the specified file (Supported by kitty and wezterm)",
+                    "kitty-direct": "Image file, tell the terminal emulator to read image data from the specified file (Supported by kitty and wezterm)",
+                    "kitty-icat": "Image file, use `kitten icat` to display the image. Requires binary `kitten` to be installed",
                     "iterm": "Image file, printed as iterm graphics protocol",
                     "chafa": "Image file, printed as ascii art using libchafa",
                     "raw": "Image file, printed as raw binary string",
@@ -346,6 +347,14 @@
         {
             "long": "kitty-direct",
             "desc": "Short for --logo-type kitty-direct --logo <path>",
+            "remark": "See \"--help logo-type\" for more info",
+            "arg": {
+                "type": "path"
+            }
+        },
+        {
+            "long": "kitty-icat",
+            "desc": "Short for --logo-type kitty-icat --logo <path>",
             "remark": "See \"--help logo-type\" for more info",
             "arg": {
                 "type": "path"

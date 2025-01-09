@@ -62,6 +62,9 @@ static const char* parseEnv(void)
     if(getenv("HYPRLAND_CMD") != NULL)
         return "Hyprland";
 
+    if(getenv("SWAYSOCK") != NULL)
+        return "Sway";
+
     #ifdef __linux__
     if(
         getenv("WAYLAND_DISPLAY") != NULL &&

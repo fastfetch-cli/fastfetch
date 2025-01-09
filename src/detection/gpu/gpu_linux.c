@@ -435,7 +435,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         return "Invalid PCI device path";
 
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-    ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString((uint16_t) vendorId));
+    ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString((uint16_t) vendorId));
     ffStrbufInit(&gpu->name);
     ffStrbufInit(&gpu->driver);
     ffStrbufInit(&gpu->platformApi);

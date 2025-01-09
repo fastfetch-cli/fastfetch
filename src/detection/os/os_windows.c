@@ -13,6 +13,7 @@ void ffDetectOSImpl(FFOSResult* os)
     const wchar_t* rawName = BrandingFormatString(L"%WINDOWS_LONG%");
     ffStrbufSetWS(&os->variant, rawName);
     GlobalFree((HGLOBAL)rawName);
+    ffStrbufSet(&os->prettyName, &os->variant);
     ffStrbufTrimRight(&os->variant, ' ');
 
     //WMI returns the "Microsoft" prefix while BrandingFormatString doesn't. Make them consistent.
@@ -22,14 +23,12 @@ void ffDetectOSImpl(FFOSResult* os)
     if(ffStrbufStartsWithS(&os->variant, "Windows "))
     {
         ffStrbufAppendS(&os->name, "Windows");
-        ffStrbufAppendS(&os->prettyName, "Windows");
 
         ffStrbufSubstrAfter(&os->variant, strlen("Windows ") - 1);
 
         if(ffStrbufStartsWithS(&os->variant, "Server "))
         {
             ffStrbufAppendS(&os->name, " Server");
-            ffStrbufAppendS(&os->prettyName, " Server");
             ffStrbufSubstrAfter(&os->variant, strlen(" Server") - 1);
         }
 
@@ -38,7 +37,7 @@ void ffDetectOSImpl(FFOSResult* os)
         ffStrbufSubstrAfter(&os->variant, index);
 
         // Windows Server 20xx Rx
-        if(ffStrbufEndsWithC(&os->prettyName, 'r'))
+        if(ffStrbufEndsWithC(&os->name, 'r'))
         {
             if(os->variant.chars[0] == 'R' &&
                 ffCharIsDigit(os->variant.chars[1]) &&
@@ -56,6 +55,6 @@ void ffDetectOSImpl(FFOSResult* os)
         ffStrbufClear(&os->variant);
     }
 
-    ffStrbufAppendF(&os->id, "%*s %*s", os->prettyName.length, os->prettyName.chars, os->version.length, os->version.chars);
+    ffStrbufAppendF(&os->id, "%s %s", os->name.chars, os->version.chars);
     ffStrbufSetStatic(&os->idLike, "Windows");
 }

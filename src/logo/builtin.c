@@ -2582,6 +2582,15 @@ static const FFlogo L[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // Lubuntu
+    {
+        .names = {"lubuntu"},
+        .lines = FASTFETCH_DATATEXT_LOGO_LUBUNTU,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Lunar
     {
         .names = {"Lunar"},
@@ -3980,6 +3989,19 @@ static const FFlogo R[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // RhinoLinux
+    {
+        .names = {"Rhino Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_RHINO,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_LIGHT_BLUE,
+            FF_COLOR_FG_LIGHT_MAGENTA,
+            FF_COLOR_FG_MAGENTA,
+        },
+        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
     // LAST
     {},
 };
@@ -4214,6 +4236,15 @@ static const FFlogo S[] = {
     // SmartOS
     {
         .names = {"SmartOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SMARTOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    // SnigdhaOS
+    {
+        .names = {"SnigdhaOS", "Snigdha"},
         .lines = FASTFETCH_DATATEXT_LOGO_SMARTOS,
         .colors = {
             FF_COLOR_FG_CYAN,
@@ -4991,9 +5022,10 @@ static const FFlogo X[] = {
         .names = {"Xray_OS"},
         .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
         .colors = {
-            FF_COLOR_FG_256 "16",
+            FF_COLOR_FG_256 "15",
             FF_COLOR_FG_256 "14",
             FF_COLOR_FG_256 "16",
+            FF_COLOR_FG_256 "24",
         }
     },
     // LAST

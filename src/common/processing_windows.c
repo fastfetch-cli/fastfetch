@@ -169,6 +169,9 @@ bool ffProcessGetInfoWindows(uint32_t pid, uint32_t* ppid, FFstrbuf* pname, FFst
         ? GetCurrentProcess()
         : OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
 
+    if (hProcess == NULL)
+        return false;
+
     if (gui)
         *gui = GetGuiResources(hProcess, GR_GDIOBJECTS) > 0;
 

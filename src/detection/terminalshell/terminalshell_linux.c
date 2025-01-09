@@ -56,7 +56,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "fastfetch")           || //994
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
                 ffStrbufContainS(&result->processName, "debug")             ||
-                ffStrbufContainS(&result->processName, "not-found")         ||
+                ffStrbufContainS(&result->processName, "command-not-")      ||
                 #ifdef __ANDROID__
                 ffStrbufEqualS(&result->processName, "proot")              ||
                 #endif
@@ -313,11 +313,11 @@ static void setShellInfoDetails(FFShellResult* result)
 
 static void setTerminalInfoDetails(FFTerminalResult* result)
 {
-    if(ffStrbufStartsWithC(&result->processName, '.') && ffStrbufEndsWithS(&result->processName, "-wrapped"))
+    if(ffStrbufStartsWithC(&result->processName, '.') && ffStrbufContainS(&result->processName, "-wrap"))
     {
         // For NixOS. Ref: #510 and https://github.com/NixOS/nixpkgs/pull/249428
         // We use processName when detecting version and font, overriding it for simplification
-        ffStrbufSubstrBefore(&result->processName, result->processName.length - (uint32_t) strlen("-wrapped"));
+        ffStrbufSubstrBeforeLastC(&result->processName, '-');
         ffStrbufSubstrAfter(&result->processName, 0);
     }
 

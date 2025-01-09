@@ -104,7 +104,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         DXCoreHardwareID hardwareId;
         if (SUCCEEDED(adapter->GetProperty(DXCoreAdapterProperty::HardwareID, sizeof(hardwareId), &hardwareId)))
         {
-            const char* vendorStr = ffGetGPUVendorString((unsigned) hardwareId.vendorID);
+            const char* vendorStr = ffGPUGetVendorString((unsigned) hardwareId.vendorID);
             ffStrbufSetStatic(&gpu->vendor, vendorStr);
 
             if (vendorStr == FF_GPU_VENDOR_NAME_NVIDIA && (options->driverSpecific || options->temp))

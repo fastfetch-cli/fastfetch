@@ -16,7 +16,7 @@ const char* FF_GPU_VENDOR_NAME_MICROSOFT = "Microsoft";
 const char* FF_GPU_VENDOR_NAME_REDHAT = "RedHat";
 const char* FF_GPU_VENDOR_NAME_ORACLE = "Oracle";
 
-const char* ffGetGPUVendorString(unsigned vendorId)
+const char* ffGPUGetVendorString(unsigned vendorId)
 {
     // https://devicehunt.com/all-pci-vendors
     switch (vendorId)

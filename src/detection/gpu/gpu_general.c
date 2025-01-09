@@ -15,7 +15,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pciaccess, pci_slot_match_iterator_create)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pciaccess, pci_device_next)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(pciaccess, pci_system_cleanup)
-    
+
     {
         // Requires root access
         // Same behavior can be observed with `cp $(which scanpci) /tmp/ && /tmp/scanpci`
@@ -31,7 +31,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             continue;
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInitStatic(&gpu->vendor, ffGetGPUVendorString(dev->vendor_id));
+        ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev->vendor_id));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
         ffStrbufInit(&gpu->platformApi);

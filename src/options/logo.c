@@ -63,6 +63,7 @@ logoType:
                 { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
                 { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
                 { "kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT },
+                { "kitty-icat", FF_LOGO_TYPE_IMAGE_KITTY_ICAT },
                 { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
                 { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
                 { "raw", FF_LOGO_TYPE_IMAGE_RAW },
@@ -171,6 +172,11 @@ logoType:
     {
         ffOptionParseString(key, value, &options->source);
         options->type = FF_LOGO_TYPE_IMAGE_KITTY_DIRECT;
+    }
+    else if(ffStrEqualsIgnCase(key, "--kitty-icat"))
+    {
+        ffOptionParseString(key, value, &options->source);
+        options->type = FF_LOGO_TYPE_IMAGE_KITTY_ICAT;
     }
     else if(ffStrEqualsIgnCase(key, "--iterm"))
     {
@@ -283,6 +289,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
                 { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
                 { "kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT },
+                { "kitty-icat", FF_LOGO_TYPE_IMAGE_KITTY_ICAT },
                 { "iterm", FF_LOGO_TYPE_IMAGE_ITERM },
                 { "chafa", FF_LOGO_TYPE_IMAGE_CHAFA },
                 { "raw", FF_LOGO_TYPE_IMAGE_RAW },

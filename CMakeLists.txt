@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.33.0
+    VERSION 2.34.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -70,8 +70,8 @@ cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR F
 cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
-cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR SunOS" OFF)
-cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS" OFF)
+cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS" OFF)
 cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
@@ -534,7 +534,7 @@ if(LINUX)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_linux.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_linux.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
@@ -617,7 +617,6 @@ elseif(FreeBSD)
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
         src/detection/bios/bios_bsd.c
-        src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_bsd.c
         src/detection/bootmgr/bootmgr_bsd.c
@@ -690,6 +689,15 @@ elseif(FreeBSD)
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
+    if(DragonFly)
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bluetooth/bluetooth_nosupport.c
+        )
+    else()
+        list(APPEND LIBFASTFETCH_SRC
+            src/detection/bluetooth/bluetooth_bsd.c
+        )
+    endif()
 elseif(NetBSD)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
@@ -914,7 +922,7 @@ elseif(APPLE)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.m
         src/detection/wifi/wifi_apple.m
-        src/detection/wm/wm_apple.c
+        src/detection/wm/wm_apple.m
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
@@ -995,6 +1003,7 @@ elseif(WIN32)
         src/util/windows/registry.c
         src/util/windows/unicode.c
         src/util/windows/wmi.cpp
+        src/util/windows/version.c
         src/util/platform/FFPlatform_windows.c
         src/util/binary_windows.c
     )
@@ -1130,6 +1139,14 @@ else()
     # `/opt/homebrew/lib` is not on in dlopen search path by default
     if(APPLE)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
+    endif()
+endif()
+
+if(ANDROID)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/vendor/lib64 -Wl,-rpath,/system/lib64")
+    else()
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/vendor/lib -Wl,-rpath,/system/lib")
     endif()
 endif()
 
@@ -1468,6 +1485,7 @@ elseif(FreeBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "usbhid"
+        PRIVATE "bluetooth"
     )
     if(NOT DragonFly)
         target_link_libraries(libfastfetch

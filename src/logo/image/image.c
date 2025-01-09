@@ -1,6 +1,7 @@
 #include "image.h"
 #include "common/io/io.h"
 #include "common/printing.h"
+#include "common/processing.h"
 #include "util/stringUtils.h"
 #include "util/base64.h"
 #include "detection/terminalsize/terminalsize.h"
@@ -133,6 +134,127 @@ static bool printImageIterm(bool printError)
             ffStrbufAppendF(&buf, "\e[1G\e[%uA", (unsigned) options->height);
         }
         ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
+    }
+
+    return true;
+}
+
+static bool printImageKittyIcat(bool printError)
+{
+    const FFOptionsLogo* options = &instance.config.logo;
+
+    if (!ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
+    {
+        if (printError)
+            fputs("Logo (kitty-icat): Failed to load image file\n", stderr);
+        return false;
+    }
+
+    fflush(stdout);
+
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+
+    if (options->position == FF_LOGO_POSITION_LEFT)
+    {
+        ffStrbufAppendF(&buf, "\e[2J\e[3J\e[%u;%uH",
+            (unsigned) options->paddingTop + 1,
+            (unsigned) options->paddingLeft + 1
+        );
+    }
+    else if (options->position == FF_LOGO_POSITION_TOP)
+    {
+        if (!options->width)
+        {
+            ffStrbufAppendNC(&buf, options->paddingTop, '\n');
+            ffStrbufAppendNC(&buf, options->paddingLeft, ' ');
+        }
+        else
+        {
+            if (printError)
+                fputs("Logo (kitty-icat): position top is not supported when logo width is set\n", stderr);
+            return false;
+        }
+    }
+    else if (options->position == FF_LOGO_POSITION_RIGHT)
+    {
+        if (printError)
+            fputs("Logo (kitty-icat): position right is not supported\n", stderr);
+        return false;
+    }
+
+    uint32_t prevLength = buf.length;
+
+    const char* error = NULL;
+
+    if (options->width)
+    {
+        char place[64];
+        snprintf(place,
+            ARRAY_SIZE(place),
+            "--place=%ux%u@%ux%u",
+            options->width,
+            options->height == 0 ? 9999 : options->height,
+            options->paddingLeft + 1,
+            options->paddingTop + 1);
+
+        error = ffProcessAppendStdOut(&buf, (char* []) {
+            "kitten",
+            "icat",
+            "-n",
+            "--align=center",
+            place,
+            "--scale-up",
+            options->source.chars,
+            NULL,
+        });
+    }
+    else
+    {
+        error = ffProcessAppendStdOut(&buf, (char* []) {
+            "kitten",
+            "icat",
+            "-n",
+            "--align=left",
+            options->source.chars,
+            NULL,
+        });
+    }
+    if (error)
+    {
+        if (printError)
+            fprintf(stderr, "Logo (kitty-icat): running `kitten icat` failed %s\n", error);
+        return false;
+    }
+
+    if (buf.length == prevLength)
+    {
+        if (printError)
+            fputs("Logo (kitty-icat): `kitten icat` returned empty output\n", stderr);
+        return false;
+    }
+
+    ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
+
+    if (options->position == FF_LOGO_POSITION_LEFT || options->position == FF_LOGO_POSITION_RIGHT)
+    {
+        uint16_t X = 0, Y = 0;
+        const char* error = ffGetTerminalResponse("\e[6n", 2, "%*[^0-9]%hu;%huR", &Y, &X);
+        if (error)
+        {
+            fprintf(stderr, "\nLogo (kitty-icat): fail to query cursor position: %s\n", error);
+            return true; // We already printed image logo, don't print ascii logo then
+        }
+        if (X < options->paddingLeft + options->width)
+            X = (uint16_t) (options->paddingLeft + options->width);
+        if (options->position == FF_LOGO_POSITION_LEFT)
+            instance.state.logoWidth = X + options->paddingRight - 1;
+        instance.state.logoHeight = Y;
+        fputs("\e[H", stdout);
+    }
+    else if (options->position == FF_LOGO_POSITION_TOP)
+    {
+        instance.state.logoWidth = instance.state.logoHeight = 0;
+        ffPrintCharTimes('\n', options->paddingRight);
     }
 
     return true;
@@ -956,6 +1078,9 @@ bool ffLogoPrintImageIfExists(FFLogoType type, bool printError)
 
     if(type == FF_LOGO_TYPE_IMAGE_KITTY_DIRECT)
         return printImageKittyDirect(printError);
+
+    if(type == FF_LOGO_TYPE_IMAGE_KITTY_ICAT)
+        return printImageKittyIcat(printError);
 
     #if !defined(FF_HAVE_CHAFA)
         if(type == FF_LOGO_TYPE_IMAGE_CHAFA)

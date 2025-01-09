@@ -4,7 +4,8 @@
 
 typedef struct FFPackagesResult
 {
-    uint32_t am;
+    uint32_t amSystem;
+    uint32_t amUser;
     uint32_t apk;
     uint32_t brew;
     uint32_t brewCask;
