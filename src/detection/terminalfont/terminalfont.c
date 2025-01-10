@@ -58,18 +58,14 @@ static void detectGhostty(FFTerminalFontResult* terminalFont)
         {"font-size =", &fontSize},
     };
 
-    if (
-        #if __APPLE__
-        !ffParsePropFileConfigValues("com.mitchellh.ghostty/config", 2, fontQueryToml) &&
-        #endif
-        !ffParsePropFileConfigValues("ghostty/config", 2, fontQueryToml)
-    ) {
-        ffStrbufAppendS(&terminalFont->error, "Couldn't find file `ghostty/config`");
-        return;
-    }
+    #if __APPLE__
+    ffParsePropFileConfigValues("com.mitchellh.ghostty/config", 2, fontQueryToml);
+    #endif
+
+    ffParsePropFileConfigValues("ghostty/config", 2, fontQueryToml);
 
     if(fontName.length == 0)
-        ffStrbufAppendS(&fontName, "JetBrains Mono");
+        ffStrbufAppendS(&fontName, "JetBrainsMono Nerd Font");
 
     if(fontSize.length == 0)
         ffStrbufAppendS(&fontSize, "13");
