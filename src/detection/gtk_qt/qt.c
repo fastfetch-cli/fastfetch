@@ -74,8 +74,7 @@ static bool detectPlasmaFromFile(const char* filename, FFQtResult* result)
         }
     }
 
-    if(line != NULL)
-        free(line);
+    free(line);
 
     fclose(kdeglobals);
 
