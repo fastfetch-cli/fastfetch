@@ -4245,7 +4245,7 @@ static const FFlogo S[] = {
     // SnigdhaOS
     {
         .names = {"SnigdhaOS", "Snigdha"},
-        .lines = FASTFETCH_DATATEXT_LOGO_SMARTOS,
+        .lines = FASTFETCH_DATATEXT_LOGO_SNIGDHAOS,
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,
