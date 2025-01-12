@@ -84,6 +84,5 @@ void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry
 void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 void ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
-void ffWaylandHandleColorManager(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version);
 
 #endif

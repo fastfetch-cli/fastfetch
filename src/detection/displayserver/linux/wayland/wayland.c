@@ -17,7 +17,6 @@
 #include "kde-output-device-v2-client-protocol.h"
 #include "kde-output-order-v1-client-protocol.h"
 #include "xdg-output-unstable-v1-client-protocol.h"
-#include "xx-color-management-v4-client-protocol.h"
 
 #if __FreeBSD__
 #include <sys/un.h>
@@ -97,10 +96,6 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     {
         ffWaylandHandleKdeOutputOrder(wldata, registry, name, version);
     }
-    // else if(ffStrEquals(interface, xx_color_manager_v4_interface.name))
-    // {
-    //     ffWaylandHandleColorManager(wldata, registry, name, version);
-    // }
     else if((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE) && ffStrEquals(interface, zxdg_output_manager_v1_interface.name))
     {
         ffWaylandHandleZxdgOutput(wldata, registry, name, version);

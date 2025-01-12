@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "wayland-client.h"
+#include <wayland-util.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -556,7 +556,7 @@ struct kde_output_device_v2_listener {
 	/**
 	 * describes when auto rotate is used
 	 *
-	 * 
+	 *
 	 * @since 4
 	 */
 	void (*auto_rotate_policy)(void *data,
@@ -565,7 +565,7 @@ struct kde_output_device_v2_listener {
 	/**
 	 * describes when auto rotate is used
 	 *
-	 * 
+	 *
 	 * @since 5
 	 */
 	void (*icc_profile_path)(void *data,
@@ -574,7 +574,7 @@ struct kde_output_device_v2_listener {
 	/**
 	 * metadata about the screen's brightness limits
 	 *
-	 * 
+	 *
 	 * @param max_peak_brightness in nits
 	 * @param max_frame_average_brightness in nits
 	 * @param min_brightness in 0.0001 nits
@@ -588,7 +588,7 @@ struct kde_output_device_v2_listener {
 	/**
 	 * overrides for the screen's brightness limits
 	 *
-	 * 
+	 *
 	 * @param max_peak_brightness -1 for no override, positive values are the brightness in nits
 	 * @param max_average_brightness -1 for no override, positive values are the brightness in nits
 	 * @param min_brightness -1 for no override, positive values are the brightness in 0.0001 nits
@@ -614,7 +614,7 @@ struct kde_output_device_v2_listener {
 	/**
 	 * describes which source the compositor uses for the color profile on an output
 	 *
-	 * 
+	 *
 	 * @since 7
 	 */
 	void (*color_profile_source)(void *data,
@@ -638,7 +638,7 @@ struct kde_output_device_v2_listener {
 	/**
 	 * the preferred color/power tradeoff
 	 *
-	 * 
+	 *
 	 * @since 10
 	 */
 	void (*color_power_tradeoff)(void *data,

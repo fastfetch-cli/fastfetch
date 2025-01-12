@@ -2,7 +2,10 @@
 #include "common/sysctl.h"
 
 #include <sys/param.h>
-#include <sys/cpuset.h>
+#if __has_include(<sys/cpuset.h>)
+    #include <sys/cpuset.h>
+    #define FF_HAVE_CPUSET 1
+#endif
 
 static const char* detectCpuTemp(double* current)
 {
@@ -63,7 +66,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         }
     }
 
-#if __x86_64__ || __i386__
+#if FF_HAVE_CPUSET && (__x86_64__ || __i386__)
     // Bind current process to the first two cores, which is *usually* a performance core
     cpuset_t currentCPU;
     CPU_ZERO(&currentCPU);
