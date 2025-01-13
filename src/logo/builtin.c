@@ -3411,6 +3411,15 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+    // Oreon
+    {
+        .names = {"Oreon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OREON,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // OS_Elbrus
     {
         .names = {"OS Elbrus"},
