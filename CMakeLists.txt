@@ -752,7 +752,7 @@ elseif(NetBSD)
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
-        src/detection/memory/memory_obsd.c
+        src/detection/memory/memory_nbsd.c
         src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
