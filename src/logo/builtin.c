@@ -2047,6 +2047,16 @@ static const FFlogo H[] = {
             FF_COLOR_FG_256 "123",
         },
     },
+    // HeliumOS
+    {
+        .names = {"HeliumOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HELIUMOS,
+        .colors = {
+            FF_COLOR_FG_256 "81",
+        },
+        .colorKeys = FF_COLOR_FG_256 "81",
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // Huawei Cloud EulerOS
     {
         .names = {"Huawei Cloud EulerOS", "hce"},
