@@ -1,3 +1,25 @@
+# 2.34.1
+
+An early release to fix KDE Plasma 6.3 compatibility. Hopefully it can be accepted by package managers before KDE 6.3 is officially released.
+
+To package managers: if you find fastfetch bugs, it's highly appreciated if you can report them to the upstream, so that all users can benefit from the fix, instead of maintaining out-of-tree patches. Thanks!
+
+Features:
+* Report vendor name when detecting GPUs by OpenGL
+    * Note: the vendor name is actually the creator of the OpenGL driver (such as `Mesa`) and may not be the same as the GPU vendor.
+
+Bugfixes:
+* Fix Ghostty termfont detection (#1495, TerminalFont, macOS)
+* Fix compatibility with KDE Plasma 6.3 (#1504, Display, Linux)
+* Make memory usage detection logic consistant with other systems (Memory, OpenBSD / NetBSD)
+* Report media file name if media title is not available (Media)
+* Fix max frequency detection for CPUs with both performance and efficiency cores (CPU, FreeBSD)
+
+Logo:
+* Add HeliumOS
+* Add Oreon
+* Update SnigdhaOS
+
 # 2.34.0
 
 Changes:
