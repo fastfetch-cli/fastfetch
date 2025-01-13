@@ -11,7 +11,7 @@ Features:
 Bugfixes:
 * Fix Ghostty termfont detection (#1495, TerminalFont, macOS)
 * Fix compatibility with KDE Plasma 6.3 (#1504, Display, Linux)
-* Make memory usage detection logic consistant with other systems (Memory, OpenBSD / NetBSD)
+* Make memory usage detection logic consistent with other systems (Memory, OpenBSD / NetBSD)
 * Report media file name if media title is not available (Media)
 * Fix max frequency detection for CPUs with both performance and efficiency cores (CPU, FreeBSD)
 
