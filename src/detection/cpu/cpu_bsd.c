@@ -73,8 +73,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     CPU_SET(1, &currentCPU);
     CPU_SET(2, &currentCPU);
     cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, sizeof(cpuset_t), &currentCPU);
-    ffCPUDetectSpeedByCpuid(cpu);
 #endif
+
+    ffCPUDetectSpeedByCpuid(cpu);
 
     uint32_t clockrate = (uint32_t) ffSysctlGetInt("hw.clockrate", 0);
     if (clockrate > cpu->frequencyBase) cpu->frequencyBase = clockrate;
