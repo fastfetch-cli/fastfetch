@@ -105,6 +105,7 @@ void ffPrintSound(FFSoundOptions* options)
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->platformApi);
     }
 }
 
@@ -226,6 +227,7 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->platformApi);
     }
 }
 
