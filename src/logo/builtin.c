@@ -3075,10 +3075,22 @@ static const FFlogo N[] = {
     },
     // NetBSD
     {
-        .names = {"netbsd"},
+        .names = {"NetBSD"},
         .lines = FASTFETCH_DATATEXT_LOGO_NETBSD,
         .colors = {
-            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // NetBSD Small
+    {
+        .names = {"NetBSD_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NETBSD_SMALL,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .colors = {
+            FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
