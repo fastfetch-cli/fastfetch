@@ -13,7 +13,7 @@ static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, vo
 
     FFSoundDevice* device = ffListAdd(userdata);
     ffStrbufInitS(&device->identifier, i->name);
-    ffStrbufInitS(&device->platformApi, "PulseAudio");
+    ffStrbufInitStatic(&device->platformApi, "PulseAudio");
     ffStrbufTrimRightSpace(&device->identifier);
     ffStrbufInitS(&device->name, i->description);
     ffStrbufTrimRightSpace(&device->name);

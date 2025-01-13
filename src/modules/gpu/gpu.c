@@ -26,7 +26,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
-        if(gpu->vendor.length > 0 && !ffStrbufStartsWith(&gpu->name, &gpu->vendor))
+        if(gpu->vendor.length > 0 && !ffStrbufStartsWithIgnCase(&gpu->name, &gpu->vendor))
         {
             ffStrbufAppend(&output, &gpu->vendor);
             ffStrbufAppendC(&output, ' ');

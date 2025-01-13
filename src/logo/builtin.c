@@ -2047,6 +2047,16 @@ static const FFlogo H[] = {
             FF_COLOR_FG_256 "123",
         },
     },
+    // HeliumOS
+    {
+        .names = {"HeliumOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HELIUMOS,
+        .colors = {
+            FF_COLOR_FG_256 "81",
+        },
+        .colorKeys = FF_COLOR_FG_256 "81",
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // Huawei Cloud EulerOS
     {
         .names = {"Huawei Cloud EulerOS", "hce"},
@@ -3075,10 +3085,22 @@ static const FFlogo N[] = {
     },
     // NetBSD
     {
-        .names = {"netbsd"},
+        .names = {"NetBSD"},
         .lines = FASTFETCH_DATATEXT_LOGO_NETBSD,
         .colors = {
-            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // NetBSD Small
+    {
+        .names = {"NetBSD_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NETBSD_SMALL,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .colors = {
+            FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
@@ -3388,6 +3410,15 @@ static const FFlogo O[] = {
         },
         .colorKeys = FF_COLOR_FG_WHITE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
+    },
+    // Oreon
+    {
+        .names = {"Oreon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OREON,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+            FF_COLOR_FG_DEFAULT,
+        },
     },
     // OS_Elbrus
     {
@@ -4245,7 +4276,7 @@ static const FFlogo S[] = {
     // SnigdhaOS
     {
         .names = {"SnigdhaOS", "Snigdha"},
-        .lines = FASTFETCH_DATATEXT_LOGO_SMARTOS,
+        .lines = FASTFETCH_DATATEXT_LOGO_SNIGDHAOS,
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,

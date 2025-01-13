@@ -1,6 +1,12 @@
 #include "cpu.h"
 #include "common/sysctl.h"
 
+#include <sys/param.h>
+#if __has_include(<sys/cpuset.h>)
+    #include <sys/cpuset.h>
+    #define FF_HAVE_CPUSET 1
+#endif
+
 static const char* detectCpuTemp(double* current)
 {
     int temp = ffSysctlGetInt("dev.cpu.0.temperature", -999999);
@@ -60,9 +66,19 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         }
     }
 
+#if FF_HAVE_CPUSET && (__x86_64__ || __i386__)
+    // Bind current process to the first two cores, which is *usually* a performance core
+    cpuset_t currentCPU;
+    CPU_ZERO(&currentCPU);
+    CPU_SET(1, &currentCPU);
+    CPU_SET(2, &currentCPU);
+    cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, sizeof(cpuset_t), &currentCPU);
+#endif
+
     ffCPUDetectSpeedByCpuid(cpu);
 
-    cpu->frequencyBase = (uint32_t) ffSysctlGetInt("hw.clockrate", 0);
+    uint32_t clockrate = (uint32_t) ffSysctlGetInt("hw.clockrate", 0);
+    if (clockrate > cpu->frequencyBase) cpu->frequencyBase = clockrate;
     cpu->temperature = FF_CPU_TEMP_UNSET;
 
     if (options->temp)
