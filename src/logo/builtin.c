@@ -3115,7 +3115,7 @@ static const FFlogo N[] = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
         },
-        .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
     // Nobara
