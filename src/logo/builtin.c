@@ -378,6 +378,18 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // ArchOld
+    {
+        .names = {"arch_old"},
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ARCH_OLD,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+        .colorKeys = FF_COLOR_FG_CYAN,
+    },
     // Archlabs
     {
         .names = {"ARCHlabs"},
