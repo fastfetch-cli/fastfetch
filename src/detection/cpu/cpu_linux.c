@@ -280,7 +280,7 @@ static const char* parseCpuInfo(
     {
         //Stop after reasonable information is acquired
         if((*line == '\0' || *line == '\n')
-            #if __arm__ || __loongarch__
+            #if __arm__ || __aarch64__ || __loongarch__
             && cpu->name.length > 0 // #1202 #1204
             #endif
         )
