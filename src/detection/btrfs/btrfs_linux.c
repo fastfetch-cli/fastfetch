@@ -24,7 +24,7 @@ static const char* enumerateDevices(FFBtrfsResult* item, int dfd, FFstrbuf* buff
             ffStrbufAppendC(&item->devices, ',');
         ffStrbufAppendS(&item->devices, entry->d_name);
 
-        char path[ARRAY_SIZE(entry->d_name) + ARRAY_SIZE("/size") + 1];
+        char path[sizeof(entry->d_name) + sizeof("/size") + 1];
         snprintf(path, ARRAY_SIZE(path), "%s/size", entry->d_name);
 
         if (ffReadFileBufferRelative(subfd, path, buffer))
