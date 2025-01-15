@@ -1,0 +1,38 @@
+name: Logo Request
+description: Request a new ASCII logo for your favorite distro
+title: "[LOGO] "
+labels: ["logo request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tip: A logo can be displayed by fastfetch without getting into fastfetch's official repo.
+        For highly customized logo for personal use, it's recommended to keep it locally.
+        Please refer to https://github.com/fastfetch-cli/fastfetch/wiki/Migrate-Neofetch-Logo-To-Fastfetch
+  - type: textarea
+    attributes:
+      label: OS
+      description: Paste content of `/etc/os-release` and `/etc/lsb-release` here. If none of these files exist, describe a way to identify the distro
+      placeholder: cat /etc/os-release
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: ASCII Art
+      description: An ASCII logo should not take up too much space (smaller than 50x20 characters). Please also include the color codes if not available in `os-release`
+      placeholder: Paste ASCII art here
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Original Image
+      description: If the ASCII art is based on an image, please provide a link to the original image
+      placeholder: Image URL or distro website URL
+  - type: checkboxes
+    attributes:
+      label: Checklist
+      options:
+        - label: The ASCII art is smaller than 50x20 characters (width x height)
+          required: true
+        - label: The ASCII art contains color codes, or the color codes are available in `os-release`
+          required: true
