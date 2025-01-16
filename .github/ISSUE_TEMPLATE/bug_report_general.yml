@@ -85,6 +85,8 @@ body:
     attributes:
       label: Configuration
       description: If applicable, paste your configuration file here.
+      placeholder: cat ~/.config/fastfetch/config.jsonc
+      render: jsonc
   - type: textarea
     attributes:
       label: System information
@@ -92,5 +94,13 @@ body:
       placeholder: |
         Note that this output will contain you public IP.
         If it is not relevant for the issue, feel free to remove it before uploading.
+      render: jsonc
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Features built-in
+      description: Output of `fastfetch --list-features`
+      render: text
     validations:
       required: true

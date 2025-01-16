@@ -85,6 +85,8 @@ body:
     attributes:
       label: Configuration
       description: If applicable, paste your configuration file here.
+      placeholder: cat ~/.config/fastfetch/config.jsonc
+      render: jsonc
   - type: markdown
     attributes:
       value: |
@@ -118,3 +120,10 @@ body:
     attributes:
       label: Error message
       description: Error message printed by `fastfetch -s none --show-errors`, if any
+  - type: textarea
+    attributes:
+      label: Features built-in
+      description: Output of `fastfetch --list-features`
+      render: text
+    validations:
+      required: true

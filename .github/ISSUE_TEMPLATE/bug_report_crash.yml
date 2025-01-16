@@ -85,13 +85,8 @@ body:
     attributes:
       label: Configuration
       description: If applicable, paste your configuration file here.
-  - type: textarea
-    attributes:
-      label: System information
-      description: Output of `fastfetch -c all.jsonc --stat --format json`
-      placeholder: |
-        Note that this output will contain you public IP.
-        If it is not relevant for the issue, feel free to remove it before uploading.
+      placeholder: cat ~/.config/fastfetch/config.jsonc
+      render: jsonc
   - type: markdown
     attributes:
       value: |
@@ -113,5 +108,6 @@ body:
     attributes:
       label: Stacktrace
       description: Paste the stacktrace or core dump file here.
+      render: text
     validations:
       required: true
