@@ -11,11 +11,11 @@ static void countBrewPackages(const char* dirname, FFPackagesResult* result)
     uint32_t baseDirLength = baseDir.length;
 
     ffStrbufAppendS(&baseDir, "/Caskroom");
-    result->brewCask += ffPackagesGetNumElements(baseDir.chars, DT_DIR);
+    result->brewCask += ffPackagesGetNumElements(baseDir.chars, true);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
 
     ffStrbufAppendS(&baseDir, "/Cellar");
-    result->brew += ffPackagesGetNumElements(baseDir.chars, DT_DIR);
+    result->brew += ffPackagesGetNumElements(baseDir.chars, true);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
 }
 
@@ -34,7 +34,7 @@ static uint32_t countMacPortsPackages(const char* dirname)
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
     ffStrbufAppendS(&baseDir, "/var/macports/software");
 
-    return ffPackagesGetNumElements(baseDir.chars, DT_DIR);
+    return ffPackagesGetNumElements(baseDir.chars, true);
 }
 
 static uint32_t getMacPortsPackages()

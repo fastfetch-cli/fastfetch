@@ -51,5 +51,5 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements);
 
 #ifndef _WIN32
-uint32_t ffPackagesGetNumElements(const char* dirname, uint8_t type);
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir);
 #endif

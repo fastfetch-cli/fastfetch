@@ -87,7 +87,7 @@ bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t n
 }
 
 #ifndef _WIN32
-uint32_t ffPackagesGetNumElements(const char* dirname, uint8_t type)
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir)
 {
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
     if(dirp == NULL)
@@ -102,31 +102,19 @@ uint32_t ffPackagesGetNumElements(const char* dirname, uint8_t type)
 
 #ifndef __sun
         if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
-            ok = entry->d_type == type;
+            ok = entry->d_type == isdir ? DT_DIR : DT_REG;
         else
 #endif
         {
             struct stat stbuf;
             if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0)
-            {
-                switch (stbuf.st_mode & S_IFMT)
-                {
-                    case S_IFDIR: ok = type == DT_DIR; break;
-                    case S_IFREG: ok = type == DT_REG; break;
-                    case S_IFLNK: ok = type == DT_LNK; break;
-                    case S_IFSOCK: ok = type == DT_SOCK; break;
-                    case S_IFBLK: ok = type == DT_BLK; break;
-                    case S_IFCHR: ok = type == DT_CHR; break;
-                    case S_IFIFO: ok = type == DT_FIFO; break;
-                    default: break;
-                }
-            }
+                ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
         }
 
         if(ok) ++num_elements;
     }
 
-    if(type == DT_DIR && num_elements >= 2)
+    if(isdir && num_elements >= 2)
         num_elements -= 2; // accounting for . and ..
 
     return num_elements;
