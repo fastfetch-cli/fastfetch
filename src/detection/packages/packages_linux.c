@@ -7,33 +7,11 @@
 #include "detection/os/os.h"
 #include "util/stringUtils.h"
 
-#include <dirent.h>
-
-static uint32_t getNumElementsImpl(const char* dirname, unsigned char type)
-{
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
-    if(dirp == NULL)
-        return 0;
-
-    uint32_t num_elements = 0;
-
-    struct dirent *entry;
-    while((entry = readdir(dirp)) != NULL) {
-        if(entry->d_type == type)
-            ++num_elements;
-    }
-
-    if(type == DT_DIR && num_elements >= 2)
-        num_elements -= 2; // accounting for . and ..
-
-    return num_elements;
-}
-
 static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, unsigned char type)
 {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dirname);
-    uint32_t num_elements = getNumElementsImpl(baseDir->chars, type);
+    uint32_t num_elements = ffPackagesGetNumElements(baseDir->chars, type);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
     return num_elements;
 }
@@ -550,7 +528,7 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     uint32_t flatpakDirLength = baseDir->length;
 
     ffStrbufAppendS(baseDir, "app");
-    num_elements += getNumElementsImpl(baseDir->chars, DT_DIR);
+    num_elements += ffPackagesGetNumElements(baseDir->chars, DT_DIR);
     ffStrbufSubstrBefore(baseDir, flatpakDirLength);
 
     num_elements += getFlatpakRuntimePackages(baseDir);

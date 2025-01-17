@@ -4,26 +4,6 @@
 #include "common/processing.h"
 #include "util/stringUtils.h"
 
-static uint32_t getNumElements(const char* dirname, unsigned char type)
-{
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
-    if(dirp == NULL)
-        return 0;
-
-    uint32_t num_elements = 0;
-
-    struct dirent *entry;
-    while((entry = readdir(dirp)) != NULL) {
-        if(entry->d_type == type)
-            ++num_elements;
-    }
-
-    if(type == DT_DIR)
-        num_elements -= 2; // accounting for . and ..
-
-    return num_elements;
-}
-
 static void countBrewPackages(const char* dirname, FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
@@ -31,11 +11,11 @@ static void countBrewPackages(const char* dirname, FFPackagesResult* result)
     uint32_t baseDirLength = baseDir.length;
 
     ffStrbufAppendS(&baseDir, "/Caskroom");
-    result->brewCask += getNumElements(baseDir.chars, DT_DIR);
+    result->brewCask += ffPackagesGetNumElements(baseDir.chars, DT_DIR);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
 
     ffStrbufAppendS(&baseDir, "/Cellar");
-    result->brew += getNumElements(baseDir.chars, DT_DIR);
+    result->brew += ffPackagesGetNumElements(baseDir.chars, DT_DIR);
     ffStrbufSubstrBefore(&baseDir, baseDirLength);
 }
 
@@ -54,7 +34,7 @@ static uint32_t countMacPortsPackages(const char* dirname)
     FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
     ffStrbufAppendS(&baseDir, "/var/macports/software");
 
-    return getNumElements(baseDir.chars, DT_DIR);
+    return ffPackagesGetNumElements(baseDir.chars, DT_DIR);
 }
 
 static uint32_t getMacPortsPackages()

@@ -31,6 +31,7 @@ typedef struct FFPackagesResult
     uint32_t pacstall;
     uint32_t paludis;
     uint32_t pkg;
+    uint32_t pkgsrc;
     uint32_t pkgtool;
     uint32_t qi;
     uint32_t rpm;
@@ -48,3 +49,7 @@ typedef struct FFPackagesResult
 const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* options);
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result);
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements);
+
+#ifndef _WIN32
+uint32_t ffPackagesGetNumElements(const char* dirname, uint8_t type);
+#endif
