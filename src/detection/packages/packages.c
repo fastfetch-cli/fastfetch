@@ -102,7 +102,7 @@ uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir)
 
 #ifndef __sun
         if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
-            ok = entry->d_type == isdir ? DT_DIR : DT_REG;
+            ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
         else
 #endif
         {
