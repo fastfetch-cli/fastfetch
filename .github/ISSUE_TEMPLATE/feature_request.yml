@@ -34,3 +34,7 @@ body:
       description: Why do you want this feature? Why doesn't `Command` module suffice for you?
     validations:
       required: true
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request here.
