@@ -80,17 +80,20 @@ static void waylandGlobalAddListener(void* data, struct wl_registry* registry, u
     if((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_GLOBAL) && ffStrEquals(interface, wldata->ffwl_output_interface->name))
     {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_GLOBAL;
-        ffWaylandHandleGlobalOutput(wldata, registry, name, version);
+        if (ffWaylandHandleGlobalOutput(wldata, registry, name, version) != NULL)
+            wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
     }
     else if((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_ZWLR) && ffStrEquals(interface, zwlr_output_manager_v1_interface.name))
     {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_ZWLR;
-        ffWaylandHandleZwlrOutput(wldata, registry, name, version);
+        if (ffWaylandHandleZwlrOutput(wldata, registry, name, version) != NULL)
+            wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
     }
     else if((wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_NONE || wldata->protocolType == FF_WAYLAND_PROTOCOL_TYPE_KDE) && ffStrEquals(interface, kde_output_device_v2_interface.name))
     {
         wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_KDE;
-        ffWaylandHandleKdeOutput(wldata, registry, name, version);
+        if (ffWaylandHandleKdeOutput(wldata, registry, name, version) != NULL)
+            wldata->protocolType = FF_WAYLAND_PROTOCOL_TYPE_NONE;
     }
     else if(ffStrEquals(interface, kde_output_order_v1_interface.name))
     {
