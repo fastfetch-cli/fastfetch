@@ -1,3 +1,15 @@
+# 2.34.2
+
+Bugfixes:
+* Suppress output of EGL again (#1513, GPU, Linux)
+    * Regression of 2.34.0
+* Show SOC name reported in `cpuinfo` if available (#1510, CPU, Linux)
+* Change package manager name of NetBSD from `pkg` to `pkgsrc` (#1515 Packages, NetBSD)
+
+Logo:
+* Add Arch_old
+* Update key color of NetBSD_small
+
 # 2.34.1
 
 An early release to fix KDE Plasma 6.3 compatibility. Hopefully it can be accepted by package managers before KDE 6.3 is officially released.
