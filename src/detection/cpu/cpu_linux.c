@@ -432,7 +432,7 @@ FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
+FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
 {
     if (cpu->name.length > 0)
         return;
@@ -565,35 +565,36 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (!detectFrequency(cpu, options) || cpu->frequencyBase == 0)
         cpu->frequencyBase = (uint32_t) ffStrbufToUInt(&cpuMHz, 0);
 
-    #if !(__x86_64__ || __i386__ || __arm__ || __aarch64__)
-    if(cpuUarch.length > 0)
-    {
-        if(cpu->name.length > 0)
-            ffStrbufAppendC(&cpu->name, ' ');
-        ffStrbufAppend(&cpu->name, &cpuUarch);
-    }
-
-    if(cpuIsa.length > 0)
-    {
-        parseIsa(&cpuIsa);
-        if(cpu->name.length > 0)
-            ffStrbufAppendC(&cpu->name, ' ');
-        ffStrbufAppend(&cpu->name, &cpuIsa);
-    }
+    #if __ANDROID__
+    detectAndroid(cpu);
+    #elif !(__x86_64__ || __i386__)
+    detectSocName(cpu);
     #endif
 
     #if __arm__ || __aarch64__
     uint32_t cpuImplementer = (uint32_t) strtoul(cpuImplementerStr.chars, NULL, 16);
     ffStrbufSetStatic(&cpu->vendor, hwImplId2Vendor(cpuImplementer));
 
-    #if __ANDROID__
-    detectAndroid(cpu);
-    #else
-    detectArmSoc(cpu);
-    #endif
-
     if (cpu->name.length == 0)
         detectArmName(&cpuinfo, cpu, cpuImplementer);
+    #elif !(__x86_64__ || __i386__)
+    if (cpu->name.length == 0)
+    {
+        if(cpuUarch.length > 0)
+        {
+            if(cpu->name.length > 0)
+                ffStrbufAppendC(&cpu->name, ' ');
+            ffStrbufAppend(&cpu->name, &cpuUarch);
+        }
+
+        if(cpuIsa.length > 0)
+        {
+            parseIsa(&cpuIsa);
+            if(cpu->name.length > 0)
+                ffStrbufAppendC(&cpu->name, ' ');
+            ffStrbufAppend(&cpu->name, &cpuIsa);
+        }
+    }
     #endif
 
     return NULL;
