@@ -2290,8 +2290,8 @@ static const FFlogo K[] = {
         .names = {"kdelinux", "kde-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_KDELINUX,
         .colors = {
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_YELLOW
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_WHITE
         }
     },
     // KDENeon
