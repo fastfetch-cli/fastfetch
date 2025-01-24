@@ -11,14 +11,6 @@
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
 
-static inline bool allRelevantValuesSet(const FFOSResult* result)
-{
-    return result->id.length > 0
-        && result->name.length > 0
-        && result->prettyName.length > 0
-    ;
-}
-
 static bool parseLsbRelease(const char* fileName, FFOSResult* result)
 {
     return ffParsePropFileValues(fileName, 4, (FFpropquery[]) {
@@ -275,18 +267,17 @@ static void detectOS(FFOSResult* os)
         if(os->prettyName.length == 0)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
 
-        if(parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
-            return;
+        parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+        return;
     }
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
-    if((parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) ||
-        parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os)) &&
-        allRelevantValuesSet(os))
-        return;
-
-    parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
+    parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+    if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0)
+        parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
+    if (os->id.length == 0 || os->name.length > 0 || os->prettyName.length > 0)
+        parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
 }
 
 void ffDetectOSImpl(FFOSResult* os)
