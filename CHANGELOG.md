@@ -15,7 +15,7 @@ Features:
 * Report more SOC names on Android (CPU, Android)
 * Support duration printing in custom format (Disk / Users)
     * For example:  
-```json
+```jsonc
 {
     "modules": [
         {
