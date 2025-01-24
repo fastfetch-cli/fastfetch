@@ -252,7 +252,9 @@ static void detectOS(FFOSResult* os)
 {
     #ifdef FF_CUSTOM_OS_RELEASE_PATH
     parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
-    parseLsbRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+        #ifdef FF_CUSTOM_LSB_RELEASE_PATH
+        parseLsbRelease(FF_STR(FF_CUSTOM_LSB_RELEASE_PATH), os);
+        #endif
     return;
     #endif
 
