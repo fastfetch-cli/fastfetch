@@ -1,14 +1,23 @@
-# 2.34.2
+# 2.35.0
 
 Bugfixes:
 * Suppress output of EGL again (#1513, GPU, Linux)
     * Regression of 2.34.0
+
+Features:
 * Show SOC name reported in `cpuinfo` if available (#1510, CPU, Linux)
-* Change package manager name of NetBSD from `pkg` to `pkgsrc` (#1515 Packages, NetBSD)
+* Change package manager name of NetBSD from `pkg` to `pkgsrc` (#1515, Packages, NetBSD)
+* Detect SOC name on RISCV (#1519, CPU, Linux)
+* Report marketing name of new QS8Es (CPU, Android)
+* Acquire acquire more os info from lsb-release if missing from os-release (#1521)
+* CMake: add option `-DCUSTOM_LSB_RELEASE_PATH` to specify the path of `lsb-release` file
+    * `-DCUSTOM_OS_RELEASE_PATH` has been supported since `v2.11.4`
+* Report more SOC names on Android (CPU, Android)
 
 Logo:
 * Add Arch_old
 * Update key color of NetBSD_small
+* Fix OpenBSD and many other ascii logos (#1522)
 
 # 2.34.1
 
