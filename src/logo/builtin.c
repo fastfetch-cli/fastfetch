@@ -2285,6 +2285,15 @@ static const FFlogo K[] = {
             FF_COLOR_FG_MAGENTA,
         }
     },
+    // KDELinux
+    {
+        .names = {"kdelinux", "kde-linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KDELINUX,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_WHITE
+        }
+    },
     // KDENeon
     {
         .names = {"KDE", "kde-neon", "kde neon"},
