@@ -13,6 +13,20 @@ Features:
 * CMake: add option `-DCUSTOM_LSB_RELEASE_PATH` to specify the path of `lsb-release` file
     * `-DCUSTOM_OS_RELEASE_PATH` has been supported since `v2.11.4`
 * Report more SOC names on Android (CPU, Android)
+* Support duration printing in custom format (Disk / Users)
+    * For example:  
+```json
+{
+    "modules": [
+        {
+            "key": "OS Age", // No longer need to write bash scripts
+            "type": "disk",
+            "folders": "/", // Different OSes may need to specify different folders
+            "format": "{days} days"
+        }
+    ]
+}
+```
 
 Logo:
 * Add Arch_old
