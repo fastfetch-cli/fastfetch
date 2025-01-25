@@ -19,10 +19,10 @@ Features:
 {
     "modules": [
         {
-            "key": "OS Age", // No longer need to write bash scripts
+            "key": "OS Installation Date", // No longer need to write bash scripts
             "type": "disk",
             "folders": "/", // Different OSes may need to specify different folders
-            "format": "{days} days" // Number of days after the root folder was created
+            "format": "{create-time:10} [{days} days]" // Reports the creation date of the root folder
         }
     ]
 }
