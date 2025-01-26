@@ -13,11 +13,19 @@ const char* ffDetectSound(FFlist* devices)
     if (defaultDev == -1)
         return "sysctl(hw.snd.default_unit) failed";
 
-    for (int idev = 0; idev <= 9; ++idev)
+    struct oss_sysinfo info = { .nummixers = 9 };
+
+    for (int idev = 0; idev <= info.nummixers; ++idev)
     {
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR);
         if (fd < 0) break;
+
+        if (idev == 0)
+        {
+            if (ioctl(fd, SNDCTL_SYSINFO, &info) != 0)
+                return "ioctl(SNDCTL_SYSINFO) failed";
+        }
 
         uint32_t devmask = 0;
         if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devmask) < 0)
@@ -40,7 +48,7 @@ const char* ffDetectSound(FFlist* devices)
         ffStrbufInitS(&device->identifier, path);
         ffStrbufInitF(&device->name, "%s %s", ci.longname, ci.hw_info);
         ffStrbufTrimRightSpace(&device->name);
-        ffStrbufInitStatic(&device->platformApi, "OSS");
+        ffStrbufInitF(&device->platformApi, "%s %s", info.product, info.version);
         device->volume = mutemask & SOUND_MASK_VOLUME
             ? 0
             : ((uint8_t) volume /*left*/ + (uint8_t) (volume >> 8) /*right*/) / 2;
