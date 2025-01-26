@@ -843,7 +843,7 @@ elseif(OpenBSD)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_obsd.c
         src/detection/gtk_qt/qt.c
-        src/detection/sound/sound_linux.c
+        src/detection/sound/sound_obsd.c
         src/detection/swap/swap_obsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
@@ -1504,6 +1504,7 @@ elseif(OpenBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "kvm"
+        PRIVATE "sndio"
     )
 elseif(NetBSD)
     target_link_libraries(libfastfetch
