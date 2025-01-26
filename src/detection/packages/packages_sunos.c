@@ -1,4 +1,5 @@
 #include "packages.h"
+#include <dirent.h>
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
@@ -12,4 +13,6 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
                 result->pkg = (uint32_t) yyjson_get_uint(packageCount);
         }
     }
+    if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT))
+        result->pkgsrc = ffPackagesGetNumElements(FASTFETCH_TARGET_DIR_ROOT "/usr/pkg/pkgdb", true);
 }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.34.1
+    VERSION 2.35.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -134,7 +134,7 @@ else()
     message(STATUS "Threads type: disabled")
 endif()
 
-set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type")
+set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type -Werror=vla")
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
@@ -1237,6 +1237,10 @@ endif()
 if(NOT "${CUSTOM_OS_RELEASE_PATH}" STREQUAL "")
     message(STATUS "Custom file path of os_release: ${CUSTOM_OS_RELEASE_PATH}")
     target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_OS_RELEASE_PATH=${CUSTOM_OS_RELEASE_PATH})
+endif()
+if(NOT "${CUSTOM_LSB_RELEASE_PATH}" STREQUAL "")
+    message(STATUS "Custom file path of lsb_release: ${CUSTOM_LSB_RELEASE_PATH}")
+    target_compile_definitions(libfastfetch PRIVATE FF_CUSTOM_LSB_RELEASE_PATH=${CUSTOM_LSB_RELEASE_PATH})
 endif()
 
 if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")

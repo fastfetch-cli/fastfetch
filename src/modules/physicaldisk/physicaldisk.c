@@ -278,7 +278,7 @@ void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
 
     ffStrbufInit(&options->namePrefix);
     options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) { 40, 60 };
+    options->tempConfig = (FFColorRangeConfig) { 50, 70 };
 }
 
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options)

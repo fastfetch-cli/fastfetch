@@ -167,11 +167,11 @@ static struct kde_output_device_v2_listener outputListener = {
     .dimming = (void*) stubListener,
 };
 
-void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &kde_output_device_v2_interface, version, name, kde_output_device_v2_interface.name, version, NULL);
     if(output == NULL)
-        return;
+        return "Failed to create kde_output_device_v2";
 
     FF_LIST_AUTO_DESTROY modes = ffListCreate(sizeof(WaylandKdeMode));
     WaylandDisplay display = {
@@ -185,12 +185,21 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
         .internal = &modes,
     };
 
-    wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display);
-    wldata->ffwl_display_roundtrip(wldata->display);
+    if (wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to add listener to kde_output_device_v2";
+    }
+
+    if (wldata->ffwl_display_roundtrip(wldata->display) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to roundtrip kde_output_device_v2";
+    }
     wldata->ffwl_proxy_destroy(output);
 
     if(display.width <= 0 || display.height <= 0 || !display.internal)
-        return;
+        return "Failed to get display information from kde_output_device_v2";
 
     uint32_t rotation = ffWaylandHandleRotation(&display);
 
@@ -233,6 +242,8 @@ void ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry,
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.name);
     ffStrbufDestroy(&display.edidName);
+
+    return NULL;
 }
 
 
@@ -243,20 +254,30 @@ static void waylandKdeOutputOrderListener(void *data, FF_MAYBE_UNUSED struct kde
         *id = ffWaylandGenerateIdFromName(output_name);
 }
 
-void ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+const char* ffWaylandHandleKdeOutputOrder(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &kde_output_order_v1_interface, version, name, kde_output_order_v1_interface.name, version, NULL);
     if(output == NULL)
-        return;
+        return "Failed to create kde_output_order_v1";
 
     struct kde_output_order_v1_listener orderListener = {
         .output = waylandKdeOutputOrderListener,
         .done = (void*) stubListener,
     };
 
-    wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &orderListener, &wldata->primaryDisplayId);
-    wldata->ffwl_display_roundtrip(wldata->display);
+    if (wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &orderListener, &wldata->primaryDisplayId) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to add listener to kde_output_order_v1";
+    }
+    if (wldata->ffwl_display_roundtrip(wldata->display) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to roundtrip kde_output_order_v1";
+    }
     wldata->ffwl_proxy_destroy(output);
+
+    return NULL;
 }
 
 #endif

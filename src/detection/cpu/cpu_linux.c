@@ -97,7 +97,11 @@ static void detectQualcomm(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips
 
-    if (ffStrbufEqualS(&cpu->name, "SM8750"))
+    if (ffStrbufEqualS(&cpu->name, "SM8750-AC"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite for Galaxy [SM8750-AC]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8750-3"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750-3]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8750"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750]");
     else if (ffStrbufEqualS(&cpu->name, "SM8635"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8s Gen 3 [SM8635]");
@@ -280,7 +284,7 @@ static const char* parseCpuInfo(
     {
         //Stop after reasonable information is acquired
         if((*line == '\0' || *line == '\n')
-            #if __arm__ || __loongarch__
+            #if __arm__ || __aarch64__ || __loongarch__
             && cpu->name.length > 0 // #1202 #1204
             #endif
         )
@@ -432,7 +436,7 @@ FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
     }
 }
 
-FF_MAYBE_UNUSED static void detectArmSoc(FFCPUResult* cpu)
+FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
 {
     if (cpu->name.length > 0)
         return;
@@ -557,7 +561,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     #if __x86_64__ || __i386__
     cpu->packages = getPackageCount(&cpuinfo);
     if (cpu->packages > 1)
-        cpu->coresPhysical *= cpu->packages;
+        cpu->coresPhysical *= cpu->packages; // https://github.com/hykilpikonna/hyfetch/issues/374#issuecomment-2571578914
     #endif
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
@@ -565,35 +569,36 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (!detectFrequency(cpu, options) || cpu->frequencyBase == 0)
         cpu->frequencyBase = (uint32_t) ffStrbufToUInt(&cpuMHz, 0);
 
-    #if !(__x86_64__ || __i386__ || __arm__ || __aarch64__)
-    if(cpuUarch.length > 0)
-    {
-        if(cpu->name.length > 0)
-            ffStrbufAppendC(&cpu->name, ' ');
-        ffStrbufAppend(&cpu->name, &cpuUarch);
-    }
-
-    if(cpuIsa.length > 0)
-    {
-        parseIsa(&cpuIsa);
-        if(cpu->name.length > 0)
-            ffStrbufAppendC(&cpu->name, ' ');
-        ffStrbufAppend(&cpu->name, &cpuIsa);
-    }
+    #if __ANDROID__
+    detectAndroid(cpu);
+    #elif !(__x86_64__ || __i386__)
+    detectSocName(cpu);
     #endif
 
     #if __arm__ || __aarch64__
     uint32_t cpuImplementer = (uint32_t) strtoul(cpuImplementerStr.chars, NULL, 16);
     ffStrbufSetStatic(&cpu->vendor, hwImplId2Vendor(cpuImplementer));
 
-    #if __ANDROID__
-    detectAndroid(cpu);
-    #else
-    detectArmSoc(cpu);
-    #endif
-
     if (cpu->name.length == 0)
         detectArmName(&cpuinfo, cpu, cpuImplementer);
+    #elif !(__x86_64__ || __i386__)
+    if (cpu->name.length == 0)
+    {
+        if(cpuUarch.length > 0)
+        {
+            if(cpu->name.length > 0)
+                ffStrbufAppendC(&cpu->name, ' ');
+            ffStrbufAppend(&cpu->name, &cpuUarch);
+        }
+
+        if(cpuIsa.length > 0)
+        {
+            parseIsa(&cpuIsa);
+            if(cpu->name.length > 0)
+                ffStrbufAppendC(&cpu->name, ' ');
+            ffStrbufAppend(&cpu->name, &cpuIsa);
+        }
+    }
     #endif
 
     return NULL;

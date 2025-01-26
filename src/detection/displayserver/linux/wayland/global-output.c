@@ -78,11 +78,11 @@ static struct zxdg_output_v1_listener zxdgOutputListener = {
     .description = (void*) ffWaylandOutputDescriptionListener,
 };
 
-void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+const char* ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, wldata->ffwl_output_interface, version, name, wldata->ffwl_output_interface->name, version, NULL);
     if(output == NULL)
-        return;
+        return "Failed to create wl_output";
 
     WaylandDisplay display = {
         .parent = wldata,
@@ -94,8 +94,16 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
         .edidName = ffStrbufCreate(),
     };
 
-    wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display);
-    wldata->ffwl_display_roundtrip(wldata->display);
+    if (wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, &display) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to add listener to wl_output";
+    }
+    if (wldata->ffwl_display_roundtrip(wldata->display) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to roundtrip wl_output";
+    }
 
     if (wldata->zxdgOutputManager)
     {
@@ -112,7 +120,7 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
     wldata->ffwl_proxy_destroy(output);
 
     if(display.width <= 0 || display.height <= 0)
-        return;
+        return "Failed to get display information from wl_output";
 
     uint32_t rotation = ffWaylandHandleRotation(&display);
 
@@ -156,15 +164,19 @@ void ffWaylandHandleGlobalOutput(WaylandData* wldata, struct wl_registry* regist
     ffStrbufDestroy(&display.description);
     ffStrbufDestroy(&display.name);
     ffStrbufDestroy(&display.edidName);
+
+    return NULL;
 }
 
-void ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+const char* ffWaylandHandleZxdgOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* manager = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zxdg_output_manager_v1_interface, version, name, zxdg_output_manager_v1_interface.name, version, NULL);
     if(manager == NULL)
-        return;
+        return "Failed to create zxdg_output_manager_v1";
 
     wldata->zxdgOutputManager = manager;
+
+    return NULL;
 }
 
 #endif

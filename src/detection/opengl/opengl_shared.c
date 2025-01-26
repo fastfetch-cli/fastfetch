@@ -154,7 +154,7 @@ const char* ffOpenGLDetectByEGL(FFOpenGLResult* result)
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglDestroySurface);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(egl, eglData, eglTerminate);
 
-    // FF_SUPPRESS_IO();
+    FF_SUPPRESS_IO();
     return eglHandleData(result, &eglData);
 }
 
