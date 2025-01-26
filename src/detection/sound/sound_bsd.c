@@ -15,10 +15,11 @@ const char* ffDetectSound(FFlist* devices)
     #else
     int defaultDev;
     {
-        char mixerp[8];
-        if (readlink("/dev/mixer", mixerp, ARRAY_SIZE(mixerp)) != 6)
+        char mixerp[12];
+        ssize_t plen = readlink("/dev/mixer", mixerp, ARRAY_SIZE(mixerp));
+        if (plen < 6)
             return "readlink(/dev/mixer) failed";
-        defaultDev = mixerp[5] - '0';
+        defaultDev = mixerp[plen - 1] - '0';
         if (defaultDev < 0 || defaultDev > 9)
             return "Invalid mixer device";
     }
