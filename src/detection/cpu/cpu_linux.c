@@ -561,7 +561,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     #if __x86_64__ || __i386__
     cpu->packages = getPackageCount(&cpuinfo);
     if (cpu->packages > 1)
-        cpu->coresPhysical *= cpu->packages;
+        cpu->coresPhysical *= cpu->packages; // https://github.com/hykilpikonna/hyfetch/issues/374#issuecomment-2571578914
     #endif
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
