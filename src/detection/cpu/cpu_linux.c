@@ -305,7 +305,7 @@ static const char* parseCpuInfo(
             #endif
 
             #if __powerpc__ || __powerpc
-            (cpuMHz->length == 0 && ffParsePropLine(line, "clock :", &cpuMHz)) || //For POWER
+            (cpuMHz->length == 0 && ffParsePropLine(line, "clock :", cpuMHz)) || //For POWER
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) || //For POWER
             #endif
 
