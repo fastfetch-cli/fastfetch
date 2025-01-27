@@ -761,7 +761,7 @@ elseif(NetBSD)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_nbsd.c
         src/detection/gtk_qt/qt.c
-        src/detection/sound/sound_bsd.c
+        src/detection/sound/sound_nbsd.c
         src/detection/swap/swap_obsd.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
@@ -1510,7 +1510,6 @@ elseif(NetBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
         PRIVATE "prop"
-        PRIVATE "ossaudio"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch
