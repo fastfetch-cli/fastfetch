@@ -38,6 +38,7 @@ typedef enum __attribute__((__packed__)) FFPackagesFlags
     FF_PACKAGES_FLAG_PKGSRC_BIT = 1 << 28,
     FF_PACKAGES_FLAG_HPKG_BIT = 1 << 29,
     FF_PACKAGES_FLAG_PISI_BIT = 1 << 30,
+    FF_PACKAGES_FLAG_SOAR_BIT = 1 << 31,
     FF_PACKAGES_FLAG_FORCE_UNSIGNED = UINT32_MAX,
 } FFPackagesFlags;
 static_assert(sizeof(FFPackagesFlags) == sizeof(uint32_t), "");

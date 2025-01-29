@@ -78,6 +78,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(mport)
         FF_PRINT_PACKAGE(qi)
         FF_PRINT_PACKAGE(pisi)
+        FF_PRINT_PACKAGE(soar)
 
         putchar('\n');
     }
@@ -130,6 +131,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.hpkgSystem, "hpkg-system"),
             FF_FORMAT_ARG(counts.hpkgUser, "hpkg-user"),
             FF_FORMAT_ARG(counts.pisi, "pisi"),
+            FF_FORMAT_ARG(counts.soar, "soar"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -222,6 +224,7 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                 case 'S': if (false);
                     FF_TEST_PACKAGE_NAME(SCOOP)
                     FF_TEST_PACKAGE_NAME(SNAP)
+                    FF_TEST_PACKAGE_NAME(SOAR)
                     FF_TEST_PACKAGE_NAME(SORCERY)
                     break;
                 case 'W': if (false);
@@ -341,6 +344,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'S': if (false);
                             FF_TEST_PACKAGE_NAME(SCOOP)
                             FF_TEST_PACKAGE_NAME(SNAP)
+                            FF_TEST_PACKAGE_NAME(SOAR)
                             FF_TEST_PACKAGE_NAME(SORCERY)
                             break;
                         case 'W': if (false);
@@ -400,6 +404,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(RPM)
         FF_TEST_PACKAGE_NAME(SCOOP)
         FF_TEST_PACKAGE_NAME(SNAP)
+        FF_TEST_PACKAGE_NAME(SOAR)
         FF_TEST_PACKAGE_NAME(SORCERY)
         FF_TEST_PACKAGE_NAME(WINGET)
         FF_TEST_PACKAGE_NAME(XBPS)
@@ -459,6 +464,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoop)
     FF_APPEND_PACKAGE_COUNT(snap)
+    FF_APPEND_PACKAGE_COUNT(soar)
     FF_APPEND_PACKAGE_COUNT(sorcery)
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
@@ -515,6 +521,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of hpkg-system packages", "hpkg-system"},
         {"Number of hpkg-user packages", "hpkg-user"},
         {"Number of pisi packages", "pisi"},
+        {"Number of soar packages", "soar"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
