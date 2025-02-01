@@ -1711,15 +1711,6 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
-    // WolfOS
-    {
-        .names = {"WolfOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
-        },
-    },
     // FreeBSD
     {
         .names = {"Freebsd"},
@@ -5023,7 +5014,15 @@ static const FFlogo W[] = {
     // LAST
     {},
 };
-
+// WolfOS
+{
+        .names = {"WolfOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
+    },
 static const FFlogo X[] = {
     // Xenia
     {
