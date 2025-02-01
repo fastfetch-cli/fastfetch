@@ -1711,12 +1711,13 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
-    // FoxOS
+    // WolfOS
     {
-        .names = {"FoxOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_FOXOS,
+        .names = {"WolfOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
         .colors = {
-            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
         },
     },
     // FreeBSD
