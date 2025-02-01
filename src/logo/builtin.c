@@ -4921,6 +4921,16 @@ static const FFlogo V[] = {
 };
 
 static const FFlogo W[] = {
+    // WolfOS
+    {
+        .names = {"WolfOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
+    },
+
     // WiiLinuxNgx
     {
         .names = {"WiiLinuxNgx"},
@@ -5014,15 +5024,6 @@ static const FFlogo W[] = {
     // LAST
     {},
 };
-// WolfOS
-{
-        .names = {"WolfOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
-        },
-    },
 static const FFlogo X[] = {
     // Xenia
     {
