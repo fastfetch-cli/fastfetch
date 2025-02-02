@@ -1690,6 +1690,16 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Filotimo
+    {
+        .names = {"filotimo"},
+        .lines = FASTFETCH_DATATEXT_LOGO_FILOTIMO,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Finnix
     {
         .names = {"Finnix"},
