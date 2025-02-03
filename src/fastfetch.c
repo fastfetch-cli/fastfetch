@@ -788,4 +788,7 @@ int main(int argc, char** argv)
         writeConfigFile(&data, &instance.state.genConfigPath);
 
     ffStrbufDestroy(&data.structure);
+
+    // Finish off by adding leading new lines like neofetch
+    printf("\n\n");
 }
