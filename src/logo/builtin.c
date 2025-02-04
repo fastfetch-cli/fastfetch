@@ -3056,6 +3056,15 @@ static const FFlogo N[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // NexaLinux
+    {
+        .names = {"nexalinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NEXALINUX,
+        .colors = {
+            FF_COLOR_FG_LIGHT_BLUE,
+            FF_COLOR_FG_LIGHT_BLUE,
+        },
+    },
     // Nitrux
     {
         .names = {"Nitrux"},
