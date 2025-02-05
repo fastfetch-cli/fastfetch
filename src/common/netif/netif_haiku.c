@@ -9,7 +9,7 @@
 #include <sys/sockio.h>
 #include <stdio.h>
 
-// losely based on Haiku's src/bin/network/route/route.cpp
+// loosely based on Haiku's src/bin/network/route/route.cpp
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
 {
