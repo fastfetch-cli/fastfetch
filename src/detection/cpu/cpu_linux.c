@@ -297,30 +297,22 @@ static const char* parseCpuInfo(
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor_id :", &cpu->vendor)) ||
             (physicalCoresBuffer->length == 0 && ffParsePropLine(line, "cpu cores :", physicalCoresBuffer)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz :", cpuMHz)) ||
-            #endif
-
-            #if __arm__ || __aarch64__
+            #elif __arm__ || __aarch64__
             (cpuImplementer->length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
-            #endif
-
-            #if __powerpc__ || __powerpc
+            #elif __powerpc__ || __powerpc
             (cpuMHz->length == 0 && ffParsePropLine(line, "clock :", cpuMHz)) || //For POWER
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) || //For POWER
-            #endif
-
-            #if __mips__ || __mips
+            #elif __mips__ || __mips
             (cpu->name.length == 0 && ffParsePropLine(line, "cpu model :", &cpu->name)) || //For MIPS
-            #endif
-
-            #if __loongarch__
+            #elif __loongarch__
             (cpu->name.length == 0 && ffParsePropLine(line, "Model Name :", &cpu->name)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "CPU MHz :", cpuMHz)) ||
-            #endif
-
-            #if __riscv__ || __loongarch__
+            #elif __riscv__ || __riscv
             (cpuIsa->length == 0 && ffParsePropLine(line, "isa :", cpuIsa)) ||
             (cpuUarch->length == 0 && ffParsePropLine(line, "uarch :", cpuUarch)) ||
+            #else
+            (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             #endif
 
             false
