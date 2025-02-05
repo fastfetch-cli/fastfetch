@@ -301,7 +301,12 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (proc)
     {
         char** argv = kvm_getargv(kd, proc, 0);
-        if (argv) ffStrbufSetS(exe, argv[0]);
+        if (argv)
+        {
+            const char* arg0 = argv[0];
+            if (arg0[0] == '-') arg0++;
+            ffStrbufSetS(exe, arg0);
+        }
     }
     kvm_close(kd);
 
