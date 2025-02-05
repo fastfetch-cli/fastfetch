@@ -1182,6 +1182,9 @@ endif()
 if(LINUX)
     check_function_exists(statx HAVE_STATX)
 endif()
+if(NOT WIN32)
+    check_function_exists(pipe2 HAVE_PIPE2)
+endif()
 
 if(ENABLE_SYSTEM_YYJSON)
     find_package(yyjson)
@@ -1294,6 +1297,10 @@ endif()
 
 if(HAVE_WCWIDTH)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_WCWIDTH)
+endif()
+
+if(HAVE_PIPE2)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_PIPE2)
 endif()
 
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
