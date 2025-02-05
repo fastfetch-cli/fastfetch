@@ -56,6 +56,18 @@ typedef struct {
 // https://github.com/NVIDIA/nvidia-settings/issues/78#issuecomment-1012837988
 enum { nvmlMemory_v2 = (unsigned int)(sizeof(nvmlMemory_v2_t) | (2 << 24U)) };
 
+// https://docs.nvidia.com/deploy/nvml-api/structnvmlMemory__t.html#structnvmlMemory__t
+// Memory allocation information for a device (v1)
+typedef struct
+{
+    // Total physical device memory (in bytes)
+    unsigned long long total;
+    // Unallocated device memory (in bytes)
+    unsigned long long free;
+    // Sum of Reserved and Allocated device memory (in bytes)
+    unsigned long long used;
+} nvmlMemory_t;
+
 // https://docs.nvidia.com/deploy/nvml-api/group__nvmlDeviceEnumvs.html#group__nvmlDeviceEnumvs_1g805c0647be9996589fc5e3f6ff680c64
 // Clock types
 typedef enum {
@@ -124,6 +136,8 @@ extern nvmlReturn_t nvmlDeviceGetPciInfo_v3(nvmlDevice_t device, nvmlPciInfo_t* 
 extern nvmlReturn_t nvmlDeviceGetTemperature(nvmlDevice_t device, nvmlTemperatureSensors_t sensorType, unsigned int* temp);
 // Retrieves the amount of used, free, reserved and total memory available on the device, in bytes. The reserved amount is supported on version 2 only
 extern nvmlReturn_t nvmlDeviceGetMemoryInfo_v2(nvmlDevice_t device, nvmlMemory_v2_t* memory);
+// Retrieves the amount of used, free, total memory available on the device, in bytes.
+extern nvmlReturn_t nvmlDeviceGetMemoryInfo(nvmlDevice_t device, nvmlMemory_t *memory);
 // Gets the device's core count
 extern nvmlReturn_t nvmlDeviceGetNumGpuCores(nvmlDevice_t device, unsigned int* numCores);
 // Retrieves the maximum clock speeds for the device
