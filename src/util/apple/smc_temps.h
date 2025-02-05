@@ -15,6 +15,7 @@ enum FFTempType
     FF_TEMP_CPU_M1X,
     FF_TEMP_CPU_M2X,
     FF_TEMP_CPU_M3X,
+    FF_TEMP_CPU_M4X,
 
     FF_TEMP_GPU_INTEL,
     FF_TEMP_GPU_AMD,
@@ -22,10 +23,11 @@ enum FFTempType
     FF_TEMP_GPU_M1X,
     FF_TEMP_GPU_M2X,
     FF_TEMP_GPU_M3X,
+    FF_TEMP_GPU_M4X,
 
     FF_TEMP_BATTERY,
 
     FF_TEMP_MEMORY,
 };
 
-const char *ffDetectSmcTemps(enum FFTempType type, double* result);
+const char* ffDetectSmcTemps(enum FFTempType type, double* result);
