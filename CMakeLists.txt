@@ -1134,7 +1134,7 @@ elseif(Haiku)
         src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
-        src/detection/os/os_uname.c
+        src/detection/os/os_haiku.c
         src/detection/packages/packages_haiku.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_haiku.c
