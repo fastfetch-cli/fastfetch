@@ -1615,6 +1615,7 @@ elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"
         PRIVATE "be"
+        PRIVATE "gnu"
     )
 endif()
 
