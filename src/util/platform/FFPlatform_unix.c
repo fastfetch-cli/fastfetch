@@ -204,8 +204,8 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     ffStrbufAppendS(&info->version, uts->version);
     #ifdef __HAIKU__
     /* historical reason */
-    if (!strcmp(uts->machine, "BePC"))
-        ffStrbufAppendS(&info->architecture, "i386");
+    if (ffStrEquals(uts->machine, "BePC"))
+        ffStrbufSetStatic(&info->architecture, "i386");
     else
     #endif
     ffStrbufAppendS(&info->architecture, uts->machine);
