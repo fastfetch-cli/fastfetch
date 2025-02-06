@@ -2008,7 +2008,7 @@ static const FFlogo H[] = {
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
             FF_COLOR_FG_GREEN,
         },
         .colorKeys = FF_COLOR_FG_RED,
