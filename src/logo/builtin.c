@@ -3900,10 +3900,10 @@ static const FFlogo R[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // Reborn
+    // RebornOS
     {
-        .names = {"Reborn", "Reborn OS", "reborn-os", "rebornos", "rebornos-linux", "reborn-os-linux"},
-        .lines = FASTFETCH_DATATEXT_LOGO_REBORN,
+        .names = {"RebornOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_REBORNOS,
         .colors = {
             FF_COLOR_FG_BLACK,
             FF_COLOR_FG_BLUE,
@@ -3914,9 +3914,9 @@ static const FFlogo R[] = {
     },
     // RebornSmall
     {
-        .names = {"Reborn_small", "Reborn OS_small", "reborn-os-small", "rebornos_small", "rebornos-linux-small", "reborn-os-linux-small"},
+        .names = {"RebornOS_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_REBORN_SMALL,
+        .lines = FASTFETCH_DATATEXT_LOGO_REBORNOS_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
         },
