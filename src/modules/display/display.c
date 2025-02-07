@@ -75,7 +75,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
     {
         FFDisplayResult* result = FF_LIST_GET(FFDisplayResult, dsResult->displays, i);
         uint32_t moduleIndex = dsResult->displays.length == 1 ? 0 : i + 1;
-        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "built-in" : "external";
+        const char* displayType = result->type == FF_DISPLAY_TYPE_UNKNOWN ? NULL : result->type == FF_DISPLAY_TYPE_BUILTIN ? "Built-in" : "External";
 
         ffStrbufClear(&key);
         if(options->moduleArgs.key.length == 0)
@@ -448,7 +448,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Screen scaled width (in pixels)", "scaled-width"},
         {"Screen scaled height (in pixels)", "scaled-height"},
         {"Screen name", "name"},
-        {"Screen type (builtin, external or unknown)", "type"},
+        {"Screen type (Built-in, External or unknown)", "type"},
         {"Screen rotation (in degrees)", "rotation"},
         {"True if being the primary screen", "is-primary"},
         {"Screen physical width (in millimeters)", "physical-width"},
