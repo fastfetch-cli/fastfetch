@@ -30,6 +30,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "DragonFly")
     set(DragonFly TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "SunOS")
     set(SunOS TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Haiku")
+    set(Haiku TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -139,7 +141,7 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
-if(WIN32 OR ENABLE_DIRECTX_HEADERS)
+if(WIN32 OR HAIKU OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
@@ -1088,6 +1090,74 @@ elseif(SunOS)
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
+elseif(Haiku)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/io/io_unix.c
+        src/common/netif/netif_haiku.c
+        src/common/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
+        src/detection/btrfs/btrfs_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_nosupport.c
+        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cursor/cursor_nosupport.c
+        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetoothradio/bluetoothradio_nosupport.c
+        src/detection/disk/disk_nosupport.c
+        src/detection/dns/dns_linux.c
+        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/diskio/diskio_nosupport.c
+        src/detection/displayserver/displayserver_haiku.cpp
+        src/detection/font/font_haiku.cpp
+        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_pci.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/host/host_nosupport.c
+        src/detection/icons/icons_nosupport.c
+        src/detection/initsystem/initsystem_nosupport.c
+        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/libc/libc_nosupport.c
+        src/detection/lm/lm_nosupport.c
+        src/detection/loadavg/loadavg_nosupport.c
+        src/detection/locale/locale_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_nosupport.c
+        src/detection/memory/memory_haiku.c
+        src/detection/mouse/mouse_nosupport.c
+        src/detection/netio/netio_nosupport.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_haiku.c
+        src/detection/packages/packages_haiku.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_haiku.c
+        src/detection/gtk_qt/qt.c
+        src/detection/sound/sound_nosupport.c
+        src/detection/swap/swap_haiku.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
+        src/detection/theme/theme_nosupport.c
+        src/detection/tpm/tpm_nosupport.c
+        src/detection/uptime/uptime_haiku.c
+        src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_nosupport.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wm/wm_nosupport.c
+        src/detection/de/de_nosupport.c
+        src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/camera/camera_nosupport.c
+        src/detection/zpool/zpool_nosupport.c
+        src/util/platform/FFPlatform_unix.c
+        src/util/binary_linux.c
+    )
 endif()
 
 if(ENABLE_DIRECTX_HEADERS)
@@ -1111,6 +1181,9 @@ if(NOT HAVE_WCWIDTH)
 endif()
 if(LINUX)
     check_function_exists(statx HAVE_STATX)
+endif()
+if(NOT WIN32)
+    check_function_exists(pipe2 HAVE_PIPE2)
 endif()
 
 if(ENABLE_SYSTEM_YYJSON)
@@ -1224,6 +1297,10 @@ endif()
 
 if(HAVE_WCWIDTH)
     target_compile_definitions(libfastfetch PUBLIC FF_HAVE_WCWIDTH)
+endif()
+
+if(HAVE_PIPE2)
+    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_PIPE2)
 endif()
 
 if(NOT "${CUSTOM_PCI_IDS_PATH}" STREQUAL "")
@@ -1534,6 +1611,12 @@ elseif(ANDROID)
             )
         endif()
     endif()
+elseif(Haiku)
+    target_link_libraries(libfastfetch
+        PRIVATE "network"
+        PRIVATE "be"
+        PRIVATE "gnu"
+    )
 endif()
 
 target_include_directories(libfastfetch
