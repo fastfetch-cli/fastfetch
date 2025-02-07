@@ -4921,15 +4921,6 @@ static const FFlogo V[] = {
 };
 
 static const FFlogo W[] = {
-    // WolfOS
-    {
-        .names = {"WolfOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
-        },
-    },
 
     // WiiLinuxNgx
     {
@@ -4938,6 +4929,15 @@ static const FFlogo W[] = {
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,
+        },
+    },
+    // WolfOS
+    {
+        .names = {"WolfOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
         },
     },
     // Windows2025
