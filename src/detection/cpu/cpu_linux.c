@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#define FF_CPUINFO_PATH "/proc/cpuinfo"
+
 static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
 {
     //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
@@ -437,8 +439,8 @@ FF_MAYBE_UNUSED static uint16_t getPackageCount(FFstrbuf* cpuinfo)
 FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     FF_STRBUF_AUTO_DESTROY cpuinfo = ffStrbufCreateA(PROC_FILE_BUFFSIZ);
-    if (!ffReadFileBuffer("/proc/cpuinfo", &cpuinfo) || cpuinfo.length == 0)
-        return "ffReadFileBuffer(\"/proc/cpuinfo\") failed";
+    if (!ffReadFileBuffer(FF_CPUINFO_PATH, &cpuinfo) || cpuinfo.length == 0)
+        return "ffReadFileBuffer(\"" FF_CPUINFO_PATH "\") failed";
 
     FF_STRBUF_AUTO_DESTROY physicalCoresBuffer = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
@@ -567,6 +569,30 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
     }
 }
 
+#ifdef __loongarch__
+FF_MAYBE_UNUSED static uint16_t getLoongarchPropCount(FFstrbuf* cpuinfo, const char* key)
+{
+    const char* p = cpuinfo->chars;
+    uint64_t low = 0, high = 0;
+    uint32_t keylen = (uint32_t) strlen(key);
+
+    while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), key, keylen)))
+    {
+        if (!p) break;
+        p += keylen;
+        char* pend;
+        unsigned long id = strtoul(p, &pend, 10);
+        if (__builtin_expect(id > 64, false))
+            high |= 1 << (id - 64);
+        else
+            low |= 1 << id;
+        p = pend;
+    }
+
+    return (uint16_t) (__builtin_popcountll(low) + __builtin_popcountll(high));
+}
+#endif
+
 FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     cpu->coresPhysical = cpu->coresLogical = (uint16_t) get_nprocs_conf();
@@ -583,8 +609,8 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
     if (cpu->name.length == 0)
     {
         FF_STRBUF_AUTO_DESTROY cpuinfo = ffStrbufCreateA(PROC_FILE_BUFFSIZ);
-        if (!ffReadFileBuffer("/proc/cpuinfo", &cpuinfo) || cpuinfo.length == 0)
-            return "ffReadFileBuffer(\"/proc/cpuinfo\") failed";
+        if (!ffReadFileBuffer(FF_CPUINFO_PATH, &cpuinfo) || cpuinfo.length == 0)
+            return "ffReadFileBuffer(\"" FF_CPUINFO_PATH "\") failed";
 
         FF_STRBUF_AUTO_DESTROY cpuMHz = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY cpuIsa = ffStrbufCreate();
@@ -621,6 +647,10 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
                 ffStrbufAppend(&cpu->name, &cpuIsa);
             }
         }
+        #elif __loongarch__
+        cpu->packages = getLoongarchPropCount(&cpuinfo, "\npackage\t\t\t:");
+        cpu->coresPhysical = getLoongarchPropCount(&cpuinfo, "\ncore\t\t\t:");
+        if (cpu->packages > 1) cpu->coresPhysical *= cpu->packages;
         #endif
     }
 
