@@ -448,7 +448,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Screen scaled width (in pixels)", "scaled-width"},
         {"Screen scaled height (in pixels)", "scaled-height"},
         {"Screen name", "name"},
-        {"Screen type (Built-in, External or unknown)", "type"},
+        {"Screen type (Built-in or External)", "type"},
         {"Screen rotation (in degrees)", "rotation"},
         {"True if being the primary screen", "is-primary"},
         {"Screen physical width (in millimeters)", "physical-width"},
