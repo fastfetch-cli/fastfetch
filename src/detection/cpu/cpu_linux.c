@@ -303,10 +303,10 @@ static const char* parseCpuInfo(
             (cpuImplementer->length == 0 && ffParsePropLine(line, "CPU implementer :", cpuImplementer)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "Hardware :", &cpu->name)) || //For Android devices
             #elif __powerpc__ || __powerpc
-            (cpuMHz->length == 0 && ffParsePropLine(line, "clock :", cpuMHz)) || //For POWER
-            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) || //For POWER
+            (cpuMHz->length == 0 && ffParsePropLine(line, "clock :", cpuMHz)) ||
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
             #elif __mips__ || __mips
-            (cpu->name.length == 0 && ffParsePropLine(line, "cpu model :", &cpu->name)) || //For MIPS
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu model :", &cpu->name)) ||
             #elif __loongarch__
             (cpu->name.length == 0 && ffParsePropLine(line, "Model Name :", &cpu->name)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "CPU MHz :", cpuMHz)) ||
@@ -319,6 +319,10 @@ static const char* parseCpuInfo(
             (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz static :", cpuMHz)) || // This one cannot be detected because of early return
             #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
+            (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu model :", &cpu->name)) ||
+            (cpu->name.length == 0 && ffParsePropLine(line, "hardware :", &cpu->name)) ||
+            (cpu->name.length == 0 && ffParsePropLine(line, "processor :", &cpu->name)) ||
             #endif
 
             false
