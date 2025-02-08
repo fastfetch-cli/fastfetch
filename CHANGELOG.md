@@ -1,3 +1,28 @@
+# 2.36.0
+
+Bugfixes:
+* Trim leading slash for login shells (Shell, OpenBSD)
+* Prefer SOC name if available over CPU name (CPU, Linux)
+
+Features:
+* Use kernel API to detect sound devices (Sound, NetBSD)
+* Use sndio for sound server detection on OpenBSD (Sound, OpenBSD)
+* Add minimal implementation for Haiku (#1538, Haiku)
+* Support CPU & GPU temperature detection for M4x (CPU / GPU, macOS)
+* Support VMEM size detection for old Nvidia cards (GPU, Linux)
+* Use [recommendedMaxWorkingSetSize](https://developer.apple.com/documentation/metal/mtldevice/recommendedmaxworkingsetsize) as total GPU mem size (GPU, macOS)
+* Support Physical core count and CPU package count detection for loongarch (CPU, Linux)
+* Split ID_LIKE when used for distro matching (#1540, Logo)
+* Capitalize `{type}`'s first letter in custom format (#1543, Display)
+* Support model name detection for s390x (CPU, Linux)
+* Support more Armbian variants detection (#1547, OS, Linux)
+
+Logo:
+* Update arch_old
+* Add Nexa Linux
+* Add filotimo
+* Update some distro names
+
 # 2.35.0
 
 Bugfixes:
