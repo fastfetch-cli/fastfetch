@@ -41,10 +41,13 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
 // Common logic for detecting Armbian image version
 FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
 {
-    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Official Armbian release images
+    // Possible values `PRETTY_NAME` starts with on Armbian:
+    // - `Armbian` for official releases
+    // - `Armbian_community` for community releases
+    // - `Armbian_Security` for images with kali repo added
+    // - `Armbian-unofficial` for an unofficial image built from source, e.g. during development and testing
+    if (ffStrbufStartsWithS(&result->prettyName, "Armbian"))
         ffStrbufSetS(&result->name, "Armbian");
-    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
-        ffStrbufSetS(&result->name, "Armbian (custom build)");
     else
         return false;
     ffStrbufSet(&result->idLike, &result->id);
