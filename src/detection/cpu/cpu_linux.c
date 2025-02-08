@@ -313,6 +313,10 @@ static const char* parseCpuInfo(
             #elif __riscv__ || __riscv
             (cpuIsa->length == 0 && ffParsePropLine(line, "isa :", cpuIsa)) ||
             (cpuUarch->length == 0 && ffParsePropLine(line, "uarch :", cpuUarch)) ||
+            #elif __s390x__
+            (cpu->name.length == 0 && ffParsePropLine(line, "processor 0:", &cpu->name)) ||
+            (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor_id :", &cpu->vendor)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz static :", cpuMHz)) || // This one cannot be detected because of early return
             #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             #endif
@@ -651,6 +655,9 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
         cpu->packages = getLoongarchPropCount(&cpuinfo, "\npackage\t\t\t:");
         cpu->coresPhysical = getLoongarchPropCount(&cpuinfo, "\ncore\t\t\t:");
         if (cpu->packages > 1) cpu->coresPhysical *= cpu->packages;
+        #elif __s390x__
+        if (ffStrbufSubstrAfterFirstS(&cpu->name, "machine = "))
+            ffStrbufPrependS(&cpu->name, "Machine ");
         #endif
     }
 
