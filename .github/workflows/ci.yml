@@ -56,7 +56,7 @@ jobs:
         run: ldd fastfetch
 
       - name: run tests
-        run: ctest
+        run: ctest --output-on-failure
 
   linux-amd64:
     name: Linux-amd64
@@ -111,7 +111,7 @@ jobs:
         run: ldd fastfetch
 
       - name: run tests
-        run: ctest
+        run: ctest --output-on-failure
 
       - name: get fastfetch version
         id: ffversion
@@ -150,7 +150,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -189,7 +189,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -225,7 +225,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -260,7 +260,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -295,7 +295,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -334,7 +334,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
         shell: alpine.sh {0}
 
       - name: upload artifacts
@@ -390,7 +390,7 @@ jobs:
         run: otool -L fastfetch
 
       - name: run tests
-        run: ctest
+        run: ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -422,7 +422,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
             cpack
 
       - name: upload artifacts
@@ -460,7 +460,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -495,7 +495,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -531,7 +531,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -567,7 +567,7 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
             ldd fastfetch
-            ctest
+            ctest --output-on-failure
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -626,7 +626,7 @@ jobs:
         run: ldd fastfetch
 
       - name: run tests
-        run: ctest
+        run: ctest --output-on-failure
 
       - name: create zip archive
         run: 7z a -tzip -mx9 -bd -y fastfetch-windows-amd64.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets

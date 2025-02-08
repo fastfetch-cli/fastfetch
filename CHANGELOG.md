@@ -16,6 +16,8 @@ Features:
 * Capitalize `{type}`'s first letter in custom format (#1543, Display)
 * Support model name detection for s390x (CPU, Linux)
 * Support more Armbian variants detection (#1547, OS, Linux)
+* Support the syntax of `{$ENV_VAR}` in custom format, which will be replaced by the value of the environment variable `ENV_VAR` (#1541)
+    * This is another way to pass 3rd-party data to fastfetch besides `Custom` module.
 
 Logo:
 * Update arch_old
