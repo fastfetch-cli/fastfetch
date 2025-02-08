@@ -409,8 +409,7 @@ static bool parseJsoncFile(const char* path)
         parseError ||
         (parseError = ffOptionsParseLogoJsonConfig(&instance.config.logo, root)) ||
         (parseError = ffOptionsParseGeneralJsonConfig(&instance.config.general, root)) ||
-        (parseError = ffOptionsParseDisplayJsonConfig(&instance.config.display, root)) ||
-        false
+        (parseError = ffOptionsParseDisplayJsonConfig(&instance.config.display, root))
     ) {
         fprintf(stderr, "JsonConfig Error: %s\n", parseError);
         exit(477);
