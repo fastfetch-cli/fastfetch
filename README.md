@@ -73,6 +73,10 @@ You may also download the program directly from [the GitHub releases page](https
 
 * `pkg install fastfetch`
 
+### Nightly
+
+<https://nightly.link/fastfetch-cli/fastfetch/workflows/ci/dev?preview>
+
 ## Build from source
 
 See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
