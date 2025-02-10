@@ -591,7 +591,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '10.0'
+          version: '10.1'
           run: |
             uname -a
             sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick pulseaudio opencl-headers ocl-icd py312-requests
