@@ -4,9 +4,15 @@
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
 
+#ifdef __HAIKU__
+#define RESOLV_CONF "/system/settings/network/resolv.conf"
+#else
+#define RESOLV_CONF "/etc/resolv.conf"
+#endif
+
 const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
 {
-    FF_AUTO_CLOSE_FILE FILE* file = fopen(FASTFETCH_TARGET_DIR_ROOT "/etc/resolv.conf", "r");
+    FF_AUTO_CLOSE_FILE FILE* file = fopen(FASTFETCH_TARGET_DIR_ROOT RESOLV_CONF, "r");
     if (!file)
         return "fopen (" FASTFETCH_TARGET_DIR_ROOT "/etc/resolv.conf) failed";
 

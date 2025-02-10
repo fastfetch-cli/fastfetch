@@ -2,6 +2,8 @@
 #include "util/textModifier.h"
 #include "fastfetch.h"
 
+#include <stdlib.h>
+
 static void verify(const char* format, const char* arg, const char* expected, int lineNo)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
@@ -112,6 +114,26 @@ int main(void)
     VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "12345 67890", "output(OK)");
     VERIFY("output({?1}OK{?}{/1}NOT OK{/})", "", "output(NOT OK)");
     }
+
+    #ifndef _WIN32 // Windows doesn't have setenv
+    {
+        ffListInit(&instance.config.display.constants, sizeof(FFstrbuf));
+        ffStrbufInitStatic(ffListAdd(&instance.config.display.constants), "CONST1");
+        ffStrbufInitStatic(ffListAdd(&instance.config.display.constants), "CONST2");
+        setenv("FF_TEST", "ENVVAR", 1);
+        VERIFY("output({$FF_TEST})", "", "output(ENVVAR)");
+        VERIFY("output({$1})", "", "output(CONST1)");
+        VERIFY("output({$FF_TEST}{$1})", "", "output(ENVVARCONST1)");
+        VERIFY("output({$1}{$FF_TEST})", "", "output(CONST1ENVVAR)");
+        VERIFY("output({$FF_TEST}{$FF_TEST})", "", "output(ENVVARENVVAR)");
+        VERIFY("output({$1}{$-1})", "", "output(CONST1CONST2)");
+
+        VERIFY("output({$FF_INVAL})", "", "output({$FF_INVAL})");
+        VERIFY("output({$9}{$0}${-9})", "", "output({$9}{$0}${-9})");
+        VERIFY("output({$1NO})", "", "output({$1NO})");
+        ffListDestroy(&instance.config.display.constants);
+    }
+    #endif
 
     //Success
     puts("\033[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);

@@ -14,6 +14,9 @@
     #include <sys/sysctl.h>
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
     #include <sys/sysctl.h>
+#elif defined(__HAIKU__)
+    #include <image.h>
+    #include <OS.h>
 #endif
 
 static void getExePath(FFPlatform* platform)
@@ -47,6 +50,17 @@ static void getExePath(FFPlatform* platform)
         ssize_t exePathLen = readlink("/proc/self/path/a.out", exePath, sizeof(exePath) - 1);
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';
+    #elif defined(__HAIKU__)
+        size_t exePathLen = 0;
+        image_info info;
+        int32 cookie = 0;
+
+        while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
+            if (info.type == B_APP_IMAGE) {
+                exePathLen = strlcpy(exePath, info.name, PATH_MAX);
+                break;
+            }
+        }
     #endif
     if (exePathLen > 0)
     {
@@ -117,6 +131,9 @@ static void getConfigDirs(FFPlatform* platform)
         ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Preferences/");
         ffPlatformPathAddHome(&platform->configDirs, platform, "Library/Application Support/");
     #endif
+    #if defined(__HAIKU__)
+        ffPlatformPathAddHome(&platform->configDirs, platform, "config/settings/");
+    #endif
 
     ffPlatformPathAddHome(&platform->configDirs, platform, "");
     platformPathAddEnv(&platform->configDirs, "XDG_CONFIG_DIRS");
@@ -185,6 +202,12 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     ffStrbufAppendS(&info->name, uts->sysname);
     ffStrbufAppendS(&info->release, uts->release);
     ffStrbufAppendS(&info->version, uts->version);
+    #ifdef __HAIKU__
+    /* historical reason */
+    if (ffStrEquals(uts->machine, "BePC"))
+        ffStrbufSetStatic(&info->architecture, "i386");
+    else
+    #endif
     ffStrbufAppendS(&info->architecture, uts->machine);
     ffStrbufInit(&info->displayVersion);
 

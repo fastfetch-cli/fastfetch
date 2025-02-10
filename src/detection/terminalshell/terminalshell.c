@@ -669,6 +669,12 @@ FF_MAYBE_UNUSED static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* e
 
 FF_MAYBE_UNUSED static bool getTerminalVersionTilix(FFstrbuf* exe, FFstrbuf* version)
 {
+    if (exe->chars[0] == '/')
+    {
+        ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
+        if (version->length) return true;
+    }
+
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "--version",

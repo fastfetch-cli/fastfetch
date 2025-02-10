@@ -18,23 +18,27 @@
 #include <linux/if.h>
 #endif
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__) || defined(__HAIKU__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
 #else
 #include <netpacket/packet.h>
 #endif
-#ifdef __sun
+#if defined(__sun) || defined(__HAIKU__)
 #include <sys/sockio.h>
 #endif
 
 static const FFLocalIpNIFlag niFlagOptions[] = {
     { IFF_UP, "UP" },
     { IFF_BROADCAST, "BROADCAST" },
+#ifdef IFF_DEBUG
     { IFF_DEBUG, "DEBUG" },
+#endif
     { IFF_LOOPBACK, "LOOPBACK" },
     { IFF_POINTOPOINT, "POINTOPOINT" },
+#ifdef IFF_RUNNING
     { IFF_RUNNING, "RUNNING" },
+#endif
     { IFF_NOARP, "NOARP" },
     { IFF_PROMISC, "PROMISC" },
     { IFF_ALLMULTI, "ALLMULTI" },
@@ -64,6 +68,13 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
 #endif
 #ifdef IFF_CANTCONFIG
     { IFF_CANTCONFIG, "CANTCONFIG" },
+#endif
+#ifdef __HAIKU__
+    { IFF_AUTOUP, "IAUTOUP" },
+    { IFF_SIMPLEX, "SIMPLEX" },
+    { IFF_LINK, "LINK" },
+    { IFF_AUTO_CONFIGURED, "AUTO_CONFIGURED" },
+    { IFF_CONFIGURING, "CONFIGURING" },
 #endif
     // sentinel
     {},
@@ -128,8 +139,12 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next)
     {
-        if (!ifa->ifa_addr || !(ifa->ifa_flags & IFF_RUNNING))
+        if (!ifa->ifa_addr)
             continue;
+#ifdef IFF_RUNNING
+        if (!(ifa->ifa_flags & IFF_RUNNING))
+            continue;
+#endif
 
         bool isDefaultRoute = ffStrEquals(defaultRouteIfName, ifa->ifa_name);
         if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
@@ -190,7 +205,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
-        #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__
+        #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT))

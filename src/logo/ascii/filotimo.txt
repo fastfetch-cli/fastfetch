@@ -1,0 +1,20 @@
+O      '
+lk:    ;xX.      .0K          '
+lodk   ;lldK'    .lld0O       :okX;
+lloo0  ;lllld0:  .lllllxKx    :clllkKk
+llllo, ;llllloox .clllllloxK  :cclllllx0N
+lllll, ;llllllll .cclllllllo' :cccclllllld
+cllll, ;cclllllc .ccccllllll' :cccccclllll
+cllll, ;cccllllc  ccccccllll' ::cccccclllc
+ccccl, ;cccccllc  :cccccccll' :::ccccccclc
+ccccc, ;cccccccc  ::cccccccl' :::::ccccccc
+:cccc, ;:ccccccc  ::::cccccc' :::::::ccccc
+:cccc, ;:::ccccc  ::::::cccc' :;::::::ccc:
+:::cc, ;:::::ccc  ;:::::::cc' :;;:::::::c:
+:::::, ;:::::::c  ;;:::::::c' :;;;;:::::::
+:::::, ;;::::::c  ;;;;::::::' :;;;;;::::::
+;::::, ,;;;::::c  ,;;;;;::::'  ';;;;;;::::
+';;::,   ;;;;:::    .;;;;;::'     .;;;;;::
+  ;;;,     ;;;;:       .;;;:'         ;;;:
+   ,;,       ,;:          ';'
+    .,
