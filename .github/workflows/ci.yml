@@ -173,8 +173,8 @@ jobs:
           name: fastfetch-linux-aarch64
           path: ./fastfetch-*.*
 
-  linux-armv7:
-    name: Linux-armv7
+  linux-armv7l:
+    name: Linux-armv7l
     runs-on: ubuntu-22.04
     permissions:
       security-events: write
@@ -209,11 +209,11 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-linux-armv7
+          name: fastfetch-linux-armv7l
           path: ./fastfetch-*.*
 
-  linux-armv6:
-    name: Linux-armv6
+  linux-armv6l:
+    name: Linux-armv6l
     runs-on: ubuntu-22.04
     permissions:
       security-events: write
@@ -245,7 +245,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-linux-armv6
+          name: fastfetch-linux-armv6l
           path: ./fastfetch-*.*
 
   linux-riscv64:
@@ -697,8 +697,8 @@ jobs:
     needs:
       - linux-amd64
       - linux-aarch64
-      - linux-armv7
-      - linux-armv6
+      - linux-armv7l
+      - linux-armv6l
       - linux-riscv64
       - linux-ppc64le
       - linux-s390x
