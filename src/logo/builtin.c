@@ -4950,15 +4950,6 @@ static const FFlogo W[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // WolfOS
-    {
-        .names = {"WolfOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_GREEN,
-        },
-    },
     // Windows2025
     {
         .names = {"Windows Server 2025"},
@@ -5039,6 +5030,15 @@ static const FFlogo W[] = {
         },
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // WolfOS
+    {
+        .names = {"WolfOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
     },
     // LAST
     {},
