@@ -2296,12 +2296,13 @@ static const FFlogo K[] = {
             FF_COLOR_FG_WHITE
         }
     },
-    // KDENeon
+    // KDE Neon
     {
-        .names = {"KDE", "kde-neon", "kde neon"},
-        .lines = FASTFETCH_DATATEXT_LOGO_KDE,
+        .names = {"KDE Neon"}, // Distro ID is `neon`; Distro name is `KDE Neon`
+        .lines = FASTFETCH_DATATEXT_LOGO_KDENEON,
         .colors = {
             FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_DEFAULT,
         },
     },
     // Kibojoe

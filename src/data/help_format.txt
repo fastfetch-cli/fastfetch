@@ -21,6 +21,8 @@ In 2.24.0 or newer, `{~startIndex,endIndex}` can be specified to slice a string.
 If an index is omitted, 0 is used. For example, both `{~,0}` `{~0,}` and `{~,}` are same as `{~0,0}` and will always generate a empty string.
 If `,endIndex` is omitted or greater than the length of the string, the length of string is used.
 
+In 2.36.0 or newer, `{$NUM}` can be specified to reference a constant defined in `display.constants`. `{$ENV_VAR}` can be specified to reference an environment variable.
+
 If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.
 This means that the format string "Values: {1} ({2})" is equivalent to "Values: {} ({})".
 Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.
