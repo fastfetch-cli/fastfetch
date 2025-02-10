@@ -100,7 +100,7 @@ uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir)
     {
         bool ok = false;
 
-#ifndef __sun
+#if !defined(__sun) && !defined(__HAIKU__)
         if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
             ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
         else

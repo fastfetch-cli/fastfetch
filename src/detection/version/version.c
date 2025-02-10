@@ -42,6 +42,8 @@
     #define FF_SYSNAME "OpenBSD"
 #elif defined(__NetBSD__)
     #define FF_SYSNAME "NetBSD"
+#elif defined(__HAIKU__)
+    #define FF_SYSNAME "Haiku"
 #else
     #define FF_SYSNAME "unknown"
 #endif

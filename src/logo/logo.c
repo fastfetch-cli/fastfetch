@@ -387,13 +387,30 @@ static const FFlogo* logoGetBuiltinDetected(FFLogoSize size)
     if(logo != NULL)
         return logo;
 
-    logo = logoGetBuiltin(&os->prettyName, size);
-    if(logo != NULL)
-        return logo;
+    if (ffStrbufContainC(&os->idLike, ' '))
+    {
+        FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+        for (
+            uint32_t start = 0, end = ffStrbufFirstIndexC(&os->idLike, ' ');
+            true;
+            start = end + 1, end = ffStrbufNextIndexC(&os->idLike, start, ' ')
+        )
+        {
+            ffStrbufSetNS(&buf, end - start, os->idLike.chars + start);
+            logo = logoGetBuiltin(&buf, size);
+            if(logo != NULL)
+                return logo;
 
-    logo = logoGetBuiltin(&os->idLike, size);
-    if(logo != NULL)
-        return logo;
+            if (end >= os->idLike.length)
+                break;
+        }
+    }
+    else
+    {
+        logo = logoGetBuiltin(&os->idLike, size);
+        if(logo != NULL)
+            return logo;
+    }
 
     logo = logoGetBuiltin(&instance.state.platform.sysinfo.name, size);
     if(logo != NULL)

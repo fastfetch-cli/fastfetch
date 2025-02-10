@@ -143,7 +143,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
-        if(__builtin_expect(options->folders.length, 0))
+        if(__builtin_expect(options->folders.length > 0, 0))
         {
             if(!ffDiskMatchMountpoint(options, fs->f_mntonname))
                 continue;

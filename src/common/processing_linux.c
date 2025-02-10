@@ -32,9 +32,9 @@
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
-static inline int ffPipe2(int *fds, int flags)
+static inline int ffPipe2(int* fds, int flags)
 {
-    #ifdef __APPLE__
+    #ifndef FF_HAVE_PIPE2
         if(pipe(fds) == -1)
             return -1;
         fcntl(fds[0], F_SETFL, fcntl(fds[0], F_GETFL) | flags);
@@ -301,7 +301,12 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (proc)
     {
         char** argv = kvm_getargv(kd, proc, 0);
-        if (argv) ffStrbufSetS(exe, argv[0]);
+        if (argv)
+        {
+            const char* arg0 = argv[0];
+            if (arg0[0] == '-') arg0++;
+            ffStrbufSetS(exe, arg0);
+        }
     }
     kvm_close(kd);
 
