@@ -28,6 +28,8 @@
 #elif defined(__NetBSD__)
     #include <sys/types.h>
     #include <sys/sysctl.h>
+#elif defined(__HAIKU__)
+    #include <OS.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -475,6 +477,16 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     kvm_close(kd);
     if (!proc)
         return "kvm_getprocs() failed";
+
+    #elif defined(__HAIKU__)
+
+    team_info info;
+    if (get_team_info(pid, &info) == B_OK)
+    {
+        ffStrbufSetS(name, info.name);
+        if (ppid)
+            *ppid = info.parent;
+    }
 
     #else
 
