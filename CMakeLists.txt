@@ -1139,7 +1139,7 @@ elseif(Haiku)
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_haiku.c
         src/detection/gtk_qt/qt.c
-        src/detection/sound/sound_nosupport.c
+        src/detection/sound/sound_haiku.cpp
         src/detection/swap/swap_haiku.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
@@ -1616,6 +1616,7 @@ elseif(ANDROID)
 elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"
+        PRIVATE "media"
         PRIVATE "be"
         PRIVATE "gnu"
     )
