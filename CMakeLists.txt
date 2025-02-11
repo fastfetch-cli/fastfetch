@@ -1092,6 +1092,7 @@ elseif(SunOS)
     )
 elseif(Haiku)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_haiku.c
         src/common/networking_linux.c

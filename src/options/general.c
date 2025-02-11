@@ -30,7 +30,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "detectVersion"))
             options->detectVersion = yyjson_get_bool(val);
 
-        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__)
+        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
         else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
             options->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "playerName"))
@@ -75,7 +75,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
     else if(ffStrEqualsIgnCase(key, "--detect-version"))
         options->detectVersion = ffOptionParseBoolean(value);
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
     else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
         options->escapeBedrock = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--player-name"))
@@ -106,7 +106,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
     options->multithreading = true;
     options->detectVersion = true;
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
     options->escapeBedrock = true;
     ffStrbufInit(&options->playerName);
     options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
@@ -117,7 +117,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
 
 void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 {
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
     ffStrbufDestroy(&options->playerName);
     #endif
 }
@@ -135,7 +135,7 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
     if (options->processingTimeout != defaultOptions.processingTimeout)
         yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
 
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 
     if (options->escapeBedrock != defaultOptions.escapeBedrock)
         yyjson_mut_obj_add_bool(doc, obj, "escapeBedrock", options->escapeBedrock);
