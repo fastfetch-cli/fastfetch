@@ -1109,7 +1109,7 @@ elseif(Haiku)
         src/detection/cursor/cursor_nosupport.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
-        src/detection/disk/disk_nosupport.c
+        src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
