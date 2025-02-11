@@ -33,6 +33,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
         status_t err = s.GetMonitorInfo(&monitor);
         if (err == B_OK) {
             ffStrbufSetF(&name, "%s %s", monitor.vendor, monitor.name);
+            ffStrbufTrimRightSpace(&name);
         }
 
         uint32_t width = (uint32_t) s.Frame().Width() + 1;
