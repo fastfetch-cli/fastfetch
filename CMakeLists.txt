@@ -1103,7 +1103,7 @@ elseif(Haiku)
         src/detection/brightness/brightness_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
-        src/detection/cpu/cpu_nosupport.c
+        src/detection/cpu/cpu_haiku.c
         src/detection/cpucache/cpucache_nosupport.c
         src/detection/cpuusage/cpuusage_nosupport.c
         src/detection/cursor/cursor_nosupport.c
