@@ -73,7 +73,7 @@ jobs:
       - name: uname -a
         run: uname -a
 
-      - name: cat /etc/os-releas
+      - name: cat /etc/os-release
         run: cat /etc/os-release
 
       - name: cat /proc/cpuinfo
@@ -142,7 +142,7 @@ jobs:
       - name: uname -a
         run: uname -a
 
-      - name: cat /etc/os-releas
+      - name: cat /etc/os-release
         run: cat /etc/os-release
 
       - name: cat /proc/cpuinfo
