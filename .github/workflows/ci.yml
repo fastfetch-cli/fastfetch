@@ -73,6 +73,12 @@ jobs:
       - name: uname -a
         run: uname -a
 
+      - name: cat /etc/os-release
+        run: cat /etc/os-release
+
+      - name: cat /proc/cpuinfo
+        run: cat /proc/cpuinfo
+
       - name: install required packages
         run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev python3-requests
 
@@ -125,7 +131,7 @@ jobs:
 
   linux-aarch64:
     name: Linux-aarch64
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04-arm
     permissions:
       security-events: write
       contents: read
@@ -133,24 +139,45 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-      - name: run VM
-        uses: uraimo/run-on-arch-action@v2
-        id: runcmd
-        with:
-          arch: aarch64
-          distro: ubuntu20.04
-          githubToken: ${{ github.token }}
-          run: |
-            uname -a
-            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev rpm
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
-            cmake --build . --target package --verbose -j4
-            ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc --stat false
-            time ./fastfetch -c presets/ci.jsonc --format json
-            time ./flashfetch
-            ldd fastfetch
-            ctest --output-on-failure
+      - name: uname -a
+        run: uname -a
+
+      - name: cat /etc/os-release
+        run: cat /etc/os-release
+
+      - name: cat /proc/cpuinfo
+        run: cat /proc/cpuinfo
+
+      - name: install required packages
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev libosmesa6-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev python3-requests libchafa-dev libddcutil-dev rpm
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - name: get fastfetch version
+        id: ffversion
+        run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
@@ -158,8 +185,8 @@ jobs:
           name: fastfetch-linux-aarch64
           path: ./fastfetch-*.*
 
-  linux-armv7:
-    name: Linux-armv7
+  linux-armv7l:
+    name: Linux-armv7l
     runs-on: ubuntu-22.04
     permissions:
       security-events: write
@@ -194,11 +221,11 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-linux-armv7
+          name: fastfetch-linux-armv7l
           path: ./fastfetch-*.*
 
-  linux-armv6:
-    name: Linux-armv6
+  linux-armv6l:
+    name: Linux-armv6l
     runs-on: ubuntu-22.04
     permissions:
       security-events: write
@@ -230,7 +257,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-linux-armv6
+          name: fastfetch-linux-armv6l
           path: ./fastfetch-*.*
 
   linux-riscv64:
@@ -591,7 +618,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '10.0'
+          version: '10.1'
           run: |
             uname -a
             sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick pulseaudio opencl-headers ocl-icd py312-requests
@@ -682,8 +709,8 @@ jobs:
     needs:
       - linux-amd64
       - linux-aarch64
-      - linux-armv7
-      - linux-armv6
+      - linux-armv7l
+      - linux-armv6l
       - linux-riscv64
       - linux-ppc64le
       - linux-s390x
