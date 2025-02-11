@@ -71,7 +71,6 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             if (device.hasUnifiedMemory && device.recommendedMaxWorkingSetSize > 0)
                 gpu->shared.total = device.recommendedMaxWorkingSetSize;
             #endif
-
         }
         return NULL;
     }
