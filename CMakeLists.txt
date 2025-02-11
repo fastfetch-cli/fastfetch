@@ -141,7 +141,7 @@ set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=retu
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
-if(WIN32 OR HAIKU OR ENABLE_DIRECTX_HEADERS)
+if(WIN32 OR Haiku OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
@@ -1279,6 +1279,8 @@ elseif(NetBSD)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-char-subscripts")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/usr/X11R7/lib -Wl,-rpath,/usr/pkg/lib") # ditto
+elseif(Haiku)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
 endif()
 
 if(FreeBSD OR OpenBSD OR NetBSD)
