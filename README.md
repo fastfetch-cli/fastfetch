@@ -29,6 +29,10 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 Some distros package an outdated fastfetch version. Older versions receive no support, so please try always to use the latest version.
 
+<a href="https://repology.org/project/fastfetch/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?minversion=2.34&columns=2" alt="Packaging status" align="right">
+</a>
+
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
 * Debian: `apt install fastfetch` (for Debian 13 or newer)
 * Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
@@ -97,10 +101,6 @@ Logos can also be heavily customized; see the [logo documentation](https://githu
 
 
 ## Packaging
-
-### Repositories
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/fastfetch.svg?header=)](https://repology.org/project/fastfetch/versions)
 
 ### Manual
 
