@@ -31,8 +31,6 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->detectVersion = yyjson_get_bool(val);
 
         #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
-        else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
-            options->escapeBedrock = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "playerName"))
             ffStrbufSetS(&options->playerName, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
@@ -76,8 +74,6 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
         options->detectVersion = ffOptionParseBoolean(value);
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
-    else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
-        options->escapeBedrock = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--player-name"))
         ffOptionParseString(key, value, &options->playerName);
     else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
@@ -107,7 +103,6 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
     options->detectVersion = true;
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
-    options->escapeBedrock = true;
     ffStrbufInit(&options->playerName);
     options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
     #elif defined(_WIN32)
@@ -136,9 +131,6 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
         yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
-
-    if (options->escapeBedrock != defaultOptions.escapeBedrock)
-        yyjson_mut_obj_add_bool(doc, obj, "escapeBedrock", options->escapeBedrock);
 
     if (!ffStrbufEqual(&options->playerName, &defaultOptions.playerName))
         yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
