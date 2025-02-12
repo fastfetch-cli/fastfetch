@@ -46,7 +46,7 @@ static const FFstrbuf* loadPciIds()
         #elif __sun
         ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
         #elif __HAIKU__
-        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/system/data/pciutils/pci.ids", &pciids);
+        ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/system/data/hwdata/pci.ids", &pciids);
         #endif
 
     #endif // FF_CUSTOM_PCI_IDS_PATH
