@@ -29,6 +29,10 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 Some distros package an outdated fastfetch version. Older versions receive no support, so please try always to use the latest version.
 
+<a href="https://repology.org/project/fastfetch/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
+</a>
+
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
 * Debian: `apt install fastfetch` (for Debian 13 or newer)
 * Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
@@ -46,8 +50,6 @@ Some distros package an outdated fastfetch version. Older versions receive no su
 * Venom Linux: `scratch install fastfetch`
 
 You may need `sudo`, `doas` or `sup` to run these commands.
-
-[See also if fastfetch has been packaged for your favorite Linux distro](#Packaging).
 
 If fastfetch is not packaged for your distro or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternative: `brew install fastfetch`
 
@@ -94,18 +96,6 @@ See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 Fastfetch uses the JSONC (or JSON with comments) for configuration. [See Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `-c <filename>`. Those files can serve as examples of the configuration syntax.
 
 Logos can also be heavily customized; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
-
-
-## Packaging
-
-### Repositories
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/fastfetch.svg?header=)](https://repology.org/project/fastfetch/versions)
-
-### Manual
-
-* DEB / RPM package: `cmake --build . --target package`
-* Install directly: `cmake --install . --prefix /usr/local`
 
 ## FAQ
 
