@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from requests import get as http_get
+import sys
 
 class PciDeviceModel:
     def __init__(self, id: int, name: str):
@@ -13,14 +13,10 @@ class PciVendorModel:
         self.name = name
         self.devices = []
 
-def main(keep_vendor_list: set):
+def main(keep_vendor_list: set, pci_ids_path: str):
     vendors = []
-    try:
-        with open('pci.ids', 'r') as f:
-            full_text = f.read()
-    except FileNotFoundError:
-        response = http_get('https://pci-ids.ucw.cz/v2.2/pci.ids')
-        full_text = response.text
+    with open(pci_ids_path, 'r') as f:
+        full_text = f.read()
 
     dev_list_text = full_text[:full_text.rfind('\n\n\n')]  # remove known classes
     for line in dev_list_text.split('\n'):
@@ -80,6 +76,8 @@ const FFPciVendor ffPciVendors[] = {{
     print(code)
 
 if __name__ == '__main__':
+    len(sys.argv) == 2 or sys.exit('Usage: gen-pciids.py </path/to/pci.ids>')
+
     # From <src/detection/gpu/gpu.c>
     main({
         0x106b, # Apple
@@ -94,4 +92,4 @@ if __name__ == '__main__':
         0x1ab8, # Parallel
         0x1414, # Microsoft
         0x108e, # Oracle
-    })
+    }, sys.argv[1])

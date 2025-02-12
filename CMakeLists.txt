@@ -271,11 +271,16 @@ endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
     if(Python_FOUND)
+        if(NOT EXISTS "${PROJECT_BINARY_DIR}/pci.ids")
+            message(STATUS "'${PROJECT_BINARY_DIR}/pci.ids' is missing, downloading...")
+            file(DOWNLOAD "https://pci-ids.ucw.cz/v2.2/pci.ids" "${PROJECT_BINARY_DIR}/pci.ids")
+        endif()
         message(STATUS "Generating 'fastfetch_pciids.c.inc'")
-        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
+        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py" "${PROJECT_BINARY_DIR}/pci.ids"
                         OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc"
                         RESULT_VARIABLE PYTHON_PCIIDS_RETCODE)
         if(NOT PYTHON_PCIIDS_RETCODE EQUAL 0)
+            file(REMOVE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
             message(FATAL_ERROR "Failed to generate 'fastfetch_pciids.c.inc'")
         endif()
     else()
