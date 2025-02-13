@@ -31,7 +31,7 @@ const FFArmGpuProduct ffAmdGpuProducts[] = {
 """
 
     for device, revision, name in products:
-        code += f"    {{ 0x{device} << 8 | 0x{revision}, \"{name.replace('"', '\\"')}\" }},\n"
+        code += f"    {{ 0x{device} << 8 | 0x{revision}, \"{name}\" }},\n"
 
     code += "};\n"
 
