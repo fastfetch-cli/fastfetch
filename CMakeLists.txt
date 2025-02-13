@@ -94,6 +94,7 @@ option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by gith
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -286,6 +287,26 @@ if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids
     else()
         message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
         set(ENABLE_EMBEDDED_PCIIDS OFF)
+    endif()
+endif()
+
+if(ENABLE_EMBEDDED_AMDGPUIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc")
+    if(Python_FOUND)
+        if(NOT EXISTS "${PROJECT_BINARY_DIR}/amdgpu.ids")
+            message(STATUS "'${PROJECT_BINARY_DIR}/amdgpu.ids' is missing, downloading...")
+            file(DOWNLOAD "https://gitlab.freedesktop.org/mesa/drm/-/raw/main/data/amdgpu.ids" "${PROJECT_BINARY_DIR}/amdgpu.ids")
+        endif()
+        message(STATUS "Generating 'fastfetch_amdgpuids.c.inc'")
+        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-amdgpuids.py" "${PROJECT_BINARY_DIR}/amdgpu.ids"
+                        OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc"
+                        RESULT_VARIABLE PYTHON_AMDGPUIDS_RETCODE)
+        if(NOT PYTHON_AMDGPUIDS_RETCODE EQUAL 0)
+            file(REMOVE "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc")
+            message(FATAL_ERROR "Failed to generate 'fastfetch_amdgpuids.c.inc'")
+        endif()
+    else()
+        message(WARNING "Python3 is not found, 'fastfetch_amdgpuids.c.inc' will not be generated")
+        set(ENABLE_EMBEDDED_AMDGPUIDS OFF)
     endif()
 endif()
 
@@ -1516,6 +1537,9 @@ endif()
 
 if(ENABLE_EMBEDDED_PCIIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_PCIIDS=1)
+endif()
+if(ENABLE_EMBEDDED_AMDGPUIDS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
 endif()
 
 if(LINUX)

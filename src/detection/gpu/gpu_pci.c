@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "common/io/io.h"
+#include "common/properties.h"
 
 #include <stdlib.h>
 #ifdef __FreeBSD__
@@ -15,6 +16,9 @@
 
 #if FF_HAVE_EMBEDDED_PCIIDS
 #include "fastfetch_pciids.c.inc"
+#endif
+#if FF_HAVE_EMBEDDED_AMDGPUIDS
+#include "fastfetch_amdgpuids.c.inc"
 #endif
 
 #define FF_STR_INDIR(x) #x
@@ -190,4 +194,44 @@ void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, 
     if (ok) return;
     #endif
     return parsePciIdsFile(loadPciIds(), subclass, vendor, device, gpu);
+}
+
+#if FF_HAVE_EMBEDDED_AMDGPUIDS
+static inline int amdGpuCmp(const uint32_t* key, const FFArmGpuProduct* element)
+{
+    // Maximum value of *key is 0x00FFFFFF. `(int) *key` should never overflow
+    return (int) *key - (int) element->id;
+}
+
+static bool loadAmdGpuIdsInc(uint16_t deviceId, uint8_t revision, FFGPUResult* gpu)
+{
+    uint32_t key = (deviceId << 8u) | revision;
+    FFArmGpuProduct* product = bsearch(&key, ffAmdGpuProducts, ARRAY_SIZE(ffAmdGpuProducts), sizeof(*ffAmdGpuProducts), (void*) amdGpuCmp);
+    if (product)
+    {
+        ffStrbufSetS(&gpu->name, product->name);
+        return true;
+    }
+    return false;
+}
+#endif
+
+static void parseAmdGpuIdsFile(uint16_t deviceId, uint8_t revision, FFGPUResult* gpu)
+{
+    char query[32];
+    snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
+    #ifdef FF_CUSTOM_AMDGPU_IDS_PATH
+    ffParsePropFile(FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), query, &gpu->name);
+    #else
+    ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
+    #endif
+}
+
+void ffGPUQueryAmdGpuName(uint16_t deviceId, uint8_t revisionId, FFGPUResult* gpu)
+{
+    #if FF_HAVE_EMBEDDED_AMDGPUIDS
+    bool ok = loadAmdGpuIdsInc(deviceId, revisionId, gpu);
+    if (ok) return;
+    #endif
+    return parseAmdGpuIdsFile(deviceId, revisionId, gpu);
 }
