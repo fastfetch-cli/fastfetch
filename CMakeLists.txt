@@ -1148,7 +1148,7 @@ elseif(Haiku)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nosupport.c
         src/detection/icons/icons_nosupport.c
-        src/detection/initsystem/initsystem_nosupport.c
+        src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
