@@ -1123,7 +1123,7 @@ elseif(Haiku)
         src/common/netif/netif_haiku.c
         src/common/networking_linux.c
         src/common/processing_linux.c
-        src/detection/battery/battery_nosupport.c
+        src/detection/battery/battery_haiku.c
         src/detection/bios/bios_nosupport.c
         src/detection/board/board_nosupport.c
         src/detection/bootmgr/bootmgr_nosupport.c
