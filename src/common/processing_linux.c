@@ -30,6 +30,7 @@
     #include <sys/sysctl.h>
 #elif defined(__HAIKU__)
     #include <OS.h>
+    #include <image.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
@@ -312,6 +313,21 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     }
     kvm_close(kd);
 
+    #elif defined(__HAIKU__)
+
+    if (exePath)
+    {
+        image_info info;
+        int32 cookie = 0;
+
+        while (get_next_image_info(pid, &cookie, &info) == B_OK)
+        {
+            if (info.type != B_APP_IMAGE) continue;
+            ffStrbufSetS(exePath, info.name);
+            break;
+        }
+    }
+
     #endif
 
     if(exe->length == 0)
@@ -487,6 +503,8 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         if (ppid)
             *ppid = info.parent;
     }
+
+    FF_UNUSED(tty);
 
     #else
 
