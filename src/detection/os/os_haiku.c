@@ -14,7 +14,7 @@ void ffDetectOSImpl(FFOSResult* os)
 
     if (get_system_info(&info) != B_OK)
         return;
-    ffStrbufAppendF(&os->version, "R%lld", info.kernel_version);
+    ffStrbufAppendF(&os->version, "R%ld", info.kernel_version);
 
     // TODO: check kernel resources?
 }

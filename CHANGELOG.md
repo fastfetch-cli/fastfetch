@@ -1,3 +1,16 @@
+# 2.36.1
+
+Changes:
+* To use [the native arm64 runner of Github Action](https://github.blog/changelog/2025-01-16-linux-arm64-hosted-runners-now-available-for-free-in-public-repositories-public-preview/), Linux aarch64 binary is built with Ubuntu 22.04 (Glibc 2.35, Debian 12).
+
+Bugfixes:
+* Chimera Linux logo is now displayed correctly (#1554, Logo)
+    * Regression of 2.36.0
+* Fix building on Haiku
+
+Logo:
+* Fix ALT Linux
+
 # 2.36.0
 
 Bugfixes:

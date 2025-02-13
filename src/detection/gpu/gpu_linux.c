@@ -4,7 +4,6 @@
 #include "detection/gpu/gpu_driver_specific.h"
 #include "common/io/io.h"
 #include "common/library.h"
-#include "common/properties.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 
@@ -491,15 +490,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
                 char* pend;
                 uint64_t revision = strtoul(buffer->chars, &pend, 16);
                 if (pend != buffer->chars)
-                {
-                    char query[32];
-                    snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
-                    #ifdef FF_CUSTOM_AMDGPU_IDS_PATH
-                    ffParsePropFile(FF_STR(FF_CUSTOM_AMDGPU_IDS_PATH), query, &gpu->name);
-                    #else
-                    ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
-                    #endif
-                }
+                    ffGPUQueryAmdGpuName((uint16_t) deviceId, (uint8_t) revision, gpu);
             }
             ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
         }

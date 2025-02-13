@@ -1,7 +1,5 @@
 extern "C" {
 #include "displayserver.h"
-#include "common/settings.h"
-#include "common/processing.h"
 }
 
 #include <math.h>
@@ -31,14 +29,16 @@ static void detectDisplays(FFDisplayServerResult* ds)
         monitor_info monitor;
         // WARNING: This is experimental new Haiku API
         status_t err = s.GetMonitorInfo(&monitor);
-        if (err == B_OK) {
+        if (err == B_OK)
+        {
             ffStrbufSetF(&name, "%s %s", monitor.vendor, monitor.name);
+            ffStrbufTrimRightSpace(&name);
         }
 
         uint32_t width = (uint32_t) s.Frame().Width() + 1;
         uint32_t height = (uint32_t) (uint32_t)s.Frame().Height() + 1;
         double scaleFactor = (double) 1.0;
-        ffdsAppendDisplay(ds,
+        FFDisplayResult* res = ffdsAppendDisplay(ds,
             width,
             height,
             (double)mode.timing.pixel_clock * 1000 / (mode.timing.v_total * mode.timing.h_total),
@@ -51,11 +51,16 @@ static void detectDisplays(FFDisplayServerResult* ds)
             &name,
             FF_DISPLAY_TYPE_UNKNOWN,
             main,
-            s.ID().id,
+            (uint64_t) s.ID().id,
             0,
             0,
             "BScreen"
         );
+        if (err == B_OK)
+        {
+            res->manufactureWeek = monitor.produced.week;
+            res->manufactureYear = monitor.produced.year;
+        }
         main = false;
     } while (s.SetToNext() == B_OK);
 

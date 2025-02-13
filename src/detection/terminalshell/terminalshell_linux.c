@@ -359,6 +359,11 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufEqualS(&result->processName, "WarpTerminal"))
         ffStrbufInitStatic(&result->prettyName, "Warp");
 
+    #elif defined(__HAIKU__)
+
+    else if(ffStrbufEqualS(&result->processName, "Terminal"))
+        ffStrbufInitStatic(&result->prettyName, "Haiku Terminal");
+
     #endif
 
     else if(strncmp(result->exeName, result->processName.chars, result->processName.length) == 0) // if exeName starts with processName, print it. Otherwise print processName

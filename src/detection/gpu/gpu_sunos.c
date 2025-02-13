@@ -1,5 +1,4 @@
 #include "gpu.h"
-#include "common/properties.h"
 #include "common/io/io.h"
 #include "common/processing.h"
 
@@ -65,11 +64,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
-        {
-            char query[32];
-            snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) deviceId, (unsigned) revision);
-            ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
-        }
+            ffGPUQueryAmdGpuName((uint16_t) deviceId, (uint8_t) revision, gpu);
 
         if (gpu->name.length == 0)
         {

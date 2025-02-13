@@ -1,7 +1,6 @@
 #include "gpu_driver_specific.h"
 
 #include "common/io/io.h"
-#include "common/properties.h"
 
 #include <sys/pciio.h>
 #include <fcntl.h>
@@ -76,11 +75,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         if (gpu->name.length == 0)
         {
             if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
-            {
-                char query[32];
-                snprintf(query, ARRAY_SIZE(query), "%X,\t%X,", (unsigned) pc->pc_device, (unsigned) pc->pc_revid);
-                ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
-            }
+                ffGPUQueryAmdGpuName(pc->pc_device, pc->pc_revid, gpu);
             if (gpu->name.length == 0)
             ffGPUFillVendorAndName(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }

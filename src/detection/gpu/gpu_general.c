@@ -2,7 +2,6 @@
 
 #ifdef FF_HAVE_PCIACCESS
 
-#include "common/properties.h"
 #include "common/io/io.h"
 #include "common/library.h"
 
@@ -43,11 +42,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
-        {
-            char query[32];
-            snprintf(query, sizeof(query), "%X,\t%X,", (unsigned) dev->device_id, (unsigned) dev->revision);
-            ffParsePropFileData("libdrm/amdgpu.ids", query, &gpu->name);
-        }
+            ffGPUQueryAmdGpuName(dev->device_id, dev->revision, gpu);
 
         if (gpu->name.length == 0)
         {
