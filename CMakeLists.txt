@@ -1124,14 +1124,14 @@ elseif(Haiku)
         src/common/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_haiku.c
-        src/detection/bios/bios_nosupport.c
-        src/detection/board/board_nosupport.c
+        src/detection/bios/bios_windows.c
+        src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_haiku.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_nosupport.c
         src/detection/cursor/cursor_nosupport.c
         src/detection/bluetooth/bluetooth_nosupport.c
@@ -1139,14 +1139,14 @@ elseif(Haiku)
         src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/displayserver_haiku.cpp
         src/detection/font/font_haiku.cpp
         src/detection/gpu/gpu_haiku.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
-        src/detection/host/host_nosupport.c
+        src/detection/host/host_windows.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
