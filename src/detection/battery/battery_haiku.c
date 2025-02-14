@@ -44,7 +44,7 @@ const char* parseBattery(int dfd, const char* battId, FFlist* results)
     return NULL;
 }
 
-const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
 {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/power/acpi_battery/");
     if (!dir) return "opendir(/dev/power/acpi_battery) failed";

@@ -24,10 +24,10 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
         return false;
 
     int size = config.ifc_value;
-    if (size == 0)
+    if (size <= 0)
         return false;
 
-    FF_AUTO_FREE void *buffer = malloc(size);
+    FF_AUTO_FREE void *buffer = malloc((size_t) size);
     if (buffer == NULL) {
         return false;
     }
