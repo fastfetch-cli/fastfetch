@@ -1,16 +1,47 @@
 #include "fastfetch.h"
 #include "battery.h"
 #include "common/io/io.h"
-#include "util/stringUtils.h"
 
-void parseBattery(FFstrbuf* content, FFlist* results)
+#include <private/device/power_managment.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
+const char* parseBattery(int dfd, const char* battId, FFlist* results)
 {
-    char* line = NULL;
-    size_t n = 0;
-    while (ffStrbufGetline(&line, &n, content))
-    {
+    FF_AUTO_CLOSE_FD int fd = openat(dfd, battId, O_RDWR);
+    if (fd < 0) return "openat() failed";
 
-    }
+    acpi_battery_info basic = {};
+    if (ioctl(fd, GET_BATTERY_INFO, &basic, sizeof(basic)) != 0)
+        return "ioctl(GET_BATTERY_INFO) failed";
+    acpi_extended_battery_info extended = {};
+    if (ioctl(fd, GET_EXTENDED_BATTERY_INFO, &extended, sizeof(extended)) != 0)
+        return "ioctl(GET_EXTENDED_BATTERY_INFO) failed";
+
+    FFBatteryResult* battery = (FFBatteryResult*)ffListAdd(results);
+    ffStrbufInitS(&battery->modelName, extended.model_number);
+    ffStrbufInitS(&battery->manufacturer, extended.oem_info);
+    ffStrbufInit(&battery->manufactureDate);
+    ffStrbufInitS(&battery->technology, extended.type); // extended.technology?
+    ffStrbufInit(&battery->status);
+    ffStrbufInitS(&battery->serial, extended.serial_number);
+    battery->temperature = FF_BATTERY_TEMP_UNSET;
+    battery->cycleCount = extended.cycles;
+    battery->timeRemaining = -1;
+    battery->capacity = (double) basic.capacity / (double) extended.last_full_charge;
+
+    if (basic.state & BATTERY_DISCHARGING)
+        ffStrbufAppendS(&battery->status, "Discharging, ");
+    if (basic.state & BATTERY_CHARGING)
+        ffStrbufAppendS(&battery->status, "Charging, ");
+    if (basic.state & BATTERY_CRITICAL_STATE)
+        ffStrbufAppendS(&battery->status, "Critical, ");
+    if (basic.state & BATTERY_NOT_CHARGING)
+        ffStrbufAppendS(&battery->status, "AC Connected, ");
+    ffStrbufTrimRight(&battery->status, ' ');
+    ffStrbufTrimRight(&battery->status, ',');
+
+    return NULL;
 }
 
 const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
@@ -18,14 +49,12 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/power/acpi_battery/");
     if (!dir) return "opendir(/dev/power/acpi_battery) failed";
 
-    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
     struct dirent* entry;
     while ((entry = readdir(dir)))
     {
         if (entry->d_name[0] == '.') continue;
-        if (!ffReadFileBufferRelative(dirfd(dir), entry->d_name, &content)) continue;
-        parseBattery(&content, results);
+        parseBattery(dirfd(dir), entry->d_name, results);
     }
 
-    return "To be supported";
+    return NULL;
 }
