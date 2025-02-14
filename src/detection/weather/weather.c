@@ -19,6 +19,17 @@ void ffPrepareWeather(FFWeatherOptions* options)
         ffStrbufAppend(&path, &options->location);
     ffStrbufAppendS(&path, "?format=");
     ffStrbufAppend(&path, &options->outputFormat);
+    switch (instance.config.display.tempUnit)
+    {
+        case FF_TEMPERATURE_UNIT_CELSIUS:
+            ffStrbufAppendS(&path, "&m");
+            break;
+        case FF_TEMPERATURE_UNIT_FAHRENHEIT:
+            ffStrbufAppendS(&path, "&u");
+            break;
+        default:
+            break;
+    }
     status = ffNetworkingSendHttpRequest(&state, "wttr.in", path.chars, "User-Agent: curl/0.0.0\r\n");
 }
 
