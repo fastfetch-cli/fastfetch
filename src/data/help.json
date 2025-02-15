@@ -722,11 +722,12 @@
             "arg": {
                 "type": "enum",
                 "enum": {
+                    "D": "Default",
                     "C": "Celsius",
                     "F": "Fahrenheit",
                     "K": "Kelvin"
                 },
-                "default": "C"
+                "default": "D"
             }
         },
         {

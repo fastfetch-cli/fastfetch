@@ -41,7 +41,7 @@ const char* ffDetectSound(FFlist* devices)
         ffStrbufInitS(&device->name, ad.name);
         ffStrbufTrimRightSpace(&device->name);
         ffStrbufInitF(&device->platformApi, "%s", "SunAudio");
-        device->volume = (uint8_t) (ai.play.gain * 100 / AUDIO_MAX_GAIN);
+        device->volume = (uint8_t) ((ai.play.gain * 100 + AUDIO_MAX_GAIN / 2) / AUDIO_MAX_GAIN);
         device->active = true;
         device->main = defaultDev == idev;
     }

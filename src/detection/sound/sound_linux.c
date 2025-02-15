@@ -18,7 +18,7 @@ static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, vo
     ffStrbufInitS(&device->name, i->description);
     ffStrbufTrimRightSpace(&device->name);
     ffStrbufTrimLeft(&device->name, ' ');
-    device->volume = i->mute ? 0 : (uint8_t) (i->volume.values[0] * 100 / PA_VOLUME_NORM);
+    device->volume = i->mute ? 0 : (uint8_t) ((i->volume.values[0] * 100 + PA_VOLUME_NORM / 2 /*round*/) / PA_VOLUME_NORM);
     device->active = i->active_port && i->active_port->available != PA_PORT_AVAILABLE_NO;
     device->main = false;
 }

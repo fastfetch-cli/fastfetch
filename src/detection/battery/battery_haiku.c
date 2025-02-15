@@ -28,7 +28,7 @@ const char* parseBattery(int dfd, const char* battId, FFlist* results)
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = extended.cycles;
     battery->timeRemaining = -1;
-    battery->capacity = (double) basic.capacity / (double) extended.last_full_charge;
+    battery->capacity = (double) basic.capacity * 100. / (double) extended.last_full_charge;
 
     if (basic.state & BATTERY_DISCHARGING)
         ffStrbufAppendS(&battery->status, "Discharging, ");
@@ -44,7 +44,7 @@ const char* parseBattery(int dfd, const char* battId, FFlist* results)
     return NULL;
 }
 
-const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
+const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
 {
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/power/acpi_battery/");
     if (!dir) return "opendir(/dev/power/acpi_battery) failed";

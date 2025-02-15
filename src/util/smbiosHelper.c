@@ -50,7 +50,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     return (const FFSmbiosHeader*) (p + 1);
 }
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__HAIKU__)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -135,6 +135,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
     if (buffer.chars == NULL)
     {
+        #ifndef __HAIKU__
         #ifdef __linux__
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
         #endif
@@ -216,6 +217,50 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 munmap(p, tableLength);
             }
         }
+        #else
+        {
+            uint32_t tableLength = 0;
+            off_t tableAddress = 0;
+            FF_AUTO_CLOSE_FD int fd = open("/dev/misc/mem", O_RDONLY);
+            if (fd < 0)
+                return NULL;
+            FF_AUTO_FREE uint8_t* smBiosBase = malloc(0x10000);
+            if (pread(fd, smBiosBase, 0x10000, 0xF0000) != 0x10000)
+                return NULL;
+
+            for (off_t offset = 0; offset <= 0xffe0; offset += 0x10)
+            {
+                FFSmbiosEntryPoint* p = (void*)(smBiosBase + offset);
+                if (memcmp(p, "_SM3_", sizeof(p->Smbios30.AnchorString)) == 0)
+                {
+                    if (p->Smbios30.EntryPointLength != sizeof(p->Smbios30))
+                        return NULL;
+                    tableLength = p->Smbios30.StructureTableMaximumSize;
+                    tableAddress = (off_t) p->Smbios30.StructureTableAddress;
+                    break;
+                }
+                else if (memcmp(p, "_SM_", sizeof(p->Smbios20.AnchorString)) == 0)
+                {
+                    if (p->Smbios20.EntryPointLength != sizeof(p->Smbios20))
+                        return NULL;
+                    tableLength = p->Smbios20.StructureTableLength;
+                    tableAddress = (off_t) p->Smbios20.StructureTableAddress;
+                    break;
+                }
+            }
+            if (tableLength == 0)
+                return NULL;
+
+            ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
+            if (pread(fd, buffer.chars, tableLength, tableAddress) == tableLength)
+            {
+                buffer.length = tableLength;
+                buffer.chars[buffer.length] = '\0';
+            }
+            else
+                return NULL;
+        }
+        #endif
 
         for (
             const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer.chars;
