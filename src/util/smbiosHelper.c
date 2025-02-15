@@ -50,7 +50,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     return (const FFSmbiosHeader*) (p + 1);
 }
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__HAIKU__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -62,6 +62,9 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     #include "common/settings.h"
     #define loff_t off_t // FreeBSD doesn't have loff_t
 #elif defined(__sun)
+    #define loff_t off_t
+#elif defined(__NetBSD__)
+    #include "common/sysctl.h"
     #define loff_t off_t
 #endif
 
@@ -135,12 +138,13 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
     if (buffer.chars == NULL)
     {
+        ffStrbufInit(&buffer);
         #ifndef __HAIKU__
         #ifdef __linux__
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
         #endif
         {
-            #ifndef __sun
+            #if !defined(__sun) && !defined(__NetBSD__)
             FF_STRBUF_AUTO_DESTROY strEntryAddress = ffStrbufCreate();
             #ifdef __FreeBSD__
             if (!ffSettingsGetFreeBSDKenv("hint.smbios.0.mem", &strEntryAddress))
@@ -177,7 +181,13 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
             if (fd < 0) return NULL;
 
             FFSmbiosEntryPoint entryPoint;
-            if (!ffReadFDData(fd, sizeof(entryPoint), &entryPoint)) return NULL;
+            #ifdef __NetBSD__
+            off_t addr = (off_t) ffSysctlGetInt64("machdep.smbios", 0);
+            if (addr == 0) return NULL;
+            if (pread(fd, &entryPoint, sizeof(entryPoint), addr) < 1) return NULL;
+            #else
+            if (ffReadFDData(fd, sizeof(entryPoint), &entryPoint) < 1) return NULL;
+            #endif
             #endif
 
             uint32_t tableLength = 0;
@@ -196,9 +206,11 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 tableLength = entryPoint.Smbios30.StructureTableMaximumSize;
                 tableAddress = (loff_t) entryPoint.Smbios30.StructureTableAddress;
             }
+            else
+                return NULL;
 
             ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
-            if (pread(fd, buffer.chars, tableLength, tableAddress) == tableLength)
+            if (pread(fd, buffer.chars, tableLength, tableAddress) == (ssize_t) tableLength)
             {
                 buffer.length = tableLength;
                 buffer.chars[buffer.length] = '\0';
@@ -277,6 +289,9 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 break;
         }
     }
+
+    if (buffer.length == 0)
+        return NULL;
 
     return &table;
 }
