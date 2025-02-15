@@ -8,7 +8,7 @@ extern "C"
 
 const char* ffDetectDisksImpl(FF_MAYBE_UNUSED FFDiskOptions* options, FF_MAYBE_UNUSED FFlist* disks)
 {
-    int pos = 0;
+    int32 pos = 0;
 
     for (dev_t dev; (dev = next_dev(&pos)) >= B_OK;)
     {

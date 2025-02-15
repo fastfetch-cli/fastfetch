@@ -10,7 +10,7 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPURe
     if (get_system_info(&sysInfo) != B_OK)
         return "get_system_info() failed";
 
-    uint32_t topoNodeCount = 0;
+    uint32 topoNodeCount = 0;
     get_cpu_topology_info(NULL, &topoNodeCount);
     if (topoNodeCount == 0)
         return "get_cpu_topology_info(NULL) failed";
