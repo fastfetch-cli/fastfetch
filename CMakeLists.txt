@@ -744,13 +744,13 @@ elseif(NetBSD)
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
         src/detection/cpu/cpu_nbsd.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nbsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
