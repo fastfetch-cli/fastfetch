@@ -223,42 +223,46 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
             off_t tableAddress = 0;
             FF_AUTO_CLOSE_FD int fd = open("/dev/misc/mem", O_RDONLY);
             if (fd < 0)
-                return NULL;
+            {perror("open(mem)");return NULL;}
             FF_AUTO_FREE uint8_t* smBiosBase = malloc(0x10000);
             if (pread(fd, smBiosBase, 0x10000, 0xF0000) != 0x10000)
-                return NULL;
-
+            {perror("pread(fd)");return NULL;}
+            puts("read(mem) ok");
             for (off_t offset = 0; offset <= 0xffe0; offset += 0x10)
             {
                 FFSmbiosEntryPoint* p = (void*)(smBiosBase + offset);
                 if (memcmp(p, "_SM3_", sizeof(p->Smbios30.AnchorString)) == 0)
                 {
+                    puts("found SM3");
                     if (p->Smbios30.EntryPointLength != sizeof(p->Smbios30))
-                        return NULL;
+                    {puts("invalid sm3 entry length"); return NULL;}
                     tableLength = p->Smbios30.StructureTableMaximumSize;
                     tableAddress = (off_t) p->Smbios30.StructureTableAddress;
                     break;
                 }
                 else if (memcmp(p, "_SM_", sizeof(p->Smbios20.AnchorString)) == 0)
                 {
+                    puts("found SM2");
                     if (p->Smbios20.EntryPointLength != sizeof(p->Smbios20))
-                        return NULL;
+                    {
+                        puts("invalid sm2 entry length");return NULL;}
                     tableLength = p->Smbios20.StructureTableLength;
                     tableAddress = (off_t) p->Smbios20.StructureTableAddress;
                     break;
                 }
             }
             if (tableLength == 0)
-                return NULL;
-
+            {puts("nothing found");return NULL;}
+            printf("found table length: %d\n", (int)tableLength);
             ffStrbufEnsureFixedLengthFree(&buffer, tableLength);
             if (pread(fd, buffer.chars, tableLength, tableAddress) == tableLength)
             {
+                puts("pread(table) done");
                 buffer.length = tableLength;
                 buffer.chars[buffer.length] = '\0';
             }
             else
-                return NULL;
+            {perror("pread(table)");return NULL;}
         }
         #endif
 
@@ -277,6 +281,8 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 break;
         }
     }
+
+    puts("Everything is ok");
 
     return &table;
 }
