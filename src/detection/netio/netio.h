@@ -17,3 +17,4 @@ typedef struct FFNetIOResult
 } FFNetIOResult;
 
 const char* ffDetectNetIO(FFlist* result, FFNetIOOptions* options);
+const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options);
