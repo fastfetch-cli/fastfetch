@@ -1159,7 +1159,7 @@ elseif(Haiku)
         src/detection/media/media_linux.c
         src/detection/memory/memory_haiku.c
         src/detection/mouse/mouse_haiku.cpp
-        src/detection/netio/netio_nosupport.c
+        src/detection/netio/netio_haiku.cpp
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_haiku.c
         src/detection/packages/packages_haiku.c
@@ -1646,6 +1646,7 @@ elseif(ANDROID)
 elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"
+        PRIVATE "bnetapi"
         PRIVATE "media"
         PRIVATE "be"
         PRIVATE "gnu"
