@@ -138,6 +138,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
     if (buffer.chars == NULL)
     {
+        ffStrbufInit(&buffer);
         #ifndef __HAIKU__
         #ifdef __linux__
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
@@ -288,6 +289,9 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 break;
         }
     }
+
+    if (buffer.length == 0)
+        return NULL;
 
     return &table;
 }
