@@ -1149,7 +1149,7 @@ elseif(Haiku)
         src/detection/host/host_windows.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_haiku.cpp
-        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/keyboard/keyboard_haiku.cpp
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
