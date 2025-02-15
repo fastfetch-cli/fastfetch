@@ -1158,7 +1158,7 @@ elseif(Haiku)
         src/detection/gamepad/gamepad_nosupport.c
         src/detection/media/media_linux.c
         src/detection/memory/memory_haiku.c
-        src/detection/mouse/mouse_nosupport.c
+        src/detection/mouse/mouse_haiku.cpp
         src/detection/netio/netio_nosupport.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_haiku.c
