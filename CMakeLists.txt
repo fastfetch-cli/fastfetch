@@ -1155,7 +1155,7 @@ elseif(Haiku)
         src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_haiku.cpp
         src/detection/media/media_linux.c
         src/detection/memory/memory_haiku.c
         src/detection/mouse/mouse_haiku.cpp
@@ -1648,6 +1648,7 @@ elseif(Haiku)
         PRIVATE "network"
         PRIVATE "bnetapi"
         PRIVATE "media"
+        PRIVATE "device"
         PRIVATE "be"
         PRIVATE "gnu"
     )
