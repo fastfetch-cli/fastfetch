@@ -1,5 +1,6 @@
 extern "C" {
 #include "bluetooth.h"
+#include "common/io/io.h"
 }
 
 #include <bluetooth/LocalDevice.h>
@@ -7,6 +8,8 @@ extern "C" {
 const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FFlist* devices /* FFBluetoothResult */)
 {
     using namespace Bluetooth;
+    FF_SUPPRESS_IO();
+
     LocalDevice* dev = LocalDevice::GetLocalDevice();
     if (!dev) return NULL;
 
