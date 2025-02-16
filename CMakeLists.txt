@@ -1134,7 +1134,7 @@ elseif(Haiku)
         src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_haiku.c
         src/detection/cursor/cursor_nosupport.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_haiku.cpp
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
@@ -1649,6 +1649,7 @@ elseif(Haiku)
         PRIVATE "bnetapi"
         PRIVATE "media"
         PRIVATE "device"
+        PRIVATE "bluetooth"
         PRIVATE "be"
         PRIVATE "gnu"
     )
