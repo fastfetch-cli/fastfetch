@@ -1138,7 +1138,7 @@ elseif(Haiku)
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_haiku.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/displayserver_haiku.cpp
