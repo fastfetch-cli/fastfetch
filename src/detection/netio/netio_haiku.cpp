@@ -1,8 +1,6 @@
 extern "C" {
 #include "netio.h"
-
 #include "common/netif/netif.h"
-#include "util/mallocHelper.h"
 }
 
 #include <NetworkInterface.h>
@@ -15,27 +13,27 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
     BNetworkInterface interface;
     uint32 cookie = 0;
 
-    const char* defaultRouteIfName = ffNetifGetDefaultRouteIfName();
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteIfIndex();
 
     while (roster.GetNextInterface(&cookie, interface) == B_OK)
     {
         if (!interface.Exists())
             continue;
 
-        if (options->defaultRouteOnly && strcmp(interface.Name(), defaultRouteIfName) != 0)
+        bool defaultRoute = interface.Index() == defaultRouteIfIndex;
+        if (options->defaultRouteOnly && !defaultRoute)
             continue;
 
         if (options->namePrefix.length && strncmp(interface.Name(), options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        ifreq_stats stats;
-        memset(&stats, 0, sizeof(stats));
-        interface.GetStats(stats);
+        ifreq_stats stats = {};
+        if (interface.GetStats(stats) != B_OK) continue;
 
         FFNetIOResult* counters = (FFNetIOResult*) ffListAdd(result);
         *counters = (FFNetIOResult) {
             .name = ffStrbufCreateS(interface.Name()),
-            .defaultRoute = strcmp(interface.Name(), defaultRouteIfName) == 0,
+            .defaultRoute = defaultRoute,
             .txBytes = stats.send.bytes,
             .rxBytes = stats.receive.bytes,
             .txPackets = stats.send.packets,
