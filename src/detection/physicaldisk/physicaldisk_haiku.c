@@ -40,10 +40,8 @@ static const char* detectDisk(int dfd, const char* diskType, const char* diskId,
     ffStrbufInitS(&device->interconnect, diskType);
     device->temperature = 0.0/0.0;
     device->type = FF_PHYSICALDISK_TYPE_NONE;
-    if (geometry.read_only)
-        device->type |= FF_PHYSICALDISK_TYPE_READONLY;
-    if (geometry.removable)
-        device->type |= FF_PHYSICALDISK_TYPE_REMOVABLE;
+    device->type |= (geometry.read_only ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE) |
+        (geometry.removable ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED);
     device->size = (uint64_t) geometry.cylinder_count * geometry.sectors_per_track * geometry.bytes_per_sector;
 
     return NULL;
