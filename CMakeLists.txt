@@ -1132,7 +1132,7 @@ elseif(Haiku)
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_haiku.c
         src/detection/cpucache/cpucache_shared.c
-        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cpuusage/cpuusage_haiku.c
         src/detection/cursor/cursor_nosupport.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
