@@ -1160,7 +1160,7 @@ elseif(Haiku)
         src/detection/memory/memory_haiku.c
         src/detection/mouse/mouse_haiku.cpp
         src/detection/netio/netio_haiku.cpp
-        src/detection/opengl/opengl_linux.c
+        src/detection/opengl/opengl_haiku.cpp
         src/detection/os/os_haiku.c
         src/detection/packages/packages_haiku.c
         src/detection/poweradapter/poweradapter_nosupport.c
@@ -1650,6 +1650,7 @@ elseif(Haiku)
         PRIVATE "media"
         PRIVATE "device"
         PRIVATE "bluetooth"
+        PRIVATE "GL"
         PRIVATE "be"
         PRIVATE "gnu"
     )
