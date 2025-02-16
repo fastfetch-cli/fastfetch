@@ -18,6 +18,7 @@ static const char* oglDetectOpenGL(FFOpenGLResult* result)
     auto ffglGetString = (decltype(&glGetString)) glView.GetGLProcAddress("glGetString");
     if (!ffglGetString) return "glView.GetGLProcAddress() failed";
     ffOpenGLHandleResult(result, ffglGetString);
+    ffStrbufSetStatic(&result->library, "OpenGLKit");
     return NULL;
 }
 
