@@ -315,6 +315,25 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     #elif defined(__HAIKU__)
 
+    {
+        team_info info;
+        if (get_team_info(pid, &info) == B_OK)
+        {
+            // This is tricky. info.args is not encoded, so that we don't know if
+            // a whitespace in args is part of the file path or an argument separator
+            if (info.argc == 1)
+                ffStrbufSetS(exe, info.args);
+            else
+            {
+                int argc = info.argc;
+                for (const char* p = info.args; (p = strchr(p, ' ')); ++p)
+                    --argc;
+                if (argc == 1)
+                    ffStrbufSetS(exe, info.args);
+            }
+        }
+    }
+
     if (exePath)
     {
         image_info info;

@@ -27,6 +27,8 @@ static bool getFileVersion(const FFstrbuf* exePath, FFstrbuf* version)
     if (len <= 0) return false;
     return ffGetFileVersion(exePathW, version);
 }
+#elif __HAIKU__
+    #include "util/haiku/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
@@ -846,6 +848,11 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "zed"))
         return getTerminalVersionZed(exe, version);
+
+    #if __HAIKU__
+    if(ffStrbufEqualS(processName, "Terminal"))
+        return ffGetFileVersion(exe->chars, version);
+    #endif
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)

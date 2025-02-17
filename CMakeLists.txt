@@ -1148,7 +1148,7 @@ elseif(Haiku)
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_windows.c
         src/detection/icons/icons_nosupport.c
-        src/detection/initsystem/initsystem_haiku.cpp
+        src/detection/initsystem/initsystem_haiku.c
         src/detection/keyboard/keyboard_haiku.cpp
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
@@ -1184,6 +1184,7 @@ elseif(Haiku)
         src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
+        src/util/haiku/version.cpp
     )
 endif()
 
