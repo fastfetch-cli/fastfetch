@@ -419,8 +419,8 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
 
     if (defaultOptions.showType != options->showType)
     {
-        if (options->showType & FF_LOCALIP_TYPE_IPV4_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showIpv4", true);
+        if (!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
+            yyjson_mut_obj_add_bool(doc, module, "showIpv4", false);
 
         if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)
             yyjson_mut_obj_add_bool(doc, module, "showIpv6", true);
@@ -446,8 +446,8 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
         if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
             yyjson_mut_obj_add_bool(doc, module, "compact", true);
 
-        if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", true);
+        if (!(options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT))
+            yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", false);
 
         if (options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT)
             yyjson_mut_obj_add_bool(doc, module, "showAllIps", true);
