@@ -92,6 +92,8 @@
         "sound",
         "camera",
         "gamepad",
+        "mouse",
+        "keyboard",
         {
             "type": "weather",
             "timeout": 1000

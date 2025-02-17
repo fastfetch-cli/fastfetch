@@ -1,6 +1,4 @@
 extern "C" {
-#include "common/font.h"
-#include "common/parsing.h"
 #include "font.h"
 }
 

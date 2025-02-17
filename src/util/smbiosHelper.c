@@ -236,6 +236,9 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
             FF_AUTO_CLOSE_FD int fd = open("/dev/misc/mem", O_RDONLY);
             if (fd < 0)
                 return NULL;
+
+            // Works on legacy BIOS only
+            // See: https://wiki.osdev.org/System_Management_BIOS#UEFI_systems
             FF_AUTO_FREE uint8_t* smBiosBase = malloc(0x10000);
             if (pread(fd, smBiosBase, 0x10000, 0xF0000) != 0x10000)
                 return NULL;

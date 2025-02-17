@@ -36,6 +36,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->platformApi);
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->deviceId = ((uint64_t) dev->domain << 6) | ((uint64_t) dev->bus << 4) | ((uint64_t) dev->dev << 2) | (uint64_t) dev->func;

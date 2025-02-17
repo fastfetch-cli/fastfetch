@@ -1132,13 +1132,13 @@ elseif(Haiku)
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_haiku.c
         src/detection/cpucache/cpucache_shared.c
-        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/cpuusage/cpuusage_haiku.c
         src/detection/cursor/cursor_nosupport.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_haiku.cpp
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicaldisk/physicaldisk_haiku.c
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/displayserver_haiku.cpp
@@ -1149,18 +1149,18 @@ elseif(Haiku)
         src/detection/host/host_windows.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_haiku.cpp
-        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/keyboard/keyboard_haiku.cpp
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/gamepad/gamepad_haiku.cpp
         src/detection/media/media_linux.c
         src/detection/memory/memory_haiku.c
-        src/detection/mouse/mouse_nosupport.c
-        src/detection/netio/netio_nosupport.c
-        src/detection/opengl/opengl_linux.c
+        src/detection/mouse/mouse_haiku.cpp
+        src/detection/netio/netio_haiku.cpp
+        src/detection/opengl/opengl_haiku.cpp
         src/detection/os/os_haiku.c
         src/detection/packages/packages_haiku.c
         src/detection/poweradapter/poweradapter_nosupport.c
@@ -1646,7 +1646,11 @@ elseif(ANDROID)
 elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"
+        PRIVATE "bnetapi"
         PRIVATE "media"
+        PRIVATE "device"
+        PRIVATE "bluetooth"
+        PRIVATE "GL"
         PRIVATE "be"
         PRIVATE "gnu"
     )

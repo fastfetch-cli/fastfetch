@@ -115,7 +115,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount)) // For Apple
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
-        gpu->coreUsage = 0.0/0.0;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         CFDictionaryRef perfStatistics = NULL;
         uint64_t vramUsed = 0, vramTotal = 0;
         if (ffCfDictGetDict(properties, CFSTR("PerformanceStatistics"), &perfStatistics) == NULL)

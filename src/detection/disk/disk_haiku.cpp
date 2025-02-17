@@ -1,19 +1,33 @@
 extern "C"
 {
 #include "disk.h"
+#include "util/stringUtils.h"
 }
 #include <fs_info.h>
 #include <Directory.h>
 #include <Path.h>
 
-const char* ffDetectDisksImpl(FF_MAYBE_UNUSED FFDiskOptions* options, FF_MAYBE_UNUSED FFlist* disks)
+const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
     int32 pos = 0;
 
     for (dev_t dev; (dev = next_dev(&pos)) >= B_OK;)
     {
         fs_info fs;
-        fs_stat_dev(dev, &fs);
+        if (fs_stat_dev(dev, &fs) < -1) continue;
+
+        if (!ffStrStartsWith(fs.device_name, "/dev/")) continue; // physical disks only
+
+        node_ref node(fs.dev, fs.root);
+        BDirectory dir(&node);
+        BPath path(&dir);
+        if (path.InitCheck() != B_OK) continue;
+
+        if (__builtin_expect(options->folders.length, 0))
+        {
+            if (!ffDiskMatchMountpoint(options, path.Path()))
+                continue;
+        }
 
         FFDisk* disk = (FFDisk*) ffListAdd(disks);
 
@@ -26,16 +40,7 @@ const char* ffDetectDisksImpl(FF_MAYBE_UNUSED FFDiskOptions* options, FF_MAYBE_U
         disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs.free_nodes);
 
         ffStrbufInitS(&disk->mountFrom, fs.device_name);
-        ffStrbufInit(&disk->mountpoint);
-        {
-            node_ref node(fs.dev, fs.root);
-            BDirectory dir(&node);
-            BPath path(&dir);
-            if (path.InitCheck() == B_OK)
-                ffStrbufSetS(&disk->mountpoint, path.Path());
-            else
-                ffStrbufSetStatic(&disk->mountpoint, "?");
-        }
+        ffStrbufInitS(&disk->mountpoint, path.Path());
         ffStrbufInitS(&disk->filesystem, fs.fsh_name);
         ffStrbufInitS(&disk->name, fs.volume_name);
         disk->type = FF_DISK_VOLUME_TYPE_NONE;
@@ -45,7 +50,12 @@ const char* ffDetectDisksImpl(FF_MAYBE_UNUSED FFDiskOptions* options, FF_MAYBE_U
             disk->type = (FFDiskVolumeType) (disk->type | FF_DISK_VOLUME_TYPE_READONLY_BIT);
         if (fs.flags & B_FS_IS_REMOVABLE)
             disk->type = (FFDiskVolumeType) (disk->type | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT);
+        if (disk->type == FF_DISK_VOLUME_TYPE_NONE) disk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
         disk->createTime = 0;
+
+        time_t crTime;
+        if (dir.GetCreationTime(&crTime) == B_OK)
+            disk->createTime = (uint64_t) crTime * 1000;
     }
-    return 0;
+    return NULL;
 }

@@ -72,7 +72,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 
     if (mute)
     {
-        bool isMute = false;
+        int32 isMute = false;
         size = sizeof(isMute);
         if (mute->GetValue(&isMute, &size, &when) == B_OK && isMute)
             return NULL;
