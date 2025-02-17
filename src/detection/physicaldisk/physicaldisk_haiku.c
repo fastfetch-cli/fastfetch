@@ -1,44 +1,36 @@
 #include "physicaldisk.h"
 
 #include "common/io/io.h"
+#include "util/stringUtils.h"
 
 #include <OS.h>
 #include <StorageDefs.h>
 #include <Drivers.h>
 #include <sys/ioctl.h>
 
-static const char* detectDisk(int dfd, const char* diskType, const char* diskId, FFlist* result)
+static const char* detectDisk(FFstrbuf* path, const char* diskType, FFlist* result)
 {
-    char buffer[64];
-    snprintf(buffer, sizeof(buffer), "%s/master/raw", diskId);
-    FF_AUTO_CLOSE_FD int rawfd = openat(dfd, buffer, O_RDONLY);
-    if (rawfd < 0)
-    {
-        snprintf(buffer, sizeof(buffer), "%s/raw", diskId);
-        rawfd = openat(dfd, buffer, O_RDONLY);
-        if (rawfd < 0) return "raw device file not found";
-    }
+    FF_AUTO_CLOSE_FD int rawfd = open(path->chars, O_RDONLY);
+    if (rawfd < 0) return "detectDisk: open(rawfd) failed";
 
     device_geometry geometry;
     if (ioctl(rawfd, B_GET_GEOMETRY, &geometry, sizeof(geometry)) < 0)
         return "ioctl(B_GET_GEOMETRY) failed";
 
-    FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
-
     char name[B_OS_NAME_LENGTH];
-    if (ioctl(rawfd, B_GET_DEVICE_NAME, name, sizeof(name)) == 0)
-        ffStrbufInitS(&device->name, name);
-    else
+    if (ioctl(rawfd, B_GET_DEVICE_NAME, name, sizeof(name)) != 0)
     {
         // ioctl reports `not a tty` for NVME drives for some reason
-        ffStrbufInitF(&device->name, "Unknown %s drive", diskType);
+        snprintf(name, sizeof(name), "Unknown %s drive", diskType);
     }
 
-    ffStrbufInitF(&device->devPath, "/dev/disk/%s/%s", diskType, buffer);
+    FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
+    ffStrbufInitS(&device->name, name);
+    ffStrbufInitCopy(&device->devPath, path);
     ffStrbufInit(&device->serial);
     ffStrbufInit(&device->revision);
     ffStrbufInitS(&device->interconnect, diskType);
-    device->temperature = 0.0/0.0;
+    device->temperature = FF_PHYSICALDISK_TEMP_UNSET;
     device->type = FF_PHYSICALDISK_TYPE_NONE;
     device->type |= (geometry.read_only ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE) |
         (geometry.removable ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED);
@@ -47,19 +39,32 @@ static const char* detectDisk(int dfd, const char* diskType, const char* diskId,
     return NULL;
 }
 
-static const char* detectDiskType(int dfd, const char* diskType, FFlist* result)
+static const char* searchRawDeviceFile(FFstrbuf* path, const char* diskType, FFlist* result)
 {
-    int newfd = openat(dfd, diskType, O_RDONLY);
-    if (newfd < 0) return "openat(dfd, diskType) failed";
-
-    FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(newfd);
-    if (!dir) return "fdopendir(newfd) failed";
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(path->chars);
+    if (!dir) return "detectDiskType: opendir() failed";
+    uint32_t baseLen = path->length;
 
     struct dirent* entry;
     while((entry = readdir(dir)))
     {
         if (entry->d_name[0] == '.') continue;
-        detectDisk(newfd, diskType, entry->d_name, result);
+        ffStrbufAppendC(path, '/');
+        ffStrbufAppendS(path, entry->d_name);
+
+        struct stat st;
+        if (stat(path->chars, &st) != 0)
+        {
+            ffStrbufSubstrBefore(path, baseLen);
+            continue;
+        }
+
+        if (S_ISDIR(st.st_mode))
+            searchRawDeviceFile(path, diskType, result);
+        else if (ffStrEquals(entry->d_name, "raw"))
+            detectDisk(path, diskType, result);
+
+        ffStrbufSubstrBefore(path, baseLen);
     }
     return NULL;
 }
@@ -69,11 +74,17 @@ const char* ffDetectPhysicalDisk(FFlist* result, FF_MAYBE_UNUSED FFPhysicalDiskO
     FF_AUTO_CLOSE_DIR DIR* dir = opendir("/dev/disk");
     if (!dir) return "opendir(/dev/disk) failed";
 
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateA(64);
+    ffStrbufAppendS(&path, "/dev/disk/");
+    uint32_t baseLen = path.length;
+
     struct dirent* entry;
     while((entry = readdir(dir)))
     {
-        if (entry->d_name[0] == '.') continue;
-        detectDiskType(dirfd(dir), entry->d_name, result);
+        if (entry->d_name[0] == '.' || ffStrEquals(entry->d_name, "virtual")) continue;
+        ffStrbufAppendS(&path, entry->d_name);
+        searchRawDeviceFile(&path, entry->d_name, result);
+        ffStrbufSubstrBefore(&path, baseLen);
     }
 
     return NULL;
