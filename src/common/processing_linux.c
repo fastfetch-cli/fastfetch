@@ -319,17 +319,20 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
         team_info info;
         if (get_team_info(pid, &info) == B_OK)
         {
-            // This is tricky. info.args is not encoded, so that we don't know if
-            // a whitespace in args is part of the file path or an argument separator
+            // This is tricky. Paths in info.args are not quoted, so that we don't know
+            // if a whitespace in args is part of the file path or an argument separator
             if (info.argc == 1)
                 ffStrbufSetS(exe, info.args);
             else
             {
-                int argc = info.argc;
-                for (const char* p = info.args; (p = strchr(p, ' ')); ++p)
+                // args = "/bin/bash -l"
+                // argc = 2
+                int argc = info.argc - 1; // 1
+                const char* arg0End = strchr(p, ' '); // " -l"
+                for (const char* p = arg0End + 1; (p = strchr(p, ' ')); ++p)
                     --argc;
                 if (argc == 1)
-                    ffStrbufSetS(exe, info.args);
+                    ffStrbufSetNS(exe, info.args, arg0End - info.args /* /bin/bash */);
             }
         }
     }
