@@ -34,7 +34,7 @@ static const char* detectDisk(FFstrbuf* path, const char* diskType, FFlist* resu
     device->type = FF_PHYSICALDISK_TYPE_NONE;
     device->type |= (geometry.read_only ? FF_PHYSICALDISK_TYPE_READONLY : FF_PHYSICALDISK_TYPE_READWRITE) |
         (geometry.removable ? FF_PHYSICALDISK_TYPE_REMOVABLE : FF_PHYSICALDISK_TYPE_FIXED);
-    device->size = (uint64_t) geometry.cylinder_count * geometry.sectors_per_track * geometry.bytes_per_sector;
+    device->size = (uint64_t) geometry.cylinder_count *geometry.heads * geometry.sectors_per_track * geometry.bytes_per_sector;
 
     return NULL;
 }
