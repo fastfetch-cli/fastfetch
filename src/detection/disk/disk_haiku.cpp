@@ -16,8 +16,6 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         fs_info fs;
         if (fs_stat_dev(dev, &fs) < -1) continue;
 
-        if (!ffStrStartsWith(fs.device_name, "/dev/")) continue; // physical disks only
-
         node_ref node(fs.dev, fs.root);
         BDirectory dir(&node);
         BPath path(&dir);
