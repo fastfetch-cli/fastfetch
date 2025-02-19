@@ -4,6 +4,8 @@
     #define FF_ARCHITECTURE "x86_64"
 #elif defined(__i386__)
     #define FF_ARCHITECTURE "i386"
+#elif defined(__ia64__)
+    #define FF_ARCHITECTURE "ia64"
 #elif defined(__aarch64__)
     #define FF_ARCHITECTURE "aarch64"
 #elif defined(__arm__)
@@ -18,8 +20,16 @@
     #define FF_ARCHITECTURE "s390x"
 #elif defined(__loongarch__)
     #define FF_ARCHITECTURE "loongarch"
+#elif defined(__sparc__)
+    #define FF_ARCHITECTURE "sparc"
+#elif defined(__alpha__)
+    #define FF_ARCHITECTURE "alpha"
+#elif defined(__hppa__)
+    #define FF_ARCHITECTURE "hppa"
+#elif defined(__m68k__)
+    #define FF_ARCHITECTURE "m68k"
 #else
-    #define FF_ARCHITECTURE "unknown"
+    #define FF_ARCHITECTURE "Unknown"
 #endif
 
 #if defined(__ANDROID__)
@@ -45,7 +55,7 @@
 #elif defined(__HAIKU__)
     #define FF_SYSNAME "Haiku"
 #else
-    #define FF_SYSNAME "unknown"
+    #define FF_SYSNAME "Unknown"
 #endif
 
 #define FF_STR_INDIR(x) #x
