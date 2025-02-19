@@ -11,9 +11,11 @@ Features:
     * Some bugs are found and fixed.
 * Remove `python-requests` dependency in `scripts/gen-*.py`.
 * Add cmake option `-DENABLE_EMBEDDED_AMDGPUIDS=BOOL` (disabled by default)
+    * If enabled, fastfetch will embed the newest [`amdgpu.ids`](https://gitlab.freedesktop.org/mesa/drm/-/blob/main/data/amdgpu.ids?ref_type=heads) file into fastfetch binary.
 * Weather module now honors `display.temp.unit` option (#1560, Weather)
 * Support Physical Memory module in NetBSD (PhysicalMemory, NetBSD)
     * Requires root permission
+* Improve non-intel CPU detection in NetBSD (#1573, CPU, NetBSD)
 
 Bugfixes:
 * Fix building in macOS 10.13 (GPU, macOS)
