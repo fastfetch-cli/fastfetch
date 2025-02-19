@@ -22,7 +22,7 @@ Bugfixes:
 * Properly round percent values when detecting volume (#1558, Sound)
 * Fix Physical Memory module doesn't work in `--format json` mode
 * Add some missing variable inits (GPU, Linux)
-* Fix `--localip-default-route-only false not working` with `--gen-config` (#1570, LocalIP)
+* Fix `--localip-default-route-only false` not working with `--gen-config` (#1570, LocalIP)
 
 Logo:
 * Update Rosa linux
