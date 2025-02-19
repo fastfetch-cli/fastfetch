@@ -11,6 +11,7 @@ typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
 
 typedef enum __attribute__((__packed__)) FFTemperatureUnit
 {
+    FF_TEMPERATURE_UNIT_DEFAULT,
     FF_TEMPERATURE_UNIT_CELSIUS,
     FF_TEMPERATURE_UNIT_FAHRENHEIT,
     FF_TEMPERATURE_UNIT_KELVIN,

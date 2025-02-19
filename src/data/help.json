@@ -105,16 +105,6 @@
             }
         },
         {
-            "long": "escape-bedrock",
-            "desc": "On Bedrock Linux, whether to escape the bedrock jail",
-            "remark": "Linux only",
-            "arg": {
-                "type": "bool",
-                "optional": true,
-                "default": true
-            }
-        },
-        {
             "long": "wmi-timeout",
             "desc": "Set the timeout (ms) for WMI queries",
             "remark": "Windows only",
@@ -732,11 +722,12 @@
             "arg": {
                 "type": "enum",
                 "enum": {
+                    "D": "Default",
                     "C": "Celsius",
                     "F": "Fahrenheit",
                     "K": "Kelvin"
                 },
-                "default": "C"
+                "default": "D"
             }
         },
         {

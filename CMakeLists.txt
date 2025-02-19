@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.36.1
+    VERSION 2.37.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -56,7 +56,7 @@ include(CheckIncludeFile)
 
 include(CMakeDependentOption)
 
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
@@ -64,23 +64,23 @@ cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBS
 cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR WIN32 OR SunOS" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR WIN32 OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS" OFF)
+cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS" OFF)
+cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly" OFF)
+cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD OR SunOS" OFF)
@@ -94,6 +94,7 @@ option(SET_TWEAK "Add tweak to project version" ON) # This is set to off by gith
 option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -271,16 +272,41 @@ endif()
 
 if(ENABLE_EMBEDDED_PCIIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
     if(Python_FOUND)
+        if(NOT EXISTS "${PROJECT_BINARY_DIR}/pci.ids")
+            message(STATUS "'${PROJECT_BINARY_DIR}/pci.ids' is missing, downloading...")
+            file(DOWNLOAD "https://pci-ids.ucw.cz/v2.2/pci.ids" "${PROJECT_BINARY_DIR}/pci.ids")
+        endif()
         message(STATUS "Generating 'fastfetch_pciids.c.inc'")
-        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py"
+        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-pciids.py" "${PROJECT_BINARY_DIR}/pci.ids"
                         OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc"
                         RESULT_VARIABLE PYTHON_PCIIDS_RETCODE)
         if(NOT PYTHON_PCIIDS_RETCODE EQUAL 0)
+            file(REMOVE "${PROJECT_BINARY_DIR}/fastfetch_pciids.c.inc")
             message(FATAL_ERROR "Failed to generate 'fastfetch_pciids.c.inc'")
         endif()
     else()
         message(WARNING "Python3 is not found, 'fastfetch_pciids.c.inc' will not be generated")
         set(ENABLE_EMBEDDED_PCIIDS OFF)
+    endif()
+endif()
+
+if(ENABLE_EMBEDDED_AMDGPUIDS AND NOT EXISTS "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc")
+    if(Python_FOUND)
+        if(NOT EXISTS "${PROJECT_BINARY_DIR}/amdgpu.ids")
+            message(STATUS "'${PROJECT_BINARY_DIR}/amdgpu.ids' is missing, downloading...")
+            file(DOWNLOAD "https://gitlab.freedesktop.org/mesa/drm/-/raw/main/data/amdgpu.ids" "${PROJECT_BINARY_DIR}/amdgpu.ids")
+        endif()
+        message(STATUS "Generating 'fastfetch_amdgpuids.c.inc'")
+        execute_process(COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen-amdgpuids.py" "${PROJECT_BINARY_DIR}/amdgpu.ids"
+                        OUTPUT_FILE "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc"
+                        RESULT_VARIABLE PYTHON_AMDGPUIDS_RETCODE)
+        if(NOT PYTHON_AMDGPUIDS_RETCODE EQUAL 0)
+            file(REMOVE "${PROJECT_BINARY_DIR}/fastfetch_amdgpuids.c.inc")
+            message(FATAL_ERROR "Failed to generate 'fastfetch_amdgpuids.c.inc'")
+        endif()
+    else()
+        message(WARNING "Python3 is not found, 'fastfetch_amdgpuids.c.inc' will not be generated")
+        set(ENABLE_EMBEDDED_AMDGPUIDS OFF)
     endif()
 endif()
 
@@ -718,13 +744,13 @@ elseif(NetBSD)
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
         src/detection/cpu/cpu_nbsd.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nbsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -1092,54 +1118,55 @@ elseif(SunOS)
     )
 elseif(Haiku)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_haiku.c
         src/common/networking_linux.c
         src/common/processing_linux.c
-        src/detection/battery/battery_nosupport.c
-        src/detection/bios/bios_nosupport.c
-        src/detection/board/board_nosupport.c
+        src/detection/battery/battery_haiku.c
+        src/detection/bios/bios_windows.c
+        src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
-        src/detection/cpu/cpu_nosupport.c
-        src/detection/cpucache/cpucache_nosupport.c
-        src/detection/cpuusage/cpuusage_nosupport.c
+        src/detection/chassis/chassis_windows.c
+        src/detection/cpu/cpu_haiku.c
+        src/detection/cpucache/cpucache_shared.c
+        src/detection/cpuusage/cpuusage_haiku.c
         src/detection/cursor/cursor_nosupport.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_haiku.cpp
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
-        src/detection/disk/disk_nosupport.c
+        src/detection/disk/disk_haiku.cpp
         src/detection/dns/dns_linux.c
-        src/detection/physicaldisk/physicaldisk_nosupport.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicaldisk/physicaldisk_haiku.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nosupport.c
         src/detection/displayserver/displayserver_haiku.cpp
         src/detection/font/font_haiku.cpp
-        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_haiku.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
-        src/detection/host/host_nosupport.c
+        src/detection/host/host_windows.c
         src/detection/icons/icons_nosupport.c
-        src/detection/initsystem/initsystem_nosupport.c
-        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/initsystem/initsystem_haiku.c
+        src/detection/keyboard/keyboard_haiku.cpp
         src/detection/libc/libc_nosupport.c
         src/detection/lm/lm_nosupport.c
         src/detection/loadavg/loadavg_nosupport.c
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
-        src/detection/gamepad/gamepad_nosupport.c
-        src/detection/media/media_nosupport.c
+        src/detection/gamepad/gamepad_haiku.cpp
+        src/detection/media/media_linux.c
         src/detection/memory/memory_haiku.c
-        src/detection/mouse/mouse_nosupport.c
-        src/detection/netio/netio_nosupport.c
-        src/detection/opengl/opengl_linux.c
+        src/detection/mouse/mouse_haiku.cpp
+        src/detection/netio/netio_haiku.cpp
+        src/detection/opengl/opengl_haiku.cpp
         src/detection/os/os_haiku.c
         src/detection/packages/packages_haiku.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_haiku.c
         src/detection/gtk_qt/qt.c
-        src/detection/sound/sound_nosupport.c
+        src/detection/sound/sound_haiku.cpp
         src/detection/swap/swap_haiku.c
         src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
@@ -1157,6 +1184,7 @@ elseif(Haiku)
         src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
+        src/util/haiku/version.cpp
     )
 endif()
 
@@ -1511,6 +1539,9 @@ endif()
 if(ENABLE_EMBEDDED_PCIIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_PCIIDS=1)
 endif()
+if(ENABLE_EMBEDDED_AMDGPUIDS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
+endif()
 
 if(LINUX)
     target_link_libraries(libfastfetch
@@ -1616,6 +1647,11 @@ elseif(ANDROID)
 elseif(Haiku)
     target_link_libraries(libfastfetch
         PRIVATE "network"
+        PRIVATE "bnetapi"
+        PRIVATE "media"
+        PRIVATE "device"
+        PRIVATE "bluetooth"
+        PRIVATE "GL"
         PRIVATE "be"
         PRIVATE "gnu"
     )

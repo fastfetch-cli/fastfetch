@@ -7,6 +7,8 @@
     #include <synchapi.h>
     #include <profileapi.h>
     #include <sysinfoapi.h>
+#elif defined(__HAIKU__)
+    #include <OS.h>
 #endif
 
 static inline double ffTimeGetTick(void) //In msec
@@ -17,6 +19,8 @@ static inline double ffTimeGetTick(void) //In msec
         LARGE_INTEGER start;
         QueryPerformanceCounter(&start);
         return (double) start.QuadPart * 1000 / (double) frequency.QuadPart;
+    #elif defined(__HAIKU__)
+        return (double) system_time() / 1000.;
     #else
         struct timespec timeNow;
         clock_gettime(CLOCK_MONOTONIC, &timeNow);
@@ -30,6 +34,8 @@ static inline uint64_t ffTimeGetNow(void)
         uint64_t timeNow;
         GetSystemTimeAsFileTime((FILETIME*) &timeNow);
         return (timeNow - 116444736000000000ull) / 10000ull;
+    #elif defined(__HAIKU__)
+        return (uint64_t) real_time_clock_usecs() / 1000u;
     #else
         struct timespec timeNow;
         clock_gettime(CLOCK_REALTIME, &timeNow);

@@ -160,6 +160,7 @@ static FFModuleBaseInfo ffModuleInfo = {
     .parseJsonObject = (void*) ffParsePhysicalMemoryJsonObject,
     .printModule = (void*) ffPrintPhysicalMemory,
     .generateJsonConfig = (void*) ffGeneratePhysicalMemoryJsonConfig,
+    .generateJsonResult = (void*) ffGeneratePhysicalMemoryJsonResult,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Size (in bytes)", "bytes"},
         {"Size formatted", "size"},

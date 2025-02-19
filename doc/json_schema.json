@@ -817,8 +817,8 @@
                         "unit": {
                             "type": "string",
                             "description": "Set the unit of the temperature",
-                            "enum": ["CELSIUS", "C", "FAHRENHEIT", "F", "KELVIN", "K"],
-                            "default": "C"
+                            "enum": ["D", "Default", "Celsius", "C", "Fahrenheit", "F", "Kelvin", "K"],
+                            "default": "D"
                         },
                         "ndigits": {
                             "type": "integer",
@@ -2641,6 +2641,7 @@
                                                 "eopkg",
                                                 "flatpak",
                                                 "guix",
+                                                "hpkg",
                                                 "linglong",
                                                 "lpkg",
                                                 "lpkgbuild",

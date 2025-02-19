@@ -80,7 +80,7 @@ const char* ffDetectSound(FFlist* devices)
         if (!bundle.mute[i])
             totalLevel += bundle.level[i];
     }
-    device->volume = (uint8_t) (totalLevel * 100 / bundle.iLevel);
+    device->volume = (uint8_t) ((totalLevel * 100 + bundle.iLevel / 2) / bundle.iLevel);
 
     return NULL;
 }

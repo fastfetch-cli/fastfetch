@@ -51,6 +51,8 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(pkg)
         FF_PRINT_PACKAGE(pkgsrc)
+        FF_PRINT_PACKAGE_NAME(hpkgSystem, counts.hpkgUser ? "hpkg-system" : "hpkg")
+        FF_PRINT_PACKAGE_NAME(hpkgUser, "hpkg-user")
         FF_PRINT_PACKAGE_NAME(flatpakSystem, counts.flatpakUser ? "flatpak-system" : "flatpak")
         FF_PRINT_PACKAGE_NAME(flatpakUser, "flatpak-user")
         FF_PRINT_PACKAGE(snap)
@@ -84,6 +86,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
         uint32_t brewAll = counts.brew + counts.brewCask;
         uint32_t guixAll = counts.guixSystem + counts.guixUser + counts.guixHome;
+        uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
         FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(counts.all, "all"),
             FF_FORMAT_ARG(counts.pacman, "pacman"),
@@ -123,10 +126,13 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.qi, "qi"),
             FF_FORMAT_ARG(counts.amUser, "am-user"),
             FF_FORMAT_ARG(counts.pkgsrc, "pkgsrc"),
+            FF_FORMAT_ARG(counts.hpkgSystem, "hpkg-system"),
+            FF_FORMAT_ARG(counts.hpkgUser, "hpkg-user"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
             FF_FORMAT_ARG(guixAll, "guix-all"),
+            FF_FORMAT_ARG(hpkgAll, "hpkg-all"),
         }));
     }
 
@@ -177,6 +183,9 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     break;
                 case 'G': if (false);
                     FF_TEST_PACKAGE_NAME(GUIX)
+                    break;
+                case 'H': if (false);
+                    FF_TEST_PACKAGE_NAME(HPKG)
                     break;
                 case 'L': if (false);
                     FF_TEST_PACKAGE_NAME(LPKG)
@@ -293,6 +302,9 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'G': if (false);
                             FF_TEST_PACKAGE_NAME(GUIX)
                             break;
+                        case 'H': if (false);
+                            FF_TEST_PACKAGE_NAME(HPKG)
+                            break;
                         case 'L': if (false);
                             FF_TEST_PACKAGE_NAME(LPKG)
                             FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -365,6 +377,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(EOPKG)
         FF_TEST_PACKAGE_NAME(FLATPAK)
         FF_TEST_PACKAGE_NAME(GUIX)
+        FF_TEST_PACKAGE_NAME(HPKG)
         FF_TEST_PACKAGE_NAME(LINGLONG)
         FF_TEST_PACKAGE_NAME(LPKG)
         FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -421,6 +434,8 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(guixSystem)
     FF_APPEND_PACKAGE_COUNT(guixUser)
     FF_APPEND_PACKAGE_COUNT(guixHome)
+    FF_APPEND_PACKAGE_COUNT(hpkgSystem)
+    FF_APPEND_PACKAGE_COUNT(hpkgUser)
     FF_APPEND_PACKAGE_COUNT(linglong)
     FF_APPEND_PACKAGE_COUNT(mport)
     FF_APPEND_PACKAGE_COUNT(nixDefault)
@@ -491,10 +506,13 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of qi packages", "qi"},
         {"Number of am-user (aka appman) packages", "am-user"},
         {"Number of pkgsrc packages", "pkgsrc"},
+        {"Number of hpkg-system packages", "hpkg-system"},
+        {"Number of hpkg-user packages", "hpkg-user"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
         {"Total number of all guix packages", "guix-all"},
+        {"Total number of all hpkg packages", "hpkg-all"},
     }))
 };
 

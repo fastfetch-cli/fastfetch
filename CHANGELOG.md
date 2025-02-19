@@ -1,3 +1,33 @@
+# 2.37.0
+
+Changes:
+* Option `--escape-bedrock` is removed. The function is always enabled now.
+
+Features:
+* Support for Haiku is greatly improved (Haiku)
+    * CPU, GPU, Disk, Sound, Terminal, Terminal Font, Init System, Battery, Mouse, Keyboard, NetIO, CPU Usage, Physical Disk and OpenGL should work on Haiku now
+    * SMBIOS related modules (Host, Bios, Board, Chassis, Physical Memory) should work in platforms with legacy BIOS system.
+    * Support for Gamepad and Bluetooth are WIP.
+    * Some bugs are found and fixed.
+* Remove `python-requests` dependency in `scripts/gen-*.py`.
+* Add cmake option `-DENABLE_EMBEDDED_AMDGPUIDS=BOOL` (disabled by default)
+    * If enabled, fastfetch will embed the newest [`amdgpu.ids`](https://gitlab.freedesktop.org/mesa/drm/-/blob/main/data/amdgpu.ids?ref_type=heads) file into fastfetch binary.
+* Weather module now honors `display.temp.unit` option (#1560, Weather)
+* Support Physical Memory module in NetBSD (PhysicalMemory, NetBSD)
+    * Requires root permission
+* Improve non-intel CPU detection in NetBSD (#1573, CPU, NetBSD)
+
+Bugfixes:
+* Fix building in macOS 10.13 (GPU, macOS)
+* Properly round percent values when detecting volume (#1558, Sound)
+* Fix Physical Memory module doesn't work in `--format json` mode
+* Add some missing variable inits (GPU, Linux)
+* Fix `--localip-default-route-only false` not working with `--gen-config` (#1570, LocalIP)
+
+Logo:
+* Update Rosa linux
+* Add Haiku2
+
 # 2.36.1
 
 Changes:

@@ -2006,10 +2006,19 @@ static const FFlogo H[] = {
         .names = {"Haiku"},
         .lines = FASTFETCH_DATATEXT_LOGO_HAIKU,
         .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_DEFAULT,
             FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
+    // Haiku2
+    {
+        .names = {"Haiku2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HAIKU2,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_YELLOW,
@@ -4056,10 +4065,11 @@ static const FFlogo R[] = {
         .names = {"rosa", "rosa-linux", "rosalinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_ROSA,
         .colors = {
-            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RGB "250;250;250",
+            FF_COLOR_FG_RGB "100;165;225",
         },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_BLUE,
+        .colorKeys = FF_COLOR_FG_RGB "100;165;225",
+        .colorTitle = FF_COLOR_FG_RGB "100;165;225",
     },
     // RhinoLinux
     {

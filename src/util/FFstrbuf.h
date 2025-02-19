@@ -233,7 +233,7 @@ static inline void ffStrbufInit(FFstrbuf* strbuf)
     strbuf->chars = CHAR_NULL_PTR;
 }
 
-FF_C_NODISCARD static inline FFstrbuf ffStrbufCreate()
+FF_C_NODISCARD static inline FFstrbuf ffStrbufCreate(void)
 {
     FFstrbuf strbuf;
     ffStrbufInit(&strbuf);
