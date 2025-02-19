@@ -53,28 +53,31 @@ void ffDetectOSImpl(FFOSResult* os)
                         break;
 
                 FF_TEST_HAIKU_VERSION(1_ALPHA_1, "R1A1")
-                FF_TEST_HAIKU_VERSION(1_PRE_ALPHA_2, "R1AP2")
+                FF_TEST_HAIKU_VERSION(1_PRE_ALPHA_2, "R1A2-")
                 FF_TEST_HAIKU_VERSION(1_ALPHA_2, "R1A2")
-                FF_TEST_HAIKU_VERSION(1_PRE_ALPHA_3, "R1AP3")
+                FF_TEST_HAIKU_VERSION(1_PRE_ALPHA_3, "R1A3-")
                 FF_TEST_HAIKU_VERSION(1_ALPHA_3, "R1A3")
-                FF_TEST_HAIKU_VERSION(1_PRE_ALPHA_4, "R1AP4")
+                FF_TEST_HAIKU_VERSION(1_PRE_ALPHA_4, "R1A4-")
                 FF_TEST_HAIKU_VERSION(1_ALPHA_4, "R1A4")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_1, "R1BP1")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_1, "R1B1-")
                 FF_TEST_HAIKU_VERSION(1_BETA_1, "R1B1")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_2, "R1BP2")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_2, "R1B2-")
                 FF_TEST_HAIKU_VERSION(1_BETA_2, "R1B2")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_3, "R1BP3")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_3, "R1B3-")
                 FF_TEST_HAIKU_VERSION(1_BETA_3, "R1B3")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_4, "R1BP4")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_4, "R1B4-")
                 FF_TEST_HAIKU_VERSION(1_BETA_4, "R1B4")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_5, "R1BP5")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_5, "R1B5-")
                 FF_TEST_HAIKU_VERSION(1_BETA_5, "R1B5")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_6, "R1BP6")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_6, "R1B6-")
                 FF_TEST_HAIKU_VERSION(1_BETA_6, "R1B6")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_7, "R1BP7")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_7, "R1B7-")
                 FF_TEST_HAIKU_VERSION(1_BETA_7, "R1B7")
-                FF_TEST_HAIKU_VERSION(1_PRE_BETA_8, "R1BP8")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_8, "R1B8-")
                 FF_TEST_HAIKU_VERSION(1_BETA_8, "R1B8")
+                FF_TEST_HAIKU_VERSION(1_PRE_BETA_9, "R1B9-")
+                FF_TEST_HAIKU_VERSION(1_BETA_9, "R1B9")
+                FF_TEST_HAIKU_VERSION(1, "R1")
             }
 
             break;
@@ -84,6 +87,6 @@ void ffDetectOSImpl(FFOSResult* os)
     if (!os->version.length)
     {
         if (get_system_info(&sys) == B_OK)
-            ffStrbufAppendF(&os->version, "R%ld", sys.kernel_version);
+            ffStrbufAppendF(&os->version, "R%ldx", sys.kernel_version);
     }
 }
