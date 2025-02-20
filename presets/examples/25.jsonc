@@ -22,7 +22,7 @@
         },
         {
             "type": "os",
-            "key": "│  {icon}  {sysname}    │{$3}│{$2}"
+            "key": "│  {icon}  \u001b[s{sysname}\u001b[u\u001b[10C│{$3}│{$2}"
         },
         {
             "type": "datetime",
