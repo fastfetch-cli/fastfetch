@@ -905,7 +905,7 @@ elseif(APPLE)
         src/detection/bootmgr/bootmgr_apple.c
         src/detection/brightness/brightness_apple.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_apple.c
         src/detection/cpu/cpu_apple.c
         src/detection/cpucache/cpucache_apple.c
         src/detection/cpuusage/cpuusage_apple.c
