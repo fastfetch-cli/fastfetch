@@ -83,6 +83,11 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Rhino Linux "));
         return;
     }
+    else if(ffStrbufStartsWithS(&result->prettyName, "VanillaOS "))
+    {
+        ffStrbufSetS(&result->id, "vanilla");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+    }
 
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
