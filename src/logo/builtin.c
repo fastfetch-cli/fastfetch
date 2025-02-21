@@ -2558,7 +2558,7 @@ static const FFlogo L[] = {
     // LinuxMint
     {
         .names = {"linuxmint", "linux-mint"},
-        .lines = FASTFETCH_DATATEXT_LOGO_MINT,
+        .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT,
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_WHITE,
@@ -2570,7 +2570,7 @@ static const FFlogo L[] = {
     {
         .names = {"linuxmint_small", "linux-mint_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_MINT_SMALL,
+        .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_WHITE,
@@ -2582,7 +2582,7 @@ static const FFlogo L[] = {
     {
         .names = {"linuxmint_old", "linux-mint_old"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_MINT_OLD,
+        .lines = FASTFETCH_DATATEXT_LOGO_LINUXMINT_OLD,
         .colors = {
             FF_COLOR_FG_GREEN,
             FF_COLOR_FG_WHITE,
@@ -2923,41 +2923,6 @@ static const FFlogo M[] = {
         },
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_WHITE,
-    },
-    // Mint
-    {
-        .names = {"mint", "mint-linux"},
-        .lines = FASTFETCH_DATATEXT_LOGO_MINT,
-        .colors = {
-            FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
-    },
-    // MintSmall
-    {
-        .names = {"mint_small", "mint-linux-small"},
-        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_MINT_SMALL,
-        .colors = {
-            FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
-    },
-    // MintOld
-    {
-        .names = {"mint_old", "mint-old", "mint-linux_old", "mint-linux-old"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
-        .lines = FASTFETCH_DATATEXT_LOGO_MINT_OLD,
-        .colors = {
-            FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_WHITE,
-        },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
     },
     // Minix
     {
