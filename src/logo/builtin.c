@@ -3660,9 +3660,9 @@ static const FFlogo P[] = {
             FF_COLOR_FG_YELLOW,
         },
     },
-    // Pisi
+    // PisiLinux
     {
-        .names = {"Pisi"},
+        .names = {"PisiLinux"},
         .lines = FASTFETCH_DATATEXT_LOGO_PISI,
         .colors = {
             FF_COLOR_FG_BLUE,

@@ -77,6 +77,7 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(pacstall)
         FF_PRINT_PACKAGE(mport)
         FF_PRINT_PACKAGE(qi)
+        FF_PRINT_PACKAGE(pisi)
 
         putchar('\n');
     }
@@ -128,6 +129,7 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.pkgsrc, "pkgsrc"),
             FF_FORMAT_ARG(counts.hpkgSystem, "hpkg-system"),
             FF_FORMAT_ARG(counts.hpkgUser, "hpkg-user"),
+            FF_FORMAT_ARG(counts.pisi, "pisi"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -206,6 +208,7 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     FF_TEST_PACKAGE_NAME(PACMAN)
                     FF_TEST_PACKAGE_NAME(PACSTALL)
                     FF_TEST_PACKAGE_NAME(PALUDIS)
+                    FF_TEST_PACKAGE_NAME(PISI)
                     FF_TEST_PACKAGE_NAME(PKG)
                     FF_TEST_PACKAGE_NAME(PKGTOOL)
                     FF_TEST_PACKAGE_NAME(PKGSRC)
@@ -324,6 +327,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             FF_TEST_PACKAGE_NAME(PACMAN)
                             FF_TEST_PACKAGE_NAME(PACSTALL)
                             FF_TEST_PACKAGE_NAME(PALUDIS)
+                            FF_TEST_PACKAGE_NAME(PISI)
                             FF_TEST_PACKAGE_NAME(PKG)
                             FF_TEST_PACKAGE_NAME(PKGTOOL)
                             FF_TEST_PACKAGE_NAME(PKGSRC)
@@ -388,6 +392,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(PACMAN)
         FF_TEST_PACKAGE_NAME(PACSTALL)
         FF_TEST_PACKAGE_NAME(PALUDIS)
+        FF_TEST_PACKAGE_NAME(PISI)
         FF_TEST_PACKAGE_NAME(PKG)
         FF_TEST_PACKAGE_NAME(PKGTOOL)
         FF_TEST_PACKAGE_NAME(PKGSRC)
@@ -445,6 +450,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(pacman)
     FF_APPEND_PACKAGE_COUNT(pacstall)
     FF_APPEND_PACKAGE_COUNT(paludis)
+    FF_APPEND_PACKAGE_COUNT(pisi)
     FF_APPEND_PACKAGE_COUNT(pkg)
     FF_APPEND_PACKAGE_COUNT(pkgtool)
     FF_APPEND_PACKAGE_COUNT(pkgsrc)
@@ -508,6 +514,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of pkgsrc packages", "pkgsrc"},
         {"Number of hpkg-system packages", "hpkg-system"},
         {"Number of hpkg-user packages", "hpkg-user"},
+        {"Number of pisi packages", "pisi"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
