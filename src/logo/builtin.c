@@ -643,6 +643,17 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // BedrockSmall
+    {
+        .names = {"bedrock_small", "bedrocklinux_small", "bedrock-linux_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK_SMALL,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // BigLinux
     {
         .names = {"BigLinux"},
