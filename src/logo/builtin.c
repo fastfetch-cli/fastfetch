@@ -634,7 +634,7 @@ static const FFlogo A[] = {
 static const FFlogo B[] = {
     // Bedrock
     {
-        .names = {"bedrock", "bedrocklinux", "bedrock-linux"},
+        .names = {"bedrock"},
         .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK, //grey
@@ -645,7 +645,7 @@ static const FFlogo B[] = {
     },
     // BedrockSmall
     {
-        .names = {"bedrock_small", "bedrocklinux_small", "bedrock-linux_small"},
+        .names = {"bedrock_small"},
         .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
