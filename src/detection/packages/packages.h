@@ -32,6 +32,7 @@ typedef struct FFPackagesResult
     uint32_t pacman;
     uint32_t pacstall;
     uint32_t paludis;
+    uint32_t pisi;
     uint32_t pkg;
     uint32_t pkgsrc;
     uint32_t pkgtool;
