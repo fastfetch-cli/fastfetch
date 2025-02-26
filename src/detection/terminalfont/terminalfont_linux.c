@@ -475,4 +475,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "Terminal"))
         detectHaikuTerminal(terminalFont);
     #endif
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "termite"))
+        detectFromConfigFile("termite/config", "font =", terminalFont);
 }
