@@ -707,6 +707,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionSakura(FFstrbuf* exe, FFstrbuf* ve
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
+
+FF_MAYBE_UNUSED static bool getTerminalVersionTermite(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL) // termite v16.9\nvte 0.78.1 +BIDI +GNUTLS +ICU +SYSTEMD
+        return false;
+
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+    ffStrbufSubstrAfterLastC(version, 'v');
+    return true;
+}
 #endif
 
 #ifdef _WIN32
@@ -811,6 +825,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufIgnCaseEqualS(processName, "sakura"))
         return getTerminalVersionSakura(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "termite"))
+        return getTerminalVersionTermite(exe, version);
 
     #endif
 
