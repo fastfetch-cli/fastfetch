@@ -5,6 +5,7 @@ Bugfixes:
 * Fix `{day-pretty}` output in custom format (DateTime, Windows)
 * Fix VanillaOS detection (OS, Linux)
 * Fix secure boot testing (Bootmgr, Linux)
+* Fix the SI unit "kB" in help message
 
 Features:
 * Support Chassis module in macOS (Chassis, macOS)

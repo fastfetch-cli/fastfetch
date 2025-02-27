@@ -786,11 +786,11 @@
                                 },
                                 {
                                     "const": "si",
-                                    "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
+                                    "description": "1000 Bytes = 1 kB, 1000 kB = 1 MB, ..."
                                 },
                                 {
                                     "const": "jedec",
-                                    "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
+                                    "description": "1024 Bytes = 1 KB, 1024 KB = 1 MB, ..."
                                 }
                             ]
                         },

@@ -683,8 +683,8 @@
                 "type": "enum",
                 "enum": {
                     "IEC": "1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ...",
-                    "SI": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ...",
-                    "JEDEC": "1024 Bytes = 1 kB, 1024 kB = 1 MB, ..."
+                    "SI": "1000 Bytes = 1 kB, 1000 kB = 1 MB, ...",
+                    "JEDEC": "1024 Bytes = 1 KB, 1024 KB = 1 MB, ..."
                 },
                 "default": "IEC"
             }
