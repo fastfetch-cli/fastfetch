@@ -1,3 +1,26 @@
+# 2.38.0
+
+Bugfixes:
+* Fix empty battery slots handling (Battery, Haiku)
+* Fix `{day-pretty}` output in custom format (DateTime, Windows)
+* Fix VanillaOS detection (OS, Linux)
+* Fix secure boot testing (Bootmgr, Linux)
+
+Features:
+* Support Chassis module in macOS (Chassis, macOS)
+* Allow customize key format with kernel name and distro name (OS)
+* Add missing `{icon}` in custom key format (Battery)
+* Add missing `{mountpoint}` and `{mount-from}` in custom output format (Disk, #1577)
+* Support percentage num & bar in custom format (GPU, #1583)
+* Support `pisi` package manager detection (Packages, Linux)
+* Support termite terminal font detection (TerminalFont, Linux)
+* Report monitor type in Brightness module (Brightness)
+
+Logo:
+* Add `opensuse-tumbleweed_small`
+* Add `Bedrock_small`
+* Remove some unnecessary distro names
+
 # 2.37.0
 
 Changes:
