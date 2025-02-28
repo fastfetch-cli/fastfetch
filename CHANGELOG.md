@@ -20,6 +20,7 @@ Features:
 Logo:
 * Add `opensuse-tumbleweed_small`
 * Add `Bedrock_small`
+* Add `fastfetch`
 * Remove some unnecessary distro names
 
 # 2.37.0
