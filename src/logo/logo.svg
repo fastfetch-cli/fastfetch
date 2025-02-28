@@ -1,0 +1,26 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect x="0" y="0" width="400" height="400" rx="15" ry="15" fill="#282c34" stroke="#3498db" stroke-width="3"/>
+  <path d="M15,0 h370 a15,15 0 0 1 15,15 v25 h-400 v-25 a15,15 0 0 1 15,-15 z" fill="#3498db" opacity="0.2"/>
+  <text x="190" y="28" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#ecf0f1">FASTFETCH</text>
+  <circle cx="25" cy="20" r="7" fill="#e74c3c"/>
+  <circle cx="45" cy="20" r="7" fill="#f1c40f"/>
+  <circle cx="65" cy="20" r="7" fill="#2ecc71"/>
+  <line x1="0" y1="40" x2="400" y2="40" stroke="#3498db" stroke-width="2"/>
+  <g>
+    <g transform="translate(0, 100) scale(3.2)">
+      <path d="M30,0 L40,15 L20,15 Z" fill="#e74c3c"/>
+      <rect x="20" y="15" width="20" height="40" fill="#ecf0f1"/>
+      <rect x="22" y="20" width="16" height="10" fill="#95a5a6"/>
+      <path d="M20,55 L20,65 L40,65 L40,55 Z" fill="#7f8c8d"/>
+      <path d="M22,65 L25,75 L29,65 Z" fill="#e67e22"/>
+      <path d="M31,65 L35,75 L38,65 Z" fill="#e67e22"/>
+    </g>
+    <g transform="translate(-30, 0)" fill="#3498db">
+      <text x="220" y="130" font-family="monospace" font-size="32" fill="#2980b9">►►►►►►►</text>
+      <text x="220" y="175" font-family="monospace" font-size="32" fill="#2980b9">►►►►►►</text>
+      <text x="220" y="220" font-family="monospace" font-size="32" fill="#2980b9">►►►►►</text>
+      <text x="220" y="265" font-family="monospace" font-size="32" fill="#2980b9">►►►►</text>
+      <text x="220" y="310" font-family="monospace" font-size="32" fill="#2980b9">►►►</text>
+    </g>
+  </g>
+</svg>

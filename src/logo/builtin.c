@@ -1581,6 +1581,22 @@ static const FFlogo E[] = {
 };
 
 static const FFlogo F[] = {
+    // Fastfetch
+    {
+        .names = {"Fastfetch", "FF"},
+        .lines = FASTFETCH_DATATEXT_LOGO_FASTFETCH,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_DEFAULT,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_CYAN,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_YELLOW,
+    },
     // Fedora
     {
         .names = {"Fedora"},
