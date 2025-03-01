@@ -4232,6 +4232,15 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Shebang
+    {
+        .names = {"Shebang"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SHEBANG,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Siduction
     {
         .names = {"Siduction"},
