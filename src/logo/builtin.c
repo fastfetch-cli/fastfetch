@@ -4232,6 +4232,15 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // Shebang
+    {
+        .names = {"Shebang"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SHEBANG,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Siduction
     {
         .names = {"Siduction"},
@@ -4502,15 +4511,6 @@ static const FFlogo S[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_SWAGARCH,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_WHITE,
-        },
-    },
-    // Shebang
-    {
-        .names = {"Shebang Linux", "Shebang", "shebang"},
-        .lines = FASTFETCH_DATATEXT_LOGO_SHEBANG,
-        .colors = {
-            FF_COLOR_FG_WHITE,
             FF_COLOR_FG_WHITE,
         },
     },
