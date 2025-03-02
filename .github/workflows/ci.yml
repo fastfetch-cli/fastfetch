@@ -422,19 +422,11 @@ jobs:
         run: |
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: c
-
       - name: configure project
         run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
-
-      - name: perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
 
       - name: list features
         run: ./fastfetch --list-features
