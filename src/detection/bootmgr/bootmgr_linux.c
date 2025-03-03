@@ -20,7 +20,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
 
     ffEfiFillLoadOption((FFEfiLoadOption *)&buffer[4], result);
 
-    if (ffReadFileData(FF_EFIVARS_PATH_PREFIX "SecureBoot-" FF_EFI_GLOBAL_GUID, sizeof(buffer), buffer) == 6)
+    if (ffReadFileData(FF_EFIVARS_PATH_PREFIX "SecureBoot-" FF_EFI_GLOBAL_GUID, sizeof(buffer), buffer) >= 5)
         result->secureBoot = buffer[4] == 1;
 
     return NULL;

@@ -18,6 +18,9 @@ const char* parseBattery(int dfd, const char* battId, FFlist* results)
     if (ioctl(fd, GET_EXTENDED_BATTERY_INFO, &extended, sizeof(extended)) != 0)
         return "ioctl(GET_EXTENDED_BATTERY_INFO) failed";
 
+    if (extended.last_full_charge == (uint32)-1)
+        return "Skipped";
+
     FFBatteryResult* battery = (FFBatteryResult*)ffListAdd(results);
     ffStrbufInitS(&battery->modelName, extended.model_number);
     ffStrbufInitS(&battery->manufacturer, extended.oem_info);

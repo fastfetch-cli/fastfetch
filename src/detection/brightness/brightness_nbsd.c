@@ -7,7 +7,7 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
     // https://man.netbsd.org/NetBSD-10.1/acpiout.4#DESCRIPTION
     char key[] = "hw.acpi.acpiout0.brightness";
     char* pn = key + strlen("hw.acpi.acpiout");
-    
+
     for (uint32_t i = 0; i <= 9; ++i)
     {
         *pn = (char) ('0' + i);
@@ -20,6 +20,7 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
         brightness->max = 100;
         brightness->min = 0;
         brightness->current = value;
+        brightness->builtin = true;
     }
     return NULL;
 }

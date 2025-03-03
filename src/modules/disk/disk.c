@@ -156,6 +156,8 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             FF_FORMAT_ARG(minutes, "minutes"),
             FF_FORMAT_ARG(seconds, "seconds"),
             FF_FORMAT_ARG(milliseconds, "milliseconds"),
+            FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
+            FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
         }));
     }
 }
@@ -483,6 +485,8 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Minutes after creation", "minutes"},
         {"Seconds after creation", "seconds"},
         {"Milliseconds after creation", "milliseconds"},
+        {"Mount point / drive letter", "mountpoint"},
+        {"Mount from (device path)", "mount-from"},
     }))
 };
 

@@ -183,7 +183,7 @@
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format of the module `Disk`. See `-h format` for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation",
+            "description": "Output format of the module `Disk`. See `-h format` for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)",
             "type": "string"
         },
         "diskioFormat": {
@@ -207,7 +207,7 @@
             "type": "string"
         },
         "gpuFormat": {
-            "description": "Output format of the module `GPU`. See `-h format` for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index",
+            "description": "Output format of the module `GPU`. See `-h format` for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num (supports Nvidia & Apple GPU only)\n    19. {core-usage-bar}: Core usage percentage bar (supports Nvidia & Apple GPU only)",
             "type": "string"
         },
         "hostFormat": {
@@ -279,7 +279,7 @@
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format of the module `Packages`. See `-h format` for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop}: Number of scoop packages\n    21. {choco}: Number of choco packages\n    22. {pkgtool}: Number of pkgtool packages\n    23. {paludis}: Number of paludis packages\n    24. {winget}: Number of winget packages\n    25. {opkg}: Number of opkg packages\n    26. {am-system}: Number of am-system packages\n    27. {sorcery}: Number of sorcery packages\n    28. {lpkg}: Number of lpkg packages\n    29. {lpkgbuild}: Number of lpkgbuild packages\n    30. {guix-system}: Number of guix-system packages\n    31. {guix-user}: Number of guix-user packages\n    32. {guix-home}: Number of guix-home packages\n    33. {linglong}: Number of linglong packages\n    34. {pacstall}: Number of pacstall packages\n    35. {mport}: Number of mport packages\n    36. {qi}: Number of qi packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {nix-all}: Total number of all nix packages\n    40. {flatpak-all}: Total number of all flatpak app packages\n    41. {brew-all}: Total number of all brew packages\n    42. {guix-all}: Total number of all guix packages",
+            "description": "Output format of the module `Packages`. See `-h format` for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop}: Number of scoop packages\n    21. {choco}: Number of choco packages\n    22. {pkgtool}: Number of pkgtool packages\n    23. {paludis}: Number of paludis packages\n    24. {winget}: Number of winget packages\n    25. {opkg}: Number of opkg packages\n    26. {am-system}: Number of am-system packages\n    27. {sorcery}: Number of sorcery packages\n    28. {lpkg}: Number of lpkg packages\n    29. {lpkgbuild}: Number of lpkgbuild packages\n    30. {guix-system}: Number of guix-system packages\n    31. {guix-user}: Number of guix-user packages\n    32. {guix-home}: Number of guix-home packages\n    33. {linglong}: Number of linglong packages\n    34. {pacstall}: Number of pacstall packages\n    35. {mport}: Number of mport packages\n    36. {qi}: Number of qi packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {nix-all}: Total number of all nix packages\n    43. {flatpak-all}: Total number of all flatpak app packages\n    44. {brew-all}: Total number of all brew packages\n    45. {guix-all}: Total number of all guix packages\n    46. {hpkg-all}: Total number of all hpkg packages",
             "type": "string"
         },
         "physicaldiskFormat": {
@@ -786,11 +786,11 @@
                                 },
                                 {
                                     "const": "si",
-                                    "description": "1000 Bytes = 1 KB, 1000 KB = 1 MB, ..."
+                                    "description": "1000 Bytes = 1 kB, 1000 kB = 1 MB, ..."
                                 },
                                 {
                                     "const": "jedec",
-                                    "description": "1024 Bytes = 1 kB, 1024 K = 1 MB, ..."
+                                    "description": "1024 Bytes = 1 KB, 1024 KB = 1 MB, ..."
                                 }
                             ]
                         },
@@ -2652,6 +2652,7 @@
                                                 "pacman",
                                                 "pacstall",
                                                 "paludis",
+                                                "pisi",
                                                 "pkg",
                                                 "pkgtool",
                                                 "qi",

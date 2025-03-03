@@ -25,6 +25,7 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
     brightness->max = param.max;
     brightness->min = param.min;
     brightness->current = param.curval;
+    brightness->builtin = true;
 
     return NULL;
 }
