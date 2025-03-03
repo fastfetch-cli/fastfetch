@@ -1,11 +1,12 @@
 # 2.38.0
 
 Bugfixes:
-* Fix empty battery slots handling (Battery, Haiku)
+* Fix empty battery slots handling (Battery, Haiku, #1575)
 * Fix `{day-pretty}` output in custom format (DateTime, Windows)
 * Fix VanillaOS detection (OS, Linux)
-* Fix secure boot testing (Bootmgr, Linux)
-* Fix the SI unit "kB" in help message
+* Fix secure boot testing (Bootmgr, Linux, #1584)
+* Fix the SI unit "kB" in help message (#1589)
+* Fix segfault on macOS 10.15 when using the binary downloaded from Github Releases (Camera, macOS, #1594)
 
 Features:
 * Support Chassis module in macOS (Chassis, macOS)
