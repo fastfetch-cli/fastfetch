@@ -37,7 +37,7 @@ bool ffKmodLoaded(const char* modName)
 #include <sys/module.h>
 #include <sys/param.h>
 
-typedef struct FFNbsdModList
+typedef struct __attribute__((__packed__)) FFNbsdModList
 {
     int len;
     modstat_t mods[];
