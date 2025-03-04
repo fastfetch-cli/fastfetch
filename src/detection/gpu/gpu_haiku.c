@@ -14,7 +14,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         .info = &dev,
     };
 
-    for (cmd.index = 0; ioctl(pokefd, POKE_GET_NTH_PCI_INFO, &cmd) == B_OK && cmd.status == B_OK; ++cmd.index)
+    for (cmd.index = 0; ioctl(pokefd, POKE_GET_NTH_PCI_INFO, &cmd, sizeof(cmd)) == B_OK && cmd.status == B_OK; ++cmd.index)
     {
         if (dev.class_base != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
             continue;

@@ -27,6 +27,8 @@ static bool getFileVersion(const FFstrbuf* exePath, FFstrbuf* version)
     if (len <= 0) return false;
     return ffGetFileVersion(exePathW, version);
 }
+#elif __HAIKU__
+    #include "util/haiku/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
@@ -705,6 +707,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionSakura(FFstrbuf* exe, FFstrbuf* ve
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
+
+FF_MAYBE_UNUSED static bool getTerminalVersionTermite(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL) // termite v16.9\nvte 0.78.1 +BIDI +GNUTLS +ICU +SYSTEMD
+        return false;
+
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+    ffStrbufSubstrAfterLastC(version, 'v');
+    return true;
+}
 #endif
 
 #ifdef _WIN32
@@ -810,6 +826,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "sakura"))
         return getTerminalVersionSakura(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "termite"))
+        return getTerminalVersionTermite(exe, version);
+
     #endif
 
     #ifdef _WIN32
@@ -846,6 +865,11 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "zed"))
         return getTerminalVersionZed(exe, version);
+
+    #if __HAIKU__
+    if(ffStrbufEqualS(processName, "Terminal"))
+        return ffGetFileVersion(exe->chars, version);
+    #endif
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)

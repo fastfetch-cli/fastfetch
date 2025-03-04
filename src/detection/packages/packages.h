@@ -18,6 +18,8 @@ typedef struct FFPackagesResult
     uint32_t guixHome;
     uint32_t guixSystem;
     uint32_t guixUser;
+    uint32_t hpkgSystem;
+    uint32_t hpkgUser;
     uint32_t linglong;
     uint32_t lpkg;
     uint32_t lpkgbuild;
@@ -30,6 +32,7 @@ typedef struct FFPackagesResult
     uint32_t pacman;
     uint32_t pacstall;
     uint32_t paludis;
+    uint32_t pisi;
     uint32_t pkg;
     uint32_t pkgsrc;
     uint32_t pkgtool;

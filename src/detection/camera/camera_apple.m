@@ -16,18 +16,18 @@ const char* ffDetectCamera(FFlist* result)
     #ifdef MAC_OS_X_VERSION_10_15
     FF_SUPPRESS_IO(); // #822
 
-    AVCaptureDeviceType deviceType;
+    AVCaptureDeviceType deviceType = NULL;
 
     #ifdef MAC_OS_VERSION_14_0
+    // Strangely `@available(macOS 14.0, *)` doesn't work here (#1594)
     if (@available(macOS 14.0, *))
     {
-        deviceType = AVCaptureDeviceTypeExternal;
+        if (&AVCaptureDeviceTypeExternal)
+            deviceType = AVCaptureDeviceTypeExternal;
     }
-    else
     #endif
-    {
+    if (deviceType == NULL)
         deviceType = AVCaptureDeviceTypeExternalUnknown;
-    }
 
     AVCaptureDeviceDiscoverySession* session = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:@[AVCaptureDeviceTypeBuiltInWideAngleCamera, deviceType]
                                                                                 mediaType:AVMediaTypeVideo

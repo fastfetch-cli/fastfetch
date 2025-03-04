@@ -54,7 +54,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     result.dayInYear = (uint8_t) (tm->tm_yday + 1);
     result.dayInMonth = (uint8_t) tm->tm_mday;
     result.dayInWeek = tm->tm_wday == 0 ? 7 : (uint8_t) tm->tm_wday;
-    strftime(result.dayPretty, sizeof(result.dayPretty), "%0d", tm);
+    strftime(result.dayPretty, sizeof(result.dayPretty), "%d", tm);
     result.hour = (uint8_t) tm->tm_hour;
     strftime(result.hourPretty, sizeof(result.hourPretty), "%H", tm);
     result.hour12 = (uint8_t) (result.hour % 12);

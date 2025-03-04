@@ -315,17 +315,17 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     #elif defined(__HAIKU__)
 
-    if (exePath)
-    {
-        image_info info;
-        int32 cookie = 0;
+    image_info info;
+    int32 cookie = 0;
 
-        while (get_next_image_info(pid, &cookie, &info) == B_OK)
-        {
-            if (info.type != B_APP_IMAGE) continue;
-            ffStrbufSetS(exePath, info.name);
-            break;
-        }
+    while (get_next_image_info(pid, &cookie, &info) == B_OK)
+    {
+        if (info.type != B_APP_IMAGE) continue;
+        ffStrbufSetS(exe, info.name);
+
+        if (exePath)
+            ffStrbufSet(exePath, exe);
+        break;
     }
 
     #endif

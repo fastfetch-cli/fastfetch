@@ -24,6 +24,7 @@ static const char* detectWithWmi(FFlist* result)
             brightness->max = 100;
             brightness->min = 0;
             brightness->current = vtValue.get<uint8_t>();
+            brightness->builtin = true;
 
             ffStrbufInit(&brightness->name);
             if (FFWmiVariant vtName = record.get(L"InstanceName"))
@@ -61,6 +62,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                 brightness->max = max;
                 brightness->min = min;
                 brightness->current = curr;
+                brightness->builtin = false;
             }
         }
     }

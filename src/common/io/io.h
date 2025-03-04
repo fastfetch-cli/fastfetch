@@ -119,7 +119,7 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
     }
     else
     {
-        #if __APPLE__ // #1395
+        #if (__APPLE__ || __HAIKU__) // #1395
         struct stat fileStat;
         if(stat(path, &fileStat) != 0)
             return false;

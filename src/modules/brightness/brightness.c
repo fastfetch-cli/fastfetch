@@ -82,6 +82,8 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 ffPercentAppendNum(&str, percent, options->percent, str.length > 0, &options->moduleArgs);
             }
 
+            ffStrbufAppendS(&str, item->builtin ? " [Built-in]" : " [External]");
+
             ffStrbufPutTo(&str, stdout);
         }
         else
@@ -100,6 +102,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
                 FF_FORMAT_ARG(item->min, "min"),
                 FF_FORMAT_ARG(item->current, "current"),
                 FF_FORMAT_ARG(valueBar, "percentage-bar"),
+                FF_FORMAT_ARG(item->builtin, "is-builtin"),
             }));
         }
 
@@ -204,6 +207,7 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
         yyjson_mut_obj_add_real(doc, obj, "max", item->max);
         yyjson_mut_obj_add_real(doc, obj, "min", item->min);
         yyjson_mut_obj_add_real(doc, obj, "current", item->current);
+        yyjson_mut_obj_add_bool(doc, obj, "builtin", item->builtin);
     }
 
     FF_LIST_FOR_EACH(FFBrightnessResult, item, result)
@@ -227,6 +231,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Minimum brightness value", "min"},
         {"Current brightness value", "current"},
         {"Screen brightness (percentage bar)", "percentage-bar"},
+        {"Is built-in screen", "is-builtin"},
     }))
 };
 

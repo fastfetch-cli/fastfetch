@@ -42,6 +42,7 @@ static const char* detectWithDisplayServices(const FFDisplayServerResult* displa
                 brightness->max = 1;
                 brightness->min = 0;
                 ffStrbufInitCopy(&brightness->name, &display->name);
+                brightness->builtin = true;
             }
         }
     }
@@ -111,6 +112,7 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
             brightness->min = 0;
             brightness->current = current;
             ffStrbufInit(&brightness->name);
+            brightness->builtin = false;
 
             uint8_t edid[128] = {};
             if (IOAVServiceReadI2C(service, 0x50, 0x00, edid, ARRAY_SIZE(edid)) == KERN_SUCCESS)
@@ -179,6 +181,7 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
             brightness->min = 0;
             brightness->current = current;
             ffStrbufInitCopy(&brightness->name, &display->name);
+            brightness->builtin = false;
         }
     }
 

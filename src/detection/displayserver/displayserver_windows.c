@@ -189,26 +189,47 @@ static void detectDisplays(FFDisplayServerResult* ds)
 
             if (display)
             {
-                DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO advColorInfo = {
+                DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO_2 advColorInfo2 = {
                     .header = {
-                        .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO,
-                        .size = sizeof(advColorInfo),
+                        .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO_2,
+                        .size = sizeof(advColorInfo2),
                         .adapterId = path->targetInfo.adapterId,
                         .id = path->targetInfo.id,
                     }
                 };
-                if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS)
+                if (DisplayConfigGetDeviceInfo(&advColorInfo2.header) == ERROR_SUCCESS)
                 {
-                    if (advColorInfo.advancedColorEnabled)
+                    if (advColorInfo2.highDynamicRangeUserEnabled)
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
-                    else if (advColorInfo.advancedColorSupported)
+                    else if (advColorInfo2.highDynamicRangeSupported)
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
                     else
                         display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-                    display->bitDepth = (uint8_t) advColorInfo.bitsPerColorChannel;
+                    display->bitDepth = (uint8_t) advColorInfo2.bitsPerColorChannel;
                 }
                 else
-                    display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+                {
+                    DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO advColorInfo = {
+                        .header = {
+                            .type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO,
+                            .size = sizeof(advColorInfo),
+                            .adapterId = path->targetInfo.adapterId,
+                            .id = path->targetInfo.id,
+                        }
+                    };
+                    if (DisplayConfigGetDeviceInfo(&advColorInfo.header) == ERROR_SUCCESS)
+                    {
+                        if (advColorInfo.advancedColorEnabled)
+                            display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+                        else if (advColorInfo.advancedColorSupported)
+                            display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+                        else
+                            display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+                        display->bitDepth = (uint8_t) advColorInfo.bitsPerColorChannel;
+                    }
+                    else
+                        display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+                }
                 if (edidLength > 0)
                     ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
             }
