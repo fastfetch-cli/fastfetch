@@ -1093,6 +1093,16 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Common Torizon
+    {
+        .names = {"common-torizon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TORIZONCORE,
+        .colors = {
+            FF_COLOR_FG_LIGHT_WHITE,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE
+        },
+    },
     // Cosmic DE
     {
         .names = {"Cosmic"},
