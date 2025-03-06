@@ -21,44 +21,41 @@ inline static NSDictionary* getWifiInfoByApple80211(CWInterface* inf)
     return CFBridgingRelease(result);
 }
 
-static NSDictionary* getWifiInfoBySystemProfiler(NSString* ifName)
+static bool queryIpconfig(const char* ifName, FFstrbuf* result)
 {
-    // Warning: costs about 2s on my machine
-    static NSArray* spData;
-    static bool inited;
-    if (!inited)
-    {
-        inited = true;
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        if (ffProcessAppendStdOut(&buffer, (char* const[]) {
-            "system_profiler",
-            "SPAirPortDataType",
-            "-xml",
-            "-detailLevel",
-            "basic",
-            NULL
-        }) != NULL)
-            return nil;
+    return ffProcessAppendStdOut(result, (char* const[]) {
+        "/usr/sbin/ipconfig",
+        "getsummary",
+        (char* const) ifName,
+        NULL
+    }) == NULL;
+}
 
-        spData = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytes:buffer.chars length:buffer.length]
-                                              options:NSPropertyListImmutable
-                                              format:nil
-                                              error:nil];
-    }
+static bool getWifiInfoByIpconfig(FFstrbuf* ipconfig, const char* prefix, FFstrbuf* result)
+{
+    // `ipconfig getsummary <interface>` returns a string like this:
+    // <dictionary> {
+    //   BSSID : <redacted>
+    //   IPv4 : <array> {
+    //   ...
+    //   }
+    //   IPv6 : <array> {
+    //   ...
+    //   }
+    //   InterfaceType : WiFi
+    //   LinkStatusActive : TRUE
+    //   NetworkID : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+    //   SSID : XXXXXX
+    //   Security : WPA2_PSK
+    // }
 
-    if (spData)
-    {
-        for (NSDictionary* data in spData[0][@"_items"])
-        {
-            for (NSDictionary* inf in data[@"spairport_airport_interfaces"])
-            {
-                if ([ifName isEqualToString:inf[@"_name"]])
-                    return inf[@"spairport_current_network_information"];
-            }
-        }
-    }
-
-    return NULL;
+    const char* start = memmem(ipconfig->chars, ipconfig->length, prefix, strlen(prefix));
+    if (!start) return false;
+    start += strlen(prefix);
+    const char* end = strchr(start, '\n');
+    if (!end) return false;
+    ffStrbufSetNS(result, (uint32_t) (end - start), start);
+    return false;
 }
 
 const char* ffDetectWifi(FFlist* result)
@@ -93,14 +90,14 @@ const char* ffDetectWifi(FFlist* result)
             continue;
 
         NSDictionary* apple = nil; // For getWifiInfoByApple80211
-        NSDictionary* sp = nil; // For getWifiInfoBySystemProfiler
+        FF_STRBUF_AUTO_DESTROY ipconfig = ffStrbufCreate();
 
         if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
         else if (apple || (apple = getWifiInfoByApple80211(inf)))
             ffStrbufAppendS(&item->conn.ssid, [apple[@"SSID_STR"] UTF8String]);
-        else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
-            ffStrbufAppendS(&item->conn.ssid, [sp[@"_name"] UTF8String]);
+        else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
+            getWifiInfoByIpconfig(&ipconfig, "\n  SSID : ", &item->conn.ssid);
         else
             ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
 
@@ -108,6 +105,8 @@ const char* ffDetectWifi(FFlist* result)
             ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
         else if (apple || (apple = getWifiInfoByApple80211(inf)))
             ffStrbufAppendS(&item->conn.bssid, [apple[@"BSSID"] UTF8String]);
+        else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
+            getWifiInfoByIpconfig(&ipconfig, "\n  BSSID : ", &item->conn.bssid);
 
         switch(inf.activePHYMode)
         {
@@ -138,22 +137,6 @@ const char* ffDetectWifi(FFlist* result)
             default:
                 if (inf.activePHYMode < 8)
                     ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
-                else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
-                {
-                    ffStrbufSetS(&item->conn.protocol, [sp[@"spairport_network_phymode"] UTF8String]);
-                    if (ffStrbufStartsWithS(&item->conn.protocol, "802.11"))
-                    {
-                        const char* subProtocol = item->conn.protocol.chars + strlen("802.11");
-                        if (ffStrEquals(subProtocol, "be"))
-                            ffStrbufSetStatic(&item->conn.protocol, "802.11be (Wi-Fi 7)");
-                        else if (ffStrEquals(subProtocol, "ax"))
-                            ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
-                        else if (ffStrEquals(subProtocol, "ac"))
-                            ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
-                        else if (ffStrEquals(subProtocol, "n"))
-                            ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
-                    }
-                }
                 break;
         }
         item->conn.signalQuality = (double) (inf.rssiValue >= -50 ? 100 : inf.rssiValue <= -100 ? 0 : (inf.rssiValue + 100) * 2);
@@ -266,26 +249,8 @@ const char* ffDetectWifi(FFlist* result)
                         }
                     }
                 }
-                else if (sp || (sp = getWifiInfoBySystemProfiler(inf.interfaceName)))
-                {
-                    ffStrbufSetS(&item->conn.security, [sp[@"spairport_security_mode"] UTF8String]);
-                    ffStrbufSubstrAfterFirstS(&item->conn.security, "_mode_");
-                    if (ffStrbufEqualS(&item->conn.security, "none"))
-                        ffStrbufSetStatic(&item->conn.security, "Insecure");
-                    else
-                    {
-                        ffStrbufReplaceAllC(&item->conn.security, '_', ' ');
-                        if (ffStrbufStartsWithS(&item->conn.security, "wpa"))
-                        {
-                            item->conn.security.chars[0] = 'W';
-                            item->conn.security.chars[1] = 'P';
-                            item->conn.security.chars[2] = 'A';
-                            char* sub = strchr(item->conn.security.chars, ' ');
-                            if (sub && sub[1])
-                                sub[1] = (char) toupper(sub[1]);
-                        }
-                    }
-                }
+                else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
+                    getWifiInfoByIpconfig(&ipconfig, "\n  Security : ", &item->conn.security);
                 break;
             default:
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);
