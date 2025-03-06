@@ -20,13 +20,14 @@
 #include "util/windows/version.h"
 #include <windows.h>
 
-static bool getFileVersion(const FFstrbuf* exePath, FFstrbuf* version)
+static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, FFstrbuf* version)
 {
     wchar_t exePathW[PATH_MAX];
     int len = MultiByteToWideChar(CP_UTF8, 0, exePath->chars, (int)exePath->length, exePathW, ARRAY_SIZE(exePathW));
     if (len <= 0) return false;
-    return ffGetFileVersion(exePathW, version);
+    return ffGetFileVersion(exePathW, stringName, version);
 }
+
 #elif __HAIKU__
     #include "util/haiku/version.h"
 #endif
@@ -98,7 +99,7 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
     }
 
     #ifdef _WIN32
-    if(getFileVersion(exe, version))
+    if(getFileVersion(exe, NULL, version))
     {
         ffStrbufSubstrBeforeLastC(version, '.');
         return true;
@@ -291,7 +292,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
     if(ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise"))
         return getShellVersionWinPowerShell(exe, version);
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
     #endif
 
     return false;
@@ -737,7 +738,7 @@ static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
         return true;
     }
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
 }
 
 static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
@@ -747,7 +748,7 @@ static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
     if(version->length)
         return true;
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
 }
 
 #endif
@@ -839,6 +840,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufStartsWithIgnCaseS(processName, "ConEmu"))
         return getTerminalVersionConEmu(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "warp.exe"))
+        return getFileVersion(exe, L"ProductVersion", version);
+
     #endif
 
     #ifndef _WIN32
@@ -914,7 +918,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #ifdef _WIN32
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
 
     #else
 

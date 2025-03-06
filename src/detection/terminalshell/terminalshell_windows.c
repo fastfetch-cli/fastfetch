@@ -87,7 +87,7 @@ static void setShellInfoDetails(FFShellResult* result)
                     if(wcsncmp(module.szModule, L"clink_dll_", strlen("clink_dll_")) == 0)
                     {
                         ffStrbufAppendS(&result->prettyName, " (with Clink ");
-                        ffGetFileVersion(module.szExePath, &result->prettyName);
+                        ffGetFileVersion(module.szExePath, NULL, &result->prettyName);
                         ffStrbufAppendC(&result->prettyName, ')');
                         break;
                     }
