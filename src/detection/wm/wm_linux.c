@@ -26,15 +26,15 @@ static bool extractHyprlandVersion(const char* line, FF_MAYBE_UNUSED uint32_t le
 static const char* getHyprland(FFstrbuf* result)
 {
     FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-    const char* error = ffFindExecutableInPath("Hyprland", &path);
-    if (error) return "Failed to find Hyprland executable path";
+    const char* error = ffFindExecutableInPath("hyprctl", &path);
+    if (error) return "Failed to find hyprctl executable path";
 
     if (ffBinaryExtractStrings(path.chars, extractHyprlandVersion, result, (uint32_t) strlen("v0.0.0")) == NULL)
         return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
         path.chars,
-        "--version",
+        "version",
         NULL
     }) == NULL)
     { // Hyprland 0.46.2 built from branch v0.46.2-b at... long and multi line
@@ -43,7 +43,7 @@ static const char* getHyprland(FFstrbuf* result)
         return NULL;
     }
 
-    return "Failed to run command `Hyprland --version`";
+    return "Failed to run command `hyprctl version`";
 }
 
 static bool extractSwayVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
