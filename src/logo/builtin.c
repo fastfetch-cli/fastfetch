@@ -4973,7 +4973,6 @@ static const FFlogo V[] = {
 };
 
 static const FFlogo W[] = {
-
     // WiiLinuxNgx
     {
         .names = {"WiiLinuxNgx"},
