@@ -766,6 +766,17 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // BredOS
+    {
+        .names = {"bredos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_BREDOS,
+        .colors = {
+            FF_COLOR_FG_BROWN, //grey
+            FF_COLOR_FG_BROWN,
+        },
+        .colorKeys = FF_COLOR_FG_BROWN, //grey
+        .colorTitle = FF_COLOR_FG_BROWN,
+    },
     // BSD
     {
         .names = {"BSD"},
