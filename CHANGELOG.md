@@ -1,3 +1,19 @@
+# 2.39.0
+
+Changes:
+* OSMesa backend for OpenGL detection is removed (#1618)
+* Fastfetch no longer tries to use the private framework `Apple80211` to acquire SSID for Wifi module, which is only useful for macOS Sonoma (Wifi, macOS)
+
+Features:
+* Improve accuracy of HDR support on Windows 11 24H2 (Display, Windows)
+* Improve performance of SSID detection on macOS Sequoia (Wifi, macOS, #1597)
+* Support warp terminal version detection on Windows (Terminal, Windows)
+
+Logo:
+* Add Common Torizon OS
+* Change FoxOS to WolfOS
+* Add Bredos
+
 # 2.38.0
 
 Bugfixes:
