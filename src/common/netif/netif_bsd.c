@@ -9,7 +9,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#ifdef __OpenBSD__
+#if defined(__OpenBSD__) || defined(__DragonFly__)
     #include <sys/sysctl.h>
 #endif
 
@@ -19,7 +19,7 @@
 # define ROUNDUP(a)           ROUNDUP2((a), sizeof(int))
 #elif defined(__NetBSD__)
 # define ROUNDUP(a)           ROUNDUP2((a), sizeof(uint64_t))
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 # define ROUNDUP(a)           ROUNDUP2((a), sizeof(int))
 #elif defined(__OpenBSD__)
 # define ROUNDUP(a)           ROUNDUP2((a), sizeof(int))
@@ -52,7 +52,7 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
 {
-    #if defined(__OpenBSD__)
+    #if defined(__OpenBSD__) || defined(__DragonFly__)
     int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY};
     size_t needed;
 

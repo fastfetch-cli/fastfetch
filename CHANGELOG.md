@@ -8,7 +8,7 @@ Features:
 * Improve accuracy of HDR support on Windows 11 24H2 (Display, Windows)
 * Improve performance of SSID detection on macOS Sequoia (Wifi, macOS, #1597)
 * Support warp terminal version detection on Windows (Terminal, Windows)
-* Support default route detection for OpenBSD (LocalIP, OpenBSD)
+* Support default route detection on OpenBSD & DragonFly BSD (LocalIP, OpenBSD / DragonFly)
 
 Logo:
 * Add Common Torizon OS
