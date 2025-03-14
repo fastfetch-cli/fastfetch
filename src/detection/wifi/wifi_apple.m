@@ -4,23 +4,6 @@
 
 #import <CoreWLAN/CoreWLAN.h>
 
-struct Apple80211; // https://code.google.com/archive/p/iphone-wireless/wikis/Apple80211.wiki
-
-// 0 is successful; < 0 is failure
-int Apple80211GetInfoCopy(struct Apple80211 *handle, CFDictionaryRef *info) __attribute__((weak_import));
-
-@interface CWInterface()
-@property (readonly) struct Apple80211* device;
-@end
-
-inline static NSDictionary* getWifiInfoByApple80211(CWInterface* inf)
-{
-    if (!inf.device || !Apple80211GetInfoCopy) return NULL;
-    CFDictionaryRef result = NULL;
-    if (Apple80211GetInfoCopy(inf.device, &result) < 0) return NULL;
-    return CFBridgingRelease(result);
-}
-
 static bool queryIpconfig(const char* ifName, FFstrbuf* result)
 {
     return ffProcessAppendStdOut(result, (char* const[]) {
@@ -89,13 +72,10 @@ const char* ffDetectWifi(FFlist* result)
         if(inf.interfaceMode == kCWInterfaceModeNone)
             continue;
 
-        NSDictionary* apple = nil; // For getWifiInfoByApple80211
         FF_STRBUF_AUTO_DESTROY ipconfig = ffStrbufCreate();
 
         if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        else if (apple || (apple = getWifiInfoByApple80211(inf)))
-            ffStrbufAppendS(&item->conn.ssid, [apple[@"SSID_STR"] UTF8String]);
         else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
             getWifiInfoByIpconfig(&ipconfig, "\n  SSID : ", &item->conn.ssid);
         else
@@ -103,8 +83,6 @@ const char* ffDetectWifi(FFlist* result)
 
         if (inf.bssid)
             ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
-        else if (apple || (apple = getWifiInfoByApple80211(inf)))
-            ffStrbufAppendS(&item->conn.bssid, [apple[@"BSSID"] UTF8String]);
         else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
             getWifiInfoByIpconfig(&ipconfig, "\n  BSSID : ", &item->conn.bssid);
 
@@ -193,63 +171,8 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufSetStatic(&item->conn.security, "OWE Transition");
                 break;
             case kCWSecurityUnknown:
-                // Sonoma...
-                if (apple || (apple = getWifiInfoByApple80211(inf)))
-                {
-                    NSDictionary* authType = apple[@"AUTH_TYPE"];
-                    if (authType)
-                    {
-                        // AUTH_LOWER seems useless. `airport` verifies if its value is between 1 and 3, and prints `unknown` if not
-
-                        NSNumber* authUpper = authType[@"AUTH_UPPER"];
-                        if (!authUpper)
-                            ffStrbufSetStatic(&item->conn.security, "Insecure");
-                        else
-                        {
-                            int authUpperValue = authUpper.intValue;
-                            switch (authUpperValue)
-                            {
-                                case 1:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA");
-                                    break;
-                                case 2:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA-PSK");
-                                    break;
-                                case 4:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA2");
-                                    break;
-                                case 8:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA2-PSK");
-                                    break;
-                                case 16:
-                                    ffStrbufSetStatic(&item->conn.security, "FT-WPA2-PSK");
-                                    break;
-                                case 32:
-                                    ffStrbufSetStatic(&item->conn.security, "LEAP");
-                                    break;
-                                case 64:
-                                    ffStrbufSetStatic(&item->conn.security, "802.1X");
-                                    break;
-                                case 128:
-                                    ffStrbufSetStatic(&item->conn.security, "FT-WPA2");
-                                    break;
-                                case 256:
-                                    ffStrbufSetStatic(&item->conn.security, "WPS");
-                                    break;
-                                case 4096:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA3-SAE");
-                                    break;
-                                case 8192:
-                                    ffStrbufSetStatic(&item->conn.security, "WPA3-FT-SAE");
-                                    break;
-                                default: // TODO: support more auth types
-                                    ffStrbufAppendF(&item->conn.security, "To be supported (%d)", authUpperValue);
-                                    break;
-                            }
-                        }
-                    }
-                }
-                else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
+                // Sonoma?
+                if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
                     getWifiInfoByIpconfig(&ipconfig, "\n  Security : ", &item->conn.security);
                 break;
             default:

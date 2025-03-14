@@ -1570,7 +1570,6 @@ elseif(APPLE)
         PRIVATE "-F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices"
         PRIVATE "-weak_framework MediaRemote"
-        PRIVATE "-weak_framework Apple80211"
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch
