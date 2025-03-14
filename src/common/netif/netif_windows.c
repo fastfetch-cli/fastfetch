@@ -1,27 +1,36 @@
 #include "netif.h"
 #include "util/mallocHelper.h"
 
+#include <ws2tcpip.h> // AF_INET6, IN6_IS_ADDR_UNSPECIFIED
 #include <iphlpapi.h>
 
-bool ffNetifGetDefaultRouteImpl(FF_MAYBE_UNUSED char* iface/* unsupported */, uint32_t* ifIndex)
+bool ffNetifGetDefaultRouteImpl(FF_MAYBE_UNUSED char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
 {
-    ULONG size = 0;
-    if (GetIpForwardTable(NULL, &size, TRUE) != ERROR_INSUFFICIENT_BUFFER)
+    PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
+    DWORD result = GetIpForwardTable2(AF_UNSPEC, &pIpForwardTable);
+
+    if (result != NO_ERROR)
         return false;
 
-    FF_AUTO_FREE MIB_IPFORWARDTABLE* pIpForwardTable = (MIB_IPFORWARDTABLE*) malloc(size);
-    if (GetIpForwardTable(pIpForwardTable, &size, TRUE) != ERROR_SUCCESS)
-        return false;
+    bool foundDefault = false;
 
-    for (uint32_t i = 0; i < pIpForwardTable->dwNumEntries; ++i)
+    for (ULONG i = 0; i < pIpForwardTable->NumEntries; ++i)
     {
-        MIB_IPFORWARDROW* ipForwardRow = &pIpForwardTable->table[i];
-        if (ipForwardRow->dwForwardDest == 0 && ipForwardRow->dwForwardMask == 0)
+        MIB_IPFORWARD_ROW2* row = &pIpForwardTable->Table[i];
+
+        if ((row->DestinationPrefix.PrefixLength == 0) &&
+            ((row->DestinationPrefix.Prefix.Ipv4.sin_family == AF_INET &&
+              row->DestinationPrefix.Prefix.Ipv4.sin_addr.S_un.S_addr == 0) ||
+             (row->DestinationPrefix.Prefix.Ipv6.sin6_family == AF_INET6 &&
+              IN6_IS_ADDR_UNSPECIFIED(&row->DestinationPrefix.Prefix.Ipv6.sin6_addr))))
         {
-            *ifIndex = ipForwardRow->dwForwardIfIndex;
+            *ifIndex = row->InterfaceIndex;
+            foundDefault = true;
             break;
         }
     }
 
-    return true;
+    FreeMibTable(pIpForwardTable);
+
+    return foundDefault;
 }
