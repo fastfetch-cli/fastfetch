@@ -227,9 +227,6 @@ void ffListFeatures(void)
         #if FF_HAVE_GLX
             "glx\n"
         #endif
-        #if FF_HAVE_OSMESA
-            "osmesa\n"
-        #endif
         #if FF_HAVE_OPENCL
             "opencl\n"
         #endif

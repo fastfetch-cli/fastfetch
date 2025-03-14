@@ -2563,8 +2563,7 @@
                                         "enum": [
                                             "auto",
                                             "egl",
-                                            "glx",
-                                            "osmesa"
+                                            "glx"
                                         ],
                                         "default": "auto"
                                     },

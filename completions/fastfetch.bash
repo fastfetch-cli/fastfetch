@@ -97,7 +97,6 @@ __fastfetch_complete_gl()
         "auto"
         "egl"
         "glx"
-        "osmesa"
     )
     COMPREPLY=($(compgen -W "${__ff_gl_types[*]}" -- "$CURRENT_WORD"))
 }
