@@ -82,6 +82,18 @@ static inline const char* ffTimeToShortStr(uint64_t msec)
     return buf;
 }
 
+// Not thread-safe
+static inline const char* ffTimeToTimeStr(uint64_t msec)
+{
+    if (msec == 0) return "";
+    time_t tsec = (time_t) (msec / 1000);
+
+    static char buf[32];
+    strftime(buf, sizeof(buf), "%T", localtime(&tsec));
+    sprintf(buf + __builtin_strlen("00:00:00"), ".%03u", (unsigned) (msec % 1000));
+    return buf;
+}
+
 #ifdef _WIN32
     #pragma GCC diagnostic pop
 #endif

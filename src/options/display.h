@@ -32,6 +32,9 @@ typedef struct FFOptionsDisplay
     int32_t stat; // <0: disable stat; 0: no threshold; >0: threshold in ms
     bool pipe; //disables all escape sequences
     bool showErrors;
+    #ifndef NDEBUG
+    bool debugMode;
+    #endif
     bool disableLinewrap;
     bool hideCursor;
     FFSizeBinaryPrefixType sizeBinaryPrefix;

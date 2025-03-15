@@ -317,6 +317,10 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         options->pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--show-errors"))
         options->showErrors = ffOptionParseBoolean(value);
+    #ifndef NDEBUG
+    else if(ffStrEqualsIgnCase(key, "--debug"))
+        options->debugMode = ffOptionParseBoolean(value);
+    #endif
     else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
         options->disableLinewrap = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--hide-cursor"))
@@ -505,6 +509,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->disableLinewrap = !options->pipe;
     #else
     options->disableLinewrap = false;
+    options->debugMode = false;
     #endif
 
     options->hideCursor = false;
