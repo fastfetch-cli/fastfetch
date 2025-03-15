@@ -364,7 +364,7 @@ set(LIBFASTFETCH_SRC
     src/common/library.c
     src/common/modules.c
     src/common/netif/netif.c
-    src/common/networking_common.c
+    src/common/networking/networking_common.c
     src/common/option.c
     src/common/parsing.c
     src/common/printing.c
@@ -493,7 +493,7 @@ if(LINUX)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_linux.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
@@ -574,7 +574,7 @@ elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
         src/common/netif/netif_linux.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
@@ -640,7 +640,7 @@ elseif(FreeBSD)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
@@ -731,7 +731,7 @@ elseif(NetBSD)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
@@ -813,7 +813,7 @@ elseif(OpenBSD)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_obsd.c
@@ -894,7 +894,7 @@ elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_apple.c
@@ -965,7 +965,7 @@ elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_windows.c
         src/common/netif/netif_windows.c
-        src/common/networking_windows.c
+        src/common/networking/networking_windows.c
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
@@ -1040,7 +1040,7 @@ elseif(SunOS)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
@@ -1121,7 +1121,7 @@ elseif(Haiku)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_haiku.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c

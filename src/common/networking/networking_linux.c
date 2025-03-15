@@ -1,5 +1,5 @@
 #include "fastfetch.h"
-#include "common/networking.h"
+#include "common/networking/networking.h"
 #include "common/time.h"
 #include "common/library.h"
 #include "util/stringUtils.h"
@@ -331,9 +331,8 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     char* headerEnd = NULL;
 
     do {
-        size_t availSpace = ffStrbufGetFree(buffer);
-        FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %zu",
-                 ++recvCount, buffer->length, availSpace);
+        FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
+                 ++recvCount, buffer->length, ffStrbufGetFree(buffer));
 
         ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
 
