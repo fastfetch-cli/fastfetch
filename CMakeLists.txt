@@ -364,6 +364,7 @@ set(LIBFASTFETCH_SRC
     src/common/library.c
     src/common/modules.c
     src/common/netif/netif.c
+    src/common/networking_common.c
     src/common/option.c
     src/common/parsing.c
     src/common/printing.c

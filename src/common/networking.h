@@ -31,3 +31,8 @@ typedef struct FFNetworkingState {
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);
 const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer);
+
+#ifdef FF_HAVE_ZLIB
+const char* ffNetworkingLoadZlibLibrary(void);
+bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd);
+#endif

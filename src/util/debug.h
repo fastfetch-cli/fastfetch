@@ -2,13 +2,11 @@
 
 static inline const char* ffFindFileName(const char* file)
 {
-    const char* lastSlash = __builtin_strrchr(file,
-        #ifdef _WIN32
-            '\\'
-        #else
-            '/'
-        #endif
-    );
+    const char* lastSlash = __builtin_strrchr(file, '/');
+    #ifdef _WIN32
+    if (lastSlash == NULL)
+        lastSlash = __builtin_strrchr(file, '\\');
+    #endif
     if (lastSlash != NULL)
         return lastSlash + 1;
     return file;
