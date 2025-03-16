@@ -105,13 +105,22 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         return "socket() failed";
     }
 
+    DWORD flag = 1;
     #ifdef TCP_NODELAY
     // Enable TCP_NODELAY to disable Nagle's algorithm
-    DWORD flag = 1;
     if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag)) != 0) {
         FF_DEBUG("Failed to set TCP_NODELAY: %d", WSAGetLastError());
     } else {
         FF_DEBUG("Successfully disabled Nagle's algorithm");
+    }
+    #endif
+
+    #ifdef TCP_FASTOPEN
+    // Set TCP Fast Open
+    if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
+        FF_DEBUG("Failed to set TCP_FASTOPEN option: %d", WSAGetLastError());
+    } else {
+        FF_DEBUG("Successfully set TCP_FASTOPEN option");
     }
     #endif
 

@@ -22,7 +22,13 @@ const char* ffNetworkingLoadZlibLibrary(void)
     if (!zlibData.inited)
     {
         zlibData.inited = true;
-        FF_LIBRARY_LOAD(zlib, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
+        FF_LIBRARY_LOAD(zlib, "dlopen libz failed",
+            #ifdef _WIN32
+                "zlib1"
+            #else
+                "libz"
+            #endif
+            FF_LIBRARY_EXTENSION, 2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateInit2_)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflate)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateEnd)
