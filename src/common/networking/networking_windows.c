@@ -109,7 +109,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     #ifdef TCP_NODELAY
     // Enable TCP_NODELAY to disable Nagle's algorithm
     if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag)) != 0) {
-        FF_DEBUG("Failed to set TCP_NODELAY: %d", WSAGetLastError());
+        FF_DEBUG("Failed to set TCP_NODELAY: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
     } else {
         FF_DEBUG("Successfully disabled Nagle's algorithm");
     }
@@ -118,7 +118,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     #ifdef TCP_FASTOPEN
     // Set TCP Fast Open
     if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
-        FF_DEBUG("Failed to set TCP_FASTOPEN option: %d", WSAGetLastError());
+        FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
     } else {
         FF_DEBUG("Successfully set TCP_FASTOPEN option");
     }
@@ -141,7 +141,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
             .sin_addr.s_addr = INADDR_ANY,
         }, sizeof(struct sockaddr_in))) != 0)
     {
-        FF_DEBUG("bind() failed: %d", WSAGetLastError());
+        FF_DEBUG("bind() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
         freeaddrinfo(addr);
         state->sockfd = INVALID_SOCKET;
@@ -177,7 +177,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 
     if(!result && WSAGetLastError() != WSA_IO_PENDING)
     {
-        FF_DEBUG("ConnectEx() failed: %d", WSAGetLastError());
+        FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
         state->sockfd = INVALID_SOCKET;
         return "ConnectEx() failed";
@@ -213,7 +213,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
     DWORD transfer, flags;
     if (!WSAGetOverlappedResult(state->sockfd, &state->overlapped, &transfer, TRUE, &flags))
     {
-        FF_DEBUG("WSAGetOverlappedResult failed: %d", WSAGetLastError());
+        FF_DEBUG("WSAGetOverlappedResult failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
         closesocket(state->sockfd);
         return "WSAGetOverlappedResult() failed";
     }
@@ -243,7 +243,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
             if (received == 0) {
                 FF_DEBUG("Connection closed (received=0)");
             } else {
-                FF_DEBUG("Reception failed: %d", WSAGetLastError());
+                FF_DEBUG("Reception failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
             }
             break;
         }

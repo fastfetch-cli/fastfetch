@@ -1034,6 +1034,7 @@ elseif(WIN32)
         src/util/windows/version.c
         src/util/platform/FFPlatform_windows.c
         src/util/binary_windows.c
+        src/util/debug_windows.c
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
