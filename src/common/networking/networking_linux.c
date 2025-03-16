@@ -33,32 +33,19 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
             FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", qlen);
         }
 
-        // Set non-blocking mode
-        int flags = fcntl(state->sockfd, F_GETFL, 0);
-        FF_DEBUG("Current socket flags: 0x%x", flags);
-
-        if (fcntl(state->sockfd, F_SETFL, flags | O_NONBLOCK) < 0) {
-            FF_DEBUG("Failed to set non-blocking mode: %s", strerror(errno));
-        } else {
-            FF_DEBUG("Successfully set non-blocking mode");
-        }
-
         // Try to send data using Fast Open
         FF_DEBUG("Using sendto() + MSG_FASTOPEN to send %u bytes of data", state->command.length);
         ssize_t sent = sendto(state->sockfd,
                              state->command.chars,
                              state->command.length,
-                             MSG_FASTOPEN,
+                             MSG_FASTOPEN | MSG_DONTWAIT,
                              state->addr->ai_addr,
                              state->addr->ai_addrlen);
 
-        // Restore blocking mode
-        fcntl(state->sockfd, F_SETFL, flags);
-
-        if (sent >= 0 || (errno == EINPROGRESS || errno == EAGAIN || errno == EWOULDBLOCK))
+        if (sent >= 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
         {
-            FF_DEBUG("TCP Fast Open succeeded or in progress (sent=%zd, errno=%d: %s)",
-                     sent, errno, sent < 0 ? strerror(errno) : "");
+            FF_DEBUG("TCP Fast Open %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
+                     sent, errno, strerror(errno));
             freeaddrinfo(state->addr);
             state->addr = NULL;
             ffStrbufDestroy(&state->host);
@@ -66,9 +53,17 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
             return NULL;
         }
 
-        // Fast Open failed
-        FF_DEBUG("TCP Fast Open failed: %s (errno=%d)", strerror(errno), errno);
-        return "sendto() failed";
+        if (errno == EINPROGRESS)
+        {
+            FF_DEBUG("TCP Fast Open cookie is not available locally");
+            return "sendto() reports EINPROGRESS";
+        }
+        else
+        {
+            // Fast Open failed
+            FF_DEBUG("TCP Fast Open failed: %s (errno=%d)", strerror(errno), errno);
+            return "sendto() failed";
+        }
     #endif
 }
 
@@ -334,7 +329,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
                  ++recvCount, buffer->length, ffStrbufGetFree(buffer));
 
-        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
+        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), MSG_WAITALL);
 
         if (received <= 0) {
             if (received == 0) {
