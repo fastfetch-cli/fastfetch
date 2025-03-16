@@ -125,6 +125,17 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
+        uint64_t duration = ffTimeGetNow() - disk->createTime;
+        uint32_t milliseconds = (uint32_t) (duration % 1000);
+        duration /= 1000;
+        uint32_t seconds = (uint32_t) (duration % 60);
+        duration /= 60;
+        uint32_t minutes = (uint32_t) (duration % 60);
+        duration /= 60;
+        uint32_t hours = (uint32_t) (duration % 24);
+        duration /= 24;
+        uint32_t days = (uint32_t) duration;
+
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(usedPretty, "size-used"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
@@ -140,6 +151,13 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(disk->createTime), "create-time"},
             FF_FORMAT_ARG(bytesPercentageBar, "size-percentage-bar"),
             FF_FORMAT_ARG(filesPercentageBar, "files-percentage-bar"),
+            FF_FORMAT_ARG(days, "days"),
+            FF_FORMAT_ARG(hours, "hours"),
+            FF_FORMAT_ARG(minutes, "minutes"),
+            FF_FORMAT_ARG(seconds, "seconds"),
+            FF_FORMAT_ARG(milliseconds, "milliseconds"),
+            FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
+            FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
         }));
     }
 }
@@ -462,7 +480,13 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Create time in local timezone", "create-time"},
         {"Size percentage bar", "size-percentage-bar"},
         {"Files percentage bar", "files-percentage-bar"},
-        {},
+        {"Days after creation", "days"},
+        {"Hours after creation", "hours"},
+        {"Minutes after creation", "minutes"},
+        {"Seconds after creation", "seconds"},
+        {"Milliseconds after creation", "milliseconds"},
+        {"Mount point / drive letter", "mountpoint"},
+        {"Mount from (device path)", "mount-from"},
     }))
 };
 

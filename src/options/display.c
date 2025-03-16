@@ -130,6 +130,8 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             {
                 int value;
                 const char* error = ffJsonConfigParseEnum(unit, &value, (FFKeyValuePair[]) {
+                    { "DEFAULT", FF_TEMPERATURE_UNIT_DEFAULT },
+                    { "D", FF_TEMPERATURE_UNIT_DEFAULT },
                     { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
                     { "C", FF_TEMPERATURE_UNIT_CELSIUS },
                     { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
@@ -315,6 +317,10 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         options->pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--show-errors"))
         options->showErrors = ffOptionParseBoolean(value);
+    #ifndef NDEBUG
+    else if(ffStrEqualsIgnCase(key, "--debug"))
+        options->debugMode = ffOptionParseBoolean(value);
+    #endif
     else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
         options->disableLinewrap = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--hide-cursor"))
@@ -418,6 +424,8 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         if(ffStrEqualsIgnCase(subkey, "unit"))
         {
             options->tempUnit = (FFTemperatureUnit) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "DEFAULT", FF_TEMPERATURE_UNIT_DEFAULT },
+                { "D", FF_TEMPERATURE_UNIT_DEFAULT },
                 { "CELSIUS", FF_TEMPERATURE_UNIT_CELSIUS },
                 { "C", FF_TEMPERATURE_UNIT_CELSIUS },
                 { "FAHRENHEIT", FF_TEMPERATURE_UNIT_FAHRENHEIT },
@@ -501,6 +509,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->disableLinewrap = !options->pipe;
     #else
     options->disableLinewrap = false;
+    options->debugMode = false;
     #endif
 
     options->hideCursor = false;
@@ -513,7 +522,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->keyPaddingLeft = 0;
     options->keyType = FF_MODULE_KEY_TYPE_STRING;
 
-    options->tempUnit = FF_TEMPERATURE_UNIT_CELSIUS;
+    options->tempUnit = FF_TEMPERATURE_UNIT_DEFAULT;
     options->tempNdigits = 1;
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
@@ -643,6 +652,9 @@ void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_do
         {
             switch (options->tempUnit)
             {
+                case FF_TEMPERATURE_UNIT_DEFAULT:
+                    yyjson_mut_obj_add_str(doc, temperature, "unit", "DEFAULT");
+                    break;
                 case FF_TEMPERATURE_UNIT_CELSIUS:
                     yyjson_mut_obj_add_str(doc, obj, "unit", "C");
                     break;

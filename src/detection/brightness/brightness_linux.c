@@ -74,6 +74,7 @@ static const char* detectWithBacklight(FFlist* result)
                 brightness->max = ffStrbufToDouble(&buffer);
                 brightness->min = 0;
                 brightness->current = actualBrightness;
+                brightness->builtin = true;
             }
         }
         ffStrbufSubstrBefore(&backlightDir, backlightDirLength);

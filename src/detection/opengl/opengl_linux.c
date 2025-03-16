@@ -4,7 +4,14 @@
 
 #include <string.h>
 
-#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX) || defined(FF_HAVE_OSMESA)
+#if __ANDROID__ && !defined(FF_HAVE_EGL)
+    // On Android, installing OpenGL headers is enough (mesa-dev)
+    #if __has_include(<EGL/egl.h>)
+        #define FF_HAVE_EGL 1
+    #endif
+#endif
+
+#if defined(FF_HAVE_EGL) || defined(FF_HAVE_GLX)
 #define FF_HAVE_GL 1
 
 #include "common/library.h"
@@ -148,66 +155,6 @@ static const char* detectByGlx(FFOpenGLResult* result)
 
 #endif //FF_HAVE_GLX
 
-#ifdef FF_HAVE_OSMESA
-#if __has_include(<GL/osmesa.h>)
-    #include <GL/osmesa.h>
-#else
-    #include <mesa/osmesa.h> // for sunos
-#endif
-
-typedef struct OSMesaData
-{
-    FF_LIBRARY_SYMBOL(glGetString)
-    FF_LIBRARY_SYMBOL(OSMesaGetProcAddress)
-    FF_LIBRARY_SYMBOL(OSMesaCreateContext)
-    FF_LIBRARY_SYMBOL(OSMesaMakeCurrent)
-    FF_LIBRARY_SYMBOL(OSMesaDestroyContext)
-
-    OSMesaContext context;
-} OSMesaData;
-
-static const char* osMesaHandleContext(FFOpenGLResult* result, OSMesaData* data)
-{
-    unsigned char buffer[FF_OPENGL_BUFFER_WIDTH * FF_OPENGL_BUFFER_HEIGHT * sizeof(uint32_t)]; // 4 bytes per pixel (RGBA)
-
-    if(data->ffOSMesaMakeCurrent(data->context, buffer, GL_UNSIGNED_BYTE, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT) != GL_TRUE)
-        return "OSMesaMakeCurrent returned GL_FALSE";
-
-    ffOpenGLHandleResult(result, data->ffglGetString);
-    ffStrbufSetF(&result->library, "OSMesa %d.%d.%d", OSMESA_MAJOR_VERSION, OSMESA_MINOR_VERSION, OSMESA_PATCH_VERSION);
-    return NULL;
-}
-
-static const char* osMesaHandleData(FFOpenGLResult* result, OSMesaData* data)
-{
-    data->ffglGetString = (void*) data->ffOSMesaGetProcAddress("glGetString");
-    if(data->ffglGetString == NULL)
-        return "OSMesaGetProcAddress(glGetString) returned NULL";
-
-    data->context = data->ffOSMesaCreateContext(OSMESA_RGBA, NULL);
-    if(data->context == NULL)
-        return "OSMesaCreateContext returned NULL";
-
-    const char* error = osMesaHandleContext(result, data);
-    data->ffOSMesaDestroyContext(data->context);
-    return error;
-}
-
-static const char* detectByOsMesa(FFOpenGLResult* result)
-{
-    OSMesaData data;
-
-    FF_LIBRARY_LOAD(osmesa, "dlopen osmesa failed", "libOSMesa" FF_LIBRARY_EXTENSION, 8);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaGetProcAddress);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaCreateContext);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaMakeCurrent);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(osmesa, data, OSMesaDestroyContext);
-
-    return osMesaHandleData(result, &data);
-}
-
-#endif //FF_HAVE_OSMESA
-
 const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
 {
     #if FF_HAVE_GL
@@ -231,15 +178,6 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
         #endif
     }
 
-    if(options->library == FF_OPENGL_LIBRARY_OSMESA)
-    {
-        #ifdef FF_HAVE_OSMESA
-            return detectByOsMesa(result);
-        #else
-            return "fastfetch was compiled without osmesa support";
-        #endif
-    }
-
     const char* error = ""; // not NULL dummy value
 
     #ifdef FF_HAVE_EGL
@@ -251,9 +189,6 @@ const char* ffDetectOpenGL(FFOpenGLOptions* options, FFOpenGLResult* result)
         if(error != NULL)
             error = detectByGlx(result);
     #endif
-
-    //We don't use osmesa in auto mode here, because it is a software implementation,
-    //that doesn't reflect the opengl supported by the hardware
 
     return error;
 

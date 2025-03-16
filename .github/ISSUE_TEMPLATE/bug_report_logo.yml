@@ -1,0 +1,129 @@
+name: Logo Bug Report
+description: If my image logo is not displayed correctly
+title: "[BUG] "
+labels: ["bug", "logo", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! We will try hard to solve the issue.
+        However since platforms and hardwares vary greatly, it can be hard to find the root cause of an issue.
+        Providing the following information may help us greatly. Thanks in advance!
+  - type: checkboxes
+    attributes:
+      label: Read the FAQ first
+      description: Please check if the issue is already covered in the FAQ.
+      options:
+        - label: I have checked the FAQ but the issue is not covered
+          required: true
+  - type: markdown
+    attributes:
+      value: "### General description of the bug"
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: I was trying to [...] but [...]
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version used
+      description: Fastfetch version used. Please use the latest version (found in the [releases](https://github.com/fastfetch-cli/fastfetch/releases)) if possible.
+      placeholder: Result of `fastfetch --version`
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Bug prevalence
+      description: How often does the bug occur?
+      options:
+        -
+        - Always
+        - Sometimes
+        - Rarely
+        - Once
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Regression
+      description: Did it work in an older version?
+      options:
+        -
+        - Not sure
+        - 'Yes'
+        - 'No'
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Installation
+      description: Where did you install fastfetch from?
+      options:
+        -
+        - GitHub Releases
+        - GitHub Actions (nightly)
+        - Built from source
+        - Package manager
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Package manager
+      description: Which package manager did you use if applicable?
+      placeholder: e.g. `apt`, `pacman`, `brew`, `scoop`
+  - type: markdown
+    attributes:
+      value: '### Often helpful information'
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+  - type: textarea
+    attributes:
+      label: Configuration
+      description: If applicable, paste your configuration file here.
+      placeholder: cat ~/.config/fastfetch/config.jsonc
+      render: jsonc
+  - type: markdown
+    attributes:
+      value: |
+        #### If an image or logo didn't show
+
+        Please make sure your terminal supports the image protocol you used.
+        Note that GNOME Terminal doesn't support any image protocols as of now
+
+        Some tips:
+        1. Try `fastfetch --show-errors` to see if there are any errors.
+        2. Try `fastfetch --logo-width {WIDTH} --logo-height {HEIGHT}`. Some protocols may require a image size being set.
+  - type: input
+    attributes:
+      label: Image protocol
+      description: The image protocol you used
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Terminal
+      description: The terminal you used
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Image tried
+      description: Upload the image file, or paste the image URL here
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Error message
+      description: Error message printed by `fastfetch -s none --show-errors`, if any
+  - type: textarea
+    attributes:
+      label: Features built-in
+      description: Output of `fastfetch --list-features`
+      render: text
+    validations:
+      required: true

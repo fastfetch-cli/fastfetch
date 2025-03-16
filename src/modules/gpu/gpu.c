@@ -20,13 +20,15 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         default: type = "Unknown"; break;
     }
 
+    FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
         FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
 
-        if(gpu->vendor.length > 0 && !ffStrbufStartsWith(&gpu->name, &gpu->vendor))
+        if(gpu->vendor.length > 0 && !ffStrbufStartsWithIgnCase(&gpu->name, &gpu->vendor))
         {
             ffStrbufAppend(&output, &gpu->vendor);
             ffStrbufAppendC(&output, ' ');
@@ -53,16 +55,28 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         {
             ffStrbufAppendS(&output, " (");
 
-            if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+            if (!(percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT))
             {
-                ffParseSize(gpu->dedicated.used, &output);
-                ffStrbufAppendS(&output, " / ");
+                if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+                {
+                    ffParseSize(gpu->dedicated.used, &output);
+                    ffStrbufAppendS(&output, " / ");
+                }
+                ffParseSize(gpu->dedicated.total, &output);
             }
-            ffParseSize(gpu->dedicated.total, &output);
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
-                ffStrbufAppendS(&output, ", ");
-                ffPercentAppendNum(&output, (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0, options->percent, false, &options->moduleArgs);
+                double percent = (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0;
+                if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                {
+                    ffStrbufAppendS(&output, ", ");
+                    ffPercentAppendNum(&output, percent, options->percent, false, &options->moduleArgs);
+                }
+                if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                {
+                    ffStrbufAppendS(&output, " ");
+                    ffPercentAppendBar(&output, percent, options->percent, &options->moduleArgs);
+                }
             }
             ffStrbufAppendC(&output, ')');
         }
@@ -78,15 +92,46 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         ffTempsAppendNum(gpu->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY dTotal = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY dUsed = ffStrbufCreate();
-        FF_STRBUF_AUTO_DESTROY sTotal = ffStrbufCreate();
-        FF_STRBUF_AUTO_DESTROY sUsed = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY dPercentNum = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY dPercentBar = ffStrbufCreate();
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.total, &dTotal);
         if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.used, &dUsed);
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
+        {
+            double percent = (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0;
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffPercentAppendNum(&dPercentNum, percent, options->percent, false, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                ffPercentAppendBar(&dPercentBar, percent, options->percent, &options->moduleArgs);
+        }
+
+        FF_STRBUF_AUTO_DESTROY sTotal = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY sUsed = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY sPercentNum = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY sPercentBar = ffStrbufCreate();
         if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.total, &sTotal);
         if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.used, &sUsed);
+        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET && gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
+        {
+            double percent = (double) gpu->shared.used / (double) gpu->shared.total * 100.0;
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffPercentAppendNum(&sPercentNum, percent, options->percent, false, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                ffPercentAppendBar(&sPercentBar, percent, options->percent, &options->moduleArgs);
+        }
 
         FF_STRBUF_AUTO_DESTROY frequency = ffStrbufCreate();
         ffParseFrequency(gpu->frequency, &frequency);
+
+        FF_STRBUF_AUTO_DESTROY coreUsageNum = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY coreUsageBar = ffStrbufCreate();
+        if (gpu->coreUsage == gpu->coreUsage) //FF_GPU_CORE_USAGE_UNSET
+        {
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffPercentAppendNum(&coreUsageNum, gpu->coreUsage, options->percent, false, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                ffPercentAppendBar(&coreUsageBar, gpu->coreUsage, options->percent, &options->moduleArgs);
+        }
 
         FF_PRINT_FORMAT_CHECKED(FF_GPU_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(gpu->vendor, "vendor"),
@@ -102,6 +147,12 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             FF_FORMAT_ARG(gpu->platformApi, "platform-api"),
             FF_FORMAT_ARG(frequency, "frequency"),
             FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(dPercentNum, "dedicated-percentage-num"),
+            FF_FORMAT_ARG(dPercentBar, "dedicated-percentage-bar"),
+            FF_FORMAT_ARG(sPercentNum, "shared-percentage-num"),
+            FF_FORMAT_ARG(sPercentBar, "shared-percentage-bar"),
+            FF_FORMAT_ARG(coreUsageNum, "core-usage-num"),
+            FF_FORMAT_ARG(coreUsageBar, "core-usage-bar"),
         }));
     }
 }
@@ -414,6 +465,12 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"The platform API used when detecting the GPU", "platform-api"},
         {"Current frequency in GHz", "frequency"},
         {"GPU vendor specific index", "index"},
+        {"Dedicated memory usage percentage num", "dedicated-percentage-num"},
+        {"Dedicated memory usage percentage bar", "dedicated-percentage-bar"},
+        {"Shared memory usage percentage num", "shared-percentage-num"},
+        {"Shared memory usage percentage bar", "shared-percentage-bar"},
+        {"Core usage percentage num (supports Nvidia & Apple GPU only)", "core-usage-num"},
+        {"Core usage percentage bar (supports Nvidia & Apple GPU only)", "core-usage-bar"},
     })),
 };
 

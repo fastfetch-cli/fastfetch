@@ -11,7 +11,7 @@
 [![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 [![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it prettily. It is written mainly in C, with performance and customizability in mind. Currently, Linux, Android, FreeBSD, macOS, SunOS and Windows 7+ are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it prettily. It is written mainly in C, with performance and customizability in mind. Currently, Linux, macOS, Windows 7+, Android, FreeBSD, OpenBSD, NetBSD, DragonFly, Haiku and SunOS are supported.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -28,6 +28,10 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 ### Linux
 
 Some distros package an outdated fastfetch version. Older versions receive no support, so please try always to use the latest version.
+
+<a href="https://repology.org/project/fastfetch/versions">
+    <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
+</a>
 
 * Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
 * Debian: `apt install fastfetch` (for Debian 13 or newer)
@@ -46,8 +50,6 @@ Some distros package an outdated fastfetch version. Older versions receive no su
 * Venom Linux: `scratch install fastfetch`
 
 You may need `sudo`, `doas` or `sup` to run these commands.
-
-[See also if fastfetch has been packaged for your favorite Linux distro](#Packaging).
 
 If fastfetch is not packaged for your distro or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternative: `brew install fastfetch`
 
@@ -73,6 +75,10 @@ You may also download the program directly from [the GitHub releases page](https
 
 * `pkg install fastfetch`
 
+### Nightly
+
+<https://nightly.link/fastfetch-cli/fastfetch/workflows/ci/dev?preview>
+
 ## Build from source
 
 See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
@@ -90,18 +96,6 @@ See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 Fastfetch uses the JSONC (or JSON with comments) for configuration. [See Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `-c <filename>`. Those files can serve as examples of the configuration syntax.
 
 Logos can also be heavily customized; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
-
-
-## Packaging
-
-### Repositories
-
-[![Packaging status](https://repology.org/badge/vertical-allrepos/fastfetch.svg?header=)](https://repology.org/project/fastfetch/versions)
-
-### Manual
-
-* DEB / RPM package: `cmake --build . --target package`
-* Install directly: `cmake --install . --prefix /usr/local`
 
 ## FAQ
 

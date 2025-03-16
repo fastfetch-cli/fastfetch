@@ -5,12 +5,13 @@
 typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
 {
     FF_SIZE_BINARY_PREFIX_TYPE_IEC,   // 1024 Bytes = 1 KiB, 1024 KiB = 1 MiB, ... (standard)
-    FF_SIZE_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 KB, 1000 KB = 1 MB, ...
-    FF_SIZE_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 kB, 1024 kB = 1 MB, ...
+    FF_SIZE_BINARY_PREFIX_TYPE_SI,    // 1000 Bytes = 1 kB, 1000 kB = 1 MB, ...
+    FF_SIZE_BINARY_PREFIX_TYPE_JEDEC, // 1024 Bytes = 1 KB, 1024 KB = 1 MB, ...
 } FFSizeBinaryPrefixType;
 
 typedef enum __attribute__((__packed__)) FFTemperatureUnit
 {
+    FF_TEMPERATURE_UNIT_DEFAULT,
     FF_TEMPERATURE_UNIT_CELSIUS,
     FF_TEMPERATURE_UNIT_FAHRENHEIT,
     FF_TEMPERATURE_UNIT_KELVIN,
@@ -31,6 +32,9 @@ typedef struct FFOptionsDisplay
     int32_t stat; // <0: disable stat; 0: no threshold; >0: threshold in ms
     bool pipe; //disables all escape sequences
     bool showErrors;
+    #ifndef NDEBUG
+    bool debugMode;
+    #endif
     bool disableLinewrap;
     bool hideCursor;
     FFSizeBinaryPrefixType sizeBinaryPrefix;

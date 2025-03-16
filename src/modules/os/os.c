@@ -63,6 +63,19 @@ void ffPrintOS(FFOSOptions* options)
         return;
     }
 
+    FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
+
+    if(options->moduleArgs.key.length == 0)
+        ffStrbufSetStatic(&key, FF_OS_MODULE_NAME);
+    else
+    {
+        FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
+            FF_FORMAT_ARG(instance.state.platform.sysinfo.name, "sysname"),
+            FF_FORMAT_ARG(os->name, "name"),
+            FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
+        }));
+    }
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
@@ -79,12 +92,12 @@ void ffPrintOS(FFOSOptions* options)
             ffStrbufAppend(&result, &instance.state.platform.sysinfo.architecture);
         }
 
-        ffPrintLogoAndKey(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
         ffStrbufPutTo(&result, stdout);
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+        FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
             FF_FORMAT_ARG(instance.state.platform.sysinfo.name, "sysname"),
             FF_FORMAT_ARG(os->name, "name"),
             FF_FORMAT_ARG(os->prettyName, "pretty-name"),
@@ -96,7 +109,8 @@ void ffPrintOS(FFOSOptions* options)
             FF_FORMAT_ARG(os->versionID, "version-id"),
             FF_FORMAT_ARG(os->codename, "codename"),
             FF_FORMAT_ARG(os->buildID, "build-id"),
-            FF_FORMAT_ARG(instance.state.platform.sysinfo.architecture, "arch")
+            FF_FORMAT_ARG(instance.state.platform.sysinfo.architecture, "arch"),
+            FF_FORMAT_ARG(instance.state.platform.sysinfo.release, "kernel-release"),
         }));
     }
 }

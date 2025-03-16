@@ -1,0 +1,40 @@
+name: Feature Request
+description: Suggest an idea for this project
+title: "[FEAT] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fastfetch is a system information tool. We only accept hardware or system level software feature requests.
+        For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
+
+        ```jsonc
+        // This module shows the git version
+        {
+          "modules": [
+            {
+              "type": "command",
+              "key": "Git",
+              "text": "git version",
+              "format": "{~12}" // cut the first 12 characters
+            }
+          ]
+        }
+        ```
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what the feature is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Motivation
+      description: Why do you want this feature? Why doesn't `Command` module suffice for you?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request here.

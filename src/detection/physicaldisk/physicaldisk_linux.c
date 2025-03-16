@@ -173,7 +173,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         if (devName[0] == '.')
             continue;
 
-        char pathSysBlock[ARRAY_SIZE("/sys/block/") + ARRAY_SIZE(sysBlockEntry->d_name)];
+        char pathSysBlock[sizeof("/sys/block/") + sizeof(sysBlockEntry->d_name)];
         snprintf(pathSysBlock, ARRAY_SIZE(pathSysBlock), "/sys/block/%s", devName);
 
         int dfd = openat(dirfd(sysBlockDirp), devName, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);

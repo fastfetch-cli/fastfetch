@@ -57,9 +57,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
                 ffStrbufContainS(&result->processName, "debug")             ||
                 ffStrbufContainS(&result->processName, "command-not-")      ||
-                #ifdef __ANDROID__
                 ffStrbufEqualS(&result->processName, "proot")              ||
-                #endif
                 ffStrbufEndsWithS(&result->processName, ".sh")
             )
             {
@@ -108,9 +106,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "login")      ||
             ffStrbufEqualS(&result->processName, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
-            #ifdef __ANDROID__
             ffStrbufEqualS(&result->processName, "proot")      ||
-            #endif
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif
@@ -362,6 +358,11 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
     else if(ffStrbufEqualS(&result->processName, "WarpTerminal"))
         ffStrbufInitStatic(&result->prettyName, "Warp");
+
+    #elif defined(__HAIKU__)
+
+    else if(ffStrbufEqualS(&result->processName, "Terminal"))
+        ffStrbufInitStatic(&result->prettyName, "Haiku Terminal");
 
     #endif
 

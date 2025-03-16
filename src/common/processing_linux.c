@@ -28,13 +28,16 @@
 #elif defined(__NetBSD__)
     #include <sys/types.h>
     #include <sys/sysctl.h>
+#elif defined(__HAIKU__)
+    #include <OS.h>
+    #include <image.h>
 #endif
 
 enum { FF_PIPE_BUFSIZ = 8192 };
 
-static inline int ffPipe2(int *fds, int flags)
+static inline int ffPipe2(int* fds, int flags)
 {
-    #ifdef __APPLE__
+    #ifndef FF_HAVE_PIPE2
         if(pipe(fds) == -1)
             return -1;
         fcntl(fds[0], F_SETFL, fcntl(fds[0], F_GETFL) | flags);
@@ -301,9 +304,29 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     if (proc)
     {
         char** argv = kvm_getargv(kd, proc, 0);
-        if (argv) ffStrbufSetS(exe, argv[0]);
+        if (argv)
+        {
+            const char* arg0 = argv[0];
+            if (arg0[0] == '-') arg0++;
+            ffStrbufSetS(exe, arg0);
+        }
     }
     kvm_close(kd);
+
+    #elif defined(__HAIKU__)
+
+    image_info info;
+    int32 cookie = 0;
+
+    while (get_next_image_info(pid, &cookie, &info) == B_OK)
+    {
+        if (info.type != B_APP_IMAGE) continue;
+        ffStrbufSetS(exe, info.name);
+
+        if (exePath)
+            ffStrbufSet(exePath, exe);
+        break;
+    }
 
     #endif
 
@@ -470,6 +493,18 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     kvm_close(kd);
     if (!proc)
         return "kvm_getprocs() failed";
+
+    #elif defined(__HAIKU__)
+
+    team_info info;
+    if (get_team_info(pid, &info) == B_OK)
+    {
+        ffStrbufSetS(name, info.name);
+        if (ppid)
+            *ppid = info.parent;
+    }
+
+    FF_UNUSED(tty);
 
     #else
 

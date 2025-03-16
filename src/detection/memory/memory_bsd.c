@@ -4,13 +4,7 @@
 const char* ffDetectMemory(FFMemoryResult* ram)
 {
     size_t length = sizeof(ram->bytesTotal);
-    if (sysctl((int[]){ CTL_HW,
-#if __NetBSD__
-        HW_PHYSMEM64
-#else
-        HW_PHYSMEM
-#endif
-    }, 2, &ram->bytesTotal, &length, NULL, 0))
+    if (sysctl((int[]){ CTL_HW, HW_PHYSMEM }, 2, &ram->bytesTotal, &length, NULL, 0))
         return "Failed to read hw.physmem";
 
     // vm.stats.vm.* are int values

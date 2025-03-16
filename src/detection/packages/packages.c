@@ -85,3 +85,38 @@ bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t n
     ffStrbufAppendF(cacheContent, "%" PRIu32, num_elements);
     return ffWriteFileBuffer(cacheDir->chars, cacheContent);
 }
+
+#ifndef _WIN32
+uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir)
+{
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
+    if(dirp == NULL)
+        return 0;
+
+    uint32_t num_elements = 0;
+
+    struct dirent *entry;
+    while((entry = readdir(dirp)) != NULL)
+    {
+        bool ok = false;
+
+#if !defined(__sun) && !defined(__HAIKU__)
+        if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
+            ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
+        else
+#endif
+        {
+            struct stat stbuf;
+            if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0)
+                ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+        }
+
+        if(ok) ++num_elements;
+    }
+
+    if(isdir && num_elements >= 2)
+        num_elements -= 2; // accounting for . and ..
+
+    return num_elements;
+}
+#endif

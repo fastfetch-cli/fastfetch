@@ -56,7 +56,6 @@ bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, cons
             { "auto", FF_OPENGL_LIBRARY_AUTO },
             { "egl", FF_OPENGL_LIBRARY_EGL },
             { "glx", FF_OPENGL_LIBRARY_GLX },
-            { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
             {}
         });
         return true;
@@ -85,7 +84,6 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
                 { "auto", FF_OPENGL_LIBRARY_AUTO },
                 { "egl", FF_OPENGL_LIBRARY_EGL },
                 { "glx", FF_OPENGL_LIBRARY_GLX },
-                { "osmesa", FF_OPENGL_LIBRARY_OSMESA },
                 {},
             });
             if (error)
@@ -118,9 +116,6 @@ void ffGenerateOpenGLJsonConfig(FFOpenGLOptions* options, yyjson_mut_doc* doc, y
             break;
         case FF_OPENGL_LIBRARY_GLX:
             yyjson_mut_obj_add_str(doc, module, "library", "glx");
-            break;
-        case FF_OPENGL_LIBRARY_OSMESA:
-            yyjson_mut_obj_add_str(doc, module, "library", "osmesa");
             break;
         }
     }

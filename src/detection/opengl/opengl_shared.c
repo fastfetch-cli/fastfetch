@@ -3,7 +3,7 @@
 
 #if __has_include(<GL/gl.h>)
 #include <GL/gl.h>
-#elif __has_include(<OpenGL/gl.h>)
+#elif __APPLE__
 #define GL_SILENCE_DEPRECATION 1
 #include <OpenGL/gl.h>
 #else
@@ -64,9 +64,14 @@ static const char* eglHandleContext(FFOpenGLResult* result, EGLData* data)
     return NULL;
 }
 
-static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data)
+static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data, bool gles)
 {
-    data->context = data->ffeglCreateContext(data->display, data->config, EGL_NO_CONTEXT, (EGLint[]){EGL_NONE});
+    data->context = data->ffeglCreateContext(data->display, data->config, EGL_NO_CONTEXT, (EGLint[]){
+        EGL_CONTEXT_CLIENT_VERSION, gles ? 2 : 1, // Try GLES 2.0+ first
+        EGL_NONE
+    });
+    if(data->context == EGL_NO_CONTEXT && gles) // Some ANGLE builds support GLES 1.1 only
+        data->context = data->ffeglCreateContext(data->display, data->config, EGL_NO_CONTEXT, (EGLint[]){EGL_NONE});
     if(data->context == EGL_NO_CONTEXT)
         return "eglCreateContext returned EGL_NO_CONTEXT";
 
@@ -78,10 +83,11 @@ static const char* eglHandleSurface(FFOpenGLResult* result, EGLData* data)
 static const char* eglHandleDisplay(FFOpenGLResult* result, EGLData* data)
 {
     // try use OpenGL API. If failed, use the default API (usually OpenGL ES)
-    data->ffeglBindAPI(EGL_OPENGL_API);
+    bool gles = !data->ffeglBindAPI(EGL_OPENGL_API);
 
     EGLint eglConfigCount;
     data->ffeglGetConfigs(data->display, &data->config, 1, &eglConfigCount);
+
     if(eglConfigCount == 0)
         return "eglGetConfigs returned 0 configs";
 
@@ -94,7 +100,7 @@ static const char* eglHandleDisplay(FFOpenGLResult* result, EGLData* data)
     if(data->surface == EGL_NO_SURFACE)
         return "eglCreatePbufferSurface returned EGL_NO_SURFACE";
 
-    const char* error = eglHandleSurface(result, data);
+    const char* error = eglHandleSurface(result, data, gles);
     data->ffeglDestroySurface(data->display, data->surface);
     return error;
 }

@@ -99,8 +99,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         device->writeCount = current->num_writes;
     }
 
-    if (stats.dinfo->mem_ptr)
-        free(stats.dinfo->mem_ptr);
+    free(stats.dinfo->mem_ptr);
     free(stats.dinfo);
 
     return NULL;

@@ -8,7 +8,6 @@
 
 #ifdef FF_HAVE_DBUS
 #include "common/dbus.h"
-#include "common/library.h"
 
 #define FF_DBUS_ITER_CONTINUE(dbus, iterator) \
     { \
@@ -93,8 +92,6 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
     DBusMessageIter arrayIterator;
     data->lib->ffdbus_message_iter_recurse(&rootIterator, &arrayIterator);
 
-    FF_STRBUF_AUTO_DESTROY desktopIdentity = ffStrbufCreate();
-
     while(true)
     {
         if(data->lib->ffdbus_message_iter_get_arg_type(&arrayIterator) != DBUS_TYPE_DICT_ENTRY)
@@ -118,10 +115,35 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
 
     if(result->song.length == 0)
     {
-        ffStrbufClear(&result->artist);
-        ffStrbufClear(&result->album);
-        ffStrbufClear(&result->url);
-        return false;
+        if(result->url.length)
+        {
+            const char* fileName = memrchr(result->url.chars, '/', result->url.length);
+            assert(fileName);
+            ++fileName;
+            ffStrbufEnsureFixedLengthFree(&result->song, result->url.length - (uint32_t) (fileName - result->url.chars));
+            for(; *fileName && *fileName != '?'; ++fileName)
+            {
+                if (*fileName != '%')
+                {
+                    ffStrbufAppendC(&result->song, *fileName);
+                }
+                else
+                {
+                    char str[] = { fileName[1], fileName[2], 0 };
+                    if (str[0] == 0 || str[1] == 0)
+                        break;
+                    ffStrbufAppendC(&result->song, (char) strtoul(str, NULL, 16));
+                    fileName += 2;
+                }
+            }
+        }
+        else
+        {
+            ffStrbufClear(&result->artist);
+            ffStrbufClear(&result->album);
+            ffStrbufClear(&result->url);
+            return false;
+        }
     }
 
     //Set short bus name

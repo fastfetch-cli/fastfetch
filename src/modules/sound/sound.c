@@ -58,6 +58,7 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
             FF_FORMAT_ARG(percentageNum, "volume-percentage"),
             FF_FORMAT_ARG(device->identifier, "identifier"),
             FF_FORMAT_ARG(percentageBar, "volume-percentage-bar"),
+            FF_FORMAT_ARG(device->platformApi, "platform-api"),
         }));
     }
 }
@@ -104,6 +105,7 @@ void ffPrintSound(FFSoundOptions* options)
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->platformApi);
     }
 }
 
@@ -218,12 +220,14 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
 
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &item->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "identifier", &item->identifier);
+        yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &item->platformApi);
     }
 
     FF_LIST_FOR_EACH(FFSoundDevice, device, result)
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
+        ffStrbufDestroy(&device->platformApi);
     }
 }
 
@@ -241,6 +245,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Volume (in percentage num)", "volume-percentage"},
         {"Identifier", "identifier"},
         {"Volume (in percentage bar)", "volume-percentage-bar"},
+        {"Platform API used", "platform-api"},
     }))
 };
 

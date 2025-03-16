@@ -227,14 +227,14 @@ void ffListFeatures(void)
         #if FF_HAVE_GLX
             "glx\n"
         #endif
-        #if FF_HAVE_OSMESA
-            "osmesa\n"
-        #endif
         #if FF_HAVE_OPENCL
             "opencl\n"
         #endif
         #if FF_HAVE_FREETYPE
             "freetype\n"
+        #endif
+        #if FF_HAVE_PCIACCESS
+            "libpciaccess\n"
         #endif
         #if FF_HAVE_PULSE
             "libpulse\n"

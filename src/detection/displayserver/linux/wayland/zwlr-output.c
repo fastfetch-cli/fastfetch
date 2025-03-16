@@ -188,11 +188,11 @@ static void waylandHandleZwlrHead(void *data, FF_MAYBE_UNUSED struct zwlr_output
     wldata->ffwl_proxy_destroy((void*) head);
 }
 
-void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
+const char* ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
 {
     struct wl_proxy* output = wldata->ffwl_proxy_marshal_constructor_versioned((struct wl_proxy*) registry, WL_REGISTRY_BIND, &zwlr_output_manager_v1_interface, version, name, zwlr_output_manager_v1_interface.name, version, NULL);
     if(output == NULL)
-        return;
+        return "Failed to bind zwlr_output_manager_v1";
 
     const struct zwlr_output_manager_v1_listener outputListener = {
         .head = waylandHandleZwlrHead,
@@ -200,9 +200,19 @@ void ffWaylandHandleZwlrOutput(WaylandData* wldata, struct wl_registry* registry
         .finished = (void*) stubListener,
     };
 
-    wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, wldata);
-    wldata->ffwl_display_roundtrip(wldata->display);
+    if (wldata->ffwl_proxy_add_listener(output, (void(**)(void)) &outputListener, wldata) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to add listener to zwlr_output_manager_v1";
+    }
+    if (wldata->ffwl_display_roundtrip(wldata->display) < 0)
+    {
+        wldata->ffwl_proxy_destroy(output);
+        return "Failed to roundtrip display";
+    }
     wldata->ffwl_proxy_destroy(output);
+
+    return NULL;
 }
 
 #endif

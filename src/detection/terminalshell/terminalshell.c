@@ -20,13 +20,16 @@
 #include "util/windows/version.h"
 #include <windows.h>
 
-static bool getFileVersion(const FFstrbuf* exePath, FFstrbuf* version)
+static bool getFileVersion(const FFstrbuf* exePath, const wchar_t* stringName, FFstrbuf* version)
 {
     wchar_t exePathW[PATH_MAX];
     int len = MultiByteToWideChar(CP_UTF8, 0, exePath->chars, (int)exePath->length, exePathW, ARRAY_SIZE(exePathW));
     if (len <= 0) return false;
-    return ffGetFileVersion(exePathW, version);
+    return ffGetFileVersion(exePathW, stringName, version);
 }
+
+#elif __HAIKU__
+    #include "util/haiku/version.h"
 #endif
 
 static bool getExeVersionRaw(FFstrbuf* exe, FFstrbuf* version)
@@ -96,7 +99,7 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
     }
 
     #ifdef _WIN32
-    if(getFileVersion(exe, version))
+    if(getFileVersion(exe, NULL, version))
     {
         ffStrbufSubstrBeforeLastC(version, '.');
         return true;
@@ -289,7 +292,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
     if(ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise"))
         return getShellVersionWinPowerShell(exe, version);
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
     #endif
 
     return false;
@@ -669,6 +672,12 @@ FF_MAYBE_UNUSED static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* e
 
 FF_MAYBE_UNUSED static bool getTerminalVersionTilix(FFstrbuf* exe, FFstrbuf* version)
 {
+    if (exe->chars[0] == '/')
+    {
+        ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
+        if (version->length) return true;
+    }
+
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "--version",
@@ -699,6 +708,20 @@ FF_MAYBE_UNUSED static bool getTerminalVersionSakura(FFstrbuf* exe, FFstrbuf* ve
     ffStrbufSubstrAfterLastC(version, ' ');
     return true;
 }
+
+FF_MAYBE_UNUSED static bool getTerminalVersionTermite(FFstrbuf* exe, FFstrbuf* version)
+{
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) != NULL) // termite v16.9\nvte 0.78.1 +BIDI +GNUTLS +ICU +SYSTEMD
+        return false;
+
+    ffStrbufSubstrBeforeFirstC(version, '\n');
+    ffStrbufSubstrAfterLastC(version, 'v');
+    return true;
+}
 #endif
 
 #ifdef _WIN32
@@ -715,7 +738,7 @@ static bool getTerminalVersionWindowsTerminal(FFstrbuf* exe, FFstrbuf* version)
         return true;
     }
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
 }
 
 static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
@@ -725,7 +748,7 @@ static bool getTerminalVersionConEmu(FFstrbuf* exe, FFstrbuf* version)
     if(version->length)
         return true;
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
 }
 
 #endif
@@ -741,7 +764,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #endif
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun) || defined(__NetBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__sun) || defined(__NetBSD__) || defined(__HAIKU__)
 
     if(ffStrbufStartsWithIgnCaseS(processName, "gnome-terminal"))
         return getTerminalVersionGnome(exe, version);
@@ -804,6 +827,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "sakura"))
         return getTerminalVersionSakura(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "termite"))
+        return getTerminalVersionTermite(exe, version);
+
     #endif
 
     #ifdef _WIN32
@@ -813,6 +839,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "ConEmu"))
         return getTerminalVersionConEmu(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "warp.exe"))
+        return getFileVersion(exe, L"ProductVersion", version);
 
     #endif
 
@@ -840,6 +869,11 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "zed"))
         return getTerminalVersionZed(exe, version);
+
+    #if __HAIKU__
+    if(ffStrbufEqualS(processName, "Terminal"))
+        return ffGetFileVersion(exe->chars, version);
+    #endif
 
     const char* termProgramVersion = getenv("TERM_PROGRAM_VERSION");
     if(termProgramVersion)
@@ -884,7 +918,7 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     #ifdef _WIN32
 
-    return getFileVersion(exe, version);
+    return getFileVersion(exe, NULL, version);
 
     #else
 

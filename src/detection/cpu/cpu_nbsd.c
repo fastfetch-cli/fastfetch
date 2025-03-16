@@ -42,10 +42,11 @@ static const char* detectCpuTemp(double* current)
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != NULL)
+    if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != NULL &&
+        ffSysctlGetString("machdep.dmi.processor-version", &cpu->name) != NULL &&
+        ffSysctlGetString("hw.cpu0.name", &cpu->name) != NULL)
     {
-        if (ffSysctlGetString("machdep.dmi.processor-version", &cpu->name) != NULL)
-            return "sysctlbyname(machdep.cpu_brand) failed";
+        ffStrbufSetS(&cpu->name, "Unknown CPU");
     }
 
     if (ffSysctlGetString("machdep.dmi.processor-vendor", &cpu->vendor) == NULL)
@@ -58,8 +59,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     ffCPUDetectSpeedByCpuid(cpu);
 
     uint32_t freq = (uint32_t) ffSysctlGetInt("machdep.cpu.frequency.target", 0);
-    if (freq > cpu->frequencyBase)
-        cpu->frequencyBase = freq;
+    if (freq == 0) freq = (uint32_t) (ffSysctlGetInt64("hw.cpu0.clock_frequency", 0) / 1000000);
+    if (freq > cpu->frequencyBase) cpu->frequencyBase = freq;
 
     cpu->temperature = FF_CPU_TEMP_UNSET;
 

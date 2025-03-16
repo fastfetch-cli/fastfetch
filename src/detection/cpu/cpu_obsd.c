@@ -15,7 +15,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     ffCPUDetectSpeedByCpuid(cpu);
 
-    cpu->frequencyBase = (uint32_t) ffSysctlGetInt(CTL_HW, HW_CPUSPEED, 0);
+    uint32_t cpuspeed = (uint32_t) ffSysctlGetInt(CTL_HW, HW_CPUSPEED, 0);
+    if (cpuspeed > cpu->frequencyBase) cpu->frequencyBase = cpuspeed;
+
     cpu->temperature = FF_CPU_TEMP_UNSET;
     if (options->temp)
     {

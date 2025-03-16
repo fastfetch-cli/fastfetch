@@ -9,7 +9,7 @@
         },
         "separator": "│ ",
         "percent": {
-            "type": 6
+            "type": ["bar", "hide-others"]
         },
         "bar": {
             "borderLeft": "",
@@ -70,7 +70,7 @@
             "type": "localip",
             "key": "│ MAC ADDR   │{$1}",
             "format": "{mac} ({ifname})",
-            "showIPv4": false,
+            "showIpv4": false,
             "showMac": true
         },
         {
@@ -120,12 +120,18 @@
         {
             "type": "memory",
             "key": "│ MEMORY     │{$1}",
-            "format": "{used} / {total} [{percentage}]"
+            "format": "{used} / {total} [{percentage}]",
+            "percent": {
+                "type": ["num"]
+            }
         },
         {
             "type": "memory",
             "key": "│ USAGE      │{$1}",
-            "format": ""
+            "format": "",
+            "percent": {
+                "type": ["bar", "hide-others"]
+            }
         },
         {
             "type": "custom",
@@ -135,12 +141,18 @@
             "type": "disk",
             "key": "│ VOLUME     │{$1}",
             "format": "{size-used} / {size-total} [{size-percentage}]",
-            "folders": "/"
+            "folders": "/",
+            "percent": {
+                "type": ["num"]
+            }
         },
         {
             "type": "disk",
             "key": "│ DISK USAGE │{$1}",
-            "format": ""
+            "format": "",
+            "percent": {
+                "type": ["bar", "hide-others"]
+            }
         },
         {
             "type": "custom",

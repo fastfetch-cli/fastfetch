@@ -2,8 +2,6 @@
 
 #include "common/time.h"
 
-const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options);
-
 static FFlist ioCounters1;
 static uint64_t time1;
 

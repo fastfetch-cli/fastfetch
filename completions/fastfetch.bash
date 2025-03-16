@@ -97,7 +97,6 @@ __fastfetch_complete_gl()
         "auto"
         "egl"
         "glx"
-        "osmesa"
     )
     COMPREPLY=($(compgen -W "${__ff_gl_types[*]}" -- "$CURRENT_WORD"))
 }
@@ -359,28 +358,6 @@ __fastfetch_completion()
     local FF_OPTIONS_PATH=(
         "-c"
         "--config"
-        "--lib-vulkan"
-        "--lib-wayland"
-        "--lib-xcb-randr"
-        "--lib-xcb"
-        "--lib-xrandr"
-        "--lib-X11"
-        "--lib-gio"
-        "--lib-dconf"
-        "--lib-dbus"
-        "--lib-xfconf"
-        "--lib-sqlite3"
-        "--lib-rpm"
-        "--lib-imagemagick"
-        "--lib-z"
-        "--lib-chafa"
-        "--lib-egl"
-        "--lib-glx"
-        "--lib-osmesa"
-        "--lib-opencl"
-        "--lib-pulse"
-        "--lib-ddcutil"
-        "--lib-nm"
     )
 
     local FF_OPTIONS_LOGO=(

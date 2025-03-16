@@ -13,29 +13,34 @@ static void paSinkInfoCallback(pa_context *c, const pa_sink_info *i, int eol, vo
 
     FFSoundDevice* device = ffListAdd(userdata);
     ffStrbufInitS(&device->identifier, i->name);
+    ffStrbufInitStatic(&device->platformApi, "PulseAudio");
     ffStrbufTrimRightSpace(&device->identifier);
     ffStrbufInitS(&device->name, i->description);
     ffStrbufTrimRightSpace(&device->name);
     ffStrbufTrimLeft(&device->name, ' ');
-    device->volume = i->mute ? 0 : (uint8_t) (i->volume.values[0] * 100 / PA_VOLUME_NORM);
+    device->volume = i->mute ? 0 : (uint8_t) ((i->volume.values[0] * 100 + PA_VOLUME_NORM / 2 /*round*/) / PA_VOLUME_NORM);
     device->active = i->active_port && i->active_port->available != PA_PORT_AVAILABLE_NO;
     device->main = false;
 }
 
-static void paServerInfoCallback(pa_context *c, const pa_server_info *i, void *userdata)
+static void paServerInfoCallback(FF_MAYBE_UNUSED pa_context *c, const pa_server_info *i, void *userdata)
 {
-    FF_UNUSED(c);
+    if(!i) return;
 
-    if(!i)
-        return;
+    FF_STRBUF_AUTO_DESTROY api = ffStrbufCreate();
+    const char* realServer = strstr(i->server_name, "(on ");
+    if (realServer)
+    {
+        ffStrbufSetS(&api, realServer + strlen("(on "));
+        ffStrbufTrimRight(&api, ')');
+    }
+    else
+        ffStrbufSetF(&api, "%s %s", i->server_name, i->server_version);
 
     FF_LIST_FOR_EACH(FFSoundDevice, device, *(FFlist*)userdata)
     {
-        if(ffStrbufEqualS(&device->identifier, i->default_sink_name))
-        {
-            device->main = true;
-            break;
-        }
+        device->main = ffStrbufEqualS(&device->identifier, i->default_sink_name);
+        ffStrbufSet(&device->platformApi, &api);
     }
 }
 

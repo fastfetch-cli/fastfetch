@@ -1,0 +1,39 @@
+<!-- Fastfetch Logo -->
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Terminal border -->
+  <rect x="0" y="0" width="400" height="400" rx="15" ry="15" fill="#282c34" stroke="#3498db"
+    stroke-width="3" />
+
+  <!-- Title bar of terminal -->
+  <g>
+    <!-- Background -->
+    <path d="M15,0 h370 a15,15 0 0 1 15,15 v25 h-400 v-25 a15,15 0 0 1 15,-15 z" fill="#3498db" opacity="0.2" />
+    <text x="190" y="28" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#ecf0f1">FASTFETCH</text>
+    <!-- Close btn -->
+    <circle cx="25" cy="20" r="7" fill="#e74c3c" />
+    <!-- Minimize btn -->
+    <circle cx="45" cy="20" r="7" fill="#f1c40f" />
+    <!-- Maximize btn -->
+    <circle cx="65" cy="20" r="7" fill="#2ecc71" />
+    <!-- Bottom border of title bar -->
+    <line x1="0" y1="40" x2="400" y2="40" stroke="#3498db" stroke-width="2" />
+  </g>
+  <!-- Rocket icon -->
+  <g>
+    <path d="M94.25,73.59 L139.99,142.20 L48.52,142.20 Z" fill="#e74c3c" />
+    <rect x="48.52" y="142.20" width="91.48" height="141.75" fill="#ecf0f1" />
+    <rect x="57.66" y="172.50" width="73.19" height="45.74" fill="#95a5a6" />
+    <path d="M57.66,328.89 L71.39,374.63 L89.68,328.89 Z" fill="#e67e22" />
+    <path d="M98.83,328.89 L117.12,374.63 L130.85,328.89 Z" fill="#e67e22" />
+    <rect x="48.52" y="283.15" width="91.48" height="45.74" fill="#7f8c8d" />
+  </g>
+  <!-- System info -->
+  <g font-family="monospace" font-size="42" fill="#2980b9" transform="translate(190, 102)">
+    <text y="0">►►►►►►►</text>
+    <text y="45">►►►►►►</text>
+    <text y="90">►►►►►</text>
+    <text y="135">►►►►</text>
+    <text y="180">►►►</text>
+    <text y="225">►►</text>
+  </g>
+</svg>

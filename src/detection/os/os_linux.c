@@ -11,14 +11,6 @@
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
 
-static inline bool allRelevantValuesSet(const FFOSResult* result)
-{
-    return result->id.length > 0
-        && result->name.length > 0
-        && result->prettyName.length > 0
-    ;
-}
-
 static bool parseLsbRelease(const char* fileName, FFOSResult* result)
 {
     return ffParsePropFileValues(fileName, 4, (FFpropquery[]) {
@@ -49,10 +41,13 @@ static bool parseOsRelease(const char* fileName, FFOSResult* result)
 // Common logic for detecting Armbian image version
 FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
 {
-    if (ffStrbufStartsWithS(&result->prettyName, "Armbian ")) // Official Armbian release images
+    // Possible values `PRETTY_NAME` starts with on Armbian:
+    // - `Armbian` for official releases
+    // - `Armbian_community` for community releases
+    // - `Armbian_Security` for images with kali repo added
+    // - `Armbian-unofficial` for an unofficial image built from source, e.g. during development and testing
+    if (ffStrbufStartsWithS(&result->prettyName, "Armbian"))
         ffStrbufSetS(&result->name, "Armbian");
-    else if (ffStrbufStartsWithS(&result->prettyName, "Armbian-unofficial ")) // Unofficial Armbian image built from source
-        ffStrbufSetS(&result->name, "Armbian (custom build)");
     else
         return false;
     ffStrbufSet(&result->idLike, &result->id);
@@ -79,6 +74,19 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetS(&result->idLike, "ubuntu");
         ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Linux Lite "));
         return;
+    }
+    else if(ffStrbufStartsWithS(&result->prettyName, "Rhino Linux "))
+    {
+        ffStrbufSetS(&result->name, "Rhino Linux");
+        ffStrbufSetS(&result->id, "rhinolinux");
+        ffStrbufSetS(&result->idLike, "ubuntu");
+        ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Rhino Linux "));
+        return;
+    }
+    else if(ffStrbufStartsWithS(&result->prettyName, "VanillaOS "))
+    {
+        ffStrbufSetS(&result->id, "vanilla");
+        ffStrbufSetS(&result->idLike, "ubuntu");
     }
 
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
@@ -252,11 +260,13 @@ static void detectOS(FFOSResult* os)
 {
     #ifdef FF_CUSTOM_OS_RELEASE_PATH
     parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
-    parseLsbRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+        #ifdef FF_CUSTOM_LSB_RELEASE_PATH
+        parseLsbRelease(FF_STR(FF_CUSTOM_LSB_RELEASE_PATH), os);
+        #endif
     return;
     #endif
 
-    if(instance.config.general.escapeBedrock && parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
+    if(parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
     {
         if(os->id.length == 0)
             ffStrbufAppendS(&os->id, "bedrock");
@@ -267,18 +277,17 @@ static void detectOS(FFOSResult* os)
         if(os->prettyName.length == 0)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
 
-        if(parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os) && allRelevantValuesSet(os))
-            return;
+        parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+        return;
     }
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
-    if((parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os) ||
-        parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os)) &&
-        allRelevantValuesSet(os))
-        return;
-
-    parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
+    parseOsRelease(FASTFETCH_TARGET_DIR_ETC "/os-release", os);
+    if (os->id.length == 0 || os->version.length == 0 || os->prettyName.length == 0 || os->codename.length == 0)
+        parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
+    if (os->id.length == 0 || os->name.length > 0 || os->prettyName.length > 0)
+        parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
 }
 
 void ffDetectOSImpl(FFOSResult* os)

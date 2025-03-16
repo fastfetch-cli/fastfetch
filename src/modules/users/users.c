@@ -62,9 +62,21 @@ void ffPrintUsers(FFUsersOptions* options)
     }
     else
     {
+        uint64_t now = ffTimeGetNow();
         for(uint32_t i = 0; i < users.length; ++i)
         {
             FFUserResult* user = FF_LIST_GET(FFUserResult, users, i);
+
+            uint64_t duration = now - user->loginTime;
+            uint32_t milliseconds = (uint32_t) (duration % 1000);
+            duration /= 1000;
+            uint32_t seconds = (uint32_t) (duration % 60);
+            duration /= 60;
+            uint32_t minutes = (uint32_t) (duration % 60);
+            duration /= 60;
+            uint32_t hours = (uint32_t) (duration % 24);
+            duration /= 24;
+            uint32_t days = (uint32_t) duration;
 
             FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(user->name, "name"),
@@ -72,6 +84,11 @@ void ffPrintUsers(FFUsersOptions* options)
                 FF_FORMAT_ARG(user->sessionName, "session-name"),
                 FF_FORMAT_ARG(user->clientIp, "client-ip"),
                 {FF_FORMAT_ARG_TYPE_STRING, ffTimeToShortStr(user->loginTime), "login-time"},
+                FF_FORMAT_ARG(days, "days"),
+                FF_FORMAT_ARG(hours, "hours"),
+                FF_FORMAT_ARG(minutes, "minutes"),
+                FF_FORMAT_ARG(seconds, "seconds"),
+                FF_FORMAT_ARG(milliseconds, "milliseconds"),
             }));
         }
     }
@@ -200,6 +217,11 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Session name", "session"},
         {"Client IP", "client-ip"},
         {"Login Time in local timezone", "login-time"},
+        {"Days after login", "days"},
+        {"Hours after login", "hours"},
+        {"Minutes after login", "minutes"},
+        {"Seconds after login", "seconds"},
+        {"Milliseconds after login", "milliseconds"},
     }))
 };
 

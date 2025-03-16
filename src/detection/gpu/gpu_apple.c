@@ -21,6 +21,7 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
             case 1: error = ffDetectSmcTemps(FF_TEMP_GPU_M1X, &result); break;
             case 2: error = ffDetectSmcTemps(FF_TEMP_GPU_M2X, &result); break;
             case 3: error = ffDetectSmcTemps(FF_TEMP_GPU_M3X, &result); break;
+            case 4: error = ffDetectSmcTemps(FF_TEMP_GPU_M4X, &result); break;
             default: error = "Unsupported Apple Silicon GPU";
         }
     }
@@ -114,7 +115,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount)) // For Apple
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
-        gpu->coreUsage = 0.0/0.0;
+        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         CFDictionaryRef perfStatistics = NULL;
         uint64_t vramUsed = 0, vramTotal = 0;
         if (ffCfDictGetDict(properties, CFSTR("PerformanceStatistics"), &perfStatistics) == NULL)

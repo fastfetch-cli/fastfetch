@@ -8,6 +8,7 @@ typedef struct FFSoundDevice
 {
     FFstrbuf identifier;
     FFstrbuf name;
+    FFstrbuf platformApi;
     uint8_t volume; // 0-100%
     bool main;
     bool active;

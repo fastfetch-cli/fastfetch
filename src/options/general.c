@@ -24,24 +24,13 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
             options->processingTimeout = (int32_t) yyjson_get_int(val);
         else if (ffStrEqualsIgnCase(key, "preRun"))
         {
-            FF_STRBUF_AUTO_DESTROY _ = ffStrbufCreate();
-            const char* error = ffProcessAppendStdOut(&_, (char* const[]) {
-                #ifdef _WIN32
-                "cmd.exe", "/C",
-                #else
-                "/bin/sh", "-c",
-                #endif
-                (char*) yyjson_get_str(val), NULL
-            });
-            if (error)
+            if (system(yyjson_get_str(val)) < 0)
                 return "Failed to execute preRun command";
         }
         else if (ffStrEqualsIgnCase(key, "detectVersion"))
             options->detectVersion = yyjson_get_bool(val);
 
-        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__)
-        else if (ffStrEqualsIgnCase(key, "escapeBedrock"))
-            options->escapeBedrock = yyjson_get_bool(val);
+        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
         else if (ffStrEqualsIgnCase(key, "playerName"))
             ffStrbufSetS(&options->playerName, yyjson_get_str(val));
         else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
@@ -84,9 +73,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
     else if(ffStrEqualsIgnCase(key, "--detect-version"))
         options->detectVersion = ffOptionParseBoolean(value);
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__)
-    else if(ffStrEqualsIgnCase(key, "--escape-bedrock"))
-        options->escapeBedrock = ffOptionParseBoolean(value);
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
     else if(ffStrEqualsIgnCase(key, "--player-name"))
         ffOptionParseString(key, value, &options->playerName);
     else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
@@ -115,8 +102,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
     options->multithreading = true;
     options->detectVersion = true;
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__)
-    options->escapeBedrock = true;
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
     ffStrbufInit(&options->playerName);
     options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
     #elif defined(_WIN32)
@@ -126,7 +112,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
 
 void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 {
-    #if defined(__linux__) || defined(__FreeBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
     ffStrbufDestroy(&options->playerName);
     #endif
 }
@@ -144,10 +130,7 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
     if (options->processingTimeout != defaultOptions.processingTimeout)
         yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
 
-    #if defined(__linux__) || defined(__FreeBSD__)
-
-    if (options->escapeBedrock != defaultOptions.escapeBedrock)
-        yyjson_mut_obj_add_bool(doc, obj, "escapeBedrock", options->escapeBedrock);
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 
     if (!ffStrbufEqual(&options->playerName, &defaultOptions.playerName))
         yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);

@@ -7,6 +7,8 @@
     #include <minwindef.h>
 #endif
 
+struct addrinfo;
+
 typedef struct FFNetworkingState {
     #ifdef _WIN32
         uintptr_t sockfd;
@@ -15,6 +17,7 @@ typedef struct FFNetworkingState {
         int sockfd;
         FFstrbuf host;
         FFstrbuf command;
+        struct addrinfo* addr;
 
         #ifdef FF_HAVE_THREADS
             FFThreadType thread;
@@ -23,7 +26,13 @@ typedef struct FFNetworkingState {
 
     uint32_t timeout;
     bool ipv6;
+    bool compression;
 } FFNetworkingState;
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);
 const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buffer);
+
+#ifdef FF_HAVE_ZLIB
+const char* ffNetworkingLoadZlibLibrary(void);
+bool ffNetworkingDecompressGzip(FFstrbuf* buffer, char* headerEnd);
+#endif

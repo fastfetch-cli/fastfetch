@@ -8,7 +8,6 @@
 #ifdef __NetBSD__
 #include <sys/types.h>
 #include <sys/statvfs.h>
-#define getfsstat(...) getvfsstat(__VA_ARGS__)
 #define statfs statvfs
 #define f_flags f_flag
 #define f_bsize f_frsize
@@ -125,18 +124,26 @@ static void detectFsInfo(struct statfs* fs, FFDisk* disk)
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 {
+    #ifndef __NetBSD__
     int size = getfsstat(NULL, 0, MNT_WAIT);
-
-    if(size <= 0)
-        return "getfsstat(NULL, 0, MNT_WAIT) failed";
+    if(size <= 0) return "getfsstat(NULL, 0, MNT_WAIT) failed";
+    #else
+    int size = getvfsstat(NULL, 0, ST_WAIT);
+    if(size <= 0) return "getvfsstat(NULL, 0, ST_WAIT) failed";
+    #endif
 
     FF_AUTO_FREE struct statfs* buf = malloc(sizeof(*buf) * (unsigned) size);
+    #ifndef __NetBSD__
     if(getfsstat(buf, (int) (sizeof(*buf) * (unsigned) size), MNT_NOWAIT) <= 0)
         return "getfsstat(buf, size, MNT_NOWAIT) failed";
+    #else
+    if(getvfsstat(buf, sizeof(*buf) * (unsigned) size, ST_NOWAIT) <= 0)
+        return "getvfsstat(buf, size, ST_NOWAIT) failed";
+    #endif
 
     for(struct statfs* fs = buf; fs < buf + size; ++fs)
     {
-        if(__builtin_expect(options->folders.length, 0))
+        if(__builtin_expect(options->folders.length > 0, 0))
         {
             if(!ffDiskMatchMountpoint(options, fs->f_mntonname))
                 continue;

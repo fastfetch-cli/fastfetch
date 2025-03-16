@@ -10,10 +10,14 @@ const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu)
     const char* removeStrings[] = {
         " CPU", " FPU", " APU", " Processor",
         " Dual-Core", " Quad-Core", " Six-Core", " Eight-Core", " Ten-Core",
-        " 2-Core", " 4-Core", " 6-Core", " 8-Core", " 10-Core", " 12-Core", " 14-Core", " 16-Core",
-        " with Radeon Graphics"
+        " 2-Core", " 4-Core", " 6-Core", " 8-Core", " 10-Core", " 12-Core", " 14-Core", " 16-Core"
     };
     ffStrbufRemoveStrings(&cpu->name, ARRAY_SIZE(removeStrings), removeStrings);
+    uint32_t radeonGraphics = ffStrbufFirstIndexS(&cpu->name, " w/ Radeon "); // w/ Radeon 780M Graphics
+    if (radeonGraphics >= cpu->name.length)
+        radeonGraphics = ffStrbufFirstIndexS(&cpu->name, " with Radeon ");
+    if (radeonGraphics < cpu->name.length)
+        ffStrbufSubstrBefore(&cpu->name, radeonGraphics);
     ffStrbufSubstrBeforeFirstC(&cpu->name, '@'); //Cut the speed output in the name as we append our own
     ffStrbufTrimRight(&cpu->name, ' '); //If we removed the @ in previous step there was most likely a space before it
     ffStrbufRemoveDupWhitespaces(&cpu->name);

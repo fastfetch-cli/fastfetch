@@ -7,33 +7,11 @@
 #include "detection/os/os.h"
 #include "util/stringUtils.h"
 
-#include <dirent.h>
-
-static uint32_t getNumElementsImpl(const char* dirname, unsigned char type)
-{
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(dirname);
-    if(dirp == NULL)
-        return 0;
-
-    uint32_t num_elements = 0;
-
-    struct dirent *entry;
-    while((entry = readdir(dirp)) != NULL) {
-        if(entry->d_type == type)
-            ++num_elements;
-    }
-
-    if(type == DT_DIR && num_elements >= 2)
-        num_elements -= 2; // accounting for . and ..
-
-    return num_elements;
-}
-
-static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, unsigned char type)
+static uint32_t getNumElements(FFstrbuf* baseDir, const char* dirname, bool isdir)
 {
     uint32_t baseDirLength = baseDir->length;
     ffStrbufAppendS(baseDir, dirname);
-    uint32_t num_elements = getNumElementsImpl(baseDir->chars, type);
+    uint32_t num_elements = ffPackagesGetNumElements(baseDir->chars, isdir);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
     return num_elements;
 }
@@ -332,10 +310,10 @@ static uint32_t getXBPS(FFstrbuf* baseDir, const char* dirname)
 
 static uint32_t getSnap(FFstrbuf* baseDir)
 {
-    uint32_t result = getNumElements(baseDir, "/snap", DT_DIR);
+    uint32_t result = getNumElements(baseDir, "/snap", true);
 
     if (result == 0)
-        result = getNumElements(baseDir, "/var/lib/snapd/snap", DT_DIR);
+        result = getNumElements(baseDir, "/var/lib/snapd/snap", true);
 
     //Accounting for the /snap/bin folder
     return result > 0 ? result - 1 : 0;
@@ -386,7 +364,29 @@ static uint32_t getRpmFromLibrpm(void)
 
 #endif //FF_HAVE_RPM
 
-static uint32_t getAM(FFstrbuf* baseDir)
+static uint32_t getAMPackages(FFstrbuf* baseDir)
+{
+    uint32_t baseLength = baseDir->length;
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    if (!dirp) return 0;
+
+    uint32_t result = 0;
+    struct dirent *entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if (entry->d_name[0] == '.') continue;
+        if (entry->d_type == DT_DIR)
+        {
+            ffStrbufAppendF(baseDir, "/%s/remove", entry->d_name);
+            if (ffPathExists(baseDir->chars, FF_PATHTYPE_FILE))
+                ++result;
+            ffStrbufSubstrBefore(baseDir, baseLength);
+        }
+    }
+    return result;
+}
+
+static uint32_t getAMSystem(FFstrbuf* baseDir)
 {
     // #771
     uint32_t baseDirLength = baseDir->length;
@@ -401,26 +401,25 @@ static uint32_t getAM(FFstrbuf* baseDir)
     {
         ++result; // `am` itself is counted as a package too
         ffStrbufSubstrBefore(baseDir, optDirLength);
-        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
-        if(dirp)
-        {
-            struct dirent *entry;
-            while ((entry = readdir(dirp)) != NULL)
-            {
-                if (entry->d_name[0] == '.') continue;
-                if (entry->d_type == DT_DIR)
-                {
-                    ffStrbufAppendF(baseDir, "/%s/AM-updater", entry->d_name);
-                    if (ffPathExists(baseDir->chars, FF_PATHTYPE_FILE))
-                        ++result;
-                    ffStrbufSubstrBefore(baseDir, optDirLength);
-                }
-            }
-        }
+        result = getAMPackages(baseDir);
     }
 
     ffStrbufSubstrBefore(baseDir, baseDirLength);
     return result;
+}
+
+static uint32_t getAMUser(void)
+{
+    // check if $XDG_CONFIG_HOME/appman/appman-config exists
+    FFstrbuf* baseDir = FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0);
+    uint32_t baseLen = baseDir->length;
+    ffStrbufAppendS(baseDir, "appman/appman-config");
+    FF_STRBUF_AUTO_DESTROY packagesPath = ffStrbufCreate();
+    if (ffReadFileBuffer(baseDir->chars, &packagesPath))
+        ffStrbufTrimRightSpace(&packagesPath);
+    ffStrbufSubstrBefore(baseDir, baseLen);
+
+    return packagesPath.length > 0 ? getAMPackages(&packagesPath) : 0;
 }
 
 static int compareHash(const void* a, const void* b)
@@ -480,7 +479,7 @@ static inline uint32_t getFlatpakRuntimePackagesArch(FFstrbuf* baseDir)
     {
         if(entry->d_type == DT_DIR && entry->d_name[0] != '.')
         {
-            num_elements += getNumElements(baseDir, entry->d_name, DT_DIR);
+            num_elements += getNumElements(baseDir, entry->d_name, true);
         }
     }
 
@@ -529,7 +528,7 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     uint32_t flatpakDirLength = baseDir->length;
 
     ffStrbufAppendS(baseDir, "app");
-    num_elements += getNumElementsImpl(baseDir->chars, DT_DIR);
+    num_elements += ffPackagesGetNumElements(baseDir->chars, true);
     ffStrbufSubstrBefore(baseDir, flatpakDirLength);
 
     num_elements += getFlatpakRuntimePackages(baseDir);
@@ -545,35 +544,36 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_DPKG_BIT)) packageCounts->dpkg += getNumStrings(baseDir, "/var/lib/dpkg/status", "Status: install ok installed", "dpkg");
     if (!(options->disabled & FF_PACKAGES_FLAG_LPKG_BIT)) packageCounts->lpkg += getNumStrings(baseDir, "/opt/Loc-OS-LPKG/installed-lpkg/Listinstalled-lpkg.list", "\n", "lpkg");
     if (!(options->disabled & FF_PACKAGES_FLAG_EMERGE_BIT)) packageCounts->emerge += countFilesRecursive(baseDir, "/var/db/pkg", "SIZE");
-    if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", DT_DIR);
+    if (!(options->disabled & FF_PACKAGES_FLAG_EOPKG_BIT)) packageCounts->eopkg += getNumElements(baseDir, "/var/lib/eopkg/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT)) packageCounts->flatpakSystem += getFlatpakPackages(baseDir, "/var/lib");
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
         packageCounts->nixDefault += getNixPackages(baseDir, "/nix/var/nix/profiles/default");
         packageCounts->nixSystem += getNixPackages(baseDir, "/run/current-system");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", DT_DIR);
-    if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", DT_REG);
-    if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", DT_REG);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACMAN_BIT)) packageCounts->pacman += getNumElements(baseDir, "/var/lib/pacman/local", true);
+    if (!(options->disabled & FF_PACKAGES_FLAG_LPKGBUILD_BIT)) packageCounts->lpkgbuild += getNumElements(baseDir, "/opt/Loc-OS-LPKG/lpkgbuild/remove", false);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PKGTOOL_BIT)) packageCounts->pkgtool += getNumElements(baseDir, "/var/log/packages", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_RPM_BIT)) packageCounts->rpm += getSQLite3Int(baseDir, "/var/lib/rpm/rpmdb.sqlite", "SELECT count(*) FROM Packages", "rpm");
     if (!(options->disabled & FF_PACKAGES_FLAG_SNAP_BIT)) packageCounts->snap += getSnap(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_XBPS_BIT)) packageCounts->xbps += getXBPS(baseDir, "/var/db/xbps");
     if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT))
     {
-        packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", DT_DIR);
-        packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", DT_DIR);
+        packageCounts->brewCask += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Caskroom", true);
+        packageCounts->brew += getNumElements(baseDir, "/home/linuxbrew/.linuxbrew/Cellar", true);
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_PALUDIS_BIT)) packageCounts->paludis += countFilesRecursive(baseDir, "/var/db/paludis/repositories", "environment.bz2");
     if (!(options->disabled & FF_PACKAGES_FLAG_OPKG_BIT)) packageCounts->opkg += getNumStrings(baseDir, "/usr/lib/opkg/status", "Package:", "opkg"); // openwrt
-    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->am = getAM(baseDir);
+    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT)) packageCounts->amSystem = getAMSystem(baseDir);
     if (!(options->disabled & FF_PACKAGES_FLAG_SORCERY_BIT)) packageCounts->sorcery += getNumStrings(baseDir, "/var/state/sorcery/packages", ":installed:", "sorcery");
     if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
     {
       packageCounts->guixSystem += getGuixPackages(baseDir, "/run/current-system/profile");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/heads/main", DT_DIR);
-    if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", DT_REG);
+    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/heads/main", true);
+    if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_QI_BIT)) packageCounts->qi += getNumStrings(baseDir, "/var/qi/installed_packages.list", "\n", "qi");
+    if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
@@ -678,4 +678,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 
     if (!(options->disabled & FF_PACKAGES_FLAG_FLATPAK_BIT))
         result->flatpakUser = getFlatpakPackages(&baseDir, "/.local/share");
+
+    if (!(options->disabled & FF_PACKAGES_FLAG_AM_BIT))
+        result->amUser = getAMUser();
 }
