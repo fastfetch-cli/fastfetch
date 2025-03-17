@@ -18,7 +18,7 @@
 // Try to use TCP Fast Open to send data
 static const char* tryTcpFastOpen(FFNetworkingState* state)
 {
-    #if !defined(MSG_FASTOPEN) || !defined(TCP_FASTOPEN)
+    #if !defined(TCP_FASTOPEN) || (defined(__linux__) && !defined(MSG_FASTOPEN))
         FF_DEBUG("TCP Fast Open not supported on this system");
         FF_UNUSED(state);
         return "TCP Fast Open not supported";
@@ -34,14 +34,20 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
         }
 
         // Try to send data using Fast Open
+        #ifdef __APPLE__
+        ssize_t sent = 0;
+        #else
         FF_DEBUG("Using sendto() + MSG_FASTOPEN to send %u bytes of data", state->command.length);
         ssize_t sent = sendto(state->sockfd,
                              state->command.chars,
                              state->command.length,
-                             MSG_FASTOPEN | MSG_DONTWAIT,
+            #ifdef MSG_FASTOPEN
+                             MSG_FASTOPEN |
+            #endif
+                             MSG_DONTWAIT,
                              state->addr->ai_addr,
                              state->addr->ai_addrlen);
-
+        #endif
         if (sent >= 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
         {
             FF_DEBUG("TCP Fast Open %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
