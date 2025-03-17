@@ -57,14 +57,17 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
         #ifndef __APPLE__
         FF_DEBUG("Using sendto() + MSG_FASTOPEN to send %u bytes of data", state->command.length);
         ssize_t sent = sendto(state->sockfd,
-                             state->command.chars,
-                             state->command.length,
+                              state->command.chars,
+                              state->command.length,
             #ifdef MSG_FASTOPEN
-                             MSG_FASTOPEN |
+                              MSG_FASTOPEN |
             #endif
-                             MSG_DONTWAIT,
-                             state->addr->ai_addr,
-                             state->addr->ai_addrlen);
+            #ifdef MSG_NOSIGNAL
+                              MSG_NOSIGNAL |
+            #endif
+                              MSG_DONTWAIT,
+                              state->addr->ai_addr,
+                              state->addr->ai_addrlen);
         #else
         if (fcntl(state->sockfd, F_SETFL, O_NONBLOCK) == -1) {
             FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
