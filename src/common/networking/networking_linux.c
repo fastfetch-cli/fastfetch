@@ -7,6 +7,7 @@
 #include "util/debug.h"
 
 #include <unistd.h>
+#include <sys/poll.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -25,18 +26,35 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
     #else
         FF_DEBUG("Attempting to use TCP Fast Open to connect to %s", state->host.chars);
 
+        #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
         // Set TCP Fast Open
-        int qlen = 5;
-        if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, &qlen, sizeof(qlen)) != 0) {
-            FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
-        } else {
-            FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", qlen);
-        }
-
-        // Try to send data using Fast Open
-        #ifdef __APPLE__
-        ssize_t sent = 0;
+        #ifdef __linux__
+        int flag = 5; // the queue length of pending packets
         #else
+        int flag = 1; // enable TCP Fast Open
+        #endif
+        if (setsockopt(state->sockfd, IPPROTO_TCP,
+            #ifdef __APPLE__
+            // https://github.com/rust-lang/libc/pull/3135
+            0x218 // TCP_FASTOPEN_FORCE_ENABLE
+            #else
+            TCP_FASTOPEN
+            #endif
+            , &flag, sizeof(flag)) != 0) {
+            FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
+            return "setsockopt(TCP_FASTOPEN) failed";
+        } else {
+            #ifdef __linux__
+            FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", flag);
+            #elif defined(__APPLE__)
+            FF_DEBUG("Successfully set TCP_FASTOPEN_FORCE_ENABLE option");
+            #else
+            FF_DEBUG("Successfully set TCP_FASTOPEN option");
+            #endif
+        }
+        #endif
+
+        #ifndef __APPLE__
         FF_DEBUG("Using sendto() + MSG_FASTOPEN to send %u bytes of data", state->command.length);
         ssize_t sent = sendto(state->sockfd,
                              state->command.chars,
@@ -47,6 +65,28 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
                              MSG_DONTWAIT,
                              state->addr->ai_addr,
                              state->addr->ai_addrlen);
+        #else
+        if (fcntl(state->sockfd, F_SETFL, O_NONBLOCK) == -1) {
+            FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
+            return "fcntl(F_SETFL) failed";
+        }
+        FF_DEBUG("Using connectx() to send %u bytes of data", state->command.length);
+        // Use connectx to establish connection and send data in one call
+        size_t sent;
+        if (connectx(state->sockfd,
+            &(sa_endpoints_t) {
+                .sae_dstaddr = state->addr->ai_addr,
+                .sae_dstaddrlen = state->addr->ai_addrlen,
+            },
+            SAE_ASSOCID_ANY, CONNECT_DATA_IDEMPOTENT,
+            &(struct iovec) {
+                .iov_base = state->command.chars,
+                .iov_len = state->command.length,
+            }, 1, &sent, NULL) != 0) sent = 0;
+        if (fcntl(state->sockfd, F_SETFL, 0) == -1) {
+            FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
+            return "fcntl(F_SETFL) failed";
+        }
         #endif
         if (sent >= 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
         {
@@ -68,7 +108,11 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
         {
             // Fast Open failed
             FF_DEBUG("TCP Fast Open failed: %s (errno=%d)", strerror(errno), errno);
+            #ifdef __APPLE__
+            return "connectx() failed";
+            #else
             return "sendto() failed";
+            #endif
         }
     #endif
 }
@@ -313,6 +357,26 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "ffNetworkingSendHttpRequest() failed";
     }
 
+    // Set larger initial receive buffer instead of small repeated receives
+    int rcvbuf = 65536; // 64KB
+    setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+
+    #ifdef __APPLE__
+    // poll for the socket to be readable.
+    // Because of the non-blocking connectx() call, the connection might not be established yet
+    FF_DEBUG("Using poll() to check if socket is readable");
+    if (poll(&(struct pollfd) {
+        .fd = state->sockfd,
+        .events = POLLIN
+    }, 1, timeout > 0 ? (int) timeout : -1) == -1)
+    {
+        FF_DEBUG("poll() failed: %s (errno=%d)", strerror(errno), errno);
+        close(state->sockfd);
+        state->sockfd = -1;
+        return "poll() failed";
+    }
+    FF_DEBUG("Socket is readable, proceeding to receive data");
+    #else
     if(timeout > 0)
     {
         FF_DEBUG("Setting receive timeout: %u ms", timeout);
@@ -321,10 +385,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         timev.tv_usec = (__typeof__(timev.tv_usec)) ((timeout % 1000) * 1000); //milliseconds to microseconds
         setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
-
-    // Set larger initial receive buffer instead of small repeated receives
-    int rcvbuf = 65536; // 64KB
-    setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+    #endif
 
     FF_DEBUG("Starting data reception");
     FF_MAYBE_UNUSED int recvCount = 0;
