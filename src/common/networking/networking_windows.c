@@ -115,15 +115,6 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
     #endif
 
-    #ifdef TCP_FASTOPEN
-    // Set TCP Fast Open
-    if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
-        FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
-    } else {
-        FF_DEBUG("Successfully set TCP_FASTOPEN option");
-    }
-    #endif
-
     // Set timeout if needed
     if (state->timeout > 0) {
         FF_DEBUG("Setting connection timeout: %u ms", state->timeout);
@@ -169,18 +160,40 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     ffStrbufAppendS(&command, headers);
     ffStrbufAppendS(&command, "\r\n");
 
+    #ifdef TCP_FASTOPEN
+    // Set TCP Fast Open
+    flag = 1;
+    if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
+        FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+    } else {
+        FF_DEBUG("Successfully set TCP_FASTOPEN option");
+    }
+    #endif
+
     FF_DEBUG("Using ConnectEx to send %u bytes of data", command.length);
+    DWORD sent = 0;
     BOOL result = ConnectEx(state->sockfd, addr->ai_addr, (int)addr->ai_addrlen,
-                          command.chars, command.length, NULL, &state->overlapped);
+                          command.chars, command.length, &sent, &state->overlapped);
 
     freeaddrinfo(addr);
 
-    if(!result && WSAGetLastError() != WSA_IO_PENDING)
+    if(!result)
     {
-        FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
-        closesocket(state->sockfd);
-        state->sockfd = INVALID_SOCKET;
-        return "ConnectEx() failed";
+        if (WSAGetLastError() != WSA_IO_PENDING)
+        {
+            FF_DEBUG("ConnectEx() failed: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+            closesocket(state->sockfd);
+            state->sockfd = INVALID_SOCKET;
+            return "ConnectEx() failed";
+        }
+        else
+        {
+            FF_DEBUG("ConnectEx() pending");
+        }
+    }
+    else
+    {
+        FF_DEBUG("ConnectEx() succeeded, sent %u bytes of data", (unsigned) sent);
     }
 
     // No need to cleanup state fields here since we need them in the receive function
