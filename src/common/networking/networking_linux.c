@@ -19,7 +19,17 @@
 // Try to use TCP Fast Open to send data
 static const char* tryTcpFastOpen(FFNetworkingState* state)
 {
-    #if !defined(TCP_FASTOPEN) || (defined(__linux__) && !defined(MSG_FASTOPEN))
+    if (!state->tfo)
+    {
+        #ifndef __APPLE__
+        FF_DEBUG("TCP Fast Open disabled, skipping");
+        return "TCP Fast Open disabled";
+        #else
+        FF_DEBUG("TCP Fast Open disabled, using connectx() to send data");
+        #endif
+    }
+
+    #if (!defined(__APPLE__) && !defined(TCP_FASTOPEN)) || (defined(__linux__) && !defined(MSG_FASTOPEN))
         FF_DEBUG("TCP Fast Open not supported on this system");
         FF_UNUSED(state);
         return "TCP Fast Open not supported";
@@ -81,7 +91,7 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
                 .sae_dstaddr = state->addr->ai_addr,
                 .sae_dstaddrlen = state->addr->ai_addrlen,
             },
-            SAE_ASSOCID_ANY, CONNECT_DATA_IDEMPOTENT,
+            SAE_ASSOCID_ANY, state->tfo ? CONNECT_DATA_IDEMPOTENT : 0,
             &(struct iovec) {
                 .iov_base = state->command.chars,
                 .iov_len = state->command.length,
@@ -91,31 +101,40 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
             return "fcntl(F_SETFL) failed";
         }
         #endif
-        if (sent >= 0 || (errno == EAGAIN || errno == EWOULDBLOCK))
+        if (sent > 0 || (errno == EAGAIN || errno == EWOULDBLOCK
+            #ifdef __APPLE__
+            // On macOS EINPROGRESS means the connection cannot be completed immediately
+            // On Linux, it means the TFO cookie is not available locally
+            || errno == EINPROGRESS
+            #endif
+        ))
         {
-            FF_DEBUG("TCP Fast Open %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
-                     sent, errno, strerror(errno));
+            FF_DEBUG(
+                #ifdef __APPLE__
+                "connectx()"
+                #else
+                "sendto()"
+                #endif
+                " %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
+                sent, errno, strerror(errno));
             freeaddrinfo(state->addr);
             state->addr = NULL;
             ffStrbufDestroy(&state->command);
             return NULL;
         }
 
-        if (errno == EINPROGRESS)
-        {
-            FF_DEBUG("TCP Fast Open cookie is not available locally");
-            return "sendto() reports EINPROGRESS";
-        }
-        else
-        {
-            // Fast Open failed
-            FF_DEBUG("TCP Fast Open failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG(
             #ifdef __APPLE__
-            return "connectx() failed";
+            "connectx()"
             #else
-            return "sendto() failed";
+            "sendto()"
             #endif
-        }
+            " failed: %s (errno=%d)", strerror(errno), errno);
+        #ifdef __APPLE__
+        return "connectx() failed";
+        #else
+        return "sendto() failed";
+        #endif
     #endif
 }
 
@@ -316,10 +335,10 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 
     const char* tfoResult = tryTcpFastOpen(state);
     if (tfoResult == NULL) {
-        FF_DEBUG("TCP Fast Open succeeded or in progress");
+        FF_DEBUG("TryTcpFastOpen succeeded or in progress");
         return NULL;
     }
-    FF_DEBUG("TCP Fast Open unavailable or failed: %s, trying traditional connection", tfoResult);
+    FF_DEBUG("TryTcpFastOpen failed: %s, trying traditional connection", tfoResult);
 
     #ifdef FF_HAVE_THREADS
     if (instance.config.general.multithreading)

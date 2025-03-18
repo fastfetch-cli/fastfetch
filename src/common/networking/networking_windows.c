@@ -166,12 +166,19 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     ffStrbufAppendS(&command, "\r\n");
 
     #ifdef TCP_FASTOPEN
-    // Set TCP Fast Open
-    flag = 1;
-    if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
-        FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
-    } else {
-        FF_DEBUG("Successfully set TCP_FASTOPEN option");
+    if (state->tfo)
+    {
+        // Set TCP Fast Open
+        flag = 1;
+        if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, (char*)&flag, sizeof(flag)) != 0) {
+            FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", ffDebugWin32Error((DWORD) WSAGetLastError()));
+        } else {
+            FF_DEBUG("Successfully set TCP_FASTOPEN option");
+        }
+    }
+    else
+    {
+        FF_DEBUG("TCP Fast Open disabled");
     }
     #endif
 
@@ -181,6 +188,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
                           command.chars, command.length, &sent, &state->overlapped);
 
     freeaddrinfo(addr);
+    addr = NULL;
 
     if(!result)
     {

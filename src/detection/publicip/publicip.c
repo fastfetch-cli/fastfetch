@@ -21,6 +21,7 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
     if (options->url.length == 0)
     {
         state->compression = true;
+        state->tfo = true;
         *status = ffNetworkingSendHttpRequest(state, options->ipv6 ? "v6.ipinfo.io" : "ipinfo.io", "/json", NULL);
     }
     else
