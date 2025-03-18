@@ -25,7 +25,7 @@ typedef struct FFNetworkingState {
 
     uint32_t timeout;
     bool ipv6;
-    bool compression;
+    bool compression; // if true, HTTP content compression will be enabled if supported
 } FFNetworkingState;
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);

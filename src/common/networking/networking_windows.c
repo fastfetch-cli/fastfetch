@@ -49,22 +49,27 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 {
     FF_DEBUG("Preparing to send HTTP request: host=%s, path=%s", host, path);
 
-    // Initialize with compression disabled by default
-    state->compression = false;
-
-    #ifdef FF_HAVE_ZLIB
-    const char* zlibError = ffNetworkingLoadZlibLibrary();
-    // Only enable compression if zlib library is successfully loaded
-    if (zlibError == NULL)
+    if (state->compression)
     {
-        state->compression = true;
-        FF_DEBUG("Successfully loaded zlib library, compression enabled");
-    } else {
-        FF_DEBUG("Failed to load zlib library, compression disabled: %s", zlibError);
+        #ifdef FF_HAVE_ZLIB
+        const char* zlibError = ffNetworkingLoadZlibLibrary();
+        // Only enable compression if zlib library is successfully loaded
+        if (zlibError == NULL)
+        {
+            FF_DEBUG("Successfully loaded zlib library, compression enabled");
+        } else {
+            FF_DEBUG("Failed to load zlib library, compression disabled: %s", zlibError);
+            state->compression = false;
+        }
+        #else
+        FF_DEBUG("zlib not supported at build time, compression disabled");
+        state->compression = false;
+        #endif
     }
-    #else
-    FF_DEBUG("zlib not supported at build time, compression disabled");
-    #endif
+    else
+    {
+        FF_DEBUG("Compression disabled");
+    }
 
     static WSADATA wsaData;
     if (wsaData.wVersion == 0)
