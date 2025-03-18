@@ -9,6 +9,8 @@ Features:
 * Improve performance of SSID detection on macOS Sequoia (Wifi, macOS, #1597)
 * Support warp terminal version detection on Windows (Terminal, Windows)
 * Support default route detection on OpenBSD & DragonFly BSD (LocalIP, OpenBSD / DragonFly)
+* Improve bash completion script
+* Improve performance of networking (PublicIP / Weather)
 
 Logo:
 * Add Common Torizon OS
