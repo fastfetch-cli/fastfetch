@@ -15,7 +15,6 @@ typedef struct FFNetworkingState {
         OVERLAPPED overlapped;
     #else
         int sockfd;
-        FFstrbuf host;
         FFstrbuf command;
         struct addrinfo* addr;
 

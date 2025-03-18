@@ -24,7 +24,7 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
         FF_UNUSED(state);
         return "TCP Fast Open not supported";
     #else
-        FF_DEBUG("Attempting to use TCP Fast Open to connect to %s", state->host.chars);
+        FF_DEBUG("Attempting to use TCP Fast Open to connect");
 
         #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
         // Set TCP Fast Open
@@ -97,7 +97,6 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
                      sent, errno, strerror(errno));
             freeaddrinfo(state->addr);
             state->addr = NULL;
-            ffStrbufDestroy(&state->host);
             ffStrbufDestroy(&state->command);
             return NULL;
         }
@@ -124,7 +123,7 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
 static const char* connectAndSend(FFNetworkingState* state)
 {
     const char* ret = NULL;
-    FF_DEBUG("Using traditional connection method to connect to %s", state->host.chars);
+    FF_DEBUG("Using traditional connection method to connect");
 
     FF_DEBUG("Attempting connect() to server...");
     if(connect(state->sockfd, state->addr->ai_addr, state->addr->ai_addrlen) == -1)
@@ -155,7 +154,6 @@ exit:
     FF_DEBUG("Releasing address info and other resources");
     freeaddrinfo(state->addr);
     state->addr = NULL;
-    ffStrbufDestroy(&state->host);
     ffStrbufDestroy(&state->command);
 
     return ret;
@@ -169,8 +167,6 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     FF_DEBUG("Initializing network connection state: host=%s, path=%s", host, path);
 
     // Initialize command and host information
-    ffStrbufInitS(&state->host, host);
-
     ffStrbufInitA(&state->command, 64);
     ffStrbufAppendS(&state->command, "GET ");
     ffStrbufAppendS(&state->command, path);
