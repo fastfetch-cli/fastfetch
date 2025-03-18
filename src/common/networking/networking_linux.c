@@ -16,68 +16,65 @@
 #include <errno.h>
 #include <fcntl.h>
 
-// Try to use TCP Fast Open to send data
-static const char* tryTcpFastOpen(FFNetworkingState* state)
+static const char* tryNonThreadingFastPath(FFNetworkingState* state)
 {
-    if (!state->tfo)
-    {
-        #ifndef __APPLE__
-        FF_DEBUG("TCP Fast Open disabled, skipping");
-        return "TCP Fast Open disabled";
-        #else
-        FF_DEBUG("TCP Fast Open disabled, using connectx() to send data");
-        #endif
-    }
+    #if defined(TCP_FASTOPEN) || __APPLE__
 
-    #if (!defined(__APPLE__) && !defined(TCP_FASTOPEN)) || (defined(__linux__) && !defined(MSG_FASTOPEN))
-        FF_DEBUG("TCP Fast Open not supported on this system");
-        FF_UNUSED(state);
-        return "TCP Fast Open not supported";
-    #else
-        FF_DEBUG("Attempting to use TCP Fast Open to connect");
-
-        #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
-        // Set TCP Fast Open
-        #ifdef __linux__
-        int flag = 5; // the queue length of pending packets
-        #else
-        int flag = 1; // enable TCP Fast Open
-        #endif
-        if (setsockopt(state->sockfd, IPPROTO_TCP,
-            #ifdef __APPLE__
-            // https://github.com/rust-lang/libc/pull/3135
-            0x218 // TCP_FASTOPEN_FORCE_ENABLE
-            #else
-            TCP_FASTOPEN
-            #endif
-            , &flag, sizeof(flag)) != 0) {
-            FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
-            return "setsockopt(TCP_FASTOPEN) failed";
-        } else {
+        if (!state->tfo)
+        {
             #ifdef __linux__
-            FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", flag);
-            #elif defined(__APPLE__)
-            FF_DEBUG("Successfully set TCP_FASTOPEN_FORCE_ENABLE option");
-            #else
-            FF_DEBUG("Successfully set TCP_FASTOPEN option");
+            // Linux doesn't support sendto() on unconnected sockets
+            FF_DEBUG("TCP Fast Open disabled, skipping");
+            return "TCP Fast Open disabled";
             #endif
         }
-        #endif
+        else
+        {
+            FF_DEBUG("Attempting to use TCP Fast Open to connect");
+
+            #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
+            // Set TCP Fast Open
+            #ifdef __linux__
+            int flag = 5; // the queue length of pending packets
+            #else
+            int flag = 1; // enable TCP Fast Open
+            #endif
+            if (setsockopt(state->sockfd, IPPROTO_TCP,
+                #ifdef __APPLE__
+                // https://github.com/rust-lang/libc/pull/3135
+                0x218 // TCP_FASTOPEN_FORCE_ENABLE
+                #else
+                TCP_FASTOPEN
+                #endif
+                , &flag, sizeof(flag)) != 0) {
+                FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
+                return "setsockopt(TCP_FASTOPEN) failed";
+            } else {
+                #ifdef __linux__
+                FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", flag);
+                #elif defined(__APPLE__)
+                FF_DEBUG("Successfully set TCP_FASTOPEN_FORCE_ENABLE option");
+                #else
+                FF_DEBUG("Successfully set TCP_FASTOPEN option");
+                #endif
+            }
+            #endif
+        }
 
         #ifndef __APPLE__
-        FF_DEBUG("Using sendto() + MSG_FASTOPEN to send %u bytes of data", state->command.length);
+        FF_DEBUG("Using sendto() + MSG_DONTWAIT to send %u bytes of data", state->command.length);
         ssize_t sent = sendto(state->sockfd,
-                              state->command.chars,
-                              state->command.length,
+                                state->command.chars,
+                                state->command.length,
             #ifdef MSG_FASTOPEN
-                              MSG_FASTOPEN |
+                                MSG_FASTOPEN |
             #endif
             #ifdef MSG_NOSIGNAL
-                              MSG_NOSIGNAL |
+                                MSG_NOSIGNAL |
             #endif
-                              MSG_DONTWAIT,
-                              state->addr->ai_addr,
-                              state->addr->ai_addrlen);
+                                MSG_DONTWAIT,
+                                state->addr->ai_addr,
+                                state->addr->ai_addrlen);
         #else
         if (fcntl(state->sockfd, F_SETFL, O_NONBLOCK) == -1) {
             FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
@@ -135,6 +132,9 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
         #else
         return "sendto() failed";
         #endif
+    #else
+        FF_UNUSED(state);
+        return "TFO support is not available";
     #endif
 }
 
@@ -333,12 +333,12 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
     FF_DEBUG("Network state initialization successful");
 
-    const char* tfoResult = tryTcpFastOpen(state);
+    const char* tfoResult = tryNonThreadingFastPath(state);
     if (tfoResult == NULL) {
-        FF_DEBUG("TryTcpFastOpen succeeded or in progress");
+        FF_DEBUG("TryNonThreadingFastPath() succeeded or in progress");
         return NULL;
     }
-    FF_DEBUG("TryTcpFastOpen failed: %s, trying traditional connection", tfoResult);
+    FF_DEBUG("TryNonThreadingFastPath() failed: %s, trying traditional connection", tfoResult);
 
     #ifdef FF_HAVE_THREADS
     if (instance.config.general.multithreading)
