@@ -11,6 +11,7 @@ Features:
 * Support default route detection on OpenBSD & DragonFly BSD (LocalIP, OpenBSD / DragonFly)
 * Improve bash completion script
 * Improve performance of networking (PublicIP / Weather)
+* Support pkgsrc package manager detection on Linux (Packages, Linux)
 
 Logo:
 * Add Common Torizon OS
