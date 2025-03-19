@@ -16,6 +16,7 @@ Logo:
 * Add Common Torizon OS
 * Change FoxOS to WolfOS
 * Add Bredos
+* Add NetBSD2
 
 # 2.38.0
 
