@@ -189,7 +189,7 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     ffStrbufInitA(&state->command, 64);
     ffStrbufAppendS(&state->command, "GET ");
     ffStrbufAppendS(&state->command, path);
-    ffStrbufAppendS(&state->command, " HTTP/1.1\nHost: ");
+    ffStrbufAppendS(&state->command, " HTTP/1.0\nHost: ");
     ffStrbufAppendS(&state->command, host);
     ffStrbufAppendS(&state->command, "\r\n");
 
@@ -476,7 +476,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "Content length mismatch";
     }
 
-    if (ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
+    if (ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
         FF_DEBUG("Received valid HTTP 200 response, content %u bytes, total %u bytes", contentLength, buffer->length);
     } else {
         FF_DEBUG("Invalid response: %.40s...", buffer->chars);
