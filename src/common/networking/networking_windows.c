@@ -151,7 +151,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(64);
     ffStrbufAppendS(&command, "GET ");
     ffStrbufAppendS(&command, path);
-    ffStrbufAppendS(&command, " HTTP/1.1\nHost: ");
+    ffStrbufAppendS(&command, " HTTP/1.0\nHost: ");
     ffStrbufAppendS(&command, host);
     ffStrbufAppendS(&command, "\r\n");
     ffStrbufAppendS(&command, "Connection: close\r\n"); // Explicitly request connection closure
@@ -314,7 +314,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "No HTTP header end found";
     }
 
-    if (ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
+    if (ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
         FF_DEBUG("Received valid HTTP 200 response, content length: %u bytes, total length: %u bytes",
                 contentLength, buffer->length);
     } else {
