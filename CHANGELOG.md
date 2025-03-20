@@ -1,3 +1,8 @@
+# 2.39.1
+
+Bugfixes:
+* Fix a regression that PublicIP detection fails randomly (PublicIP, #1629)
+
 # 2.39.0
 
 Changes:
