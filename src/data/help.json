@@ -1419,10 +1419,9 @@
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "Auto detection",
+                    "auto": "Prefer EGL on *nix; prefer platform specific implementation on others",
                     "egl": "EGL",
-                    "glx": "GLX",
-                    "osmesa": "OSMesa"
+                    "glx": "GLX (*nix only)"
                 },
                 "default": "auto"
             }

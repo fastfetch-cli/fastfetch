@@ -79,7 +79,7 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
             wchar_t fullPath[MAX_PATH];
             wcscpy(fullPath, pPath);
             wcscat(fullPath, L"\\dwm.exe");
-            ffGetFileVersion(fullPath, result);
+            ffGetFileVersion(fullPath, NULL, result);
         }
         CoTaskMemFree(pPath);
         return NULL;

@@ -3,7 +3,7 @@
 #ifndef _WIN32
     #include <net/if.h>
 #else
-    #define IF_NAMESIZE 16
+    #define IF_NAMESIZE 0
 #endif
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex);

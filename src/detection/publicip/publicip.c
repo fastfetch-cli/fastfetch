@@ -1,5 +1,5 @@
 #include "publicip.h"
-#include "common/networking.h"
+#include "common/networking/networking.h"
 
 #define FF_UNITIALIZED ((const char*)(uintptr_t) -1)
 static FFNetworkingState states[2];
@@ -19,7 +19,11 @@ void ffPreparePublicIp(FFPublicIpOptions* options)
     state->ipv6 = options->ipv6;
 
     if (options->url.length == 0)
+    {
+        state->compression = true;
+        state->tfo = true;
         *status = ffNetworkingSendHttpRequest(state, options->ipv6 ? "v6.ipinfo.io" : "ipinfo.io", "/json", NULL);
+    }
     else
     {
         FF_STRBUF_AUTO_DESTROY host = ffStrbufCreateCopy(&options->url);

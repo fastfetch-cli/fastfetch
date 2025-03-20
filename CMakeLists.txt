@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.38.0
+    VERSION 2.39.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -74,7 +74,6 @@ cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR EN
 cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
 cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS" OFF)
-cmake_dependent_option(ENABLE_OSMESA "Enable osmesa" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
 cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR SunOS" OFF)
@@ -365,6 +364,7 @@ set(LIBFASTFETCH_SRC
     src/common/library.c
     src/common/modules.c
     src/common/netif/netif.c
+    src/common/networking/networking_common.c
     src/common/option.c
     src/common/parsing.c
     src/common/printing.c
@@ -493,7 +493,7 @@ if(LINUX)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_linux.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_linux.c
         src/detection/bios/bios_linux.c
@@ -574,7 +574,7 @@ elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
         src/common/netif/netif_linux.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_android.c
         src/detection/bios/bios_android.c
@@ -640,7 +640,7 @@ elseif(FreeBSD)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_bsd.c
@@ -731,7 +731,7 @@ elseif(NetBSD)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
@@ -813,7 +813,7 @@ elseif(OpenBSD)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_obsd.c
@@ -894,7 +894,7 @@ elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_apple.c
@@ -965,7 +965,7 @@ elseif(WIN32)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_windows.c
         src/common/netif/netif_windows.c
-        src/common/networking_windows.c
+        src/common/networking/networking_windows.c
         src/common/processing_windows.c
         src/detection/battery/battery_windows.c
         src/detection/bios/bios_windows.c
@@ -1034,13 +1034,14 @@ elseif(WIN32)
         src/util/windows/version.c
         src/util/platform/FFPlatform_windows.c
         src/util/binary_windows.c
+        src/util/debug_windows.c
     )
 elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_bsd.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
         src/detection/bios/bios_windows.c
@@ -1121,7 +1122,7 @@ elseif(Haiku)
         src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_haiku.c
-        src/common/networking_linux.c
+        src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_haiku.c
         src/detection/bios/bios_windows.c
@@ -1478,10 +1479,6 @@ else()
         "GL"
     )
 endif()
-ff_lib_enable(OSMESA
-    "osmesa"
-    "OSMesa"
-)
 ff_lib_enable(OPENCL
     "OpenCL"
     "OpenCL"
@@ -1575,7 +1572,6 @@ elseif(APPLE)
         PRIVATE "-F /System/Library/PrivateFrameworks"
         PRIVATE "-weak_framework DisplayServices"
         PRIVATE "-weak_framework MediaRemote"
-        PRIVATE "-weak_framework Apple80211"
     )
 elseif(WIN32)
     target_link_libraries(libfastfetch

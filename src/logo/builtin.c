@@ -766,6 +766,16 @@ static const FFlogo B[] = {
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // BredOS
+    {
+        .names = {"Bredos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_BREDOS,
+        .colors = {
+            FF_COLOR_FG_RGB "198;151;66", //grey
+        },
+        .colorKeys = FF_COLOR_FG_RGB "198;151;66",
+        .colorTitle = FF_COLOR_FG_RGB "198;151;66",
+    },
     // BSD
     {
         .names = {"BSD"},
@@ -1092,6 +1102,16 @@ static const FFlogo C[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // Common Torizon
+    {
+        .names = {"common-torizon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TORIZONCORE,
+        .colors = {
+            FF_COLOR_FG_LIGHT_WHITE,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE
+        },
     },
     // Cosmic DE
     {
@@ -1747,14 +1767,6 @@ static const FFlogo F[] = {
         },
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
-    },
-    // FoxOS
-    {
-        .names = {"FoxOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_FOXOS,
-        .colors = {
-            FF_COLOR_FG_YELLOW,
-        },
     },
     // FreeBSD
     {
@@ -3129,6 +3141,18 @@ static const FFlogo N[] = {
     {
         .names = {"NetBSD"},
         .lines = FASTFETCH_DATATEXT_LOGO_NETBSD,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // NetBSD2
+    {
+        .names = {"NetBSD2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NETBSD2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
@@ -5060,6 +5084,15 @@ static const FFlogo W[] = {
         },
         .colorKeys = FF_COLOR_FG_CYAN,
         .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // WolfOS
+    {
+        .names = {"WolfOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WOLFOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_GREEN,
+        },
     },
     // LAST
     {},
