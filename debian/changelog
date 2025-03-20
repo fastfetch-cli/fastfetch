@@ -1,3 +1,15 @@
+fastfetch (2.39.0ubuntu1) jammy; urgency=medium
+
+  * Remove unwanted debugging code
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 20 Mar 2025 10:39:22 +0800
+
+fastfetch (2.39.0) jammy; urgency=medium
+
+  * Update to 2.39.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 20 Mar 2025 10:35:18 +0800
+
 fastfetch (2.38.0) jammy; urgency=medium
 
   * Update to 2.38.0
