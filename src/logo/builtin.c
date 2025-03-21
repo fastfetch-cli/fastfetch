@@ -4995,10 +4995,10 @@ static const FFlogo V[] = {
 };
 
 static const FFlogo W[] = {
-    // WiiLinuxNgx
+    // WiiLinux
     {
-        .names = {"WiiLinuxNgx"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WII_LINUX_NGX,
+        .names = {"WiiLinuxNgx", "WiiLinux", "Wii-Linux", "Wii Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WII_LINUX,
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,
