@@ -708,7 +708,6 @@ elseif(FreeBSD)
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_bsd.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
@@ -720,10 +719,12 @@ elseif(FreeBSD)
     if(DragonFly)
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_nosupport.c
+            src/detection/wifi/wifi_nosupport.c
         )
     else()
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_bsd.c
+            src/detection/wifi/wifi_bsd.c
         )
     endif()
 elseif(NetBSD)
