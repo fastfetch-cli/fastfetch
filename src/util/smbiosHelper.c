@@ -50,7 +50,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     return (const FFSmbiosHeader*) (p + 1);
 }
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__) || defined(__OpenBSD__)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -139,7 +139,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
     if (buffer.chars == NULL)
     {
         ffStrbufInit(&buffer);
-        #ifndef __HAIKU__
+        #if !__HAIKU__ && !__OpenBSD__
         #ifdef __linux__
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
         #endif
@@ -233,7 +233,13 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         {
             uint32_t tableLength = 0;
             off_t tableAddress = 0;
-            FF_AUTO_CLOSE_FD int fd = open("/dev/misc/mem", O_RDONLY);
+            FF_AUTO_CLOSE_FD int fd = open(
+                #if __HAIKU__
+                "/dev/misc/mem"
+                #else
+                "/dev/mem"
+                #endif
+            , O_RDONLY);
             if (fd < 0)
                 return NULL;
 

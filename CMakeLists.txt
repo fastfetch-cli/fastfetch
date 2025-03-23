@@ -817,22 +817,22 @@ elseif(OpenBSD)
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_obsd.c
-        src/detection/bios/bios_nosupport.c
+        src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
-        src/detection/board/board_nosupport.c
+        src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_obsd.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_obsd.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -889,6 +889,7 @@ elseif(OpenBSD)
         src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
+        src/util/smbiosHelper.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC

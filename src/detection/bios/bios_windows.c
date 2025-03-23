@@ -89,7 +89,7 @@ const char* ffDetectBios(FFBiosResult* bios)
             default: break;
         }
     }
-    #elif __HAIKU__
+    #elif __HAIKU__ || __OpenBSD__
     // Currently SMBIOS detection is supported in legency BIOS only
     ffStrbufSetStatic(&bios->type, "BIOS");
     #endif
