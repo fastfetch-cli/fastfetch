@@ -3395,7 +3395,7 @@ static const FFlogo O[] = {
     // OpenSuseTumbleweedSmall
     {
         .names = {"opensuse-tumbleweed_small"},
-        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED,
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
             FF_COLOR_FG_WHITE,
