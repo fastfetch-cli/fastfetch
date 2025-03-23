@@ -42,6 +42,7 @@ void ffPrintBootmgr(FFBootmgrOptions* options)
             FF_FORMAT_ARG(bootmgr.firmware, "firmware-path"),
             FF_FORMAT_ARG(firmwareName, "firmware-name"),
             FF_FORMAT_ARG(bootmgr.secureBoot, "secure-boot"),
+            FF_FORMAT_ARG(bootmgr.order, "order"),
         }));
     }
 
@@ -102,6 +103,7 @@ void ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjs
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "name", &bootmgr.name);
     yyjson_mut_obj_add_strbuf(doc, obj, "firmware", &bootmgr.firmware);
+    yyjson_mut_obj_add_uint(doc, obj, "order", bootmgr.order);
     yyjson_mut_obj_add_bool(doc, obj, "secureBoot", bootmgr.secureBoot);
 
 exit:
@@ -122,6 +124,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Firmware file path", "firmware-path"},
         {"Firmware file name", "firmware-name"},
         {"Is secure boot enabled", "secure-boot"},
+        {"Boot order", "order"},
     }))
 };
 
