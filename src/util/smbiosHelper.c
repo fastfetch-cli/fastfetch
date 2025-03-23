@@ -335,6 +335,9 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
 
             // Works on legacy BIOS only
             // See: https://wiki.osdev.org/System_Management_BIOS#UEFI_systems
+            // On BSD systems, we can get EFI system resource table (ESRT) via EFIIOC_GET_TABLE
+            // However, to acquire SMBIOS entry point, we need EFI configuration table (provided by EFI system table)
+            // which is not available via EFIIOC_GET_TABLE.
             FF_AUTO_FREE uint8_t* smBiosBase = malloc(0x10000);
             if (pread(fd, smBiosBase, 0x10000, 0xF0000) != 0x10000) {
                 FF_DEBUG("Failed to read SMBIOS memory region: %s", strerror(errno));
