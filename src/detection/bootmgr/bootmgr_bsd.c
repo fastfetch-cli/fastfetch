@@ -2,9 +2,21 @@
 #include "efi_helper.h"
 #include "common/io/io.h"
 
-#include <sys/efiio.h>
+#ifdef __OpenBSD__
+    #include <dev/efi/efiio.h>
+#else
+    #include <sys/efiio.h>
+#endif
 #include <sys/ioctl.h>
 #include <fcntl.h>
+
+#ifdef __NetBSD__
+    typedef uint16_t efi_char;
+#endif
+
+#ifndef EFI_GLOBAL_VARIABLE
+    #define EFI_GLOBAL_VARIABLE { 0x8be4df61, 0x93ca, 0x11d2, 0xaa, 0x0d, { 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c } }
+#endif
 
 const char* ffDetectBootmgr(FFBootmgrResult* result)
 {
@@ -13,7 +25,7 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
 
     uint8_t buffer[2048];
     struct efi_var_ioc ioc = {
-        .vendor = { 0x8be4df61, 0x93ca, 0x11d2, 0xaa, 0x0d, { 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c } },
+        .vendor = EFI_GLOBAL_VARIABLE,
         .data = buffer,
     };
 

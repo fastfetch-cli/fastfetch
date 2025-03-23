@@ -739,7 +739,7 @@ elseif(NetBSD)
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nbsd.c
-        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_nbsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
@@ -821,7 +821,7 @@ elseif(OpenBSD)
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_windows.c
-        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_obsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
