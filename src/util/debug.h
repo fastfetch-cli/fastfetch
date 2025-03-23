@@ -1,3 +1,4 @@
+#include "fastfetch.h"
 #include "common/time.h"
 
 static inline const char* ffFindFileName(const char* file)
