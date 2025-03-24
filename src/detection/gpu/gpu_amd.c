@@ -65,7 +65,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
 
     FF_AUTO_FREE AdapterInfo* devices = NULL;
     int numDevices = 0;
-    if (adlData.ffADL2_Adapter_AdapterInfoX3_Get(adlData.apiHandle, -1, &numDevices, &devices) == 0)
+    if (adlData.ffADL2_Adapter_AdapterInfoX3_Get(adlData.apiHandle, -1, &numDevices, &devices) == 0) // Return 1 on success
         return "ffADL2_Adapter_AdapterInfoX3_Get() failed";
 
     const AdapterInfo* device = NULL;
@@ -146,7 +146,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         if (adlData.ffADL2_Adapter_ASICFamilyType_Get(adlData.apiHandle, device->iAdapterIndex, &asicTypes, &valids) == ADL_OK)
         {
             asicTypes &= valids; // This design is strange
-            *result.type = asicTypes & ADL_ASIC_INTEGRATED ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            *result.type = (asicTypes & ADL_ASIC_INTEGRATED) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
         }
     }
 

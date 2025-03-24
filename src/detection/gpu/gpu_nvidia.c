@@ -33,7 +33,7 @@ struct FFNvapiData {
     bool inited;
 } nvapiData;
 
-const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
+static const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
 {
     if (!nvapiData.inited)
     {
@@ -79,11 +79,14 @@ const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
 
     uint32_t gpuIndex = *result->index;
 
-    if ((uint32_t) gpuCount < gpuIndex)
+    if (gpuIndex >= (uint32_t) gpuCount)
         return "GPU index out of range";
 
+    // Not very sure. Need to check in multi-GPU system
+    NvPhysicalGpuHandle gpuHandle = handles[gpuIndex];
+
     NvApiGPUMemoryType memType;
-    if (nvapiData.ffnvapi_GPU_GetRamType(handles[gpuIndex], &memType) < 0)
+    if (nvapiData.ffnvapi_GPU_GetRamType(gpuHandle, &memType) < 0)
         return "NvAPI_GPU_GetRamType() failed";
 
     switch (memType)
@@ -160,7 +163,7 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
     {
         char pciBusIdStr[32];
-        snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr) - 1, "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
+        snprintf(pciBusIdStr, ARRAY_SIZE(pciBusIdStr), "%04x:%02x:%02x.%d", cond->pciBusId.domain, cond->pciBusId.bus, cond->pciBusId.device, cond->pciBusId.func);
 
         nvmlReturn_t ret = nvmlData.ffnvmlDeviceGetHandleByPciBusId_v2(pciBusIdStr, &device);
         if (ret != NVML_SUCCESS)
@@ -187,24 +190,28 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
 
             break;
         }
-        if (!device) return "Device not found";
     }
 
-    nvmlBrandType_t brand;
-    if (nvmlData.ffnvmlDeviceGetBrand(device, &brand) == NVML_SUCCESS)
+    if (!device) return "Device not found";
+
+    if (result.type)
     {
-        switch (brand)
+        nvmlBrandType_t brand;
+        if (nvmlData.ffnvmlDeviceGetBrand(device, &brand) == NVML_SUCCESS)
         {
-            case NVML_BRAND_NVIDIA_RTX:
-            case NVML_BRAND_QUADRO_RTX:
-            case NVML_BRAND_GEFORCE:
-            case NVML_BRAND_TITAN:
-            case NVML_BRAND_TESLA:
-            case NVML_BRAND_QUADRO:
-                *result.type = FF_GPU_TYPE_DISCRETE;
-                break;
-            default:
-                break;
+            switch (brand)
+            {
+                case NVML_BRAND_NVIDIA_RTX:
+                case NVML_BRAND_QUADRO_RTX:
+                case NVML_BRAND_GEFORCE:
+                case NVML_BRAND_TITAN:
+                case NVML_BRAND_TESLA:
+                case NVML_BRAND_QUADRO:
+                    *result.type = FF_GPU_TYPE_DISCRETE;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

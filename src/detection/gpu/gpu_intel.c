@@ -215,7 +215,8 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
                     availableCount++;
                 }
             }
-            *result.temp = sumValue / availableCount;
+            if (availableCount > 0)
+                *result.temp = sumValue / availableCount;
         }
     }
 
