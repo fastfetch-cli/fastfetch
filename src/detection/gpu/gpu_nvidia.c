@@ -21,6 +21,105 @@ struct FFNvmlData {
     bool inited;
 } nvmlData;
 
+#if defined(_WIN32) && !defined(FF_DISABLE_DLOPEN)
+
+#include "nvapi.h"
+
+struct FFNvapiData {
+    FF_LIBRARY_SYMBOL(nvapi_Unload)
+    FF_LIBRARY_SYMBOL(nvapi_EnumPhysicalGPUs)
+    FF_LIBRARY_SYMBOL(nvapi_GPU_GetRamType)
+
+    bool inited;
+} nvapiData;
+
+const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
+{
+    if (!nvapiData.inited)
+    {
+        nvapiData.inited = true;
+
+        FF_LIBRARY_LOAD(libnvapi, "dlopen nvapi failed",
+            #ifdef _WIN64
+            "nvapi64.dll"
+            #else
+            "nvapi.dll"
+            #endif
+        , 1);
+        FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libnvapi, nvapi_QueryInterface)
+        #define FF_NVAPI_INTERFACE(iName, iOffset) \
+            __typeof__(&iName) ff ## iName = ffnvapi_QueryInterface(iOffset); \
+            if (ff ## iName == NULL) return "nvapi_QueryInterface " #iName " failed";
+
+        FF_NVAPI_INTERFACE(nvapi_Initialize, NVAPI_INTERFACE_OFFSET_INITIALIZE)
+        FF_NVAPI_INTERFACE(nvapi_Unload, NVAPI_INTERFACE_OFFSET_UNLOAD)
+        FF_NVAPI_INTERFACE(nvapi_EnumPhysicalGPUs, NVAPI_INTERFACE_OFFSET_ENUM_PHYSICAL_GPUS)
+        FF_NVAPI_INTERFACE(nvapi_GPU_GetRamType, NVAPI_INTERFACE_OFFSET_GPU_GET_RAM_TYPE)
+        #undef FF_NVAPI_INTERFACE
+
+        if (ffnvapi_Initialize() < 0)
+            return "NvAPI_Initialize() failed";
+
+        nvapiData.ffnvapi_EnumPhysicalGPUs = ffnvapi_EnumPhysicalGPUs;
+        nvapiData.ffnvapi_GPU_GetRamType = ffnvapi_GPU_GetRamType;
+        nvapiData.ffnvapi_Unload = ffnvapi_Unload;
+
+        atexit((void*) ffnvapi_Unload);
+        libnvapi = NULL; // don't close nvapi
+    }
+
+    if (nvapiData.ffnvapi_EnumPhysicalGPUs == NULL)
+        return "loading nvapi library failed";
+
+    NvPhysicalGpuHandle handles[32];
+    int gpuCount = 0;
+
+    if (nvapiData.ffnvapi_EnumPhysicalGPUs(handles, &gpuCount) < 0)
+        return "NvAPI_EnumPhysicalGPUs() failed";
+
+    uint32_t gpuIndex = *result->index;
+
+    if ((uint32_t) gpuCount < gpuIndex)
+        return "GPU index out of range";
+
+    NvApiGPUMemoryType memType;
+    if (nvapiData.ffnvapi_GPU_GetRamType(handles[gpuIndex], &memType) < 0)
+        return "NvAPI_GPU_GetRamType() failed";
+
+    switch (memType)
+    {
+        #define FF_NVAPI_MEMORY_TYPE(type) \
+            case NVAPI_GPU_MEMORY_TYPE_##type: \
+                ffStrbufSetStatic(result->memoryType, #type); \
+                break;
+        FF_NVAPI_MEMORY_TYPE(UNKNOWN)
+        FF_NVAPI_MEMORY_TYPE(SDRAM)
+        FF_NVAPI_MEMORY_TYPE(DDR1)
+        FF_NVAPI_MEMORY_TYPE(DDR2)
+        FF_NVAPI_MEMORY_TYPE(GDDR2)
+        FF_NVAPI_MEMORY_TYPE(GDDR3)
+        FF_NVAPI_MEMORY_TYPE(GDDR4)
+        FF_NVAPI_MEMORY_TYPE(DDR3)
+        FF_NVAPI_MEMORY_TYPE(GDDR5)
+        FF_NVAPI_MEMORY_TYPE(LPDDR2)
+        FF_NVAPI_MEMORY_TYPE(GDDR5X)
+        FF_NVAPI_MEMORY_TYPE(LPDDR3)
+        FF_NVAPI_MEMORY_TYPE(LPDDR4)
+        FF_NVAPI_MEMORY_TYPE(LPDDR5)
+        FF_NVAPI_MEMORY_TYPE(GDDR6)
+        FF_NVAPI_MEMORY_TYPE(GDDR6X)
+        FF_NVAPI_MEMORY_TYPE(GDDR7)
+        #undef FF_NVAPI_MEMORY_TYPE
+        default:
+            ffStrbufSetF(result->memoryType, "Unknown (%d)", memType);
+            break;
+    }
+
+    return NULL;
+}
+
+#endif
+
 const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResult result, const char* soName)
 {
 #ifndef FF_DISABLE_DLOPEN
@@ -113,7 +212,13 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
     {
         unsigned int value;
         if (nvmlData.ffnvmlDeviceGetIndex(device, &value) == NVML_SUCCESS)
+        {
             *result.index = value;
+            #ifdef _WIN32
+            if (result.memoryType)
+                detectMemTypeByNvapi(&result);
+            #endif
+        }
     }
 
 
