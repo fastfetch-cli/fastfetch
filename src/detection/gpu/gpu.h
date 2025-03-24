@@ -34,6 +34,7 @@ typedef struct FFGPUResult
     FFstrbuf name;
     FFstrbuf driver;
     FFstrbuf platformApi;
+    FFstrbuf memoryType;
     double temperature;
     double coreUsage;
     int32_t coreCount;

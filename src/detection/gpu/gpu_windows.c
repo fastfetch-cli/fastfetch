@@ -37,6 +37,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
+        ffStrbufInit(&gpu->memoryType);
         ffStrbufInitStatic(&gpu->platformApi, "SetupAPI");
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;

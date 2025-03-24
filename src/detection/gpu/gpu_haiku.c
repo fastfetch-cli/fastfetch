@@ -23,7 +23,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev.vendor_id));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
-        ffStrbufInit(&gpu->platformApi);
+        ffStrbufInitStatic(&gpu->platformApi, POKE_DEVICE_FULLNAME);
+        ffStrbufInit(&gpu->memoryType);
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;

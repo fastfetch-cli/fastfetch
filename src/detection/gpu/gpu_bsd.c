@@ -40,7 +40,8 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(pc->pc_vendor));
         ffStrbufInit(&gpu->name);
         ffStrbufInitS(&gpu->driver, pc->pd_name);
-        ffStrbufInit(&gpu->platformApi);
+        ffStrbufInitStatic(&gpu->platformApi, "/dev/pci");
+        ffStrbufInit(&gpu->memoryType);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;

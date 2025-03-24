@@ -153,6 +153,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             FF_FORMAT_ARG(sPercentBar, "shared-percentage-bar"),
             FF_FORMAT_ARG(coreUsageNum, "core-usage-num"),
             FF_FORMAT_ARG(coreUsageBar, "core-usage-bar"),
+            FF_FORMAT_ARG(gpu->memoryType, "memory-type"),
         }));
     }
 }
@@ -411,6 +412,8 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, sharedObj, "used");
 
+        yyjson_mut_obj_add_strbuf(doc, obj, "memoryType", &gpu->memoryType);
+
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
             yyjson_mut_obj_add_real(doc, obj, "temperature", gpu->temperature);
         else
@@ -469,8 +472,9 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Dedicated memory usage percentage bar", "dedicated-percentage-bar"},
         {"Shared memory usage percentage num", "shared-percentage-num"},
         {"Shared memory usage percentage bar", "shared-percentage-bar"},
-        {"Core usage percentage num (supports Nvidia & Apple GPU only)", "core-usage-num"},
-        {"Core usage percentage bar (supports Nvidia & Apple GPU only)", "core-usage-bar"},
+        {"Core usage percentage num", "core-usage-num"},
+        {"Core usage percentage bar", "core-usage-bar"},
+        {"Memory type (Windows only)", "memory-type"},
     })),
 };
 
