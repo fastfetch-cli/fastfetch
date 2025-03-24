@@ -89,9 +89,9 @@ FF_MAYBE_UNUSED static inline bool getDriverSpecificDetectionFn(const char* vend
     {
         *pDetectFn = ffDetectAmdGpuInfo;
         #ifdef _WIN64
-            *pDllName = "amd_ags_x64.dll";
+            *pDllName = "atiadlxx.dll";
         #else
-            *pDllName = "amd_ags_x86.dll";
+            *pDllName = "atiadlxy.dll";
         #endif
     }
     #endif
