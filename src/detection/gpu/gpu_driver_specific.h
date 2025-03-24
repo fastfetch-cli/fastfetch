@@ -41,6 +41,8 @@ typedef struct FFGpuDriverResult
     uint32_t* index;
     double* temp;
     FFGPUMemory* memory;
+    FFstrbuf* memoryType;
+    FFGPUMemory* sharedMemory;
     uint32_t* coreCount;
     double* coreUsage;
     FFGPUType* type;

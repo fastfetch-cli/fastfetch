@@ -141,6 +141,50 @@ typedef struct ctl_mem_state_t
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv417ctlMemoryGetState16ctl_mem_handle_tP15ctl_mem_state_t
 extern ctl_result_t ctlMemoryGetState(ctl_mem_handle_t hMemory, ctl_mem_state_t *pState);
 
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv414ctl_mem_type_t
+typedef enum ctl_mem_type_t
+{
+    CTL_MEM_TYPE_HBM = 0,
+    CTL_MEM_TYPE_DDR = 1,
+    CTL_MEM_TYPE_DDR3 = 2,
+    CTL_MEM_TYPE_DDR4 = 3,
+    CTL_MEM_TYPE_DDR5 = 4,
+    CTL_MEM_TYPE_LPDDR = 5,
+    CTL_MEM_TYPE_LPDDR3 = 6,
+    CTL_MEM_TYPE_LPDDR4 = 7,
+    CTL_MEM_TYPE_LPDDR5 = 8,
+    CTL_MEM_TYPE_GDDR4 = 9,
+    CTL_MEM_TYPE_GDDR5 = 10,
+    CTL_MEM_TYPE_GDDR5X = 11,
+    CTL_MEM_TYPE_GDDR6 = 12,
+    CTL_MEM_TYPE_GDDR6X = 13,
+    CTL_MEM_TYPE_GDDR7 = 14,
+    CTL_MEM_TYPE_MAX
+} ctl_mem_type_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv413ctl_mem_loc_t
+typedef enum ctl_mem_loc_t
+{
+    CTL_MEM_LOC_SYSTEM = 0,
+    CTL_MEM_LOC_DEVICE = 1,
+    CTL_MEM_LOC_MAX
+} ctl_mem_loc_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctl_mem_properties_t
+typedef struct ctl_mem_properties_t
+{
+    uint32_t Size;
+    uint8_t Version;
+    ctl_mem_type_t type;
+    ctl_mem_loc_t location;
+    uint64_t physicalSize;
+    int32_t busWidth;
+    int32_t numChannels;
+} ctl_mem_properties_t;
+
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv422ctlMemoryGetProperties16ctl_mem_handle_tP20ctl_mem_properties_t
+extern ctl_result_t ctlMemoryGetProperties(ctl_mem_handle_t hMemory, ctl_mem_properties_t *pProperties);
+
 typedef struct ctl_freq_handle_t* ctl_freq_handle_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlenumfrequencydomains

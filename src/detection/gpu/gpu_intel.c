@@ -12,6 +12,7 @@ struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlEnumTemperatureSensors)
     FF_LIBRARY_SYMBOL(ctlTemperatureGetState)
     FF_LIBRARY_SYMBOL(ctlEnumMemoryModules)
+    FF_LIBRARY_SYMBOL(ctlMemoryGetProperties)
     FF_LIBRARY_SYMBOL(ctlMemoryGetState)
     FF_LIBRARY_SYMBOL(ctlEnumFrequencyDomains)
     FF_LIBRARY_SYMBOL(ctlFrequencyGetProperties)
@@ -42,6 +43,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumTemperatureSensors)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlTemperatureGetState)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumMemoryModules)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetProperties)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetState)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumFrequencyDomains)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlFrequencyGetProperties)
@@ -135,14 +137,56 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
             result.memory->total = 0;
             for (uint32_t iMem = 0; iMem < memoryCount; iMem++)
             {
-                ctl_mem_state_t memoryState = {
-                    .Size = sizeof(ctl_mem_state_t),
+                ctl_mem_properties_t memoryProperties = {
+                    .Size = sizeof(memoryProperties),
                     .Version = 0,
                 };
-                if (igclData.ffctlMemoryGetState(memoryModules[iMem], &memoryState) == CTL_RESULT_SUCCESS)
+                if (igclData.ffctlMemoryGetProperties(memoryModules[iMem], &memoryProperties) == CTL_RESULT_SUCCESS)
                 {
-                    result.memory->total += memoryState.size;
-                    result.memory->used += memoryState.size - memoryState.free;
+                    if (memoryProperties.location == CTL_MEM_LOC_DEVICE && result.memoryType)
+                    {
+                        switch (memoryProperties.type)
+                        {
+                            #define FF_ICTL_MEM_TYPE_CASE(type) case CTL_MEM_TYPE_##type: ffStrbufSetStatic(result.memoryType, #type); break
+                            FF_ICTL_MEM_TYPE_CASE(HBM);
+                            FF_ICTL_MEM_TYPE_CASE(DDR);
+                            FF_ICTL_MEM_TYPE_CASE(DDR3);
+                            FF_ICTL_MEM_TYPE_CASE(DDR4);
+                            FF_ICTL_MEM_TYPE_CASE(DDR5);
+                            FF_ICTL_MEM_TYPE_CASE(LPDDR);
+                            FF_ICTL_MEM_TYPE_CASE(LPDDR3);
+                            FF_ICTL_MEM_TYPE_CASE(LPDDR4);
+                            FF_ICTL_MEM_TYPE_CASE(LPDDR5);
+                            FF_ICTL_MEM_TYPE_CASE(GDDR4);
+                            FF_ICTL_MEM_TYPE_CASE(GDDR5);
+                            FF_ICTL_MEM_TYPE_CASE(GDDR5X);
+                            FF_ICTL_MEM_TYPE_CASE(GDDR6);
+                            FF_ICTL_MEM_TYPE_CASE(GDDR6X);
+                            FF_ICTL_MEM_TYPE_CASE(GDDR7);
+                            #undef FF_ICTL_MEM_TYPE_CASE
+                            default:
+                                ffStrbufSetF(result.memoryType, "Unknown (%u)", memoryProperties.type);
+                                break;
+                        }
+                    }
+
+                    ctl_mem_state_t memoryState = {
+                        .Size = sizeof(ctl_mem_state_t),
+                        .Version = 0,
+                    };
+                    if (igclData.ffctlMemoryGetState(memoryModules[iMem], &memoryState) == CTL_RESULT_SUCCESS)
+                    {
+                        if (memoryProperties.location == CTL_MEM_LOC_DEVICE)
+                        {
+                            result.memory->total += memoryState.size;
+                            result.memory->used += memoryState.size - memoryState.free;
+                        }
+                        else if (result.sharedMemory && memoryProperties.location == CTL_MEM_LOC_SYSTEM)
+                        {
+                            result.sharedMemory->total += memoryState.size;
+                            result.sharedMemory->used += memoryState.size - memoryState.free;
+                        }
+                    }
                 }
             }
         }

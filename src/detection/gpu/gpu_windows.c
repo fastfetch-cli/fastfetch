@@ -174,6 +174,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .index = &gpu->index,
                     .temp = options->temp ? &gpu->temperature : NULL,
                     .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                    .sharedMemory = options->driverSpecific ? &gpu->shared : NULL,
+                    .memoryType = options->driverSpecific ? &gpu->memoryType : NULL,
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                     .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,
