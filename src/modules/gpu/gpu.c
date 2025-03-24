@@ -194,6 +194,7 @@ void ffPrintGPU(FFGPUOptions* options)
         ffStrbufDestroy(&gpu->name);
         ffStrbufDestroy(&gpu->driver);
         ffStrbufDestroy(&gpu->platformApi);
+        ffStrbufDestroy(&gpu->memoryType);
     }
 }
 
@@ -399,9 +400,6 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, dedicatedObj, "used");
 
-        yyjson_mut_obj_add_strbuf(doc, obj, "driver", &gpu->driver);
-        yyjson_mut_obj_add_strbuf(doc, obj, "name", &gpu->name);
-
         yyjson_mut_val* sharedObj = yyjson_mut_obj_add_obj(doc, memoryObj, "shared");
         if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
             yyjson_mut_obj_add_uint(doc, sharedObj, "total", gpu->shared.total);
@@ -412,7 +410,13 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, sharedObj, "used");
 
-        yyjson_mut_obj_add_strbuf(doc, obj, "memoryType", &gpu->memoryType);
+        if (gpu->memoryType.length)
+            yyjson_mut_obj_add_strbuf(doc, memoryObj, "type", &gpu->memoryType);
+        else
+            yyjson_mut_obj_add_null(doc, memoryObj, "type");
+
+        yyjson_mut_obj_add_strbuf(doc, obj, "driver", &gpu->driver);
+        yyjson_mut_obj_add_strbuf(doc, obj, "name", &gpu->name);
 
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
             yyjson_mut_obj_add_real(doc, obj, "temperature", gpu->temperature);
@@ -443,6 +447,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         ffStrbufDestroy(&gpu->name);
         ffStrbufDestroy(&gpu->driver);
         ffStrbufDestroy(&gpu->platformApi);
+        ffStrbufDestroy(&gpu->memoryType);
     }
 }
 
