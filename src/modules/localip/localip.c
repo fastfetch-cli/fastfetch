@@ -26,7 +26,7 @@ static void formatKey(const FFLocalIpOptions* options, FFLocalIpResult* ip, uint
         ffStrbufClear(key);
         FF_PARSE_FORMAT_STRING_CHECKED(key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
-            FF_FORMAT_ARG(ip->name, "name"),
+            FF_FORMAT_ARG(ip->name, "ifname"),
             FF_FORMAT_ARG(ip->mac, "mac"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
