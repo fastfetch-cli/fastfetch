@@ -29,6 +29,7 @@ const char* ffGpuDetectDriverVersion(FFlist* gpus)
                 ffStrbufAppendS(&x->driver, version.UTF8String);
             }
         }
+        return NULL;
     }
     return "Unsupported macOS version";
 }
