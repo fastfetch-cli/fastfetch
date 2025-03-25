@@ -108,7 +108,7 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
 
     if (ffReadFileBufferRelative(dfd, "capacity_level", &tmpBuffer))
     {
-        ffStrbufTrimRightSpace(&result->manufacturer);
+        ffStrbufTrimRightSpace(&tmpBuffer);
         if (ffStrbufEqualS(&tmpBuffer, "Critical"))
         {
             if (result->status.length)
