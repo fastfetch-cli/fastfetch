@@ -170,7 +170,6 @@ static void getTerminalFromEnv(FFTerminalResult* result)
 
             #ifdef __APPLE__
             !ffStrbufEqualS(&result->processName, "launchd") &&
-            !ffStrbufEqualS(&result->processName, "stable") && //for WarpTerminal
             #else
             !ffStrbufEqualS(&result->processName, "systemd") &&
             !ffStrbufEqualS(&result->processName, "init") &&
@@ -351,11 +350,16 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufInitStatic(&result->prettyName, "iTerm");
     else if(ffStrbufEndsWithS(&result->exePath, "Terminal.app/Contents/MacOS/Terminal"))
     {
-        ffStrbufSetStatic(&result->processName, "Apple_Terminal"); // for terminal font detection
+        ffStrbufSetStatic(&result->processName, "Apple_Terminal"); // $TERM_PROGRAM, for terminal font detection
         ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
     }
     else if(ffStrbufEqualS(&result->processName, "Apple_Terminal"))
         ffStrbufInitStatic(&result->prettyName, "Apple Terminal");
+    else if(ffStrbufEndsWithS(&result->exePath, "Warp.app/Contents/MacOS/stable"))
+    {
+        ffStrbufSetStatic(&result->processName, "WarpTerminal"); // $TERM_PROGRAM, for terminal font detection
+        ffStrbufInitStatic(&result->prettyName, "Warp");
+    }
     else if(ffStrbufEqualS(&result->processName, "WarpTerminal"))
         ffStrbufInitStatic(&result->prettyName, "Warp");
 

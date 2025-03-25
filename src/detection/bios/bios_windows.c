@@ -27,6 +27,11 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
         };
     };
 } SYSTEM_BOOT_ENVIRONMENT_INFORMATION;
+#elif __OpenBSD__
+#include "common/io/io.h"
+
+#include <fcntl.h>
+#include <unistd.h>
 #endif
 
 typedef struct FFSmbiosBios
@@ -92,6 +97,9 @@ const char* ffDetectBios(FFBiosResult* bios)
     #elif __HAIKU__
     // Currently SMBIOS detection is supported in legency BIOS only
     ffStrbufSetStatic(&bios->type, "BIOS");
+    #elif __OpenBSD__
+    FF_AUTO_CLOSE_FD int fd = open("/dev/efi", O_RDONLY);
+    ffStrbufSetStatic(&bios->type, fd >= 0 ? "UEFI" : "BIOS");
     #endif
 
     return NULL;

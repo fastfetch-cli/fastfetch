@@ -22,7 +22,13 @@ const char* ffNetworkingLoadZlibLibrary(void)
     if (!zlibData.inited)
     {
         zlibData.inited = true;
-        FF_LIBRARY_LOAD(zlib, "dlopen libz failed", "libz" FF_LIBRARY_EXTENSION, 2)
+        FF_LIBRARY_LOAD(zlib, "dlopen libz failed",
+            #ifdef _WIN32
+                "zlib1"
+            #else
+                "libz"
+            #endif
+            FF_LIBRARY_EXTENSION, 2)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateInit2_)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflate)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(zlib, zlibData, inflateEnd)
@@ -43,7 +49,7 @@ static uint32_t guessGzipOutputSize(const void* data, uint32_t dataSize)
     if (dataSize > 18) {
         // Get ISIZE value from the end of file (little endian)
         const uint8_t* tail = (const uint8_t*)data + dataSize - 4;
-        uint32_t uncompressedSize = tail[0] | (tail[1] << 8) | (tail[2] << 16) | (tail[3] << 24);
+        uint32_t uncompressedSize = (uint32_t) tail[0] | ((uint32_t) tail[1] << 8u) | ((uint32_t) tail[2] << 16u) | ((uint32_t) tail[3] << 24u);
 
         // For valid gzip files, this value is the length of the uncompressed data modulo 2^32
         if (uncompressedSize > 0) {

@@ -3148,6 +3148,18 @@ static const FFlogo N[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // NetBSD2
+    {
+        .names = {"NetBSD2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NETBSD2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // NetBSD Small
     {
         .names = {"NetBSD_small"},
@@ -3383,7 +3395,7 @@ static const FFlogo O[] = {
     // OpenSuseTumbleweedSmall
     {
         .names = {"opensuse-tumbleweed_small"},
-        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED,
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -4983,10 +4995,10 @@ static const FFlogo V[] = {
 };
 
 static const FFlogo W[] = {
-    // WiiLinuxNgx
+    // WiiLinux
     {
-        .names = {"WiiLinuxNgx"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WII_LINUX_NGX,
+        .names = {"WiiLinuxNgx", "WiiLinux", "Wii-Linux", "Wii Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WII_LINUX,
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,

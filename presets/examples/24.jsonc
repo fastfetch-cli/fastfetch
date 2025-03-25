@@ -28,38 +28,38 @@
       {
         "type": "title",
         "key": "{#90}{$1}│ {#92}User        {#90}│",
-        "format": "{$2}{$3}{user-name} {#2}[{home-dir}]"
+        "format": "{$2}{$3}{user-name}  {#2}[{home-dir}]"
       },
       {
         "type": "users",
         "key": "{#90}{$1}│ {#92}Users       {#90}│",
         "myselfOnly": false,
-        "format": "{$2}{$3}{1}@{host-name}{/host-name}localhost{/}{?client-ip}  {#2}[IP:{client-ip}]{?}  {#2}[Login time: {login-time}]",
+        "format": "{$2}{$3}{1}@{host-name}{/host-name}localhost{/}{?client-ip}  {#2}[IP:{client-ip}]{?}  [Login time: {login-time}]"
       },
       {
         "type": "datetime",
         "key": "{#90}{$1}│ {#92}Datetime    {#90}│",
-        "format": "{$2}{$3}{year}-{month-pretty}-{day-in-month}  {hour-pretty}:{minute-pretty}:{second-pretty}  {#2}{weekday}  {#2}[W{week}] {#2}[UTC{offset-from-utc}]"
+        "format": "{$2}{$3}{year}-{month-pretty}-{day-in-month} {hour-pretty}:{minute-pretty}:{second-pretty}  [{weekday}] [W{week}] [UTC{offset-from-utc}]"
       },
       {
         "type": "title",
-        "key": "{#90}{$1}│ {#93}Host:       {#90}│",
-        "format": "{$2}{$3}{#1}{#36}{host-name}"
+        "key": "{#90}{$1}│ {#93}Host        {#90}│",
+        "format": "{$2}{$3}{host-name}"
       },
       {
         "type": "host",
         "key": "{#90}{$1}│ {#93}Machine     {#90}│",
-        "format": "{$2}{$3}{name} {#2}{version}"
+        "format": "{$2}{$3}{name}  {#2}{version}"
       },
       {
         "type": "os",
         "key": "{#90}{$1}│ {#93}OS          {#90}│",
-        "format": "{$2}{$3}{pretty-name} {codename} {#2}[v{version}] {#2}[{arch}]"
+        "format": "{$2}{$3}{?pretty-name}{pretty-name}{?}{/pretty-name}{name}{/} {codename}  {#2}[v{version}] [{arch}]"
       },
       {
         "type": "kernel",
         "key": "{#90}{$1}│ {#93}Kernel      {#90}│",
-        "format": "{$2}{$3}{sysname} {#2}[v{release}]"
+        "format": "{$2}{$3}{sysname}  {#2}[v{release}]"
       },
       {
         "type": "uptime",
@@ -71,14 +71,14 @@
         "key": "{#90}{$1}│ {#91}CPU         {#90}│",
         "showPeCoreCount": true,
         "temp": true,
-        "format": "{$2}{$3}{name} {#2}[C:{core-types}] {#2}[{freq-max}]"
+        "format": "{$2}{$3}{name}  {#2}[C:{core-types}] [{freq-max}]"
       },
       {
         "type": "gpu",
         "key": "{#90}{$1}│ {#91}GPU         {#90}│",
         "detectionMethod": "auto",
         "driverSpecific": true,
-        "format": "{$2}{$3}{name} {#2}[C:{core-count}] {#2}[{type}]"
+        "format": "{$2}{$3}{name}  {#2}[C:{core-count}]{?frequency} [{frequency}]{?} [{type}]"
       },
       {
         "type": "memory",
@@ -98,7 +98,7 @@
       {
         "type": "terminal",
         "key": "{#90}{$1}│ {#95}Terminal    {#90}│",
-        "format": "{$2}{$3}{pretty-name} {#2}[{version}] [PID:{pid}]"
+        "format": "{$2}{$3}{pretty-name}  {#2}[{version}] [PID:{pid}]"
       },
       {
         "type": "terminalfont",

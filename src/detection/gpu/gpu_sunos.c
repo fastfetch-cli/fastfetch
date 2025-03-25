@@ -9,7 +9,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) {
-        "scanpci",
+        "/usr/bin/scanpci",
         "-v",
         NULL,
     });
@@ -51,9 +51,10 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
+        ffStrbufInit(&gpu->memoryType);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
-        ffStrbufInit(&gpu->platformApi);
+        ffStrbufInitStatic(&gpu->platformApi, "/usr/bin/scanpci");
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;

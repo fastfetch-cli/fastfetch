@@ -70,6 +70,7 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
 
         FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);
         ffStrbufInitS(&gpu->name, desc);
+        ffStrbufInit(&gpu->memoryType);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;

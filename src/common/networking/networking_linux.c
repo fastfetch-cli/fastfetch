@@ -7,6 +7,7 @@
 #include "util/debug.h"
 
 #include <unistd.h>
+#include <sys/poll.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -15,60 +16,125 @@
 #include <errno.h>
 #include <fcntl.h>
 
-// Try to use TCP Fast Open to send data
-static const char* tryTcpFastOpen(FFNetworkingState* state)
+static const char* tryNonThreadingFastPath(FFNetworkingState* state)
 {
-    #if !defined(MSG_FASTOPEN) || !defined(TCP_FASTOPEN)
-        FF_DEBUG("TCP Fast Open not supported on this system");
-        FF_UNUSED(state);
-        return "TCP Fast Open not supported";
-    #else
-        FF_DEBUG("Attempting to use TCP Fast Open to connect to %s", state->host.chars);
+    #if defined(TCP_FASTOPEN) || __APPLE__
 
-        // Set TCP Fast Open
-        int qlen = 5;
-        if (setsockopt(state->sockfd, IPPROTO_TCP, TCP_FASTOPEN, &qlen, sizeof(qlen)) != 0) {
-            FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
-        } else {
-            FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", qlen);
-        }
-
-        // Set non-blocking mode
-        int flags = fcntl(state->sockfd, F_GETFL, 0);
-        FF_DEBUG("Current socket flags: 0x%x", flags);
-
-        if (fcntl(state->sockfd, F_SETFL, flags | O_NONBLOCK) < 0) {
-            FF_DEBUG("Failed to set non-blocking mode: %s", strerror(errno));
-        } else {
-            FF_DEBUG("Successfully set non-blocking mode");
-        }
-
-        // Try to send data using Fast Open
-        FF_DEBUG("Using sendto() + MSG_FASTOPEN to send %u bytes of data", state->command.length);
-        ssize_t sent = sendto(state->sockfd,
-                             state->command.chars,
-                             state->command.length,
-                             MSG_FASTOPEN,
-                             state->addr->ai_addr,
-                             state->addr->ai_addrlen);
-
-        // Restore blocking mode
-        fcntl(state->sockfd, F_SETFL, flags);
-
-        if (sent >= 0 || (errno == EINPROGRESS || errno == EAGAIN || errno == EWOULDBLOCK))
+        if (!state->tfo)
         {
-            FF_DEBUG("TCP Fast Open succeeded or in progress (sent=%zd, errno=%d: %s)",
-                     sent, errno, sent < 0 ? strerror(errno) : "");
+            #ifdef __linux__
+            // Linux doesn't support sendto() on unconnected sockets
+            FF_DEBUG("TCP Fast Open disabled, skipping");
+            return "TCP Fast Open disabled";
+            #endif
+        }
+        else
+        {
+            FF_DEBUG("Attempting to use TCP Fast Open to connect");
+
+            #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
+            // Set TCP Fast Open
+            #ifdef __linux__
+            int flag = 5; // the queue length of pending packets
+            #else
+            int flag = 1; // enable TCP Fast Open
+            #endif
+            if (setsockopt(state->sockfd, IPPROTO_TCP,
+                #ifdef __APPLE__
+                // https://github.com/rust-lang/libc/pull/3135
+                0x218 // TCP_FASTOPEN_FORCE_ENABLE
+                #else
+                TCP_FASTOPEN
+                #endif
+                , &flag, sizeof(flag)) != 0) {
+                FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
+                return "setsockopt(TCP_FASTOPEN) failed";
+            } else {
+                #ifdef __linux__
+                FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", flag);
+                #elif defined(__APPLE__)
+                FF_DEBUG("Successfully set TCP_FASTOPEN_FORCE_ENABLE option");
+                #else
+                FF_DEBUG("Successfully set TCP_FASTOPEN option");
+                #endif
+            }
+            #endif
+        }
+
+        #ifndef __APPLE__
+        FF_DEBUG("Using sendto() + MSG_DONTWAIT to send %u bytes of data", state->command.length);
+        ssize_t sent = sendto(state->sockfd,
+                                state->command.chars,
+                                state->command.length,
+            #ifdef MSG_FASTOPEN
+                                MSG_FASTOPEN |
+            #endif
+            #ifdef MSG_NOSIGNAL
+                                MSG_NOSIGNAL |
+            #endif
+                                MSG_DONTWAIT,
+                                state->addr->ai_addr,
+                                state->addr->ai_addrlen);
+        #else
+        if (fcntl(state->sockfd, F_SETFL, O_NONBLOCK) == -1) {
+            FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
+            return "fcntl(F_SETFL) failed";
+        }
+        FF_DEBUG("Using connectx() to send %u bytes of data", state->command.length);
+        // Use connectx to establish connection and send data in one call
+        size_t sent;
+        if (connectx(state->sockfd,
+            &(sa_endpoints_t) {
+                .sae_dstaddr = state->addr->ai_addr,
+                .sae_dstaddrlen = state->addr->ai_addrlen,
+            },
+            SAE_ASSOCID_ANY, state->tfo ? CONNECT_DATA_IDEMPOTENT : 0,
+            &(struct iovec) {
+                .iov_base = state->command.chars,
+                .iov_len = state->command.length,
+            }, 1, &sent, NULL) != 0) sent = 0;
+        if (fcntl(state->sockfd, F_SETFL, 0) == -1) {
+            FF_DEBUG("fcntl(F_SETFL) failed: %s", strerror(errno));
+            return "fcntl(F_SETFL) failed";
+        }
+        #endif
+        if (sent > 0 || (errno == EAGAIN || errno == EWOULDBLOCK
+            #ifdef __APPLE__
+            // On macOS EINPROGRESS means the connection cannot be completed immediately
+            // On Linux, it means the TFO cookie is not available locally
+            || errno == EINPROGRESS
+            #endif
+        ))
+        {
+            FF_DEBUG(
+                #ifdef __APPLE__
+                "connectx()"
+                #else
+                "sendto()"
+                #endif
+                " %s (sent=%zd, errno=%d: %s)", errno == 0 ? "succeeded" : "was in progress",
+                sent, errno, strerror(errno));
             freeaddrinfo(state->addr);
             state->addr = NULL;
-            ffStrbufDestroy(&state->host);
             ffStrbufDestroy(&state->command);
             return NULL;
         }
 
-        // Fast Open failed
-        FF_DEBUG("TCP Fast Open failed: %s (errno=%d)", strerror(errno), errno);
+        FF_DEBUG(
+            #ifdef __APPLE__
+            "connectx()"
+            #else
+            "sendto()"
+            #endif
+            " failed: %s (errno=%d)", strerror(errno), errno);
+        #ifdef __APPLE__
+        return "connectx() failed";
+        #else
         return "sendto() failed";
+        #endif
+    #else
+        FF_UNUSED(state);
+        return "TFO support is not available";
     #endif
 }
 
@@ -76,7 +142,7 @@ static const char* tryTcpFastOpen(FFNetworkingState* state)
 static const char* connectAndSend(FFNetworkingState* state)
 {
     const char* ret = NULL;
-    FF_DEBUG("Using traditional connection method to connect to %s", state->host.chars);
+    FF_DEBUG("Using traditional connection method to connect");
 
     FF_DEBUG("Attempting connect() to server...");
     if(connect(state->sockfd, state->addr->ai_addr, state->addr->ai_addrlen) == -1)
@@ -107,7 +173,6 @@ exit:
     FF_DEBUG("Releasing address info and other resources");
     freeaddrinfo(state->addr);
     state->addr = NULL;
-    ffStrbufDestroy(&state->host);
     ffStrbufDestroy(&state->command);
 
     return ret;
@@ -121,12 +186,10 @@ static const char* initNetworkingState(FFNetworkingState* state, const char* hos
     FF_DEBUG("Initializing network connection state: host=%s, path=%s", host, path);
 
     // Initialize command and host information
-    ffStrbufInitS(&state->host, host);
-
     ffStrbufInitA(&state->command, 64);
     ffStrbufAppendS(&state->command, "GET ");
     ffStrbufAppendS(&state->command, path);
-    ffStrbufAppendS(&state->command, " HTTP/1.1\nHost: ");
+    ffStrbufAppendS(&state->command, " HTTP/1.0\nHost: ");
     ffStrbufAppendS(&state->command, host);
     ffStrbufAppendS(&state->command, "\r\n");
 
@@ -239,22 +302,29 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
 {
     FF_DEBUG("Preparing to send HTTP request: host=%s, path=%s", host, path);
 
-    // Initialize with compression disabled by default
-    state->compression = false;
-
-    #ifdef FF_HAVE_ZLIB
-    const char* zlibError = ffNetworkingLoadZlibLibrary();
-    // Only enable compression if zlib library is successfully loaded
-    if (zlibError == NULL)
+    if (state->compression)
     {
-        state->compression = true;
-        FF_DEBUG("Successfully loaded zlib library, compression enabled");
-    } else {
-        FF_DEBUG("Failed to load zlib library, compression disabled: %s", zlibError);
+        FF_DEBUG("Compression enabled, checking if zlib is available");
+
+        #ifdef FF_HAVE_ZLIB
+        const char* zlibError = ffNetworkingLoadZlibLibrary();
+        // Only enable compression if zlib library is successfully loaded
+        if (zlibError == NULL)
+        {
+            FF_DEBUG("Successfully loaded zlib library, compression enabled");
+        } else {
+            FF_DEBUG("Failed to load zlib library, compression disabled: %s", zlibError);
+            state->compression = false;
+        }
+        #else
+        FF_DEBUG("zlib not supported at build time, compression disabled");
+        state->compression = false;
+        #endif
     }
-    #else
-    FF_DEBUG("zlib not supported at build time, compression disabled");
-    #endif
+    else
+    {
+        FF_DEBUG("Compression disabled");
+    }
 
     const char* initResult = initNetworkingState(state, host, path, headers);
     if (initResult != NULL) {
@@ -263,12 +333,12 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
     }
     FF_DEBUG("Network state initialization successful");
 
-    const char* tfoResult = tryTcpFastOpen(state);
+    const char* tfoResult = tryNonThreadingFastPath(state);
     if (tfoResult == NULL) {
-        FF_DEBUG("TCP Fast Open succeeded or in progress");
+        FF_DEBUG("TryNonThreadingFastPath() succeeded or in progress");
         return NULL;
     }
-    FF_DEBUG("TCP Fast Open unavailable or failed: %s, trying traditional connection", tfoResult);
+    FF_DEBUG("TryNonThreadingFastPath() failed: %s, trying traditional connection", tfoResult);
 
     #ifdef FF_HAVE_THREADS
     if (instance.config.general.multithreading)
@@ -312,6 +382,26 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "ffNetworkingSendHttpRequest() failed";
     }
 
+    // Set larger initial receive buffer instead of small repeated receives
+    int rcvbuf = 65536; // 64KB
+    setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+
+    #ifdef __APPLE__
+    // poll for the socket to be readable.
+    // Because of the non-blocking connectx() call, the connection might not be established yet
+    FF_DEBUG("Using poll() to check if socket is readable");
+    if (poll(&(struct pollfd) {
+        .fd = state->sockfd,
+        .events = POLLIN
+    }, 1, timeout > 0 ? (int) timeout : -1) == -1)
+    {
+        FF_DEBUG("poll() failed: %s (errno=%d)", strerror(errno), errno);
+        close(state->sockfd);
+        state->sockfd = -1;
+        return "poll() failed";
+    }
+    FF_DEBUG("Socket is readable, proceeding to receive data");
+    #else
     if(timeout > 0)
     {
         FF_DEBUG("Setting receive timeout: %u ms", timeout);
@@ -320,10 +410,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         timev.tv_usec = (__typeof__(timev.tv_usec)) ((timeout % 1000) * 1000); //milliseconds to microseconds
         setsockopt(state->sockfd, SOL_SOCKET, SO_RCVTIMEO, &timev, sizeof(timev));
     }
-
-    // Set larger initial receive buffer instead of small repeated receives
-    int rcvbuf = 65536; // 64KB
-    setsockopt(state->sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
+    #endif
 
     FF_DEBUG("Starting data reception");
     FF_MAYBE_UNUSED int recvCount = 0;
@@ -334,7 +421,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         FF_DEBUG("Data reception loop #%d, current buffer size: %u, available space: %u",
                  ++recvCount, buffer->length, ffStrbufGetFree(buffer));
 
-        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), 0);
+        ssize_t received = recv(state->sockfd, buffer->chars + buffer->length, ffStrbufGetFree(buffer), MSG_WAITALL);
 
         if (received <= 0) {
             if (received == 0) {
@@ -389,7 +476,7 @@ const char* ffNetworkingRecvHttpResponse(FFNetworkingState* state, FFstrbuf* buf
         return "Content length mismatch";
     }
 
-    if (ffStrbufStartsWithS(buffer, "HTTP/1.1 200 OK\r\n")) {
+    if (ffStrbufStartsWithS(buffer, "HTTP/1.0 200 OK\r\n")) {
         FF_DEBUG("Received valid HTTP 200 response, content %u bytes, total %u bytes", contentLength, buffer->length);
     } else {
         FF_DEBUG("Invalid response: %.40s...", buffer->chars);

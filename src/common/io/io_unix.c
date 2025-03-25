@@ -256,6 +256,11 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
 bool ffSuppressIO(bool suppress)
 {
+    #ifndef NDEBUG
+    if (instance.config.display.debugMode)
+        return false;
+    #endif
+
     static bool init = false;
     static int origOut = -1;
     static int origErr = -1;

@@ -30,7 +30,7 @@ static const char* drmParseSysfs(FFDisplayServerResult* result)
 
         char buf;
         ffStrbufAppendS(&drmDir, "/enabled");
-        if (!ffReadFileData(drmDir.chars, sizeof(buf), &buf) || buf != 'e') {
+        if (ffReadFileData(drmDir.chars, sizeof(buf), &buf) <= 0 || buf != 'e') {
           /* read failed or enabled != "enabled" */
           ffStrbufSubstrBefore(&drmDir, drmDirWithDnameLength);
           ffStrbufAppendS(&drmDir, "/status");

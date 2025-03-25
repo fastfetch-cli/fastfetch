@@ -1,3 +1,8 @@
+# 2.39.1
+
+Bugfixes:
+* Fix a regression that PublicIP detection fails randomly (PublicIP, #1629)
+
 # 2.39.0
 
 Changes:
@@ -9,11 +14,15 @@ Features:
 * Improve performance of SSID detection on macOS Sequoia (Wifi, macOS, #1597)
 * Support warp terminal version detection on Windows (Terminal, Windows)
 * Support default route detection on OpenBSD & DragonFly BSD (LocalIP, OpenBSD / DragonFly)
+* Improve bash completion script
+* Improve performance of networking (PublicIP / Weather)
+* Support pkgsrc package manager detection on Linux (Packages, Linux)
 
 Logo:
 * Add Common Torizon OS
 * Change FoxOS to WolfOS
 * Add Bredos
+* Add NetBSD2
 
 # 2.38.0
 

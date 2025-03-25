@@ -15,7 +15,6 @@ typedef struct FFNetworkingState {
         OVERLAPPED overlapped;
     #else
         int sockfd;
-        FFstrbuf host;
         FFstrbuf command;
         struct addrinfo* addr;
 
@@ -26,7 +25,8 @@ typedef struct FFNetworkingState {
 
     uint32_t timeout;
     bool ipv6;
-    bool compression;
+    bool compression; // if true, HTTP content compression will be enabled if supported
+    bool tfo; // if true, TCP Fast Open will be attempted first, and fallback to traditional connection if it fails
 } FFNetworkingState;
 
 const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* host, const char* path, const char* headers);
