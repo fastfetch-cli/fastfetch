@@ -128,9 +128,13 @@ static const char* detectByRegistry(FFCPUResult* cpu)
 
     if (cpu->coresLogical == 0)
     {
-        DWORD cores;
-        if (RegQueryInfoKeyW(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor", NULL, NULL, &cores, NULL, NULL, NULL, NULL, NULL, NULL, NULL) == ERROR_SUCCESS)
-            cpu->coresOnline = cpu->coresPhysical = cpu->coresLogical = (uint16_t) cores;
+        FF_HKEY_AUTO_DESTROY hProcsKey = NULL;
+        if (ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor", &hProcsKey, NULL))
+        {
+            uint32_t cores;
+            if (ffRegGetNSubKeys(hProcsKey, &cores, NULL))
+                cpu->coresOnline = cpu->coresPhysical = cpu->coresLogical = (uint16_t) cores;
+        }
     }
 
     uint32_t mhz;

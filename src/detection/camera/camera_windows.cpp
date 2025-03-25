@@ -48,7 +48,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
 
     for (uint32_t i = 0; i < count; i++)
     {
-        IMFActivate* device = devices[i];
+        IMFActivate* FF_AUTO_RELEASE_COM_OBJECT device = devices[i];
 
         wchar_t buffer[256];
         uint32_t length = 0;
@@ -90,9 +90,11 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
             continue;
 
         // Assume first type is the maximum resolution
-        IMFMediaType* FF_AUTO_RELEASE_COM_OBJECT type = NULL;
+        IMFMediaType* type = NULL;
         for (DWORD idx = 0; SUCCEEDED(handler->GetMediaTypeByIndex(idx, &type)); ++idx)
         {
+            on_scope_exit destroyType([=] { type->Release(); });
+
             GUID majorType;
             if (FAILED(type->GetMajorType(&majorType)) || majorType != MFMediaType_Video)
                 continue;
@@ -123,7 +125,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
         }
     }
 
-    CoTaskMemFree(devices);
+    if (devices) CoTaskMemFree(devices);
 
     return nullptr;
 }

@@ -16,6 +16,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
     FF_AUTO_FREE struct kinfo_proc* processes = ffSysctlGetData(request, requestLength, &length);
     if(processes == NULL)
         return "sysctl(CTL_KERN, KERN_PROC, KERN_PROC_ALL) failed";
+    assert(length % sizeof(struct kinfo_proc) == 0);
 
     for(size_t i = 0; i < length / sizeof(struct kinfo_proc); i++)
     {

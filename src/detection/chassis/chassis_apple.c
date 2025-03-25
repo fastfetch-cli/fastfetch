@@ -17,10 +17,11 @@ const char* ffDetectChassis(FFChassisResult* result)
 
     if (ffStrbufStartsWithS(&host.name, "MacBook "))
         ffStrbufSetStatic(&result->type, "Laptop");
-    else if (ffStrbufStartsWithS(&host.name, "Mac mini "))
+    else if (ffStrbufStartsWithS(&host.name, "Mac mini ") ||
+             ffStrbufStartsWithS(&host.name, "Mac Studio "))
         ffStrbufSetStatic(&result->type, "Mini PC");
     else if (ffStrbufStartsWithS(&host.name, "iMac "))
-        ffStrbufSetStatic(&result->type, "All-in-One");
+        ffStrbufSetStatic(&result->type, "All in One");
     else
         ffStrbufSetStatic(&result->type, "Desktop");
 

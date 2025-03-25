@@ -9,12 +9,19 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+static void freePropDict(prop_dictionary_t* pdict)
+{
+    assert(pdict != NULL);
+    if (*pdict == NULL) return;
+    prop_object_release(*pdict);
+}
+
 static const char* detectCpuTemp(double* current)
 {
     FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY);
     if (fd < 0) return "open(_PATH_SYSMON, O_RDONLY) failed";
 
-    prop_dictionary_t root = NULL;
+    __attribute__((__cleanup__(freePropDict))) prop_dictionary_t root = NULL;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0)
         return "prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed";
 

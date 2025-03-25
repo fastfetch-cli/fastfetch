@@ -25,7 +25,7 @@ const char* ffDetectBios(FFBiosResult* result)
         {
             ffStrbufSetStatic(&result->type,
                 ffPathExists("/dev/efi" /*efidev*/, FF_PATHTYPE_FILE) ||
-                ffPathExists("/boot/efi/efi/" /*efi partition*/, FF_PATHTYPE_DIRECTORY)
+                ffPathExists("/boot/efi/efi/" /*efi partition. Note /boot/efi exists on BIOS system*/, FF_PATHTYPE_DIRECTORY)
                     ? "UEFI" : "BIOS");
         }
     }

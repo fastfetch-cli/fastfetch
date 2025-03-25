@@ -37,7 +37,7 @@ const char* ffDetectCamera(FFlist* result)
         {
         case V4L2_COLORSPACE_SMPTE170M: ffStrbufInitStatic(&camera->colorspace, "SMPTE 170M"); break;
         case V4L2_COLORSPACE_SMPTE240M: ffStrbufInitStatic(&camera->colorspace, "SMPTE 240M"); break;
-        case V4L2_COLORSPACE_BT878: ffStrbufInitStatic(&camera->colorspace, "BT.808"); break;
+        case V4L2_COLORSPACE_BT878: ffStrbufInitStatic(&camera->colorspace, "BT.878"); break;
         case V4L2_COLORSPACE_470_SYSTEM_M: ffStrbufInitStatic(&camera->colorspace, "NTSC"); break;
         case V4L2_COLORSPACE_470_SYSTEM_BG: ffStrbufInitStatic(&camera->colorspace, "EBU 3213"); break;
         case V4L2_COLORSPACE_JPEG: ffStrbufInitStatic(&camera->colorspace, "JPEG"); break;

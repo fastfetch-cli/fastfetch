@@ -92,7 +92,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             else if (dischargeRate)
             {
                 ffStrbufAppendS(&battery->status, "Discharging, ");
-                battery->timeRemaining = (int32_t)((double)curr / dischargeRate * 3600)
+                battery->timeRemaining = (int32_t)((double)curr / dischargeRate * 3600);
             }
             if (critical)
                 ffStrbufAppendS(&battery->status, "Critical, ");

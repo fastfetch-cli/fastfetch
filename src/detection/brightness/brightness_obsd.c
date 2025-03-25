@@ -8,24 +8,35 @@
 
 const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFlist* result)
 {
-    FF_AUTO_CLOSE_FD int devfd = open("/dev/ttyC0", O_RDONLY);
+    char path[] = "/dev/ttyCX";
+    for (char i = '0'; i <= '9'; ++i) {
+        path[strlen("/dev/ttyC")] = i;
 
-    if (devfd < 0) return "open(dev/ttyC0, O_RDONLY) failed";
+        FF_AUTO_CLOSE_FD int devfd = open(path, O_RDONLY);
 
-    struct wsdisplay_param param = {
-        .param = WSDISPLAYIO_PARAM_BRIGHTNESS,
-    };
+        if (devfd < 0) {
+            if (errno == EACCES && i == '0')
+                return "Permission denied when opening tty device";
+            if (errno == ENOENT)
+                break;
+            continue;
+        }
 
-    if (ioctl(devfd, WSDISPLAYIO_GETPARAM, &param) < 0)
-        return "ioctl(WSDISPLAYIO_GETPARAM) failed";
+        struct wsdisplay_param param = {
+            .param = WSDISPLAYIO_PARAM_BRIGHTNESS,
+        };
 
-    FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
-    ffStrbufInitStatic(&brightness->name, "wsdisplay");
+        if (ioctl(devfd, WSDISPLAYIO_GETPARAM, &param) < 0)
+            continue;
 
-    brightness->max = param.max;
-    brightness->min = param.min;
-    brightness->current = param.curval;
-    brightness->builtin = true;
+        FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
+        ffStrbufInitF(&brightness->name, "ttyC%c", i);
+
+        brightness->max = param.max;
+        brightness->min = param.min;
+        brightness->current = param.curval;
+        brightness->builtin = true;
+    }
 
     return NULL;
 }

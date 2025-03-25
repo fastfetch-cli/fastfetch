@@ -21,5 +21,5 @@ const char* ffDetectBluetooth(FF_MAYBE_UNUSED FFBluetoothOptions* options, FF_MA
     if (bt_devenum((void*) enumDev, devices) < 0)
         return "bt_devenum() failed";
 
-    return 0;
+    return NULL;
 }

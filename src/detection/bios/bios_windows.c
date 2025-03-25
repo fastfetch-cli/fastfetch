@@ -94,12 +94,9 @@ const char* ffDetectBios(FFBiosResult* bios)
             default: break;
         }
     }
-    #elif __HAIKU__
-    // Currently SMBIOS detection is supported in legency BIOS only
+    #elif __HAIKU__ || __OpenBSD__
+    // Currently SMBIOS detection is supported in legancy BIOS only
     ffStrbufSetStatic(&bios->type, "BIOS");
-    #elif __OpenBSD__
-    FF_AUTO_CLOSE_FD int fd = open("/dev/efi", O_RDONLY);
-    ffStrbufSetStatic(&bios->type, fd >= 0 ? "UEFI" : "BIOS");
     #endif
 
     return NULL;
