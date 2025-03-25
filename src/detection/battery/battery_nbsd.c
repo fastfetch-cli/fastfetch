@@ -70,9 +70,7 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
                     critical = true;
             }
             else if (ffStrEquals(desc, "discharge rate"))
-            {
                 prop_dictionary_get_uint(dict, "cur-value", &dischargeRate);
-            }
         }
 
         if (max > 0)
@@ -92,7 +90,10 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             if (charging)
                 ffStrbufAppendS(&battery->status, "Charging, ");
             else if (dischargeRate)
+            {
                 ffStrbufAppendS(&battery->status, "Discharging, ");
+                battery->timeRemaining = (int32_t)((double)curr / dischargeRate * 3600)
+            }
             if (critical)
                 ffStrbufAppendS(&battery->status, "Critical, ");
             if (acConnected)
@@ -100,8 +101,11 @@ const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* r
             ffStrbufTrimRight(&battery->status, ' ');
             ffStrbufTrimRight(&battery->status, ',');
         }
+
+        prop_object_iterator_release(iter);
     }
     prop_object_iterator_release(itKey);
+    prop_object_release(root);
 
     return NULL;
 }
