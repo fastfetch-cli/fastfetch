@@ -35,8 +35,14 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     {
         // find the start of device entry
         const char* pstart = memrchr(buffer.chars, '\n', (size_t) (pclass - buffer.chars));
+        if (pstart == NULL)
+            return "PCI info not found, invalid scanpci result";
         while (pstart[1] != 'p')
+        {
             pstart = memrchr(buffer.chars, '\n', (size_t) (pstart - buffer.chars - 1));
+            if (pstart == NULL)
+                return "PCI info not found, invalid scanpci result";
+        }
         ++pstart;
 
         uint32_t vendorId, deviceId;

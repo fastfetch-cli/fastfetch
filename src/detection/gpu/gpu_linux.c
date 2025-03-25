@@ -426,7 +426,9 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else
     {
-        pPciPath = memrchr(deviceDir->chars, '/', deviceDir->length) + 1;
+        pPciPath = memrchr(deviceDir->chars, '/', deviceDir->length);
+        assert(pPciPath);
+        pPciPath++;
     }
 
     uint32_t pciDomain, pciBus, pciDevice, pciFunc;
