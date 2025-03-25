@@ -608,7 +608,7 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
 
     #if __ANDROID__
     detectAndroid(cpu);
-    #else
+    #elif !__powerpc__ && !__powerpc
     detectSocName(cpu);
     #endif
 
