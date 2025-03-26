@@ -8,10 +8,10 @@
 #include <inttypes.h>
 #include <fcntl.h>
 
-static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FFDiskIOOptions* options)
+static const char* parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FFDiskIOOptions* options)
 {
     FF_AUTO_CLOSE_FD int devfd = openat(dfd, "device", O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
-    if (devfd < 0) return; // virtual device
+    if (devfd < 0) return "virtual device";
 
     FF_STRBUF_AUTO_DESTROY name = ffStrbufCreate();
 
@@ -49,7 +49,7 @@ static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FF
         }
 
         if (options->namePrefix.length && !ffStrbufStartsWith(&name, &options->namePrefix))
-            return;
+            return "ignored";
     }
 
     // I/Os merges sectors ticks ...
@@ -57,10 +57,10 @@ static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FF
     {
         char sysBlockStat[PROC_FILE_BUFFSIZ];
         ssize_t fileSize = ffReadFileDataRelative(dfd, "stat", ARRAY_SIZE(sysBlockStat) - 1, sysBlockStat);
-        if (fileSize <= 0) return;
+        if (fileSize <= 0) return "failed to read stat file";
         sysBlockStat[fileSize] = '\0';
         if (sscanf(sysBlockStat, "%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u%" PRIu64 "%*u", &nRead, &sectorRead, &nWritten, &sectorWritten) <= 0)
-            return;
+            return "invalid stat file format";
     }
 
     FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
@@ -70,6 +70,8 @@ static void parseDiskIOCounters(int dfd, const char* devName, FFlist* result, FF
     device->bytesWritten = sectorWritten * 512;
     device->readCount = nRead;
     device->writeCount = nWritten;
+
+    return NULL;
 }
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
@@ -83,7 +85,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
     {
         const char* const devName = sysBlockEntry->d_name;
 
-        if (devName[0] == '.') continue;;
+        if (devName[0] == '.') continue;
 
         FF_AUTO_CLOSE_FD int dfd = openat(dirfd(sysBlockDirp), devName, O_RDONLY | O_CLOEXEC | O_PATH | O_DIRECTORY);
         if (dfd > 0) parseDiskIOCounters(dfd, devName, result, options);

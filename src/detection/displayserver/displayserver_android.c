@@ -4,6 +4,33 @@
 
 #include <math.h>
 
+static bool checkHdrStatus(FFDisplayResult* display)
+{
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
+    if (ffSettingsGetAndroidProperty("ro.surface_flinger.has_HDR_display", &buffer))
+    {
+        if (ffStrbufIgnCaseEqualS(&buffer, "true"))
+        {
+            display->hdrStatus = FF_DISPLAY_HDR_STATUS_SUPPORTED;
+
+            if (ffSettingsGetAndroidProperty("persist.sys.hdr_mode", &buffer) &&
+                ffStrbufToUInt(&buffer, 0) > 0)
+                display->hdrStatus = FF_DISPLAY_HDR_STATUS_ENABLED;
+
+            return true;
+        }
+        else
+        {
+            display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+            return true;
+        }
+    }
+
+    display->hdrStatus = FF_DISPLAY_HDR_STATUS_UNKNOWN;
+    return false;
+}
+
 static void detectWithDumpsys(FFDisplayServerResult* ds)
 {
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
@@ -54,7 +81,7 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
             }
 
             ffStrbufRecalculateLength(&name);
-            ffdsAppendDisplay(ds,
+            FFDisplayResult* display = ffdsAppendDisplay(ds,
                 (uint32_t)width,
                 (uint32_t)height,
                 refreshRate,
@@ -72,6 +99,7 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
                 0,
                 "dumpsys"
             );
+            if (display) display->hdrStatus = checkHdrStatus(display);
         }
 
         index = nextIndex + 1;
@@ -92,7 +120,7 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
         uint32_t height = (uint32_t) ffStrbufToUInt(&buffer, 0);
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         double scaleFactor = (double) ffStrbufToUInt(&buffer, 0) / 160.;
-        return ffdsAppendDisplay(ds,
+        FFDisplayResult* display = ffdsAppendDisplay(ds,
             width,
             height,
             0,
@@ -110,6 +138,8 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
             0,
             "getprop"
         );
+        if (display) display->hdrStatus = checkHdrStatus(display);
+        return !!display;
     }
 
     return false;

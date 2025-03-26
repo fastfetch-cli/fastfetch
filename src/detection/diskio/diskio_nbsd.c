@@ -12,12 +12,12 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
     if (sysctl(mib, ARRAY_SIZE(mib), NULL, &len, NULL, 0) < 0)
         return "sysctl({HW_IOSTATS}, NULL) failed";
     uint32_t nDrive = (uint32_t) (len / sizeof(struct io_sysctl));
-    
-    struct io_sysctl* stats = malloc(len);
+
+    FF_AUTO_FREE struct io_sysctl* stats = malloc(len);
 
     if (sysctl(mib, ARRAY_SIZE(mib), stats, &len, NULL, 0) < 0)
         return "sysctl({HW_IOSTATS}, stats) failed";
-    
+
     for (uint32_t i = 0; i < nDrive; ++i)
     {
         struct io_sysctl* st = &stats[i];

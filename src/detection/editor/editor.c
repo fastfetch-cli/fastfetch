@@ -10,6 +10,7 @@
 #ifdef _WIN32
 static inline char* realpath(const char* restrict file_name, char* restrict resolved_name)
 {
+    assert(resolved_name != NULL);
     return _fullpath(resolved_name, file_name, _MAX_PATH);
 }
 #endif

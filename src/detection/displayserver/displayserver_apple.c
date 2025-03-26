@@ -68,7 +68,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
             if(displayInfo)
             {
                 CFDictionaryRef productNames;
-                if(!ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames))
+                if(ffCfDictGetDict(displayInfo, CFSTR(kDisplayProductName), &productNames) == NULL)
                     ffCfDictGetString(productNames, CFSTR("en_US"), &buffer);
 
                 // CGDisplayScreenSize reports invalid result for external displays on old Intel MacBook Pro

@@ -14,7 +14,7 @@ const char* ffDetectDNS(FFDNSOptions* options, FFlist* results)
 {
     FF_AUTO_CLOSE_FILE FILE* file = fopen(FASTFETCH_TARGET_DIR_ROOT RESOLV_CONF, "r");
     if (!file)
-        return "fopen (" FASTFETCH_TARGET_DIR_ROOT "/etc/resolv.conf) failed";
+        return "fopen (" FASTFETCH_TARGET_DIR_ROOT RESOLV_CONF ") failed";
 
     FF_AUTO_FREE char* line = NULL;
     size_t len = 0;

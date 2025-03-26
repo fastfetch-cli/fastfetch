@@ -69,10 +69,15 @@ const char* ffDetectDiskIO(FFlist* result, FFDiskIOOptions* options)
             uint64_t temp = *currValue;
             *currValue -= *prevValue;
             *currValue /= (time2 - time1) / 1000 /* seconds */;
+
+            // For next function call
             *prevValue = temp;
         }
     }
+
+    // For next function call
     time1 = time2;
+    // Leak ioCounters1 here
 
     return NULL;
 }

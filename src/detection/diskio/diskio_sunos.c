@@ -27,7 +27,7 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
             continue;
 
         FFDiskIOResult* device = (FFDiskIOResult*) ffListAdd(result);
-        ffStrbufInit(&device->devPath);
+        ffStrbufInit(&device->devPath); // unlike other platforms, `/dev/ks_name` is not available
         ffStrbufInitS(&device->name, ks->ks_name);
         device->bytesRead = kio.nread;
         device->readCount = kio.reads;

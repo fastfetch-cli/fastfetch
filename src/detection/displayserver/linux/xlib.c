@@ -147,7 +147,7 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         "xlib-randr-crtc"
     );
 
-    if (edidLength)
+    if (item && edidLength)
     {
         item->hdrStatus = ffEdidGetHdrCompatible(edidData, edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
         ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
@@ -231,7 +231,7 @@ static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
     if(monitorInfos == NULL)
         return false;
 
-    bool foundAMonitor;
+    bool foundAMonitor = false;
 
     for(int i = 0; i < numberOfMonitors; i++)
     {
@@ -272,7 +272,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         0,
         (uint32_t) WidthMMOfScreen(screen),
         (uint32_t) HeightMMOfScreen(screen),
-        "xlib_randr_screen"
+        "xlib-randr-screen"
     );
 }
 
