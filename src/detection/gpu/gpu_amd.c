@@ -49,6 +49,7 @@ struct FFAdlData {
     FF_LIBRARY_SYMBOL(ADL2_Adapter_DedicatedVRAMUsage_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_VRAMUsage_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_ASICFamilyType_Get)
+    FF_LIBRARY_SYMBOL(ADL2_Overdrive_Caps)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive6_CurrentStatus_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive6_Temperature_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive6_StateInfo_Get)
@@ -119,9 +120,13 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
     FF_AUTO_FREE AdapterInfo* devices = NULL;
     int numDevices = 0;
     int adapterResult = adlData.ffADL2_Adapter_AdapterInfoX3_Get(adlData.apiHandle, -1, &numDevices, &devices);
-    FF_DEBUG("ADL2_Adapter_AdapterInfoX3_Get returned %s (%d), found %d devices", ffAdlStatusToString(adapterResult), adapterResult, numDevices);
+    FF_DEBUG("ADL2_Adapter_AdapterInfoX3_Get returned %s (%d)", ffAdlStatusToString(adapterResult), adapterResult);
 
-    if (adapterResult != 1)  // 1 means success for this function
+    if (adapterResult == ADL_OK)
+    {
+        FF_DEBUG("found %d adapters", numDevices);
+    }
+    else
     {
         FF_DEBUG("ffADL2_Adapter_AdapterInfoX3_Get() failed");
         return "ffADL2_Adapter_AdapterInfoX3_Get() failed";
@@ -162,7 +167,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
 
         if (status == ADL_OK)
         {
-            *result.coreCount = (uint32_t) coreInfo.iNumCUs;
+            *result.coreCount = (uint32_t) coreInfo.iNumCUs * (uint32_t) coreInfo.iNumPEsPerCU;
             FF_DEBUG("Got core count: %u", *result.coreCount);
         }
         else
@@ -210,6 +215,40 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         }
     }
 
+    if (result.type)
+    {
+        int asicTypes = 0;
+        int valids = 0;
+        int status = adlData.ffADL2_Adapter_ASICFamilyType_Get(adlData.apiHandle, device->iAdapterIndex, &asicTypes, &valids);
+        FF_DEBUG("ADL2_Adapter_ASICFamilyType_Get returned %s (%d), asicTypes: 0x%x, valids: 0x%x",
+            ffAdlStatusToString(status), status, asicTypes, valids);
+
+        if (status == ADL_OK)
+        {
+            asicTypes &= valids; // This design is strange
+            *result.type = asicTypes & ADL_ASIC_INTEGRATED ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            FF_DEBUG("GPU type: %s", *result.type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
+        }
+        else
+        {
+            FF_DEBUG("Failed to get GPU type");
+        }
+    }
+
+    if (result.index)
+    {
+        *result.index = (uint32_t) device->iAdapterIndex;
+        FF_DEBUG("Setting adapter index: %u", *result.index);
+    }
+
+    if (result.name)
+    {
+        ffStrbufSetS(result.name, device->strAdapterName);
+        FF_DEBUG("Setting adapter name: %s", device->strAdapterName);
+    }
+
+    adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, NULL, NULL, NULL);
+
     if (result.frequency)
     {
         ADLOD6StateInfo stateInfo;
@@ -253,38 +292,6 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         {
             FF_DEBUG("Failed to get GPU activity");
         }
-    }
-
-    if (result.type)
-    {
-        int asicTypes = 0;
-        int valids = 0;
-        int status = adlData.ffADL2_Adapter_ASICFamilyType_Get(adlData.apiHandle, device->iAdapterIndex, &asicTypes, &valids);
-        FF_DEBUG("ADL2_Adapter_ASICFamilyType_Get returned %s (%d), asicTypes: 0x%x, valids: 0x%x",
-            ffAdlStatusToString(status), status, asicTypes, valids);
-
-        if (status == ADL_OK)
-        {
-            asicTypes &= valids; // This design is strange
-            *result.type = asicTypes & ADL_ASIC_INTEGRATED ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-            FF_DEBUG("GPU type: %s", *result.type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
-        }
-        else
-        {
-            FF_DEBUG("Failed to get GPU type");
-        }
-    }
-
-    if (result.index)
-    {
-        *result.index = (uint32_t) device->iAdapterIndex;
-        FF_DEBUG("Setting adapter index: %u", *result.index);
-    }
-
-    if (result.name)
-    {
-        ffStrbufSetS(result.name, device->strAdapterName);
-        FF_DEBUG("Setting adapter name: %s", device->strAdapterName);
     }
 
     if (result.temp)

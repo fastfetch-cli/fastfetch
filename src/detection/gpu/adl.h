@@ -11,7 +11,7 @@ extern int ADL2_Main_Control_Create(ADL_MAIN_MALLOC_CALLBACK callback, int iEnum
 extern int ADL2_Main_Control_Destroy(ADL_CONTEXT_HANDLE context);
 
 // Retrieves adapter information for given adapter or all OS-known adapters.
-// Return 1 on success
+// Return ADL_OK on success, DESPITE THE OFFICIAL DOCUMENT SAYS IT RETURNS 1 FOR SUCCESS!
 extern int ADL2_Adapter_AdapterInfoX3_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* numAdapters, AdapterInfo** lppAdapterInfo);
 
 // Function to retrieve Graphic Core Info.
@@ -34,6 +34,13 @@ extern int ADL2_Adapter_DedicatedVRAMUsage_Get(ADL_CONTEXT_HANDLE context, int i
 // Return ADL_OK on success
 extern int ADL2_Adapter_ASICFamilyType_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* lpAsicTypes, int* lpValids);
 
+
+// Function to retrieve current power management capabilities.
+// Return ADL_OK on success
+extern int ADL2_Overdrive_Caps(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* iSupported, int* iEnabled, int* iVersion);
+
+/////////// Overdrive 6 functions
+
 // Function to retrieve current Overdrive and performance-related activity.
 // Return ADL_OK on success
 extern int ADL2_Overdrive6_CurrentStatus_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLOD6CurrentStatus* lpCurrentStatus);
@@ -45,3 +52,5 @@ extern int ADL2_Overdrive6_Temperature_Get(ADL_CONTEXT_HANDLE context, int iAdap
 // Function to retrieve the current or default Overdrive clock ranges.
 // Return ADL_OK on success
 extern int ADL2_Overdrive6_StateInfo_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int iStateType, ADLOD6StateInfo* lpStateInfo);
+
+/// Overdrive 8 functions
