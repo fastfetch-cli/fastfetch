@@ -209,7 +209,10 @@ static bool isRemovable(FFDisk* currentDisk)
     char sysBlockVolume[PATH_MAX]; // /sys/devices/pci0000:00/0000:00:14.0/usb4/4-3/4-3:1.0/host0/target0:0:0/0:0:0:0/block/sda/sda1
     if (realpath(sysBlockPartition, sysBlockVolume) == NULL)
         return false;
-    strcpy(strrchr(sysBlockVolume, '/') + 1, "removable");
+    char* lastSlash = strrchr(sysBlockVolume, '/');
+    if (lastSlash == NULL)
+        return false;
+    strcpy(lastSlash + 1, "removable");
 
     char removableChar = '0';
     return ffReadFileData(sysBlockVolume, 1, &removableChar) > 0 && removableChar == '1';

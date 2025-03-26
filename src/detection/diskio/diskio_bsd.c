@@ -13,7 +13,8 @@
 
 const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
 {
-    struct gmesh geomTree;
+    __attribute__((__cleanup__(geom_deletetree)))
+    struct gmesh geomTree = {};
     if (geom_gettree(&geomTree) < 0)
         return "geom_gettree() failed";
 
@@ -21,6 +22,9 @@ const char* ffDiskIOGetIoCounters(FFlist* result, FFDiskIOOptions* options)
         return "geom_stats_open() failed";
 
     void* snap = geom_stats_snapshot_get();
+    if (!snap)
+        return "geom_stats_snapshot_get() failed";
+
     struct devstat* snapIter;
     while ((snapIter = geom_stats_snapshot_next(snap)) != NULL)
     {

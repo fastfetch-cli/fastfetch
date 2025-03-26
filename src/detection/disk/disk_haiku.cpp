@@ -14,7 +14,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     for (dev_t dev; (dev = next_dev(&pos)) >= B_OK;)
     {
         fs_info fs;
-        if (fs_stat_dev(dev, &fs) < -1) continue;
+        if (fs_stat_dev(dev, &fs) < 0) continue;
 
         node_ref node(fs.dev, fs.root);
         BDirectory dir(&node);
@@ -32,10 +32,10 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         disk->bytesTotal = (uint64_t)fs.total_blocks * (uint64_t) fs.block_size;
         disk->bytesFree = (uint64_t)fs.free_blocks * (uint64_t) fs.block_size;
         disk->bytesAvailable = disk->bytesFree;
-        disk->bytesUsed = 0; // To be filled in ./disk. c
+        disk->bytesUsed = 0; // To be filled in ./disk.c
 
         disk->filesTotal = (uint32_t) fs.total_nodes;
-        disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs.free_nodes);
+        disk->filesUsed = (uint32_t) (fs.total_nodes - fs.free_nodes);
 
         ffStrbufInitS(&disk->mountFrom, fs.device_name);
         ffStrbufInitS(&disk->mountpoint, path.Path());
