@@ -50,6 +50,9 @@ struct FFAdlData {
     FF_LIBRARY_SYMBOL(ADL2_Adapter_VRAMUsage_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_ASICFamilyType_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive_Caps)
+    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_Capabilities_Get)
+    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_PerformanceStatus_Get)
+    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_Temperature_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive6_CurrentStatus_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive6_Temperature_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive6_StateInfo_Get)
@@ -77,27 +80,20 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         adlData.inited = true;
         FF_DEBUG("Initializing ADL library");
         FF_LIBRARY_LOAD(atiadl, "dlopen atiadlxx failed", soName , 1);
-        FF_DEBUG("Loading ADL2_Main_Control_Create");
         FF_LIBRARY_LOAD_SYMBOL_MESSAGE(atiadl, ADL2_Main_Control_Create)
-        FF_DEBUG("Loading ADL2_Main_Control_Destroy");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Main_Control_Destroy)
-        FF_DEBUG("Loading ADL2_Adapter_AdapterInfoX3_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_AdapterInfoX3_Get)
-        FF_DEBUG("Loading ADL2_Adapter_Graphic_Core_Info_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_Graphic_Core_Info_Get)
-        FF_DEBUG("Loading ADL2_Adapter_MemoryInfo2_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_MemoryInfo2_Get)
-        FF_DEBUG("Loading ADL2_Adapter_DedicatedVRAMUsage_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_DedicatedVRAMUsage_Get)
-        FF_DEBUG("Loading ADL2_Adapter_VRAMUsage_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_VRAMUsage_Get)
-        FF_DEBUG("Loading ADL2_Adapter_ASICFamilyType_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_ASICFamilyType_Get)
-        FF_DEBUG("Loading ADL2_Overdrive6_CurrentStatus_Get");
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive_Caps)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_Capabilities_Get)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_PerformanceStatus_Get)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_Temperature_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive6_CurrentStatus_Get)
-        FF_DEBUG("Loading ADL2_Overdrive6_Temperature_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive6_Temperature_Get)
-        FF_DEBUG("Loading ADL2_Overdrive6_StateInfo_Get");
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive6_StateInfo_Get)
         FF_DEBUG("ADL library loaded");
 
@@ -247,71 +243,139 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_DEBUG("Setting adapter name: %s", device->strAdapterName);
     }
 
-    adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, NULL, NULL, NULL);
+    int overdrive_supported = 0;
+    int odParam = 0;
+    int activity_supported = 0;
+    int caps_status = adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, &overdrive_supported, &odParam, &activity_supported);
+    FF_DEBUG("ADL2_Overdrive_Caps returned %s (%d), overdrive_supported: %d", ffAdlStatusToString(caps_status), caps_status, overdrive_supported);
 
-    if (result.frequency)
+    if (overdrive_supported >= 7)
     {
-        ADLOD6StateInfo stateInfo;
-        int status = adlData.ffADL2_Overdrive6_StateInfo_Get(adlData.apiHandle, device->iAdapterIndex, ADL_OD6_GETSTATEINFO_CUSTOM_PERFORMANCE, &stateInfo);
-        FF_DEBUG("ADL2_Overdrive6_StateInfo_Get returned %s (%d), performance levels: %d",
-            ffAdlStatusToString(status), status, stateInfo.iNumberOfPerformanceLevels);
+        FF_DEBUG("Using OverdriveN API");
 
-        if (status == ADL_OK)
+        if (result.frequency)
         {
-            int clock = 0; // assume in 10 kHz
-            for (int i = 0; i < stateInfo.iNumberOfPerformanceLevels; i++)
+            ADLODNCapabilities odCapabilities;
+            int status = adlData.ffADL2_OverdriveN_Capabilities_Get(adlData.apiHandle, device->iAdapterIndex, &odCapabilities);
+            FF_DEBUG("ADL2_OverdriveN_Capabilities_Get returned %s (%d)", ffAdlStatusToString(status), status);
+
+            if (status == ADL_OK)
             {
-                FF_DEBUG("Performance level %d: engine clock = %d", i, stateInfo.aLevels[i].iEngineClock);
-                if (stateInfo.aLevels[i].iEngineClock > clock)
-                    clock = stateInfo.aLevels[i].iEngineClock;
+                *result.frequency = (uint32_t) odCapabilities.sEngineClockRange.iMax / 100; // assume in 10 KHz
+                FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
             }
-            *result.frequency = (uint32_t) clock / 100;
-            FF_DEBUG("Using max engine clock: %u MHz", *result.frequency);
-        }
-        else
-        {
-            FF_DEBUG("Failed to get frequency information");
-        }
-    }
-
-    if (result.coreUsage)
-    {
-        ADLOD6CurrentStatus status;
-        int apiStatus = adlData.ffADL2_Overdrive6_CurrentStatus_Get(adlData.apiHandle, device->iAdapterIndex, &status);
-        FF_DEBUG("ADL2_Overdrive6_CurrentStatus_Get returned %s (%d)", ffAdlStatusToString(apiStatus), apiStatus);
-
-        if (apiStatus == ADL_OK)
-        {
-            if (result.coreUsage)
+            else
             {
-                *result.coreUsage = status.iActivityPercent;
-                FF_DEBUG("Got GPU activity: %d%%", status.iActivityPercent);
+                FF_DEBUG("Failed to get frequency information");
             }
         }
-        else
+
+        if (result.coreUsage)
         {
-            FF_DEBUG("Failed to get GPU activity");
+            ADLODNPerformanceStatus performanceStatus;
+            int status = adlData.ffADL2_OverdriveN_PerformanceStatus_Get(adlData.apiHandle, device->iAdapterIndex, &performanceStatus);
+            FF_DEBUG("ADL2_OverdriveN_PerformanceStatus_Get returned %s (%d)", ffAdlStatusToString(status), status);
+
+            if (status == ADL_OK)
+            {
+                *result.coreUsage = performanceStatus.iGPUActivityPercent;
+                FF_DEBUG("Got GPU activity: %d%%", performanceStatus.iGPUActivityPercent);
+            }
+            else
+            {
+                FF_DEBUG("Failed to get GPU activity");
+            }
+        }
+
+        if (result.temp)
+        {
+            int milliDegrees = 0;
+            int status = adlData.ffADL2_OverdriveN_Temperature_Get(adlData.apiHandle, device->iAdapterIndex, 1, &milliDegrees);
+            FF_DEBUG("ADL2_OverdriveN_Temperature_Get returned %s (%d), temperature: %d milliC",
+                ffAdlStatusToString(status), status, milliDegrees);
+
+            if (status == ADL_OK)
+            {
+                *result.temp = milliDegrees / 1000.0;
+                FF_DEBUG("Temperature: %.1f°C", *result.temp);
+            }
+            else
+            {
+                FF_DEBUG("Failed to get temperature");
+            }
         }
     }
-
-    if (result.temp)
+    else if (overdrive_supported >= 6)
     {
-        int milliDegrees = 0;
-        int status = adlData.ffADL2_Overdrive6_Temperature_Get(adlData.apiHandle, device->iAdapterIndex, &milliDegrees);
-        FF_DEBUG("ADL2_Overdrive6_Temperature_Get returned %s (%d), temperature: %d milliC",
-            ffAdlStatusToString(status), status, milliDegrees);
+        FF_DEBUG("Using Overdrive8 API; to be supported");
+    }
+    else
+    {
+        FF_DEBUG("Using Overdrive6 API");
 
-        if (status == ADL_OK)
+        if (result.frequency)
         {
-            *result.temp = milliDegrees / 1000.0;
-            FF_DEBUG("Temperature: %.1f°C", *result.temp);
+            ADLOD6StateInfo stateInfo;
+            int status = adlData.ffADL2_Overdrive6_StateInfo_Get(adlData.apiHandle, device->iAdapterIndex, ADL_OD6_GETSTATEINFO_CUSTOM_PERFORMANCE, &stateInfo);
+            FF_DEBUG("ADL2_Overdrive6_StateInfo_Get returned %s (%d), performance levels: %d",
+                ffAdlStatusToString(status), status, stateInfo.iNumberOfPerformanceLevels);
+
+            if (status == ADL_OK)
+            {
+                int clock = 0; // assume in 10 kHz
+                for (int i = 0; i < stateInfo.iNumberOfPerformanceLevels; i++)
+                {
+                    FF_DEBUG("Performance level %d: engine clock = %d", i, stateInfo.aLevels[i].iEngineClock);
+                    if (stateInfo.aLevels[i].iEngineClock > clock)
+                        clock = stateInfo.aLevels[i].iEngineClock;
+                }
+                *result.frequency = (uint32_t) clock / 100;
+                FF_DEBUG("Using max engine clock: %u MHz", *result.frequency);
+            }
+            else
+            {
+                FF_DEBUG("Failed to get frequency information");
+            }
         }
-        else
+
+        if (result.coreUsage)
         {
-            FF_DEBUG("Failed to get temperature");
+            ADLOD6CurrentStatus status;
+            int apiStatus = adlData.ffADL2_Overdrive6_CurrentStatus_Get(adlData.apiHandle, device->iAdapterIndex, &status);
+            FF_DEBUG("ADL2_Overdrive6_CurrentStatus_Get returned %s (%d)", ffAdlStatusToString(apiStatus), apiStatus);
+
+            if (apiStatus == ADL_OK)
+            {
+                if (result.coreUsage)
+                {
+                    *result.coreUsage = status.iActivityPercent;
+                    FF_DEBUG("Got GPU activity: %d%%", status.iActivityPercent);
+                }
+            }
+            else
+            {
+                FF_DEBUG("Failed to get GPU activity");
+            }
+        }
+
+        if (result.temp)
+        {
+            int milliDegrees = 0;
+            int status = adlData.ffADL2_Overdrive6_Temperature_Get(adlData.apiHandle, device->iAdapterIndex, &milliDegrees);
+            FF_DEBUG("ADL2_Overdrive6_Temperature_Get returned %s (%d), temperature: %d milliC",
+                ffAdlStatusToString(status), status, milliDegrees);
+
+            if (status == ADL_OK)
+            {
+                *result.temp = milliDegrees / 1000.0;
+                FF_DEBUG("Temperature: %.1f°C", *result.temp);
+            }
+            else
+            {
+                FF_DEBUG("Failed to get temperature");
+            }
         }
     }
-
     FF_DEBUG("AMD GPU detection complete");
     return NULL;
 }
