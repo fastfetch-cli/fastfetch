@@ -129,9 +129,9 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
                 }
                 else
                 {
-                    char str[] = { fileName[1], fileName[2], 0 };
-                    if (str[0] == 0 || str[1] == 0)
+                    if (fileName[1] == 0 || fileName[2] == 0)
                         break;
+                    char str[] = { fileName[1], fileName[2], 0 };
                     ffStrbufAppendC(&result->song, (char) strtoul(str, NULL, 16));
                     fileName += 2;
                 }

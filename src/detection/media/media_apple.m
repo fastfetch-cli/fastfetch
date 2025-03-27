@@ -11,7 +11,7 @@ extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void(^ca
 extern void MRMediaRemoteGetNowPlayingClient(dispatch_queue_t dispatcher, void (^callback)(_Nullable id clientObj)) __attribute__((weak_import));
 extern CFStringRef MRNowPlayingClientGetBundleIdentifier(id clientObj) __attribute__((weak_import));
 extern CFStringRef MRNowPlayingClientGetParentAppBundleIdentifier(id clientObj) __attribute__((weak_import));
-void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing));
+void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing)) __attribute__((weak_import));
 
 static const char* getMedia(FFMediaResult* result)
 {
@@ -20,6 +20,7 @@ static const char* getMedia(FFMediaResult* result)
     FF_TEST_FN_EXISTANCE(MRMediaRemoteGetNowPlayingClient);
     FF_TEST_FN_EXISTANCE(MRNowPlayingClientGetBundleIdentifier);
     FF_TEST_FN_EXISTANCE(MRNowPlayingClientGetParentAppBundleIdentifier);
+    FF_TEST_FN_EXISTANCE(MRMediaRemoteGetNowPlayingApplicationIsPlaying);
     #undef FF_TEST_FN_EXISTANCE
 
     dispatch_group_t group = dispatch_group_create();
@@ -63,6 +64,7 @@ static const char* getMedia(FFMediaResult* result)
     });
 
     dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    // Don't dispatch_release because we are using ARC
 
     if(result->playerId.length > 0)
     {
