@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <usbhid.h>
+#include <sys/kbio.h>
 
 #if __has_include(<dev/usb/usb_ioctl.h>)
     #include <dev/usb/usb_ioctl.h> // FreeBSD
@@ -11,12 +12,38 @@
     #include <bus/u4b/usb_ioctl.h> // DragonFly
 #endif
 
-#define MAX_UHID_JOYS 64
+static const char* detectByIoctl(FFlist* devices)
+{
+    keyboard_info_t kbdInfo;
+    if (ioctl(STDIN_FILENO, KDGKBINFO, &kbdInfo) != 0)
+        return "ioctl(KDGKBINFO) failed";
 
-const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
+    FFKeyboardDevice* device = (FFKeyboardDevice*) ffListAdd(devices);
+
+    switch (kbdInfo.kb_type) {
+        case KB_84:
+            ffStrbufInitS(&device->name, "AT 84-key keyboard");
+            break;
+        case KB_101:
+            ffStrbufInitS(&device->name, "AT 101/102-key keyboard");
+            break;
+        default:
+            ffStrbufInitS(&device->name, "Unknown keyboard");
+            break;
+    }
+
+    ffStrbufAppendF(&device->name, " (kbd%d)", kbdInfo.kb_index);
+
+    ffStrbufInit(&device->serial);
+    return NULL;
+}
+
+#define MAX_UHID_KBDS 64
+
+static const char* detectByUsbhid(FFlist* devices)
 {
     char path[16];
-    for (int i = 0; i < MAX_UHID_JOYS; i++)
+    for (int i = 0; i < MAX_UHID_KBDS; i++)
     {
         snprintf(path, ARRAY_SIZE(path), "/dev/uhid%d", i);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
@@ -43,10 +70,19 @@ const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
                     ffStrbufInitS(&device->name, di.udi_product);
                 }
             }
+            hid_end_parse(hData);
         }
 
         hid_dispose_report_desc(repDesc);
     }
 
     return NULL;
+}
+
+const char* ffDetectKeyboard(FFlist* devices /* List of FFKeyboardDevice */)
+{
+    detectByUsbhid(devices);
+    if (devices->length > 0)
+        return NULL;
+    return detectByIoctl(devices);
 }
