@@ -20,8 +20,12 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)
     {
         snprintf(path, ARRAY_SIZE(path), "/dev/uhid%d", i);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
-        if (fd < 0) continue;
-
+        if (fd < 0)
+        {
+            if (errno == ENOENT)
+                break; // No more devices
+            continue; // Device not found
+        }
         report_desc_t repDesc = hid_get_report_desc(fd);
         if (!repDesc) continue;
 
