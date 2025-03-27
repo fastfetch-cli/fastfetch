@@ -36,7 +36,7 @@ static const char* ffAdlStatusToString(int status) {
 }
 
 // Memory allocation function
-void* __attribute__((__stdcall__)) ADL_Main_Memory_Alloc(int iSize)
+static void* __attribute__((__stdcall__)) ffAdlMainMemoryAlloc(int iSize)
 {
     return malloc((size_t) iSize);
 }
@@ -97,7 +97,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive6_StateInfo_Get)
         FF_DEBUG("ADL library loaded");
 
-        int result = ffADL2_Main_Control_Create(ADL_Main_Memory_Alloc, 1 /*iEnumConnectedAdapters*/, &adlData.apiHandle);
+        int result = ffADL2_Main_Control_Create(ffAdlMainMemoryAlloc, 1 /*iEnumConnectedAdapters*/, &adlData.apiHandle);
         FF_DEBUG("ADL2_Main_Control_Create returned %s (%d)", ffAdlStatusToString(result), result);
         if (result != ADL_OK)
             return "ffADL2_Main_Control_Create() failed";
@@ -243,15 +243,18 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_DEBUG("Setting adapter name: %s", device->strAdapterName);
     }
 
-    int overdrive_supported = 0;
-    int odParam = 0;
-    int activity_supported = 0;
-    int caps_status = adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, &overdrive_supported, &odParam, &activity_supported);
-    FF_DEBUG("ADL2_Overdrive_Caps returned %s (%d), overdrive_supported: %d", ffAdlStatusToString(caps_status), caps_status, overdrive_supported);
+    int odVersion = 0;
 
-    if (overdrive_supported >= 7)
     {
-        FF_DEBUG("Using OverdriveN API");
+        int odSupported = 0;
+        int odEnabled = 0;
+        int status = adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, &odSupported, &odEnabled, &odVersion);
+        FF_DEBUG("ADL2_Overdrive_Caps returned %s (%d); supported %d, enabled %d; version %d", ffAdlStatusToString(status), status, odSupported, odEnabled, odVersion);
+    }
+
+    if (odVersion >= 6)
+    {
+        FF_DEBUG("Using OverdriveN API (odVersion=%d)", odVersion);
 
         if (result.frequency)
         {
@@ -305,13 +308,9 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
             }
         }
     }
-    else if (overdrive_supported >= 6)
-    {
-        FF_DEBUG("Using Overdrive8 API; to be supported");
-    }
     else
     {
-        FF_DEBUG("Using Overdrive6 API");
+        FF_DEBUG("Using Overdrive6 API (odVersion=%d)", odVersion);
 
         if (result.frequency)
         {
@@ -346,11 +345,8 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
 
             if (apiStatus == ADL_OK)
             {
-                if (result.coreUsage)
-                {
-                    *result.coreUsage = status.iActivityPercent;
-                    FF_DEBUG("Got GPU activity: %d%%", status.iActivityPercent);
-                }
+                *result.coreUsage = status.iActivityPercent;
+                FF_DEBUG("Got GPU activity: %d%%", status.iActivityPercent);
             }
             else
             {
