@@ -46,6 +46,14 @@ extern int ADL2_Overdrive6_StateInfo_Get(ADL_CONTEXT_HANDLE context, int iAdapte
 
 /// Overdrive 8 functions
 
+// Function to retrieve the Overdrive8 current settings.
+extern int ADL2_Overdrive8_Current_Setting_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLOD8CurrentSetting *lpCurrentSetting);
+
+// Function to retrieve the Overdrive8 current settings.
+extern int ADL2_New_QueryPMLogData_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLPMLogDataOutput *lpDataOutput);
+
+/// Overdrive N functions
+
 // Function to retrieve the OverdriveN capabilities.
 extern int ADL2_OverdriveN_Capabilities_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLODNCapabilities* lpODCapabilities);
 
@@ -54,3 +62,6 @@ extern int ADL2_OverdriveN_PerformanceStatus_Get(ADL_CONTEXT_HANDLE context, int
 
 // Function to retrieve the current temperature.
 extern int ADL2_OverdriveN_Temperature_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int iTemperatureType, int *iTemperature);
+
+// Function to retrieve the current GPU clocks settings.
+extern int ADL2_OverdriveN_SystemClocks_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLODNPerformanceLevels *lpODPerformanceLevels);
