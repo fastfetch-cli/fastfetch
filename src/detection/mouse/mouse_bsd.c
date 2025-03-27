@@ -11,12 +11,12 @@
 #include <bus/u4b/usb_ioctl.h> // DragonFly
 #endif
 
-#define MAX_UHID_JOYS 64
+#define MAX_UHID_MICE 64
 
 const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)
 {
     char path[16];
-    for (int i = 0; i < MAX_UHID_JOYS; i++)
+    for (int i = 0; i < MAX_UHID_MICE; i++)
     {
         snprintf(path, ARRAY_SIZE(path), "/dev/uhid%d", i);
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
@@ -43,6 +43,7 @@ const char* ffDetectMouse(FFlist* devices /* List of FFMouseDevice */)
                     ffStrbufInitS(&device->name, di.udi_product);
                 }
             }
+            hid_end_parse(hData);
         }
 
         hid_dispose_report_desc(repDesc);

@@ -53,6 +53,7 @@ const char* ffDetectGamepad(FFlist* devices /* List of FFGamepadDevice */)
                     device->battery = 0;
                 }
             }
+            hid_end_parse(hData);
         }
 
         hid_dispose_report_desc(repDesc);
