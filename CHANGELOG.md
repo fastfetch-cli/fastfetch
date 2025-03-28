@@ -1,3 +1,37 @@
+# 2.40.0
+
+Changes:
+* In `key-format` of `LocalIP` module, `{name}` has been renamed to `{ifname}` for consistency (LocalIP, #1639)
+
+Features:
+* Support Warp Terminal font detection (TerminalFont, Windows)
+* Support more AMD GPU information using ADL SDK, including memory type detection (GPU, Windows)
+* Support Intel dGPU memory type detection (GPU, Windows)
+* Support VMEM type detection via NVAPI (GPU, Windows, #993)
+* Support Bootmgr module for OpenBSD and NetBSD
+* Bootmgr module now reports boot order
+* Use SystemConfiguration for DNS entries detection (DNS, macOS)
+* Add `systemd-resolved` support for DNS module (DNS, Linux)
+* Improve Wifi performance on FreeBSD using ioctl
+* Support remaining time reporting for batteries on NetBSD (Battery, NetBSD)
+* Add new Mac models support (Host, macOS)
+
+Bugfixes:
+* Fix `outputColor` not working when `length` is set in Separator module (#1644)
+* Fix CPU detection on PowerPC platforms (#1640, CPU, Linux)
+* Fix battery manufacture date detection (Battery, macOS)
+* Fix battery critical state detection (Battery, Linux)
+* Fix GPU device type detection (GPU)
+* Fix Warp Terminal PID detection (Terminal, macOS)
+* Remove disk creation time detection support on SunOS as ctim is file status change timestamp, not creation time (Disk, SunOS)
+* Fix memleaks in Gamepad / Mouse / Keyboard modules (FreeBSD)
+* Fall back to KDGKBINFO if usbhid fails (Keyboard, FreeBSD)
+* Fix code smells in multiple modules
+
+Logo:
+* Fix opensuse-tumbleweed_small (#1636)
+* Change WiiLinuxNgx to more generic name with aliases Wii-Linux and WiiLinux (#1633)
+
 # 2.39.1
 
 Bugfixes:
