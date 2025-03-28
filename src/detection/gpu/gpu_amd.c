@@ -50,8 +50,8 @@ struct FFAdlData {
     FF_LIBRARY_SYMBOL(ADL2_Adapter_VRAMUsage_Get)
     FF_LIBRARY_SYMBOL(ADL2_Adapter_ASICFamilyType_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive_Caps)
-    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_Capabilities_Get)
-    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_SystemClocks_Get)
+    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_CapabilitiesX2_Get)
+    FF_LIBRARY_SYMBOL(ADL2_OverdriveN_SystemClocksX2_Get)
     FF_LIBRARY_SYMBOL(ADL2_OverdriveN_PerformanceStatus_Get)
     FF_LIBRARY_SYMBOL(ADL2_OverdriveN_Temperature_Get)
     FF_LIBRARY_SYMBOL(ADL2_Overdrive8_Current_Setting_Get)
@@ -92,8 +92,8 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_VRAMUsage_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Adapter_ASICFamilyType_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive_Caps)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_Capabilities_Get)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_SystemClocks_Get)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_CapabilitiesX2_Get)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_SystemClocksX2_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_OverdriveN_PerformanceStatus_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_Overdrive8_Current_Setting_Get)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(atiadl, adlData, ADL2_New_QueryPMLogData_Get)
@@ -270,24 +270,113 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         int status = adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, &odSupported, &odEnabled, &odVersion);
         FF_DEBUG("ADL2_Overdrive_Caps returned %s (%d); supported %d, enabled %d; version %d",
                 ffAdlStatusToString(status), status, odSupported, odEnabled, odVersion);
+        if (!odSupported)
+        {
+            FF_DEBUG("Overdrive not supported, results may be inaccurate");
+        }
     }
 
-    if (odVersion > 8)
+
+    if (odVersion == 8)
+    {
+        FF_DEBUG("Using Overdrive8 API (odVersion=%d)", odVersion);
+
+        if (result.frequency)
+        {
+            ADLOD8CurrentSetting currentSetting = { .count = OD8_COUNT };
+            int status = adlData.ffADL2_Overdrive8_Current_Setting_Get(adlData.apiHandle, device->iAdapterIndex, &currentSetting);
+            FF_DEBUG("ADL2_Overdrive8_Current_Setting_Get returned %s (%d)", ffAdlStatusToString(status), status);
+            if (status == ADL_OK)
+            {
+                FF_DEBUG("OD8 Settings count: %d", currentSetting.count);
+
+                *result.frequency = (uint32_t) currentSetting.Od8SettingTable[OD8_GFXCLK_FMAX];
+                FF_DEBUG("Got max engine clock (OD8_GFXCLK_FMAX): %u MHz", *result.frequency);
+            }
+            else
+            {
+                FF_DEBUG("Failed to get max frequency information");
+            }
+        }
+
+        if (result.temp || result.coreUsage)
+        {
+            ADLPMLogDataOutput pmLogDataOutput = {};
+            int status = adlData.ffADL2_New_QueryPMLogData_Get(adlData.apiHandle, device->iAdapterIndex, &pmLogDataOutput);
+            FF_DEBUG("ADL2_New_QueryPMLogData_Get returned %s (%d)", ffAdlStatusToString(status), status);
+            if (status == ADL_OK)
+            {
+                if (result.temp)
+                {
+                    ADLSingleSensorData* sensor = &pmLogDataOutput.sensors[ADL_PMLOG_TEMPERATURE_HOTSPOT];
+                    FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_TEMPERATURE_HOTSPOT, "ADL_PMLOG_TEMPERATURE_HOTSPOT", sensor->supported, sensor->value);
+                    if (sensor->supported)
+                    {
+                        *result.temp = sensor->value;
+                        FF_DEBUG("Temperature: %.1f°C (HOTSPOT)", *result.temp);
+                    }
+                    else
+                    {
+                        sensor = &pmLogDataOutput.sensors[ADL_PMLOG_TEMPERATURE_GFX];
+                        FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_TEMPERATURE_GFX, "ADL_PMLOG_TEMPERATURE_GFX", sensor->supported, sensor->value);
+                        if (sensor->supported)
+                        {
+                            *result.temp = sensor->value;
+                            FF_DEBUG("Temperature: %.1f°C (GFX)", *result.temp);
+                        }
+                        else
+                        {
+                            sensor = &pmLogDataOutput.sensors[ADL_PMLOG_TEMPERATURE_SOC];
+                            FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_TEMPERATURE_SOC, "ADL_PMLOG_TEMPERATURE_SOC", sensor->supported, sensor->value);
+                            if (sensor->supported)
+                            {
+                                *result.temp = sensor->value;
+                                FF_DEBUG("Temperature: %.1f°C (SOC)", *result.temp);
+                            }
+                            else
+                            {
+                                FF_DEBUG("No supported temp sensor found, temp detection failed");
+                            }
+                        }
+                    }
+                }
+                if (result.coreUsage)
+                {
+                    ADLSingleSensorData* activity = &pmLogDataOutput.sensors[ADL_PMLOG_INFO_ACTIVITY_GFX];
+                    FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_INFO_ACTIVITY_GFX, "ADL_PMLOG_INFO_ACTIVITY_GFX", activity->supported, activity->value);
+                    if (activity->supported)
+                    {
+                        *result.coreUsage = activity->value;
+                        FF_DEBUG("Core usage: %.1f%%", *result.coreUsage);
+                    }
+                    else
+                    {
+                        FF_DEBUG("Sensor %d not supported, GPU usage detection failed", ADL_PMLOG_INFO_ACTIVITY_GFX);
+                    }
+                }
+            }
+            else
+            {
+                FF_DEBUG("Failed to get temperature / GPU activity");
+            }
+        }
+    }
+    else if (odVersion == 7)
     {
         FF_DEBUG("Using OverdriveN API (odVersion=%d)", odVersion);
 
         if (result.frequency)
         {
             // https://github.com/MaynardMiner/odvii/blob/master/OverdriveN.cpp#L176
-            ADLODNCapabilities odCapabilities;
-            int status = adlData.ffADL2_OverdriveN_Capabilities_Get(adlData.apiHandle, device->iAdapterIndex, &odCapabilities);
-            FF_DEBUG("ADL2_OverdriveN_Capabilities_Get returned %s (%d)", ffAdlStatusToString(status), status);
+            ADLODNCapabilitiesX2 odCapabilities = {};
+            int status = adlData.ffADL2_OverdriveN_CapabilitiesX2_Get(adlData.apiHandle, device->iAdapterIndex, &odCapabilities);
+            FF_DEBUG("ADL2_OverdriveN_CapabilitiesX2_Get returned %s (%d)", ffAdlStatusToString(status), status);
 
             if (status == ADL_OK)
             {
                 if (odCapabilities.iMaximumNumberOfPerformanceLevels == 0)
                 {
-                    FF_DEBUG("ADL2_OverdriveN_Capabilities_Get: no performance levels available");
+                    FF_DEBUG("ADL2_OverdriveN_CapabilitiesX2_Get: no performance levels available");
                 }
                 else
                 {
@@ -295,26 +384,33 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
                             odCapabilities.iMaximumNumberOfPerformanceLevels,
                             odCapabilities.sEngineClockRange.iMin, odCapabilities.sEngineClockRange.iMax);
 
-                    size_t size = sizeof(ADLODNPerformanceLevels) + sizeof(ADLODNPerformanceLevel) * ((unsigned) odCapabilities.iMaximumNumberOfPerformanceLevels - 1);
-                    FF_AUTO_FREE ADLODNPerformanceLevels* odPerfLevels = malloc(size);
-                    *odPerfLevels = (ADLODNPerformanceLevels) {
-                        .iSize = (int) size,
-                        .iNumberOfPerformanceLevels = odCapabilities.iMaximumNumberOfPerformanceLevels,
-                    };
-                    int status = adlData.ffADL2_OverdriveN_SystemClocks_Get(adlData.apiHandle, device->iAdapterIndex, odPerfLevels);
-                    FF_DEBUG("ADL2_OverdriveN_SystemClocks_Get returned %s (%d), levels: %d",
+                    size_t size = sizeof(ADLODNPerformanceLevelsX2) + sizeof(ADLODNPerformanceLevelX2) * ((unsigned) odCapabilities.iMaximumNumberOfPerformanceLevels - 1);
+                    FF_AUTO_FREE ADLODNPerformanceLevelsX2* odPerfLevels = calloc(size, 1);
+                    odPerfLevels->iSize = (int) size;
+                    odPerfLevels->iNumberOfPerformanceLevels = odCapabilities.iMaximumNumberOfPerformanceLevels;
+                    odPerfLevels->iMode = ODNControlType_Current;
+
+                    int status = adlData.ffADL2_OverdriveN_SystemClocksX2_Get(adlData.apiHandle, device->iAdapterIndex, odPerfLevels);
+                    FF_DEBUG("ADL2_OverdriveN_SystemClocksX2_Get returned %s (%d), levels: %d",
                             ffAdlStatusToString(status), status, odPerfLevels->iNumberOfPerformanceLevels);
 
-                    *result.frequency = 0;
+                    int frequency = 0;
                     for (int i = 0; i < odPerfLevels->iNumberOfPerformanceLevels; i++)
                     {
-                        uint32_t clock = (uint32_t) odPerfLevels->aLevels[i].iClock;
-                        FF_DEBUG("Performance level %d: engine clock = %u", i, clock);
-                        if (clock > *result.frequency)
-                        *result.frequency = clock;
+                        ADLODNPerformanceLevelX2* level = &odPerfLevels->aLevels[i];\
+                        FF_DEBUG("Performance level %d: enabled: %d, engine clock = %d", i, level->iEnabled, level->iClock);
+                        if (!level->iEnabled && level->iClock > frequency)
+                            frequency = level->iClock;
                     }
-                    *result.frequency /= 10; // assume in 10 kHz
-                    FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
+                    if (frequency != 0)
+                    {
+                        *result.frequency = (uint32_t) frequency;
+                        FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
+                    }
+                    else
+                    {
+                        FF_DEBUG("ADL2_OverdriveN_SystemClocksX2_Get: no enabled performance levels found");
+                    }
                 }
             }
             else
@@ -333,8 +429,8 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
             {
                 FF_DEBUG("Performance Status - Activity: %d%%, CoreClock: %dMHz, MemoryClock: %dMHz",
                         performanceStatus.iGPUActivityPercent,
-                        performanceStatus.iCoreClock / 100,
-                        performanceStatus.iMemoryClock / 100);
+                        performanceStatus.iCoreClock,
+                        performanceStatus.iMemoryClock);
 
                 *result.coreUsage = performanceStatus.iGPUActivityPercent;
                 FF_DEBUG("Got GPU activity: %d%%", performanceStatus.iGPUActivityPercent);
@@ -349,8 +445,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         {
             int milliDegrees = 0;
             int status = adlData.ffADL2_OverdriveN_Temperature_Get(adlData.apiHandle, device->iAdapterIndex, 1, &milliDegrees);
-            FF_DEBUG("ADL2_OverdriveN_Temperature_Get returned %s (%d)",
-                ffAdlStatusToString(status), status);
+            FF_DEBUG("ADL2_OverdriveN_Temperature_Get returned %s (%d)", ffAdlStatusToString(status), status);
 
             if (status == ADL_OK)
             {
@@ -363,103 +458,36 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
             }
         }
     }
-    else if (odVersion == 8)
-    {
-        FF_DEBUG("Using Overdrive8 API (odVersion=%d)", odVersion);
-
-        if (result.frequency)
-        {
-            ADLOD8CurrentSetting currentSetting;
-            int status = adlData.ffADL2_Overdrive8_Current_Setting_Get(adlData.apiHandle, device->iAdapterIndex, &currentSetting);
-            FF_DEBUG("ADL2_Overdrive8_Current_Setting_Get returned %s (%d)", ffAdlStatusToString(status), status);
-            if (status == ADL_OK)
-            {
-                FF_DEBUG("OD8 Settings count: %d", currentSetting.count);
-
-                *result.frequency = (uint32_t) currentSetting.Od8SettingTable[OD8_GFXCLK_FMAX];
-                FF_DEBUG("Got max engine clock (OD8 GFXCLK_FMAX): %u MHz", *result.frequency);
-            }
-            else
-            {
-                FF_DEBUG("Failed to get max frequency information");
-            }
-        }
-
-        if (result.temp || result.coreUsage)
-        {
-            ADLPMLogDataOutput pmLogDataOutput;
-            int status = adlData.ffADL2_New_QueryPMLogData_Get(adlData.apiHandle, device->iAdapterIndex, &pmLogDataOutput);
-            FF_DEBUG("ADL2_New_QueryPMLogData_Get returned %s (%d)", ffAdlStatusToString(status), status);
-            if (status == ADL_OK)
-            {
-                if (result.temp)
-                {
-                    ADLSingleSensorData* edge = &pmLogDataOutput.sensors[ADL_PMLOG_TEMPERATURE_EDGE];
-                    FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_TEMPERATURE_EDGE, "ADL_PMLOG_TEMPERATURE_EDGE", edge->supported, edge->value);
-                    if (edge->supported)
-                    {
-                        *result.temp = edge->value;
-                        FF_DEBUG("Temperature: %.1f°C", *result.temp);
-                    }
-                    else
-                    {
-                        FF_DEBUG("Sensor %d not supported", ADL_PMLOG_TEMPERATURE_EDGE);
-                        ADLSingleSensorData* hotspot = &pmLogDataOutput.sensors[ADL_PMLOG_TEMPERATURE_EDGE];
-                        FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_TEMPERATURE_EDGE, "ADL_PMLOG_TEMPERATURE_EDGE", hotspot->supported, hotspot->value);
-                        if (hotspot->supported)
-                        {
-                            *result.temp = hotspot->value;
-                            FF_DEBUG("Temperature: %.1f°C", *result.temp);
-                        }
-                        else
-                        {
-                            FF_DEBUG("Sensor %d not supported", PMLOG_TEMPERATURE_HOTSPOT);
-                        }
-                    }
-                }
-                if (result.coreUsage)
-                {
-                    ADLSingleSensorData* activity = &pmLogDataOutput.sensors[ADL_PMLOG_INFO_ACTIVITY_GFX];
-                    FF_DEBUG("Sensor %d: %s, supported: %d, value: %d", ADL_PMLOG_INFO_ACTIVITY_GFX, "ADL_PMLOG_INFO_ACTIVITY_GFX", activity->supported, activity->value);
-                    if (activity->supported)
-                    {
-                        *result.coreUsage = activity->value;
-                        FF_DEBUG("Core usage: %.1f%%", *result.coreUsage);
-                    }
-                    else
-                    {
-                        FF_DEBUG("Sensor %d not supported", ADL_PMLOG_INFO_ACTIVITY_GFX);
-                    }
-                }
-            }
-            else
-            {
-                FF_DEBUG("Failed to get temperature / GPU activity");
-            }
-        }
-    }
     else if (odVersion == 6)
     {
         FF_DEBUG("Using Overdrive6 API (odVersion=%d)", odVersion);
 
         if (result.frequency)
         {
-            ADLOD6StateInfo stateInfo;
-            int status = adlData.ffADL2_Overdrive6_StateInfo_Get(adlData.apiHandle, device->iAdapterIndex, ADL_OD6_GETSTATEINFO_CUSTOM_PERFORMANCE, &stateInfo);
+            FF_AUTO_FREE ADLOD6StateInfo* stateInfo = calloc(sizeof(ADLOD6StateInfo) + sizeof(ADLOD6PerformanceLevel), 1);
+            stateInfo->iNumberOfPerformanceLevels = 2;
+
+            int status = adlData.ffADL2_Overdrive6_StateInfo_Get(adlData.apiHandle, device->iAdapterIndex, ADL_OD6_GETSTATEINFO_CUSTOM_PERFORMANCE, stateInfo);
             FF_DEBUG("ADL2_Overdrive6_StateInfo_Get returned %s (%d), performance levels: %d",
-                ffAdlStatusToString(status), status, stateInfo.iNumberOfPerformanceLevels);
+                ffAdlStatusToString(status), status, stateInfo->iNumberOfPerformanceLevels);
 
             if (status == ADL_OK)
             {
-                int clock = 0; // assume in 10 kHz
-                for (int i = 0; i < stateInfo.iNumberOfPerformanceLevels; i++)
+                // OD6 uses clock ranges instead of discrete performance levels.
+                // iNumberOfPerformanceLevels is always 2.
+                // The 1st level indicates the minimum clocks in the range.
+                // The 2nd level indicates the maximum clocks in the range.
+                if (stateInfo->iNumberOfPerformanceLevels != 2)
                 {
-                    FF_DEBUG("Performance level %d: engine clock = %d", i, stateInfo.aLevels[i].iEngineClock);
-                    if (stateInfo.aLevels[i].iEngineClock > clock)
-                        clock = stateInfo.aLevels[i].iEngineClock;
+                    FF_DEBUG("ADL2_Overdrive6_StateInfo_Get: unexpected number of performance levels: %d", stateInfo->iNumberOfPerformanceLevels);
                 }
-                *result.frequency = (uint32_t) clock / 100;
-                FF_DEBUG("Using max engine clock: %u MHz", *result.frequency);
+                else
+                {
+                    FF_DEBUG("OD6 Settings - MinPerformanceLevels: %d, MaxPerformanceLevels: %d",
+                            stateInfo->aLevels[0].iEngineClock, stateInfo->aLevels[1].iEngineClock);
+                    *result.frequency = (uint32_t) stateInfo->aLevels[1].iEngineClock / 100; // in 10 kHz
+                    FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
+                }
             }
             else
             {
@@ -469,7 +497,7 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
 
         if (result.coreUsage)
         {
-            ADLOD6CurrentStatus status;
+            ADLOD6CurrentStatus status = {};
             int apiStatus = adlData.ffADL2_Overdrive6_CurrentStatus_Get(adlData.apiHandle, device->iAdapterIndex, &status);
             FF_DEBUG("ADL2_Overdrive6_CurrentStatus_Get returned %s (%d)", ffAdlStatusToString(apiStatus), apiStatus);
 
