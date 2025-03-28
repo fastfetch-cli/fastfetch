@@ -185,7 +185,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         #ifndef __DragonFly__
         struct stat st;
         if(stat(fs->f_mntonname, &st) == 0 && st.st_birthtimespec.tv_sec > 0)
-            disk->createTime = (uint64_t)(((uint64_t) st.st_birthtimespec.tv_sec * 1000) + (st.st_birthtimespec.tv_nsec / 1000000));
+            disk->createTime = (uint64_t)(((uint64_t) st.st_birthtimespec.tv_sec * 1000) + ((uint64_t) st.st_birthtimespec.tv_nsec / 1000000));
         #endif
     }
 
