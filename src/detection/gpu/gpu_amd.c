@@ -6,31 +6,33 @@
 #include "util/debug.h"
 
 // Helper function to convert ADL status code to string
-static const char* ffAdlStatusToString(int status) {
+FF_MAYBE_UNUSED static const char* ffAdlStatusToString(int status) {
     switch (status) {
-        case ADL_OK: return "ADL_OK";
-        case ADL_OK_WARNING: return "ADL_OK_WARNING";
-        case ADL_OK_MODE_CHANGE: return "ADL_OK_MODE_CHANGE";
-        case ADL_OK_RESTART: return "ADL_OK_RESTART";
-        case ADL_OK_WAIT: return "ADL_OK_WAIT";
-        case ADL_ERR: return "ADL_ERR";
-        case ADL_ERR_NOT_INIT: return "ADL_ERR_NOT_INIT";
-        case ADL_ERR_INVALID_PARAM: return "ADL_ERR_INVALID_PARAM";
-        case ADL_ERR_INVALID_PARAM_SIZE: return "ADL_ERR_INVALID_PARAM_SIZE";
-        case ADL_ERR_INVALID_ADL_IDX: return "ADL_ERR_INVALID_ADL_IDX";
-        case ADL_ERR_INVALID_CONTROLLER_IDX: return "ADL_ERR_INVALID_CONTROLLER_IDX";
-        case ADL_ERR_INVALID_DIPLAY_IDX: return "ADL_ERR_INVALID_DIPLAY_IDX";
-        case ADL_ERR_NOT_SUPPORTED: return "ADL_ERR_NOT_SUPPORTED";
-        case ADL_ERR_NULL_POINTER: return "ADL_ERR_NULL_POINTER";
-        case ADL_ERR_DISABLED_ADAPTER: return "ADL_ERR_DISABLED_ADAPTER";
-        case ADL_ERR_INVALID_CALLBACK: return "ADL_ERR_INVALID_CALLBACK";
-        case ADL_ERR_RESOURCE_CONFLICT: return "ADL_ERR_RESOURCE_CONFLICT";
-        case ADL_ERR_SET_INCOMPLETE: return "ADL_ERR_SET_INCOMPLETE";
-        case ADL_ERR_NO_XDISPLAY: return "ADL_ERR_NO_XDISPLAY";
-        case ADL_ERR_CALL_TO_INCOMPATIABLE_DRIVER: return "ADL_ERR_CALL_TO_INCOMPATIABLE_DRIVER";
-        case ADL_ERR_NO_ADMINISTRATOR_PRIVILEGES: return "ADL_ERR_NO_ADMINISTRATOR_PRIVILEGES";
-        case ADL_ERR_FEATURESYNC_NOT_STARTED: return "ADL_ERR_FEATURESYNC_NOT_STARTED";
-        case ADL_ERR_INVALID_POWER_STATE: return "ADL_ERR_INVALID_POWER_STATE";
+        #define FF_ADL_STATUS_CASE(name) case name: return #name;
+        FF_ADL_STATUS_CASE(ADL_OK)
+        FF_ADL_STATUS_CASE(ADL_OK_WARNING)
+        FF_ADL_STATUS_CASE(ADL_OK_MODE_CHANGE)
+        FF_ADL_STATUS_CASE(ADL_OK_RESTART)
+        FF_ADL_STATUS_CASE(ADL_OK_WAIT)
+        FF_ADL_STATUS_CASE(ADL_ERR)
+        FF_ADL_STATUS_CASE(ADL_ERR_NOT_INIT)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_PARAM)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_PARAM_SIZE)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_ADL_IDX)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_CONTROLLER_IDX)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_DIPLAY_IDX)
+        FF_ADL_STATUS_CASE(ADL_ERR_NOT_SUPPORTED)
+        FF_ADL_STATUS_CASE(ADL_ERR_NULL_POINTER)
+        FF_ADL_STATUS_CASE(ADL_ERR_DISABLED_ADAPTER)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_CALLBACK)
+        FF_ADL_STATUS_CASE(ADL_ERR_RESOURCE_CONFLICT)
+        FF_ADL_STATUS_CASE(ADL_ERR_SET_INCOMPLETE)
+        FF_ADL_STATUS_CASE(ADL_ERR_NO_XDISPLAY)
+        FF_ADL_STATUS_CASE(ADL_ERR_CALL_TO_INCOMPATIABLE_DRIVER)
+        FF_ADL_STATUS_CASE(ADL_ERR_NO_ADMINISTRATOR_PRIVILEGES)
+        FF_ADL_STATUS_CASE(ADL_ERR_FEATURESYNC_NOT_STARTED)
+        FF_ADL_STATUS_CASE(ADL_ERR_INVALID_POWER_STATE)
+        #undef FF_ADL_STATUS_CASE
         default: return "Unknown ADL error";
     }
 }
@@ -394,22 +396,17 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
                     FF_DEBUG("ADL2_OverdriveN_SystemClocksX2_Get returned %s (%d), levels: %d",
                             ffAdlStatusToString(status), status, odPerfLevels->iNumberOfPerformanceLevels);
 
-                    int frequency = 0;
-                    for (int i = 0; i < odPerfLevels->iNumberOfPerformanceLevels; i++)
+                    // lowest to highest
+                    for (int i = odPerfLevels->iNumberOfPerformanceLevels - 1; i >= 0 ; i--)
                     {
-                        ADLODNPerformanceLevelX2* level = &odPerfLevels->aLevels[i];\
+                        ADLODNPerformanceLevelX2* level = &odPerfLevels->aLevels[i];
                         FF_DEBUG("Performance level %d: enabled: %d, engine clock = %d", i, level->iEnabled, level->iClock);
-                        if (!level->iEnabled && level->iClock > frequency)
-                            frequency = level->iClock;
-                    }
-                    if (frequency != 0)
-                    {
-                        *result.frequency = (uint32_t) frequency;
-                        FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
-                    }
-                    else
-                    {
-                        FF_DEBUG("ADL2_OverdriveN_SystemClocksX2_Get: no enabled performance levels found");
+                        if (level->iEnabled)
+                        {
+                            *result.frequency = (uint32_t) level->iClock / 100; // in 10 kHz
+                            FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
+                            break;
+                        }
                     }
                 }
             }
