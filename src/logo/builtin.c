@@ -5144,10 +5144,10 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "15",
         }
     },
-    //Xray_OS
+    //Ada
     {
-        .names = {"Xray_OS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
+        .names = {"Ada"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ADA,
         .colors = {
             FF_COLOR_FG_256 "15",
             FF_COLOR_FG_256 "14",
