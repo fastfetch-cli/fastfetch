@@ -9,6 +9,14 @@ extern "C" {
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 
+static void ffCoTaskMemFreeWrapper(void* pptr)
+{
+    assert(pptr != NULL);
+    void* ptr = *(void**)pptr;
+    if (ptr) CoTaskMemFree(ptr);
+}
+#define FF_COTASK_AUTO_FREE __attribute__((__cleanup__(ffCoTaskMemFreeWrapper)))
+
 const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
 {
     const char* error = ffInitCom();
@@ -20,7 +28,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
     if (FAILED(CoCreateInstance(CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, IID_IMMDeviceEnumerator, (void **)&pEnum)))
         return "CoCreateInstance(CLSID_MMDeviceEnumerator) failed";
 
-    LPWSTR mainDeviceId = NULL;
+    LPWSTR FF_COTASK_AUTO_FREE mainDeviceId = NULL;
 
     {
         IMMDevice* FF_AUTO_RELEASE_COM_OBJECT pDefaultDevice = NULL;
@@ -47,7 +55,7 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         if (FAILED(pDevices->Item(deviceIdx, &immDevice)))
             continue;
 
-        LPWSTR immDeviceId = NULL;
+        LPWSTR FF_COTASK_AUTO_FREE immDeviceId = NULL;
         if (FAILED(immDevice->GetId(&immDeviceId)))
             continue;
 
