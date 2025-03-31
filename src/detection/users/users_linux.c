@@ -39,11 +39,27 @@ next:
         ffStrbufInitS(&user->name, n->ut_user);
         ffStrbufInitS(&user->hostName, n->ut_host);
         ffStrbufInitS(&user->sessionName, n->ut_line);
-        #ifdef __linux__
-        // https://www.linuxquestions.org/questions/programming-9/get-the-ip-addr-out-from-an-int32_t-value-287687/#post1458622
-        ffStrbufInitS(&user->clientIp, inet_ntoa((struct in_addr) { .s_addr = (in_addr_t) n->ut_addr_v6[0] }));
-        #else
         ffStrbufInit(&user->clientIp);
+        #ifdef __linux__
+        bool isIpv6 = false;
+        for (int i = 1; i < 4; ++i) {
+            if (n->ut_addr_v6[i] != 0) {
+                isIpv6 = true;
+                break;
+            }
+        }
+
+        if (isIpv6) {
+            char ipv6_str[INET6_ADDRSTRLEN];
+            if (inet_ntop(AF_INET6, n->ut_addr_v6, ipv6_str, INET6_ADDRSTRLEN) != NULL) {
+                ffStrbufSetS(&user->clientIp, ipv6_str);
+            }
+        } else if (n->ut_addr_v6[0] != 0) {
+            char ipv4_str[INET_ADDRSTRLEN];
+            if (inet_ntop(AF_INET, n->ut_addr_v6, ipv4_str, INET_ADDRSTRLEN) != NULL) {
+                ffStrbufSetS(&user->clientIp, ipv4_str);
+            }
+        }
         #endif
         user->loginTime = (uint64_t) n->ut_tv.tv_sec * 1000 + (uint64_t) n->ut_tv.tv_usec / 1000;
     }
