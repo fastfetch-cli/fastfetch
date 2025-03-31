@@ -123,67 +123,73 @@ const char* ffDetectPhysicalMemory(FFlist* result)
         else if (ldevice)
             ffStrbufSetS(&device->locator, ldevice);
 
-        switch (data->FormFactor)
-        {
-            case 0x01: ffStrbufSetStatic(&device->formFactor, "Other"); break;
-            case 0x02: ffStrbufSetStatic(&device->formFactor, "Unknown"); break;
-            case 0x03: ffStrbufSetStatic(&device->formFactor, "SIMM"); break;
-            case 0x04: ffStrbufSetStatic(&device->formFactor, "SIP"); break;
-            case 0x05: ffStrbufSetStatic(&device->formFactor, "Chip"); break;
-            case 0x06: ffStrbufSetStatic(&device->formFactor, "DIP"); break;
-            case 0x07: ffStrbufSetStatic(&device->formFactor, "ZIP"); break;
-            case 0x08: ffStrbufSetStatic(&device->formFactor, "Proprietary Card"); break;
-            case 0x09: ffStrbufSetStatic(&device->formFactor, "DIMM"); break;
-            case 0x0A: ffStrbufSetStatic(&device->formFactor, "TSOP"); break;
-            case 0x0B: ffStrbufSetStatic(&device->formFactor, "Row of chips"); break;
-            case 0x0C: ffStrbufSetStatic(&device->formFactor, "RIMM"); break;
-            case 0x0D: ffStrbufSetStatic(&device->formFactor, "SODIMM"); break;
-            case 0x0E: ffStrbufSetStatic(&device->formFactor, "SRIMM"); break;
-            case 0x0F: ffStrbufSetStatic(&device->formFactor, "FBDIMM"); break;
-            case 0x10: ffStrbufSetStatic(&device->formFactor, "Die"); break;
-            default: ffStrbufSetF(&device->formFactor, "Unknown (%d)", (int) data->FormFactor); break;
-        }
+        const char* formFactorNames[] = {
+            NULL,              // 0x00 (用于索引，实际上没有0x00的类型)
+            "Other",           // 0x01
+            "Unknown",         // 0x02
+            "SIMM",            // 0x03
+            "SIP",             // 0x04
+            "Chip",            // 0x05
+            "DIP",             // 0x06
+            "ZIP",             // 0x07
+            "Proprietary Card",// 0x08
+            "DIMM",            // 0x09
+            "TSOP",            // 0x0A
+            "Row of chips",    // 0x0B
+            "RIMM",            // 0x0C
+            "SODIMM",          // 0x0D
+            "SRIMM",           // 0x0E
+            "FBDIMM",          // 0x0F
+            "Die",             // 0x10
+        };
+        if (data->FormFactor > 0 && data->FormFactor < ARRAY_SIZE(formFactorNames))
+            ffStrbufSetS(&device->formFactor, formFactorNames[data->FormFactor]);
+        else
+            ffStrbufSetF(&device->formFactor, "Unknown (%d)", (int) data->FormFactor);
 
-        switch (data->MemoryType)
-        {
-            case 0x01: ffStrbufSetStatic(&device->type, "Other"); break;
-            case 0x02: ffStrbufSetStatic(&device->type, "Unknown"); break;
-            case 0x03: ffStrbufSetStatic(&device->type, "DRAM"); break;
-            case 0x04: ffStrbufSetStatic(&device->type, "EDRAM"); break;
-            case 0x05: ffStrbufSetStatic(&device->type, "VRAM"); break;
-            case 0x06: ffStrbufSetStatic(&device->type, "SRAM"); break;
-            case 0x07: ffStrbufSetStatic(&device->type, "RAM"); break;
-            case 0x08: ffStrbufSetStatic(&device->type, "ROM"); break;
-            case 0x09: ffStrbufSetStatic(&device->type, "FLASH"); break;
-            case 0x0A: ffStrbufSetStatic(&device->type, "EEPROM"); break;
-            case 0x0B: ffStrbufSetStatic(&device->type, "FEPROM"); break;
-            case 0x0C: ffStrbufSetStatic(&device->type, "EPROM"); break;
-            case 0x0D: ffStrbufSetStatic(&device->type, "CDRAM"); break;
-            case 0x0E: ffStrbufSetStatic(&device->type, "3DRAM"); break;
-            case 0x0F: ffStrbufSetStatic(&device->type, "SDRAM"); break;
-            case 0x10: ffStrbufSetStatic(&device->type, "SGRAM"); break;
-            case 0x11: ffStrbufSetStatic(&device->type, "RDRAM"); break;
-            case 0x12: ffStrbufSetStatic(&device->type, "DDR"); break;
-            case 0x13: ffStrbufSetStatic(&device->type, "DDR2"); break;
-            case 0x14: ffStrbufSetStatic(&device->type, "DDR2 FB-DIMM"); break;
-            case 0x15:
-            case 0x16:
-            case 0x17: ffStrbufSetStatic(&device->type, "Reserved"); break;
-            case 0x18: ffStrbufSetStatic(&device->type, "DDR3"); break;
-            case 0x19: ffStrbufSetStatic(&device->type, "FBD2"); break;
-            case 0x1A: ffStrbufSetStatic(&device->type, "DDR4"); break;
-            case 0x1B: ffStrbufSetStatic(&device->type, "LPDDR"); break;
-            case 0x1C: ffStrbufSetStatic(&device->type, "LPDDR2"); break;
-            case 0x1D: ffStrbufSetStatic(&device->type, "LPDDR3"); break;
-            case 0x1E: ffStrbufSetStatic(&device->type, "LPDDR4"); break;
-            case 0x1F: ffStrbufSetStatic(&device->type, "Logical non-volatile device"); break;
-            case 0x20: ffStrbufSetStatic(&device->type, "HBM"); break;
-            case 0x21: ffStrbufSetStatic(&device->type, "HBM2"); break;
-            case 0x22: ffStrbufSetStatic(&device->type, "DDR5"); break;
-            case 0x23: ffStrbufSetStatic(&device->type, "LPDDR5"); break;
-            case 0x24: ffStrbufSetStatic(&device->type, "HBM3"); break;
-            default: ffStrbufSetF(&device->type, "Unknown (%d)", (int) data->MemoryType); break;
-        }
+        const char* memoryTypeNames[] = {
+            NULL,         // 0x00 (用于索引，实际上没有0x00的类型)
+            "Other",      // 0x01
+            "Unknown",    // 0x02
+            "DRAM",       // 0x03
+            "EDRAM",      // 0x04
+            "VRAM",       // 0x05
+            "SRAM",       // 0x06
+            "RAM",        // 0x07
+            "ROM",        // 0x08
+            "FLASH",      // 0x09
+            "EEPROM",     // 0x0A
+            "FEPROM",     // 0x0B
+            "EPROM",      // 0x0C
+            "CDRAM",      // 0x0D
+            "3DRAM",      // 0x0E
+            "SDRAM",      // 0x0F
+            "SGRAM",      // 0x10
+            "RDRAM",      // 0x11
+            "DDR",        // 0x12
+            "DDR2",       // 0x13
+            "DDR2 FB-DIMM", // 0x14
+            "Reserved",   // 0x15
+            "Reserved",   // 0x16
+            "Reserved",   // 0x17
+            "DDR3",       // 0x18
+            "FBD2",       // 0x19
+            "DDR4",       // 0x1A
+            "LPDDR",      // 0x1B
+            "LPDDR2",     // 0x1C
+            "LPDDR3",     // 0x1D
+            "LPDDR4",     // 0x1E
+            "Logical non-volatile device", // 0x1F
+            "HBM",        // 0x20
+            "HBM2",       // 0x21
+            "DDR5",       // 0x22
+            "LPDDR5",     // 0x23
+            "HBM3",       // 0x24
+        };
+        if (data->MemoryType > 0 && data->MemoryType < ARRAY_SIZE(memoryTypeNames))
+            ffStrbufSetStatic(&device->type, memoryTypeNames[data->MemoryType]);
+        else
+            ffStrbufSetF(&device->type, "Unknown (%d)", (int) data->MemoryType);
 
         if (data->Header.Length > offsetof(FFSmbiosMemoryDevice, Speed)) // 2.3+
         {
