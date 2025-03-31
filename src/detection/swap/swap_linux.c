@@ -7,7 +7,7 @@
 
 const char* ffDetectSwap(FFSwapResult* swap)
 {
-    // #620
+    // Ref: #620
     char buf[PROC_FILE_BUFFSIZ];
     ssize_t nRead = ffReadFileData("/proc/meminfo", ARRAY_SIZE(buf) - 1, buf);
     if(nRead < 0)
