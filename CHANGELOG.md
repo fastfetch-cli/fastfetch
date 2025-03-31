@@ -23,9 +23,9 @@ Bugfixes:
 * Fix battery critical state detection (Battery, Linux)
 * Fix Warp Terminal PID detection (Terminal, macOS)
 * Remove disk creation time detection support on SunOS as ctim is file status change timestamp, not creation time (Disk, SunOS)
-* Fix memleaks in Gamepad / Mouse / Keyboard modules (FreeBSD)
 * Fall back to KDGKBINFO if `usbhid` fails (Keyboard, FreeBSD)
-* Fix code smells in multiple modules
+* Fix multiple paging file support (Swap, Windows)
+* Fix memleaks, code smells in multiple modules
 
 Logo:
 * Fix opensuse-tumbleweed_small (#1636)
@@ -371,7 +371,7 @@ Features:
 * Support tilix version detection (Terminal, Linux)
 * Support percent type config in module level. Example: 
 
-```json
+```jsonc
 {
     "type": "memory",
     "percent": {
