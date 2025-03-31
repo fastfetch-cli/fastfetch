@@ -272,9 +272,10 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         int status = adlData.ffADL2_Overdrive_Caps(adlData.apiHandle, device->iAdapterIndex, &odSupported, &odEnabled, &odVersion);
         FF_DEBUG("ADL2_Overdrive_Caps returned %s (%d); supported %d, enabled %d; version %d",
                 ffAdlStatusToString(status), status, odSupported, odEnabled, odVersion);
-        if (!odSupported)
+        if (status != ADL_OK)
         {
             FF_DEBUG("Overdrive not supported, results may be inaccurate");
+            // Note even if Overdrive is not supported, we can still get the OD version
         }
     }
 
@@ -396,16 +397,23 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
                     FF_DEBUG("ADL2_OverdriveN_SystemClocksX2_Get returned %s (%d), levels: %d",
                             ffAdlStatusToString(status), status, odPerfLevels->iNumberOfPerformanceLevels);
 
-                    // lowest to highest
-                    for (int i = odPerfLevels->iNumberOfPerformanceLevels - 1; i >= 0 ; i--)
+                    if (status != ADL_OK)
                     {
-                        ADLODNPerformanceLevelX2* level = &odPerfLevels->aLevels[i];
-                        FF_DEBUG("Performance level %d: enabled: %d, engine clock = %d", i, level->iEnabled, level->iClock);
-                        if (level->iEnabled)
+                        FF_DEBUG("Failed to get frequency information");
+                    }
+                    else
+                    {
+                        // lowest to highest
+                        for (int i = odPerfLevels->iNumberOfPerformanceLevels - 1; i >= 0 ; i--)
                         {
-                            *result.frequency = (uint32_t) level->iClock / 100; // in 10 kHz
-                            FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
-                            break;
+                            ADLODNPerformanceLevelX2* level = &odPerfLevels->aLevels[i];
+                            FF_DEBUG("Performance level %d: enabled: %d, engine clock = %d", i, level->iEnabled, level->iClock);
+                            if (level->iEnabled)
+                            {
+                                *result.frequency = (uint32_t) level->iClock / 100; // in 10 kHz
+                                FF_DEBUG("Got max engine clock: %u MHz", *result.frequency);
+                                break;
+                            }
                         }
                     }
                 }
