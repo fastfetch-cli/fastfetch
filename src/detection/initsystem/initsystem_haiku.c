@@ -16,6 +16,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
 
     ffStrbufSetStatic(&result->exe, path);
     ffStrbufSetStatic(&result->name, "launch_daemon");
+    result->pid = 0;
 
     team_info teamInfo;
     int32 cookie = 0;
@@ -28,7 +29,8 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
         }
     }
 
-    ffGetFileVersion(path, &result->version);
+    if (instance.config.general.detectVersion)
+        ffGetFileVersion(path, &result->version);
 
     return NULL;
 }
