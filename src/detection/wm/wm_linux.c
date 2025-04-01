@@ -14,12 +14,13 @@ const char* ffDetectWMPlugin(FF_MAYBE_UNUSED FFstrbuf* pluginName)
 
 static bool extractHyprlandVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
-    if (line[0] != 'v') return true;
     int count = 0;
-    sscanf(line + 1, "%*d.%*d.%*d%n", &count);
+    sscanf(line, "    version: bump to v%*d.%*d.%*d%n", &count);
     if (count == 0) return true;
 
-    ffStrbufSetNS((FFstrbuf*) userdata, len - 1, line + 1);
+    // SUPER hacky
+    uint32_t prefixLen = (uint32_t) strlen("    version: bump to v"); // version bump commit message
+    ffStrbufSetNS((FFstrbuf*) userdata, len - prefixLen, line + prefixLen);
     return false;
 }
 
@@ -29,7 +30,7 @@ static const char* getHyprland(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("Hyprland", &path);
     if (error) return "Failed to find Hyprland executable path";
 
-    if (ffBinaryExtractStrings(path.chars, extractHyprlandVersion, result, (uint32_t) strlen("v0.0.0")) == NULL)
+    if (ffBinaryExtractStrings(path.chars, extractHyprlandVersion, result, (uint32_t) strlen("    version: bump to v0.0.0")) == NULL)
         return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
