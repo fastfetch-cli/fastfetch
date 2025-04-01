@@ -38,7 +38,7 @@ static bool getWifiInfoByIpconfig(FFstrbuf* ipconfig, const char* prefix, FFstrb
     const char* end = strchr(start, '\n');
     if (!end) return false;
     ffStrbufSetNS(result, (uint32_t) (end - start), start);
-    return false;
+    return true;
 }
 
 const char* ffDetectWifi(FFlist* result)

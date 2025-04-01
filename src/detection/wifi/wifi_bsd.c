@@ -98,6 +98,10 @@ const char* ffDetectWifi(FFlist* result)
                 ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
             if (IEEE80211_IS_CHAN_VHT(&curchan))
                 ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+            #ifdef IEEE80211_IS_CHAN_HE // for future use
+            if (IEEE80211_IS_CHAN_HE(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+            #endif
         }
 
         union {
