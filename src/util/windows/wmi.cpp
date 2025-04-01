@@ -107,7 +107,7 @@ bool FFWmiRecord::getString(const wchar_t* key, FFstrbuf* strbuf)
             case VT_BSTR:
                 if(type == CIM_DATETIME)
                 {
-                    ISWbemDateTime *pDateTime;
+                    FF_AUTO_RELEASE_COM_OBJECT ISWbemDateTime *pDateTime = nullptr;
                     BSTR dateStr;
                     if(FAILED(CoCreateInstance(__uuidof(SWbemDateTime), 0, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pDateTime))))
                         result = false;
