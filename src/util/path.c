@@ -38,8 +38,7 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
         if (!ffPathExists(result->chars, FF_PATHTYPE_FILE))
             continue;
         #else
-        struct stat st;
-        if (stat(result->chars, &st) < 0 || !(st.st_mode & S_IXUSR))
+        if (access(result->chars, X_OK) != 0)
             continue;
         #endif
 
@@ -52,7 +51,8 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
 bool ffIsAbsolutePath(const char* path)
 {
     #ifdef _WIN32
-    return ffCharIsEnglishAlphabet(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/');
+    return (ffCharIsEnglishAlphabet(path[0]) && path[1] == ':' && (path[2] == '\\' || path[2] == '/')) // drive letter path
+        || (path[0] == '\\' && path[1] == '\\'); // UNC path
     #else
     return path[0] == '/';
     #endif
