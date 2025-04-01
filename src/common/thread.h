@@ -65,8 +65,8 @@
                     struct timespec ts;
                     if (clock_gettime(CLOCK_REALTIME, &ts) == 0)
                     {
-                        ts.tv_sec += ts.tv_sec / 1000;
-                        ts.tv_nsec += (ts.tv_nsec % 1000) * 1000000;
+                        ts.tv_sec += timeout / 1000;
+                        ts.tv_nsec += (timeout % 1000) * 1000000;
                         if (pthread_timedjoin_np(thread, NULL, &ts) != 0)
                         {
                             pthread_kill(thread, SIGTERM);
