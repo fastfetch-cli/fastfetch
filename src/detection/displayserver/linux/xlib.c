@@ -17,7 +17,7 @@ typedef struct X11PropertyData
     FF_LIBRARY_SYMBOL(XFree)
 } X11PropertyData;
 
-static bool x11InitPropertyData(void* libraryHandle, X11PropertyData* propertyData)
+static bool x11InitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, X11PropertyData* propertyData)
 {
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XInternAtom, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XGetWindowProperty, false)

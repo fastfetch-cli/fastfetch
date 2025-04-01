@@ -26,7 +26,7 @@ typedef struct XcbPropertyData
     FF_LIBRARY_SYMBOL(xcb_get_atom_name_reply)
 } XcbPropertyData;
 
-static bool xcbInitPropertyData(void* libraryHandle, XcbPropertyData* propertyData)
+static bool xcbInitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, XcbPropertyData* propertyData)
 {
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_intern_atom, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_intern_atom_reply, false)
