@@ -11,7 +11,7 @@
 
 typedef struct FFlist
 {
-    char* data;
+    uint8_t* data;
     uint32_t elementSize;
     uint32_t length;
     uint32_t capacity;
@@ -37,7 +37,7 @@ static inline void ffListInitA(FFlist* list, uint32_t elementSize, uint32_t capa
 {
     ffListInit(list, elementSize);
     list->capacity = capacity;
-    list->data = __builtin_expect(capacity == 0, 0) ? NULL : (char*) malloc((size_t)list->capacity * list->elementSize);
+    list->data = __builtin_expect(capacity == 0, 0) ? NULL : (uint8_t*) malloc((size_t)list->capacity * list->elementSize);
 }
 
 static inline FFlist ffListCreate(uint32_t elementSize)
