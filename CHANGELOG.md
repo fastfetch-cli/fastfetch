@@ -8,13 +8,17 @@ Features:
 * Support more AMD GPU information using ADL SDK, including memory type detection (GPU, Windows)
 * Support Intel dGPU memory type detection (GPU, Windows)
 * Support Nvidia VMEM type detection via NVAPI (GPU, Windows, #993)
-* Support Bootmgr module for OpenBSD and NetBSD
+* Support Boot manager detection for OpenBSD and NetBSD (Bootmgr, OpenBSD / NetBSD)
 * Use `SystemConfiguration` for DNS entries detection (DNS, macOS)
-* Add `systemd-resolved` support for DNS module (DNS, Linux)
+* Add `systemd-resolved` support for DNS module (DNS, Linux, #1646)
 * Improve performance and accuracy of Wifi detection on FreeBSD using ioctl (Wifi, FreeBSD)
 * Support remaining time reporting for batteries on NetBSD (Battery, NetBSD)
 * Add new Mac models support (Host, macOS)
 * Load config from fastfetch binary path with `--config` option (#1649)
+* Support TPM detection on macOS (TPM, macOS)
+* Support IPv6 client address report (Users, Linux / Windows)
+* Support default route detection for IPv6 (LocalIP, Linux)
+* Round seconds to the nearest minute to match the behavior of `uptime` command (Uptime)
 
 Bugfixes:
 * Fix `outputColor` not working when `length` is set in Separator module (#1644)
@@ -26,6 +30,7 @@ Bugfixes:
 * Fall back to KDGKBINFO if `usbhid` fails (Keyboard, FreeBSD)
 * Fix multiple paging file support (Swap, Windows)
 * Fix memleaks, code smells in multiple modules
+* Fix boot time calculation on NetBSD (Uptime, NetBSD)
 
 Logo:
 * Fix opensuse-tumbleweed_small (#1636)
