@@ -198,6 +198,12 @@ void ffParseDuration(uint32_t days, uint32_t hours, uint32_t minutes, uint32_t s
         return;
     }
 
+    if(seconds >= 30)
+    {
+        minutes++;
+        seconds = 0;
+    }
+
     if(days > 0)
     {
         ffStrbufAppendF(result, "%u day", days);
