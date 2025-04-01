@@ -11,7 +11,11 @@ static inline void ffStrbufSetWS(FFstrbuf* result, const wchar_t* source)
     return ffStrbufSetNWS(result, (uint32_t)wcslen(source), source);
 }
 
-void ffStrbufInitNWS(FFstrbuf* result, uint32_t length, const wchar_t* source);
+static inline void ffStrbufInitNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)
+{
+    ffStrbufInit(result);
+    return ffStrbufSetNWS(result, length, source);
+}
 
 static inline void ffStrbufInitWS(FFstrbuf* result, const wchar_t* source)
 {
