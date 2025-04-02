@@ -31,18 +31,18 @@ static const char* getHyprland(FFstrbuf* result)
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     FF_DEBUG("Checking for " FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h" " file");
-    if (ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h", &buffer))
+    if (ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h", result))
     {
         FF_DEBUG("Found version.h file, extracting version");
-        if (ffStrbufSubstrAfterFirstS(&buffer, "\n#define GIT_TAG "))
+        if (ffStrbufSubstrAfterFirstS(result, "\n#define GIT_TAG "))
         {
-            ffStrbufSubstrAfterFirstC(&buffer, '"');
-            ffStrbufSubstrBeforeFirstC(&buffer, '"');
-            FF_DEBUG("Extracted version from version.h: %s", buffer.chars);
+            ffStrbufSubstrAfterFirstC(result, '"');
+            ffStrbufSubstrBeforeFirstC(result, '"');
+            FF_DEBUG("Extracted version from version.h: %s", result->chars);
             return NULL;
         }
         FF_DEBUG("Failed to extract version from version.h");
-        ffStrbufClear(&buffer);
+        ffStrbufClear(result);
     }
     else
     {
