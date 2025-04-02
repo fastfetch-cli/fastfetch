@@ -31,6 +31,7 @@ Bugfixes:
 * Fix multiple paging file support (Swap, Windows)
 * Fix memleaks, code smells in multiple modules
 * Fix boot time calculation on NetBSD (Uptime, NetBSD)
+* Temporarily fix Hyprland version detection (WM, Linux, #1657)
 
 Logo:
 * Fix opensuse-tumbleweed_small (#1636)

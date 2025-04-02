@@ -18,7 +18,7 @@ static bool extractHyprlandVersion(const char* line, FF_MAYBE_UNUSED uint32_t le
     sscanf(line, "    version: bump to v%*d.%*d.%*d%n", &count);
     if (count == 0) return true;
 
-    // SUPER hacky
+    // SUPER hacky and doesn't work for development versions
     uint32_t prefixLen = (uint32_t) strlen("    version: bump to v"); // version bump commit message
     ffStrbufSetNS((FFstrbuf*) userdata, len - prefixLen, line + prefixLen);
     return false;
@@ -30,8 +30,8 @@ static const char* getHyprland(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("Hyprland", &path);
     if (error) return "Failed to find Hyprland executable path";
 
-    if (ffBinaryExtractStrings(path.chars, extractHyprlandVersion, result, (uint32_t) strlen("    version: bump to v0.0.0")) == NULL)
-        return NULL;
+    ffBinaryExtractStrings(path.chars, extractHyprlandVersion, result, (uint32_t) strlen("    version: bump to v0.0.0"));
+    if (result->length > 0) return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
         path.chars,
@@ -51,7 +51,9 @@ static bool extractSwayVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, v
 {
     if (!ffStrStartsWith(line, "sway version ")) return true;
 
-    ffStrbufSetNS((FFstrbuf*) userdata, len - (uint32_t) strlen("sway version "), line + strlen("sway version "));
+    FFstrbuf* result = (FFstrbuf*) userdata;
+    ffStrbufSetNS(result, len - (uint32_t) strlen("sway version "), line + strlen("sway version "));
+    ffStrbufTrimRightSpace(result);
     return false;
 }
 
@@ -61,11 +63,8 @@ static const char* getSway(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("sway", &path);
     if (error) return "Failed to find sway executable path";
 
-    if (ffBinaryExtractStrings(path.chars, extractSwayVersion, result, (uint32_t) strlen("v0.0.0")) == NULL)
-    {
-        ffStrbufTrimRightSpace(result);
-        return NULL;
-    }
+    ffBinaryExtractStrings(path.chars, extractSwayVersion, result, (uint32_t) strlen("v0.0.0"));
+    if (result->length > 0) return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
         path.chars,
