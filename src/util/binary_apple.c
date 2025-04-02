@@ -14,12 +14,28 @@
 
 // Ref: https://github.com/AlexDenisov/segment_dumper/blob/master/main.c
 
+/**
+ * Helper function to read data from a file at a specific offset
+ */
 static inline bool readData(FILE *objFile, void *buf, size_t size, off_t offset)
 {
     fseek(objFile, offset, SEEK_SET);
     return fread(buf, 1, size, objFile) == size;
 }
 
+/**
+ * Handles a Mach-O section by extracting strings from the __cstring section
+ *
+ * @param objFile File handle to the Mach-O object file
+ * @param name Section name to check
+ * @param offset Offset of the section in the file
+ * @param size Size of the section
+ * @param cb Callback function to process strings
+ * @param userdata User data for the callback
+ * @param minLength Minimum string length to extract
+ *
+ * @return true to continue processing, false to stop
+ */
 static bool handleMachSection(FILE *objFile, const char *name, off_t offset, size_t size, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     if (!ffStrEquals(name, "__cstring")) return true;
@@ -43,6 +59,22 @@ static bool handleMachSection(FILE *objFile, const char *name, off_t offset, siz
     return true;
 }
 
+/**
+ * Processes a Mach-O header (32-bit or 64-bit)
+ *
+ * This function parses the load commands in a Mach-O header, looking for
+ * LC_SEGMENT or LC_SEGMENT_64 commands that contain the __TEXT segment.
+ * It then processes the sections within that segment to extract strings.
+ *
+ * @param objFile File handle to the Mach-O object file
+ * @param offset Offset of the Mach header in the file
+ * @param is_64 Whether this is a 64-bit Mach-O header
+ * @param cb Callback function to process strings
+ * @param userdata User data for the callback
+ * @param minLength Minimum string length to extract
+ *
+ * @return NULL on success, error message on failure
+ */
 static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     uint32_t ncmds;
@@ -117,6 +149,20 @@ static const char* dumpMachHeader(FILE *objFile, off_t offset, bool is_64, bool 
     return NULL;
 }
 
+/**
+ * Processes a Fat binary header (Universal binary)
+ *
+ * This function handles the fat header of a universal binary, which can contain
+ * multiple Mach-O binaries for different architectures. It extracts and processes
+ * each embedded Mach-O file.
+ *
+ * @param objFile File handle to the universal binary
+ * @param cb Callback function to process strings
+ * @param userdata User data for the callback
+ * @param minLength Minimum string length to extract
+ *
+ * @return NULL on success, error message on failure
+ */
 static const char* dumpFatHeader(FILE *objFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     struct fat_header header;
@@ -165,21 +211,32 @@ static const char* dumpFatHeader(FILE *objFile, bool (*cb)(const char *str, uint
     return "Unsupported fat header";
 }
 
+/**
+ * Extracts string literals from a Mach-O (Apple) binary file
+ *
+ * This function supports both single-architecture Mach-O files and
+ * universal binaries (fat binaries) containing multiple architectures.
+ * It locates the __cstring section in the __TEXT segment which contains
+ * the string literals used in the program.
+ */
 const char *ffBinaryExtractStrings(const char *machoFile, bool (*cb)(const char *str, uint32_t len, void *userdata), void *userdata, uint32_t minLength)
 {
     FF_AUTO_CLOSE_FILE FILE *objFile = fopen(machoFile, "rb");
     if (objFile == NULL)
         return "File could not be opened";
 
+    // Read the magic number to determine the type of binary
     uint32_t magic;
     if (!readData(objFile, &magic, sizeof(magic), 0))
         return "read magic number failed";
 
+    // Check for supported formats
     // MH_CIGAM and MH_CIGAM_64 seem to be no longer used, as `swap_mach_header` is marked as deprecated.
     // However FAT_CIGAM and FAT_CIGAM_64 are still used (/usr/bin/vim).
     if (magic != MH_MAGIC && magic != MH_MAGIC_64 && magic != FAT_CIGAM && magic != FAT_CIGAM_64 && magic != FAT_MAGIC && magic != FAT_MAGIC_64)
         return "Unsupported format or big endian mach-o file";
 
+    // Process either a fat binary or a regular Mach-O binary
     if (magic == FAT_MAGIC || magic == FAT_MAGIC_64 || magic == FAT_CIGAM || magic == FAT_CIGAM_64)
         return dumpFatHeader(objFile, cb, userdata, minLength);
     else
