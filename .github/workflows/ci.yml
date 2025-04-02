@@ -520,41 +520,6 @@ jobs:
           name: fastfetch-freebsd-amd64
           path: ./fastfetch-*.*
 
-  dragonfly-amd64:
-    name: DragonFly-amd64
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v4
-
-      - name: run VM
-        uses: vmactions/dragonflybsd-vm@v1
-        with:
-          usesh: yes
-          prepare: |
-            uname -a
-            pkg update
-            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl opencl ocl-icd v4l_compat chafa libelf
-
-          run: |
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
-            cmake --build . --target package --verbose -j4
-            ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc --stat false
-            time ./fastfetch -c presets/ci.jsonc --format json
-            time ./flashfetch
-            ldd fastfetch
-            ctest --output-on-failure
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-dragonfly-amd64
-          path: ./fastfetch-*.*
-
   openbsd-amd64:
     name: OpenBSD-amd64
     runs-on: ubuntu-latest
@@ -706,7 +671,6 @@ jobs:
       - freebsd-amd64
       - openbsd-amd64
       - netbsd-amd64
-      - dragonfly-amd64
       - sunos-amd64
       - windows-amd64
     permissions:
