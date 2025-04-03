@@ -473,6 +473,9 @@ static void updateLogoPath(void)
     if(ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
         return;
 
+    if (ffStrbufEqualS(&options->source, "-")) // stdin
+        return;
+
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
     {

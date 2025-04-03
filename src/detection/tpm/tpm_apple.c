@@ -16,7 +16,7 @@ const char* ffDetectTPM(FFTPMResult* result)
     #else
 
     FF_IOOBJECT_AUTO_RELEASE io_service_t t2Service = IOServiceGetMatchingService(
-        kIOMainPortDefault,
+        MACH_PORT_NULL,
         IOServiceMatching("AppleT2"));
 
     if (t2Service) {

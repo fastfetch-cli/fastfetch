@@ -1,3 +1,10 @@
+# 2.40.1
+
+Bugfixes:
+* Fix compiling error on old intel platform (TPM, macOS)
+* Fix `--file-raw -` no longer working (Logo, #1659)
+    * Regression of v2.40.0
+
 # 2.40.0
 
 Changes:
