@@ -98,7 +98,7 @@ const char* ffDetectBattery(FFBatteryOptions* options, FFlist* results)
                     // https://github.com/AsahiLinux/linux/blob/b5c05cbffb0488c7618106926d522cc3b43d93d5/drivers/power/supply/macsmc_power.c#L410-L419
                     int year = (manufactureDate[0] - '0') * 10 + (manufactureDate[1] - '0') + 2000 - 8;
                     int month = (manufactureDate[2] - '0') * 10 + (manufactureDate[3] - '0');
-                    int day = (manufactureDate[4] - '0') * 10 + (manufactureDate[3] - '5');
+                    int day = (manufactureDate[4] - '0') * 10 + (manufactureDate[3] - '0');
                     ffStrbufSetF(&battery->manufactureDate, "%.4d-%.2d-%.2d", year, month, day);
                 }
             }

@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <wtsapi32.h>
+#include <ws2tcpip.h>
 
 static inline uint64_t to_ms(uint64_t ret)
 {
@@ -41,8 +42,14 @@ const char* ffDetectUsers(FFUsersOptions* options, FFlist* users)
         PWTS_CLIENT_ADDRESS address = NULL;
         if (WTSQuerySessionInformationW(WTS_CURRENT_SERVER_HANDLE, session->SessionId, WTSClientAddress, (LPWSTR *) &address, &bytes))
         {
-            if (address->AddressFamily == 2 /*AF_INET*/)
+            if (address->AddressFamily == AF_INET)
                 ffStrbufSetF(&user->clientIp, "%u.%u.%u.%u", address->Address[2], address->Address[3], address->Address[4], address->Address[5]);
+            else if (address->AddressFamily == AF_INET6)
+            {
+                char ipStr[INET6_ADDRSTRLEN];
+                if (inet_ntop(AF_INET6, address->Address, ipStr, sizeof(ipStr)) != NULL)
+                    ffStrbufSetS(&user->clientIp, ipStr);
+            }
             WTSFreeMemory(address);
         }
 

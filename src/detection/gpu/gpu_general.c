@@ -33,7 +33,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev->vendor_id));
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
-        ffStrbufInit(&gpu->platformApi);
+        ffStrbufInitStatic(&gpu->platformApi, "libpciaccess");
+        ffStrbufInit(&gpu->memoryType);
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
@@ -46,9 +47,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             ffGPUQueryAmdGpuName(dev->device_id, dev->revision, gpu);
 
         if (gpu->name.length == 0)
-        {
-            ffGPUFillVendorAndName((dev->device_class >> 8) & 8, dev->vendor_id, dev->device_id, gpu);
-        }
+            ffGPUFillVendorAndName((dev->device_class >> 8) & 0xFF, dev->vendor_id, dev->device_id, gpu);
     }
 
     ffpci_system_cleanup();

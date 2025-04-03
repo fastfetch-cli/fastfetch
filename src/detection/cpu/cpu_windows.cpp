@@ -26,6 +26,8 @@ const char* detectThermalTemp(double* current, double* critical)
             else
                 *critical = 0.0/0.0;
         }
+
+        return NULL;
     }
 
     return "No WMI result returned";

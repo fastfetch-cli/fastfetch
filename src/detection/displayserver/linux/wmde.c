@@ -374,7 +374,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
         ffStrbufAppendS(&procPath, dirent->d_name);
         uint32_t procFolderPathLength = procPath.length;
 
-        //Don't check for processes not owend by the current user.
+        //Don't check for processes not owned by the current user.
         ffStrbufAppendS(&procPath, "/loginuid");
         ffReadFileBuffer(procPath.chars, &loginuid);
         if(ffStrbufToUInt(&loginuid, (uint64_t) -1) != userId)

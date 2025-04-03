@@ -56,8 +56,6 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIO
         return true;
     }
 
-    ffStrbufInitWS(&device->devPath, szDevice);
-
     DISK_PERFORMANCE dp = {};
     if (DeviceIoControl(hDevice, IOCTL_DISK_PERFORMANCE, NULL, 0, &dp, sizeof(dp), &retSize, NULL))
     {
@@ -71,6 +69,8 @@ static bool detectPhysicalDisk(const wchar_t* szDevice, FFlist* result, FFDiskIO
         ffStrbufDestroy(&device->name);
         result->length--;
     }
+
+    ffStrbufInitWS(&device->devPath, szDevice);
 
     return true;
 }

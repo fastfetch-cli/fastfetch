@@ -426,7 +426,9 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else
     {
-        pPciPath = memrchr(deviceDir->chars, '/', deviceDir->length) + 1;
+        pPciPath = memrchr(deviceDir->chars, '/', deviceDir->length);
+        assert(pPciPath);
+        pPciPath++;
     }
 
     uint32_t pciDomain, pciBus, pciDevice, pciFunc;
@@ -438,6 +440,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     ffStrbufInit(&gpu->name);
     ffStrbufInit(&gpu->driver);
     ffStrbufInit(&gpu->platformApi);
+    ffStrbufInit(&gpu->memoryType);
     gpu->index = FF_GPU_INDEX_UNSET;
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
@@ -632,6 +635,7 @@ static const char* detectOf(FFlist* gpus, FFstrbuf* buffer, FFstrbuf* drmDir, co
     ffStrbufInit(&gpu->name);
     ffStrbufInit(&gpu->vendor);
     ffStrbufInit(&gpu->driver);
+    ffStrbufInit(&gpu->memoryType);
     ffStrbufInitF(&gpu->platformApi, "DRM (%s)", drmKey);
     gpu->temperature = FF_GPU_TEMP_UNSET;
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;

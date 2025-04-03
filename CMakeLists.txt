@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.39.1
+    VERSION 2.40.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -708,7 +708,6 @@ elseif(FreeBSD)
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_bsd.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
@@ -720,10 +719,12 @@ elseif(FreeBSD)
     if(DragonFly)
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_nosupport.c
+            src/detection/wifi/wifi_nosupport.c
         )
     else()
         list(APPEND LIBFASTFETCH_SRC
             src/detection/bluetooth/bluetooth_bsd.c
+            src/detection/wifi/wifi_bsd.c
         )
     endif()
 elseif(NetBSD)
@@ -739,7 +740,7 @@ elseif(NetBSD)
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nbsd.c
-        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_nbsd.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nbsd.c
@@ -817,22 +818,22 @@ elseif(OpenBSD)
         src/common/processing_linux.c
         src/common/sysctl.c
         src/detection/battery/battery_obsd.c
-        src/detection/bios/bios_nosupport.c
+        src/detection/bios/bios_windows.c
         src/detection/bluetooth/bluetooth_nosupport.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
-        src/detection/board/board_nosupport.c
-        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/board/board_windows.c
+        src/detection/bootmgr/bootmgr_bsd.c
         src/detection/brightness/brightness_obsd.c
         src/detection/btrfs/btrfs_nosupport.c
-        src/detection/chassis/chassis_nosupport.c
+        src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_obsd.c
-        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpucache/cpucache_shared.c
         src/detection/cpuusage/cpuusage_bsd.c
         src/detection/cursor/cursor_linux.c
         src/detection/disk/disk_bsd.c
         src/detection/dns/dns_linux.c
         src/detection/physicaldisk/physicaldisk_nosupport.c
-        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
         src/detection/displayserver/linux/drm.c
@@ -889,6 +890,7 @@ elseif(OpenBSD)
         src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
+        src/util/smbiosHelper.c
     )
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
@@ -911,7 +913,7 @@ elseif(APPLE)
         src/detection/cpuusage/cpuusage_apple.c
         src/detection/cursor/cursor_apple.m
         src/detection/disk/disk_bsd.c
-        src/detection/dns/dns_linux.c
+        src/detection/dns/dns_apple.c
         src/detection/physicaldisk/physicaldisk_apple.c
         src/detection/physicalmemory/physicalmemory_apple.m
         src/detection/diskio/diskio_apple.c
@@ -945,7 +947,7 @@ elseif(APPLE)
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
         src/detection/theme/theme_nosupport.c
-        src/detection/tpm/tpm_nosupport.c
+        src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_apple.m

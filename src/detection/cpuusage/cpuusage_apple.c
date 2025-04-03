@@ -3,6 +3,7 @@
 
 #include <mach/processor_info.h>
 #include <mach/mach_host.h>
+#include <mach/vm_map.h>
 
 const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 {
@@ -28,5 +29,7 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
             .totalAll = (uint64_t)total,
         };
     }
+
+    vm_deallocate(mach_task_self(), (vm_address_t) cpuInfo, numCpuInfo * sizeof(integer_t));
     return NULL;
 }

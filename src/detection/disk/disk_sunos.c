@@ -99,9 +99,6 @@ static void detectStats(FFDisk* disk)
     ffStrbufSetS(&disk->name, fs.f_fstr);
 
     disk->createTime = 0;
-    struct stat deviceStat;
-    if(stat(disk->mountpoint.chars, &deviceStat) == 0)
-        disk->createTime = (uint64_t) deviceStat.st_ctim.tv_sec * 1000 + (uint64_t) deviceStat.st_ctim.tv_nsec / 1000000000;
 }
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)

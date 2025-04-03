@@ -4,6 +4,7 @@
 #include "common/properties.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "util/windows/unicode.h"
+#include "util/windows/registry.h"
 #include "util/stringUtils.h"
 #include "terminalfont.h"
 
@@ -259,6 +260,22 @@ static void detectConEmu(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
+static void detectWarp(FFTerminalFontResult* terminalFont)
+{
+    FF_HKEY_AUTO_DESTROY key = NULL;
+    if (!ffRegOpenKeyForRead(HKEY_CURRENT_USER, L"Software\\Warp.dev\\Warp", &key, &terminalFont->error))
+        return;
+
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+    if (!ffRegReadStrbuf(key, L"FontName", &fontName, NULL))
+        ffStrbufSetS(&fontName, "Hack");
+    if (!ffRegReadStrbuf(key, L"FontSize", &fontSize, &terminalFont->error))
+        ffStrbufSetS(&fontSize, "13");
+
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminal->processName, "Windows Terminal") ||
@@ -270,4 +287,6 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectConhost(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ConEmu"))
         detectConEmu(terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "warp"))
+        detectWarp(terminalFont);
 }

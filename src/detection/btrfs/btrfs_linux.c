@@ -12,7 +12,10 @@ static const char* enumerateDevices(FFBtrfsResult* item, int dfd, FFstrbuf* buff
 
     FF_AUTO_CLOSE_DIR DIR* dirp = fdopendir(subfd);
     if(dirp == NULL)
+    {
+        close(subfd);
         return "fdopendir(\"/sys/fs/btrfs/UUID/devices\") == NULL";
+    }
 
     struct dirent* entry;
     while ((entry = readdir(dirp)) != NULL)

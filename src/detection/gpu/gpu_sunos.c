@@ -9,7 +9,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) {
-        "scanpci",
+        "/usr/bin/scanpci",
         "-v",
         NULL,
     });
@@ -35,8 +35,14 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     {
         // find the start of device entry
         const char* pstart = memrchr(buffer.chars, '\n', (size_t) (pclass - buffer.chars));
+        if (pstart == NULL)
+            return "PCI info not found, invalid scanpci result";
         while (pstart[1] != 'p')
+        {
             pstart = memrchr(buffer.chars, '\n', (size_t) (pstart - buffer.chars - 1));
+            if (pstart == NULL)
+                return "PCI info not found, invalid scanpci result";
+        }
         ++pstart;
 
         uint32_t vendorId, deviceId;
@@ -51,9 +57,10 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
+        ffStrbufInit(&gpu->memoryType);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
-        ffStrbufInit(&gpu->platformApi);
+        ffStrbufInitStatic(&gpu->platformApi, "/usr/bin/scanpci");
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;

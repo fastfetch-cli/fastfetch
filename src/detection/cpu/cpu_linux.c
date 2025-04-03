@@ -430,7 +430,6 @@ FF_MAYBE_UNUSED static uint16_t getPackageCount(FFstrbuf* cpuinfo)
 
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), "\nphysical id\t:", strlen("\nphysical id\t:"))))
     {
-        if (!p) break;
         p += strlen("\nphysical id\t:");
         char* pend;
         unsigned long id = strtoul(p, &pend, 10);
@@ -586,7 +585,6 @@ FF_MAYBE_UNUSED static uint16_t getLoongarchPropCount(FFstrbuf* cpuinfo, const c
 
     while ((p = memmem(p, cpuinfo->length - (uint32_t) (p - cpuinfo->chars), key, keylen)))
     {
-        if (!p) break;
         p += keylen;
         char* pend;
         unsigned long id = strtoul(p, &pend, 10);
@@ -608,7 +606,7 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
 
     #if __ANDROID__
     detectAndroid(cpu);
-    #else
+    #elif !__powerpc__ && !__powerpc
     detectSocName(cpu);
     #endif
 

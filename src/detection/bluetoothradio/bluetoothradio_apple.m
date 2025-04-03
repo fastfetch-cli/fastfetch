@@ -3,12 +3,12 @@
 
 #import <IOBluetooth/IOBluetooth.h>
 
-// For some reason the official declaration of IOBluetoothHostController don't include property `controllers`
+// For some reason the official declaration of IOBluetoothHostController doesn't include property `controllers`
 @interface IOBluetoothHostController()
 + (id)controllers;
 @end
 
-const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothResult */)
+const char* ffDetectBluetoothRadio(FFlist* devices /* FFBluetoothRadioResult */)
 {
     NSArray<IOBluetoothHostController*>* ctrls = IOBluetoothHostController.controllers;
     if(!ctrls)

@@ -1,11 +1,12 @@
 #include "bootmgr.h"
 #include "efi_helper.h"
+#include "common/io/io.h"
 
 #include <windows.h>
 
 const char* enablePrivilege(const wchar_t* privilege)
 {
-    HANDLE token;
+    FF_AUTO_CLOSE_FD HANDLE token = NULL;
     if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token))
         return "OpenProcessToken() failed";
 
@@ -32,13 +33,12 @@ const char* ffDetectBootmgr(FFBootmgrResult* result)
     if (enablePrivilege(L"SeSystemEnvironmentPrivilege") != NULL)
         return "Failed to enable SeSystemEnvironmentPrivilege";
 
-    uint16_t value;
-    if (GetFirmwareEnvironmentVariableW(L"BootCurrent", L"{" FF_EFI_GLOBAL_GUID L"}", &value, sizeof(value)) != 2)
+    if (GetFirmwareEnvironmentVariableW(L"BootCurrent", L"{" FF_EFI_GLOBAL_GUID L"}", &result->order, sizeof(result->order)) != 2)
         return "GetFirmwareEnvironmentVariableW(BootCurrent) failed";
 
     uint8_t buffer[2048];
     wchar_t key[16];
-    swprintf(key, ARRAY_SIZE(key), L"Boot%04X", value);
+    swprintf(key, ARRAY_SIZE(key), L"Boot%04X", result->order);
     uint32_t size = GetFirmwareEnvironmentVariableW(key, L"{" FF_EFI_GLOBAL_GUID L"}", buffer, sizeof(buffer));
     if (size < sizeof(FFEfiLoadOption) || size == ARRAY_SIZE(buffer))
         return "GetFirmwareEnvironmentVariableW(Boot####) failed";

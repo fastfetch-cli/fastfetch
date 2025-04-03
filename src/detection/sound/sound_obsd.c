@@ -64,7 +64,7 @@ const char* ffDetectSound(FFlist* devices)
         return "sioctl_ondesc() failed";
 
     if (bundle.iLevel != bundle.iMute || bundle.iLevel == 0)
-        return "Unexpecd sioctl_ondesc() result";
+        return "Unexpected sioctl_ondesc() result";
 
     FFSoundDevice* device = ffListAdd(devices);
     ffStrbufInitS(&device->name, bundle.name);

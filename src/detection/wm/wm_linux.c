@@ -6,42 +6,90 @@
 #include "util/binary.h"
 #include "util/path.h"
 #include "util/stringUtils.h"
+#include "util/debug.h"
 
 const char* ffDetectWMPlugin(FF_MAYBE_UNUSED FFstrbuf* pluginName)
 {
     return "Not supported on this platform";
 }
 
-static bool extractHyprlandVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+static bool extractHyprlandVersion(const char* line, uint32_t len, void *userdata)
 {
     if (line[0] != 'v') return true;
+    ++line; --len;
     int count = 0;
-    sscanf(line + 1, "%*d.%*d.%*d%n", &count);
+    sscanf(line, "%*d.%*d.%*d%n", &count);
     if (count == 0) return true;
 
-    ffStrbufSetNS((FFstrbuf*) userdata, len - 1, line + 1);
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
     return false;
 }
 
 static const char* getHyprland(FFstrbuf* result)
 {
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-    const char* error = ffFindExecutableInPath("Hyprland", &path);
-    if (error) return "Failed to find Hyprland executable path";
+    FF_DEBUG("Detecting Hyprland version");
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    if (ffBinaryExtractStrings(path.chars, extractHyprlandVersion, result, (uint32_t) strlen("v0.0.0")) == NULL)
+    FF_DEBUG("Checking for " FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h" " file");
+    if (ffReadFileBuffer(FASTFETCH_TARGET_DIR_USR "/include/hyprland/src/version.h", result))
+    {
+        FF_DEBUG("Found version.h file, extracting version");
+        if (ffStrbufSubstrAfterFirstS(result, "\n#define GIT_TAG "))
+        {
+            ffStrbufSubstrAfterFirstC(result, '"');
+            ffStrbufSubstrBeforeFirstC(result, '"');
+            FF_DEBUG("Extracted version from version.h: %s", result->chars);
+            return NULL;
+        }
+        FF_DEBUG("Failed to extract version from version.h");
+        ffStrbufClear(result);
+    }
+    else
+    {
+        FF_DEBUG("version.h file not found, trying Hyprland executable");
+    }
+
+    const char* error = ffFindExecutableInPath("Hyprland", &buffer);
+    if (error) {
+        FF_DEBUG("Error finding Hyprland executable: %s", error);
+        return "Failed to find Hyprland executable path";
+    }
+    FF_DEBUG("Found Hyprland executable at: %s", buffer.chars);
+
+    ffBinaryExtractStrings(buffer.chars, extractHyprlandVersion, result, (uint32_t) strlen("v0.0.0"));
+    if (result->length > 0) {
+        FF_DEBUG("Extracted version from binary strings: %s", result->chars);
         return NULL;
+    }
+    FF_DEBUG("Failed to extract version from binary strings, trying --version option");
 
     if (ffProcessAppendStdOut(result, (char* const[]){
-        path.chars,
+        buffer.chars,
         "--version",
         NULL
     }) == NULL)
-    { // Hyprland 0.46.2 built from branch v0.46.2-b at... long and multi line
-        ffStrbufSubstrAfterFirstC(result, ' ');
-        ffStrbufSubstrBeforeFirstC(result, ' ');
+    {
+        // Hyprland 0.48.1 built from branch  at commit 29e2e59...
+        // Date: ...
+        // Tag: v0.48.1, commits: 5937
+        // ...
+
+        FF_DEBUG("Raw version output: %s", result->chars);
+        // Use tag if available
+        if (ffStrbufSubstrAfterFirstS(result, "\nTag: v"))
+        {
+            ffStrbufSubstrBeforeFirstC(result, ',');
+            FF_DEBUG("Extracted version from Tag: %s", result->chars);
+        }
+        else
+        {
+            ffStrbufSubstrAfterFirstC(result, ' ');
+            ffStrbufSubstrBeforeFirstC(result, ' ');
+            FF_DEBUG("Extracted version from output: %s", result->chars);
+        }
         return NULL;
     }
+    FF_DEBUG("Failed to run Hyprland --version command");
 
     return "Failed to run command `Hyprland --version`";
 }
@@ -50,7 +98,9 @@ static bool extractSwayVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, v
 {
     if (!ffStrStartsWith(line, "sway version ")) return true;
 
-    ffStrbufSetNS((FFstrbuf*) userdata, len - (uint32_t) strlen("sway version "), line + strlen("sway version "));
+    FFstrbuf* result = (FFstrbuf*) userdata;
+    ffStrbufSetNS(result, len - (uint32_t) strlen("sway version "), line + strlen("sway version "));
+    ffStrbufTrimRightSpace(result);
     return false;
 }
 
@@ -60,11 +110,8 @@ static const char* getSway(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("sway", &path);
     if (error) return "Failed to find sway executable path";
 
-    if (ffBinaryExtractStrings(path.chars, extractSwayVersion, result, (uint32_t) strlen("v0.0.0")) == NULL)
-    {
-        ffStrbufTrimRightSpace(result);
-        return NULL;
-    }
+    ffBinaryExtractStrings(path.chars, extractSwayVersion, result, (uint32_t) strlen("v0.0.0"));
+    if (result->length > 0) return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
         path.chars,

@@ -13,6 +13,9 @@
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
     FF_AUTO_CLOSE_FD int fd = open("/dev/pci", O_RDONLY, 0);
+    if (fd < 0)
+        return "open(\"/dev/pci\", O_RDONLY, 0) failed";
+
     struct pci_conf confs[128];
     struct pci_match_conf match = {
         .pc_class = PCIC_DISPLAY,
@@ -40,7 +43,8 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(pc->pc_vendor));
         ffStrbufInit(&gpu->name);
         ffStrbufInitS(&gpu->driver, pc->pd_name);
-        ffStrbufInit(&gpu->platformApi);
+        ffStrbufInitStatic(&gpu->platformApi, "/dev/pci");
+        ffStrbufInit(&gpu->memoryType);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
         gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
@@ -77,7 +81,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
             if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
                 ffGPUQueryAmdGpuName(pc->pc_device, pc->pc_revid, gpu);
             if (gpu->name.length == 0)
-            ffGPUFillVendorAndName(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
+                ffGPUFillVendorAndName(pc->pc_subclass, pc->pc_vendor, pc->pc_device, gpu);
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN)

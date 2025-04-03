@@ -13,6 +13,17 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
+    //Ada
+    {
+        .names = {"Ada"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ADA,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+            FF_COLOR_FG_256 "24",
+        }
+    },
     // Adélie
     {
         .names = {"Adélie", "Adelie"},
@@ -3395,7 +3406,7 @@ static const FFlogo O[] = {
     // OpenSuseTumbleweedSmall
     {
         .names = {"opensuse-tumbleweed_small"},
-        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED,
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
             FF_COLOR_FG_WHITE,
@@ -4995,10 +5006,10 @@ static const FFlogo V[] = {
 };
 
 static const FFlogo W[] = {
-    // WiiLinuxNgx
+    // WiiLinux
     {
-        .names = {"WiiLinuxNgx"},
-        .lines = FASTFETCH_DATATEXT_LOGO_WII_LINUX_NGX,
+        .names = {"WiiLinuxNgx", "WiiLinux", "Wii-Linux", "Wii Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_WII_LINUX,
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_WHITE,
@@ -5142,17 +5153,6 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "93",
             FF_COLOR_FG_256 "16",
             FF_COLOR_FG_256 "15",
-        }
-    },
-    //Xray_OS
-    {
-        .names = {"Xray_OS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
-        .colors = {
-            FF_COLOR_FG_256 "15",
-            FF_COLOR_FG_256 "14",
-            FF_COLOR_FG_256 "16",
-            FF_COLOR_FG_256 "24",
         }
     },
     // LAST

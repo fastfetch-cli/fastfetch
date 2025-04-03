@@ -18,11 +18,12 @@ static double detectGpuTemp(const FFstrbuf* gpuName)
     {
         switch (strtol(gpuName->chars + strlen("Apple M"), NULL, 10))
         {
+            case 0: error = "Invalid Apple Silicon GPU"; break;
             case 1: error = ffDetectSmcTemps(FF_TEMP_GPU_M1X, &result); break;
             case 2: error = ffDetectSmcTemps(FF_TEMP_GPU_M2X, &result); break;
             case 3: error = ffDetectSmcTemps(FF_TEMP_GPU_M3X, &result); break;
             case 4: error = ffDetectSmcTemps(FF_TEMP_GPU_M4X, &result); break;
-            default: error = "Unsupported Apple Silicon GPU";
+            default: error = "Unsupported Apple Silicon GPU"; break;
         }
     }
     else if (ffStrbufStartsWithS(gpuName, "Intel"))
@@ -102,7 +103,8 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         }
 
         FFGPUResult* gpu = ffListAdd(gpus);
-
+        gpu->index = FF_GPU_INDEX_UNSET;
+        ffStrbufInit(&gpu->memoryType);
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
@@ -112,7 +114,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufInit(&gpu->driver); // Ok for both Apple and Intel
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);
 
-        if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount)) // For Apple
+        if(ffCfDictGetInt(properties, CFSTR("gpu-core-count"), &gpu->coreCount) != NULL) // For Apple
             gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
 
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
@@ -131,9 +133,9 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 if (ffCfDictGetInt64(perfStatistics, CFSTR("In use system memory"), (int64_t*) &vramUsed) != NULL)
                     vramTotal = 0;
             }
-            else if (ffCfDictGetInt64(perfStatistics, CFSTR("vramUsedBytes"), (int64_t*) &vramTotal) == NULL)
+            else if (ffCfDictGetInt64(perfStatistics, CFSTR("vramFreeBytes"), (int64_t*) &vramTotal) == NULL)
             {
-                if (ffCfDictGetInt64(perfStatistics, CFSTR("vramFreeBytes"), (int64_t*) &vramUsed) == NULL)
+                if (ffCfDictGetInt64(perfStatistics, CFSTR("vramUsedBytes"), (int64_t*) &vramUsed) == NULL)
                     vramTotal += vramUsed;
                 else
                     vramTotal = 0;
@@ -143,15 +145,15 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         ffStrbufInit(&gpu->name);
         //IOAccelerator returns model / vendor-id properties for Apple Silicon, but not for Intel Iris GPUs.
         //Still needs testing for AMD's
-        if(ffCfDictGetString(properties, CFSTR("model"), &gpu->name))
+        if(ffCfDictGetString(properties, CFSTR("model"), &gpu->name) != NULL)
         {
             CFRelease(properties);
+            properties = NULL;
 
-            io_registry_entry_t parentEntry;
-            IORegistryEntryGetParentEntry(registryEntry, kIOServicePlane, &parentEntry);
-            if(IORegistryEntryCreateCFProperties(parentEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
+            FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t parentEntry = 0;
+            if(IORegistryEntryGetParentEntry(registryEntry, kIOServicePlane, &parentEntry) != kIOReturnSuccess ||
+                IORegistryEntryCreateCFProperties(parentEntry, &properties, kCFAllocatorDefault, kNilOptions) != kIOReturnSuccess)
             {
-                IOObjectRelease(parentEntry);
                 IOObjectRelease(registryEntry);
                 continue;
             }
@@ -179,7 +181,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 gpu->shared.total = vramTotal;
                 gpu->shared.used = vramUsed;
             }
-            else
+            else if (gpu->type == FF_GPU_TYPE_DISCRETE)
             {
                 gpu->dedicated.total = vramTotal;
                 gpu->dedicated.used = vramUsed;

@@ -36,7 +36,7 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
             return "geom_gettree() failed";
         }
 
-        for (cLabels = geomTree.lg_class.lh_first; !ffStrEquals(cLabels->lg_name, "LABEL"); cLabels = cLabels->lg_class.le_next);
+        for (cLabels = geomTree.lg_class.lh_first; cLabels && !ffStrEquals(cLabels->lg_name, "LABEL"); cLabels = cLabels->lg_class.le_next);
         if (!cLabels)
             return "Class LABEL is not found";
     }
@@ -165,7 +165,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         disk->bytesUsed = 0; // To be filled in ./disk.c
 
         disk->filesTotal = (uint32_t) fs->f_files;
-        disk->filesUsed = (uint32_t) (disk->filesTotal - (uint64_t)fs->f_ffree);
+        disk->filesUsed = (uint32_t) (fs->f_files - fs->f_ffree);
 
         ffStrbufInitS(&disk->mountFrom, fs->f_mntfromname);
         ffStrbufInitS(&disk->mountpoint, fs->f_mntonname);
@@ -185,7 +185,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         #ifndef __DragonFly__
         struct stat st;
         if(stat(fs->f_mntonname, &st) == 0 && st.st_birthtimespec.tv_sec > 0)
-            disk->createTime = (uint64_t)((st.st_birthtimespec.tv_sec * 1000) + (st.st_birthtimespec.tv_nsec / 1000000));
+            disk->createTime = (uint64_t)(((uint64_t) st.st_birthtimespec.tv_sec * 1000) + ((uint64_t) st.st_birthtimespec.tv_nsec / 1000000));
         #endif
     }
 

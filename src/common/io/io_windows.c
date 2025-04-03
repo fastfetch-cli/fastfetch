@@ -159,6 +159,11 @@ bool ffPathExpandEnv(const char* in, FFstrbuf* out)
 
 bool ffSuppressIO(bool suppress)
 {
+    #ifndef NDEBUG
+    if (instance.config.display.debugMode)
+        return false;
+    #endif
+
     static bool init = false;
     static HANDLE hOrigOut = INVALID_HANDLE_VALUE;
     static HANDLE hOrigErr = INVALID_HANDLE_VALUE;

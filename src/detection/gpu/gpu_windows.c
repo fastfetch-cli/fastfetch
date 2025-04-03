@@ -37,6 +37,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         ffStrbufInit(&gpu->vendor);
         ffStrbufInit(&gpu->name);
         ffStrbufInit(&gpu->driver);
+        ffStrbufInit(&gpu->memoryType);
         ffStrbufInitStatic(&gpu->platformApi, "SetupAPI");
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->temperature = FF_GPU_TEMP_UNSET;
@@ -47,13 +48,14 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         gpu->deviceId = 0;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
-        uint32_t pciBus = 0, pciAddr = UINT32_MAX, pciDev = 0, pciFunc = 0;
+        uint32_t pciBus = 0, pciAddr = 0, pciDev = 0, pciFunc = 0;
         if (SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_BUSNUMBER, NULL, (PBYTE) &pciBus, sizeof(pciBus), NULL) &&
             SetupDiGetDeviceRegistryPropertyW(hdev, &did, SPDRP_ADDRESS, NULL, (PBYTE) &pciAddr, sizeof(pciAddr), NULL))
         {
             pciDev = (pciAddr >> 16) & 0xFFFF;
             pciFunc = pciAddr & 0xFFFF;
             gpu->deviceId = (pciBus * 1000ull) + (pciDev * 10ull) + pciFunc;
+            pciAddr = 1; // Set to 1 to indicate that the device is a PCI device
         }
 
         wchar_t buffer[256];
@@ -173,6 +175,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     .index = &gpu->index,
                     .temp = options->temp ? &gpu->temperature : NULL,
                     .memory = options->driverSpecific ? &gpu->dedicated : NULL,
+                    .sharedMemory = options->driverSpecific ? &gpu->shared : NULL,
+                    .memoryType = options->driverSpecific ? &gpu->memoryType : NULL,
                     .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
                     .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
                     .type = &gpu->type,

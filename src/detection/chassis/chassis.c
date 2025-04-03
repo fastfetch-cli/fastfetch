@@ -34,6 +34,7 @@ const char* ffChassisTypeToString(uint32_t type)
         case 0x1A: return "Compact PCI";
         case 0x1B: return "Advanced TCA";
         case 0x1C: return "Blade";
+        case 0x1D: return "Mobile Workstation";
         case 0x1E: return "Tablet";
         case 0x1F: return "Convertible";
         case 0x20: return "Detachable";

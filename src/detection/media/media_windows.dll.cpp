@@ -32,15 +32,15 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
         {
             switch (playbackInfo.PlaybackStatus())
             {
-    #define FF_MEDIA_SET_STATUS(status_code) \
-    case GlobalSystemMediaTransportControlsSessionPlaybackStatus::status_code: result->status = #status_code; break
-                FF_MEDIA_SET_STATUS(Closed);
-                FF_MEDIA_SET_STATUS(Opened);
-                FF_MEDIA_SET_STATUS(Changing);
-                FF_MEDIA_SET_STATUS(Stopped);
-                FF_MEDIA_SET_STATUS(Playing);
-                FF_MEDIA_SET_STATUS(Paused);
-    #undef FF_MEDIA_SET_STATUS
+            #define FF_MEDIA_SET_STATUS(status_code) \
+    case GlobalSystemMediaTransportControlsSessionPlaybackStatus::status_code: result->status = #status_code; break;
+                FF_MEDIA_SET_STATUS(Closed)
+                FF_MEDIA_SET_STATUS(Opened)
+                FF_MEDIA_SET_STATUS(Changing)
+                FF_MEDIA_SET_STATUS(Stopped)
+                FF_MEDIA_SET_STATUS(Playing)
+                FF_MEDIA_SET_STATUS(Paused)
+            #undef FF_MEDIA_SET_STATUS
             }
         }
 

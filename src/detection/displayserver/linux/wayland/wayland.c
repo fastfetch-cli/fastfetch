@@ -273,7 +273,7 @@ const char* ffdsConnectWayland(FFDisplayServerResult* result)
             FF_LIST_FOR_EACH(FFstrbuf, basePath, instance.state.platform.configDirs)
             {
                 char path[1024];
-                snprintf(path, ARRAY_SIZE(path) - 1, "%s%s", basePath->chars, fileName);
+                snprintf(path, ARRAY_SIZE(path), "%s%s", basePath->chars, fileName);
                 if (ffReadFileBuffer(path, &monitorsXml))
                     break;
             }

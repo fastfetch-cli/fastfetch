@@ -472,31 +472,27 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     if (parseJsoncFile(value)) return;
 
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
+
+    //Try to load as a relative path with the directory of fastfetch binary
+    if (instance.state.platform.exePath.length)
+    {
+        ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
+        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+        ffStrbufAppendS(&absolutePath, "/");
+        ffStrbufAppendS(&absolutePath, value);
+
+        if (parseJsoncFile(absolutePath.chars)) return;
+        ffStrbufClear(&absolutePath);
+    }
+
     //Try to load as a relative path
 
-    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
         //We need to copy it, because if a config file loads a config file, the value of path must be unchanged
         ffStrbufSet(&absolutePath, path);
         ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
-        ffStrbufAppendS(&absolutePath, value);
-
-        bool success = parseJsoncFile(absolutePath.chars);
-        if (!success)
-        {
-            ffStrbufAppendS(&absolutePath, ".jsonc");
-            success = parseJsoncFile(absolutePath.chars);
-        }
-
-        if (success) return;
-    }
-
-    {
-        //Try exe path
-        ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
-        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
-        ffStrbufAppendS(&absolutePath, "/presets/");
         ffStrbufAppendS(&absolutePath, value);
 
         bool success = parseJsoncFile(absolutePath.chars);

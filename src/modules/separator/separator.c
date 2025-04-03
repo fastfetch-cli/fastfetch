@@ -36,6 +36,9 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 {
     ffLogoPrintLine();
 
+    if(options->outputColor.length && !instance.config.display.pipe)
+        ffPrintColor(&options->outputColor);
+
     if (options->length > 0)
     {
         if(__builtin_expect(options->string.length == 1, 1))
@@ -47,68 +50,67 @@ void ffPrintSeparator(FFSeparatorOptions* options)
                 fputs(options->string.chars, stdout);
             }
         }
-        putchar('\n');
-        return;
-    }
-
-    setlocale(LC_CTYPE, "");
-    mbstate_t state = {};
-    bool fqdn = instance.config.modules.title.fqdn;
-    const FFPlatform* platform = &instance.state.platform;
-
-    FF_AUTO_FREE wchar_t* wstr = malloc((max(
-        platform->userName.length, options->string.length) + 1) * sizeof(*wstr));
-
-    uint32_t titleLength = 1 // @
-        + getWcsWidth(&platform->userName, wstr, &state) // user name
-        + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
-
-    if(options->outputColor.length && !instance.config.display.pipe)
-        ffPrintColor(&options->outputColor);
-    if(__builtin_expect(options->string.length == 1, 1))
-    {
-        ffPrintCharTimes(options->string.chars[0], titleLength);
     }
     else
     {
-        uint32_t wcsLength = getWcsWidth(&options->string, wstr, &state);
+        setlocale(LC_CTYPE, "");
+        mbstate_t state = {};
+        bool fqdn = instance.config.modules.title.fqdn;
+        const FFPlatform* platform = &instance.state.platform;
 
-        int remaining = (int) titleLength;
-        //Write the whole separator as often as it fits fully into titleLength
-        for (; remaining >= (int) wcsLength; remaining -= (int) wcsLength)
-            ffStrbufWriteTo(&options->string, stdout);
+        FF_AUTO_FREE wchar_t* wstr = malloc((max(
+            platform->userName.length, options->string.length) + 1) * sizeof(*wstr));
 
-        if (remaining > 0)
+        uint32_t titleLength = 1 // @
+            + getWcsWidth(&platform->userName, wstr, &state) // user name
+            + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
+
+        if(__builtin_expect(options->string.length == 1, 1))
         {
-            //Write as much of the separator as needed to fill titleLength
-            if (wcsLength != options->string.length)
+            ffPrintCharTimes(options->string.chars[0], titleLength);
+        }
+        else
+        {
+            uint32_t wcsLength = getWcsWidth(&options->string, wstr, &state);
+
+            int remaining = (int) titleLength;
+            //Write the whole separator as often as it fits fully into titleLength
+            for (; remaining >= (int) wcsLength; remaining -= (int) wcsLength)
+                ffStrbufWriteTo(&options->string, stdout);
+
+            if (remaining > 0)
             {
-                // Unicode chars
-                for(int i = 0; remaining > 0; ++i)
+                //Write as much of the separator as needed to fill titleLength
+                if (wcsLength != options->string.length)
                 {
-                    #ifdef __linux__
-                    // https://stackoverflow.com/questions/75126743/i-have-difficulties-with-putwchar-in-c#answer-75137784
-                    char wch[16] = "";
-                    uint32_t wchLength = (uint32_t) wcrtomb(wch, wstr[i], &state);
-                    fwrite(wch, wchLength, 1, stdout);
-                    #else
-                    putwchar(wstr[i]);
-                    #endif
-                    int width = mk_wcwidth(wstr[i]);
-                    remaining -= width < 0 ? 0 : width;
+                    // Unicode chars
+                    for(int i = 0; remaining > 0; ++i)
+                    {
+                        #ifdef __linux__
+                        // https://stackoverflow.com/questions/75126743/i-have-difficulties-with-putwchar-in-c#answer-75137784
+                        char wch[16] = "";
+                        uint32_t wchLength = (uint32_t) wcrtomb(wch, wstr[i], &state);
+                        fwrite(wch, wchLength, 1, stdout);
+                        #else
+                        putwchar(wstr[i]);
+                        #endif
+                        int width = mk_wcwidth(wstr[i]);
+                        remaining -= width < 0 ? 0 : width;
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < remaining; i++)
+                        putchar(options->string.chars[i]);
                 }
             }
-            else
-            {
-                for(int i = 0; i < remaining; i++)
-                    putchar(options->string.chars[i]);
-            }
         }
+        setlocale(LC_CTYPE, "C");
     }
+
     if(options->outputColor.length && !instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
     putchar('\n');
-    setlocale(LC_CTYPE, "C");
 }
 
 bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value)

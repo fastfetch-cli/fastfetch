@@ -28,7 +28,7 @@ static inline void cfReleaseWrapper(void* type)
 
 #define FF_CFTYPE_AUTO_RELEASE __attribute__((__cleanup__(cfReleaseWrapper)))
 
-static inline void wrapIoObjectRelease(io_service_t* service)
+static inline void wrapIoObjectRelease(io_object_t* service)
 {
     assert(service);
     if (*service)

@@ -20,7 +20,7 @@ const char* ffDetectUptime(FFUptimeResult* result)
         return "sysctl({CTL_KERN, KERN_BOOTTIME}) failed";
 
     #if __NetBSD__
-    result->bootTime = (uint64_t) bootTime.tv_sec * 1000 + (uint64_t) bootTime.tv_nsec / 10000000;
+    result->bootTime = (uint64_t) bootTime.tv_sec * 1000 + (uint64_t) bootTime.tv_nsec / 1000000;
     #else
     result->bootTime = (uint64_t) bootTime.tv_sec * 1000 + (uint64_t) bootTime.tv_usec / 1000;
     #endif
