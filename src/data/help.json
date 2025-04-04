@@ -458,6 +458,17 @@
             }
         },
         {
+            "long": "color",
+            "desc": "Set the color of both keys and title",
+            "remark": [
+                "Shortcut for \"--color-keys <color>\" and \"--color-title <color>\"",
+                "For color syntax, see <https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification>"
+            ],
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
             "long": "color-keys",
             "desc": "Set the color of the keys",
             "remark": "Doesn't affect Title, Separator, and Colors modules. See `-h color` for the list of available colors",
@@ -485,14 +496,6 @@
             "long": "color-separator",
             "desc": "Set the color of the key-value separator",
             "remark": "See `-h color` for the list of available colors",
-            "arg": {
-                "type": "color"
-            }
-        },
-        {
-            "long": "color",
-            "desc": "Set the color of both keys and title",
-            "remark": "Shortcut for \"--color-keys <color>\" and \"--color-title <color>\"",
             "arg": {
                 "type": "color"
             }
@@ -1523,7 +1526,7 @@
             "long": "<module>-format",
             "desc": [
                 "Set the format string to use for a specific module",
-                "To see how a format string works, use \"fastfetch -h format\".",
+                "See <https://github.com/fastfetch-cli/fastfetch/wiki/Format-String-Guide>",
                 "For help about a specific format string, use \"fastfetch -h <module>-format\""
             ],
             "arg": {

@@ -36,7 +36,7 @@ static void printCommandFormatHelpJson(void)
             yyjson_mut_val* obj = yyjson_mut_obj(doc);
             if (yyjson_mut_obj_add(root, yyjson_mut_strbuf(doc, &type), obj))
             {
-                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreateF("Output format of the module `%s`. See `-h format` for formatting syntax\n", baseInfo->name);
+                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreateF("Output format of the module `%s`. See Wiki for formatting syntax\n", baseInfo->name);
                 for (unsigned i = 0; i < baseInfo->formatArgs.count; i++)
                 {
                     const FFModuleFormatArg* arg = &baseInfo->formatArgs.args[i];
@@ -180,7 +180,11 @@ static void printFullHelp()
     }
     yyjson_doc_free(doc);
 
-    puts("\n" FASTFETCH_DATATEXT_HELP_FOOTER);
+    puts("\n\
+Parsing is not case sensitive. E.g. `--print-logos` is equal to `--Print-Logos`\n\
+If a value starts with a ?, it is optional. An optional boolean value defaults to true if not specified.\n\
+More detailed help messages for each options can be printed with `-h <option_without_dash_prefix>`\n\
+All options can be made permanent with command `fastfetch <options> --gen-config`");
 }
 
 static bool printSpecificCommandHelp(const char* command)
@@ -298,10 +302,6 @@ static void printCommandHelp(const char* command)
 {
     if(command == NULL)
         printFullHelp();
-    else if(ffStrEqualsIgnCase(command, "color"))
-        puts(FASTFETCH_DATATEXT_HELP_COLOR);
-    else if(ffStrEqualsIgnCase(command, "format"))
-        puts(FASTFETCH_DATATEXT_HELP_FORMAT);
     else if(ffStrEqualsIgnCase(command, "format-json"))
         printCommandFormatHelpJson();
     else if(ffCharIsEnglishAlphabet(command[0]) && ffStrEndsWithIgnCase(command, "-format")) // <module>-format
