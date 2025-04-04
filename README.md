@@ -11,7 +11,7 @@
 [![latest packaged version(s)](https://repology.org/badge/latest-versions/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 [![Packaging status](https://repology.org/badge/tiny-repos/fastfetch.svg)](https://repology.org/project/fastfetch/versions)
 
-Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it prettily. It is written mainly in C, with performance and customizability in mind. Currently, Linux, macOS, Windows 7+, Android, FreeBSD, OpenBSD, NetBSD, DragonFly, Haiku and SunOS are supported.
+Fastfetch is a [neofetch](https://github.com/dylanaraps/neofetch)-like tool for fetching system information and displaying it in a visually appealing way. It is written mainly in C, with a focus on performance and customizability. Currently, it supports Linux, macOS, Windows 7+, Android, FreeBSD, OpenBSD, NetBSD, DragonFly, Haiku, and SunOS.
 
 <img src="screenshots/example1.png" width="49%" align="left" />
 <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/Transparent_Square_Tiles_Texture.png" width="49%" height="16px" align="left" />
@@ -27,7 +27,7 @@ There are [screenshots on different platforms](https://github.com/fastfetch-cli/
 
 ### Linux
 
-Some distros package an outdated fastfetch version. Older versions receive no support, so please try always to use the latest version.
+Some distributions package outdated versions of fastfetch. Older versions receive no support, so please always try to use the latest version.
 
 <a href="https://repology.org/project/fastfetch/versions">
     <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
@@ -49,9 +49,9 @@ Some distros package an outdated fastfetch version. Older versions receive no su
 * Void Linux: `xbps-install fastfetch`
 * Venom Linux: `scratch install fastfetch`
 
-You may need `sudo`, `doas` or `sup` to run these commands.
+You may need `sudo`, `doas`, or `sup` to run these commands.
 
-If fastfetch is not packaged for your distro or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternative: `brew install fastfetch`
+If fastfetch is not packaged for your distribution or an outdated version is packaged, [linuxbrew](https://brew.sh/) is a good alternative: `brew install fastfetch`
 
 ### macOS
 
@@ -81,19 +81,19 @@ You may also download the program directly from [the GitHub releases page](https
 
 ## Build from source
 
-See Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
+See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 
 ## Usage
 
-* Run it with default configuration: `fastfetch`
-* Run it with [all supported modules](https://github.com/fastfetch-cli/fastfetch/wiki/Support+Status#available-modules) and find what interests you: `fastfetch -c all.jsonc`
-* Find all data that fastfetch detects: `fastfetch -s <module> --format json`
+* Run with default configuration: `fastfetch`
+* Run with [all supported modules](https://github.com/fastfetch-cli/fastfetch/wiki/Support+Status#available-modules) to find what interests you: `fastfetch -c all.jsonc`
+* View all data that fastfetch detects: `fastfetch -s <module> --format json`
 * Display help messages: `fastfetch --help`
-* Generate config file based on command line arguments: `fastfetch --arg1 --arg2 --gen-config`
+* Generate a config file based on command line arguments: `fastfetch --arg1 --arg2 --gen-config`
 
 ## Customization
 
-Fastfetch uses the JSONC (or JSON with comments) for configuration. [See Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in [`presets`](presets), including the ones used for the screenshots above. You can load them using `-c <filename>`. Those files can serve as examples of the configuration syntax.
+Fastfetch uses JSONC (JSON with comments) for configuration. [See the Wiki for details](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration). There are some premade config files in the [`presets`](presets) directory, including those used for the screenshots above. You can load them using `-c <filename>`. These files can serve as examples of the configuration syntax.
 
 Logos can also be heavily customized; see the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for more information.
 
@@ -102,29 +102,29 @@ Logos can also be heavily customized; see the [logo documentation](https://githu
 ### Q: Neofetch is good enough. Why do I need fastfetch?
 
 1. Fastfetch is actively maintained.
-2. Fastfetch is faster. As the name suggests.
-3. Fastfetch has a greater number of features, though by default fastfetch only has a few modules enabled; use `fastfetch -c all` to find what you want.
+2. Fastfetch is faster, as the name suggests.
+3. Fastfetch has a greater number of features, though by default it only has a few modules enabled; use `fastfetch -c all` to discover what you want.
 4. Fastfetch is more configurable. You can find more information in the Wiki: <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration>.
 5. Fastfetch is more polished. For example, neofetch prints `555 MiB` in the Memory module and `23 G` in the Disk module, whereas fastfetch prints `555.00 MiB` and `22.97 GiB` respectively.
 6. Fastfetch is more accurate. For example, [neofetch never actually supports the Wayland protocol](https://github.com/dylanaraps/neofetch/pull/2395).
 
-### Q: Fastfetch shows my local IP address. It leaks my privacy!
+### Q: Fastfetch shows my local IP address. Does it leak my privacy?
 
-A local IP (10.x.x.x, 172.x.x.x, 192.168.x.x) has nothing to do with privacy. It only makes sense if you are on the same network, for example, if you connect to the same Wi-Fi network.
+A local IP address (10.x.x.x, 172.x.x.x, 192.168.x.x) has nothing to do with privacy. It only has meaning if you are on the same network, for example, if you connect to the same Wi-Fi network.
 
-Actually the `Local IP` module is the most useful module for me personally. I (@CarterLi) have several VMs installed to test fastfetch and often need to SSH into them. I have fastfetch running on shell startup and I never need to type `ip addr` manually.
+Actually, the `Local IP` module is the most useful module for me personally. I (@CarterLi) have several VMs installed to test fastfetch and often need to SSH into them. With fastfetch running on shell startup, I never need to type `ip addr` manually.
 
 If you really don't like it, you can disable the `Local IP` module in `config.jsonc`.
 
 ### Q: Where is the config file? I can't find it.
 
-`Fastfetch` does not generate config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See [Wiki for detail](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
+Fastfetch does not generate a config file automatically. You can use `fastfetch --gen-config` to generate one. The config file will be saved in `~/.config/fastfetch/config.jsonc` by default. See the [Wiki for details](https://github.com/fastfetch-cli/fastfetch/wiki/Configuration).
 
 ### Q: The configuration is so complex. Where is the documentation?
 
-Fastfetch uses JSON (with comments) for configuration. I suggest you use an IDE with JSON schema support (like VSCode) to edit it.
+Fastfetch uses JSON (with comments) for configuration. I suggest using an IDE with JSON schema support (like VSCode) to edit it.
 
-Alternatively, you can refer to the presets in [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
+Alternatively, you can refer to the presets in the [`presets` directory](https://github.com/fastfetch-cli/fastfetch/tree/dev/presets).
 
 The **correct** way to edit the configuration:
 
@@ -134,32 +134,32 @@ This is an example that [changes size prefix from MiB / GiB to MB / GB](https://
 
 ### Q: I WANT THE DOCUMENTATION!
 
-[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema). It is generated from [JSON schema](https://github.com/fastfetch-cli/fastfetch/blob/dev/doc/json_schema.json) but you won't like it.
+[Here is the documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema). It is generated from the [JSON schema](https://github.com/fastfetch-cli/fastfetch/blob/dev/doc/json_schema.json), but you might not find it very user-friendly.
 
 ### Q: How can I customize the module output?
 
-Fastfetch uses `format` to generate output. For example, to make the `GPU` module show only the GPU name (leaving other information undisplayed), you can use
+Fastfetch uses `format` to generate output. For example, to make the `GPU` module show only the GPU name (leaving other information undisplayed), you can use:
 
 ```jsonc
 {
     "modules": [
         {
             "type": "gpu",
-            "format": "{name}" // See `fastfetch -h gpu-format` for detail
+            "format": "{name}" // See `fastfetch -h gpu-format` for details
         }
     ]
 }
 ```
 
-. . which is equivalent to `fastfetch -s gpu --gpu-format '{name}'`
+...which is equivalent to `fastfetch -s gpu --gpu-format '{name}'`
 
-See `fastfetch -h format` for information on basic usage. For module specific formattion, see `fastfetch -h <module>-format`
+See `fastfetch -h format` for information on basic usage. For module-specific formatting, see `fastfetch -h <module>-format`
 
-### Q: I have my own ascii-art / image file. How can I show it with fastfetch?
+### Q: I have my own ASCII art / image file. How can I show it with fastfetch?
 
-Try `fastfetch -l /path/to/logo`. See [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for detail.
+Try `fastfetch -l /path/to/logo`. See the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for details.
 
-If you just want to display distro name in [FIGlet text](https://github.com/pwaller/pyfiglet):
+If you just want to display the distro name in [FIGlet text](https://github.com/pwaller/pyfiglet):
 
 ```bash
 # install pyfiglet and jq first
@@ -168,32 +168,32 @@ pyfiglet -s -f small_slant $(fastfetch -s os --format json | jq -r '.[0].result.
 
 ![image](https://github.com/fastfetch-cli/fastfetch/assets/6134068/6466524e-ab8c-484f-848d-eec7ddeb7df2)
 
-### Q: My image logo behaves weird. How can I fix it?
+### Q: My image logo behaves strangely. How can I fix it?
 
-See troubleshooting section: <https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options#troubleshooting>
+See the troubleshooting section: <https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options#troubleshooting>
 
-### Q: Fastfetch runs in white and black on shell startup. Why?
+### Q: Fastfetch runs in black and white on shell startup. Why?
 
-This issue usually happens when using fastfetch with `p10k`. There are known incompatibility between fastfetch and p10k instant prompt.
-The p10k doc clearly states that you should NOT print anything to stdout after `p10k-instant-prompt` is initialized. You should either put `fastfetch` before initialization of `p10k-instant-prompt` (recommended)
+This issue usually occurs when using fastfetch with `p10k`. There are known incompatibilities between fastfetch and p10k instant prompt.
+The p10k documentation clearly states that you should NOT print anything to stdout after `p10k-instant-prompt` is initialized. You should put `fastfetch` before the initialization of `p10k-instant-prompt` (recommended).
 
-You can always use `fastfetch --pipe false` to force fastfetch running in colorful mode.
+You can always use `fastfetch --pipe false` to force fastfetch to run in colorful mode.
 
-### Q: Why do fastfetch and neofetch show different memory usage result?
+### Q: Why do fastfetch and neofetch show different memory usage results?
 
 See [#1096](https://github.com/fastfetch-cli/fastfetch/issues/1096).
 
-### Q: Fastfetch shows less dpkg packages than neofetch, is it a bug?
+### Q: Fastfetch shows fewer dpkg packages than neofetch. Is it a bug?
 
-Neofetch incorrectly counts `rc` packages ( the package has been removed, but that the configuration files remain ). Bug https://github.com/dylanaraps/neofetch/issues/2278
+Neofetch incorrectly counts `rc` packages (packages that have been removed but still have configuration files remaining). See bug: https://github.com/dylanaraps/neofetch/issues/2278
 
-### Q: I use Debian / Ubuntu / Debian derived distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is it a bug?
+### Q: I use Debian / Ubuntu / Debian-derived distro. My GPU is detected as `XXXX Device XXXX (VGA compatible)`. Is this a bug?
 
-Try upgrading `pci.ids`: Download <https://pci-ids.ucw.cz/v2.2/pci.ids> and overwrite file `/usr/share/hwdata/pci.ids`. For AMD GPUs, you should also upgrade `amdgpu.ids`: Download <https://gitlab.freedesktop.org/mesa/drm/-/raw/main/data/amdgpu.ids> and overwrite file `/usr/share/libdrm/amdgpu.ids`
+Try upgrading `pci.ids`: Download <https://pci-ids.ucw.cz/v2.2/pci.ids> and overwrite the file `/usr/share/hwdata/pci.ids`. For AMD GPUs, you should also upgrade `amdgpu.ids`: Download <https://gitlab.freedesktop.org/mesa/drm/-/raw/main/data/amdgpu.ids> and overwrite the file `/usr/share/libdrm/amdgpu.ids`
 
-Alternatively, you may try to use `fastfetch --gpu-driver-specific`, so that `fastfetch` will try to ask the driver for GPU name if supported.
+Alternatively, you may try using `fastfetch --gpu-driver-specific`, which will make fastfetch attempt to ask the driver for the GPU name if supported.
 
-### Q: I get error `Authorization required, but no authorization protocol specified` when running fastfetch in root
+### Q: I get the error `Authorization required, but no authorization protocol specified` when running fastfetch as root
 
 Try `export XAUTHORITY=$HOME/.Xauthority`
 
@@ -203,7 +203,7 @@ Try `fastfetch --wm-detect-plugin`. See also [#984](https://github.com/fastfetch
 
 ### Q: How can I change the colors of my ASCII logo?
 
-Try `fastfetch --logo-color-[1-9] <color>`. `[1-9]` is the index of color placeholders.
+Try `fastfetch --logo-color-[1-9] <color>`, where `[1-9]` is the index of color placeholders.
 
 For example: `fastfetch --logo-color-1 red --logo-color-2 green`.
 
@@ -220,7 +220,7 @@ In JSONC, you can use:
 }
 ```
 
-### Q: How to hide a key?
+### Q: How do I hide a key?
 
 Set the key to a white space.
 
@@ -232,7 +232,7 @@ Set the key to a white space.
 
 ### Q: I want feature A / B / C. Will fastfetch support it?
 
-Fastfetch is a system information tool. We only accept hardware or system level software feature requests. For most personal uses, I recommend using `Command` module to detect it yourself, which can be used to grab output from a custom shell script:
+Fastfetch is a system information tool. We only accept hardware or system-level software feature requests. For most personal uses, I recommend using the `Command` module to implement custom functionality, which can be used to grab output from a custom shell script:
 
 ```jsonc
 // This module shows the default editor
@@ -247,23 +247,23 @@ Fastfetch is a system information tool. We only accept hardware or system level 
 }
 ```
 
-Otherwise, open a feature request in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues).
+Otherwise, please open a feature request in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues).
 
 ### Q: I have questions. Where can I get help?
 
 * For usage questions, please start a discussion in [GitHub Discussions](https://github.com/fastfetch-cli/fastfetch/discussions).
-* For possible bugs, please open an issue in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues). Be sure to fill the bug-report template carefully for developers to investigate.
+* For possible bugs, please open an issue in [GitHub Issues](https://github.com/fastfetch-cli/fastfetch/issues). Be sure to fill out the bug report template carefully to help developers investigate.
 
 ## Donate
 
-If you find Fastfetch to be useful, please consider donating.
+If you find Fastfetch useful, please consider donating.
 
 * Current maintainer: [@CarterLi](https://paypal.me/zhangsongcui)
 * Original author: [@LinusDierheimer](https://github.com/sponsors/LinusDierheimer)
 
 ## Star History
 
-Give it a star to support us!
+Give us a star to show your support!
 
 <a href="https://star-history.com/#fastfetch-cli/fastfetch&Date">
   <picture>

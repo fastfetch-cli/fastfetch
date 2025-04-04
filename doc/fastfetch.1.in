@@ -1,8 +1,7 @@
 .TH FASTFETCH 1 "@FASTFETCH_BUILD_DATE@" "@CMAKE_PROJECT_NAME@ @CMAKE_PROJECT_VERSION@"
 
 .SH NAME
-fastfetch \- a neofetch\-like tool for fetching system information and
-displaying them in a pretty way
+fastfetch \- a fast and customizable system information tool similar to neofetch
 
 .SH SYNOPSIS
 
@@ -11,15 +10,12 @@ displaying them in a pretty way
 
 .SH DESCRIPTION
 
-Fastfetch is a neofetch\-like tool for fetching system information and
-displaying them in a pretty way. It is written mainly in C, with performance
-and customizability in mind.
-Currently, Linux, Android, FreeBSD, MacOS and Windows 7+ are supported.
+Fastfetch is a tool for displaying system information in a visually appealing way. Written primarily in C, it focuses on performance and customizability while providing functionality similar to neofetch.
+It supports Linux, Android, *BSD, macOS, Haiku, and Windows 7 or newer.
 
 .SH "EXIT STATUS"
 
-On successful execution, fastfetch returns zero. If any error happened,
-the exit code will be non\-zero.
+Fastfetch returns zero on successful execution. Any errors result in a non-zero exit code.
 
 .SH OPTIONS
 
@@ -27,115 +23,200 @@ the exit code will be non\-zero.
 .TP
 
 .B \-h, \-\-help \fI[command]
-Show help output, displaying all available options or help for given command
+Display help information for all available options or for a specific command
 .TP
 
 .B \-v, \-\-version
-Show version of fastfetch
+Display the version of fastfetch
+.TP
+
+.B \-\-version\-raw
+Display the raw version string (major.minor.patch)
 .TP
 
 .B \-\-list\-config\-paths
-List search paths of config files
+List search paths for configuration files
 .TP
 
 .B \-\-list\-data\-paths
-List search paths of presets and logos
+List search paths for presets and logos
 .TP
 
 .B \-\-list\-logos
-List available logos, they can be loaded with \fI\-\-logo
+List available logos that can be loaded with \fI\-\-logo
 .TP
 
 .B \-\-list\-modules
-List available modules
+List all available modules
 .TP
 
 .B \-\-list\-presets
-List available presets, they can be loaded with \fI\-\-config
+List available presets that can be loaded with \fI\-\-config
 .TP
 
 .B \-\-list\-features
-List the supported features fastfetch was compiled with
+List the features that fastfetch was compiled with (mainly for development)
 .TP
 
 .B \-\-print\-logos
-Print available logos
+Display all available logos
 .TP
 
 .B \-\-print\-structure
-Print the default structure
+Display the default structure
 .TP
 
 .B \-\-format \fI<type>
-Set the output format. Besides the
-.I default
-format, only
-.I json
-is supported currently.
-
-
-.SS "Display Options"
-.TP
-
-.B \-l, \-\-logo \fI<logo>
-Set the logo to display
-.TP
-
-.B \-s, \-\-structure \fI<structure>
-Set the structure of the fetch. For details about the structure,
-see the CONFIGURATION section.
-
+Set the output format. Available options are:
+.RS
+.IP \(bu 2
+\fIdefault\fR: Default human-readable format
+.IP \(bu 2
+\fIjson\fR: JSON format for machine processing
+.RE
 
 .SS "Config Options"
 .TP
 
 .B \-c, \-\-config \fI<config>
-Use the specified config file or preset. If
-.I none
-is specified, disable further config loading. For details about
-config files, see the CONFIGURATION section
+Use the specified config file or preset. Specify \fInone\fR to disable further config loading. See the CONFIGURATION section for details on config files.
 .TP
 
-.B \-\-gen\-config \fI[file]
-Generate a config file with options specified on the command line.
-If \fIfile\fR is specified, the configuration will be written to the
-file, otherwise it will be written to stdout.
+.B \-\-gen\-config \fI[path]
+Generate a config file with options specified on the command line. If \fIpath\fR is not specified, it defaults to \fB~/.config/fastfetch/config.jsonc\fR. If \fIpath\fR is "\-", the configuration will be written to stdout.
 .TP
 
-.B \-\-gen\-config\-force \fI[file]
-Same as \fB\-\-gen\-config\fR, but overwrites existing config
+.B \-\-gen\-config\-force \fI[path]
+Same as \fB\-\-gen\-config\fR, but overwrites any existing file at the destination path.
 .TP
 
+.SS "Logo Options"
+.TP
 
-To list all options, use \fB\-\-help\fR. It will also print all available module options.
+.B \-l, \-\-logo \fI<logo>
+Set the logo to display. Can be the name of a built-in logo or a path to an image file. Use \fInone\fR to disable the logo.
+.TP
+
+.B \-\-logo\-type \fI<type>
+Set the type of the logo specified with \fI\-\-logo\fR. Available types include \fIauto\fR, \fIbuiltin\fR, \fIfile\fR, \fIsixel\fR, \fIkitty\fR, and others. See \fB\-\-help logo\-type\fR for details.
+.TP
+
+.B \-\-logo\-width \fI<width>
+Set the width of the logo in characters (for image logos)
+.TP
+
+.B \-\-logo\-height \fI<height>
+Set the height of the logo in characters (for image logos)
+.TP
+
+.B \-\-logo\-color\-[1\-9] \fI<color>
+Override specific colors in the logo
+
+.SS "Display Options"
+.TP
+
+.B \-s, \-\-structure \fI<structure>
+Set the structure of the fetch (a colon-separated list of module names)
+.TP
+
+.B \-\-color \fI<color>
+Set the color of keys and title. See \fB\-\-help color\fR for available colors.
+.TP
+
+.B \-\-color\-keys \fI<color>
+Set the color of keys only
+.TP
+
+.B \-\-color\-title \fI<color>
+Set the color of the title only
+.TP
+
+.B \-\-separator \fI<string>
+Set the separator between key and value (default: ": ")
+.TP
+
+.B \-\-key\-width \fI<num>
+Align the width of keys to \fI<num>\fR characters
+.TP
+
+.B \-\-show\-errors
+Display errors when they occur (default: false)
+.TP
+
+.B \-\-pipe
+Disable colors (automatically detected based on whether stdout is a terminal)
+
+To list all available options including module-specific options, use \fB\-\-help\fR.
 
 .SH CONFIGURATION
 .SS "Fetch Structure"
-The structure of a fetch describes the modules that should be included in
-the output. It consists of a string of modules, separated by a colon (:).
+The structure defines which modules to display and in what order. It consists of module names separated by colons (:).
+For example: \fBtitle:separator:os:kernel:uptime\fR
+
 To list all available modules, use \fB\-\-list\-modules\fR
 
 .SS "Config Files"
 
-Fastfetch uses JSONC based format for configuration. Fastfetch doesn't generate
-config file automatically; it should be generated manually by \fB\-\-gen\-config\fR.
-The config file will be saved in \fB~/.config/fastfetch/config.jsonc\fR by default.
+Fastfetch uses JSONC for configuration files. JSONC is JSON with support for comments (// and /* */). Configuration files must have the .jsonc extension.
 
-A JSONC config file is a JSON file that also supports comments with (// and /* */).
-Those files must have the extension '.jsonc'.
+You can generate a default config file using \fB\-\-gen\-config\fR. By default, the config file is saved at \fB~/.config/fastfetch/config.jsonc\fR.
 
-The specified configuration/preset files are searched in the following order:
+The configuration/preset files are searched in the following locations (in order):
 
-1. relative to the current working directory
+.RS
+.IP 1. 4
+Relative to the current working directory
+.IP 2. 4
+Relative to ~/.local/share/fastfetch/presets/
+.IP 3. 4
+Relative to /usr/share/fastfetch/presets/
+.RE
 
-2. relative to ~/.local/share/fastfetch/presets/
+For detailed information on logo options, module configuration, and formatting, visit:
+.RS
+\fIhttps://github.com/fastfetch-cli/fastfetch/wiki/Configuration\fR
+.RE
 
-3. relative to /usr/share/fastfetch/presets/
+Fastfetch provides several built-in presets. List them with \fB\-\-list\-presets\fR.
 
-Fastfetch provides some default presets. List them with \fB\-\-list\-presets\fR.
+.SS "JSON Schema"
+A JSON schema is available for editor intelligence when editing the configuration file. Add the following line at the beginning of your config file:
+.PP
+\fB"$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json"\fR
+
+.SH EXAMPLES
+.TP
+Basic usage:
+.RS
+\fBfastfetch\fR
+.RE
+.TP
+Use a specific logo:
+.RS
+\fBfastfetch \-\-logo arch\fR
+.RE
+.TP
+Custom structure:
+.RS
+\fBfastfetch \-\-structure title:os:kernel:uptime:memory\fR
+.RE
+.TP
+Generate a config file:
+.RS
+\fBfastfetch \-\-gen\-config\fR
+.RE
+.TP
+Use a preset:
+.RS
+\fBfastfetch \-\-config neofetch\fR
+.RE
 
 .SH "SEE ALSO"
 .BR neofetch (1)
 
 .SH BUGS
 Please report bugs to: \fIhttps://github.com/fastfetch\-cli/fastfetch/issues\fR
+
+.SH AUTHORS
+Fastfetch is developed by a team of contributors on GitHub.
+Visit \fIhttps://github.com/fastfetch-cli/fastfetch\fR for more information.

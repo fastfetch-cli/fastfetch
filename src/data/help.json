@@ -3,7 +3,7 @@
         {
             "short": "h",
             "long": "help",
-            "desc": "Show this message, or help for a specific command",
+            "desc": "Display this help message or help for a specific command",
             "arg": {
                 "type": "command",
                 "optional": true
@@ -16,15 +16,15 @@
         },
         {
             "long": "version-raw",
-            "desc": "Show the raw version string (major.minor.patch)"
+            "desc": "Display the raw version string (major.minor.patch)"
         },
         {
             "long": "list-config-paths",
-            "desc": "List search paths of config files"
+            "desc": "List search paths for config files"
         },
         {
             "long": "list-data-paths",
-            "desc": "List search paths of presets and logos"
+            "desc": "List search paths for presets and logos"
         },
         {
             "long": "list-logos",
@@ -36,21 +36,21 @@
         },
         {
             "long": "list-presets",
-            "desc": "List presets fastfetch knows about",
+            "desc": "List presets that fastfetch knows about",
             "remark": "Presets can be loaded with \"--config <preset-name>\""
         },
         {
             "long": "list-features",
-            "desc": "List the supported features fastfetch was compiled with",
+            "desc": "List the supported features that fastfetch was compiled with",
             "remark": "Mainly for development"
         },
         {
             "long": "print-logos",
-            "desc": "Print available logos"
+            "desc": "Display available logos"
         },
         {
             "long": "print-structure",
-            "desc": "Print the default structure"
+            "desc": "Display the default structure"
         },
         {
             "long": "format",
@@ -69,16 +69,16 @@
         {
             "short": "c",
             "long": "config",
-            "desc": "Specify the config file or preset to be loaded",
-            "remark": "The file will be searched in the order of \"fastfetch --list-config-paths\". If \"none\", disable further config loading. See also https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for more info",
+            "desc": "Specify the config file or preset to load",
+            "remark": "The file will be searched according to the order shown by \"fastfetch --list-config-paths\". Use \"none\" to disable further config loading. See also https://github.com/fastfetch-cli/fastfetch/wiki/Configuration for more info",
             "arg": {
                 "type": "config"
             }
         },
         {
             "long": "gen-config",
-            "desc": "Generate a config file to specified path with options specified in the command line (if any)",
-            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will Print the generated config if <path> is \"-\"",
+            "desc": "Generate a config file at the specified path with options from the command line (if any)",
+            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will print the generated config if <path> is \"-\"",
             "arg": {
                 "type": "path",
                 "optional": true
@@ -86,7 +86,7 @@
         },
         {
             "long": "gen-config-force",
-            "desc": "Generate a config file to specified path. Overwrite the existing one",
+            "desc": "Generate a config file at the specified path, overwriting any existing file",
             "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\"",
             "arg": {
                 "type": "path",
@@ -97,7 +97,7 @@
     "General": [
         {
             "long": "thread",
-            "desc": "Use separate threads to send HTTP requests",
+            "desc": "Use separate threads for HTTP requests",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -123,9 +123,9 @@
         },
         {
             "long": "ds-force-drm",
-            "desc": "Set if only DRM should be used to detect displays",
+            "desc": "Specify whether only DRM should be used to detect displays",
             "remark": [
-                "Use this option if you encountered problems with other detection method.",
+                "Use this option if you encounter problems with other detection methods.",
                 "Linux only"
             ],
             "arg": {
@@ -133,7 +133,7 @@
                 "optional": true,
                 "default": "false",
                 "enum": {
-                    "true": "Try `libdrm` first, then `sysfs` if libdrm failed",
+                    "true": "Try `libdrm` first, then `sysfs` if libdrm fails",
                     "sysfs-only": "Use `/sys/class/drm` only",
                     "false": "Try `wayland`, then `x11`, then `drm`"
                 }
@@ -141,7 +141,7 @@
         },
         {
             "long": "detect-version",
-            "desc": "Whether to detect and display the version of terminal, shell and editor",
+            "desc": "Specify whether to detect and display versions of terminal, shell, editor, and others",
             "remark": "Mainly for benchmarking",
             "arg": {
                 "type": "bool",
@@ -155,31 +155,31 @@
             "short": "l",
             "long": "logo",
             "desc": "Set the logo source. Use \"none\" to disable the logo",
-            "remark": "Should be the name of a builtin logo, or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
+            "remark": "Should be the name of a built-in logo or a path to an image file. See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "logo"
             }
         },
         {
             "long": "logo-type",
-            "desc": "Set the type of the logo given in \"--logo\"",
+            "desc": "Set the type of the logo specified in \"--logo\"",
             "remark": "See also https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options",
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "If something is given, first try builtin, then file. Otherwise detect logo",
-                    "builtin": "Builtin ascii art",
-                    "small": "Builtin ascii art, small version",
+                    "auto": "If something is given, first try built-in, then file. Otherwise detect logo",
+                    "builtin": "Built-in ASCII art",
+                    "small": "Built-in ASCII art, small version",
                     "file": "Text file, printed with color code replacement",
                     "file-raw": "Text file, printed as is",
                     "data": "Text data, printed with color code replacement",
                     "data-raw": "Text data, printed as is",
                     "sixel": "Image file, printed as sixel codes",
-                    "kitty": "Image file, printed as kitty graphics protocol",
-                    "kitty-direct": "Image file, tell the terminal emulator to read image data from the specified file (Supported by kitty and wezterm)",
-                    "kitty-icat": "Image file, use `kitten icat` to display the image. Requires binary `kitten` to be installed",
-                    "iterm": "Image file, printed as iterm graphics protocol",
-                    "chafa": "Image file, printed as ascii art using libchafa",
+                    "kitty": "Image file, printed using kitty graphics protocol",
+                    "kitty-direct": "Image file, tells the terminal emulator to read image data from the specified file",
+                    "kitty-icat": "Image file, uses `kitten icat` to display the image. Requires binary `kitten` to be installed",
+                    "iterm": "Image file, printed using iterm graphics protocol",
+                    "chafa": "Image file, printed as ASCII art using libchafa",
                     "raw": "Image file, printed as raw binary string",
                     "none": "Disable logo printing"
                 }
@@ -187,7 +187,7 @@
         },
         {
             "long": "logo-width",
-            "desc": "Set the width of the logo (in characters), if it is an image",
+            "desc": "Set the width of the logo (in characters) if it is an image",
             "remark": "Required for iTerm image protocol",
             "arg": {
                 "type": "num"
@@ -195,7 +195,7 @@
         },
         {
             "long": "logo-height",
-            "desc": "Set the height of the logo (in characters), if it is an image",
+            "desc": "Set the height of the logo (in characters) if it is an image",
             "remark": "Required for iTerm image protocol",
             "arg": {
                 "type": "num"
@@ -203,7 +203,7 @@
         },
         {
             "long": "logo-preserve-aspect-ratio",
-            "desc": "Set if the logo should fill the specified width and height as much as possible without stretching",
+            "desc": "Specify whether the logo should fill the specified width and height as much as possible without stretching",
             "remark": "Supported by iTerm image protocol only",
             "arg": {
                 "type": "bool",
@@ -213,7 +213,7 @@
         },
         {
             "long": "logo-color-[1-9]",
-            "desc": "Overwrite a color in the logo",
+            "desc": "Override a color in the logo",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
@@ -222,35 +222,35 @@
         },
         {
             "long": "logo-padding",
-            "desc": "Set the padding on the left and the right of the logo",
+            "desc": "Set the padding on the left and right sides of the logo",
             "arg": {
                 "type": "num"
             }
         },
         {
             "long": "logo-padding-left",
-            "desc": "Set the padding on the left of the logo",
+            "desc": "Set the padding on the left side of the logo",
             "arg": {
                 "type": "num"
             }
         },
         {
             "long": "logo-padding-right",
-            "desc": "Set the padding on the right of the logo",
+            "desc": "Set the padding on the right side of the logo",
             "arg": {
                 "type": "num"
             }
         },
         {
             "long": "logo-padding-top",
-            "desc": "Set the padding on the top of the logo",
+            "desc": "Set the padding at the top of the logo",
             "arg": {
                 "type": "num"
             }
         },
         {
             "long": "logo-print-remaining",
-            "desc": "Whether to print the remaining logo, if it has more lines than modules to display",
+            "desc": "Specify whether to print the remaining logo if it has more lines than modules to display",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -259,7 +259,7 @@
         },
         {
             "long": "logo-position",
-            "desc": "Set the position of the logo should be displayed",
+            "desc": "Set the position where the logo should be displayed",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -271,7 +271,7 @@
         },
         {
             "long": "logo-recache",
-            "desc": "If true, regenerate image logo cache",
+            "desc": "If true, regenerate the image logo cache",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -433,7 +433,7 @@
             "short": "s",
             "long": "structure",
             "desc": "Set the structure of the fetch",
-            "remark": "Must be a colon separated list of keys. Use \"fastfetch --list-modules\" to see the ones available",
+            "remark": "Must be a colon-separated list of keys. Use \"fastfetch --list-modules\" to see available options",
             "arg": {
                 "type": "structure",
                 "default": "\"fastfetch --print-structure\""
@@ -451,16 +451,27 @@
         {
             "long": "pipe",
             "desc": "Disable colors",
-            "remark": "Auto detection based on isatty(1)",
+            "remark": "Auto-detected based on isatty(1) by default",
             "arg": {
                 "type": "bool",
                 "optional": true
             }
         },
         {
+            "long": "color",
+            "desc": "Set the color of both keys and title",
+            "remark": [
+                "Shortcut for \"--color-keys <color>\" and \"--color-title <color>\"",
+                "For color syntax, see <https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification>"
+            ],
+            "arg": {
+                "type": "color"
+            }
+        },
+        {
             "long": "color-keys",
             "desc": "Set the color of the keys",
-            "remark": "Doesn't affect module Title, Separator and Colors. See `-h color` for the list of available colors",
+            "remark": "Doesn't affect Title, Separator, and Colors modules. See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
             }
@@ -490,14 +501,6 @@
             }
         },
         {
-            "long": "color",
-            "desc": "Set the color of both the keys and title",
-            "remark": "Shortcut of \"--color-keys <color>\" and \"--color-title <color>\"",
-            "arg": {
-                "type": "color"
-            }
-        },
-        {
             "long": "key-width",
             "desc": "Align the width of keys to <num> characters",
             "arg": {
@@ -513,7 +516,7 @@
         },
         {
             "long": "key-type",
-            "desc": "Set whether to show icon before string keys",
+            "desc": "Specify whether to show an icon before string keys",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -527,7 +530,7 @@
         },
         {
             "long": "bright-color",
-            "desc": "Set if the keys, title and ASCII logo should be printed in bright color",
+            "desc": "Specify whether keys, title, and ASCII logo should be printed in bright color",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -544,7 +547,7 @@
         },
         {
             "long": "show-errors",
-            "desc": "Print occurring errors",
+            "desc": "Print errors when they occur",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -553,7 +556,7 @@
         },
         {
             "long": "disable-linewrap",
-            "desc": "Whether to disable line wrap during the run",
+            "desc": "Specify whether to disable line wrap during execution",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -562,7 +565,7 @@
         },
         {
             "long": "hide-cursor",
-            "desc": "Whether to hide the cursor during the run",
+            "desc": "Specify whether to hide the cursor during execution",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -595,7 +598,7 @@
         },
         {
             "long": "percent-color-green",
-            "desc": "Set color used in green state of percentage bars and numbers",
+            "desc": "Set color used for the green state of percentage bars and numbers",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -604,7 +607,7 @@
         },
         {
             "long": "percent-color-yellow",
-            "desc": "Set color used in yellow state of percentage bars and numbers",
+            "desc": "Set color used for the yellow state of percentage bars and numbers",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -613,7 +616,7 @@
         },
         {
             "long": "percent-color-red",
-            "desc": "Set color used in red state of percentage bars and numbers",
+            "desc": "Set color used for the red state of percentage bars and numbers",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -622,7 +625,7 @@
         },
         {
             "long": "bar-char-elapsed",
-            "desc": "Set the character to use in elapsed part of percentage bars",
+            "desc": "Set the character to use in the elapsed part of percentage bars",
             "arg": {
                 "type": "str",
                 "default": "\u25a0"
@@ -630,7 +633,7 @@
         },
         {
             "long": "bar-char-total",
-            "desc": "Set the character to use in total part of percentage bars",
+            "desc": "Set the character to use in the total part of percentage bars",
             "arg": {
                 "type": "str",
                 "default": "-"
@@ -638,7 +641,7 @@
         },
         {
             "long": "bar-border-left",
-            "desc": "Set the string to use at left border of percentage bars",
+            "desc": "Set the string to use at the left border of percentage bars",
             "arg": {
                 "type": "string",
                 "default": "[ "
@@ -646,7 +649,7 @@
         },
         {
             "long": "bar-border-right",
-            "desc": "Set the string to use at right border of percentage bars",
+            "desc": "Set the string to use at the right border of percentage bars",
             "arg": {
                 "type": "string",
                 "default": " ]"
@@ -654,7 +657,7 @@
         },
         {
             "long": "bar-width",
-            "desc": "Set the width of percentage bars, in number of characters",
+            "desc": "Set the width of percentage bars in characters",
             "arg": {
                 "type": "num",
                 "default": 10
@@ -662,7 +665,7 @@
         },
         {
             "long": "no-buffer",
-            "desc": "Set if the stdout application buffer should be disabled",
+            "desc": "Specify whether the stdout application buffer should be disabled",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -678,7 +681,7 @@
         },
         {
             "long": "size-binary-prefix",
-            "desc": "Set the binary prefix to used when formatting sizes",
+            "desc": "Set the binary prefix to use when formatting sizes",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -710,7 +713,7 @@
         },
         {
             "long": "freq-ndigits",
-            "desc": "Set the number of digits to keep after the decimal point when printing CPU / GPU frequency in GHz",
+            "desc": "Set the number of digits to keep after the decimal point when printing CPU/GPU frequency in GHz",
             "arg": {
                 "type": "num",
                 "default": 2
@@ -718,7 +721,7 @@
         },
         {
             "long": "temp-unit",
-            "desc": "Set the unit of the temperature",
+            "desc": "Set the temperature unit",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -740,7 +743,7 @@
         },
         {
             "long": "temp-color-green",
-            "desc": "Set color used in green state of temperature values",
+            "desc": "Set color used for the green state of temperature values",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -749,7 +752,7 @@
         },
         {
             "long": "temp-color-yellow",
-            "desc": "Set color used in yellow state of temperature values",
+            "desc": "Set color used for the yellow state of temperature values",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -758,7 +761,7 @@
         },
         {
             "long": "temp-color-red",
-            "desc": "Set color used in red state of temperature values",
+            "desc": "Set color used for the red state of temperature values",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -769,7 +772,7 @@
     "Module specific": [
         {
             "long": "title-fqdn",
-            "desc": "Set if the title should use fully qualified domain name",
+            "desc": "Specify whether the title should use fully qualified domain name",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -778,7 +781,7 @@
         },
         {
             "long": "title-color-user",
-            "desc": "Set color of the user name (left part)",
+            "desc": "Set the color of the user name (left part)",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -787,7 +790,7 @@
         },
         {
             "long": "title-color-at",
-            "desc": "Set color of the @ symbol (middle part)",
+            "desc": "Set the color of the @ symbol (middle part)",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -796,7 +799,7 @@
         },
         {
             "long": "title-color-host",
-            "desc": "Set color of the host name (right part)",
+            "desc": "Set the color of the host name (right part)",
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color",
@@ -822,7 +825,7 @@
         {
             "long": "separator-length",
             "desc": "Set the length of the separator line",
-            "remark": "Set to 0 to automatically calculate it with the title length",
+            "remark": "Set to 0 to automatically calculate it based on the title length",
             "arg": {
                 "type": "num",
                 "default": "0"
@@ -830,8 +833,8 @@
         },
         {
             "long": "disk-folders",
-            "desc": "A colon (semicolon on Windows) separated list of folder paths to be detected",
-            "remark": "On Windows, a drive latter must be upper cased and end with \"\\\". \"/\" is used as an alias of the system drive. This option overrides other disk-show-* options",
+            "desc": "A colon (semicolon on Windows) separated list of folder paths to detect",
+            "remark": "On Windows, a drive letter must be upper-cased and end with \"\\\". \"/\" is used as an alias of the system drive. This option overrides other disk-show-* options",
             "arg": {
                 "type": "path",
                 "default": "Auto detection using mount-points"
@@ -839,7 +842,7 @@
         },
         {
             "long": "disk-show-regular",
-            "desc": "Set if regular volume should be printed",
+            "desc": "Specify whether regular volumes should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -848,7 +851,7 @@
         },
         {
             "long": "disk-show-external",
-            "desc": "Set if external volume should be printed",
+            "desc": "Specify whether external volumes should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -857,7 +860,7 @@
         },
         {
             "long": "disk-show-hidden",
-            "desc": "Set if hidden volumes should be printed",
+            "desc": "Specify whether hidden volumes should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -866,7 +869,7 @@
         },
         {
             "long": "disk-show-subvolumes",
-            "desc": "Set if subvolumes should be printed",
+            "desc": "Specify whether subvolumes should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -875,7 +878,7 @@
         },
         {
             "long": "disk-show-readonly",
-            "desc": "Set if read only volumes should be printed",
+            "desc": "Specify whether read-only volumes should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -884,7 +887,7 @@
         },
         {
             "long": "disk-show-unknown",
-            "desc": "Set if unknown (unable to detect sizes) volumes should be printed",
+            "desc": "Specify whether unknown volumes (unable to detect sizes) should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -894,7 +897,7 @@
         {
             "long": "disk-use-available",
             "desc": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
-            "remark": "Maybe required for macOS to print correct results",
+            "remark": "May be required for macOS to display correct results",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -911,7 +914,7 @@
         },
         {
             "long": "diskio-name-prefix",
-            "desc": "Show disks with given name prefix only",
+            "desc": "Show only disks with the given name prefix",
             "arg": {
                 "type": "str"
             }
@@ -926,7 +929,7 @@
         },
         {
             "long": "physicaldisk-name-prefix",
-            "desc": "Show disks with given name prefix only",
+            "desc": "Show only disks with the given name prefix",
             "arg": {
                 "type": "str"
             }
@@ -942,7 +945,7 @@
         },
         {
             "long": "bluetooth-show-disconnected",
-            "desc": "Set if disconnected bluetooth devices should be printed",
+            "desc": "Specify whether disconnected Bluetooth devices should be displayed",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -951,10 +954,10 @@
         },
         {
             "long": "packages-disabled",
-            "desc": "A colon separated list of package managers to be disabled when detecting",
+            "desc": "A colon-separated list of package managers to disable when detecting",
             "remark": [
                 "Some detection methods can be very slow.",
-                "You may need to increase value of '--processing-timeout' to make it actually work.",
+                "You may need to increase the value of '--processing-timeout' to make it work properly.",
                 "Use `--packages-disabled none` to enable all."
             ],
             "arg": {
@@ -964,7 +967,7 @@
         },
         {
             "long": "display-compact-type",
-            "desc": "Set if all displays should be printed in one line",
+            "desc": "Specify whether all displays should be printed in one line",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -979,7 +982,7 @@
         },
         {
             "long": "display-precise-refresh-rate",
-            "desc": "Set if decimal refresh rates should not be rounded into integers when printing",
+            "desc": "Specify whether decimal refresh rates should not be rounded to integers when printing",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -988,21 +991,21 @@
         },
         {
             "long": "display-order",
-            "desc": "Set the order should be used when printing displays",
+            "desc": "Set the order to use when printing displays",
             "arg": {
                 "type": "enum",
                 "enum": {
                     "none": "Use the detected order",
-                    "asc": "Sort by display name ascendingly",
-                    "desc": "Sort by display name descendingly"
+                    "asc": "Sort by display name in ascending order",
+                    "desc": "Sort by display name in descending order"
                 },
                 "default": "none"
             }
         },
         {
             "long": "brightness-ddcci-sleep",
-            "desc": "Set the sleep times (in ms) when sending DDC/CI requests",
-            "remark": "See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for detail",
+            "desc": "Set the sleep time (in ms) when sending DDC/CI requests",
+            "remark": "See <https://www.ddcutil.com/performance_options/#option-sleep-multiplier> for details",
             "arg": {
                 "type": "num",
                 "default": 10
@@ -1010,7 +1013,7 @@
         },
         {
             "long": "brightness-compact",
-            "desc": "Set if multiple results should be printed in one line",
+            "desc": "Specify whether multiple results should be printed in one line",
             "arg": {
                 "type": "bool",
                 "default": false
@@ -1018,7 +1021,7 @@
         },
         {
             "long": "sound-type",
-            "desc": "Set what type of sound devices should be printed",
+            "desc": "Set which types of sound devices should be displayed",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -1031,9 +1034,9 @@
         },
         {
             "long": "battery-use-setup-api",
-            "desc": "Set if \"SetupAPI\" should be used on Windows to detect battery info",
+            "desc": "Specify whether \"SetupAPI\" should be used on Windows to detect battery info",
             "remark": [
-                "SetupAPI supports multi batteries, but slower.",
+                "SetupAPI supports multiple batteries, but is slower.",
                 "Windows only"
             ],
             "arg": {
@@ -1053,7 +1056,7 @@
         },
         {
             "long": "cpu-show-pe-core-count",
-            "desc": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
+            "desc": "Detect and display CPU frequency of different core types (e.g., P-cores and E-cores) if supported",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1071,7 +1074,7 @@
         },
         {
             "long": "cpuusage-separate",
-            "desc": "Display CPU usage per CPU logical core, instead of an average result",
+            "desc": "Display CPU usage per logical core, instead of an average result",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1088,9 +1091,9 @@
         },
         {
             "long": "de-slow-version-detection",
-            "desc": "Set if DE version should be detected with slow operations",
+            "desc": "Specify whether DE version should be detected with slower operations",
             "remark": [
-                "It's only used as a fallback method. Please file a bug report if you encounter any issues.",
+                "This is only used as a fallback method. Please file a bug report if you encounter any issues.",
                 "Linux only"
             ],
             "arg": {
@@ -1110,11 +1113,8 @@
         },
         {
             "long": "gpu-driver-specific",
-            "desc": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
-            "remark": [
-                "Correctly NVML (NVIDIA) and IGCL (Intel, Windows only) are supported.",
-                "Both require the latest proprietary driver to be installed."
-            ],
+            "desc": "Use driver-specific methods to detect more detailed GPU information (memory usage, core count, etc.)",
+            "remark": "Requires the latest GPU drivers to be installed.",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1124,14 +1124,14 @@
         {
             "long": "gpu-detection-method",
             "desc": "Force using a specified method to detect GPUs",
-            "remark": "Will fall back to next methods if the specified method fails",
+            "remark": "Will fall back to other methods if the specified method fails",
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "Query platform specific graphic APIs. Requires proper GPU drivers installed. Not supported on FreeBSD",
-                    "pci": "Search PCI devices, which do not requires GPU driver installed. Not supported on Windows and macOS",
-                    "vulkan": "Use Vulkan API. Slow and requires proper vulkan driver installed. Used for Android",
-                    "opencl": "Use OpenCL API. Slow and requires proper OpenCL driver installed",
+                    "auto": "Query platform-specific graphics APIs. Requires proper GPU drivers to be installed. Not supported on BSDs",
+                    "pci": "Search PCI devices, which does not require GPU drivers to be installed. Not supported on Windows and macOS",
+                    "vulkan": "Use Vulkan API. Slow and requires proper Vulkan drivers to be installed. Used for Android",
+                    "opencl": "Use OpenCL API. Slow and requires proper OpenCL drivers to be installed",
                     "opengl": "Use OpenGL API. Slow and only detects one GPU"
                 },
                 "default": "auto"
@@ -1139,7 +1139,7 @@
         },
         {
             "long": "gpu-hide-type",
-            "desc": "Specify the type of GPUs should not be printed",
+            "desc": "Specify which types of GPUs should not be displayed",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -1152,7 +1152,7 @@
         },
         {
             "long": "battery-temp",
-            "desc": "Detect and display Battery temperature if supported",
+            "desc": "Detect and display battery temperature if supported",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1178,7 +1178,7 @@
         },
         {
             "long": "localip-show-ipv4",
-            "desc": "Show IPv4 addresses in local ip module",
+            "desc": "Show IPv4 addresses in the local IP module",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1187,7 +1187,7 @@
         },
         {
             "long": "localip-show-ipv6",
-            "desc": "Show IPv6 addresses in local ip module",
+            "desc": "Show IPv6 addresses in the local IP module",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1196,7 +1196,7 @@
         },
         {
             "long": "localip-show-mac",
-            "desc": "Show mac addresses in local ip module",
+            "desc": "Show MAC addresses in the local IP module",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1205,7 +1205,7 @@
         },
         {
             "long": "localip-show-loop",
-            "desc": "Show loop back addresses (127.0.0.1) in local ip module",
+            "desc": "Show loopback addresses (127.0.0.1) in the local IP module",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1214,7 +1214,7 @@
         },
         {
             "long": "localip-show-mtu",
-            "desc": "Show net interface's MTU (Maximum Transmission Unit) size in bytes",
+            "desc": "Show network interface MTU (Maximum Transmission Unit) size in bytes",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1223,7 +1223,7 @@
         },
         {
             "long": "localip-show-speed",
-            "desc": "Show net interface's link speed with human-readable format (or an 1Mb units integer in JSON format)",
+            "desc": "Show network interface link speed in human-readable format (or as a 1Mb units integer in JSON format)",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1232,7 +1232,7 @@
         },
         {
             "long": "localip-show-prefix-len",
-            "desc": "Show network prefix length (/N) in local ip module",
+            "desc": "Show network prefix length (/N) in the local IP module",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1241,14 +1241,14 @@
         },
         {
             "long": "localip-name-prefix",
-            "desc": "Show interfaces with given interface name prefix only",
+            "desc": "Show only interfaces with the given interface name prefix",
             "arg": {
                 "type": "str"
             }
         },
         {
             "long": "localip-default-route-only",
-            "desc": "Show the interface that is used for default routing only",
+            "desc": "Show only the interface that is used for default routing",
             "remark": "Doesn't work on Android",
             "arg": {
                 "type": "bool",
@@ -1258,7 +1258,7 @@
         },
         {
             "long": "localip-show-all-ips",
-            "desc": "Show all IPs bound to the same interface. By default only the first IP is shown",
+            "desc": "Show all IPs bound to the same interface. By default, only the first IP is shown",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1267,7 +1267,7 @@
         },
         {
             "long": "localip-show-flags",
-            "desc": "Show net interface flags in local ip module",
+            "desc": "Show network interface flags in the local IP module",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1285,7 +1285,7 @@
         },
         {
             "long": "dns-show-type",
-            "desc": "Specify the type of DNS servers should be detected",
+            "desc": "Specify which types of DNS servers should be detected",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -1298,14 +1298,14 @@
         },
         {
             "long": "netio-name-prefix",
-            "desc": "Show interfaces with given name prefix only",
+            "desc": "Show only interfaces with the given name prefix",
             "arg": {
                 "type": "str"
             }
         },
         {
             "long": "netio-default-route-only",
-            "desc": "Show the interfac that is used for default routing only",
+            "desc": "Show only the interface that is used for default routing",
             "remark": "Doesn't work on Android",
             "arg": {
                 "type": "bool",
@@ -1331,7 +1331,7 @@
         },
         {
             "long": "publicip-timeout",
-            "desc": "Time in milliseconds to wait for the public ip server to respond",
+            "desc": "Time in milliseconds to wait for the public IP server to respond",
             "remark": "0 to disable timeout",
             "arg": {
                 "type": "num",
@@ -1340,14 +1340,14 @@
         },
         {
             "long": "publicip-url",
-            "desc": "The URL of public IP detection server to be used",
+            "desc": "The URL of the public IP detection server to use",
             "arg": {
                 "type": "str"
             }
         },
         {
             "long": "publicip-ipv6",
-            "desc": "Whether to use IPv6 for public IP detection server",
+            "desc": "Specify whether to use IPv6 for the public IP detection server",
             "arg": {
                 "type": "bool",
                 "default": false
@@ -1355,8 +1355,8 @@
         },
         {
             "long": "weather-location",
-            "desc": "Set the location to be used",
-            "remark": "Must be URI encoded (e.g. a whitespace must be encoded as \"+\")",
+            "desc": "Set the location to use",
+            "remark": "Must be URI encoded (e.g., a whitespace must be encoded as \"+\")",
             "arg": {
                 "type": "str"
             }
@@ -1372,7 +1372,7 @@
         },
         {
             "long": "weather-output-format",
-            "desc": "The output weather format to be used",
+            "desc": "The output weather format to use",
             "remark": "Must be URI encoded",
             "arg": {
                 "type": "str"
@@ -1380,7 +1380,7 @@
         },
         {
             "long": "wm-detect-plugin",
-            "desc": "Set if window manager plugin should be detected on supported platforms",
+            "desc": "Specify whether window manager plugins should be detected on supported platforms",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1398,7 +1398,7 @@
         },
         {
             "long": "users-myself-only",
-            "desc": "Show only current user",
+            "desc": "Show only the current user",
             "arg": {
                 "type": "bool",
                 "optional": true,
@@ -1407,7 +1407,7 @@
         },
         {
             "long": "player-name",
-            "desc": "The name of the player to use for module Media and Player",
+            "desc": "The name of the player to use for the Media and Player modules",
             "remark": "Linux only",
             "arg": {
                 "type": "str"
@@ -1419,7 +1419,7 @@
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "Prefer EGL on *nix; prefer platform specific implementation on others",
+                    "auto": "Prefer EGL on *nix; prefer platform-specific implementation on others",
                     "egl": "EGL",
                     "glx": "GLX (*nix only)"
                 },
@@ -1436,8 +1436,8 @@
         },
         {
             "long": "command-param",
-            "desc": "Set the parameter used when starting the shell",
-            "remark": "If set to empty string, it will be ignored",
+            "desc": "Set the parameter to use when starting the shell",
+            "remark": "If set to an empty string, it will be ignored",
             "arg": {
                 "type": "str",
                 "default": "\"/c\" for Windows; \"-c\" for *nix"
@@ -1452,14 +1452,14 @@
         },
         {
             "long": "command-text",
-            "desc": "Set the command text to be executed",
+            "desc": "Set the command text to execute",
             "arg": {
                 "type": "str"
             }
         },
         {
             "long": "colors-symbol",
-            "desc": "Set the symbol to be printed by Colors module",
+            "desc": "Set the symbol to be printed by the Colors module",
             "arg": {
                 "type": "enum",
                 "enum": {
@@ -1525,9 +1525,9 @@
         {
             "long": "<module>-format",
             "desc": [
-                "Set the format string to use for each specific module",
-                "To see how a format string works, use \"fastfetch -h format\".",
-                "To see help about a specific format string, use \"fastfetch -h <module>-format\""
+                "Set the format string to use for a specific module",
+                "See <https://github.com/fastfetch-cli/fastfetch/wiki/Format-String-Guide>",
+                "For help about a specific format string, use \"fastfetch -h <module>-format\""
             ],
             "arg": {
                 "type": "format"
@@ -1537,9 +1537,9 @@
         {
             "long": "<module>-key",
             "desc": [
-                "Set the key to use for each specific module.",
-                "For modules which print multiple lines, the string is parsed",
-                "as a format string with the index as first character"
+                "Set the key to use for a specific module.",
+                "For modules that print multiple lines, the string is parsed",
+                "as a format string with the index as the first character"
             ],
             "arg": {
                 "type": "key"
@@ -1548,7 +1548,7 @@
         },
         {
             "long": "<module>-key-color",
-            "desc": "Override the global \"--color-keys\" option for each specific module",
+            "desc": "Override the global \"--color-keys\" option for a specific module",
             "arg": {
                 "type": "color"
             },
@@ -1564,7 +1564,7 @@
         },
         {
             "long": "<module>-output-color",
-            "desc": "Override the global \"--color-output\" option for each specific module",
+            "desc": "Override the global \"--color-output\" option for a specific module",
             "arg": {
                 "type": "color"
             },
@@ -1572,7 +1572,7 @@
         },
         {
             "long": "<module>-key-width",
-            "desc": "Override the global \"--key-width\" option for each specific module",
+            "desc": "Override the global \"--key-width\" option for a specific module",
             "arg": {
                 "type": "num"
             },
@@ -1581,8 +1581,8 @@
         {
             "long": "<module>-percent-green",
             "desc": [
-                "Threshold of percentage colors",
-                "Value less then percent-green will be shown in green"
+                "Threshold for percentage color ranges",
+                "Values less than percent-green will be shown in green"
             ],
             "arg": {
                 "type": "num"
@@ -1592,9 +1592,9 @@
         {
             "long": "<module>-percent-yellow",
             "desc": [
-                "Threshold of percentage colors",
-                "Value greater than percent-green and less then yellow will be shown in yellow",
-                "Value greater than percent-yellow will be shown in red"
+                "Threshold for percentage color ranges",
+                "Values greater than percent-green and less than percent-yellow will be shown in yellow",
+                "Values greater than percent-yellow will be shown in red"
             ],
             "arg": {
                 "type": "num"
@@ -1605,7 +1605,7 @@
             "long": "<module>-percent-type",
             "desc": "Set the percentage output type",
             "remark": [
-                "0 for use global `--percent-type` value",
+                "0 to use global `--percent-type` value",
                 "1 for percentage number",
                 "2 for multi-color bar",
                 "3 for both",
@@ -1622,8 +1622,8 @@
         {
             "long": "<module>-temp-green",
             "desc": [
-                "Threshold of temperature colors",
-                "Value less then temp-green will be shown in green"
+                "Threshold for temperature color ranges",
+                "Values less than temp-green will be shown in green"
             ],
             "arg": {
                 "type": "num"
@@ -1633,9 +1633,9 @@
         {
             "long": "<module>-temp-yellow",
             "desc": [
-                "Threshold of temperature colors",
-                "Value greater than temp-green and less then yellow will be shown in yellow",
-                "Value greater than temp-yellow will be shown in red"
+                "Threshold for temperature color ranges",
+                "Values greater than temp-green and less than temp-yellow will be shown in yellow",
+                "Values greater than temp-yellow will be shown in red"
             ],
             "arg": {
                 "type": "num"
