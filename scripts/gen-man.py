@@ -296,10 +296,6 @@ def main():
                 else:
                     print(f" {option['remark']}")
 
-            # Add default value if available
-            if "arg" in keyList and "default" in option["arg"]:
-                print(f" Default: {option['arg']['default']}")
-
             print()
 
 
