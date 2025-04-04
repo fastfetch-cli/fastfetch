@@ -70,7 +70,7 @@ Display the default structure
 Set the output format. Available options are:
 .RS
 .IP \(bu 2
-\fIdefault\fR: Standard human-readable format
+\fIdefault\fR: Default human-readable format
 .IP \(bu 2
 \fIjson\fR: JSON format for machine processing
 .RE
