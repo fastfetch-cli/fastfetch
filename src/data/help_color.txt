@@ -1,24 +1,25 @@
 Usage: fastfetch --color <color>
 
-Shortcut of `fastfetch --color-keys <color> --color-title <color>`.
-If no color is set, the main color of the logo will be used.
+This is a shortcut for `fastfetch --color-keys <color> --color-title <color>`.
+If no color is specified, the main color of the logo will be used.
 
-Following information applies to all settings
+The following information applies to all color settings:
 
-<color> must be a color encoding as ANSI escape sequences. It is inserted between "ESC[" and "m".
-Infos about them can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
+<color> must be a color encoding in ANSI escape sequence format. It is inserted between "ESC[" and "m".
+More information about ANSI escape codes can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
+
 Examples:
    35:              sets the color to magenta
-   38;5;38:         sets the color to 38th color of ANSI 256 colors
+   38;5;38:         sets the color to the 38th color in the ANSI 256 color palette
    4;92:            sets the color to bright green with underline
-   5;104:           blinking text on a blue background
+   5;104:           sets blinking text on a blue background
 
 ANSI named colors are also supported:
    magenta:         equivalent to `35`
    underline_bright_green: equivalent to `4;92`
 
-After v2.15.0, some special keys can be used:
-   keys:            use the color set by `--color-keys`
-   title:           use the color set by `--color-title`
-   output:          use the color set by `--color-output`
-   separator:       use the color set by `--color-separator`
+Since v2.15.0, the following special keywords can be used:
+   keys:            uses the color set by `--color-keys`
+   title:           uses the color set by `--color-title`
+   output:          uses the color set by `--color-output`
+   separator:       uses the color set by `--color-separator`

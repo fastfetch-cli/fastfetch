@@ -1,3 +1,16 @@
+# 2.40.2
+
+Changes:
+* Since v2.40.0, we've been loading config files from the directory where the fastfetch binary is located. However, this approach may lead to loading unexpected files. For example, `fastfetch -c groups` would attempt to load `/usr/bin/groups`. Therefore, we now enforce the `.jsonc` extension when loading config files. Examples:
+    1. `-c filename`: loads `filename.jsonc`
+    2. `-c filename.jsonc`: loads `filename.jsonc`
+    3. `-c filename.json`: loads `filename.json` and enforces strict JSON syntax (no comments or trailing commas)
+    4. `-c filename.ext`: loads `filename.ext.jsonc` (`.jsonc` extension is enforced)
+
+Features:
+* Mark kitty image protocol support for warp terminal (Logo)
+* Documentation improvements
+
 # 2.40.1
 
 Bugfixes:

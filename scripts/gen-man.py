@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
 """
-Python script to generate a man page for the command `fastfetch`.
-The man content will be printed to stdout so you will need to
-pipe it to a file if you want to save it.
-The command options will be generated using a JSON file.
-For the format of the JSON file, see https://github.com/fastfetch-cli/fastfetch/blob/dev/src/data/help.json
+Python script to generate a comprehensive man page for the command `fastfetch`.
+
+The generated man page content will be printed to stdout,
+so you will need to pipe it to a file if you want to save it.
+Example: python3 gen-man.py > fastfetch.1
+
+The command options are generated using a JSON file.
+For the JSON file format, see:
+https://github.com/fastfetch-cli/fastfetch/blob/dev/src/data/help.json
 """
 
 from json import load
@@ -33,7 +37,7 @@ pathToHelpFile = path.join(pathToCurrentDir, "../src/data/help.json")
 # man page section
 manSection = 1
 # title (center header)
-titlePage = "Fastfetch man page"
+titlePage = "FASTFETCH"
 # date (center footer)
 # format : "Month (abbreviation) Day Year"
 todayDate = datetime.fromtimestamp(
@@ -47,81 +51,118 @@ pathToVersionFile = path.join(pathToCurrentDir, "../CMakeLists.txt")
 ###### Sections Text ######
 
 # text displayed in the "NAME" section
-nameSection = r"fastfetch \- A maintained, feature\-rich and performance oriented, neofetch like system information tool"
+nameSection = r"fastfetch \- A fast and feature-rich system information tool similar to neofetch"
+
+# text displayed in the "DESCRIPTION" section
+descriptionSection = r"""
+Fastfetch is a tool for displaying system information in a visually appealing way. Written primarily in C, it focuses on performance and customizability while providing functionality similar to neofetch.
+It supports Linux, Android, FreeBSD, macOS, and Windows 7 or newer.
+"""
 
 # text displayed at the beginning of the "OPTIONS" section
 optionSection = r"""
-Parsing is not case sensitive. E.g. \fB--logo-type\fR is
-equal to \fB--LOGO-TYPE\fR.
+Options are parsed in a case-insensitive manner. For example, \fB--logo-type\fR and \fB--LOGO-TYPE\fR are treated identically.
 
-If a value is between square brackets, it is optional.
-An optional boolean value defaults to true if not specified.
+Arguments in square brackets are optional. Optional boolean arguments default to 'true' when specified without a value.
 
-More detailed help messages for each options can be printed
-with \fB-h <option_without_dash_prefix>\fR.
+For more detailed information about a specific option, use:
+\fBfastfetch -h <option_name_without_dashes>\fR
 
-All options can be made permanent with command
-\fBfastfetch <options> --gen-config\fR.
+Any combination of options can be made permanent by generating a configuration file:
+\fBfastfetch <options> --gen-config\fR
 """
 
 # text displayed in the "CONFIGURATION"
 configurationSection = f"""
 .SS Fetch Structure
 
-The structure of a fetch describes the modules that should
-be included in the output. It consists of a string of modules,
-separated by a colon (:). To list all available modules,
-use --list-modules.
+The structure defines which modules to display and in what order. It consists of module names separated by colons (:).
+For example: {startBold}title:separator:os:kernel:uptime{endBold}
+
+To list all available modules, use {startBold}--list-modules{endBold}
 
 
 .SS Config Files
 
-Fastfetch uses JSONC based format for configuration.
-Fastfetch doesn't generate config file automatically;
-it should be generated manually by {startBold}--gen-config{endBold}.
-The config file will be saved in
-{startBold}~/.config/fastfetch/config.jsonc{endBold} by default.
+Fastfetch uses JSONC (JSON with Comments) for configuration files. These files must have the .jsonc extension.
 
-A JSONC config file is a JSON file that also supports comments
-with (// and /* */). Those files must have the extension '.jsonc'.
+You can generate a default config file using {startBold}--gen-config{endBold}. By default, the config file is saved at {startBold}~/.config/fastfetch/config.jsonc{endBold}.
 
-The specified configuration/preset files are searched in the following order:
+The configuration/preset files are searched in the following locations (in order):
 
-{startBold}1.{endBold} relative to the current working directory
+{startBold}1.{endBold} Relative to the current working directory
 
-{startBold}2.{endBold} relative to ~/.local/share/fastfetch/presets/
+{startBold}2.{endBold} Relative to ~/.local/share/fastfetch/presets/
 
-{startBold}3.{endBold} relative to /usr/share/fastfetch/presets/
+{startBold}3.{endBold} Relative to /usr/share/fastfetch/presets/
 
-Fastfetch provides some default presets. List them with --list-presets.
+For detailed information on logo options, module configuration, and formatting, visit:
+{startBold}https://github.com/fastfetch-cli/fastfetch/wiki/Configuration{endBold}
+
+Fastfetch provides several built-in presets. List them with {startBold}--list-presets{endBold}.
+
+.SS JSON Schema
+A JSON schema is available for editor intelligence when editing the configuration file. Add the following line at the beginning of your config file:
+
+{startBold}"$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json"{endBold}
 """
 
 # text displayed in the "EXAMPLE" section
-exampleSection = """
-.SS Config files:
+exampleSection = f"""
+.SS Basic Usage
+{startBold}fastfetch{endBold}
+
+.SS Use a specific logo
+{startBold}fastfetch --logo arch{endBold}
+
+.SS Custom structure
+{startBold}fastfetch --structure title:os:kernel:uptime:memory{endBold}
+
+.SS Generate a config file
+{startBold}fastfetch --gen-config{endBold}
+
+.SS Use a preset
+{startBold}fastfetch --config neofetch{endBold}
+
+.SS Config File Example
 .nf
 // ~/.config/fastfetch/config.jsonc
-{
+{{
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {{
+        "type": "auto",
+        "source": "arch"
+    }},
+    "display": {{
+        "separator": ": ",
+        "color": {{
+            "keys": "blue",
+            "title": "red"
+        }},
+        "key": {{
+            "width": 12
+        }}
+    }},
     "modules": [
         "title",
         "separator",
-        "module1",
-        {
-            "type": "module2",
-            "module2-option": "value"
-        }
+        "os",
+        "kernel",
+        "uptime",
+        {{
+            "type": "memory",
+            "format": "{{used}}/{{total}} ({{used_percent}}%)"
+        }}
     ]
-}
+}}
 .fi
 """
 
 # text displayed in the "BUGS" section
-bugSection = "Please report bugs to : \
-https://github.com/fastfetch-cli/fastfetch/issues"
+bugSection = "Please report bugs to: https://github.com/fastfetch-cli/fastfetch/issues"
 
-# text displayed in the "WIKI" section
-wikiSection = "Fastfetch github wiki : https://github.com/fastfetch-cli/fastfetch/wiki/Configuration"
+# text displayed in the "AUTHORS" section
+authorsSection = "Fastfetch is developed by a team of contributors on GitHub.\nVisit https://github.com/fastfetch-cli/fastfetch for more information."
 
 
 ###### Argument decoration ######
@@ -130,7 +171,7 @@ wikiSection = "Fastfetch github wiki : https://github.com/fastfetch-cli/fastfetc
 
 # if an optional argument is displayed as [?optArg] (with "optArg" underlined)
 # this value should be f"[?{startUnderline}"
-startOptionalArgument = f"[{startUnderline}?"
+startOptionalArgument = f"[{startUnderline}"
 # if an optional argument is displayed as [?optArg] (with "optArg underlined")
 # this value should be f"{endUnderline}]"
 endOptionalArgument = f"{endUnderline}]"
@@ -161,7 +202,7 @@ def main():
         for line in versionFile:
             researchVersion = search(r"^\s*VERSION (\d+\.\d+\.\d+)$", line)
             if (researchVersion):
-                print(f"\"{researchVersion.group(1)}\"", end=" ")
+                print(f"\"Fastfetch {researchVersion.group(1)}\"", end=" ")
                 break
 
     print(f"\"{titlePage}\"")
@@ -177,13 +218,13 @@ def main():
 
     print(".SH SYNOPSIS")
     print(".B fastfetch")
-    print(f"[{startUnderline}OPTIONS{endUnderline}]")\
+    print(f"[{startUnderline}OPTIONS{endUnderline}...]")
 
 
-    ###### Wiki ######
+    ###### Description ######
 
-    print(".SH WIKI")
-    print(wikiSection)
+    print(".SH DESCRIPTION")
+    print(descriptionSection)
 
 
     ###### Configuration ######
@@ -202,7 +243,7 @@ def main():
     for key, value in helpFileData.items():
 
         # print new subsection
-        print(f".SS {key}:")
+        print(f".SS {key}")
 
         # loop through every option in a section
         for option in value:
@@ -237,7 +278,29 @@ def main():
                     print(startMandatoryArgument + option['arg']['type'] + endMandatoryArgument, end="")
 
             # description
-            print(f"\n {option['desc']} \n")
+            print()
+
+            # If desc is a list, join with newlines and proper spacing
+            if isinstance(option['desc'], list):
+                desc_text = "\n ".join(option['desc'])
+                print(f" {desc_text}")
+            else:
+                print(f" {option['desc']}")
+
+            # Add remarks if available
+            if "remark" in keyList:
+                print()
+                if isinstance(option['remark'], list):
+                    for remark in option['remark']:
+                        print(f" {remark}")
+                else:
+                    print(f" {option['remark']}")
+
+            # Add default value if available
+            if "arg" in keyList and "default" in option["arg"]:
+                print(f" Default: {option['arg']['default']}")
+
+            print()
 
 
     ###### Examples ######
@@ -246,12 +309,22 @@ def main():
     print(exampleSection)
 
 
+    ###### See Also ######
+
+    print(".SH \"SEE ALSO\"")
+    print(".BR neofetch (1)")
+
+
     ###### Bugs ######
 
     print(".SH BUGS")
     print(bugSection)
 
 
+    ###### Authors ######
+
+    print(".SH AUTHORS")
+    print(authorsSection)
 
 
 if __name__ == "__main__":

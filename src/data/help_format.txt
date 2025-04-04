@@ -1,55 +1,56 @@
-A format string is a string that contains placeholders for values.
-These placeholders begin with a '{', containing the index of the value, and end with a '}'.
-For example the format string "Values: {1} ({2})", with the values "First" and "My second val", will produce "Values: First (My second val)".
-The format string can contain placeholders in any order and have multiple occurrences.
-To include spaces when setting from the command line, surround the whole string with double quotes (").
+A format string is a text string that contains placeholders for values.
+These placeholders begin with a '{', contain the index of the value, and end with a '}'.
+For example, the format string "Values: {1} ({2})" with the values "First" and "My second val" will produce "Values: First (My second val)".
+Format strings can contain placeholders in any order and include multiple occurrences of the same placeholder.
+When setting a format string from the command line that contains spaces, surround the entire string with double quotes (").
 
-In 2.14.0 or newer, the value indices can be meaningful named tags.
-For example: "--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'" is equivalent to "--title-format '{6}{7}{8}'"
+In version 2.14.0 or newer, value indices can be meaningful named tags.
+For example: "--title-format '{user-name-colored}{at-symbol-colored}{host-name-colored}'" is equivalent to "--title-format '{6}{7}{8}'".
 See "fastfetch -h title-format" for all supported tags.
 
-In 2.17.0 or newer, a truncation length can be specified using syntax '<arg>:<trunc-length>`
-For example: "--title-format '{user-name:5}'" will truncate user name into 5-length string.
-If '<trunc-length>' is negative, an ellipsis … will be appended at the end when the original string is truncated.
-Note: The string length is counted in raw bytes. Multi-byte unicode characters and ANSI escape codes are not taken into account.
+In version 2.17.0 or newer, a truncation length can be specified using the syntax '{arg:trunc-length}'.
+For example: "--title-format '{user-name:5}'" will truncate the user name to a 5-character string.
+If 'trunc-length' is negative, an ellipsis (…) will be appended when the string is truncated.
+Note: String length is counted in raw bytes. Multi-byte Unicode characters and ANSI escape codes are not taken into account.
 
-In 2.23.0 or newer, `<` or `>` can be specified instead of `:` to set a left or right padding.
-For example: "--title-format '{user-name<20}'" will generate `<user-name>         `;
-"--title-format '{user-name>20}'" will generate `         <user-name>`
+In version 2.23.0 or newer, '<' or '>' can be used instead of ':' to set left or right padding.
+For example: "--title-format '{user-name<20}'" will generate `<user-name>         ` (left-aligned with spaces),
+while "--title-format '{user-name>20}'" will generate `         <user-name>` (right-aligned with spaces).
 
-In 2.24.0 or newer, `{~startIndex,endIndex}` can be specified to slice a string. Negative index counts back from the end of the string.
-If an index is omitted, 0 is used. For example, both `{~,0}` `{~0,}` and `{~,}` are same as `{~0,0}` and will always generate a empty string.
-If `,endIndex` is omitted or greater than the length of the string, the length of string is used.
+In version 2.24.0 or newer, '{~startIndex,endIndex}' can be specified to slice a string. Negative indices count backward from the end of the string.
+If an index is omitted, 0 is used by default. For example, '{~,0}', '{~0,}', and '{~,}' are all equivalent to '{~0,0}' and will generate an empty string.
+If ',endIndex' is omitted or greater than the string length, the length of the string is used instead.
 
-In 2.36.0 or newer, `{$NUM}` can be specified to reference a constant defined in `display.constants`. `{$ENV_VAR}` can be specified to reference an environment variable.
+In version 2.36.0 or newer, '{$NUM}' can be used to reference a constant defined in `display.constants`, and '{$ENV_VAR}' can be used to reference an environment variable.
 
-If the value index is missing, meaning the placeholder is "{}", an internal counter sets the value index.
+If a value index is missing (empty placeholder: "{}"), an internal counter automatically assigns the next sequential value.
 This means that the format string "Values: {1} ({2})" is equivalent to "Values: {} ({})".
-Note that this counter only counts empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.
+Note that this counter only increments for empty placeholders, so the format string "{2} {} {}" will contain the second value, then the first, and then the second again.
 
-To make formatting easier, a double open curly brace ("{{") will be printed as a single open curly brace and not counted as the beginning of a placeholder.
-If a value index is misformatted or wants a non-existing value, it will be printed as is, with the curly braces around it.
-If the last placeholder isn't closed, it will be treated like it was at the end of the format string.
+To simplify formatting, a double open curly brace ("{{") will be printed as a single open curly brace ('{') and not be treated as the beginning of a placeholder.
+If a value index is incorrectly formatted or references a non-existent value, it will be printed as-is with the curly braces preserved.
+If the final placeholder is not closed, it will be treated as if it were closed at the end of the format string.
 
-To only print something if a variable is set, use "{?<index>} ... {?}".
-For example, to only print a second value if it is set, use "{?2} Second value: {2}{?}".
-If a "{?}" is found without an opener, it is printed as is.
+To conditionally print content only when a variable is set, use "{?<index>} ... {?}".
+For example, to print a second value only if it is set, use "{?2} Second value: {2}{?}".
+If a "{?}" is found without a corresponding opener, it is printed as-is.
 
-To only print something if a variable is not set, do the same as with if, just replace every '?' with a '/'.
-For example to print a fallback for a second value if it is not set, use "{?2}{2}{?}{/2}Second value fallback{/}".
+To conditionally print content only when a variable is NOT set, use "{/<index>} ... {/}" (same syntax as above, but with '/' instead of '?').
+For example, to print a fallback for a second value if it is not set, use "{?2}{2}{?}{/2}Second value fallback{/}".
 
-To stop formatting at any point in the format string, use "{-}".
+To terminate formatting at any point in the format string, use "{-}".
 
-To print something with color, start a placeholder with a '#' and then the linux terminal color encoding.
-"\033[" at the start, and an 'm' at the end is automatically added, so don't do that.
-A "{#}" is equivalent to a "{#0}" and resets everything to normal.
-For example to print something pink and underline, use "{#4;35}...{#}". "{#underline_magenta}" is also supported. See `fastfetch -h color` for detail.
-Information about what the numbers mean can be found here: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
-Which escape codes are supported and how they look is defined by your terminal.
+To apply color to text, start a placeholder with '#' followed by Linux terminal color codes.
+The escape sequence "\033[" at the start and 'm' at the end are automatically added, so you don't need to include them.
+"{#}" is equivalent to "{#0}" and resets all formatting to normal.
+For example, to print text in pink and underlined, use "{#4;35}...{#}". Named formats like "{#underline_magenta}" are also supported.
+See `fastfetch -h color` for details about supported color codes.
+Information about color code meanings can be found at: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_(Select_Graphic_Rendition)_parameters.
+The supported escape codes and their appearance depend on your terminal.
 
-If a format string evaluates to an empty value, the whole line in the output will be discarded.
-You can therefore use --host-format " " to disable host output.
-Note that --host-format "" would evaluate as not set, and therefore use the built-in host format
+If a format string evaluates to an empty value, the entire line will be omitted from the output.
+You can use this behavior to disable specific outputs, for example: "--host-format " " will disable host output.
+Note that "--host-format ""' (empty string) would be treated as not set, and therefore the built-in host format would be used.
 
-Format string is also the way to go to set a fixed value - just use one without placeholders.
-For example when running in headless mode, you could use "--display-format Preferred".
+Format strings can also be used to set fixed values—simply use a string without any placeholders.
+For example, when running in headless mode, you could use "--display-format Preferred".

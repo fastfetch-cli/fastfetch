@@ -35,14 +35,14 @@
             "oneOf": [
                 {
                     "type": "number",
-                    "description": "1 for percentage number, 2 for multi-color bar, 3 for both, 6 for bar only, 9 for colored number, 10 for monochrome bar",
+                    "description": "0 to use global setting, 1 for percentage number, 2 for multi-color bar, 3 for both, 6 for bar only, 9 for colored number, 10 for monochrome bar",
                     "minimum": 0,
                     "maximum": 255,
                     "default": 9
                 },
                 {
                     "type": "array",
-                    "description": "array of string flags",
+                    "description": "Array of string flags",
                     "items": {
                         "enum": [
                             "num",
@@ -60,7 +60,7 @@
             ]
         },
         "percent": {
-            "description": "Threshold of percentage colors",
+            "description": "Thresholds for percentage colors",
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -68,13 +68,13 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 100,
-                    "description": "Value less then green will be shown in green"
+                    "description": "Values less than green will be shown in green"
                 },
                 "yellow": {
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 100,
-                    "description": "Value greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
+                    "description": "Values greater than green and less than yellow will be shown in yellow.\nValues greater than yellow will be shown in red"
                 },
                 "type": {
                     "$ref": "#/$defs/percentType"
@@ -96,13 +96,13 @@
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 100,
-                            "description": "Value (in celsius) less then green will be shown in green"
+                            "description": "Values (in celsius) less than green will be shown in green"
                         },
                         "yellow": {
                             "type": "integer",
                             "minimum": 0,
                             "maximum": 100,
-                            "description": "Value (in celsius) greater than green and less then yellow will be shown in yellow.\nValue greater than yellow will be shown in red"
+                            "description": "Values (in celsius) greater than green and less than yellow will be shown in yellow.\nValues greater than yellow will be shown in red"
                         }
                     }
                 }
@@ -131,11 +131,11 @@
             "type": "string"
         },
         "bootmgrFormat": {
-            "description": "Output format of the module `Bootmgr`. See `-h format` for formatting syntax\n    1. {name}: Name / description\n    2. {firmware-path}: Firmware file path\n    3. {firmware-name}: Firmware file name\n    4. {secure-boot}: Is secure boot enabled",
+            "description": "Output format of the module `Bootmgr`. See `-h format` for formatting syntax\n    1. {name}: Name / description\n    2. {firmware-path}: Firmware file path\n    3. {firmware-name}: Firmware file name\n    4. {secure-boot}: Is secure boot enabled\n    5. {order}: Boot order",
             "type": "string"
         },
         "brightnessFormat": {
-            "description": "Output format of the module `Brightness`. See `-h format` for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)",
+            "description": "Output format of the module `Brightness`. See `-h format` for formatting syntax\n    1. {percentage}: Screen brightness (percentage num)\n    2. {name}: Screen name\n    3. {max}: Maximum brightness value\n    4. {min}: Minimum brightness value\n    5. {current}: Current brightness value\n    6. {percentage-bar}: Screen brightness (percentage bar)\n    7. {is-builtin}: Is built-in screen",
             "type": "string"
         },
         "btrfsFormat": {
@@ -207,7 +207,7 @@
             "type": "string"
         },
         "gpuFormat": {
-            "description": "Output format of the module `GPU`. See `-h format` for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num (supports Nvidia & Apple GPU only)\n    19. {core-usage-bar}: Core usage percentage bar (supports Nvidia & Apple GPU only)",
+            "description": "Output format of the module `GPU`. See `-h format` for formatting syntax\n    1. {vendor}: GPU vendor\n    2. {name}: GPU name\n    3. {driver}: GPU driver\n    4. {temperature}: GPU temperature\n    5. {core-count}: GPU core count\n    6. {type}: GPU type\n    7. {dedicated-total}: GPU total dedicated memory\n    8. {dedicated-used}: GPU used dedicated memory\n    9. {shared-total}: GPU total shared memory\n    10. {shared-used}: GPU used shared memory\n    11. {platform-api}: The platform API used when detecting the GPU\n    12. {frequency}: Current frequency in GHz\n    13. {index}: GPU vendor specific index\n    14. {dedicated-percentage-num}: Dedicated memory usage percentage num\n    15. {dedicated-percentage-bar}: Dedicated memory usage percentage bar\n    16. {shared-percentage-num}: Shared memory usage percentage num\n    17. {shared-percentage-bar}: Shared memory usage percentage bar\n    18. {core-usage-num}: Core usage percentage num\n    19. {core-usage-bar}: Core usage percentage bar\n    20. {memory-type}: Memory type (Windows only)",
             "type": "string"
         },
         "hostFormat": {
@@ -394,7 +394,7 @@
     "type": "object",
     "additionalProperties": false,
     "title": "JSON config",
-    "description": "JSON config file for fastfetch. Usually be `~/.config/fastfetch.jsonc`",
+    "description": "JSON config file for fastfetch. Usually located at `~/.config/fastfetch/config.jsonc`",
     "properties": {
         "$schema": {
             "type": "string",
@@ -420,7 +420,7 @@
                     "additionalProperties": false,
                     "properties": {
                         "type": {
-                            "description": "Set the type of the logo given",
+                            "description": "Set the type of the logo",
                             "enum": [
                                 "auto",
                                 "builtin",
@@ -447,7 +447,7 @@
                         "color": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Overwrite a color in the logo",
+                            "description": "Override colors in the logo",
                             "properties": {
                                 "1": {
                                     "description": "Color 1",
@@ -521,12 +521,12 @@
                         },
                         "printRemaining": {
                             "type": "boolean",
-                            "description": "Whether to print the remaining logo, if it has more lines than modules to display",
-                            "default": false
+                            "description": "Whether to print the remaining logo if it has more lines than modules to display",
+                            "default": true
                         },
                         "preserveAspectRatio": {
                             "type": "boolean",
-                            "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol",
+                            "description": "Whether to preserve the aspect ratio of the logo. Supported by iTerm image protocol only",
                             "default": false
                         },
                         "recache": {
@@ -536,7 +536,7 @@
                         },
                         "position": {
                             "type": "string",
-                            "description": "Set the position of the logo should be displayed",
+                            "description": "Set the position where the logo should be displayed",
                             "enum": [
                                 "left",
                                 "top",
@@ -547,7 +547,7 @@
                         "chafa": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Chafa configuration. See chafa document for details",
+                            "description": "Chafa configuration. See chafa documentation for details",
                             "properties": {
                                 "fgOnly": {
                                     "type": "boolean",
@@ -560,7 +560,7 @@
                                 },
                                 "canvasMode": {
                                     "type": "string",
-                                    "description": "Determine how colors are used in the output. This value maps the value of enum ChafaCanvasMode.",
+                                    "description": "Determine how colors are used in the output. This value maps to enum ChafaCanvasMode.",
                                     "enum": [
                                         "TRUECOLOR",
                                         "INDEXED_256",
@@ -574,7 +574,7 @@
                                 },
                                 "colorSpace": {
                                     "type": "string",
-                                    "description": "Set color space used for quantization. This value maps the value of enum ChafaColorSpace.",
+                                    "description": "Set color space used for quantization. This value maps to enum ChafaColorSpace.",
                                     "enum": [
                                         "RGB",
                                         "DIN99D"
@@ -582,7 +582,7 @@
                                 },
                                 "ditherMode": {
                                     "type": "string",
-                                    "description": "Set output dither mode (No effect with 24-bit color). This value maps the value of enum ChafaDitherMode.",
+                                    "description": "Set output dither mode (No effect with 24-bit color). This value maps to enum ChafaDitherMode.",
                                     "enum": [
                                         "NONE",
                                         "ORDERED",
@@ -600,14 +600,9 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "multithreading": {
-                    "type": "boolean",
-                    "description": "Use multiple threads to detect values",
-                    "default": true
-                },
                 "thread": {
                     "type": "boolean",
-                    "description": "Alias of multithreading",
+                    "description": "Use separate threads for HTTP requests",
                     "default": true
                 },
                 "escapeBedrock": {
@@ -617,7 +612,7 @@
                 },
                 "playerName": {
                     "type": "string",
-                    "description": "The name of the player to use for module Media and Player. Linux only"
+                    "description": "The name of the player to use for Media and Player modules. Linux only"
                 },
                 "dsForceDrm": {
                     "description": "Force display detection to use DRM. Linux only",
@@ -629,13 +624,13 @@
                         },
                         {
                             "type": "string",
-                            "description": "Use `/sys/class/drm` only.",
+                            "description": "Use `/sys/class/drm` only",
                             "const": "sysfs-only"
                         },
                         {
                             "type": "boolean",
                             "const": true,
-                            "description": "Try `libdrm` first, then `sysfs` if libdrm failed"
+                            "description": "Try `libdrm` first, then `sysfs` if libdrm fails"
                         }
                     ],
                     "default": false
@@ -663,7 +658,7 @@
             }
         },
         "display": {
-            "description": "Configure how things to be displayed",
+            "description": "Configure how things should be displayed",
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -682,7 +677,7 @@
                 },
                 "pipe": {
                     "type": "boolean",
-                    "description": "Whether to enable pipe mode (disable logo and all escape sequences)",
+                    "description": "Whether to disable colors (auto-detected based on isatty(1) by default)",
                     "default": false
                 },
                 "showErrors": {
@@ -692,12 +687,12 @@
                 },
                 "disableLinewrap": {
                     "type": "boolean",
-                    "description": "Whether to disable line wrap during the run",
+                    "description": "Whether to disable line wrap during execution",
                     "default": true
                 },
                 "hideCursor": {
                     "type": "boolean",
-                    "description": "Whether to hide the cursor during the run",
+                    "description": "Whether to hide the cursor during execution",
                     "default": true
                 },
                 "separator": {
@@ -709,7 +704,7 @@
                     "description": "Set the color of the keys and title",
                     "oneOf": [
                         {
-                            "description": "Set the both color of the keys and title",
+                            "description": "Set both the colors of keys and title",
                             "$ref": "#/$defs/colors"
                         },
                         {
@@ -774,11 +769,11 @@
                 "size": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how a size value should be displayed",
+                    "description": "Set how size values should be displayed",
                     "properties": {
                         "binaryPrefix": {
                             "type": "string",
-                            "description": "Set the binary prefix to used when formatting sizes",
+                            "description": "Set the binary prefix to use when formatting sizes",
                             "oneOf": [
                                 {
                                     "const": "iec",
@@ -792,7 +787,8 @@
                                     "const": "jedec",
                                     "description": "1024 Bytes = 1 KB, 1024 KB = 1 MB, ..."
                                 }
-                            ]
+                            ],
+                            "default": "iec"
                         },
                         "maxPrefix": {
                             "type": "string",
@@ -816,7 +812,7 @@
                     "properties": {
                         "unit": {
                             "type": "string",
-                            "description": "Set the unit of the temperature",
+                            "description": "Set the unit of temperature",
                             "enum": ["D", "Default", "Celsius", "C", "Fahrenheit", "F", "Kelvin", "K"],
                             "default": "D"
                         },
@@ -830,19 +826,22 @@
                         "color": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Set color used in different states of temperature values",
+                            "description": "Set colors used in different states of temperature values",
                             "properties": {
                                 "green": {
                                     "description": "Color used in green state",
-                                    "$ref": "#/$defs/colors"
+                                    "$ref": "#/$defs/colors",
+                                    "default": "green"
                                 },
                                 "yellow": {
                                     "description": "Color used in yellow state",
-                                    "$ref": "#/$defs/colors"
+                                    "$ref": "#/$defs/colors",
+                                    "default": "light_yellow"
                                 },
                                 "red": {
                                     "description": "Color used in red state",
-                                    "$ref": "#/$defs/colors"
+                                    "$ref": "#/$defs/colors",
+                                    "default": "light_red"
                                 }
                             }
                         }
@@ -884,7 +883,7 @@
                 "percent": {
                     "type": "object",
                     "additionalProperties": false,
-                    "description": "Set how a percentage value should be displayed",
+                    "description": "Set how percentage values should be displayed",
                     "properties": {
                         "type": {
                             "$ref": "#/$defs/percentType"
@@ -899,19 +898,22 @@
                         "color": {
                             "type": "object",
                             "additionalProperties": false,
-                            "description": "Set color used in different states of percentage bars and numbers",
+                            "description": "Set colors used in different states of percentage bars and numbers",
                             "properties": {
                                 "green": {
                                     "description": "Color used in green state",
-                                    "$ref": "#/$defs/colors"
+                                    "$ref": "#/$defs/colors",
+                                    "default": "green"
                                 },
                                 "yellow": {
                                     "description": "Color used in yellow state",
-                                    "$ref": "#/$defs/colors"
+                                    "$ref": "#/$defs/colors",
+                                    "default": "light_yellow"
                                 },
                                 "red": {
                                     "description": "Color used in red state",
-                                    "$ref": "#/$defs/colors"
+                                    "$ref": "#/$defs/colors",
+                                    "default": "light_red"
                                 }
                             }
                         }
@@ -924,7 +926,7 @@
                     "properties": {
                         "ndigits": {
                             "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz of decimal\n-1 will show the frequency in MHz",
+                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz with decimal\n-1 will show the frequency in MHz",
                             "minimum": -1,
                             "maximum": 9,
                             "default": 2
