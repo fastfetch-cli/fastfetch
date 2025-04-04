@@ -374,13 +374,13 @@ static void listModules(bool pretty)
     }
 }
 
-static bool parseJsoncFile(const char* path)
+static bool parseJsoncFile(const char* path, bool strictJson)
 {
     assert(!instance.state.configDoc);
 
     {
         yyjson_read_err error;
-        instance.state.configDoc = yyjson_read_file(path, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, &error);
+        instance.state.configDoc = yyjson_read_file(path, strictJson ? 0 : YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, &error);
         if (!instance.state.configDoc)
         {
             if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
@@ -452,57 +452,52 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         fprintf(stderr, "Error: usage: %s <config>\n", key);
         exit(413);
     }
-    uint32_t fileNameLen = (uint32_t) strlen(value);
-    if(fileNameLen == 0)
-    {
-        fprintf(stderr, "Error: usage: %s <config>\n", key);
-        exit(413);
-    }
 
-    if (ffStrEqualsIgnCase(value, "none"))
+    if (value[0] == '\0' || ffStrEqualsIgnCase(value, "none"))
         return;
-
-    if (ffStrEndsWithIgnCase(value, ".conf"))
-    {
-        fprintf(stderr, "Error: flag based config files are no longer not supported: %s\n", value);
-        exit(414);
-    }
 
     //Try to load as an absolute path
 
-    if (parseJsoncFile(value)) return;
+    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateS(value);
+    bool strictJson = ffStrbufEndsWithIgnCaseS(&absolutePath, ".json");
+    bool needExtension = !strictJson && !ffStrbufEndsWithIgnCaseS(&absolutePath, ".jsonc");
+    if (needExtension)
+        ffStrbufAppendS(&absolutePath, ".jsonc");
 
-    FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(128);
+    if (parseJsoncFile(absolutePath.chars, strictJson)) return;
 
-    //Try to load as a relative path with the directory of fastfetch binary
-    if (instance.state.platform.exePath.length)
+    if (!ffStrbufContainC(&absolutePath, '/')
+        #ifdef _WIN32
+        && !ffStrbufContainC(&absolutePath, '\\')
+        #endif
+    )
     {
-        ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
-        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
-        ffStrbufAppendS(&absolutePath, "/");
-        ffStrbufAppendS(&absolutePath, value);
+        //Try to load as a relative path
 
-        if (parseJsoncFile(absolutePath.chars)) return;
-        ffStrbufClear(&absolutePath);
-    }
-
-    //Try to load as a relative path
-
-    FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
-    {
-        //We need to copy it, because if a config file loads a config file, the value of path must be unchanged
-        ffStrbufSet(&absolutePath, path);
-        ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
-        ffStrbufAppendS(&absolutePath, value);
-
-        bool success = parseJsoncFile(absolutePath.chars);
-        if (!success)
+        FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
         {
-            ffStrbufAppendS(&absolutePath, ".jsonc");
-            success = parseJsoncFile(absolutePath.chars);
+            ffStrbufSet(&absolutePath, path);
+            ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
+            ffStrbufAppendS(&absolutePath, value);
+            if (needExtension)
+                ffStrbufAppendS(&absolutePath, ".jsonc");
+
+            if (parseJsoncFile(absolutePath.chars, strictJson)) return;
         }
 
-        if (success) return;
+        //Try to load as a relative path with the directory of fastfetch binary
+
+        if (instance.state.platform.exePath.length)
+        {
+            ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
+            ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+            ffStrbufAppendS(&absolutePath, "/");
+            ffStrbufAppendS(&absolutePath, value);
+            if (needExtension)
+                ffStrbufAppendS(&absolutePath, ".jsonc");
+
+            if (parseJsoncFile(absolutePath.chars, strictJson)) return;
+        }
     }
 
     //File not found
@@ -665,7 +660,7 @@ static void parseConfigFiles(void)
             uint32_t dirLength = dir->length;
 
             ffStrbufAppendS(dir, "fastfetch/config.jsonc");
-            bool success = parseJsoncFile(dir->chars);
+            bool success = parseJsoncFile(dir->chars, false);
             ffStrbufSubstrBefore(dir, dirLength);
             if (success) return;
         }
