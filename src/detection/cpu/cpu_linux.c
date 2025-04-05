@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
 
@@ -432,11 +433,11 @@ FF_MAYBE_UNUSED static uint16_t getPackageCount(FFstrbuf* cpuinfo)
     {
         p += strlen("\nphysical id\t:");
         char* pend;
-        unsigned long id = strtoul(p, &pend, 10);
+        unsigned long long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false)) // Do 129-socket boards exist?
-            high |= 1 << (id - 64);
+            high |= 1ULL << (id - 64);
         else
-            low |= 1 << id;
+            low |= 1ULL << id;
         p = pend;
     }
 
@@ -458,9 +459,7 @@ FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFC
     cpu->coresOnline = (uint16_t) get_nprocs();
     cpu->packages = getPackageCount(&cpuinfo);
     cpu->coresPhysical = (uint16_t) ffStrbufToUInt(&physicalCoresBuffer, 0); // physical cores in single package
-    if (cpu->coresPhysical == 0)
-        cpu->coresPhysical = cpu->coresLogical;
-    else if (cpu->packages > 1)
+    if (cpu->coresPhysical > 0 && cpu->packages > 1)
         cpu->coresPhysical *= cpu->packages;
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
@@ -472,6 +471,82 @@ FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFC
 }
 
 #else
+
+static const char* detectPhysicalCores(FFCPUResult* cpu)
+{
+    int dfd = open("/sys/devices/system/cpu/", O_RDONLY | O_DIRECTORY);
+    if (dfd < 0) return "open(\"/sys/devices/system/cpu/\") failed";
+
+    FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
+    if (!dir) return "fdopendir(dfd) failed";
+
+    uint64_t pkgLow = 0, pkgHigh = 0;
+
+    struct dirent* entry;
+    FF_LIST_AUTO_DESTROY cpuList = ffListCreate(sizeof(uint32_t));
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_type != DT_DIR || !ffStrStartsWith(entry->d_name, "cpu") || !ffCharIsDigit(entry->d_name[strlen("cpu")]))
+            continue;
+
+        FF_AUTO_CLOSE_FD int cpuxfd = openat(dirfd(dir), entry->d_name, O_RDONLY | O_DIRECTORY);
+        if (cpuxfd < 0)
+            continue;
+
+        char buf[128];
+
+        // Check if the directory contains a file named "topology/physical_package_id"
+        // that lists the physical package id of the CPU.
+
+        ssize_t len = ffReadFileDataRelative(cpuxfd, "topology/physical_package_id", sizeof(buf) - 1, buf);
+        if (len > 0)
+        {
+            buf[len] = '\0';
+            unsigned long long id = strtoul(buf, NULL, 10);
+            if (__builtin_expect(id > 64, false)) // Do 129-socket boards exist?
+                pkgHigh |= 1ULL << (id - 64);
+            else
+                pkgLow |= 1ULL << id;
+        }
+
+        // Check if the directory contains a file named "topology/core_cpus_list"
+        // that lists the physical cores in the package.
+
+        len = ffReadFileDataRelative(cpuxfd, "topology/core_cpus_list", sizeof(buf) - 1, buf);
+        if (len > 0)
+        {
+            buf[len] = '\0'; // low-high or low
+
+            for (const char* p = buf; *p;)
+            {
+                char* pend;
+                uint32_t coreId = (uint32_t) strtoul(p, &pend, 10);
+                if (pend == p) break;
+
+                bool found = false;
+                FF_LIST_FOR_EACH(uint32_t, id, cpuList)
+                {
+                    if (*id == coreId)
+                    {
+                        // This core is already counted
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    *(uint32_t*) ffListAdd(&cpuList) = coreId;
+
+                p = strchr(pend, ',');
+                if (!p) break;
+                ++p;
+            }
+        }
+    }
+
+    cpu->coresPhysical = (uint16_t) cpuList.length;
+    cpu->packages = (uint16_t) (__builtin_popcountll(pkgLow) + __builtin_popcountll(pkgHigh));
+    return NULL;
+}
 
 FF_MAYBE_UNUSED static void parseIsa(FFstrbuf* cpuIsa)
 {
@@ -601,7 +676,7 @@ FF_MAYBE_UNUSED static uint16_t getLoongarchPropCount(FFstrbuf* cpuinfo, const c
 
 FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    cpu->coresPhysical = cpu->coresLogical = (uint16_t) get_nprocs_conf();
+    cpu->coresLogical = (uint16_t) get_nprocs_conf();
     cpu->coresOnline = (uint16_t) get_nprocs();
 
     #if __ANDROID__
@@ -662,6 +737,9 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
             ffStrbufPrependS(&cpu->name, "Machine ");
         #endif
     }
+
+    if (cpu->coresPhysical == 0)
+        detectPhysicalCores(cpu);
 
     return NULL;
 }
