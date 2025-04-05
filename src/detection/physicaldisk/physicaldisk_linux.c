@@ -78,6 +78,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
     ffStrbufInitMove(&device->name, &name);
     ffStrbufInitF(&device->devPath, "/dev/%s", devName);
 
+    bool isVirtual = false;
     {
         ffStrbufInit(&device->interconnect);
         if (ffStrStartsWith(devName, "nvme"))
@@ -97,6 +98,8 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
                     ffStrbufSetStatic(&device->interconnect, "SCSI");
                 else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
                     ffStrbufSetStatic(&device->interconnect, "NVMe");
+                else if (strstr(pathSysDeviceReal, "/virtio") != NULL)
+                    ffStrbufSetStatic(&device->interconnect, "Virtual");
                 else
                 {
                     if (ffAppendFileBufferRelative(devfd, "transport", &device->interconnect))
@@ -106,6 +109,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
         }
     }
 
+    if (!isVirtual)
     {
         char isRotationalChar = '1';
         if (ffReadFileDataRelative(dfd, "queue/rotational", 1, &isRotationalChar) > 0)
