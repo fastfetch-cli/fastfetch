@@ -105,6 +105,24 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     uint32_t clockrate = (uint32_t) ffSysctlGetInt("hw.clockrate", 0);
     if (clockrate > cpu->frequencyBase) cpu->frequencyBase = clockrate;
+
+    for (uint16_t i = 0; i < cpu->coresLogical; ++i)
+    {
+        ffStrbufClear(&buffer);
+        char key[32];
+        snprintf(key, sizeof(key), "dev.cpu.%u.freq_levels", i);
+        if (ffSysctlGetString(key, &buffer) == NULL)
+        {
+            if (buffer.length == 0) continue;
+
+            // MHz/Watts pairs like: 2501/32000 2187/27125 2000/24000
+            uint32_t fmax = (uint32_t) strtoul(buffer.chars, NULL, 10);
+            if (cpu->frequencyMax < fmax) cpu->frequencyMax = fmax;
+        }
+        else
+            break;
+    }
+
     cpu->temperature = FF_CPU_TEMP_UNSET;
 
     if (options->temp)
