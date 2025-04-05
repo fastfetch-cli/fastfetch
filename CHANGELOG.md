@@ -1,3 +1,10 @@
+# 2.40.3
+
+Bugfixes:
+* Fix loading example configs from presets directory (#1672)
+    * Regression of v2.40.2
+* Mark kitty image protocol support for warp terminal on macOS too (Logo)
+
 # 2.40.2
 
 Changes:

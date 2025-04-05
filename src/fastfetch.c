@@ -466,38 +466,31 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     if (parseJsoncFile(absolutePath.chars, strictJson)) return;
 
-    if (!ffStrbufContainC(&absolutePath, '/')
-        #ifdef _WIN32
-        && !ffStrbufContainC(&absolutePath, '\\')
-        #endif
-    )
+    //Try to load as a relative path
+
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
-        //Try to load as a relative path
+        ffStrbufSet(&absolutePath, path);
+        ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
+        ffStrbufAppendS(&absolutePath, value);
+        if (needExtension)
+            ffStrbufAppendS(&absolutePath, ".jsonc");
 
-        FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
-        {
-            ffStrbufSet(&absolutePath, path);
-            ffStrbufAppendS(&absolutePath, "fastfetch/presets/");
-            ffStrbufAppendS(&absolutePath, value);
-            if (needExtension)
-                ffStrbufAppendS(&absolutePath, ".jsonc");
+        if (parseJsoncFile(absolutePath.chars, strictJson)) return;
+    }
 
-            if (parseJsoncFile(absolutePath.chars, strictJson)) return;
-        }
+    //Try to load as a relative path with the directory of fastfetch binary
 
-        //Try to load as a relative path with the directory of fastfetch binary
+    if (instance.state.platform.exePath.length)
+    {
+        ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
+        ffStrbufSubstrBeforeLastC(&absolutePath, '/');
+        ffStrbufAppendS(&absolutePath, "/");
+        ffStrbufAppendS(&absolutePath, value);
+        if (needExtension)
+            ffStrbufAppendS(&absolutePath, ".jsonc");
 
-        if (instance.state.platform.exePath.length)
-        {
-            ffStrbufSet(&absolutePath, &instance.state.platform.exePath);
-            ffStrbufSubstrBeforeLastC(&absolutePath, '/');
-            ffStrbufAppendS(&absolutePath, "/");
-            ffStrbufAppendS(&absolutePath, value);
-            if (needExtension)
-                ffStrbufAppendS(&absolutePath, ".jsonc");
-
-            if (parseJsoncFile(absolutePath.chars, strictJson)) return;
-        }
+        if (parseJsoncFile(absolutePath.chars, strictJson)) return;
     }
 
     //File not found
