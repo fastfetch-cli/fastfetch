@@ -83,6 +83,13 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
         ffStrbufInit(&device->interconnect);
         if (ffStrStartsWith(devName, "nvme"))
             ffStrbufSetStatic(&device->interconnect, "NVMe");
+        else if (ffStrStartsWith(devName, "mmcblk"))
+            ffStrbufSetStatic(&device->interconnect, "MMC");
+        else if (ffStrStartsWith(devName, "md"))
+        {
+            ffStrbufSetStatic(&device->interconnect, "RAID");
+            isVirtual = true;
+        }
         else
         {
             char pathSysDeviceLink[64];
