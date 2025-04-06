@@ -38,6 +38,7 @@ static const char* getHyprland(FFstrbuf* result)
         {
             ffStrbufSubstrAfterFirstC(result, '"');
             ffStrbufSubstrBeforeFirstC(result, '"');
+            ffStrbufTrimLeft(result, 'v');
             FF_DEBUG("Extracted version from version.h: %s", result->chars);
             return NULL;
         }
