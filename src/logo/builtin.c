@@ -2365,7 +2365,7 @@ static const FFlogo K[] = {
     },
     // KDE Neon
     {
-        .names = {"KDE Neon"}, // Distro ID is `neon`; Distro name is `KDE Neon`
+        .names = {"KDE Neon"}, // Distro ID is "neon"; Distro name is "KDE Neon"
         .lines = FASTFETCH_DATATEXT_LOGO_KDENEON,
         .colors = {
             FF_COLOR_FG_GREEN,
