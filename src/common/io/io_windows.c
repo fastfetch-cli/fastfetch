@@ -147,6 +147,14 @@ ssize_t ffReadFileDataRelative(HANDLE dfd, const char* fileName, size_t dataSize
 
 bool ffPathExpandEnv(const char* in, FFstrbuf* out)
 {
+    if (in[0] == '~') {
+        if ((in[1] == '/' || in[1] == '\\' || in[1] == '\0') && !ffStrContainsC(in, '%')) {
+            ffStrbufSet(out, &instance.state.platform.homeDir);
+            ffStrbufAppendS(out, in + 1);
+            return true;
+        }
+    }
+
     DWORD length = ExpandEnvironmentStringsA(in, NULL, 0);
     if (length <= 1) return false;
 
