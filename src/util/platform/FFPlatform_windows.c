@@ -129,14 +129,6 @@ static void getDataDirs(FFPlatform* platform)
     platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_RoamingAppData);
     platformPathAddKnownFolder(&platform->dataDirs, &FOLDERID_LocalAppData);
     ffPlatformPathAddHome(&platform->dataDirs, platform, "");
-
-    if (platform->exePath.length > 0)
-    {
-        // Add ${currentExePath}
-        FF_STRBUF_AUTO_DESTROY path = ffStrbufCreateCopy(&platform->exePath);
-        ffStrbufSubstrBeforeLastC(&path, '/');
-        ffPlatformPathAddAbsolute(&platform->dataDirs, path.chars);
-    }
 }
 
 static void getUserName(FFPlatform* platform)
