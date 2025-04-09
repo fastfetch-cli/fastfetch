@@ -1,3 +1,10 @@
+# 2.40.4
+
+Bugfixes:
+* Fix loading presets config on Windows (Windows, #1682)
+    * Regression of v2.40.0
+* Remove the prefix `v` of Hyprland version on Arch Linux (WM, Linux)
+
 # 2.40.3
 
 Bugfixes:
