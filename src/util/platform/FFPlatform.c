@@ -12,6 +12,7 @@ void ffPlatformInit(FFPlatform* platform)
     ffStrbufInit(&platform->exePath);
 
     ffStrbufInit(&platform->userName);
+    ffStrbufInit(&platform->fullUserName);
     ffStrbufInit(&platform->hostName);
     ffStrbufInit(&platform->userShell);
 

@@ -181,6 +181,8 @@ static void getUserName(FFPlatform* platform, const struct passwd* pwd)
         user = pwd->pw_name;
 
     ffStrbufAppendS(&platform->userName, user);
+
+    if (pwd) ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
 }
 
 static void getHostName(FFPlatform* platform, const struct utsname* uts)

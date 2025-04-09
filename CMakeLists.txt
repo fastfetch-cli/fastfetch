@@ -1589,6 +1589,7 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "propsys"
+        PRIVATE "secur32"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch

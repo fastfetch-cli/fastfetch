@@ -22,6 +22,7 @@ typedef struct FFPlatform
     FFstrbuf exePath; // The real path of current exe
 
     FFstrbuf userName;
+    FFstrbuf fullUserName;
     FFstrbuf hostName;
     FFstrbuf userShell;
 
