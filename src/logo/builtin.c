@@ -197,6 +197,17 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    //AnduinOS
+    {
+        .names = {"anduinos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_UBUNTU,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Antergos
     {
         .names = {"Antergos"},
