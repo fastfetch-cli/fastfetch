@@ -977,7 +977,6 @@ elseif(WIN32)
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
-        src/detection/cpu/cpu_windows.cpp
         src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
@@ -1590,6 +1589,7 @@ elseif(WIN32)
         PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
+        PRIVATE "pdh"
     )
 elseif(FreeBSD)
     target_link_libraries(libfastfetch
