@@ -93,6 +93,7 @@ static const FFlogo A[] = {
     {
         .names = {"Alpine2"},
         .lines = FASTFETCH_DATATEXT_LOGO_ALPINE2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
