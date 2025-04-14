@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 
+#include "common/init.h"
 #include "modules/modules.h"
 
 int main(void)

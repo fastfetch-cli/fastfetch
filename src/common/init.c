@@ -1,4 +1,5 @@
 #include "fastfetch.h"
+#include "common/init.h"
 #include "common/parsing.h"
 #include "common/thread.h"
 #include "detection/displayserver/displayserver.h"

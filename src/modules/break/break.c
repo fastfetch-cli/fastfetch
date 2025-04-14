@@ -1,4 +1,5 @@
 #include "common/printing.h"
+#include "logo/logo.h"
 #include "modules/break/break.h"
 
 void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)

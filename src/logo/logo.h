@@ -21,7 +21,13 @@ typedef struct FFlogo
 } FFlogo;
 
 //logo.c
+void ffLogoPrint(void);
 void ffLogoPrintChars(const char* data, bool doColorReplacement);
+void ffLogoPrintLine(void);
+void ffLogoPrintRemaining(void);
+void ffLogoBuiltinPrint(void);
+void ffLogoBuiltinList(void);
+void ffLogoBuiltinListAutocompletion(void);
 
 //builtin.c
 extern const FFlogo* ffLogoBuiltins[];
