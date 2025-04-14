@@ -89,6 +89,18 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // Alpine2
+    {
+        .names = {"Alpine2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ALPINE2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // AlpineSmall
     {
         .names = {"Alpine_small"},
@@ -111,6 +123,17 @@ static const FFlogo A[] = {
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // Alpine3Small
+    {
+        .names = {"alpine3_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ALPINE3_SMALL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     // Alter
