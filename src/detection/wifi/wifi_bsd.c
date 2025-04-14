@@ -2,15 +2,11 @@
 #include "common/io/io.h"
 #include "util/stringUtils.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
 #include <net/if_media.h>
 #include <net80211/ieee80211_ioctl.h>
-#include <unistd.h>
 
 const char* ffDetectWifi(FFlist* result)
 {
