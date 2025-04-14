@@ -319,7 +319,7 @@ static const char* fujitsuPartId2name(uint32_t partId)
     switch (partId)
     {
     case 0x001: return "A64FX";
-    case 0x003: return "MONAKA"
+    case 0x003: return "MONAKA";
     default: return NULL;
     }
 }
