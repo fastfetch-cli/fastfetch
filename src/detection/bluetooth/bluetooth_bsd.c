@@ -6,7 +6,13 @@
 static int enumDev(FF_MAYBE_UNUSED int sockfd, struct bt_devinfo const* dev, FFlist* devices)
 {
     FFBluetoothResult* device = ffListAdd(devices);
-    ffStrbufInitS(&device->name, bt_devremote_name_gen(dev->devname, &dev->bdaddr));
+    ffStrbufInitS(&device->name,
+        #if __FreeBSD__
+        bt_devremote_name_gen(dev->devname, &dev->bdaddr)
+        #else
+        dev->devname
+        #endif
+    );
     ffStrbufInitS(&device->address, bt_ntoa(&dev->bdaddr, NULL));
     ffStrbufUpperCase(&device->address);
     ffStrbufInit(&device->type);

@@ -734,7 +734,7 @@ elseif(NetBSD)
         src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nbsd.c
         src/detection/bootmgr/bootmgr_bsd.c
@@ -1620,6 +1620,7 @@ elseif(OpenBSD)
     )
 elseif(NetBSD)
     target_link_libraries(libfastfetch
+        PRIVATE "bluetooth"
         PRIVATE "m"
         PRIVATE "prop"
     )
