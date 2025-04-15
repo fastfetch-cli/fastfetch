@@ -1591,6 +1591,12 @@ elseif(WIN32)
         PRIVATE "secur32"
         PRIVATE "pdh"
     )
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+        # WoA only works on Windows 10 or higher
+        target_link_libraries(libfastfetch
+            PRIVATE "mincore"
+        )
+    endif()
 elseif(FreeBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
