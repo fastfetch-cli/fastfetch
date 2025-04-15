@@ -130,7 +130,11 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             switch (GetLastError())
             {
             case ERROR_IO_PENDING:
-                if (!timeout || WaitForSingleObject(hChildPipeRead, (DWORD) timeout) != WAIT_OBJECT_0)
+                #if __aarch64__
+                if (!GetOverlappedResultEx(hChildPipeRead, &overlapped, &nRead, timeout < 0 ? INFINITE : (DWORD) timeout, FALSE))
+                #else
+                // To support Windows 7
+                if (timeout >= 0 && WaitForSingleObject(hChildPipeRead, (DWORD) timeout) != WAIT_OBJECT_0)
                 {
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
@@ -138,13 +142,18 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 }
 
                 if (!GetOverlappedResult(hChildPipeRead, &overlapped, &nRead, FALSE))
+                #endif
                 {
                     if (GetLastError() == ERROR_BROKEN_PIPE)
                         return NULL;
 
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
-                    return "GetOverlappedResult(hChildPipeRead) failed";
+                    return "GetOverlappedResult"
+                        #if __arch64__
+                        "Ex"
+                        #endif
+                        "(hChildPipeRead) failed";
                 }
                 break;
 
