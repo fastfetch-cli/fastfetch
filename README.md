@@ -71,6 +71,10 @@ You may also download the program directly from [the GitHub releases page](https
 
 * `pkg install fastfetch`
 
+### NetBSD
+
+* `pkgin in fastfetch`
+
 ### Android (Termux)
 
 * `pkg install fastfetch`
