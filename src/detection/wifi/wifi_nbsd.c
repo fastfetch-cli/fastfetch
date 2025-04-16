@@ -44,7 +44,6 @@ const char* ffDetectWifi(FFlist* result)
         struct ieee80211_nodereq nr = {};
         strlcpy(nr.nr_ifname, i->if_name, sizeof(nr.nr_ifname));
 
-        // 首先检查接口状态
         struct ifreq ifr = {};
         strlcpy(ifr.ifr_name, i->if_name, sizeof(ifr.ifr_name));
         if (ioctl(sock, SIOCGIFFLAGS, &ifr) < 0) {
@@ -53,13 +52,11 @@ const char* ffDetectWifi(FFlist* result)
             ffStrbufSetStatic(&item->inf.status, ifr.ifr_flags & IFF_UP ? "Up" : "Down");
         }
 
-        // 尝试获取当前连接的节点信息
         if (ioctl(sock, SIOCG80211NODE, &nr) < 0) {
             ffStrbufSetStatic(&item->conn.status, "Not associated");
             continue;
         }
 
-        // 获取SSID
         if (nr.nr_nwid_len > 0) {
             ffStrbufSetStatic(&item->conn.status, "Associated");
             ffStrbufAppendNS(&item->conn.ssid, nr.nr_nwid_len, (char*)nr.nr_nwid);
@@ -68,20 +65,16 @@ const char* ffDetectWifi(FFlist* result)
             continue;
         }
 
-        // 获取BSSID
         ffStrbufSetF(&item->conn.bssid, "%02X:%02X:%02X:%02X:%02X:%02X",
                     nr.nr_bssid[0], nr.nr_bssid[1], nr.nr_bssid[2],
                     nr.nr_bssid[3], nr.nr_bssid[4], nr.nr_bssid[5]);
 
-        // 获取信道和频率
         item->conn.channel = nr.nr_channel;
 
-        // 获取信号强度
         if (nr.nr_max_rssi) {
             item->conn.signalQuality = ((float)nr.nr_rssi / nr.nr_max_rssi) * 100.0;
         }
 
-        // 确定协议类型
         if (nr.nr_flags & IEEE80211_NODEREQ_HT) {
             ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
         } else if (nr.nr_flags & IEEE80211_NODEREQ_VHT) {
@@ -92,7 +85,6 @@ const char* ffDetectWifi(FFlist* result)
             ffStrbufSetStatic(&item->conn.protocol, "802.11g");
         }
 
-        // 获取安全设置
         struct ieee80211_wpaparams wpa = {};
         strlcpy(wpa.i_name, i->if_name, sizeof(wpa.i_name));
 
