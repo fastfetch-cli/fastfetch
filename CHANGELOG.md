@@ -1,5 +1,9 @@
 # 2.41.0
 
+Changes:
+* Due to [the deprecation](https://github.com/actions/runner-images/issues/11101), Linux x86_64 binaries are now built with Ubuntu 22.04 (Glibc 2.35, Debian 12)
+    * You can always build fastfetch yourself on your own. Please don't report bugs related to this change.
+
 Bugfixes:
 * Don't detect disk type for virtual disks (PhysicalDisk, Linux, #1669)
 

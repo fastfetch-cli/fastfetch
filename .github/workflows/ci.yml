@@ -60,7 +60,7 @@ jobs:
 
   linux-amd64:
     name: Linux-amd64
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       security-events: write
       contents: read
@@ -80,12 +80,12 @@ jobs:
         run: cat /proc/cpuinfo
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev directx-headers-dev
 
       - name: install linuxbrew packages
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa ddcutil --ignore-dependencies
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
