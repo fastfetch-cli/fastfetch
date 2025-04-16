@@ -60,7 +60,7 @@ jobs:
 
   linux-amd64:
     name: Linux-amd64
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     permissions:
       security-events: write
       contents: read
@@ -80,12 +80,12 @@ jobs:
         run: cat /proc/cpuinfo
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev directx-headers-dev
 
       - name: install linuxbrew packages
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa ddcutil --ignore-dependencies
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
@@ -151,8 +151,13 @@ jobs:
       - name: install required packages
         run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libxfconf-0-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev libchafa-dev libddcutil-dev rpm
 
+      - name: install linuxbrew packages
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
+
       - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -654,6 +659,68 @@ jobs:
           name: fastfetch-windows-amd64
           path: ./fastfetch-windows-amd64.*
 
+  windows-aarch64:
+    name: Windows-aarch64
+    runs-on: windows-11-arm
+    permissions:
+      security-events: write
+      contents: read
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: setup-msys2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
+          update: true
+          install: git mingw-w64-clang-aarch64-7zip mingw-w64-clang-aarch64-cmake mingw-w64-clang-aarch64-clang mingw-w64-clang-aarch64-vulkan-loader mingw-w64-clang-aarch64-vulkan-headers mingw-w64-clang-aarch64-opencl-icd mingw-w64-clang-aarch64-opencl-headers mingw-w64-clang-aarch64-cppwinrt mingw-w64-clang-aarch64-imagemagick
+
+      - name: print msys version
+        run: uname -a
+
+      - name: configure project
+        run: env PKG_CONFIG_PATH=/clangarm64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build . --verbose -j4
+
+      - name: copy necessary dlls
+        run: cp /clangarm64/bin/{OpenCL,vulkan-1}.dll .
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: ldd fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - name: create zip archive
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-aarch64.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: create 7z archive
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-aarch64.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-windows-aarch64
+          path: ./fastfetch-windows-aarch64.*
+
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
@@ -673,6 +740,7 @@ jobs:
       - netbsd-amd64
       - sunos-amd64
       - windows-amd64
+      - windows-aarch64
     permissions:
       contents: write
     steps:

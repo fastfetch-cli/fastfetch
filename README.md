@@ -71,6 +71,10 @@ You may also download the program directly from [the GitHub releases page](https
 
 * `pkg install fastfetch`
 
+### NetBSD
+
+* `pkgin in fastfetch`
+
 ### Android (Termux)
 
 * `pkg install fastfetch`
@@ -227,6 +231,56 @@ Set the key to a white space.
 ```jsonc
 {
     "key": " "
+}
+```
+
+### Q: How can I display images on Windows?
+
+As of April 2025:
+
+#### mintty and Wezterm
+
+mintty (used by Bash on Windows and MSYS2) and Wezterm (nightly build only) support the iTerm image protocol on Windows.
+
+In `config.jsonc`:  
+```json
+{
+  "logo": {
+    "type": "iterm",
+    "source": "C:/path/to/image.png",
+    "width": <num-in-chars>
+  }
+}
+```
+
+#### Windows Terminal
+
+Windows Terminal supports the sixel image protocol only.
+
+* If you installed fastfetch through MSYS2:
+    1. Install imagemagick: `pacman -S mingw-w64-<subsystem>-x86_64-imagemagick`
+    2. In `config.jsonc`:  
+```jsonc
+{
+  "logo": {
+    "type": "sixel", // DO NOT USE "auto"
+    "source": "C:/path/to/image.png", // Do NOT use `~` as fastfetch is a native Windows program and doesn't apply cygwin path conversion
+    "width": <image-width-in-chars>, // Optional
+    "height": <image-height-in-chars> // Optional
+  }
+}
+```
+* If you installed fastfetch via scoop or downloaded the binary directly from the GitHub Releases page:
+    1. Convert your image manually to sixel format using [any online image conversion service](https://www.google.com/search?q=convert+image+to+sixel)
+    2. In `config.jsonc`:  
+```jsonc
+{
+  "logo": {
+    "type": "raw", // DO NOT USE "auto"
+    "source": "C:/path/to/image.sixel",
+    "width": <image-width-in-chars>, // Required
+    "height": <image-height-in-chars> // Required
+  }
 }
 ```
 

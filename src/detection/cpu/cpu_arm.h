@@ -106,9 +106,14 @@ static const char* armPartId2name(uint32_t partId)
     case 0xd80: return "Cortex-A520";
     case 0xd81: return "Cortex-A720";
     case 0xd82: return "Cortex-X4";
+    case 0xd83: return "Neoverse-V3AE";
     case 0xd84: return "Neoverse-V3";
     case 0xd85: return "Cortex-X925";
     case 0xd87: return "Cortex-A725";
+    case 0xd88: return "Cortex-A520AE";
+    case 0xd89: return "Cortex-A720AE";
+    case 0xd8e: return "Neoverse-N3";
+    case 0xd8f: return "Cortex-A320";
     default: return NULL;
     }
 }
@@ -314,6 +319,7 @@ static const char* fujitsuPartId2name(uint32_t partId)
     switch (partId)
     {
     case 0x001: return "A64FX";
+    case 0x003: return "MONAKA";
     default: return NULL;
     }
 }

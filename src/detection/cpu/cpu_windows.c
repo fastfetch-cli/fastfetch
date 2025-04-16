@@ -4,6 +4,46 @@
 #include "util/mallocHelper.h"
 #include "util/smbiosHelper.h"
 
+#include <pdh.h>
+
+static void ffPdhOpenCloseQuery(HQUERY* query)
+{
+    assert(query);
+    if (*query)
+    {
+        PdhCloseQuery(*query);
+        *query = NULL;
+    }
+}
+
+static const char* detectThermalTemp(double* result)
+{
+    // typeperf.exe -sc 1 "\Thermal Zone Information(*)\Temperature"
+
+    __attribute__((__cleanup__(ffPdhOpenCloseQuery))) HQUERY query = NULL;
+
+    if (PdhOpenQuery(NULL, 0, &query) != ERROR_SUCCESS)
+        return "Failed to open PDH query";
+
+    HCOUNTER counter = NULL;
+    if (PdhAddEnglishCounter(query,
+        L"\\Thermal Zone Information(*)\\Temperature",
+        0,
+        &counter) != ERROR_SUCCESS)
+        return "Failed to add TZI temperature counter";
+
+    if (PdhCollectQueryData(query) != ERROR_SUCCESS)
+        return "Failed to collect query data";
+
+    PDH_FMT_COUNTERVALUE value;
+    if (PdhGetFormattedCounterValue(counter, PDH_FMT_DOUBLE, NULL, &value) != ERROR_SUCCESS)
+        return "Failed to format counter value";
+
+    *result = value.doubleValue - 273;
+
+    return NULL;
+}
+
 // 7.5
 typedef struct FFSmbiosProcessorInfo
 {
@@ -165,8 +205,6 @@ static const char* detectCoreTypes(FFCPUResult* cpu)
     return NULL;
 }
 
-const char* detectThermalTemp(double* current, double* critical);
-
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     detectNCores(cpu);
@@ -182,7 +220,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         detectMaxSpeedBySmbios(cpu);
 
     if(options->temp)
-        detectThermalTemp(&cpu->temperature, NULL);
+        detectThermalTemp(&cpu->temperature);
 
     return NULL;
 }

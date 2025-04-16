@@ -228,7 +228,7 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
     }
 }
 
-static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const char* drmKey)
+static void pciDetectIntelSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer, const char* drmKey)
 {
     // Works for Intel GPUs
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
@@ -238,12 +238,46 @@ static void pciDetectIntelSpecific(FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf*
 
     if (!drmKey) return;
 
-    if (ffStrbufEqualS(&gpu->driver, "xe"))
+    const uint32_t pciDirLen = pciDir->length;
+
+    bool isXE = ffStrbufEqualS(&gpu->driver, "xe");
+    if (isXE)
         ffStrbufAppendS(pciDir, "/tile0/gt0/freq0/max_freq");
     else
         ffStrbufAppendF(pciDir, "/drm/%s/gt_max_freq_mhz", drmKey);
     if (ffReadFileBuffer(pciDir->chars, buffer))
         gpu->frequency = (uint32_t) ffStrbufToUInt(buffer, 0);
+    ffStrbufSubstrBefore(pciDir, pciDirLen);
+
+    if (options->temp)
+    {
+        ffStrbufAppendS(pciDir, "/hwmon/");
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+        if (dirp)
+        {
+            struct dirent* entry;
+            while ((entry = readdir(dirp)) != NULL)
+            {
+                if (entry->d_name[0] == '.') continue;
+
+                ffStrbufSubstrBefore(pciDir, pciDirLen + strlen("/hwmon/"));
+                ffStrbufAppendS(pciDir, entry->d_name);
+                // https://github.com/Syllo/nvtop/blob/73291884d926445e499d6b9b71cb7a9bdbc7c393/src/extract_gpuinfo_intel.c#L279-L281
+                ffStrbufAppendS(pciDir, isXE ? "/temp2_input" : "/temp1_input");
+
+                if (ffReadFileBuffer(pciDir->chars, buffer))
+                {
+                    uint64_t value = ffStrbufToUInt(buffer, 0);
+                    if (value > 0)
+                    {
+                        gpu->temperature = (double) value / 1000;
+                        break;
+                    }
+                }
+            }
+        }
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+    }
 }
 
 static inline int popcountBytes(uint8_t* bytes, uint32_t length)
@@ -500,7 +534,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
     {
-        pciDetectIntelSpecific(gpu, deviceDir, buffer, drmKey);
+        pciDetectIntelSpecific(options, gpu, deviceDir, buffer, drmKey);
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
         if (options->driverSpecific && drmKey)
             drmDetectIntelSpecific(gpu, drmKey, buffer);

@@ -3,6 +3,7 @@
 #include "common/io/io.h"
 #include "util/stringUtils.h"
 
+#if !_WIN32
 const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
 {
     char* path = getenv("PATH");
@@ -47,6 +48,22 @@ const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
     ffStrbufClear(result);
     return "Executable not found";
 }
+#else
+#include <windows.h>
+
+const char* ffFindExecutableInPath(const char* name, FFstrbuf* result)
+{
+    char buffer[MAX_PATH + 1];
+    DWORD length = SearchPathA(NULL, name, ".exe", sizeof(buffer), buffer, NULL);
+    if (length == 0)
+    {
+        ffStrbufClear(result);
+        return "Executable not found";
+    }
+    ffStrbufSetS(result, buffer);
+    return NULL;
+}
+#endif
 
 bool ffIsAbsolutePath(const char* path)
 {

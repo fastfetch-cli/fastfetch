@@ -63,27 +63,3 @@ typedef struct FFinstance
 } FFinstance;
 extern FFinstance instance; // Defined in `common/init.c`
 extern FFModuleBaseInfo** ffModuleInfos[];
-
-//////////////////////
-// Init functions //
-//////////////////////
-
-//common/init.c
-void ffInitInstance();
-void ffStart();
-void ffFinish();
-void ffDestroyInstance();
-
-void ffListFeatures();
-
-////////////////////
-// Logo functions //
-////////////////////
-
-void ffLogoPrint();
-void ffLogoPrintRemaining();
-void ffLogoPrintLine();
-
-void ffLogoBuiltinPrint();
-void ffLogoBuiltinList();
-void ffLogoBuiltinListAutocompletion();

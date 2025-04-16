@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.40.4
+    VERSION 2.41.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -102,7 +102,7 @@ if(NOT BINARY_LINK_TYPE IN_LIST BINARY_LINK_TYPE_OPTIONS)
     message(FATAL_ERROR "BINARY_LINK_TYPE must be one of ${BINARY_LINK_TYPE_OPTIONS}")
 endif()
 
-set(PACKAGE_MANAGERS AM APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SORCERY WINGET XBPS)
+set(PACKAGE_MANAGERS AM APK BREW CHOCO DPKG EMERGE EOPKG FLATPAK GUIX LINGLONG LPKG LPKGBUILD MACPORTS NIX OPKG PACMAN PACSTALL PALUDIS PISI PKG PKGTOOL RPM SCOOP SNAP SOAR SORCERY WINGET XBPS)
 foreach(package_manager ${PACKAGE_MANAGERS})
     if(package_manager STREQUAL "WINGET")
         option(PACKAGES_DISABLE_${package_manager} "Disable ${package_manager} package manager detection by default" ON)
@@ -705,7 +705,7 @@ elseif(FreeBSD)
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_linux.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
@@ -734,7 +734,7 @@ elseif(NetBSD)
         src/common/sysctl.c
         src/detection/battery/battery_nbsd.c
         src/detection/bios/bios_nbsd.c
-        src/detection/bluetooth/bluetooth_nosupport.c
+        src/detection/bluetooth/bluetooth_bsd.c
         src/detection/bluetoothradio/bluetoothradio_nosupport.c
         src/detection/board/board_nbsd.c
         src/detection/bootmgr/bootmgr_bsd.c
@@ -879,7 +879,7 @@ elseif(OpenBSD)
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_obsd.c
         src/detection/wallpaper/wallpaper_linux.c
-        src/detection/wifi/wifi_nosupport.c
+        src/detection/wifi/wifi_nbsd.c
         src/detection/wm/wm_nosupport.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
@@ -977,7 +977,6 @@ elseif(WIN32)
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
-        src/detection/cpu/cpu_windows.cpp
         src/detection/cpucache/cpucache_windows.c
         src/detection/cpuusage/cpuusage_windows.c
         src/detection/cursor/cursor_windows.c
@@ -1589,7 +1588,15 @@ elseif(WIN32)
         PRIVATE "cfgmgr32"
         PRIVATE "winbrand"
         PRIVATE "propsys"
+        PRIVATE "secur32"
+        PRIVATE "pdh"
     )
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+        # WoA only works on Windows 10 or higher
+        target_link_libraries(libfastfetch
+            PRIVATE "mincore"
+        )
+    endif()
 elseif(FreeBSD)
     target_link_libraries(libfastfetch
         PRIVATE "m"
@@ -1613,6 +1620,7 @@ elseif(OpenBSD)
     )
 elseif(NetBSD)
     target_link_libraries(libfastfetch
+        PRIVATE "bluetooth"
         PRIVATE "m"
         PRIVATE "prop"
     )

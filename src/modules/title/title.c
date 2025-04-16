@@ -63,6 +63,7 @@ void ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(userNameColored, "user-name-colored"),
             FF_FORMAT_ARG(atColored, "at-symbol-colored"),
             FF_FORMAT_ARG(hostNameColored, "host-name-colored"),
+            FF_FORMAT_ARG(instance.state.platform.fullUserName, "full-user-name"),
         }));
     }
 }
@@ -170,6 +171,7 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "fullUserName", &instance.state.platform.fullUserName);
     yyjson_mut_obj_add_strbuf(doc, obj, "hostName", &instance.state.platform.hostName);
     yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
@@ -193,6 +195,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"User name (colored)", "user-name-colored"},
         {"@ symbol (colored)", "at-symbol-colored"},
         {"Host name (colored)", "host-name-colored"},
+        {"Full user name", "full-user-name"},
     }))
 };
 

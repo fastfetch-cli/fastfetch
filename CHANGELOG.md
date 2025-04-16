@@ -1,3 +1,33 @@
+# 2.41.0
+
+Changes:
+* Due to [the deprecation](https://github.com/actions/runner-images/issues/11101), Linux x86_64 binaries are now built with Ubuntu 22.04 (Glibc 2.35, Debian 12)
+    * You can always build fastfetch yourself on your own. Please don't report bugs related to this change.
+
+Bugfixes:
+* Don't detect disk type for virtual disks (PhysicalDisk, Linux, #1669)
+
+Features:
+* Support physical core count detection on non-x86 platforms (CPU, Linux / FreeBSD)
+* Support CPU frequency detection on PPC64 (CPU, FreeBSD)
+* Support soar packages count detection (Packages, Linux)
+* Support `~` path expanding on Windows (Logo, Windows)
+* Support retrieving full user name (Title)
+    * Exposed with `--title-format '{full-user-name}'`
+* Improve CPU (thermal zone) temperature detection on Windows (CPU, Windows)
+    * Administrator privileges are no longer needed
+* Support base Wifi info detection on OpenBSD (Wifi, OpenBSD) 
+    * To be tested
+* Support GPU temperature detection for Intel dGPU on Linux (GPU, Linux)
+    * To be tested
+* Add new ARM CPU part numbers (CPU, Linux)
+* Add base implementation of Bluetooth device detection (Bluetooth, NetBSD, #1690)
+* Some small improvements
+
+Logo:
+* Add anduinos
+* Add 2 more Alpine logos
+
 # 2.40.4
 
 Bugfixes:

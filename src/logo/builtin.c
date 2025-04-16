@@ -89,6 +89,18 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // Alpine2
+    {
+        .names = {"Alpine2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ALPINE2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // AlpineSmall
     {
         .names = {"Alpine_small"},
@@ -111,6 +123,17 @@ static const FFlogo A[] = {
             FF_COLOR_FG_WHITE,
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // Alpine3Small
+    {
+        .names = {"alpine3_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_ALPINE3_SMALL,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
     // Alter
@@ -196,6 +219,17 @@ static const FFlogo A[] = {
         },
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    //AnduinOS
+    {
+        .names = {"anduinos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ANDUINOS,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_WHITE,
     },
     // Antergos
     {
@@ -2365,7 +2399,7 @@ static const FFlogo K[] = {
     },
     // KDE Neon
     {
-        .names = {"KDE Neon"}, // Distro ID is `neon`; Distro name is `KDE Neon`
+        .names = {"KDE Neon"}, // Distro ID is "neon"; Distro name is "KDE Neon"
         .lines = FASTFETCH_DATATEXT_LOGO_KDENEON,
         .colors = {
             FF_COLOR_FG_GREEN,

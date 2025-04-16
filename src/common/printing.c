@@ -1,5 +1,6 @@
 #include "fastfetch.h"
 #include "common/printing.h"
+#include "logo/logo.h"
 #include "util/textModifier.h"
 
 void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModuleArgs* moduleArgs, FFPrintType printType)
