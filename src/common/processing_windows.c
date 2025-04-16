@@ -150,7 +150,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                     CancelIo(hChildPipeRead);
                     TerminateProcess(hProcess, 1);
                     return "GetOverlappedResult"
-                        #if __arch64__
+                        #if __aarch64__
                         "Ex"
                         #endif
                         "(hChildPipeRead) failed";
