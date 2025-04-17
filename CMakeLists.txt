@@ -1834,10 +1834,18 @@ if (BUILD_TESTS)
         PRIVATE libfastfetch
     )
 
+    add_executable(fastfetch-test-color
+        tests/color.c
+    )
+    target_link_libraries(fastfetch-test-color
+        PRIVATE libfastfetch
+    )
+
     enable_testing()
     add_test(NAME test-strbuf COMMAND fastfetch-test-strbuf)
     add_test(NAME test-list COMMAND fastfetch-test-list)
     add_test(NAME test-format COMMAND fastfetch-test-format)
+    add_test(NAME test-color COMMAND fastfetch-test-color)
 endif()
 
 ##################
