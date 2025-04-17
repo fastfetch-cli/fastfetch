@@ -4590,8 +4590,20 @@ static const FFlogo S[] = {
 static const FFlogo T[] = {
     // T2
     {
-        .names = {"T2"},
+        .names = {"T2", "T2 SDE", "T2/Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_T2,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    // T2Small
+    {
+        .names = {"T2_small", "T2 SDE_small", "T2/Linux_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_T2_SMALL,
         .colors = {
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_BLUE,
