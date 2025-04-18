@@ -1124,6 +1124,14 @@ static const FFlogo C[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // Codex Linux (reMarkable OS)
+    {
+        .names = {"Codex Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CODEX,
+        .colors = {
+            FF_COLOR_FG_WHITE
+        },
+    },
     // Condres
     {
         .names = {"Condres"},
