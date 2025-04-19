@@ -663,6 +663,17 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Aurora
+    {
+        .names = {"Aurora"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AURORA,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Azos
     {
         .names = {"Azos"},
