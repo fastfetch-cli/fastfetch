@@ -67,6 +67,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     uint32_t freq = (uint32_t) ffSysctlGetInt("machdep.cpu.frequency.target", 0);
     if (freq == 0) freq = (uint32_t) (ffSysctlGetInt64("hw.cpu0.clock_frequency", 0) / 1000000);
+    if (freq == 0) freq = (uint32_t) ffSysctlGetInt("machdep.dmi.processor-frequency", 0);
     if (freq > cpu->frequencyBase) cpu->frequencyBase = freq;
 
     cpu->temperature = FF_CPU_TEMP_UNSET;
