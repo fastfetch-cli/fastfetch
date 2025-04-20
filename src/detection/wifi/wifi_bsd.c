@@ -17,6 +17,7 @@ const char* ffDetectWifi(FFlist* result)
 
     FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if(sock < 0) {
+        if_freenameindex(infs);
         return "socket() failed";
     }
 
