@@ -7,6 +7,9 @@
 
 #if FF_HAVE_LINUX_VIDEODEV2
     #include <linux/videodev2.h>
+#elif __has_include(<sys/videoio.h>) // OpenBSD
+    #include <sys/videoio.h>
+    #define FF_HAVE_LINUX_VIDEODEV2 1
 #endif
 
 const char* ffDetectCamera(FFlist* result)
@@ -19,7 +22,13 @@ const char* ffDetectCamera(FFlist* result)
         path[ARRAY_SIZE(path) - 2] = (char) (i + '0');
         FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY);
         if (fd < 0)
-            break;
+        {
+            if (errno == ENOENT)
+                break;
+            if (errno == ENXIO)
+                continue;
+            return "Failed to open /dev/videoN";
+        }
 
         struct v4l2_capability cap = {};
         if (ioctl(fd, VIDIOC_QUERYCAP, &cap) < 0 || !(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
