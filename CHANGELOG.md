@@ -1,11 +1,27 @@
+# 2.42.0
+
+Bugfixes:
+* Don't detect disk type for virtual disks (PhysicalDisk, Linux, #1669)
+* Fix CPU temperature reports incorrect results (CPU, OpenBSD)
+* Fix setting `logo.chafa.symbols` in JSON config (Logo, #1709)
+
+Features:
+* Support CPU temperature detection (CPU, SunOS)
+* Better CPU frequency detection (CPU, NetBSD)
+* Support Wifi detection (Wifi, NetBSD)
+* Support Webcam detection (Camera, OpenBSD)
+    * Requires root permission
+
+Logos:
+* Add Aurora (#1700)
+* Remove GoralixOS (#1699)
+* Add Codex Linux (#1701)
+
 # 2.41.0
 
 Changes:
 * Due to [the deprecation](https://github.com/actions/runner-images/issues/11101), Linux x86_64 binaries are now built with Ubuntu 22.04 (Glibc 2.35, Debian 12)
     * You can always build fastfetch yourself on your own. Please don't report bugs related to this change.
-
-Bugfixes:
-* Don't detect disk type for virtual disks (PhysicalDisk, Linux, #1669)
 
 Features:
 * Support physical core count detection on non-x86 platforms (CPU, Linux / FreeBSD)
