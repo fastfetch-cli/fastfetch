@@ -49,6 +49,7 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&platform->userName);
     ffStrbufDestroy(&platform->hostName);
     ffStrbufDestroy(&platform->userShell);
+    ffStrbufDestroy(&platform->fullUserName);
 
     FFPlatformSysinfo* info = &platform->sysinfo;
     ffStrbufDestroy(&info->architecture);
