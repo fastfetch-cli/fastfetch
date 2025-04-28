@@ -12,7 +12,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
 
     char levelStr[4] = "L";
-    for (uint32_t i = 0; i < sizeof (result->caches) / sizeof (result->caches[0]) && result->caches[i].length > 0; i++)
+    for (uint32_t i = 0; i < ARRAY_SIZE(result->caches) && result->caches[i].length > 0; i++)
     {
         ffStrbufClear(&key);
         levelStr[1] = (char) ('1' + i);
@@ -72,7 +72,7 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
     uint64_t sum = 0;
-    for (uint32_t i = 0; i < sizeof (result->caches) / sizeof (result->caches[0]) && result->caches[i].length > 0; i++)
+    for (uint32_t i = 0; i < ARRAY_SIZE(result->caches) && result->caches[i].length > 0; i++)
     {
         if (buffer.length)
             ffStrbufAppendS(&buffer, ", ");
@@ -199,7 +199,7 @@ void ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yy
 
     yyjson_mut_val* caches = yyjson_mut_obj_add_obj(doc, module, "result");
 
-    for (uint32_t i = 0; i < sizeof (result.caches) / sizeof (result.caches[0]) && result.caches[i].length > 0; i++)
+    for (uint32_t i = 0; i < ARRAY_SIZE(result.caches) && result.caches[i].length > 0; i++)
     {
         yyjson_mut_val* level = yyjson_mut_obj_add_arr(doc, caches, &"l1\0l2\0l3\0l4\0"[i * 3]);
         FF_LIST_FOR_EACH(FFCPUCache, src, result.caches[i])
