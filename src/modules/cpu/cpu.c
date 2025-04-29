@@ -220,7 +220,7 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_uint(doc, frequency, "max", cpu.frequencyMax);
 
         yyjson_mut_val* coreTypes = yyjson_mut_obj_add_arr(doc, obj, "coreTypes");
-        for (uint32_t i = 0; i < sizeof (cpu.coreTypes) / sizeof (cpu.coreTypes[0]) && cpu.coreTypes[i].count > 0; i++)
+        for (uint32_t i = 0; i < ARRAY_SIZE(cpu.coreTypes) && cpu.coreTypes[i].count > 0; i++)
         {
             yyjson_mut_val* core = yyjson_mut_arr_add_obj(doc, coreTypes);
             yyjson_mut_obj_add_uint(doc, core, "count", cpu.coreTypes[i].count);
