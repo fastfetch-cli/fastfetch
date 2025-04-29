@@ -125,7 +125,7 @@ const char* ffDetectWifi(FFlist* result)
         if (ioctl(sock, SIOCG80211, &ireq) >= 0) {
             struct ieee80211req_sta_info* sta = stareq.req.info;
             if (sta->isi_len != 0) {
-                int8_t rssi = (int8_t) sta->isi_rssi; // This is strange
+                int8_t rssi = (int8_t) sta->isi_rssi; // Strangely, `sta->isi_rssi` is unsigned
                 item->conn.signalQuality = (rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2);
 
                 if (sta->isi_txrate) {
