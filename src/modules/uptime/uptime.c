@@ -7,7 +7,7 @@
 
 void ffPrintUptime(FFUptimeOptions* options)
 {
-    FFUptimeResult result;
+    FFUptimeResult result = {};
 
     const char* error = ffDetectUptime(&result);
 
@@ -19,26 +19,26 @@ void ffPrintUptime(FFUptimeOptions* options)
 
     uint64_t uptime = result.uptime;
 
-    uint32_t milliseconds = (uint32_t) (uptime % 1000);
-    uptime /= 1000;
-    uint32_t seconds = (uint32_t) (uptime % 60);
-    uptime /= 60;
-    uint32_t minutes = (uint32_t) (uptime % 60);
-    uptime /= 60;
-    uint32_t hours = (uint32_t) (uptime % 24);
-    uptime /= 24;
-    uint32_t days = (uint32_t) uptime;
-
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        ffParseDuration(days, hours, minutes, seconds, &buffer);
+        ffParseDuration((uptime + 500) / 1000, &buffer);
 
         ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
+        uint32_t milliseconds = (uint32_t) (uptime % 1000);
+        uptime /= 1000;
+        uint32_t seconds = (uint32_t) (uptime % 60);
+        uptime /= 60;
+        uint32_t minutes = (uint32_t) (uptime % 60);
+        uptime /= 60;
+        uint32_t hours = (uint32_t) (uptime % 24);
+        uptime /= 24;
+        uint32_t days = (uint32_t) uptime;
+
         FF_PRINT_FORMAT_CHECKED(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(days, "days"),
             FF_FORMAT_ARG(hours, "hours"),
