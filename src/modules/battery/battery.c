@@ -27,17 +27,6 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
         }));
     }
 
-
-    uint32_t timeRemaining = result->timeRemaining < 0 ? 0 : (uint32_t) result->timeRemaining;
-
-    uint32_t seconds = timeRemaining % 60;
-    timeRemaining /= 60;
-    uint32_t minutes = timeRemaining % 60;
-    timeRemaining /= 60;
-    uint32_t hours = timeRemaining % 24;
-    timeRemaining /= 24;
-    uint32_t days = timeRemaining;
-
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -70,7 +59,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 if(str.length > 0)
                     ffStrbufAppendS(&str, " (");
 
-                ffParseDuration(days, hours, minutes, seconds, &str);
+                ffParseDuration((uint32_t) result->timeRemaining, &str);
                 ffStrbufAppendS(&str, " remaining)");
             }
         }
@@ -95,6 +84,15 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     }
     else
     {
+        uint32_t timeRemaining = result->timeRemaining < 0 ? 0 : (uint32_t) result->timeRemaining;
+        uint32_t seconds = timeRemaining % 60;
+        timeRemaining /= 60;
+        uint32_t minutes = timeRemaining % 60;
+        timeRemaining /= 60;
+        uint32_t hours = timeRemaining % 24;
+        timeRemaining /= 24;
+        uint32_t days = timeRemaining;
+
         FF_STRBUF_AUTO_DESTROY capacityNum = ffStrbufCreate();
         if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
             ffPercentAppendNum(&capacityNum, result->capacity, options->percent, false, &options->moduleArgs);

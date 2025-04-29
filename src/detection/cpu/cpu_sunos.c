@@ -1,5 +1,58 @@
 #include "cpu.h"
+#include "common/processing.h"
 #include <kstat.h>
+
+static const char* detectCPUTempByKstat(kstat_ctl_t* kc, FFCPUResult* cpu)
+{
+    const char* possibleModules[] = {"temperature", "cpu_temp", "acpi_thermal", NULL};
+
+    for (int i = 0; possibleModules[i] != NULL; i++) {
+        kstat_t* ks = kstat_lookup(kc, possibleModules[i], -1, NULL);
+        if (ks && kstat_read(kc, ks, NULL) >= 0) {
+            kstat_named_t* kn = kstat_data_lookup(ks, "temperature");
+            if (kn) {
+                switch (kn->data_type) {
+                    case KSTAT_DATA_INT32:
+                        cpu->temperature = (float)kn->value.i32;
+                        return NULL;
+                    case KSTAT_DATA_UINT32:
+                        cpu->temperature = (float)kn->value.ui32;
+                        return NULL;
+                    case KSTAT_DATA_FLOAT:
+                        cpu->temperature = kn->value.f;
+                        return NULL;
+                }
+            }
+        }
+    }
+
+    return "Failed to find CPU temperature using kstat";
+}
+
+static const char* detectCPUTempByIpmiTool(FFCPUResult* cpu)
+{
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    const char* error = ffProcessAppendStdOut(&buffer, (char* const[]){
+        "ipmitool",
+        "-c",
+        "sdr",
+        "list",
+        NULL
+    });
+
+    if (error)
+        return error;
+
+    char* line = NULL;
+    size_t len = 0;
+    while (ffStrbufGetline(&line, &len, &buffer))
+    {
+        if (sscanf(line, "CPU%*d Temp,%lf,degrees C,ok", &cpu->temperature) == 1)
+            return NULL;
+    }
+
+    return "ipmitool sdr list failed to find CPU temperature";
+}
 
 static inline void kstatFreeWrap(kstat_ctl_t** pkc)
 {
@@ -8,7 +61,7 @@ static inline void kstatFreeWrap(kstat_ctl_t** pkc)
         kstat_close(*pkc);
 }
 
-const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPUResult* cpu)
+const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
     if (!kc)
@@ -41,6 +94,12 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPURe
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "ncpus");
         if (kn) cpu->coresLogical = cpu->coresPhysical = cpu->coresOnline = (uint16_t) kn->value.ui32;
+    }
+
+    if (options->temp)
+    {
+        if (detectCPUTempByKstat(kc, cpu) != NULL)
+            detectCPUTempByIpmiTool(cpu);
     }
 
     return NULL;

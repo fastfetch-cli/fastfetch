@@ -106,7 +106,10 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
                 else if (strstr(pathSysDeviceReal, "/nvme") != NULL)
                     ffStrbufSetStatic(&device->interconnect, "NVMe");
                 else if (strstr(pathSysDeviceReal, "/virtio") != NULL)
+                {
                     ffStrbufSetStatic(&device->interconnect, "Virtual");
+                    isVirtual = true;
+                }
                 else
                 {
                     if (ffAppendFileBufferRelative(devfd, "transport", &device->interconnect))

@@ -17,6 +17,7 @@ const char* ffDetectWifi(FFlist* result)
 
     FF_AUTO_CLOSE_FD int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if(sock < 0) {
+        if_freenameindex(infs);
         return "socket() failed";
     }
 
@@ -82,22 +83,23 @@ const char* ffDetectWifi(FFlist* result)
             item->conn.channel = curchan.ic_ieee;
             item->conn.frequency = curchan.ic_freq;
 
-            if (IEEE80211_IS_CHAN_FHSS(&curchan))
-                ffStrbufSetStatic(&item->conn.protocol, "802.11 (FHSS)");
-            if (IEEE80211_IS_CHAN_A(&curchan))
-                ffStrbufSetStatic(&item->conn.protocol, "802.11a");
-            if (IEEE80211_IS_CHAN_B(&curchan))
-                ffStrbufSetStatic(&item->conn.protocol, "802.11b");
-            if (IEEE80211_IS_CHAN_ANYG(&curchan))
-                ffStrbufSetStatic(&item->conn.protocol, "802.11g");
-            if (IEEE80211_IS_CHAN_HT(&curchan))
-                ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
-            if (IEEE80211_IS_CHAN_VHT(&curchan))
-                ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
             #ifdef IEEE80211_IS_CHAN_HE // for future use
             if (IEEE80211_IS_CHAN_HE(&curchan))
                 ffStrbufSetStatic(&item->conn.protocol, "802.11ax (Wi-Fi 6)");
+            else
             #endif
+            if (IEEE80211_IS_CHAN_VHT(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11ac (Wi-Fi 5)");
+            else if (IEEE80211_IS_CHAN_HT(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11n (Wi-Fi 4)");
+            else if (IEEE80211_IS_CHAN_ANYG(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11g");
+            else if (IEEE80211_IS_CHAN_B(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11b");
+            else if (IEEE80211_IS_CHAN_A(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11a");
+            else if (IEEE80211_IS_CHAN_FHSS(&curchan))
+                ffStrbufSetStatic(&item->conn.protocol, "802.11 (FHSS)");
         }
 
         union {

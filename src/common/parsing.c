@@ -190,19 +190,26 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
     }
 }
 
-void ffParseDuration(uint32_t days, uint32_t hours, uint32_t minutes, uint32_t seconds, FFstrbuf* result)
+void ffParseDuration(uint64_t totalSeconds, FFstrbuf* result)
 {
-    if(days == 0 && hours == 0 && minutes == 0)
+    if(totalSeconds < 60)
     {
-        ffStrbufAppendF(result, "%u seconds", seconds);
+        ffStrbufAppendF(result, "%u second", (unsigned) totalSeconds);
+        if (totalSeconds != 1)
+            ffStrbufAppendC(result, 's');
         return;
     }
 
-    if(seconds >= 30)
-    {
-        minutes++;
-        seconds = 0;
-    }
+    uint32_t seconds = totalSeconds % 60;
+    totalSeconds /= 60;
+    if (seconds >= 30)
+        totalSeconds++;
+
+    uint32_t minutes = totalSeconds % 60;
+    totalSeconds /= 60;
+    uint32_t hours = totalSeconds % 24;
+    totalSeconds /= 24;
+    uint32_t days = (uint32_t) totalSeconds;
 
     if(days > 0)
     {

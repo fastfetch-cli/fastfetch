@@ -401,7 +401,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
 
             yyjson_val* symbols = yyjson_obj_get(val, "symbols");
             if (symbols)
-                ffStrbufAppendS(&options->chafaSymbols, yyjson_get_str(symbols));
+                ffStrbufSetS(&options->chafaSymbols, yyjson_get_str(symbols));
 
             yyjson_val* canvasMode = yyjson_obj_get(val, "canvasMode");
             if (canvasMode)

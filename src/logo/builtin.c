@@ -663,6 +663,17 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_YELLOW,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Aurora
+    {
+        .names = {"Aurora"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AURORA,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
+    },
     // Azos
     {
         .names = {"Azos"},
@@ -1123,6 +1134,14 @@ static const FFlogo C[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
+    },
+    // Codex Linux (reMarkable OS)
+    {
+        .names = {"Codex Linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_CODEX,
+        .colors = {
+            FF_COLOR_FG_WHITE
+        },
     },
     // Condres
     {
@@ -2017,15 +2036,6 @@ static const FFlogo G[] = {
         },
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_WHITE,
-    },
-    // GoralixOS
-    {
-        .names = {"GoralixOS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_GORALIXOS,
-        .colors = {
-            FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_LIGHT_BLACK,
-        },
     },
     // GrapheneOS
     {
@@ -4590,8 +4600,20 @@ static const FFlogo S[] = {
 static const FFlogo T[] = {
     // T2
     {
-        .names = {"T2"},
+        .names = {"T2", "T2 SDE", "T2/Linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_T2,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE,
+        },
+    },
+    // T2Small
+    {
+        .names = {"T2_small", "T2 SDE_small", "T2/Linux_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_T2_SMALL,
         .colors = {
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_BLUE,

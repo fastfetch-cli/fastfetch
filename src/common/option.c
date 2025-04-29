@@ -177,6 +177,7 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
         if (ffCharIsEnglishAlphabet(value[0]))
         {
             FF_APPEND_COLOR_CODE_COND(reset_, FF_COLOR_MODE_RESET)
+            else FF_APPEND_COLOR_CODE_COND(bold_, FF_COLOR_MODE_BOLD)
             else FF_APPEND_COLOR_CODE_COND(bright_, FF_COLOR_MODE_BOLD)
             else FF_APPEND_COLOR_CODE_COND(dim_, FF_COLOR_MODE_DIM)
             else FF_APPEND_COLOR_CODE_COND(italic_, FF_COLOR_MODE_ITALIC)
@@ -211,6 +212,35 @@ void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
                 fprintf(stderr, "Error: invalid color code found: %s\n", value);
                 exit(479);
             }
+        }
+        else if (value[0] == '#')
+        {
+            // RGB color
+            ++value;
+            char* pend = NULL;
+            uint32_t rgb = (uint32_t) strtoul(value, &pend, 16);
+            if (pend == value) {
+                fprintf(stderr, "Error: invalid RGB color code found: %s\n", value);
+                exit(479);
+            }
+            if (pend - value > 6) {
+                fprintf(stderr, "Error: RGB color code too long: %s\n", value);
+                exit(479);
+            }
+            else if (pend - value == 3) {
+                rgb = ((rgb & 0xF00) >> 8) * 0x110000 +
+                      ((rgb & 0x0F0) >> 4) * 0x001100 +
+                      ((rgb & 0x00F) >> 0) * 0x000011;
+            }
+            else if (pend - value != 6) {
+                fprintf(stderr, "Error: invalid RGB color code length: %s\n", value);
+                exit(479);
+            }
+
+            uint32_t r = rgb >> 16, g = (rgb >> 8) & 0xFF, b = rgb & 0xFF;
+            ffStrbufAppendF(buffer, FF_COLOR_FG_RGB "%u;%u;%u", r, g, b);
+            value = pend;
+            continue;
         }
         ffStrbufAppendC(buffer, *value);
         ++value;

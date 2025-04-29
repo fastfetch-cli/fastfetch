@@ -2,7 +2,7 @@
 
 #include "fastfetch.h"
 
-#define FF_BIOS_MODULE_NAME "Bios"
+#define FF_BIOS_MODULE_NAME "BIOS"
 
 void ffPrintBios(FFBiosOptions* options);
 void ffInitBiosOptions(FFBiosOptions* options);
