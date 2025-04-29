@@ -1,21 +1,27 @@
 # 2.42.0
 
+Changes:
+* Normalize the module name `Bios` to `BIOS` (#1721)
+    * No configuration file changes are required because fastfetch parses module names case-insensitively.
+
 Bugfixes:
-* Don't detect disk type for virtual disks (PhysicalDisk, Linux, #1669)
-* Fix CPU temperature reports incorrect results (CPU, OpenBSD)
-* Fix setting `logo.chafa.symbols` in JSON config (Logo, #1709)
+* Disable disk type detection for virtual disks (PhysicalDisk, Linux, #1669)
+* Fix incorrect CPU temperature reporting (CPU, OpenBSD)
+* Fix setting `logo.chafa.symbols` in JSON configuration (Logo, #1709)
+* Fix non-normalized time display (Uptime, #1720)
+* Miscellaneous minor fixes
 
 Features:
-* Support CPU temperature detection (CPU, SunOS)
-* Better CPU frequency detection (CPU, NetBSD)
-* Support Wifi detection (Wifi, NetBSD)
-* Support Webcam detection (Camera, OpenBSD)
-    * Requires root permission
+* Add CPU temperature detection support (CPU, SunOS)
+* Improve CPU frequency detection (CPU, NetBSD)
+* Add Wi-Fi detection support (Wifi, NetBSD)
+* Add Webcam detection support (Camera, OpenBSD)
+    * Requires root privileges
 
 Logos:
-* Add Aurora (#1700)
-* Remove GoralixOS (#1699)
-* Add Codex Linux (#1701)
+* Remove GoralixOS logo (#1699)
+* Add Aurora logo (#1700)
+* Add Codex Linux logo (#1701)
 
 # 2.41.0
 
@@ -897,7 +903,7 @@ Bugfixes:
 * Fix some presets
 * Better detection for XTerm terminal fonts (#1095, TerminalFont, Linux)
 * Remove debug output (#1097, Windows)
-* Fix command line option `--gpu-hide-type` doesn't work (#1098, GPU)
+* Fix flag `--gpu-hide-type` doesn't work (#1098, GPU)
 * Fix wrong date on Raspbian 10 (#1108, DateTime, Linux)
 * Use `brightness` instead of `actuall_brightness` when detecting current brightness level (Brightness, Linux)
     * Ref: https://bugzilla.kernel.org/show_bug.cgi?id=203905
