@@ -22,11 +22,11 @@ static const char* detectThermalTemp(double* result)
 
     __attribute__((__cleanup__(ffPdhOpenCloseQuery))) HQUERY query = NULL;
 
-    if (PdhOpenQuery(NULL, 0, &query) != ERROR_SUCCESS)
+    if (PdhOpenQueryW(NULL, 0, &query) != ERROR_SUCCESS)
         return "Failed to open PDH query";
 
     HCOUNTER counter = NULL;
-    if (PdhAddEnglishCounter(query,
+    if (PdhAddEnglishCounterW(query,
         L"\\Thermal Zone Information(*)\\Temperature",
         0,
         &counter) != ERROR_SUCCESS)
