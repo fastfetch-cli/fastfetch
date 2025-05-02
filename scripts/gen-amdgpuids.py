@@ -3,7 +3,7 @@
 import sys
 
 def main(amdgpu_ids_path: str):
-    with open(amdgpu_ids_path, 'r') as f:
+    with open(amdgpu_ids_path, 'r', encoding="utf-8") as f:
         full_text = f.read()
 
     products = []
