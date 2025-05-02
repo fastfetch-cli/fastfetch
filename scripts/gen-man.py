@@ -183,7 +183,7 @@ endMandatoryArgument = f"{endUnderline}"
 def main():
 
     # importing the JSON file
-    with open(pathToHelpFile, 'r') as jsonFile:
+    with open(pathToHelpFile, 'r', encoding="utf-8") as jsonFile:
         helpFileData = load(jsonFile) # json.load
 
 
@@ -196,7 +196,7 @@ def main():
     print(f"\"{todayDate}\"", end=" ")
 
     # version number
-    with open(pathToVersionFile, 'r') as versionFile:
+    with open(pathToVersionFile, 'r', encoding="utf-8") as versionFile:
 
         # research version number in file with regex
         for line in versionFile:
