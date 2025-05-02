@@ -38,6 +38,7 @@ const FFArmGpuProduct ffAmdGpuProducts[] = {
     print(code)
 
 if __name__ == '__main__':
-    len(sys.argv) == 2 or sys.exit('Usage: gen-amdgpuids.py </path/to/amdgpu.ids>')
+    if len(sys.argv) != 2:
+        sys.exit('Usage: gen-amdgpuids.py </path/to/amdgpu.ids>')
 
     main(sys.argv[1])
