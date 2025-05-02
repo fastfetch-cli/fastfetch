@@ -76,7 +76,8 @@ const FFPciVendor ffPciVendors[] = {{
     print(code)
 
 if __name__ == '__main__':
-    len(sys.argv) == 2 or sys.exit('Usage: gen-pciids.py </path/to/pci.ids>')
+    if len(sys.argv) != 2:
+        sys.exit('Usage: gen-pciids.py </path/to/pci.ids>')
 
     # From <src/detection/gpu/gpu.c>
     main({
