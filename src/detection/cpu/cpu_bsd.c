@@ -36,7 +36,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         return "sysctlbyname(hw.model) failed";
 
     cpu->coresLogical = (uint16_t) ffSysctlGetInt("hw.ncpu", 1);
-    cpu->coresPhysical = 0;
+    cpu->coresPhysical = (uint16_t) ffSysctlGetInt("kern.smp.cores", 0);
     cpu->coresOnline = (uint16_t) ffSysctlGetInt("kern.smp.cpus", cpu->coresLogical);
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
@@ -57,39 +57,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         //   </children>
         //  </group>
         // </groups>
-        char* line = NULL;
-        size_t len = 0;
-        bool inLvl2 = false, threadGroup = false;
-        uint32_t cpuCount = 0;
-        while (ffStrbufGetline(&line, &len, &buffer))
-        {
-            if (!inLvl2)
-            {
-                if (ffStrStartsWith(line, "   <group level=\"2\""))
-                {
-                    inLvl2 = true;
-                    cpuCount = 0;
-                    threadGroup = false;
-                }
-                else if (ffStrStartsWith(line, " <group level=\"1\""))
-                    cpu->packages++;
-            }
-            else
-            {
-                if (ffStrEquals(line, "   </group>"))
-                {
-                    cpu->coresPhysical += threadGroup ? 1 : cpuCount;
-                    inLvl2 = false;
-                }
-                else if (cpuCount == 0 && ffStrStartsWith(line, "    <cpu count=\""))
-                    cpuCount = (uint32_t) strtoul(line + strlen("    <cpu count=\""), NULL, 10);
-                else if (cpuCount > 0 && ffStrStartsWith(line, "    <flags>"))
-                {
-                    if (ffStrContains(line, "<flag name=\"THREAD\">THREAD group</flag>"))
-                        threadGroup = true;
-                }
-            }
-        }
+        for (char* p = buffer.chars; (p = strstr(p, "\n </group>\n")); ++p)
+            cpu->packages++;
     }
 
 #if FF_HAVE_CPUSET && (__x86_64__ || __i386__)
