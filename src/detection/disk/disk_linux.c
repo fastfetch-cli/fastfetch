@@ -240,9 +240,9 @@ static void detectStats(FFDisk* disk)
     if(statvfs(disk->mountpoint.chars, &fs) != 0)
         memset(&fs, 0, sizeof(fs)); //Set all values to 0, so our values get initialized to 0 too
 
-    disk->bytesTotal = fs.f_blocks * fs.f_frsize;
-    disk->bytesFree = fs.f_bfree * fs.f_frsize;
-    disk->bytesAvailable = fs.f_bavail * fs.f_frsize;
+    disk->bytesTotal = fs.f_blocks * (uint64_t) fs.f_frsize;
+    disk->bytesFree = fs.f_bfree * (uint64_t) fs.f_frsize;
+    disk->bytesAvailable = fs.f_bavail * (uint64_t) fs.f_frsize;
     disk->bytesUsed = 0; // To be filled in ./disk.c
 
     if (fs.f_files >= fs.f_ffree)
