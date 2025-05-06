@@ -335,6 +335,7 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
 {
     FF_LIBRARY_LOAD(xcbRandr, "dlopen libxcb-randr failed", "libxcb-randr" FF_LIBRARY_EXTENSION, 1)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_connect)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_connection_has_error)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_get_setup)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_setup_roots_iterator)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(xcbRandr, xcb_screen_next)
@@ -368,8 +369,11 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
 
 
     data.connection = ffxcb_connect(NULL, NULL);
-    if(data.connection == NULL)
+    if(ffxcb_connection_has_error(data.connection) > 0)
+    {
+        ffxcb_disconnect(data.connection);
         return "xcb_connect() failed";
+    }
 
 
     data.result = result;
