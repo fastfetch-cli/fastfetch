@@ -69,6 +69,7 @@ static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* vers
     if (*path == '\0')
         path = exe->chars;
     ffBinaryExtractStrings(path, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
+    if (version->length > 0) return true;
 
     if(!getExeVersionRaw(exe, version))
         return false;
