@@ -21,7 +21,12 @@
     #include <sys/ioctl.h>
 #endif
 
-#include "gpu_asahi.h"
+#if defined(FF_HAVE_DRM) && __has_include(<drm/asahi_drm.h>)
+    // https://github.com/alyssarosenzweig/linux/blob/agx-uapi-v7/include/uapi/drm/asahi_drm.h
+    // Found in kernel-headers-6.14.4-400.asahi.fc42.aarch64
+    #include <drm/asahi_drm.h>
+    #define FF_HAVE_DRM_ASAHI 1
+#endif
 
 #define FF_STR_INDIR(x) #x
 #define FF_STR(x) FF_STR_INDIR(x)
@@ -590,13 +595,13 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
 
 #if __aarch64__
 
-FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FFstrbuf* buffer, const char* drmKey)
+FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, const char* name, FF_MAYBE_UNUSED FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey)
 {
     if (sscanf(name, "agx-t%lu", &gpu->deviceId) == 1)
         ffStrbufSetStatic(&gpu->name, ffCPUAppleCodeToName((uint32_t) gpu->deviceId));
     ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_APPLE);
 
-    #if FF_HAVE_DRM
+    #if FF_HAVE_DRM_ASAHI
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
     FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
@@ -609,38 +614,32 @@ FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, cons
             .size = sizeof(paramsGlobal),
         }) >= 0)
         {
-            ffStrbufAppendF(&gpu->driver, " %u", paramsGlobal.unstable_uabi_version);
+            // They removed `unstable_uabi_version` from the struct. Hopefully they won't introduce new ABI changes.
+            gpu->coreCount = (int32_t) (paramsGlobal.num_clusters_total * paramsGlobal.num_cores_per_cluster);
+            gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
+            gpu->deviceId = paramsGlobal.chip_id;
 
-            // FIXME: They will introduce ABI breaking changes. Always check the latest version
-            // https://www.reddit.com/r/AsahiLinux/comments/1ei2qiv/comment/lgm0v5s/
-            if (paramsGlobal.unstable_uabi_version == DRM_ASAHI_UNSTABLE_UABI_VERSION)
+            if (!gpu->name.length)
             {
-                gpu->coreCount = (int) paramsGlobal.num_cores_total_active;
-                gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
-                gpu->deviceId = paramsGlobal.chip_id;
-
-                if (!gpu->name.length)
-                {
-                    const char* variant = " Unknown";
-                    switch (paramsGlobal.gpu_variant) {
-                    case 'G':
-                        variant = "";
-                        break;
-                    case 'S':
-                        variant = " Pro";
-                        break;
-                    case 'C':
-                        variant = " Max";
-                        break;
-                    case 'D':
-                        variant = " Ultra";
-                        break;
-                    }
-                    ffStrbufSetF(&gpu->name, "Apple M%d%s (G%d%c %02X)",
-                        paramsGlobal.gpu_generation - 12, variant,
-                        paramsGlobal.gpu_generation, paramsGlobal.gpu_variant,
-                        paramsGlobal.gpu_revision + 0xA0);
+                const char* variant = " Unknown";
+                switch (paramsGlobal.gpu_variant) {
+                case 'G':
+                    variant = "";
+                    break;
+                case 'S':
+                    variant = " Pro";
+                    break;
+                case 'C':
+                    variant = " Max";
+                    break;
+                case 'D':
+                    variant = " Ultra";
+                    break;
                 }
+                ffStrbufSetF(&gpu->name, "Apple M%d%s (G%d%c %02X)",
+                    paramsGlobal.gpu_generation - 12, variant,
+                    paramsGlobal.gpu_generation, paramsGlobal.gpu_variant,
+                    paramsGlobal.gpu_revision + 0xA0);
             }
         }
     }
