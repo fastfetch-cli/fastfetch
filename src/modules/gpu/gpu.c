@@ -173,6 +173,9 @@ void ffPrintGPU(FFGPUOptions* options)
 
     FF_LIST_FOR_EACH(FFGPUResult, gpu, gpus)
     {
+        if(gpu->type == FF_GPU_TYPE_UNKNOWN && options->hideType == FF_GPU_TYPE_UNKNOWN)
+            continue;
+
         if(gpu->type == FF_GPU_TYPE_INTEGRATED && options->hideType == FF_GPU_TYPE_INTEGRATED)
             continue;
 
@@ -230,7 +233,8 @@ bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char
     if (ffStrEqualsIgnCase(subKey, "hide-type"))
     {
         options->hideType = (FFGPUType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "none", FF_GPU_TYPE_UNKNOWN },
+            { "none", FF_GPU_TYPE_NONE },
+            { "unknown", FF_GPU_TYPE_UNKNOWN },
             { "integrated", FF_GPU_TYPE_INTEGRATED },
             { "discrete", FF_GPU_TYPE_DISCRETE },
             {},
@@ -288,7 +292,8 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "none", FF_GPU_TYPE_UNKNOWN },
+                { "none", FF_GPU_TYPE_NONE },
+                { "unknown", FF_GPU_TYPE_UNKNOWN },
                 { "integrated", FF_GPU_TYPE_INTEGRATED },
                 { "discrete", FF_GPU_TYPE_DISCRETE },
                 {},
@@ -345,8 +350,11 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     {
         switch (options->hideType)
         {
-            case FF_GPU_TYPE_UNKNOWN:
+            case FF_GPU_TYPE_NONE:
                 yyjson_mut_obj_add_str(doc, module, "hideType", "none");
+                break;
+            case FF_GPU_TYPE_UNKNOWN:
+                yyjson_mut_obj_add_str(doc, module, "hideType", "unknown");
                 break;
             case FF_GPU_TYPE_INTEGRATED:
                 yyjson_mut_obj_add_str(doc, module, "hideType", "integrated");

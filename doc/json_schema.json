@@ -2053,6 +2053,7 @@
                                         "enum": [
                                             "integrated",
                                             "discrete",
+                                            "unknown",
                                             "none"
                                         ],
                                         "default": "none"

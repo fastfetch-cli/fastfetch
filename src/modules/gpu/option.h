@@ -7,7 +7,8 @@
 
 typedef enum __attribute__((__packed__)) FFGPUType
 {
-    FF_GPU_TYPE_UNKNOWN,
+    FF_GPU_TYPE_NONE,      // Indicates no specific GPU type. Useful as a hide filter only.
+    FF_GPU_TYPE_UNKNOWN,   // Indicates an unknown or unrecognized GPU type.
     FF_GPU_TYPE_INTEGRATED,
     FF_GPU_TYPE_DISCRETE,
 } FFGPUType;

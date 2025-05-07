@@ -1139,12 +1139,13 @@
         },
         {
             "long": "gpu-hide-type",
-            "desc": "Specify which types of GPUs should not be displayed",
+            "desc": "Specify which types of GPUs should not be displayed (default: all GPUs are shown, regardless of recognition)",
             "arg": {
                 "type": "enum",
                 "enum": {
                     "integrated": "Hide integrated GPUs",
                     "discrete": "Hide discrete GPUs",
+                    "unknown": "Hide unknown (unrecognized) GPUs",
                     "none": "Do not hide any GPUs"
                 },
                 "default": "none"
