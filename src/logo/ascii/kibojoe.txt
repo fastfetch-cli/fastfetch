@@ -1,13 +1,13 @@
-${c3}           ./+oooooo+/.
+$3           ./+oooooo+/.
            -/+ooooo+/:.`
-          ${c1}`${c3}yyyo${c2}+++/++${c3}osss${c1}.
-         ${c1}+NMN${c3}yssssssssssss${c1}.
-       ${c1}.dMMMMN${c3}sssssssssssy${c1}Ns`
-      +MMMMMMMm${c3}sssssssssssh${c1}MNo`
-    `hMMMMMNNNMd${c3}sssssssssssd${c1}MMN/
-   .${c3}syyyssssssy${c1}NNmmmmd${c3}sssss${c1}hMMMMd:
-  -NMmh${c3}yssssssssyhhhhyssyh${c1}mMMMMMMMy`
- -NMMMMMNN${c3}mdhyyyyyyyhdm${c1}NMMMMMMMMMMMN+
+          $1`$3yyyo$2+++/++$3osss$1.
+         $1+NMN$3yssssssssssss$1.
+       $1.dMMMMN$3sssssssssssy$1Ns`
+      +MMMMMMMm$3sssssssssssh$1MNo`
+    `hMMMMMNNNMd$3sssssssssssd$1MMN/
+   .$3syyyssssssy$1NNmmmmd$3sssss$1hMMMMd:
+  -NMmh$3yssssssssyhhhhyssyh$1mMMMMMMMy`
+ -NMMMMMNN$3mdhyyyyyyyhdm$1NMMMMMMMMMMMN+
 `NMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMd.
 ods+/:-----://+oyydmNMMMMMMMMMMMMMMMMMN-
 `                     .-:+osyhhdmmNNNmdo

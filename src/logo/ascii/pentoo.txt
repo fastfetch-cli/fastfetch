@@ -1,4 +1,4 @@
-${c2}           `:oydNNMMMMNNdyo:`
+$2           `:oydNNMMMMNNdyo:`
         :yNMMMMMMMMMMMMMMMMNy:
       :dMMMMMMMMMMMMMMMMMMMMMMd:
      oMMMMMMMho/-....-/ohMMMMMMMo
@@ -6,15 +6,15 @@ ${c2}           `:oydNNMMMMNNdyo:`
    .MMMMMMo                oMMMMMM.
    +MMMMMm                  mMMMMM+
    oMMMMMh                  hMMMMMo
- //hMMMMMm//${c1}`${c2}          ${c1}`${c2}////mMMMMMh//
-MMMMMMMMMMM${c1}/${c2}      ${c1}/o/`${c2}  ${c1}.${c2}smMMMMMMMMMMM
-MMMMMMMMMMm      ${c1}`NMN:${c2}    ${c1}.${c2}yMMMMMMMMMM
-MMMMMMMMMMMh${c1}:.${c2}              dMMMMMMMMM
-MMMMMMMMMMMMMy${c1}.${c2}            ${c1}-${c2}NMMMMMMMMM
-MMMMMMMMMMMd:${c1}`${c2}           ${c1}-${c2}yNMMMMMMMMMM
-MMMMMMMMMMh${c1}`${c2}          ${c1}./${c2}hNMMMMMMMMMMMM
-MMMMMMMMMM${c1}s${c2}        ${c1}.:${c2}ymMMMMMMMMMMMMMMM
-MMMMMMMMMMN${c1}s:..-/${c2}ohNMMMMMMMMMMMMMMMMMM
+ //hMMMMMm//$1`$2          $1`$2////mMMMMMh//
+MMMMMMMMMMM$1/$2      $1/o/`$2  $1.$2smMMMMMMMMMMM
+MMMMMMMMMMm      $1`NMN:$2    $1.$2yMMMMMMMMMM
+MMMMMMMMMMMh$1:.$2              dMMMMMMMMM
+MMMMMMMMMMMMMy$1.$2            $1-$2NMMMMMMMMM
+MMMMMMMMMMMd:$1`$2           $1-$2yNMMMMMMMMMM
+MMMMMMMMMMh$1`$2          $1./$2hNMMMMMMMMMMMM
+MMMMMMMMMM$1s$2        $1.:$2ymMMMMMMMMMMMMMMM
+MMMMMMMMMMN$1s:..-/$2ohNMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
  MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM

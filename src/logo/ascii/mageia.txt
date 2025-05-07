@@ -4,7 +4,7 @@
          .   .
           °°° .°°°.
       .°°°.   '___'
-${c2}     .${c1}'___'     ${c2}   .
+$2     .$1'___'     $2   .
    :dkxc;'.  ..,cxkd;
  .dkk. kkkkkkkkkk .kkd.
 .dkk.  ';cloolc;.  .kkd

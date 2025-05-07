@@ -9,10 +9,10 @@
   :loooocooo cloo      loooo
  loooo  :ooooool       loooo
 looo    cooooo        cooooo
-looooooooooooo      ;loooooo ${c2}looooooc
-${c1}looooooooo loo   cloooooool    ${c2}looooc
-${c1} cooo       cooooooooooo       ${c2}looolooooool
-${c1}            cooo:     ${c2}coooooooooooooooooool
+looooooooooooo      ;loooooo $2looooooc
+$1looooooooo loo   cloooooool    $2looooc
+$1 cooo       cooooooooooo       $2looolooooool
+$1            cooo:     $2coooooooooooooooooool
                        loooooooooooolc:   loooc;
                              cooo:    loooooooooooc
                             ;oool         looooooo:

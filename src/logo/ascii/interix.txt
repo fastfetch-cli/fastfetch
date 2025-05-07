@@ -1,17 +1,17 @@
-                   .${c3}.
-${c1}                  75${c3}G!
-${c1}                ^?PG${c3}&&J.
-${c1}              :!5GPP${c3}&&&B!
-${c1}             :YPPPPP${c3}&&&&&Y:
-${c1}            !5PPPPPP${c3}&&&&&&B!
-${c1}          :?PPPPPPPP${c3}&&&&&&&&Y~
-${c1}         !5PPPPPPPPP${c3}###&&&&&&B7
-${c1}       :?PPPP5555555${c3}B####&&&&&&5:
-${c1}      ~5PPPP555YJ${c5}7!~7?${c3}5B###&&&&&B?.
-${c1}   .:JPPPP5555Y${c5}?^....:^?${c3}G####&&&&&5:
-${c1}   75PPP555555Y${c5}7:....:^!${c3}5#####&&&&&B7.
-${c1} :JPPPP${c2}555555YY?${c5}~::::^~${c2}7YPGBB###${c3}&&&&&5^
-${c1}75${c2}GGPPPPPP555555YJ?77??YYYYYY55PPGGB#${c3}&B?
-${c2}~!!7JY5PGGBBBBBBBBGGGGGGGBGGGGGP5YJ?7~~~
+                   .$3.
+$1                  75$3G!
+$1                ^?PG$3&&J.
+$1              :!5GPP$3&&&B!
+$1             :YPPPPP$3&&&&&Y:
+$1            !5PPPPPP$3&&&&&&B!
+$1          :?PPPPPPPP$3&&&&&&&&Y~
+$1         !5PPPPPPPPP$3###&&&&&&B7
+$1       :?PPPP5555555$3B####&&&&&&5:
+$1      ~5PPPP555YJ$57!~7?$35B###&&&&&B?.
+$1   .:JPPPP5555Y$5?^....:^?$3G####&&&&&5:
+$1   75PPP555555Y$57:....:^!$35#####&&&&&B7.
+$1 :JPPPP$2555555YY?$5~::::^~$27YPGBB###$3&&&&&5^
+$175$2GGPPPPPP555555YJ?77??YYYYYY55PPGGB#$3&B?
+$2~!!7JY5PGGBBBBBBBBGGGGGGGBGGGGGP5YJ?7~~~
        .::^~7?JYPGBB#BGPYJ?7!7^:.
                  ..:^...

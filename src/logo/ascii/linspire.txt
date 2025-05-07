@@ -1,12 +1,12 @@
-${c2}                                                   __^
-${c2}                                                __/    \
-${c2}   MMy        dMy                            __/        \
-${c2}  dMMy        MMy                            ${c1}MM${c2}          \
-${c2}  MMMy            ,,        ${c1}dMMMMn                        ${c2}\
-${c2} dMMy        dMM dMMMMMMy  ${c1}dMM  MM dMMMMMy  dMM MM.nMMM dMMMMMM
-${c1}MMM          ${c2}MMy MMy  MMy ${c1}dMM      MMy  MMy MMy MMy    dy   dMy
-${c1}MMM         ${c2}dMM dMM   MMy  ${c1}dMMMMy dMM  dMM dMM dMM    dMMMMMMM
-${c2} dMMy       MMy MMy  MMy     ${c1}dMMy MM  MMy MMy  MMy    dMM
-${c2}dMMy       dMM dMM  dMM ${c1}dMM  MMy dMMMMMy dMM  dMM     MMy   MM
-${c2}MMMMMMMMMM MMy MMy  MMy ${c1}dMMMyyy MMy     MMy  MMy      dMMMMMMy
-${c2}                                ${c1}dy
+$2                                                   __^
+$2                                                __/    \
+$2   MMy        dMy                            __/        \
+$2  dMMy        MMy                            $1MM$2          \
+$2  MMMy            ,,        $1dMMMMn                        $2\
+$2 dMMy        dMM dMMMMMMy  $1dMM  MM dMMMMMy  dMM MM.nMMM dMMMMMM
+$1MMM          $2MMy MMy  MMy $1dMM      MMy  MMy MMy MMy    dy   dMy
+$1MMM         $2dMM dMM   MMy  $1dMMMMy dMM  dMM dMM dMM    dMMMMMMM
+$2 dMMy       MMy MMy  MMy     $1dMMy MM  MMy MMy  MMy    dMM
+$2dMMy       dMM dMM  dMM $1dMM  MMy dMMMMMy dMM  dMM     MMy   MM
+$2MMMMMMMMMM MMy MMy  MMy $1dMMMyyy MMy     MMy  MMy      dMMMMMMy
+$2                                $1dy
