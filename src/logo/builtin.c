@@ -2267,6 +2267,15 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Hydra Framework
+    {
+        .names = {"Hydra"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HYDRA,
+        .colors = {
+                FF_COLOR_FG_RED,
+                FF_COLOR_FG_WHITE,
+        },
+    },
     // LAST
     {},
 };
