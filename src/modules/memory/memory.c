@@ -116,7 +116,7 @@ void ffGenerateMemoryJsonConfig(FFMemoryOptions* options, yyjson_mut_doc* doc, y
 
 void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FFMemoryResult storage;
+    FFMemoryResult storage = {};
     const char* error = ffDetectMemory(&storage);
 
     if(error)
