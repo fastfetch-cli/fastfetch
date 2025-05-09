@@ -505,7 +505,7 @@ void ffInitGPUOptions(FFGPUOptions* options)
         #endif
     ;
     options->temp = false;
-    options->hideType = FF_GPU_TYPE_UNKNOWN;
+    options->hideType = FF_GPU_TYPE_NONE;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }
