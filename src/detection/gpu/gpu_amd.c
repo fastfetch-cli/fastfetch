@@ -208,8 +208,8 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
                 // If we have dedicated VRAM usage, subtract it from the total
                 if (result.memory->used != FF_GPU_VMEM_SIZE_UNSET)
                     result.sharedMemory->used -= result.memory->used;
-                FF_DEBUG("Total VRAM usage: %llu bytes, Shared VRAM usage: %llu bytes (%llu MB)",
-                         totalUsage, result.sharedMemory->used, result.sharedMemory->used / (1024 * 1024));
+                FF_DEBUG("Total VRAM usage: %llu bytes (%llu MB), Shared VRAM usage: %llu bytes (%llu MB)",
+                         totalUsage, totalUsage / (1024 * 1024), result.sharedMemory->used, result.sharedMemory->used / (1024 * 1024));
             } else {
                 FF_DEBUG("Failed to get total VRAM usage");
             }
