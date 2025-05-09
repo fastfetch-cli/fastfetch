@@ -55,6 +55,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__) || defined(__OpenBSD__)
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/mman.h>
 #include <stddef.h>
 
