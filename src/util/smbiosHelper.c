@@ -32,6 +32,7 @@ bool ffIsSmbiosValueSet(FFstrbuf* value)
         !ffStrbufIgnCaseEqualS(value, "All Series") &&
         !ffStrbufIgnCaseEqualS(value, "N/A") &&
         !ffStrbufIgnCaseEqualS(value, "Unknown") &&
+        !ffStrbufIgnCaseEqualS(value, "Standard") &&
         !ffStrbufIgnCaseEqualS(value, "0x0000")
     ;
 }
