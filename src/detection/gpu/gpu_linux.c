@@ -145,25 +145,22 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
         gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-        #define FF_VRAM_CASE(x) case AMDGPU_VRAM_TYPE_ ## x: ffStrbufSetStatic(&gpu->memoryType, #x); break
+        #define FF_VRAM_CASE(name, value) case value /* AMDGPU_VRAM_TYPE_ ## name */: ffStrbufSetStatic(&gpu->memoryType, #name); break
         switch (gpuInfo.vram_type)
         {
-            FF_VRAM_CASE(UNKNOWN);
-            FF_VRAM_CASE(GDDR1);
-            FF_VRAM_CASE(DDR2);
-            FF_VRAM_CASE(GDDR3);
-            FF_VRAM_CASE(GDDR4);
-            FF_VRAM_CASE(GDDR5);
-            FF_VRAM_CASE(HBM);
-            FF_VRAM_CASE(DDR3);
-            FF_VRAM_CASE(DDR4);
-            FF_VRAM_CASE(GDDR6);
-            FF_VRAM_CASE(DDR5);
-            FF_VRAM_CASE(LPDDR4);
-            FF_VRAM_CASE(LPDDR5);
-            #ifdef AMDGPU_VRAM_TYPE_GDDR7
-                FF_VRAM_CASE(GDDR7);
-            #endif
+            FF_VRAM_CASE(UNKNOWN, 0);
+            FF_VRAM_CASE(GDDR1, 1);
+            FF_VRAM_CASE(DDR2, 2);
+            FF_VRAM_CASE(GDDR3, 3);
+            FF_VRAM_CASE(GDDR4, 4);
+            FF_VRAM_CASE(GDDR5, 5);
+            FF_VRAM_CASE(HBM, 6);
+            FF_VRAM_CASE(DDR3, 7);
+            FF_VRAM_CASE(DDR4, 8);
+            FF_VRAM_CASE(GDDR6, 9);
+            FF_VRAM_CASE(DDR5, 10);
+            FF_VRAM_CASE(LPDDR4, 11);
+            FF_VRAM_CASE(LPDDR5, 12);
             default:
                 ffStrbufAppendF(&gpu->memoryType, "Unknown (%u)", gpuInfo.vram_type);
                 break;
