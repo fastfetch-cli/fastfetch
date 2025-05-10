@@ -253,6 +253,11 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
                     gpu->shared.used = value;
             }
         }
+
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+        ffStrbufAppendS(pciDir, "/gpu_busy_percent");
+        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+            gpu->coreUsage = (double) value;
     }
 }
 
