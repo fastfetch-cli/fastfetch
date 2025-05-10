@@ -145,6 +145,29 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
         gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
         gpu->index = FF_GPU_INDEX_UNSET;
         gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+        #define FF_VRAM_CASE(x) case AMDGPU_VRAM_TYPE_ ## x: ffStrbufSetStatic(&gpu->memoryType, #x); break
+        switch (gpuInfo.vram_type)
+        {
+            FF_VRAM_CASE(UNKNOWN);
+            FF_VRAM_CASE(GDDR1);
+            FF_VRAM_CASE(DDR2);
+            FF_VRAM_CASE(GDDR3);
+            FF_VRAM_CASE(GDDR4);
+            FF_VRAM_CASE(GDDR5);
+            FF_VRAM_CASE(HBM);
+            FF_VRAM_CASE(DDR3);
+            FF_VRAM_CASE(DDR4);
+            FF_VRAM_CASE(GDDR6);
+            FF_VRAM_CASE(DDR5);
+            FF_VRAM_CASE(LPDDR4);
+            FF_VRAM_CASE(LPDDR5);
+            #ifdef AMDGPU_VRAM_TYPE_GDDR7
+                FF_VRAM_CASE(GDDR7);
+            #endif
+            default:
+                ffStrbufAppendF(&gpu->memoryType, "Unknown (%u)", gpuInfo.vram_type);
+                break;
+        }
 
         struct amdgpu_heap_info heapInfo;
         if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_VRAM, 0, &heapInfo) >= 0)
