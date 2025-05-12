@@ -7,12 +7,12 @@
         .oddddddddddddddc.
       ,dddddddddddddddo.
     ,ccoooooooocoddooo:
-  ,cooooooooooooooooop ${c3}                 c000x.
-${c1}.cooooooooooooooopcllll${c3}              .cddddddo.
-${c1}coooooooooooooop' .qlll.${c3}           .ddoooooooo;
-${c1}cooooooooooc;        ${c3}'qlllp.     .ddoooooooooo;
-${c1}.cooooooc;             ${c3}'lllbc...coooooooooooo;
-${c1}  .cooc'                ${c3}.llllcoooooooooooooo.
+  ,cooooooooooooooooop $3                 c000x.
+$1.cooooooooooooooopcllll$3              .cddddddo.
+$1coooooooooooooop' .qlll.$3           .ddoooooooo;
+$1cooooooooooc;        $3'qlllp.     .ddoooooooooo;
+$1.cooooooc;             $3'lllbc...coooooooooooo;
+$1  .cooc'                $3.llllcoooooooooooooo.
                          .coooooooooooooop:
                        .coooooooooooooop'
                       .cooooooooooooop.

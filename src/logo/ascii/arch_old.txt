@@ -2,15 +2,15 @@
          _=(SDGJT=_
        _GTDJHGGFCVS)
       ,GTDJGGDTDFBGX0
-${c1}     JDJDIJHRORVFSBSVL${c2}-=+=,_
-${c1}    IJFDUFHJNXIXCDXDSV,${c2}  "DEBL
-${c1}   [LKDSDJTDU=OUSCSBFLD.${c2}   '?ZWX,
-${c1}  ,LMDSDSWH'     `DCBOSI${c2}     DRDS],
-${c1}  SDDFDFH'         !YEWD,${c2}   )HDROD
-${c1} !KMDOCG            &GSU|${c2}\_GFHRGO\'
-${c1} HKLSGP'${c2}           __${c1}\TKM0${c2}\GHRBV)'
-${c1}JSNRVW'${c2}       __+MNAEC${c1}\IOI,${c2}\BN'
-${c1}HELK['${c2}    __,=OFFXCBGHC${c1}\FD)
-${c1}?KGHE ${c2}\_-#DASDFLSV='${c1}    'EF
+$1     JDJDIJHRORVFSBSVL$2-=+=,_
+$1    IJFDUFHJNXIXCDXDSV,$2  "DEBL
+$1   [LKDSDJTDU=OUSCSBFLD.$2   '?ZWX,
+$1  ,LMDSDSWH'     `DCBOSI$2     DRDS],
+$1  SDDFDFH'         !YEWD,$2   )HDROD
+$1 !KMDOCG            &GSU|$2\_GFHRGO\'
+$1 HKLSGP'$2           __$1\TKM0$2\GHRBV)'
+$1JSNRVW'$2       __+MNAEC$1\IOI,$2\BN'
+$1HELK['$2    __,=OFFXCBGHC$1\FD)
+$1?KGHE $2\_-#DASDFLSV='$1    'EF
 'EHTI                    !H
  `0F'                    '!

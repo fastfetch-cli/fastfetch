@@ -5,7 +5,7 @@
            .';;;:::;,,.x,
       ..'''.            0Xxoc:,.  ...
   ....                ,ONkc;,;cokOdc',.
- .                   OMo           ':${c2}dd${c1}o.
+ .                   OMo           ':$2dd$1o.
                     dMc               :OO;
                     0M.                 .:o.
                     ;Wd

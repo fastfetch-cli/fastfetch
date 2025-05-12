@@ -4,13 +4,13 @@
    Nsshhy+.              `/shhysm
   dohhy/                    -shhsy
  dohhs`                       /hhys
-N+hho   ${c2}+ssssss+-   .+syhys+   ${c1}/hhsy
-ohhh`   ${c2}ymmo++hmm+`smmy/::+y`   ${c1}shh+
-+hho    ${c2}ymm-  /mmy+mms          ${c1}:hhod
-/hh+    ${c2}ymmhhdmmh.smm/          ${c1}.hhsh
-+hhs    ${c2}ymm+::-`  /mmy`    `    ${c1}/hh+m
-yyhh-   ${c2}ymm-       /dmdyosyd`  ${c1}`yhh+
- ohhy`  ${c2}://`         -/+++/-   ${c1}ohhom
+N+hho   $2+ssssss+-   .+syhys+   $1/hhsy
+ohhh`   $2ymmo++hmm+`smmy/::+y`   $1shh+
++hho    $2ymm-  /mmy+mms          $1:hhod
+/hh+    $2ymmhhdmmh.smm/          $1.hhsh
++hhs    $2ymm+::-`  /mmy`    `    $1/hh+m
+yyhh-   $2ymm-       /dmdyosyd`  $1`yhh+
+ ohhy`  $2://`         -/+++/-   $1ohhom
  N+hhy-                      `shhoh
    sshho.                  `+hhyom
     dsyhhs/.            `:ohhhoy

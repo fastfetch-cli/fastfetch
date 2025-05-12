@@ -1,20 +1,20 @@
-${c1}          :+ooo/.      ${c2}./ooo+:
-${c1}        :+ooooooo/.  ${c2}./ooooooo+:
-${c1}      :+ooooooooooo:${c2}:ooooooooooo+:
-${c1}    :+ooooooooooo+-  ${c2}-+ooooooooooo+:
-${c1}  :+ooooooooooo+-  ${c3}--  ${c2}-+ooooooooooo+:
-${c1}.+ooooooooooo+-  ${c3}:+oo+:  ${c2}-+ooooooooooo+-
-${c1}-+ooooooooo+-  ${c3}:+oooooo+:  ${c2}-+oooooooooo-
-${c1}  :+ooooo+-  ${c3}:+oooooooooo+:  ${c2}-+oooooo:
-${c1}    :+o+-  ${c3}:+oooooooooooooo+:  ${c2}-+oo:
-${c4}     ./   ${c3}:oooooooooooooooooo:   ${c5}/.
-${c4}   ./oo+:  ${c3}-+oooooooooooooo+-  ${c5}:+oo/.
-${c4} ./oooooo+:  ${c3}-+oooooooooo+-  ${c5}:+oooooo/.
-${c4}-oooooooooo+:  ${c3}-+oooooo+-  ${c5}:+oooooooooo-
-${c4}.+ooooooooooo+:  ${c3}-+oo+-  ${c5}:+ooooooooooo+.
-${c4}  -+ooooooooooo+:  ${c3}..  ${c5}:+ooooooooooo+-
-${c4}    -+ooooooooooo+:  ${c5}:+ooooooooooo+-
-${c4}      -+oooooooooo+:${c5}:+oooooooooo+-
-${c4}        -+oooooo+:    ${c5}:+oooooo+-
-${c4}          -+oo+:        ${c5}:+oo+-
-${c4}            ..            ${c5}..
+$1          :+ooo/.      $2./ooo+:
+$1        :+ooooooo/.  $2./ooooooo+:
+$1      :+ooooooooooo:$2:ooooooooooo+:
+$1    :+ooooooooooo+-  $2-+ooooooooooo+:
+$1  :+ooooooooooo+-  $3--  $2-+ooooooooooo+:
+$1.+ooooooooooo+-  $3:+oo+:  $2-+ooooooooooo+-
+$1-+ooooooooo+-  $3:+oooooo+:  $2-+oooooooooo-
+$1  :+ooooo+-  $3:+oooooooooo+:  $2-+oooooo:
+$1    :+o+-  $3:+oooooooooooooo+:  $2-+oo:
+$4     ./   $3:oooooooooooooooooo:   $5/.
+$4   ./oo+:  $3-+oooooooooooooo+-  $5:+oo/.
+$4 ./oooooo+:  $3-+oooooooooo+-  $5:+oooooo/.
+$4-oooooooooo+:  $3-+oooooo+-  $5:+oooooooooo-
+$4.+ooooooooooo+:  $3-+oo+-  $5:+ooooooooooo+.
+$4  -+ooooooooooo+:  $3..  $5:+ooooooooooo+-
+$4    -+ooooooooooo+:  $5:+ooooooooooo+-
+$4      -+oooooooooo+:$5:+oooooooooo+-
+$4        -+oooooo+:    $5:+oooooo+-
+$4          -+oo+:        $5:+oo+-
+$4            ..            $5..

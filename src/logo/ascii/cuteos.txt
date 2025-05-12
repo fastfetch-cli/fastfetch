@@ -1,14 +1,14 @@
-                       ${c3}1ua${c2}
-                  ${c3}MMM1ua${c2}
- ${c1}MM${c2}EE        ${c3} MMMMM1uazE${c2}
-${c1}MM ${c2}EEEE     ${c3}M1MM1uazzEn ${c2}EEEE  MME
-    EEEEE  ${c3}MMM uazEno ${c2}EEEE
-    EEEEE${c1}MMMMMMEno~; ${c2}EE          E${c2}
-     EE ${c1}MMMMMMMM~;;E  ${c2}MMMMM      M ${c2}
-     E ${c1}MMMMMMMMM          ${c2}  E  E   ${c2}
-      ${c1}MMMMMMMMMMM
-           ${c1}MMMMMMMMM ${c2}EE ${c1}
-                MM1MMMM ${c2}EEE ${c1}
+                       $31ua$2
+                  $3MMM1ua$2
+ $1MM$2EE        $3 MMMMM1uazE$2
+$1MM $2EEEE     $3M1MM1uazzEn $2EEEE  MME
+    EEEEE  $3MMM uazEno $2EEEE
+    EEEEE$1MMMMMMEno~; $2EE          E$2
+     EE $1MMMMMMMM~;;E  $2MMMMM      M $2
+     E $1MMMMMMMMM          $2  E  E   $2
+      $1MMMMMMMMMMM
+           $1MMMMMMMMM $2EE $1
+                MM1MMMM $2EEE $1
                      MMMMM
                           MMM
                               M

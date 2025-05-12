@@ -1,25 +1,25 @@
                .-/+ooosssssssooo+\-.
             ,:+sssssssssssssssssssss+:.
-         -+ssssssssssssssssssss${c2}.....${c1}ssss+-
-       .ssssss${c2},${c1}ss${c2}:cloooooo:${c1}ss${c2}.:loooo.${c1}ssssss.
-    .ssssssss${c2}loo${c1}ss${c2}oooooooc${c1}ss${c2}.ooooooooo${c1}ssssss.
-   .ssssss${c2}.;looooool:,''.${c1}ss${c2}:ooooooooooc${c1}ssssss.
-  +ssssss${c2};loooool;.${c1}ssssssssss${c2}ooooooooo${c1}ssssssss+
- /ssssss${c2};clool'${c1}sssssssssssssss${c2}ooooooc${c1}ssss${c2},,${c1}sssss.
-.sssssssssssssssssssssssssssssssssssss${c2}.:oo,${c1}sssss.
-.sssss${c2}.;clol:,.${c1}ssssssssssssssssssssss${c2}.loooo'${c1}ssss.
-+ssss${c2}:ooooooooo,${c1}ssssssssssssssssssssss${c2}'ooool${c1}ssss+
-osss${c2}'ooooooooooo.${c1}ssssssssssssssssssssss${c2}loooo.${c1}ssso
-osss${c2}'ooooooooool${c1}sssssssssssssssssssssss${c2}co${c1}ssssssso
-ossss${c2},looooooc.${c1}sssssssssssssssssssssss${c2}.loooo.${c1}ssso
-+ssssss${c2}.,;;;'.${c1}ssssssssssssssssssssssss${c2};ooooc${c1}ssss+
-.ssssssssssssssssssssssssssssssssssss${c2},ooool.${c1}ssss.
-.sssssss${c2}.cooooc.${c1}sssssssssssss${c2}.,,,,.${c1}ss${c2}.cooo.${c1}sssss.
- `sssssss${c2}ooooo:.${c1}ssssssssssss${c2}oooooooc.${c1}ss${c2}:l.${c1}sssss'
-  +ssssss${c2}.coooooc,..${c1}sssssss${c2}cooooooooo.${c1}ssssssss+
-   `sssssss${c2}.:oo${c1}s${c2}ooooolc:.${c1}s${c2}.ooooooooooo'${c1}ssssss'
-    .sssssss${c2}.o${c1}ss${c2}`:loooo;${c1}sss${c2},ooooooooc${c1}sssssss.
-     `sssssssss${c2};oooo';:c'${c1}ssss${c2}`:ooo:'${c1}sssssss'
+         -+ssssssssssssssssssss$2.....$1ssss+-
+       .ssssss$2,$1ss$2:cloooooo:$1ss$2.:loooo.$1ssssss.
+    .ssssssss$2loo$1ss$2oooooooc$1ss$2.ooooooooo$1ssssss.
+   .ssssss$2.;looooool:,''.$1ss$2:ooooooooooc$1ssssss.
+  +ssssss$2;loooool;.$1ssssssssss$2ooooooooo$1ssssssss+
+ /ssssss$2;clool'$1sssssssssssssss$2ooooooc$1ssss$2,,$1sssss.
+.sssssssssssssssssssssssssssssssssssss$2.:oo,$1sssss.
+.sssss$2.;clol:,.$1ssssssssssssssssssssss$2.loooo'$1ssss.
++ssss$2:ooooooooo,$1ssssssssssssssssssssss$2'ooool$1ssss+
+osss$2'ooooooooooo.$1ssssssssssssssssssssss$2loooo.$1ssso
+osss$2'ooooooooool$1sssssssssssssssssssssss$2co$1ssssssso
+ossss$2,looooooc.$1sssssssssssssssssssssss$2.loooo.$1ssso
++ssssss$2.,;;;'.$1ssssssssssssssssssssssss$2;ooooc$1ssss+
+.ssssssssssssssssssssssssssssssssssss$2,ooool.$1ssss.
+.sssssss$2.cooooc.$1sssssssssssss$2.,,,,.$1ss$2.cooo.$1sssss.
+ `sssssss$2ooooo:.$1ssssssssssss$2oooooooc.$1ss$2:l.$1sssss'
+  +ssssss$2.coooooc,..$1sssssss$2cooooooooo.$1ssssssss+
+   `sssssss$2.:oo$1s$2ooooolc:.$1s$2.ooooooooooo'$1ssssss'
+    .sssssss$2.o$1ss$2`:loooo;$1sss$2,ooooooooc$1sssssss.
+     `sssssssss$2;oooo';:c'$1ssss$2`:ooo:'$1sssssss'
        -+sssssssssssssssssssssssssssssss+-
           `:+sssssssssssssssssssssss+:'
                `-\+ooosssssssooo+/-'

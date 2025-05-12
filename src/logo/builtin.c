@@ -652,10 +652,22 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
-    // Athena
+    // AthenaOS
     {
-        .names = {"Athena"},
-        .lines = FASTFETCH_DATATEXT_LOGO_ATHENA,
+        .names = {"AthenaOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ATHENAOS,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_LIGHT_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_LIGHT_BLUE,
+    },
+    // AthenaOS_old
+    {
+        .names = {"AthenaOS_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ATHENAOS_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_YELLOW,

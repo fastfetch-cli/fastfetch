@@ -1,11 +1,11 @@
-             ${c1}.::::::::.${c2}
-`/////`      ${c1}:zzzzzzzz${c2}        ://///-
- VVVVVu`         ${c1}-zzz`${c2}       /VVVVV.
- `dVVVVV        ${c1}.zzz`${c2}       :VVVVV:
-  `VVVVVo       ${c1}zzz${c2}        -VVVVV/
-   .VVVVV\     ${c1}zzz/${c2}       .VVVVV+
-    -VVVVV:   ${c1}zzzzzzzzz${c2}  .dVVVVs
-     \VVVVV-  ${c1}`````````${c2}  VVVVVV
+             $1.::::::::.$2
+`/////`      $1:zzzzzzzz$2        ://///-
+ VVVVVu`         $1-zzz`$2       /VVVVV.
+ `dVVVVV        $1.zzz`$2       :VVVVV:
+  `VVVVVo       $1zzz$2        -VVVVV/
+   .VVVVV\     $1zzz/$2       .VVVVV+
+    -VVVVV:   $1zzzzzzzzz$2  .dVVVVs
+     \VVVVV-  $1`````````$2  VVVVVV
       +VVVVV.           sVVVVu`
        oVVVVd`         +VVVVd`
         VVVVVV        /VVVVV.

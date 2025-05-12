@@ -188,28 +188,26 @@ const char* ffDetectAmdGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverResu
         FF_DEBUG("ADL2_Adapter_DedicatedVRAMUsage_Get returned %s (%d), usage: %d MB",
             ffAdlStatusToString(status), status, vramUsage);
 
-        if (status == ADL_OK) {
+        if (status == ADL_OK && vramUsage >= 0) {
             result.memory->used = (uint64_t) vramUsage * 1024 * 1024;
             FF_DEBUG("Dedicated VRAM usage: %llu bytes (%d MB)", result.memory->used, vramUsage);
         } else {
             FF_DEBUG("Failed to get dedicated VRAM usage");
         }
+    }
 
-        if (result.sharedMemory)
-        {
-            vramUsage = 0;
-            status = adlData.ffADL2_Adapter_VRAMUsage_Get(adlData.apiHandle, device->iAdapterIndex, &vramUsage);
-            FF_DEBUG("ADL2_Adapter_VRAMUsage_Get returned %s (%d), usage: %d MB",
-                ffAdlStatusToString(status), status, vramUsage);
+    if (result.sharedMemory)
+    {
+        int vramUsage = 0;
+        int status = adlData.ffADL2_Adapter_VRAMUsage_Get(adlData.apiHandle, device->iAdapterIndex, &vramUsage);
+        FF_DEBUG("ADL2_Adapter_VRAMUsage_Get returned %s (%d), usage: %d MB",
+            ffAdlStatusToString(status), status, vramUsage);
 
-            if (status == ADL_OK) {
-                uint64_t totalUsage = (uint64_t) vramUsage * 1024 * 1024;
-                result.sharedMemory->used = totalUsage - result.memory->used;
-                FF_DEBUG("Total VRAM usage: %llu bytes, Shared VRAM usage: %llu bytes (%llu MB)",
-                         totalUsage, result.sharedMemory->used, result.sharedMemory->used / (1024 * 1024));
-            } else {
-                FF_DEBUG("Failed to get total VRAM usage");
-            }
+        if (status == ADL_OK && vramUsage >= 0) {
+            result.sharedMemory->used = (uint64_t) vramUsage * 1024 * 1024;
+            FF_DEBUG("Shared VRAM usage: %llu bytes (%d MB)", result.sharedMemory->used, vramUsage);
+        } else {
+            FF_DEBUG("Failed to get total VRAM usage");
         }
     }
 

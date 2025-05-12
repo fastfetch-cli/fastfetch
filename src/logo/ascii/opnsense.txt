@@ -6,11 +6,11 @@
      .,cll:'                 ':llc,.
     ,;;:okxdxd:           :dxdxko:;;,
    .xxxx0XNNK0O.         .O0KNNX0xxxx.
-       ,${c2}cc:${c1},.               .,${c2}:cc${c1},
- ........;${c2}ccc:${c1};.         .;${c2}:ccc${c1};........
- ${c2}ccccccccccccccc         ccccccccccccccc${c1}
- ........;${c2}ccc:${c1};.         .;${c2}:ccc${c1};........
-       ,${c2}cc:${c1},.               .,${c2}:cc${c1},
+       ,$2cc:$1,.               .,$2:cc$1,
+ ........;$2ccc:$1;.         .;$2:ccc$1;........
+ $2ccccccccccccccc         ccccccccccccccc$1
+ ........;$2ccc:$1;.         .;$2:ccc$1;........
+       ,$2cc:$1,.               .,$2:cc$1,
    .xxxx0XNNK0O.         .O0KNNX0xxxx.
     ,;;:okxdxd:           :dxdxko:;;,
      .,cll:'                 ':llc,.
