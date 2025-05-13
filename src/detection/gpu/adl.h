@@ -20,9 +20,6 @@ extern int ADL2_Adapter_Graphic_Core_Info_Get(ADL_CONTEXT_HANDLE context, int iA
 // Function to retrieve memory information from the adapter. Version 2
 extern int ADL2_Adapter_MemoryInfo2_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, ADLMemoryInfo2* lpMemoryInfo2);
 
-// This function retrieves the VRAM usage of given adapter.
-extern int ADL2_Adapter_VRAMUsage_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* iVRAMUsageInMB);
-
 // This function retrieves the Dedicated VRAM usage of given adapter.
 extern int ADL2_Adapter_DedicatedVRAMUsage_Get(ADL_CONTEXT_HANDLE context, int iAdapterIndex, int* iVRAMUsageInMB);
 
