@@ -13,9 +13,9 @@
 
 static inline void applyVulkanVersion(uint32_t vulkanVersion, FFVersion* ffVersion)
 {
-    ffVersion->major = VK_VERSION_MAJOR(vulkanVersion);
-    ffVersion->minor = VK_VERSION_MINOR(vulkanVersion);
-    ffVersion->patch = VK_VERSION_PATCH(vulkanVersion);
+    ffVersion->major = VK_API_VERSION_MAJOR(vulkanVersion);
+    ffVersion->minor = VK_API_VERSION_MINOR(vulkanVersion);
+    ffVersion->patch = VK_API_VERSION_PATCH(vulkanVersion);
 }
 
 static void applyDriverName(VkPhysicalDeviceDriverPropertiesKHR* properties, FFstrbuf* result)
