@@ -11,6 +11,7 @@ Bugfixes:
 * Fix compiling on Asahi Linux (GPU, Linux)
 * Fix duplicated playback status (Media, Linux)
 * Don't show 255 in custom format when muted on macOS (#1750, Sound, macOS)
+* Remove shared memory detection for AMD GPUs, which doesn't work as expected (GPU, Windows)
 
 Logos:
 * new AthenaOS
