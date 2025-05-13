@@ -1,3 +1,21 @@
+# 2.43.0
+
+Features:
+* Support physical core count and package count detection on Solaris (CPU, SunOS)
+* Improve physical core count detection on FreeBSD (CPU, FreeBSD)
+* Add option to hide unknown GPUs (GPU)
+* Detect VRAM type of AMD GPUs on Linux (GPU, Linux)
+
+Bugfixes:
+* Fix disk usage detection on 32-bit Linux (#1734, Disk, Linux)
+* Fix compiling on Asahi Linux (GPU, Linux)
+* Fix duplicated playback status (Media, Linux)
+* Don't show 255 in custom format when muted on macOS (#1750, Sound, macOS)
+
+Logos:
+* new AthenaOS
+* add Hydra Framework
+
 # 2.42.0
 
 Changes:
