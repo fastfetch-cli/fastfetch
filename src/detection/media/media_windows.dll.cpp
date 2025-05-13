@@ -1,5 +1,6 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Media.Control.h>
+#include <winrt/Windows.ApplicationModel.h>
 #include <wchar.h>
 
 extern "C"
@@ -11,6 +12,7 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
     // C++/WinRT requires Windows 8.1+ and C++ runtime (std::string, exceptions and other stuff)
     // Make it a separate dll in order not to break Windows 7 support
     using namespace winrt::Windows::Media::Control;
+    using namespace winrt::Windows::ApplicationModel;
 
     try
     {
@@ -48,6 +50,11 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
         ::wcsncpy(result->song, mediaProps.Title().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
         ::wcsncpy(result->artist, mediaProps.Artist().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
         ::wcsncpy(result->album, mediaProps.AlbumTitle().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+        try
+        {
+            // Only works for UWP apps
+            ::wcsncpy(result->playerName, AppInfo::GetFromAppUserModelId(session.SourceAppUserModelId()).DisplayInfo().DisplayName().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+        } catch (...) { }
 
         return NULL;
     }
