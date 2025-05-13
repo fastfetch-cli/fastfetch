@@ -5,6 +5,9 @@ Features:
 * Improve physical core count detection on FreeBSD (CPU, FreeBSD)
 * Add option to hide unknown GPUs (GPU)
 * Detect VRAM type of AMD GPUs on Linux (GPU, Linux)
+* Support playing media detection on macOS 15.4 (#1737, Media, macOS)
+    * Whether it works on newer versions is unknown
+* Detect player name for Windows UMP apps (Media, Windows)
 
 Bugfixes:
 * Fix disk usage detection on 32-bit Linux (#1734, Disk, Linux)
