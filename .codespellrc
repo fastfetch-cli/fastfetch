@@ -1,5 +1,5 @@
 [codespell]
 check-filenames =
 builtin = clear,rare,usage,informal
-skip = */.git,*/cmake-build-*,*/.idea,*/completions,*/presets,*/screenshots,*/tests,*/3rdparty,*/logo/ascii
+skip = */.git,*/cmake-build-*,*/.idea,*/completions,*/presets,*/screenshots,*/tests,*/3rdparty,*/logo/ascii,./src/detection/gpu/asahi_drm.h
 ignore-words-list = iterm,compiletime,unknwn,pengwin,siduction,master,slave,sur,doas,conexant,ags,bu
