@@ -1,3 +1,25 @@
+# 2.43.0
+
+Features:
+* Support physical core count and package count detection on Solaris (CPU, SunOS)
+* Improve physical core count detection on FreeBSD (CPU, FreeBSD)
+* Add option to hide unknown GPUs (GPU)
+* Detect VRAM type of AMD GPUs on Linux (GPU, Linux)
+* Support playing media detection on macOS 15.4 (#1737, Media, macOS)
+    * Whether it works on newer versions is unknown
+* Detect player name for Windows UMP apps (Media, Windows)
+
+Bugfixes:
+* Fix disk usage detection on 32-bit Linux (#1734, Disk, Linux)
+* Fix compiling on Asahi Linux (GPU, Linux)
+* Fix duplicated playback status (Media, Linux)
+* Don't show 255 in custom format when muted on macOS (#1750, Sound, macOS)
+* Remove shared memory detection for AMD GPUs, which doesn't work as expected (GPU, Windows)
+
+Logos:
+* new AthenaOS
+* add Hydra Framework
+
 # 2.42.0
 
 Changes:

@@ -182,7 +182,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
             else
                 buf[0] = '\0';
 
-            double scaleFactor = (double) result->width / (double) result->scaledWidth;
+            double scaleFactor = (double) result->height / (double) result->scaledHeight;
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result->width, "width"),

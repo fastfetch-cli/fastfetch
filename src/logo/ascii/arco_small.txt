@@ -6,6 +6,6 @@
      ooooo ooooo
     ooooo   ooooo
    ooooo     ooooo
-  ooooo  ${c2}<oooooooo>${c1}
- ooooo      ${c2}<oooooo>${c1}
-ooooo          ${c2}<oooo>
+  ooooo  $2<oooooooo>$1
+ ooooo      $2<oooooo>$1
+ooooo          $2<oooo>

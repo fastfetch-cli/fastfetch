@@ -142,6 +142,7 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
             ffStrbufClear(&result->artist);
             ffStrbufClear(&result->album);
             ffStrbufClear(&result->url);
+            ffStrbufClear(&result->status);
             return false;
         }
     }

@@ -1,20 +1,20 @@
         ;00000     :000Ol
      .x00kk00:    O0kk00k;
     l00:   :00.  o0k   :O0k.
-  .k0k.     x${c2}d$dddd${c1}k'    .d00;
-  k0k.      ${c2}.dddddl       ${c1}o00,
- o00.        ${c2}':cc:.        ${c1}d0O
+  .k0k.     x$2d$dddd$1k'    .d00;
+  k0k.      $2.dddddl       $1o00,
+ o00.        $2':cc:.        $1d0O
 .00l                       ,00.
 l00.                       d0x
 k0O                     .:k0o
 O0k                 ;dO0000d.
-k0O               .O0O${c2}xxxxk${c1}00:
-o00.              k0O${c2}dddddd${c1}occ
-'00l              x0O${c2}dddddo${c3};..${c1}
- x00.             .x00${c2}kxxd${c3}:..${c1}
- .O0x               .:oxxx${c4}Okl.${c1}
-  .x0d                     ${c4},xx,${c1}
-    .:o.          ${c4}.xd       ckd${c1}
-       ..          ${c4}dxl     .xx;
+k0O               .O0O$2xxxxk$100:
+o00.              k0O$2dddddd$1occ
+'00l              x0O$2dddddo$3;..$1
+ x00.             .x00$2kxxd$3:..$1
+ .O0x               .:oxxx$4Okl.$1
+  .x0d                     $4,xx,$1
+    .:o.          $4.xd       ckd$1
+       ..          $4dxl     .xx;
                     :xxolldxd'
                       ;oxdl.

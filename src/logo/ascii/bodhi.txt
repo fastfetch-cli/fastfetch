@@ -1,18 +1,18 @@
-${c1}|           ${c2},,mmKKKKKKKKWm,,
- ${c1}'      ${c2},aKKP${c1}LL**********|L*${c2}TKp,
-   ${c1}t  ${c2}aKP${c1}L**```          ```**L${c2}*Kp
-    IX${c1}EL${c3}L,wwww,              ${c1}``*||${c2}Kp
-  ,#P${c1}L|${c3}KKKpPP@IPPTKmw,          ${c1}`*||${c2}K
- ,K${c1}LL*${c3}{KKKKKKPPb$KPhpKKPKp        ${c1}`||${c2}K
- #${c1}PL  ${c3}!KKKKKKPhKPPP$KKEhKKKKp      ${c1}`||${c2}K
-!H${c1}L*   ${c3}1KKKKKKKphKbPKKKKKK$KKp      ${c1}`|I${c2}W
-$$$${c1}bL     ${c3}KKKKKKKKBQKhKbKKKKKKKK       ${c1}|I${c2}N
-$$$${c1}bL     ${c3}!KKKKKKKKKKNKKKKKKKPP`       ${c1}|I${c2}b
-TH${c1}L*     ${c3}TKKKKKK##KKKN@KKKK^         ${c1}|I${c2}M
- K@${c1}L      ${c3}*KKKKKKKKKKKEKE5          ${c1}||${c2}K
- `NL${c1}L      ${c3}`KKKKKKKKKK"```|L       ${c1}||${c2}#P
-  `K@${c1}LL       ${c3}`"**"`        ${c1}'.   :||${c2}#P
-    Yp${c1}LL                      ${c1}' |L${c2}$M`
-     `Tp${c1}pLL,                ,|||${c2}p'L
-        "Kpp${c1}LL++,.,    ,,|||$$$${c2}#K*   ${c1}'.
-           ${c2}`"MKWpppppppp#KM"`        ${c1}`h,
+$1|           $2,,mmKKKKKKKKWm,,
+ $1'      $2,aKKP$1LL**********|L*$2TKp,
+   $1t  $2aKP$1L**```          ```**L$2*Kp
+    IX$1EL$3L,wwww,              $1``*||$2Kp
+  ,#P$1L|$3KKKpPP@IPPTKmw,          $1`*||$2K
+ ,K$1LL*$3{KKKKKKPPb$KPhpKKPKp        $1`||$2K
+ #$1PL  $3!KKKKKKPhKPPP$KKEhKKKKp      $1`||$2K
+!H$1L*   $31KKKKKKKphKbPKKKKKK$KKp      $1`|I$2W
+$$$$1bL     $3KKKKKKKKBQKhKbKKKKKKKK       $1|I$2N
+$$$$1bL     $3!KKKKKKKKKKNKKKKKKKPP`       $1|I$2b
+TH$1L*     $3TKKKKKK##KKKN@KKKK^         $1|I$2M
+ K@$1L      $3*KKKKKKKKKKKEKE5          $1||$2K
+ `NL$1L      $3`KKKKKKKKKK"```|L       $1||$2#P
+  `K@$1LL       $3`"**"`        $1'.   :||$2#P
+    Yp$1LL                      $1' |L$2$M`
+     `Tp$1pLL,                ,|||$2p'L
+        "Kpp$1LL++,.,    ,,|||$$$$2#K*   $1'.
+           $2`"MKWpppppppp#KM"`        $1`h,

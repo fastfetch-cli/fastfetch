@@ -1,17 +1,17 @@
-                ${c2}__
-             ${c2}gpBBBBBBBBBP
-         ${c2}_gBBBBBBBBBRP
-       ${c2}4BBBBBBBBRP  ${c4},_____
-            ${c2}`"" ${c4}_g@@@@@@@@@@@@@%g>
-            ${c4}__@@@@@@@@@@@@@@@@P"  ${c1}___
-         ${c4}_g@@@@@@@@@@@@@@@N"` ${c1}_gN@@@@@N^
-     ${c4}_w@@@@@@@@@@@@@@@@P" ${c1}_g@@@@@@@P"
-  ${c4}_g@@@@@@@@@@@@@@@N"`  ${c1}VMNN@NNNM^`
-${c4}^MMM@@@@@@@@@@@MP" ${c3},ggppww__
-        ${c4}`""""" ${c3}_wNNNNNNNNNNNNNNNNNNN
-            ${c3}_gBNNNNNNNNNNNNNNNNNP"
-        ${c3}_wNNNNNNNNNNNNNNNNNNMP`
-     ${c3}_gBNNNNNNNNNNNNNNNNNP"
- ${c3}_wNNNNNNNNNNNNNNNNNNNM^
- ${c3}""Y^^MNNNNNNNNNNNNP`
-         ${c3}`"""""""
+                $2__
+             $2gpBBBBBBBBBP
+         $2_gBBBBBBBBBRP
+       $24BBBBBBBBRP  $4,_____
+            $2`"" $4_g@@@@@@@@@@@@@%g>
+            $4__@@@@@@@@@@@@@@@@P"  $1___
+         $4_g@@@@@@@@@@@@@@@N"` $1_gN@@@@@N^
+     $4_w@@@@@@@@@@@@@@@@P" $1_g@@@@@@@P"
+  $4_g@@@@@@@@@@@@@@@N"`  $1VMNN@NNNM^`
+$4^MMM@@@@@@@@@@@MP" $3,ggppww__
+        $4`""""" $3_wNNNNNNNNNNNNNNNNNNN
+            $3_gBNNNNNNNNNNNNNNNNNP"
+        $3_wNNNNNNNNNNNNNNNNNNMP`
+     $3_gBNNNNNNNNNNNNNNNNNP"
+ $3_wNNNNNNNNNNNNNNNNNNNM^
+ $3""Y^^MNNNNNNNNNNNNP`
+         $3`"""""""

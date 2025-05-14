@@ -94,7 +94,9 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         }, 0, NULL, &dataSize, &active) == kAudioHardwareNoError)
             device->active = !!active;
 
-        if (!muted)
+        if (muted)
+            device->volume = 0;
+        else
         {
             float volume;
             dataSize = sizeof(volume);

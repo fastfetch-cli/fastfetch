@@ -125,7 +125,7 @@ void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjso
 
 void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    FFSwapResult storage;
+    FFSwapResult storage = {};
     const char* error = ffDetectSwap(&storage);
 
     if(error)

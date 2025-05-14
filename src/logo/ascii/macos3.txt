@@ -1,16 +1,16 @@
-${c1}                -:+:.
-${c1}               :++++.
-${c1}              /+++/.
-${c1}      .:-::- .+/:-\`\`.::-
-${c1}   .:/++++++/::::/++++++/::`
-${c2} .:///////////////////////::`
-${c2} /////////////////////////`
-${c3}+++++++++++++++++++++++++`
-${c3}++++++++++++++++++++++++
-${c4}ssssssssssssssssssssssss.
-${c4}:ssssssssssssssssssssssss-
-${c5} osssssssssssssssssssssssss`
-${c5} `syyyyyyyyyyyyyyyyyyyyyyyyys`
-${c6}  `ossssssssssssssssssssssss
-${c6}    :ooooooooooooooooooo+.
-${c6}     `:++oo+/:-  -:/+o+/-
+$1                -:+:.
+$1               :++++.
+$1              /+++/.
+$1      .:-::- .+/:-\`\`.::-
+$1   .:/++++++/::::/++++++/::`
+$2 .:///////////////////////::`
+$2 /////////////////////////`
+$3+++++++++++++++++++++++++`
+$3++++++++++++++++++++++++
+$4ssssssssssssssssssssssss.
+$4:ssssssssssssssssssssssss-
+$5 osssssssssssssssssssssssss`
+$5 `syyyyyyyyyyyyyyyyyyyyyyyyys`
+$6  `ossssssssssssssssssssssss
+$6    :ooooooooooooooooooo+.
+$6     `:++oo+/:-  -:/+o+/-

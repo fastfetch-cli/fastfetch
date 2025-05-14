@@ -1,0 +1,24 @@
+use scripting additions
+use framework "/System/Library/PrivateFrameworks/MediaRemote.framework"
+
+set MRNowPlayingRequest to current application's NSClassFromString("MRNowPlayingRequest")
+
+if MRNowPlayingRequest's localNowPlayingItem() is missing value then
+	return
+end if
+
+if MRNowPlayingRequest's localIsPlaying() then
+	set status to "Playing"
+else
+	set status to "Paused"
+end if
+
+set infoDict to MRNowPlayingRequest's localNowPlayingItem()'s nowPlayingInfo()
+set bundleObj to MRNowPlayingRequest's localNowPlayingPlayerPath()'s client()
+
+return status & "
+" & (infoDict's valueForKey:"kMRMediaRemoteNowPlayingInfoTitle" as text) & "
+" & (infoDict's valueForKey:"kMRMediaRemoteNowPlayingInfoArtist" as text) & "
+" & (infoDict's valueForKey:"kMRMediaRemoteNowPlayingInfoAlbum" as text) & "
+" & (bundleObj's bundleIdentifier() as text) & "
+" & (bundleObj's displayName() as text)

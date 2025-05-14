@@ -19,11 +19,16 @@ static const char* getMedia(FFMediaResult* media)
     }
 
     ffStrbufSetWS(&media->playerId, result.playerId);
-    ffStrbufSet(&media->player, &media->playerId);
-    if (ffStrbufEndsWithIgnCaseS(&media->player, ".exe"))
-        ffStrbufSubstrBefore(&media->player, media->player.length - 4);
+    if (result.playerName[0])
+    {
+        ffStrbufSetWS(&media->player, result.playerName);
+    }
     else
-        ffStrbufSubstrAfterFirstC(&media->player, '!'); // UWP ID
+    {
+        ffStrbufSet(&media->player, &media->playerId);
+        if (ffStrbufEndsWithIgnCaseS(&media->player, ".exe"))
+            ffStrbufSubstrBefore(&media->player, media->player.length - 4);
+    }
     ffStrbufSetWS(&media->song, result.song);
     ffStrbufSetWS(&media->artist, result.artist);
     ffStrbufSetWS(&media->album, result.album);

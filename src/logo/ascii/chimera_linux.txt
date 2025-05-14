@@ -1,18 +1,18 @@
-${c3}ddddddddddddddc  ${c1},cc:
-${c3}ddddddddddddddc  ${c1},cc:
-${c3}ddddddddddddddd  ${c1},cc:
-${c3}ddddddddddddl:'  ${c1},cc:
-${c3}dddddddddl'    ${c1}..;cc:
-${c3}dddddddo.   ${c1},:cccccc:
-${c3}ddddddl   ${c1},ccc:'''''
-${c3}dddddo.  ${c1};ccc.          ............
+$3ddddddddddddddc  $1,cc:
+$3ddddddddddddddc  $1,cc:
+$3ddddddddddddddd  $1,cc:
+$3ddddddddddddl:'  $1,cc:
+$3dddddddddl'    $1..;cc:
+$3dddddddo.   $1,:cccccc:
+$3ddddddl   $1,ccc:'''''
+$3dddddo.  $1;ccc.          ............
         .ccc.           cccccccccccc
-${c2}......  ${c1}.ccc.          .ccc'''''''''
-${c2}OOOOOk.  ${c1};ccc.        .ccc;   ......
-${c2}OOOOOOd   ${c1}'ccc:,....,:ccc'   ${c4}coooooo
-${c2}OOOOOOOx.   ${c1}':cccccccc:'   ${c4}.looooooo
-${c2}OOOOOOOOOd,     ${c1}`'''`     ${c4}.coooooooo
-${c2}OOOOOOOOOOOOdc,.    ${c4}..,coooooooooooo
-${c2}OOOOOOOOOOOOOOOO'  ${c4}.oooooooooooooooo
-${c2}OOOOOOOOOOOOOOOO'  ${c4}.oooooooooooooooo
-${c2}OOOOOOOOOOOOOOOO'  ${c4}.oooooooooooooooo
+$2......  $1.ccc.          .ccc'''''''''
+$2OOOOOk.  $1;ccc.        .ccc;   ......
+$2OOOOOOd   $1'ccc:,....,:ccc'   $4coooooo
+$2OOOOOOOx.   $1':cccccccc:'   $4.looooooo
+$2OOOOOOOOOd,     $1`'''`     $4.coooooooo
+$2OOOOOOOOOOOOdc,.    $4..,coooooooooooo
+$2OOOOOOOOOOOOOOOO'  $4.oooooooooooooooo
+$2OOOOOOOOOOOOOOOO'  $4.oooooooooooooooo
+$2OOOOOOOOOOOOOOOO'  $4.oooooooooooooooo

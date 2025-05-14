@@ -200,14 +200,14 @@ void ffParseDuration(uint64_t totalSeconds, FFstrbuf* result)
         return;
     }
 
-    uint32_t seconds = totalSeconds % 60;
+    uint32_t seconds = (uint32_t) (totalSeconds % 60);
     totalSeconds /= 60;
     if (seconds >= 30)
         totalSeconds++;
 
-    uint32_t minutes = totalSeconds % 60;
+    uint32_t minutes = (uint32_t) (totalSeconds % 60);
     totalSeconds /= 60;
-    uint32_t hours = totalSeconds % 24;
+    uint32_t hours = (uint32_t) (totalSeconds % 24);
     totalSeconds /= 24;
     uint32_t days = (uint32_t) totalSeconds;
 

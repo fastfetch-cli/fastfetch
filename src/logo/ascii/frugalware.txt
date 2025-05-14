@@ -6,13 +6,13 @@
        ++osoooooooooooosssssssssssssyyo+++++++o:
       -o+ssoooooooooooosssssssssssssyyo+++++++s`
       o++ssoooooo++++++++++++++sssyyyyo++++++o:
-     :o++ssoooooo${c2}/-------------${c1}+syyyyyo+++++oo
-    `o+++ssoooooo${c2}/-----${c1}+++++ooosyyyyyyo++++os:
-    /o+++ssoooooo${c2}/-----${c1}ooooooosyyyyyyyo+oooss
-   .o++++ssooooos${c2}/------------${c1}syyyyyyhsosssy-
-   ++++++ssooooss${c2}/-----${c1}+++++ooyyhhhhhdssssso
-  -s+++++syssssss${c2}/-----${c1}yyhhhhhhhhhhhddssssy.
-  sooooooyhyyyyyh${c2}/-----${c1}hhhhhhhhhhhddddyssy+
+     :o++ssoooooo$2/-------------$1+syyyyyo+++++oo
+    `o+++ssoooooo$2/-----$1+++++ooosyyyyyyo++++os:
+    /o+++ssoooooo$2/-----$1ooooooosyyyyyyyo+oooss
+   .o++++ssooooos$2/------------$1syyyyyyhsosssy-
+   ++++++ssooooss$2/-----$1+++++ooyyhhhhhdssssso
+  -s+++++syssssss$2/-----$1yyhhhhhhhhhhhddssssy.
+  sooooooyhyyyyyh$2/-----$1hhhhhhhhhhhddddyssy+
  :yooooooyhyyyhhhyyyyyyhhhhhhhhhhdddddyssy`
  yoooooooyhyyhhhhhhhhhhhhhhhhhhhddddddysy/
 -ysooooooydhhhhhhhhhhhddddddddddddddddssy

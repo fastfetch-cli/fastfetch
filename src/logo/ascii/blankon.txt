@@ -1,17 +1,17 @@
-${c2}        `./ohdNMMMMNmho+.` ${c1}       .+oo:`
-${c2}      -smMMMMMMMMMMMMMMMMmy-`    ${c1}`yyyyy+
-${c2}   `:dMMMMMMMMMMMMMMMMMMMMMMd/`  ${c1}`yyyyys
-${c2}  .hMMMMMMMNmhso/++symNMMMMMMMh- ${c1}`yyyyys
-${c2} -mMMMMMMms-`         -omMMMMMMN-${c1}.yyyyys
-${c2}.mMMMMMMy.              .yMMMMMMm:${c1}yyyyys
-${c2}sMMMMMMy                 `sMMMMMMh${c1}yyyyys
-${c2}NMMMMMN:                  .NMMMMMN${c1}yyyyys
-${c2}MMMMMMm.                   NMMMMMN${c1}yyyyys
-${c2}hMMMMMM+                  /MMMMMMN${c1}yyyyys
-${c2}:NMMMMMN:                :mMMMMMM+${c1}yyyyys
-${c2} oMMMMMMNs-            .sNMMMMMMs.${c1}yyyyys
-${c2}  +MMMMMMMNho:.`  `.:ohNMMMMMMNo ${c1}`yyyyys
-${c2}   -hMMMMMMMMNNNmmNNNMMMMMMMMh-  ${c1}`yyyyys
-${c2}     :yNMMMMMMMMMMMMMMMMMMNy:`   ${c1}`yyyyys
-${c2}       .:sdNMMMMMMMMMMNds/.      ${c1}`yyyyyo
-${c2}           `.:/++++/:.`           ${c1}:oys+.
+$2        `./ohdNMMMMNmho+.` $1       .+oo:`
+$2      -smMMMMMMMMMMMMMMMMmy-`    $1`yyyyy+
+$2   `:dMMMMMMMMMMMMMMMMMMMMMMd/`  $1`yyyyys
+$2  .hMMMMMMMNmhso/++symNMMMMMMMh- $1`yyyyys
+$2 -mMMMMMMms-`         -omMMMMMMN-$1.yyyyys
+$2.mMMMMMMy.              .yMMMMMMm:$1yyyyys
+$2sMMMMMMy                 `sMMMMMMh$1yyyyys
+$2NMMMMMN:                  .NMMMMMN$1yyyyys
+$2MMMMMMm.                   NMMMMMN$1yyyyys
+$2hMMMMMM+                  /MMMMMMN$1yyyyys
+$2:NMMMMMN:                :mMMMMMM+$1yyyyys
+$2 oMMMMMMNs-            .sNMMMMMMs.$1yyyyys
+$2  +MMMMMMMNho:.`  `.:ohNMMMMMMNo $1`yyyyys
+$2   -hMMMMMMMMNNNmmNNNMMMMMMMMh-  $1`yyyyys
+$2     :yNMMMMMMMMMMMMMMMMMMNy:`   $1`yyyyys
+$2       .:sdNMMMMMMMMMMNds/.      $1`yyyyyo
+$2           `.:/++++/:.`           $1:oys+.

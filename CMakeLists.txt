@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.42.0
+    VERSION 2.43.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -326,6 +326,11 @@ endif()
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 
+if(APPLE)
+    # See src/detection/media/media_apple.m
+    fastfetch_load_text(src/data/nowPlaying.scptd DATATEXT_NOWPLAYING)
+endif()
+
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
@@ -342,7 +347,6 @@ foreach(file ${LOGO_FILES})
     fastfetch_load_text("${file}" content)
     get_filename_component(file "${file}" NAME_WE)
     string(TOUPPER "${file}" file)
-    string(REGEX REPLACE "\\$\\{c([0-9]+)\\}" "$\\1" content "${content}")
     set(LOGO_BUILTIN_H "${LOGO_BUILTIN_H}#define FASTFETCH_DATATEXT_LOGO_${file} ${content}\n")
 endforeach()
 file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
