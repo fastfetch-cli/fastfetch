@@ -21,15 +21,16 @@
     #include <sys/ioctl.h>
 #endif
 
-#if defined(FF_HAVE_DRM) && __has_include(<drm/asahi_drm.h>)
+#if defined(FF_HAVE_DRM) && defined(__aarch64__)
     // https://github.com/alyssarosenzweig/linux/blob/agx-uapi-v7/include/uapi/drm/asahi_drm.h
     // Found in kernel-headers-6.14.4-400.asahi.fc42.aarch64
-    #include <drm/asahi_drm.h>
+    #if __has_include(<drm/asahi_drm.h>)
+        #include <drm/asahi_drm.h>
+    #else
+        #include "asahi_drm.h"
+    #endif
     #define FF_HAVE_DRM_ASAHI 1
 #endif
-
-#define FF_STR_INDIR(x) #x
-#define FF_STR(x) FF_STR_INDIR(x)
 
 static bool pciDetectDriver(FFstrbuf* result, FFstrbuf* pciDir, FFstrbuf* buffer, FF_MAYBE_UNUSED const char* drmKey)
 {
