@@ -60,9 +60,7 @@ function __fastfetch_complete_structure
 end
 
 echo '
-import json
-import subprocess
-import sys
+import json, subprocess, sys
 
 
 def main():
@@ -110,7 +108,6 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+    except:
         sys.exit(1)
 ' | python3 | source
