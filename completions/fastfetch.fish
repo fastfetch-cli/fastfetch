@@ -62,11 +62,17 @@ end
 echo '
 import json, subprocess, sys
 
+
 def main():
     data: dict[str, list[dict]] = json.loads(subprocess.check_output(["fastfetch", "--help-raw"]))
 
     for key in data:
         for flag in data[key]:
+            if flag["long"] == "logo-color-[1-9]":
+                for i in range(1, 10):
+                    print(f"""complete -c fastfetch -d "{flag["desc"]}" -l "logo-color-{i}" -x -a "(__fastfetch_complete_color)" """)
+                continue
+
             if flag.get("pseudo", False):
                 continue
 
@@ -75,7 +81,7 @@ def main():
                 command_prefix += f""" -o {flag["short"]}"""
 
             if "arg" in flag:
-                type: str = flag["arg"]["type"];
+                type: str = flag["arg"]["type"]
                 if type == "bool":
                     print(f"{command_prefix} -x -a \"(__fastfetch_complete_bool)\"")
                 elif type == "color":
@@ -97,6 +103,7 @@ def main():
                     print(f"{command_prefix} -x")
             else:
                 print(f"{command_prefix} -f")
+
 
 if __name__ == "__main__":
     try:
