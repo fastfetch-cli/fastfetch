@@ -2516,6 +2516,19 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    // Kylin
+    {
+        .names = {"Kylin", "kylin"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KYLIN,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_BLACK
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // LAST
     {},
 };
