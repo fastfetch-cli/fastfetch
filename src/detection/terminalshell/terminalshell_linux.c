@@ -55,9 +55,10 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "valgrind")            ||
                 ffStrbufEqualS(&result->processName, "fastfetch")           || //994
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
+                ffStrbufEqualS(&result->processName, "proot")               ||
+                ffStrbufEqualS(&result->processName, "script")              ||
                 ffStrbufContainS(&result->processName, "debug")             ||
                 ffStrbufContainS(&result->processName, "command-not-")      ||
-                ffStrbufEqualS(&result->processName, "proot")              ||
                 ffStrbufEndsWithS(&result->processName, ".sh")
             )
             {
@@ -107,6 +108,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "clifm")      || // https://github.com/leo-arch/clifm/issues/289
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             ffStrbufEqualS(&result->processName, "proot")      ||
+            ffStrbufEqualS(&result->processName, "script")     ||
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif
