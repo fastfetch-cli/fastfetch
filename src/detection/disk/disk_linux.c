@@ -218,6 +218,35 @@ static bool isRemovable(FFDisk* currentDisk)
     return ffReadFileData(sysBlockVolume, 1, &removableChar) > 0 && removableChar == '1';
 }
 
+static bool isReadOnly(FFDisk* currentDisk, struct mntent* device)
+{
+    if (!hasmntopt(device, MNTOPT_RO))
+        return false;
+
+    // For BTRFS on Fedora Atomic, check if there are other R/W mount points for the same device
+    if (ffStrbufEqualS(&currentDisk->filesystem, "btrfs"))
+    {
+        const char* deviceName = device->mnt_fsname;
+        FILE* mountsFile = setmntent("/proc/mounts", "r");
+        if (mountsFile != NULL)
+        {
+            struct mntent* otherDev;
+            while ((otherDev = getmntent(mountsFile)))
+            {
+                // If same device but not read-only, then this device has R/W access
+                if (ffStrEquals(otherDev->mnt_fsname, deviceName) &&
+                    !hasmntopt(otherDev, MNTOPT_RO))
+                {
+                    endmntent(mountsFile);
+                    return false;
+                }
+            }
+            endmntent(mountsFile);
+        }
+    }
+    return true;
+}
+
 static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mntent* device)
 {
     if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
@@ -228,7 +257,7 @@ static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mntent* 
         currentDisk->type = FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
     else
         currentDisk->type = FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-    if (hasmntopt(device, MNTOPT_RO))
+    if (isReadOnly(currentDisk, device))
         currentDisk->type |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
 }
 
