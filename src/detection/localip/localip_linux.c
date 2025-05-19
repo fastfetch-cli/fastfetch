@@ -29,6 +29,7 @@
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__) || defined(__HAIKU__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
+#elif defined(__GNU__)
 #else
 #include <netpacket/packet.h>
 #endif
@@ -69,12 +70,14 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
 #ifdef IFF_NOTRAILERS
     FF_LOCALIP_NIFLAG(NOTRAILERS),
 #endif
-#ifdef __linux__
+#if defined( __linux__) || defined (__GNU__)
     FF_LOCALIP_NIFLAG(MASTER),
     FF_LOCALIP_NIFLAG(SLAVE),
     FF_LOCALIP_NIFLAG(PORTSEL),
     FF_LOCALIP_NIFLAG(AUTOMEDIA),
     FF_LOCALIP_NIFLAG(DYNAMIC),
+#endif
+#ifdef __linux__
     FF_LOCALIP_NIFLAG(LOWER_UP),
     FF_LOCALIP_NIFLAG(DORMANT),
     FF_LOCALIP_NIFLAG(ECHO),
@@ -562,6 +565,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 FF_DEBUG("No MAC address available for interface %s", adapter->mac->ifa_name);
             }
         }
+        #elif defined(__GNU__)
         #else
         (void) adapter;
         #endif

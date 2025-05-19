@@ -16,7 +16,7 @@ typedef struct FFOptionsGeneral
     bool detectVersion;
 
     // Module options that cannot be put in module option structure
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
     FFstrbuf playerName;
     FFDsForceDrmType dsForceDrm;
     #elif defined(_WIN32)

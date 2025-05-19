@@ -54,6 +54,8 @@
     #define FF_SYSNAME "NetBSD"
 #elif defined(__HAIKU__)
     #define FF_SYSNAME "Haiku"
+#elif defined(__GNU__)
+    #define FF_SYSNAME "GNU"
 #else
     #define FF_SYSNAME "Unknown"
 #endif
