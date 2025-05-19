@@ -566,6 +566,8 @@ typedef union v64_uni { v64 v; u64 u; } v64_uni;
  *============================================================================*/
 
 #define byte_move_idx(x) ((char *)dst)[x] = ((const char *)src)[x];
+#define byte_move_src(x) ((char *)tmp)[x] = ((const char *)src)[x];
+#define byte_move_dst(x) ((char *)dst)[x] = ((const char *)tmp)[x];
 
 static_inline void byte_copy_2(void *dst, const void *src) {
 #if !YYJSON_DISABLE_UNALIGNED_MEMORY_ACCESS
@@ -605,7 +607,9 @@ static_inline void byte_move_2(void *dst, const void *src) {
     memcpy(&tmp, src, 2);
     memcpy(dst, &tmp, 2);
 #else
-    repeat2_incr(byte_move_idx)
+    char tmp[2];
+    repeat2_incr(byte_move_src)
+    repeat2_incr(byte_move_dst)
 #endif
 }
 
@@ -615,7 +619,9 @@ static_inline void byte_move_4(void *dst, const void *src) {
     memcpy(&tmp, src, 4);
     memcpy(dst, &tmp, 4);
 #else
-    repeat4_incr(byte_move_idx)
+    char tmp[4];
+    repeat4_incr(byte_move_src)
+    repeat4_incr(byte_move_dst)
 #endif
 }
 
@@ -625,7 +631,9 @@ static_inline void byte_move_8(void *dst, const void *src) {
     memcpy(&tmp, src, 8);
     memcpy(dst, &tmp, 8);
 #else
-    repeat8_incr(byte_move_idx)
+    char tmp[8];
+    repeat8_incr(byte_move_src)
+    repeat8_incr(byte_move_dst)
 #endif
 }
 
@@ -639,7 +647,9 @@ static_inline void byte_move_16(void *dst, const void *src) {
     memcpy(pdst, &tmp1, 8);
     memcpy(pdst + 8, &tmp2, 8);
 #else
-    repeat16_incr(byte_move_idx)
+    char tmp[16];
+    repeat16_incr(byte_move_src)
+    repeat16_incr(byte_move_dst)
 #endif
 }
 
@@ -700,7 +710,6 @@ static_inline u32 byte_load_4(const void *src) {
 #if !YYJSON_DISABLE_UNALIGNED_MEMORY_ACCESS
     memcpy(&uni, src, 4);
 #else
-    v32_uni uni;
     uni.v.c[0] = ((const char *)src)[0];
     uni.v.c[1] = ((const char *)src)[1];
     uni.v.c[2] = ((const char *)src)[2];

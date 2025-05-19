@@ -224,7 +224,7 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
                 int len = snprintf(str, sizeof str, "%.3fms", ms);
                 if (thres > 0)
                     snprintf(str, sizeof str, "\e[%sm%.3fms\e[m", (ms <= thres ? FF_COLOR_FG_GREEN : ms <= 2 * thres ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_RED), ms);
-                printf("\e[s\e[1A\e[9999999C\e[%dD%s\e[u", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
+                printf("\e7\e[1A\e[9999999C\e[%dD%s\e8", len, str); // Save; Up 1; Right 9999999; Left <len>; Print <str>; Load
             }
         }
 

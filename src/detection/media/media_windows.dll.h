@@ -5,6 +5,7 @@
 typedef struct FFWinrtMediaResult
 {
     wchar_t playerId[FF_MEDIA_WIN_RESULT_BUFLEN];
+    wchar_t playerName[FF_MEDIA_WIN_RESULT_BUFLEN];
     wchar_t song[FF_MEDIA_WIN_RESULT_BUFLEN];
     wchar_t artist[FF_MEDIA_WIN_RESULT_BUFLEN];
     wchar_t album[FF_MEDIA_WIN_RESULT_BUFLEN];

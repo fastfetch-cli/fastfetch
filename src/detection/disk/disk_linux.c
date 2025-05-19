@@ -220,7 +220,7 @@ static bool isRemovable(FFDisk* currentDisk)
 
 static void detectType(const FFlist* disks, FFDisk* currentDisk, struct mntent* device)
 {
-    if(ffStrbufStartsWithS(&currentDisk->mountpoint, "/boot") || ffStrbufStartsWithS(&currentDisk->mountpoint, "/efi"))
+    if(hasmntopt(device, "x-gvfs-hide") || hasmntopt(device, "hidden"))
         currentDisk->type = FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
     else if(isSubvolume(disks, currentDisk))
         currentDisk->type = FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
@@ -281,7 +281,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     {
         if (__builtin_expect(options->folders.length, 0))
         {
-            if (!ffDiskMatchMountpoint(options, device->mnt_dir))
+            if (!ffDiskMatchMountpoint(&options->folders, device->mnt_dir))
                 continue;
         }
         else if(!isPhysicalDevice(device))

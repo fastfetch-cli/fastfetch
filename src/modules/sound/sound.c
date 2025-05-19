@@ -46,11 +46,14 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     else
     {
         FF_STRBUF_AUTO_DESTROY percentageNum = ffStrbufCreate();
-        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-            ffPercentAppendNum(&percentageNum, device->volume, options->percent, false, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY percentageBar = ffStrbufCreate();
-        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
-            ffPercentAppendBar(&percentageBar, device->volume, options->percent, &options->moduleArgs);
+        if(device->volume != FF_SOUND_VOLUME_UNKNOWN)
+        {
+            if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                ffPercentAppendNum(&percentageNum, device->volume, options->percent, false, &options->moduleArgs);
+            if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                ffPercentAppendBar(&percentageBar, device->volume, options->percent, &options->moduleArgs);
+        }
 
         FF_PRINT_FORMAT_CHECKED(FF_SOUND_MODULE_NAME, index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(device->main, "is-main"),

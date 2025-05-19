@@ -205,6 +205,12 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "hidden-folders"))
+    {
+        ffOptionParseString(key, value, &options->hiddenFolders);
+        return true;
+    }
+
     if (ffStrEqualsIgnCase(subKey, "show-regular"))
     {
         if (ffOptionParseBoolean(value))
@@ -290,6 +296,12 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
         if (ffStrEqualsIgnCase(key, "folders"))
         {
             ffStrbufSetS(&options->folders, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "hiddenFolders"))
+        {
+            ffStrbufSetS(&options->hiddenFolders, yyjson_get_str(val));
             continue;
         }
 
@@ -496,6 +508,11 @@ void ffInitDiskOptions(FFDiskOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInit(&options->folders);
+    #if _WIN32 || __APPLE__ || __ANDROID__
+    ffStrbufInit(&options->hiddenFolders);
+    #else
+    ffStrbufInitStatic(&options->hiddenFolders, "/efi:/boot:/boot/efi");
+    #endif
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
