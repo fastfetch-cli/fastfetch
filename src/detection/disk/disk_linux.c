@@ -281,7 +281,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     {
         if (__builtin_expect(options->folders.length, 0))
         {
-            if (!ffDiskMatchMountpoint(options, device->mnt_dir))
+            if (!ffDiskMatchMountpoint(&options->folders, device->mnt_dir))
                 continue;
         }
         else if(!isPhysicalDevice(device))

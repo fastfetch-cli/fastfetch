@@ -1,6 +1,6 @@
 #include "disk.h"
 
-bool ffDiskMatchMountpoint(FFDiskOptions* options, const char* mountpoint)
+bool ffDiskMatchMountpoint(FFstrbuf* folders, const char* mountpoint)
 {
     #ifdef _WIN32
     const char separator = ';';
@@ -11,12 +11,12 @@ bool ffDiskMatchMountpoint(FFDiskOptions* options, const char* mountpoint)
     uint32_t mountpointLength = (uint32_t) strlen(mountpoint);
 
     uint32_t startIndex = 0;
-    while(startIndex < options->folders.length)
+    while(startIndex < folders->length)
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(&options->folders, startIndex, separator);
+        uint32_t colonIndex = ffStrbufNextIndexC(folders, startIndex, separator);
 
         uint32_t folderLength = colonIndex - startIndex;
-        if (folderLength == mountpointLength && memcmp(options->folders.chars + startIndex, mountpoint, mountpointLength) == 0)
+        if (folderLength == mountpointLength && memcmp(folders->chars + startIndex, mountpoint, mountpointLength) == 0)
             return true;
 
         startIndex = colonIndex + 1;
@@ -51,6 +51,15 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
             disk->bytesUsed = disk->bytesTotal - (
                 options->calcType == FF_DISK_CALC_TYPE_FREE ? disk->bytesFree : disk->bytesAvailable
             );
+        }
+    }
+
+    if (options->hiddenFolders.length)
+    {
+        FF_LIST_FOR_EACH(FFDisk, disk, *disks)
+        {
+            if (ffDiskMatchMountpoint(&options->hiddenFolders, disk->mountpoint.chars))
+                disk->type |= FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
         }
     }
 

@@ -23,7 +23,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         if (__builtin_expect(options->folders.length, 0))
         {
-            if (!ffDiskMatchMountpoint(options, path.Path()))
+            if (!ffDiskMatchMountpoint(&options->folders, path.Path()))
                 continue;
         }
 
