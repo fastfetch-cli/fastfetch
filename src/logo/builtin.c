@@ -4735,6 +4735,30 @@ static const FFlogo T[] = {
 };
 
 static const FFlogo U[] = {
+    // UBLinux
+    {
+        .names = {"UBLinux", "ublinux", "UBL", "ubl", "UBLOS", "ublos"},
+        .lines = FASTFETCH_DATATEXT_LOGO_UBLINUX,
+        .colors = {
+            FF_COLOR_FG_256 "38",
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_256 "38",
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
+    // UBLinuxSmall
+    {
+        .names = {"UBLinux_small", "ublinux_small", "UBL", "ubl_small", "UBLOS_small", "ublos_small"},
+        .lines = FASTFETCH_DATATEXT_LOGO_UBLINUX_SMALL,
+        .colors = {
+            FF_COLOR_FG_256 "38",
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_BLACK,
+        },
+        .colorKeys = FF_COLOR_FG_256 "38",
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // Ubuntu
     {
         .names = {"ubuntu", "ubuntu-linux"},
