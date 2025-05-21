@@ -841,6 +841,14 @@
             }
         },
         {
+            "long": "disk-hide-folders",
+            "desc": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
+            "arg": {
+                "type": "path",
+                "default": "Auto detection using mount-points"
+            }
+        },
+        {
             "long": "disk-show-regular",
             "desc": "Specify whether regular volumes should be displayed",
             "arg": {

@@ -205,9 +205,9 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "hidden-folders"))
+    if (ffStrEqualsIgnCase(subKey, "hide-folders"))
     {
-        ffOptionParseString(key, value, &options->hiddenFolders);
+        ffOptionParseString(key, value, &options->hideFolders);
         return true;
     }
 
@@ -299,9 +299,9 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hiddenFolders"))
+        if (ffStrEqualsIgnCase(key, "hideFolders"))
         {
-            ffStrbufSetS(&options->hiddenFolders, yyjson_get_str(val));
+            ffStrbufSetS(&options->hideFolders, yyjson_get_str(val));
             continue;
         }
 
@@ -394,8 +394,8 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     if (!ffStrbufEqual(&options->folders, &defaultOptions.folders))
         yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
 
-    if (!ffStrbufEqual(&options->hiddenFolders, &defaultOptions.hiddenFolders))
-        yyjson_mut_obj_add_strbuf(doc, module, "hiddenFolders", &options->hiddenFolders);
+    if (!ffStrbufEqual(&options->hideFolders, &defaultOptions.hideFolders))
+        yyjson_mut_obj_add_strbuf(doc, module, "hideFolders", &options->hideFolders);
 
     if (defaultOptions.calcType != options->calcType)
         yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
@@ -512,9 +512,9 @@ void ffInitDiskOptions(FFDiskOptions* options)
 
     ffStrbufInit(&options->folders);
     #if _WIN32 || __APPLE__ || __ANDROID__
-    ffStrbufInit(&options->hiddenFolders);
+    ffStrbufInit(&options->hideFolders);
     #else
-    ffStrbufInitStatic(&options->hiddenFolders, "/efi:/boot:/boot/efi");
+    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi");
     #endif
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
