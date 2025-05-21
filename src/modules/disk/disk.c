@@ -394,6 +394,9 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     if (!ffStrbufEqual(&options->folders, &defaultOptions.folders))
         yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
 
+    if (!ffStrbufEqual(&options->hiddenFolders, &defaultOptions.hiddenFolders))
+        yyjson_mut_obj_add_strbuf(doc, module, "hiddenFolders", &options->hiddenFolders);
+
     if (defaultOptions.calcType != options->calcType)
         yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
 
