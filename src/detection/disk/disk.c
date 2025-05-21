@@ -54,14 +54,5 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
         }
     }
 
-    if (options->hideFolders.length)
-    {
-        FF_LIST_FOR_EACH(FFDisk, disk, *disks)
-        {
-            if (ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
-                disk->type |= FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-        }
-    }
-
     return NULL;
 }

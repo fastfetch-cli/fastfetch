@@ -607,3 +607,32 @@ bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
 
     return changed;
 }
+
+/// @brief Check if a separated string contains a substring.
+/// @param strbuf The substring to check.
+/// @param compLength The length of the separated string to check.
+/// @param comp The separated string to check.
+/// @param separator The separator character.
+bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    if (strbuf->length == 0)
+        return true;
+
+    if (compLength == 0)
+        return false;
+
+    for (const char* p = comp; p < comp + compLength;)
+    {
+        const char* colon = memchr(p, separator, compLength);
+        if (colon == NULL)
+            return strcmp(strbuf->chars, p) == 0;
+
+        uint32_t substrLength = (uint32_t) (colon - p);
+        if (strbuf->length == substrLength && memcmp(strbuf->chars, p, substrLength) == 0)
+            return true;
+
+        p = colon + 1;
+    }
+
+    return false;
+}

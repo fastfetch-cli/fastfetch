@@ -845,7 +845,15 @@
             "desc": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
             "arg": {
                 "type": "path",
-                "default": "Auto detection using mount-points"
+                "default": "/efi:/boot:/boot/efi"
+            }
+        },
+        {
+            "long": "disk-hide-fs",
+            "desc": "A colon separated list of file systems to hide from the disk output",
+            "arg": {
+                "type": "string",
+                "default": ""
             }
         },
         {

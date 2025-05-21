@@ -92,6 +92,7 @@ void ffStrbufLowerCase(FFstrbuf* strbuf);
 bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
 void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
+bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 {
@@ -504,6 +505,16 @@ static inline void ffStrbufTrim(FFstrbuf* strbuf, char c)
 {
     ffStrbufTrimRight(strbuf, c);
     ffStrbufTrimLeft(strbuf, c);
+}
+
+static inline bool ffStrbufMatchSeparatedS(const FFstrbuf* strbuf, const char* comp, char separator)
+{
+    return ffStrbufMatchSeparatedNS(strbuf, (uint32_t) strlen(comp), comp, separator);
+}
+
+static inline bool ffStrbufMatchSeparated(const FFstrbuf* strbuf, const FFstrbuf* comp, char separator)
+{
+    return ffStrbufMatchSeparatedNS(strbuf, comp->length, comp->chars, separator);
 }
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))
