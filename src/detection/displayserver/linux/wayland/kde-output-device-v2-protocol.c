@@ -60,12 +60,18 @@ static const struct wl_message kde_output_device_v2_events[] = {
 	{ "brightness", "8u", kde_output_device_v2_types + 0 },
 	{ "color_power_tradeoff", "10u", kde_output_device_v2_types + 0 },
 	{ "dimming", "11u", kde_output_device_v2_types + 0 },
+	{ "replication_source", "13s", kde_output_device_v2_types + 0 },
+	{ "ddc_ci_allowed", "14u", kde_output_device_v2_types + 0 },
+	{ "max_bits_per_color", "15u", kde_output_device_v2_types + 0 },
+	{ "max_bits_per_color_range", "15uu", kde_output_device_v2_types + 0 },
+	{ "automatic_max_bits_per_color_limit", "15u", kde_output_device_v2_types + 0 },
+	{ "edr_policy", "16u", kde_output_device_v2_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_v2_interface = {
-	"kde_output_device_v2", 11,
+	"kde_output_device_v2", 16,
 	0, NULL,
-	27, kde_output_device_v2_events,
+	33, kde_output_device_v2_events,
 };
 
 static const struct wl_message kde_output_device_mode_v2_events[] = {
