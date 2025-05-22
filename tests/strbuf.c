@@ -635,6 +635,20 @@ int main(void)
         VERIFY(ffStrbufEqualS(&newStr, ""));
     }
 
+    {
+        ffStrbufSetStatic(&strbuf, "abc");
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "abc:def:ghi", ' ') == false);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "abc:def:ghi", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "def:ghi", ' ') == false);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "def:ghi", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "def", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "abc", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "", ' ') == false);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, ":abc:", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, "abc:", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, ":abc", ':') == true);
+    }
+
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

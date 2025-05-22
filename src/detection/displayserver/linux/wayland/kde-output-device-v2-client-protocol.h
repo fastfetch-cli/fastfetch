@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <wayland-util.h>
+#include <wayland-client.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -214,6 +214,26 @@ enum kde_output_device_v2_capability {
 	 * @since 9
 	 */
 	KDE_OUTPUT_DEVICE_V2_CAPABILITY_BRIGHTNESS = 0x80,
+	/**
+	 * if this outputdevice supports the built-in color profile
+	 * @since 12
+	 */
+	KDE_OUTPUT_DEVICE_V2_CAPABILITY_BUILT_IN_COLOR = 0x100,
+	/**
+	 * if this outputdevice supports DDC/CI
+	 * @since 14
+	 */
+	KDE_OUTPUT_DEVICE_V2_CAPABILITY_DDC_CI = 0x200,
+	/**
+	 * if this outputdevice supports setting max bpc
+	 * @since 15
+	 */
+	KDE_OUTPUT_DEVICE_V2_CAPABILITY_MAX_BITS_PER_COLOR = 0x400,
+	/**
+	 * if this outputdevice supports EDR
+	 * @since 16
+	 */
+	KDE_OUTPUT_DEVICE_V2_CAPABILITY_EDR = 0x800,
 };
 /**
  * @ingroup iface_kde_output_device_v2
@@ -235,6 +255,22 @@ enum kde_output_device_v2_capability {
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_BRIGHTNESS_SINCE_VERSION 9
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_CAPABILITY_BUILT_IN_COLOR_SINCE_VERSION 12
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_CAPABILITY_DDC_CI_SINCE_VERSION 14
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_CAPABILITY_MAX_BITS_PER_COLOR_SINCE_VERSION 15
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_CAPABILITY_EDR_SINCE_VERSION 16
 #endif /* KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
@@ -315,6 +351,18 @@ enum kde_output_device_v2_color_power_tradeoff {
 	KDE_OUTPUT_DEVICE_V2_COLOR_POWER_TRADEOFF_ACCURACY = 1,
 };
 #endif /* KDE_OUTPUT_DEVICE_V2_COLOR_POWER_TRADEOFF_ENUM */
+
+#ifndef KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ENUM
+#define KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ENUM
+/**
+ * @ingroup iface_kde_output_device_v2
+ * when the compositor may make use of EDR
+ */
+enum kde_output_device_v2_edr_policy {
+	KDE_OUTPUT_DEVICE_V2_EDR_POLICY_NEVER = 0,
+	KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ALWAYS = 1,
+};
+#endif /* KDE_OUTPUT_DEVICE_V2_EDR_POLICY_ENUM */
 
 /**
  * @ingroup iface_kde_output_device_v2
@@ -658,6 +706,74 @@ struct kde_output_device_v2_listener {
 	void (*dimming)(void *data,
 			struct kde_output_device_v2 *kde_output_device_v2,
 			uint32_t multiplier);
+	/**
+	 * source output for mirroring
+	 *
+	 *
+	 * @param source uuid of the source output
+	 * @since 13
+	 */
+	void (*replication_source)(void *data,
+				   struct kde_output_device_v2 *kde_output_device_v2,
+				   const char *source);
+	/**
+	 * if DDC/CI should be used to control brightness etc.
+	 *
+	 * If the ddc_ci capability is present, this determines if
+	 * settings such as brightness, contrast or others should be set
+	 * using DDC/CI.
+	 * @param allowed 1 if allowed, 0 if disabled
+	 * @since 14
+	 */
+	void (*ddc_ci_allowed)(void *data,
+			       struct kde_output_device_v2 *kde_output_device_v2,
+			       uint32_t allowed);
+	/**
+	 * override max bpc
+	 *
+	 * This limits the amount of bits per color that are sent to the
+	 * display.
+	 * @param max_bpc 0 for the default / automatic
+	 * @since 15
+	 */
+	void (*max_bits_per_color)(void *data,
+				   struct kde_output_device_v2 *kde_output_device_v2,
+				   uint32_t max_bpc);
+	/**
+	 * range of max bits per color value
+	 *
+	 *
+	 * @param min_value the minimum supported by the driver
+	 * @param max_value the maximum supported by the driver
+	 * @since 15
+	 */
+	void (*max_bits_per_color_range)(void *data,
+					 struct kde_output_device_v2 *kde_output_device_v2,
+					 uint32_t min_value,
+					 uint32_t max_value);
+	/**
+	 * if and to what value automatic max bpc is limited
+	 *
+	 *
+	 * @param max_bpc_limit which value automatic bpc gets limited to. 0 if not limited
+	 * @since 15
+	 */
+	void (*automatic_max_bits_per_color_limit)(void *data,
+						   struct kde_output_device_v2 *kde_output_device_v2,
+						   uint32_t max_bpc_limit);
+	/**
+	 * when the compositor may apply EDR
+	 *
+	 * When EDR is enabled, the compositor may increase the backlight
+	 * beyond the user-specified setting, in order to present HDR
+	 * content on displays without native HDR support. This will
+	 * usually result in better visuals, but also increases battery
+	 * usage.
+	 * @since 16
+	 */
+	void (*edr_policy)(void *data,
+			   struct kde_output_device_v2 *kde_output_device_v2,
+			   uint32_t policy);
 };
 
 /**
@@ -779,6 +895,30 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2 *kde_output_device
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_DIMMING_SINCE_VERSION 11
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_REPLICATION_SOURCE_SINCE_VERSION 13
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_DDC_CI_ALLOWED_SINCE_VERSION 14
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_MAX_BITS_PER_COLOR_SINCE_VERSION 15
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_MAX_BITS_PER_COLOR_RANGE_SINCE_VERSION 15
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_AUTOMATIC_MAX_BITS_PER_COLOR_LIMIT_SINCE_VERSION 15
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_EDR_POLICY_SINCE_VERSION 16
 
 
 /** @ingroup iface_kde_output_device_v2 */

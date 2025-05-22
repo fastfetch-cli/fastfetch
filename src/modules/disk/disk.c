@@ -179,6 +179,12 @@ void ffPrintDisk(FFDiskOptions* options)
             if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
                 continue;
 
+            if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
+                continue;
+
+            if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
+                continue;
+
             printDisk(options, disk, ++index);
         }
     }
@@ -205,9 +211,15 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
         return true;
     }
 
-    if (ffStrEqualsIgnCase(subKey, "hidden-folders"))
+    if (ffStrEqualsIgnCase(subKey, "hide-folders"))
     {
-        ffOptionParseString(key, value, &options->hiddenFolders);
+        ffOptionParseString(key, value, &options->hideFolders);
+        return true;
+    }
+
+    if (ffStrEqualsIgnCase(subKey, "hide-fs"))
+    {
+        ffOptionParseString(key, value, &options->hideFS);
         return true;
     }
 
@@ -299,9 +311,15 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hiddenFolders"))
+        if (ffStrEqualsIgnCase(key, "hideFolders"))
         {
-            ffStrbufSetS(&options->hiddenFolders, yyjson_get_str(val));
+            ffStrbufSetS(&options->hideFolders, yyjson_get_str(val));
+            continue;
+        }
+
+        if (ffStrEqualsIgnCase(key, "hideFS"))
+        {
+            ffStrbufSetS(&options->hideFS, yyjson_get_str(val));
             continue;
         }
 
@@ -393,6 +411,12 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 
     if (!ffStrbufEqual(&options->folders, &defaultOptions.folders))
         yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
+
+    if (!ffStrbufEqual(&options->hideFolders, &defaultOptions.hideFolders))
+        yyjson_mut_obj_add_strbuf(doc, module, "hideFolders", &options->hideFolders);
+
+    if (!ffStrbufEqual(&options->hideFS, &defaultOptions.hideFS))
+        yyjson_mut_obj_add_strbuf(doc, module, "hideFS", &options->hideFS);
 
     if (defaultOptions.calcType != options->calcType)
         yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
@@ -509,10 +533,11 @@ void ffInitDiskOptions(FFDiskOptions* options)
 
     ffStrbufInit(&options->folders);
     #if _WIN32 || __APPLE__ || __ANDROID__
-    ffStrbufInit(&options->hiddenFolders);
+    ffStrbufInit(&options->hideFolders);
     #else
-    ffStrbufInitStatic(&options->hiddenFolders, "/efi:/boot:/boot/efi");
+    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi");
     #endif
+    ffStrbufInit(&options->hideFS);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
     options->calcType = FF_DISK_CALC_TYPE_FREE;
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
@@ -521,4 +546,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
 void ffDestroyDiskOptions(FFDiskOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->folders);
+    ffStrbufDestroy(&options->hideFolders);
+    ffStrbufDestroy(&options->hideFS);
 }
