@@ -29,6 +29,8 @@ typedef struct FFDiskOptions
     FFModuleArgs moduleArgs;
 
     FFstrbuf folders;
+    FFstrbuf hideFolders;
+    FFstrbuf hideFS;
     FFDiskVolumeType showTypes;
     FFDiskCalcType calcType;
     FFPercentageModuleConfig percent;

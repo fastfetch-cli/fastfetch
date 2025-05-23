@@ -137,6 +137,12 @@ static void waylandKdeHdrListener(void *data, FF_MAYBE_UNUSED struct kde_output_
     display->hdrEnabled = !!hdr_enabled;
 }
 
+static void waylandKdeMaxBitsPerColorListener(void *data, FF_MAYBE_UNUSED struct kde_output_device_v2 *kde_output_device_v2, uint32_t max_bpc)
+{
+    WaylandDisplay* display = data;
+    display->bitDepth = (uint8_t) max_bpc;
+}
+
 static struct kde_output_device_v2_listener outputListener = {
     .geometry = waylandKdeGeometryListener,
     .current_mode = waylandKdeCurrentModeListener,
@@ -165,6 +171,12 @@ static struct kde_output_device_v2_listener outputListener = {
     .brightness = (void*) stubListener,
     .color_power_tradeoff = (void*) stubListener,
     .dimming = (void*) stubListener,
+    .replication_source = (void*) stubListener,
+    .ddc_ci_allowed = (void*) stubListener,
+    .max_bits_per_color = (void*) waylandKdeMaxBitsPerColorListener,
+    .max_bits_per_color_range = (void*) stubListener,
+    .automatic_max_bits_per_color_limit = (void*) stubListener,
+    .edr_policy = (void*) stubListener,
 };
 
 const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
@@ -237,6 +249,7 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
         item->manufactureYear = display.myear;
         item->manufactureWeek = display.mweek;
         item->serial = display.serial;
+        item->bitDepth = display.bitDepth;
     }
 
     ffStrbufDestroy(&display.description);

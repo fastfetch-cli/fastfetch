@@ -145,7 +145,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     {
         if(__builtin_expect(options->folders.length > 0, 0))
         {
-            if(!ffDiskMatchMountpoint(options, fs->f_mntonname))
+            if(!ffDiskMatchMountpoint(&options->folders, fs->f_mntonname))
                 continue;
         }
         else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))

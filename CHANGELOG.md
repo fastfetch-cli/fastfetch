@@ -1,3 +1,18 @@
+# 2.44.0
+
+Features:
+* Add option `--disk-hide-folders` and `--disk-hide-fs` to hide specific mountpoints and filesystems in Disk module (Disk)
+    * `--disk-hide-folders` defaults to `/efi:/boot:/boot/efi` on Linux and *BSD. Previously these EFI-related folders were hardcoded to be hidden on Linux.
+
+Bugfixes:
+* Fix Apple Terminal compatibility with `--stat` (macOS, #1755)
+* Ignore `/usr/bin/script` when detecting shell and terminal (Terminal / Shell, #1761)
+* Fix compatibility with KDE Plasma 6.4 which is in beta currently (Display, Linux, #1765)
+
+Logos:
+* Add Kylin (#1760)
+* Add UBLinux (#1764)
+
 # 2.43.0
 
 Features:

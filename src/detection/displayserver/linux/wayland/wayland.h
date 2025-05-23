@@ -34,6 +34,7 @@ typedef struct WaylandData
 typedef struct WaylandDisplay
 {
     WaylandData* parent;
+    void* internal;
     int32_t width;
     int32_t height;
     int32_t refreshRate;
@@ -55,7 +56,7 @@ typedef struct WaylandDisplay
     uint16_t myear;
     uint16_t mweek;
     uint32_t serial;
-    void* internal;
+    uint8_t bitDepth;
 } WaylandDisplay;
 
 inline static void stubListener(void* data, ...)

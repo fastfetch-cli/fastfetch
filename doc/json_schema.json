@@ -1754,6 +1754,14 @@
                                         "type": "string",
                                         "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options"
                                     },
+                                    "hideFolders": {
+                                        "type": "string",
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output\nDefault: /efi:/boot:/boot/efi"
+                                    },
+                                    "hideFS": {
+                                        "type": "string",
+                                        "description": "A colon separated file systems to hide from the disk output"
+                                    },
                                     "showExternal": {
                                         "type": "boolean",
                                         "description": "Set if external volume should be printed",
