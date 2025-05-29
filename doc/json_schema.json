@@ -115,7 +115,7 @@
             "type": "string"
         },
         "biosFormat": {
-            "description": "Output format of the module `Bios`. See Wiki for formatting syntax\n    1. {date}: Bios date\n    2. {release}: Bios release\n    3. {vendor}: Bios vendor\n    4. {version}: Bios version\n    5. {type}: Firmware type",
+            "description": "Output format of the module `BIOS`. See Wiki for formatting syntax\n    1. {date}: Bios date\n    2. {release}: Bios release\n    3. {vendor}: Bios vendor\n    4. {version}: Bios version\n    5. {type}: Firmware type",
             "type": "string"
         },
         "bluetoothFormat": {
@@ -339,7 +339,7 @@
             "type": "string"
         },
         "titleFormat": {
-            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)",
+            "description": "Output format of the module `Title`. See Wiki for formatting syntax\n    1. {user-name}: User name\n    2. {host-name}: Host name\n    3. {home-dir}: Home directory\n    4. {exe-path}: Executable path of current process\n    5. {user-shell}: User's default shell\n    6. {user-name-colored}: User name (colored)\n    7. {at-symbol-colored}: @ symbol (colored)\n    8. {host-name-colored}: Host name (colored)\n    9. {full-user-name}: Full user name",
             "type": "string"
         },
         "themeFormat": {
