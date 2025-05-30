@@ -351,10 +351,7 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     {
         {
             struct drm_xe_device_query query = {
-                .extensions = 0,
                 .query = DRM_XE_DEVICE_QUERY_GT_TOPOLOGY,
-                .size = 0,
-                .data = 0,
             };
             if (ioctl(fd, DRM_IOCTL_XE_DEVICE_QUERY, &query) >= 0)
             {
