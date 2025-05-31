@@ -4060,8 +4060,19 @@ static const FFlogo R[] = {
     },
     // RedHatEnterpriseLinux
     {
-        .names = {"rhel", "redhat", "redhat-linux"},
+        .names = {"rhel", "redhat"},
         .lines = FASTFETCH_DATATEXT_LOGO_RHEL,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    // RedHatEnterpriseLinux
+    {
+        .names = {"rhel_small", "redhat_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_RHEL_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
         },
@@ -4070,7 +4081,7 @@ static const FFlogo R[] = {
     },
     // RedHatEnterpriseLinux_old
     {
-        .names = {"rhel_old", "redhat_old", "redhat-linux_old"},
+        .names = {"rhel_old", "redhat_old"},
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_RHEL_OLD,
         .colors = {
@@ -4082,11 +4093,10 @@ static const FFlogo R[] = {
     {
         .names = {"RedOS", "RED OS", "red-os", "redos"},
         .lines = FASTFETCH_DATATEXT_LOGO_REDOS,
-        .colors =
-            {
-                FF_COLOR_FG_RED,
-                FF_COLOR_FG_WHITE,
-            },
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
         .colorTitle = FF_COLOR_FG_RED,
         .colorKeys = FF_COLOR_FG_RED,
     },
@@ -4095,11 +4105,10 @@ static const FFlogo R[] = {
         .names = {"RedOS_small", "RED OS_small", "red-os_small", "redos_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_REDOS_SMALL,
-        .colors =
-            {
-                FF_COLOR_FG_RED,
-                FF_COLOR_FG_WHITE,
-            },
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE,
+        },
         .colorTitle = FF_COLOR_FG_RED,
         .colorKeys = FF_COLOR_FG_RED,
     },
