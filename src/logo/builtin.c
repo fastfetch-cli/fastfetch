@@ -5108,9 +5108,9 @@ static const FFlogo V[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_VOID,
         .colors = {
             FF_COLOR_FG_GREEN,
-            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_LIGHT_BLACK,
         },
-        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     // VoidSmall
@@ -5121,7 +5121,7 @@ static const FFlogo V[] = {
         .colors = {
             FF_COLOR_FG_GREEN,
         },
-        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
     // Void2Small
