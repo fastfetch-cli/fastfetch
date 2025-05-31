@@ -143,6 +143,39 @@ static const char* getWslg(FFstrbuf* result)
     return NULL;
 }
 
+static bool extractCtwmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    int count = 0;
+    sscanf(line, "%*d.%*d.%*d%n", &count);
+    if (count == 0) return true;
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
+    return false;
+}
+
+static const char* getCtwm(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("ctwm", &path);
+    if (error) return "Failed to find ctwm executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCtwmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "--version",
+        NULL
+    }) == NULL)
+    { // ctwm version 4.0.1\n...
+        ffStrbufSubstrBeforeFirstC(result, '\n');
+        ffStrbufSubstrAfterLastC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `ctwm --version`";
+}
+
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 {
     if (!wmName)
@@ -156,6 +189,9 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "WSLg"))
         return getWslg(result);
+
+    if (ffStrbufEqualS(wmName, "ctwm"))
+        return getCtwm(result);
 
     return "Unsupported WM";
 }
