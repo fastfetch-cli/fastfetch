@@ -143,7 +143,7 @@ static const char* getWslg(FFstrbuf* result)
     return NULL;
 }
 
-static bool extractCtwmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+static bool extractCtFvWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
     int count = 0;
     sscanf(line, "%*d.%*d.%*d%n", &count);
@@ -159,7 +159,7 @@ static const char* getCtwm(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("ctwm", &path);
     if (error) return "Failed to find ctwm executable path";
 
-    ffBinaryExtractStrings(path.chars, extractCtwmVersion, result, (uint32_t) strlen("0.0.0"));
+    ffBinaryExtractStrings(path.chars, extractCtFvWmVersion, result, (uint32_t) strlen("0.0.0"));
     if (result->length > 0) return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
@@ -174,6 +174,29 @@ static const char* getCtwm(FFstrbuf* result)
     }
 
     return "Failed to run command `ctwm --version`";
+}
+
+static const char* getFvwm(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("fvwm", &path);
+    if (error) return "Failed to find fvwm executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCtFvWmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "-version",
+        NULL
+    }) == NULL)
+    { // [FVWM][main]: fvwm Version 2.2.5\n...
+        ffStrbufSubstrBeforeFirstC(result, '\n');
+        ffStrbufSubstrAfterLastC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `fvwm -version`";
 }
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
@@ -192,6 +215,9 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "ctwm"))
         return getCtwm(result);
+
+    if (ffStrbufEqualS(wmName, "fvwm"))
+        return getFvwm(result);
 
     return "Unsupported WM";
 }
