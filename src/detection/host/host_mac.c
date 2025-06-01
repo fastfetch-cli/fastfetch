@@ -121,7 +121,7 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
            ffStrEquals(version, "16,5"))        return "MacBook Pro (16-inch, 2024, Three Thunderbolt 5 ports)";
         if(ffStrEquals(version, "15,14"))       return "Mac Studio (M3 Ultra, 2025)";
         if(ffStrEquals(version, "15,13"))       return "MacBook Air (15-inch, M3, 2024)";
-        if(ffStrEquals(version, "15,2"))        return "MacBook Air (13-inch, M3, 2024)";
+        if(ffStrEquals(version, "15,12"))       return "MacBook Air (13-inch, M3, 2024)";
         if(ffStrEquals(version, "15,3"))        return "MacBook Pro (14-inch, Nov 2023, Two Thunderbolt / USB 4 ports)";
         if(ffStrEquals(version, "15,4"))        return "iMac (24-inch, 2023, Two Thunderbolt / USB 4 ports)";
         if(ffStrEquals(version, "15,5"))        return "iMac (24-inch, 2023, Two Thunderbolt / USB 4 ports, Two USB 3 ports)";
