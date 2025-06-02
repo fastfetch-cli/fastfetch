@@ -1967,6 +1967,8 @@ if(LINUX)
 
         set(CPACK_RPM_PACKAGE_LICENSE "MIT")
     endif()
+elseif(FreeBSD)
+    set(CPACK_GENERATOR "${CPACK_GENERATOR};FREEBSD")
 endif()
 
 set(CPACK_SET_DESTDIR ON)
