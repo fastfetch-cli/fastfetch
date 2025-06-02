@@ -1968,6 +1968,7 @@ if(LINUX)
         set(CPACK_RPM_PACKAGE_LICENSE "MIT")
     endif()
 elseif(FreeBSD)
+    set(CPACK_FREEBSD_PACKAGE_LICENSE "MIT")
     set(CPACK_GENERATOR "${CPACK_GENERATOR};FREEBSD")
 endif()
 
