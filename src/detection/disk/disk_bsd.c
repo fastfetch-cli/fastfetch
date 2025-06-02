@@ -148,7 +148,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             if(!ffDiskMatchMountpoint(&options->folders, fs->f_mntonname))
                 continue;
         }
-        else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs"))
+        else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs") && !ffStrEquals(fs->f_fstypename, "fusefs.sshfs"))
             continue;
 
         #ifdef __FreeBSD__
