@@ -429,6 +429,7 @@
                                 "file-raw",
                                 "data",
                                 "data-raw",
+                                "command-raw",
                                 "sixel",
                                 "kitty",
                                 "kitty-direct",
