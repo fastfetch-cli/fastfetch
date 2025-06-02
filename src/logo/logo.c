@@ -510,7 +510,7 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
     )
     {
         if (instance.config.display.showErrors)
-            fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
+            fprintf(stderr, "Logo: Failed to load file content from logo source: %s\n", options->source.chars);
         return false;
     }
 
@@ -603,7 +603,7 @@ void ffLogoPrint(void)
             {
                 // Image logo should have been handled
                 if(options->type == FF_LOGO_TYPE_BUILTIN || options->type == FF_LOGO_TYPE_SMALL)
-                    fprintf(stderr, "Logo: Failed to load %s logo: %s \n", options->type == FF_LOGO_TYPE_BUILTIN ? "builtin" : "builtin small", options->source.chars);
+                    fprintf(stderr, "Logo: Failed to load %s logo: %s\n", options->type == FF_LOGO_TYPE_BUILTIN ? "builtin" : "builtin small", options->source.chars);
             }
 
             logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
