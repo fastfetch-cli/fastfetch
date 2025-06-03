@@ -5261,9 +5261,8 @@ static const FFlogo X[] = {
         .names = {"Xenia"},
         .lines = FASTFETCH_DATATEXT_LOGO_XENIA,
         .colors = {
-            FF_COLOR_FG_YELLOW,
-            FF_COLOR_FG_GREEN,
             FF_COLOR_FG_RED,
+            FF_COLOR_FG_WHITE
         }
     },
     // XCP-ng
