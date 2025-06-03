@@ -143,7 +143,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
     {
         FF_DEBUG("Initializing SMBIOS buffer");
         ffStrbufInit(&buffer);
-        #if !__HAIKU__ && !__OpenBSD__
+        #if !__HAIKU__ && !__OpenBSD__ && !__DragonFly__
         #ifdef __linux__
         FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
