@@ -5262,7 +5262,7 @@ static const FFlogo X[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_XENIA,
         .colors = {
             FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE
+            FF_COLOR_FG_WHITE,
         }
     },
     // XCP-ng
