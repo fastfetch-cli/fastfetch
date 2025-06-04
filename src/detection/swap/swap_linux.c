@@ -5,7 +5,34 @@
 
 #include <inttypes.h>
 
-const char* ffDetectSwap(FFlist* result)
+static const char* detectByProcMeminfo(FFlist* result)
+{
+    // For Android
+    // Ref: #620
+    char buf[PROC_FILE_BUFFSIZ];
+    ssize_t nRead = ffReadFileData("/proc/meminfo", ARRAY_SIZE(buf) - 1, buf);
+    if(nRead < 0)
+        return "ffReadFileData(\"/proc/meminfo\", ARRAY_SIZE(buf)-1, buf)";
+    buf[nRead] = '\0';
+
+    uint64_t swapTotal = 0, swapFree = 0;
+
+    char *token = NULL;
+    if ((token = strstr(buf, "SwapTotal:")) != NULL)
+        swapTotal = strtoul(token + strlen("SwapTotal:"), NULL, 10);
+
+    if ((token = strstr(buf, "SwapFree:")) != NULL)
+        swapFree = strtoul(token + strlen("SwapFree:"), NULL, 10);
+
+    FFSwapResult* swap = ffListAdd(result);
+    ffStrbufInitStatic(&swap->name, "Total");
+    swap->bytesTotal = swapTotal * 1024lu;
+    swap->bytesUsed = (swapTotal - swapFree) * 1024lu;
+
+    return NULL;
+}
+
+static const char* detectByProcSwaps(FFlist* result)
 {
     // Ref: #620
     char buf[PROC_FILE_BUFFSIZ];
@@ -45,4 +72,11 @@ const char* ffDetectSwap(FFlist* result)
     }
 
     return NULL;
+}
+
+const char* ffDetectSwap(FFlist* result)
+{
+    if (detectByProcSwaps(result) == NULL)
+        return NULL;
+    return detectByProcMeminfo(result);
 }
