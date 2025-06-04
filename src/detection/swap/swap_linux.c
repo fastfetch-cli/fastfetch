@@ -5,7 +5,7 @@
 
 #include <inttypes.h>
 
-const char* ffDetectSwap(FFSwapResult* swap)
+const char* ffDetectSwap(FFlist* result)
 {
     // Ref: #620
     char buf[PROC_FILE_BUFFSIZ];
@@ -20,17 +20,29 @@ const char* ffDetectSwap(FFSwapResult* swap)
     while(line && *++line)
     {
         uint64_t total, used;
-        if(sscanf(line, "%*[^\t]%" SCNu64 "%" SCNu64, &total, &used) != 2)
+        char name[256];
+        if(sscanf(line, "%255s %*[^\t]%" SCNu64 "%" SCNu64, name, &total, &used) != 3)
             return "Invalid /proc/swaps format found";
 
-        swap->bytesTotal += total;
-        swap->bytesUsed += used;
+        uint32_t nameLen = (uint32_t) strnlen(name, sizeof(name));
+        FFSwapResult* swap = ffListAdd(result);
+        ffStrbufInitA(&swap->name, nameLen);
+        for (size_t i = 0; i < nameLen; ++i)
+        {
+            if(name[i] == '\\')
+            {
+                char octal[4] = { name[i + 1], name[i + 2], name[i + 3], '\0' };
+                ffStrbufAppendC(&swap->name, (char) strtol(octal, NULL, 8));
+                i += 3;
+            }
+            else
+                ffStrbufAppendC(&swap->name, name[i]);
+        }
+        swap->bytesTotal = total * 1024u;
+        swap->bytesUsed = used * 1024u;
 
         line = memchr(line, '\n', (size_t) (nRead - (line - buf)));
     }
-
-    swap->bytesTotal *= 1024u;
-    swap->bytesUsed *= 1024u;
 
     return NULL;
 }
