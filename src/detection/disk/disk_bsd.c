@@ -52,7 +52,7 @@ static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
     return NULL;
 }
 #else
-static const char* detectFsLabel(struct statfs* fs, FFDisk* disk)
+static const char* detectFsLabel(FF_MAYBE_UNUSED struct statfs* fs, FF_MAYBE_UNUSED FFDisk* disk)
 {
     return "Fastfetch was compiled without libgeom support";
 }
@@ -159,13 +159,13 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         FFDisk* disk = ffListAdd(disks);
 
-        disk->bytesTotal = (uint64_t)fs->f_blocks * fs->f_bsize;
-        disk->bytesFree = (uint64_t)fs->f_bfree * fs->f_bsize;
-        disk->bytesAvailable = (uint64_t)fs->f_bavail * fs->f_bsize;
+        disk->bytesTotal = (uint64_t)fs->f_blocks * (uint64_t)fs->f_bsize;
+        disk->bytesFree = (uint64_t)fs->f_bfree * (uint64_t)fs->f_bsize;
+        disk->bytesAvailable = (uint64_t)fs->f_bavail * (uint64_t)fs->f_bsize;
         disk->bytesUsed = 0; // To be filled in ./disk.c
 
         disk->filesTotal = (uint32_t) fs->f_files;
-        disk->filesUsed = (uint32_t) (fs->f_files - fs->f_ffree);
+        disk->filesUsed = (uint32_t) fs->f_files - (uint32_t) fs->f_ffree;
 
         ffStrbufInitS(&disk->mountFrom, fs->f_mntfromname);
         ffStrbufInitS(&disk->mountpoint, fs->f_mntonname);
