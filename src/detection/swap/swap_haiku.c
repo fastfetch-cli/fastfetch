@@ -8,8 +8,9 @@ const char* ffDetectSwap(FFSwapResult* swap)
     if (get_system_info(&info) != B_OK)
         return "Error getting system info";
 
-    swap->bytesTotal = B_PAGE_SIZE * (uint64_t) info.max_swap_pages;
-    swap->bytesUsed = B_PAGE_SIZE * (uint64_t) (info.max_swap_pages - info.free_swap_pages);
+    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    swap->bytesTotal = pageSize * (uint64_t) info.max_swap_pages;
+    swap->bytesUsed = pageSize * (uint64_t) (info.max_swap_pages - info.free_swap_pages);
 
     return NULL;
 }
