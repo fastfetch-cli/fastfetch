@@ -9,22 +9,28 @@ const char* ffDetectSwap(FFSwapResult* swap)
 {
     // Ref: #620
     char buf[PROC_FILE_BUFFSIZ];
-    ssize_t nRead = ffReadFileData("/proc/meminfo", ARRAY_SIZE(buf) - 1, buf);
-    if(nRead < 0)
-        return "ffReadFileData(\"/proc/meminfo\", ARRAY_SIZE(buf)-1, buf)";
+    ssize_t nRead = ffReadFileData("/proc/swaps", ARRAY_SIZE(buf) - 1, buf);
+    if(nRead <= 0)
+        return "ffReadFileData(\"/proc/swaps\", ARRAY_SIZE(buf)-1, buf) failed";
     buf[nRead] = '\0';
 
-    uint64_t swapTotal = 0, swapFree = 0;
+    // Skip header
+    char* line = memchr(buf, '\n', (size_t) nRead);
 
-    char *token = NULL;
-    if ((token = strstr(buf, "SwapTotal:")) != NULL)
-        swapTotal = strtoul(token + strlen("SwapTotal:"), NULL, 10);
+    while(line && *++line)
+    {
+        uint64_t total, used;
+        if(sscanf(line, "%*[^\t]%" SCNu64 "%" SCNu64, &total, &used) != 2)
+            return "Invalid /proc/swaps format found";
 
-    if ((token = strstr(buf, "SwapFree:")) != NULL)
-        swapFree = strtoul(token + strlen("SwapFree:"), NULL, 10);
+        swap->bytesTotal += total;
+        swap->bytesUsed += used;
 
-    swap->bytesTotal = swapTotal * 1024lu;
-    swap->bytesUsed = (swapTotal - swapFree) * 1024lu;
+        line = memchr(line, '\n', (size_t) (nRead - (line - buf)));
+    }
+
+    swap->bytesTotal *= 1024u;
+    swap->bytesUsed *= 1024u;
 
     return NULL;
 }
