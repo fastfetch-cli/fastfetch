@@ -2,16 +2,17 @@
 #include "common/sysctl.h"
 
 #include <vm/vm_param.h>
+#include <sys/stat.h>
 
-const char* ffDetectSwap(FFSwapResult* swap)
+const char* ffDetectSwap(FFlist* result)
 {
     int mib[16];
     size_t mibsize = ARRAY_SIZE(mib);
     if (sysctlnametomib("vm.swap_info", mib, &mibsize) < 0)
         return "sysctlnametomib(\"vm.swap_info\") failed";
 
-    swap->bytesUsed = swap->bytesTotal = 0;
-
+    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
+    
     for (int n = 0; ; ++n)
     {
         mib[mibsize] = n;
@@ -21,12 +22,12 @@ const char* ffDetectSwap(FFSwapResult* swap)
             break;
         if (xsw.xsw_version != XSWDEV_VERSION)
             return "xswdev version mismatch";
-        swap->bytesUsed += (uint64_t) xsw.xsw_used;
-        swap->bytesTotal += (uint64_t) xsw.xsw_nblks;
+        
+        FFSwapResult* swap = ffListAdd(result);
+        ffStrbufInitF(&swap->name, "/dev/%s", devname(xsw.xsw_dev, S_IFCHR));
+        swap->bytesUsed = (uint64_t) xsw.xsw_used * pageSize;
+        swap->bytesTotal = (uint64_t) xsw.xsw_nblks * pageSize;
     }
-
-    swap->bytesUsed *= instance.state.platform.sysinfo.pageSize;
-    swap->bytesTotal *= instance.state.platform.sysinfo.pageSize;
 
     return NULL;
 }
