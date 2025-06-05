@@ -60,6 +60,7 @@ logoType:
                 { "file-raw", FF_LOGO_TYPE_FILE_RAW },
                 { "data", FF_LOGO_TYPE_DATA },
                 { "data-raw", FF_LOGO_TYPE_DATA_RAW },
+                { "command-raw", FF_LOGO_TYPE_COMMAND_RAW },
                 { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
                 { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
                 { "kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT },
@@ -286,6 +287,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
                 { "file-raw", FF_LOGO_TYPE_FILE_RAW },
                 { "data", FF_LOGO_TYPE_DATA },
                 { "data-raw", FF_LOGO_TYPE_DATA_RAW },
+                { "command-raw", FF_LOGO_TYPE_COMMAND_RAW },
                 { "sixel", FF_LOGO_TYPE_IMAGE_SIXEL },
                 { "kitty", FF_LOGO_TYPE_IMAGE_KITTY },
                 { "kitty-direct", FF_LOGO_TYPE_IMAGE_KITTY_DIRECT },
@@ -491,6 +493,9 @@ void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc
                 break;
             case FF_LOGO_TYPE_DATA_RAW:
                 yyjson_mut_obj_add_str(doc, obj, "type", "data-raw");
+                break;
+            case FF_LOGO_TYPE_COMMAND_RAW:
+                yyjson_mut_obj_add_str(doc, obj, "type", "command-raw");
                 break;
             case FF_LOGO_TYPE_IMAGE_SIXEL:
                 yyjson_mut_obj_add_str(doc, obj, "type", "sixel");

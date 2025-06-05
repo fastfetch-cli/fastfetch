@@ -37,6 +37,10 @@ static bool isPhysicalDevice(const struct mntent* device)
     if(ffStrEquals(device->mnt_type, "zfs"))
         return true;
 
+    //sshfs
+    if(ffStrEquals(device->mnt_type, "fuse.sshfs"))
+        return true;
+
     //Pseudo filesystems don't have a device in /dev
     if(!ffStrStartsWith(device->mnt_fsname, "/dev/"))
         return false;

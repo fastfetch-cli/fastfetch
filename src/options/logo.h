@@ -14,6 +14,7 @@ typedef enum __attribute__((__packed__)) FFLogoType
     FF_LOGO_TYPE_FILE_RAW,    //text file, printed as is
     FF_LOGO_TYPE_DATA,        //text data, printed with color code replacement
     FF_LOGO_TYPE_DATA_RAW,    //text data, printed as is
+    FF_LOGO_TYPE_COMMAND_RAW, //command to generate text data, printed as is
     FF_LOGO_TYPE_IMAGE_SIXEL, //image file, printed as sixel codes
     FF_LOGO_TYPE_IMAGE_KITTY, //image file, printed as kitty graphics protocol
     FF_LOGO_TYPE_IMAGE_KITTY_DIRECT, //image file, tell the terminal emulator to read image data from the specified file (Supported by kitty and wezterm)

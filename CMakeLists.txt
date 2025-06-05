@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.44.0
+    VERSION 2.45.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -787,7 +787,7 @@ elseif(NetBSD)
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_nbsd.c
-        src/detection/packages/packages_obsd.c
+        src/detection/packages/packages_nbsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_nbsd.c
         src/detection/gtk_qt/qt.c
@@ -802,7 +802,7 @@ elseif(NetBSD)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_nbsd.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_linux.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
@@ -884,7 +884,7 @@ elseif(OpenBSD)
         src/detection/users/users_obsd.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_obsd.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_linux.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
@@ -1961,12 +1961,17 @@ if(LINUX)
         endif()
     endif()
 
-    find_program(HAVE_RPMBUILD "rpmbuild")
-    if(HAVE_RPMBUILD)
-        set(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
+    if(NOT IS_MUSL)
+        find_program(HAVE_RPMBUILD "rpmbuild")
+        if(HAVE_RPMBUILD)
+            set(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
 
-        set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+            set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+        endif()
     endif()
+elseif(FreeBSD)
+    set(CPACK_FREEBSD_PACKAGE_LICENSE "MIT")
+    set(CPACK_GENERATOR "${CPACK_GENERATOR};FREEBSD")
 endif()
 
 set(CPACK_SET_DESTDIR ON)

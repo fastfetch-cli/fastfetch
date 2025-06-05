@@ -151,7 +151,7 @@ static const char* detectNCores(FFCPUResult* cpu)
         else if (ptr->Relationship == RelationProcessorCore)
             ++cpu->coresPhysical;
         else if (ptr->Relationship == RelationProcessorPackage)
-            cpu->packages++;
+            ++cpu->packages;
     }
 
     return NULL;

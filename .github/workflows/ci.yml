@@ -383,7 +383,7 @@ jobs:
         run: |
           cat /etc/alpine-release
           uname -a
-          apk add cmake samurai vulkan-loader-dev libxcb-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev gcc g++
+          apk add cmake samurai vulkan-loader-dev libxcb-dev libxrandr-dev rpm-dev wayland-dev libdrm-dev dconf-dev imagemagick-dev chafa-dev zlib-dev dbus-dev mesa-dev opencl-dev xfconf-dev sqlite-dev networkmanager-dev pulseaudio-dev ddcutil-dev elfutils-dev gcc g++
         shell: alpine.sh --root {0}
 
       - name: build
@@ -595,6 +595,80 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-netbsd-amd64
+          path: ./fastfetch-*.*
+
+  dragonfly-amd64:
+    name: DragonFly-amd64
+    runs-on: ubuntu-latest
+    if: false
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: vmactions/dragonflybsd-vm@v1
+        with:
+          usesh: yes
+          prepare: |
+            uname -a
+            pkg update
+            pkg install -y cmake git pkgconf binutils wayland vulkan-headers vulkan-loader libxcb libXrandr libX11 libdrm glib dconf dbus sqlite3-tcl xfce4-conf egl opencl ocl-icd v4l_compat chafa libelf
+
+          run: |
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-dragonfly-amd64
+          path: ./fastfetch-*.*
+
+  haiku-amd64:
+    name: Haiku-amd64
+    runs-on: ubuntu-latest
+    if: false
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: run VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: haiku
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          version: 'r1beta5'
+          run: |
+            uname -a
+            ls -l
+            pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake gcc make pkgconfig python3.10
+            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
+            cmake --build . --target package --verbose -j4
+            ./fastfetch --list-features
+            time ./fastfetch -c presets/ci.jsonc --stat false
+            time ./fastfetch -c presets/ci.jsonc --format json
+            time ./flashfetch
+            ldd fastfetch
+            ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-haiku-amd64
           path: ./fastfetch-*.*
 
   windows-amd64:

@@ -4,8 +4,9 @@
 
 typedef struct FFSwapResult
 {
+    FFstrbuf name;
     uint64_t bytesUsed;
     uint64_t bytesTotal;
 } FFSwapResult;
 
-const char* ffDetectSwap(FFSwapResult* swap);
+const char* ffDetectSwap(FFlist* result /* List of FFSwapResult */);

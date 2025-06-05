@@ -11,4 +11,5 @@ typedef struct FFSwapOptions
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;
+    bool separate;
 } FFSwapOptions;

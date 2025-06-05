@@ -128,6 +128,39 @@ static const char* getSway(FFstrbuf* result)
     return "Failed to run command `sway --version`";
 }
 
+static bool extractI3Version(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    int count = 0;
+    sscanf(line, "%*d.%*d%n", &count);
+    if (count == 0) return true;
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
+    return false;
+}
+
+static const char* getI3(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("i3", &path);
+    if (error) return "Failed to find i3 executable path";
+
+    ffBinaryExtractStrings(path.chars, extractI3Version, result, (uint32_t) strlen("0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "--version",
+        NULL
+    }) == NULL)
+    { // i3 version 1.10 C 2009...
+        ffStrbufSubstrAfterFirstS(result, "version ");
+        ffStrbufSubstrBeforeFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `i3 --version`";
+}
+
 static const char* getWslg(FFstrbuf* result)
 {
     if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result))
@@ -143,6 +176,62 @@ static const char* getWslg(FFstrbuf* result)
     return NULL;
 }
 
+static bool extractCtFvWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    int count = 0;
+    sscanf(line, "%*d.%*d.%*d%n", &count);
+    if (count == 0) return true;
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
+    return false;
+}
+
+static const char* getCtwm(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("ctwm", &path);
+    if (error) return "Failed to find ctwm executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCtFvWmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "--version",
+        NULL
+    }) == NULL)
+    { // ctwm version 4.0.1\n...
+        ffStrbufSubstrBeforeFirstC(result, '\n');
+        ffStrbufSubstrAfterLastC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `ctwm --version`";
+}
+
+static const char* getFvwm(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("fvwm", &path);
+    if (error) return "Failed to find fvwm executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCtFvWmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "-version",
+        NULL
+    }) == NULL)
+    { // [FVWM][main]: fvwm Version 2.2.5\n...
+        ffStrbufSubstrBeforeFirstC(result, '\n');
+        ffStrbufSubstrAfterLastC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `fvwm -version`";
+}
+
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 {
     if (!wmName)
@@ -154,8 +243,17 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
     if (ffStrbufEqualS(wmName, "sway"))
         return getSway(result);
 
+    if (ffStrbufEqualS(wmName, "i3"))
+        return getI3(result);
+
     if (ffStrbufEqualS(wmName, "WSLg"))
         return getWslg(result);
+
+    if (ffStrbufEqualS(wmName, "ctwm"))
+        return getCtwm(result);
+
+    if (ffStrbufEqualS(wmName, "fvwm"))
+        return getFvwm(result);
 
     return "Unsupported WM";
 }
