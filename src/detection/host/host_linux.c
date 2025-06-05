@@ -70,6 +70,27 @@ const char* ffDetectHost(FFHostResult* host)
     //KVM/Qemu virtual machine
     if(ffStrbufStartsWithS(&host->name, "Standard PC"))
         ffStrbufPrependS(&host->name, "KVM/QEMU ");
+    
+    // First check for FreeBSD regardless of host->family/name
+    FFstrbuf uname;
+    ffStrbufInit(&uname);
+    ffProcessAppendStdOut(&uname, (char* const[]) {
+        "uname",
+        "-a",
+        NULL,
+    });
+
+    if (ffStrbufContainsS(&uname, "FreeBSD")) {
+        ffStrbufAppendF(&host->name, " - %s", "FreeBSD Compatibility Layer");
+        ffStrbufAppendS(&host->family, "FreeBSD");
+
+        if (instance.config.general.detectVersion) {
+            ffStrbufAppend(&host->version, &uname);
+        }
+
+        ffStrbufDestroy(&uname);
+        return NULL;
+    }
 
     if(host->family.length == 0 && host->name.length == 0)
     {
