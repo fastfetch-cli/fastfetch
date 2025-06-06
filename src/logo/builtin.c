@@ -1733,7 +1733,7 @@ static const FFlogo F[] = {
     },
     {
         .names = {"Fedora2_small"},
-        .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA2_SMALL,
         .colors = {
             FF_COLOR_FG_BLUE,
