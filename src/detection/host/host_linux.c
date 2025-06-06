@@ -93,6 +93,17 @@ const char* ffDetectHost(FFHostResult* host)
                 }); // supported in 2.2.3 and later
             }
         }
+        else if (ffStrbufStartsWithS(&instance.state.platform.sysinfo.version, "FreeBSD "))
+        {
+            ffStrbufSetStatic(&host->name, "Linux Binary Compatibility on FreeBSD");
+            ffStrbufSetStatic(&host->family, "FreeBSD");
+            ffStrbufSetStatic(&host->vendor, "FreeBSD Foundation");
+            if (instance.config.general.detectVersion)
+            {
+                ffStrbufSetS(&host->version, instance.state.platform.sysinfo.version.chars + strlen("FreeBSD "));
+                ffStrbufSubstrBeforeFirstC(&host->version, ' ');
+            }
+        }
     }
 
     return NULL;
