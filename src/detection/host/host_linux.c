@@ -77,10 +77,11 @@ const char* ffDetectHost(FFHostResult* host)
         //On WSL, the real host can't be detected. Instead use WSL as host.
         if(wslDistroName != NULL || getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
         {
-            ffStrbufAppendS(&host->name, "Windows Subsystem for Linux");
+            ffStrbufSetStatic(&host->name, "Windows Subsystem for Linux");
             if (wslDistroName)
                 ffStrbufAppendF(&host->name, " - %s", wslDistroName);
-            ffStrbufAppendS(&host->family, "WSL");
+            ffStrbufSetStatic(&host->family, "WSL");
+            ffStrbufSetStatic(&host->vendor, "Microsoft Corporation");
 
             if (instance.config.general.detectVersion)
             {
