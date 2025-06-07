@@ -256,7 +256,7 @@ static bool detectRio(FFTerminalFontResult* terminalFont)
     ffParsePropFileConfigValues("rio/config.toml", 2, fontQueryToml);
 
     if(fontName.length == 0)
-        ffStrbufAppendS(&fontName, "cascadiacode");
+        ffStrbufAppendS(&fontName, "Cascadia Code");
 
     if(fontSize.length == 0)
         ffStrbufAppendS(&fontSize, "18");
