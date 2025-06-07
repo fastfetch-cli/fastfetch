@@ -1593,7 +1593,6 @@ elseif(WIN32)
         PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
-        PRIVATE "pdh"
     )
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
         # WoA only works on Windows 10 or higher
