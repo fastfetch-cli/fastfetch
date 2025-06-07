@@ -706,10 +706,10 @@ static const FFlogo B[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK, //grey
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // BedrockSmall
     {
@@ -717,10 +717,11 @@ static const FFlogo B[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_BLACK, //grey
+            FF_COLOR_FG_DEFAULT,
         },
-        .colorKeys = FF_COLOR_FG_WHITE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // BigLinux
     {
