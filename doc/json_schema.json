@@ -3002,6 +3002,11 @@
                                         "const": "swap",
                                         "description": "Print swap (paging file) space usage"
                                     },
+                                    "separate": {
+                                        "type": "boolean",
+                                        "description": "Set if detailed swap devices should be reported on separate lines instead of a summary",
+                                        "default": false
+                                    },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
