@@ -30,6 +30,7 @@ const char* ffDetectWMPlugin(FFstrbuf* pluginName)
             !ffStrEqualsIgnCase(comm, "kwm") &&
             !ffStrEqualsIgnCase(comm, "chunkwm") &&
             !ffStrEqualsIgnCase(comm, "yabai") &&
+            !ffStrEqualsIgnCase(comm, "aerospace") &&
             !ffStrEqualsIgnCase(comm, "rectangle")
         ) continue;
 
