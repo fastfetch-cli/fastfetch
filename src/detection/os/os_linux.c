@@ -240,6 +240,15 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetS(&result->prettyName, "Raspberry Pi OS");
         return true;
     }
+    else if (ffStrbufEndsWithS(&instance.state.platform.sysinfo.release, "+truenas"))
+    {
+        // TrueNAS Scale
+        ffStrbufSetS(&result->id, "truenas-scale");
+        ffStrbufSetS(&result->idLike, "debian");
+        ffStrbufSetS(&result->name, "TrueNAS Scale");
+        ffStrbufSetS(&result->prettyName, "TrueNAS Scale");
+        return true;
+    }
     else
     {
         // Hack for MX Linux. See #847

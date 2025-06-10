@@ -4739,6 +4739,18 @@ static const FFlogo T[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // TrueNAS Scale
+    {
+        .names = {"TrueNAS-Scale"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TRUENAS_SCALE,
+        .colors = {
+            FF_COLOR_FG_256 "39",
+            FF_COLOR_FG_256 "32",
+            FF_COLOR_FG_256 "248",
+        },
+        .colorKeys = FF_COLOR_FG_256 "248",
+        .colorTitle = FF_COLOR_FG_256 "32",
+    },
     // TuxedoOS
     {
         .names = {"Tuxedo OS", "tuxedo"},
