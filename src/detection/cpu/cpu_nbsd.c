@@ -51,7 +51,9 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != NULL &&
         ffSysctlGetString("machdep.dmi.processor-version", &cpu->name) != NULL &&
-        ffSysctlGetString("hw.cpu0.name", &cpu->name) != NULL)
+        ffSysctlGetString("hw.cpu0.name", &cpu->name) != NULL &&
+        ffSysctlGetString("hw.model", &cpu->name) != NULL)
+
     {
         ffStrbufSetS(&cpu->name, "Unknown CPU");
     }
