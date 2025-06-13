@@ -2186,6 +2186,17 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // HarmonyOS
+    {
+        .names = {"HarmonyOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HARMONYOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Hash
     {
         .names = {"Hash"},
