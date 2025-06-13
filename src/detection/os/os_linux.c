@@ -306,6 +306,17 @@ static void detectOS(FFOSResult* os)
         parseLsbRelease(FASTFETCH_TARGET_DIR_ETC "/lsb-release", os);
     if (os->id.length == 0 || os->name.length > 0 || os->prettyName.length > 0)
         parseOsRelease(FASTFETCH_TARGET_DIR_USR "/lib/os-release", os);
+    if (os->id.length == 0 || os->name.length > 0 || os->prettyName.length > 0)
+    {
+        // HarmonyOS has no os-release file
+        if (ffStrbufEqualS(&instance.state.platform.sysinfo.name, "HarmonyOS"))
+        {
+            ffStrbufSetS(&os->id, "harmonyos");
+            ffStrbufSetS(&os->idLike, "harmonyos");
+            ffStrbufSetS(&os->name, "HarmonyOS");
+            ffStrbufSetS(&os->prettyName, "HarmonyOS");
+        }
+    }
 }
 
 void ffDetectOSImpl(FFOSResult* os)
