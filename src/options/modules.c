@@ -26,6 +26,7 @@ void ffOptionsInitModules(FFOptionsModules* options)
     ffInitDiskOptions(&options->disk);
     ffInitDiskIOOptions(&options->diskIo);
     ffInitDisplayOptions(&options->display);
+    ffInitDotfileManagerOptions(&options->dotfileManager);
     ffInitDNSOptions(&options->dns);
     ffInitEditorOptions(&options->editor);
     ffInitFontOptions(&options->font);
@@ -103,6 +104,7 @@ void ffOptionsDestroyModules(FFOptionsModules* options)
     ffDestroyDiskOptions(&options->disk);
     ffDestroyDiskIOOptions(&options->diskIo);
     ffDestroyDisplayOptions(&options->display);
+    ffDestroyDotfileManagerOptions(&options->dotfileManager);
     ffDestroyDNSOptions(&options->dns);
     ffDestroyEditorOptions(&options->editor);
     ffDestroyFontOptions(&options->font);
