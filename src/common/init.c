@@ -105,6 +105,7 @@ void ffStart(void)
     ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe && !instance.state.resultDoc;
 
     #ifdef _WIN32
+    SetErrorMode(SEM_FAILCRITICALERRORS);
     if (instance.config.display.noBuffer)
         setvbuf(stdout, NULL, _IONBF, 0);
     else
