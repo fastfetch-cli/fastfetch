@@ -576,6 +576,25 @@ static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool getTerminalVersionGhostty(FFstrbuf* exe, FFstrbuf* version)
+{
+    const char* env = getenv("TERM_PROGRAM_VERSION");
+    if (env)
+    {
+        ffStrbufAppendS(version, env);
+        // 1.1.3-arch1
+        ffStrbufSubstrBeforeFirstC(version, '-');
+        if(version->length > 0) return true;
+    }
+
+    if(!getExeVersionRaw(exe, version)) return false;
+    // Ghostty 1.1.3-arch1\n\nVersion\n...
+    ffStrbufSubstrBeforeFirstC(version, '\n'); // Ghostty 1.1.3-arch1
+    ffStrbufSubstrAfterFirstC(version, ' ');   // 1.1.3-arch1, only Arch Linux has the suffix '-arch1'
+    ffStrbufSubstrBeforeFirstC(version, '-');  // 1.1.3
+    return version->length > 0;
+}
+
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -872,6 +891,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "zed"))
         return getTerminalVersionZed(exe, version);
+
+    if(ffStrbufStartsWithIgnCaseS(processName, "ghostty"))
+        return getTerminalVersionGhostty(exe, version);
 
     #if __HAIKU__
     if(ffStrbufEqualS(processName, "Terminal"))
