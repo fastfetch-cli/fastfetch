@@ -254,7 +254,7 @@ static const FFlogo A[] = {
     },
    // AnushOS
     {
-        .names = {"AnushOS","anushos"},
+        .names = {"AnushOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_ANUSHOS,
         .colors = {
             FF_COLOR_FG_WHITE,
