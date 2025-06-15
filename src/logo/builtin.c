@@ -2014,6 +2014,16 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // GhostFreak
+    {
+        .names = {"GhostFreak"},
+        .lines = FASTFETCH_DATATEXT_LOGO_GHOSTFREAK,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_DEFAULT,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Glaucus
     {
         .names = {"Glaucus"},
