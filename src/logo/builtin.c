@@ -252,6 +252,20 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+   // AnushOS
+    {
+        .names = {"AnushOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ANUSHOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // AoscOsRetro
     {
         .names = {"Aosc OS/Retro", "aoscosretro"},
