@@ -589,7 +589,7 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: '7.6'
+          version: '7.7'
           run: |
             uname -a
             sudo pkg_add -r cmake git pkgconf wayland vulkan-headers vulkan-loader glib2 dconf dbus sqlite3 xfconf imagemagick chafa
