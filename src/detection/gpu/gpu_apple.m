@@ -3,6 +3,9 @@
 #import <Metal/MTLDevice.h>
 #import <IOKit/kext/KextManager.h>
 
+#ifndef MAC_OS_VERSION_26_0
+    #define MTLGPUFamilyMetal4 ((MTLGPUFamily) 5002)
+#endif
 #ifndef MAC_OS_VERSION_13_0
     #define MTLGPUFamilyMetal3 ((MTLGPUFamily) 5001)
 #endif
@@ -57,7 +60,9 @@ const char* ffGpuDetectMetal(FFlist* gpus)
             else if ([device supportsFeatureSet:MTLFeatureSet_macOS_GPUFamily1_v1])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Feature Set 1");
             #else // MAC_OS_X_VERSION_10_15
-            if ([device supportsFamily:MTLGPUFamilyMetal3])
+            if ([device supportsFamily:MTLGPUFamilyMetal4])
+                ffStrbufSetStatic(&gpu->platformApi, "Metal 4");
+            else if ([device supportsFamily:MTLGPUFamilyMetal3])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal 3");
             else if ([device supportsFamily:MTLGPUFamilyCommon3])
                 ffStrbufSetStatic(&gpu->platformApi, "Metal Common 3");
