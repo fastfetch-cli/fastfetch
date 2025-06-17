@@ -237,7 +237,7 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
     if (!wmName)
         return "No WM detected";
 
-    if (ffStrbufEqualS(wmName, "Hyprland"))
+    if (ffStrbufIgnCaseEqualS(wmName, "Hyprland"))
         return getHyprland(result);
 
     if (ffStrbufEqualS(wmName, "sway"))
