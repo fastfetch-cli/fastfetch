@@ -408,9 +408,9 @@ jobs:
           name: fastfetch-musl-amd64
           path: ./fastfetch-*.*
 
-  macos-universal:
-    name: macOS-universal
-    runs-on: macos-latest
+  macos-amd64:
+    name: macOS-amd64
+    runs-on: macos-13
     permissions:
       security-events: write
       contents: read
@@ -426,7 +426,7 @@ jobs:
           HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa
 
       - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_OSX_ARCHITECTURES='arm64;x86_64' .
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
@@ -452,7 +452,54 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-macos-universal
+          name: fastfetch-macos-amd64
+          path: ./fastfetch-*.*
+
+  macos-aarch64:
+    name: macOS-aarch64
+    runs-on: macos-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: uname -a
+        run: uname -a
+
+      - name: install required packages
+        run: |
+          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa
+
+      - name: configure project
+        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+
+      - name: build project
+        run: cmake --build . --target package --verbose -j4
+
+      - name: list features
+        run: ./fastfetch --list-features
+
+      - name: run fastfetch
+        run: time ./fastfetch -c presets/ci.jsonc --stat false
+
+      - name: run fastfetch --format json
+        run: time ./fastfetch -c presets/ci.jsonc --format json
+
+      - name: run flashfetch
+        run: time ./flashfetch
+
+      - name: print dependencies
+        run: otool -L fastfetch
+
+      - name: run tests
+        run: ctest --output-on-failure
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-macos-aarch64
           path: ./fastfetch-*.*
 
   sunos-amd64:
@@ -808,7 +855,8 @@ jobs:
       - linux-ppc64le
       - linux-s390x
       - musl-amd64
-      - macos-universal
+      - macos-amd64
+      - macos-aarch64
       - freebsd-amd64
       - openbsd-amd64
       - netbsd-amd64
