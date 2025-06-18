@@ -109,6 +109,8 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
             ffDrmDetectI915(gpu, fd);
         else if (ffStrStartsWith(driverName, "amdgpu"))
             ffDrmDetectAmdgpu(options, gpu, dev->nodes[DRM_NODE_RENDER]);
+        else if (ffStrStartsWith(driverName, "radeon"))
+            ffDrmDetectRadeon(options, gpu, dev->nodes[DRM_NODE_RENDER]);
         else if (ffStrStartsWith(driverName, "xe"))
             ffDrmDetectXe(gpu, fd);
         else if (ffStrStartsWith(driverName, "asahi"))

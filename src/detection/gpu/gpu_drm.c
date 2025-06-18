@@ -12,6 +12,44 @@
 
 #include "intel_drm.h"
 #include "asahi_drm.h"
+#include <radeon_drm.h>
+
+const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath)
+{
+    FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY);
+    if (fd < 0) return "Failed to open DRM render device";
+
+    struct drm_radeon_info info;
+    info.request = RADEON_INFO_ACTIVE_CU_COUNT;
+    if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
+        gpu->coreCount = (int32_t) info.value;
+
+    if (options->temp)
+    {
+        info.request = RADEON_INFO_CURRENT_GPU_TEMP; // millidegrees C
+        if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
+            gpu->temperature = (double) info.value / 1000.0;
+    }
+
+    info.request = RADEON_INFO_MAX_SCLK; // MHz
+    if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
+        gpu->frequency = (uint32_t) (info.value / 1000u);
+
+    struct drm_radeon_gem_info gemInfo;
+    if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0 && gemInfo.vram_visible > 0)
+    {
+        gpu->type = FF_GPU_TYPE_DISCRETE;
+        if (options->driverSpecific)
+        {
+            gpu->dedicated.total = gemInfo.vram_visible;
+            info.request = RADEON_INFO_VRAM_USAGE;
+            if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
+                gpu->dedicated.used = info.value;
+        }
+    }
+
+    return NULL;
+}
 
 #ifdef FF_HAVE_DRM_AMDGPU
 #include <amdgpu.h>

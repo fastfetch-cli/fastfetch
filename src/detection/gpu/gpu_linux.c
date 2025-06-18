@@ -105,14 +105,19 @@ FF_MAYBE_UNUSED static const char* drmFindRenderFromCard(const char* drmCardKey,
 
 static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
 {
-#if FF_HAVE_DRM_AMDGPU
     const char* error = drmFindRenderFromCard(drmKey, buffer);
     if (error) return error;
-    return ffDrmDetectAmdgpu(options, gpu, buffer->chars);
-    #else
-    FF_UNUSED(options, gpu, drmKey, buffer);
-    return "Fastfetch is not compiled with libdrm_amdgpu support";
+    if (ffStrbufEqualS(&gpu->driver, "radeon"))
+        return ffDrmDetectRadeon(options, gpu, buffer->chars);
+    else
+    {
+#if FF_HAVE_DRM_AMDGPU
+        return ffDrmDetectAmdgpu(options, gpu, buffer->chars);
+#else
+        FF_UNUSED(options, gpu, drmKey, buffer);
+        return "Fastfetch is not compiled with libdrm_amdgpu support";
 #endif
+    }
 }
 
 static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
@@ -135,47 +140,50 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
     ffStrbufAppendC(pciDir, '/');
 
     const uint32_t hwmonLen = pciDir->length;
-    ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
-    if (ffPathExists(pciDir->chars, FF_PATHTYPE_ANY))
-        gpu->type = FF_GPU_TYPE_INTEGRATED;
-    else
-        gpu->type = FF_GPU_TYPE_DISCRETE;
-
     uint64_t value = 0;
     if (options->temp)
     {
-        ffStrbufSubstrBefore(pciDir, hwmonLen);
         ffStrbufAppendS(pciDir, "temp1_input"); // The on die GPU temperature in millidegrees Celsius
         if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
             gpu->temperature = (double) value / 1000;
     }
 
-    if (options->driverSpecific)
+    if (ffStrbufEqualS(&gpu->driver, "amdgpu")) // Ancient radeon drivers don't have these files
     {
-        ffStrbufSubstrBefore(pciDir, pciDirLen);
-        ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
-        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-        {
-            if (gpu->type == FF_GPU_TYPE_DISCRETE)
-                gpu->dedicated.total = value;
-            else
-                gpu->shared.total = value;
+        ffStrbufSubstrBefore(pciDir, hwmonLen);
+        ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
+        if (ffPathExists(pciDir->chars, FF_PATHTYPE_ANY))
+            gpu->type = FF_GPU_TYPE_INTEGRATED;
+        else
+            gpu->type = FF_GPU_TYPE_DISCRETE;
 
-            ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
-            ffStrbufAppendS(pciDir, "/mem_info_vis_vram_used");
+        if (options->driverSpecific)
+        {
+            ffStrbufSubstrBefore(pciDir, pciDirLen);
+            ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
             if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
             {
                 if (gpu->type == FF_GPU_TYPE_DISCRETE)
-                    gpu->dedicated.used = value;
+                    gpu->dedicated.total = value;
                 else
-                    gpu->shared.used = value;
-            }
-        }
+                    gpu->shared.total = value;
 
-        ffStrbufSubstrBefore(pciDir, pciDirLen);
-        ffStrbufAppendS(pciDir, "/gpu_busy_percent");
-        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-            gpu->coreUsage = (double) value;
+                ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
+                ffStrbufAppendS(pciDir, "/mem_info_vis_vram_used");
+                if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+                {
+                    if (gpu->type == FF_GPU_TYPE_DISCRETE)
+                        gpu->dedicated.used = value;
+                    else
+                        gpu->shared.used = value;
+                }
+            }
+
+            ffStrbufSubstrBefore(pciDir, pciDirLen);
+            ffStrbufAppendS(pciDir, "/gpu_busy_percent");
+            if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+                gpu->coreUsage = (double) value;
+        }
     }
 }
 
