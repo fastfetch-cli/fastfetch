@@ -45,9 +45,12 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
 {
     FF_LIBRARY_LOAD(libdrm, "dlopen libdrm" FF_LIBRARY_EXTENSION " failed", "libdrm" FF_LIBRARY_EXTENSION, 2)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmGetDevices)
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, drmFreeDevices)
 
     drmDevicePtr devices[64];
     int nDevices = ffdrmGetDevices(devices, ARRAY_SIZE(devices));
+    if (nDevices < 0)
+        return "drmGetDevices() failed";
 
     for (int iDev = 0; iDev < nDevices; ++iDev)
     {
@@ -135,6 +138,8 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
 
         fillGPUTypeGeneric(gpu);
     }
+
+    ffdrmFreeDevices(devices, nDevices);
 
     return NULL;
 }
