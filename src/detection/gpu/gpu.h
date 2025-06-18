@@ -49,6 +49,14 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus);
 
 const char* ffGPUGetVendorString(unsigned vendorId);
 
+typedef struct FFGpuDriverPciBusId
+{
+    uint32_t domain;
+    uint32_t bus;
+    uint32_t device;
+    uint32_t func;
+} FFGpuDriverPciBusId;
+
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
 void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 void ffGPUQueryAmdGpuName(uint16_t deviceId, uint8_t revisionId, FFGPUResult* gpu);
@@ -61,13 +69,5 @@ const char* ffDrmDetectXe(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd);
 #endif // FF_HAVE_DRM
 
-typedef struct FFGpuDriverPciBusId
-{
-    uint32_t domain;
-    uint32_t bus;
-    uint32_t device;
-    uint32_t func;
-} FFGpuDriverPciBusId;
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);
-
 #endif // defined(XXX)
