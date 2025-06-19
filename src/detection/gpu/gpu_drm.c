@@ -47,9 +47,10 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
     if (options->driverSpecific)
     {
         struct drm_radeon_gem_info gemInfo;
-        if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0 && gemInfo.vram_visible > 0)
+        if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0)
         {
-            gpu->dedicated.total = gemInfo.vram_visible;
+            // vram_usage can be bigger than vram_usage, so we use vram_size here
+            gpu->dedicated.total = gemInfo.vram_size;
             gpu->shared.total = gemInfo.gart_size;
 
             uint64_t memSize;
