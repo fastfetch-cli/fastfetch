@@ -50,12 +50,20 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
         if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0 && gemInfo.vram_visible > 0)
         {
             gpu->dedicated.total = gemInfo.vram_visible;
+            gpu->shared.total = gemInfo.gart_size;
+
             uint64_t memSize;
             if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
                 .request = RADEON_INFO_VRAM_USAGE, // uint64_t
                 .value = (uintptr_t) &memSize,
             }) >= 0)
                 gpu->dedicated.used = memSize;
+
+            if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
+                .request = RADEON_INFO_GTT_USAGE, // uint64_t
+                .value = (uintptr_t) &memSize,
+            }) >= 0)
+                gpu->shared.used = memSize;
         }
     }
 
@@ -126,16 +134,13 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
         struct amdgpu_heap_info heapInfo;
         if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_VRAM, 0, &heapInfo) >= 0)
         {
-            if (gpu->type == FF_GPU_TYPE_DISCRETE)
-            {
-                gpu->dedicated.total = heapInfo.heap_size;
-                gpu->dedicated.used = heapInfo.heap_usage;
-            }
-            else
-            {
-                gpu->shared.total = heapInfo.heap_size;
-                gpu->shared.used = heapInfo.heap_usage;
-            }
+            gpu->dedicated.total = heapInfo.heap_size;
+            gpu->dedicated.used = heapInfo.heap_usage;
+        }
+        if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_GTT, 0, &heapInfo) >= 0)
+        {
+            gpu->shared.total = heapInfo.heap_size;
+            gpu->shared.used = heapInfo.heap_usage;
         }
     }
 
