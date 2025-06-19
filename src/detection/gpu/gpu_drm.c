@@ -19,32 +19,43 @@ const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, con
     FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY);
     if (fd < 0) return "Failed to open DRM render device";
 
-    struct drm_radeon_info info;
-    info.request = RADEON_INFO_ACTIVE_CU_COUNT;
-    if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
-        gpu->coreCount = (int32_t) info.value;
+    uint32_t value;
+
+    // https://github.com/torvalds/linux/blob/fb4d33ab452ea254e2c319bac5703d1b56d895bf/drivers/gpu/drm/radeon/radeon_kms.c#L231
+
+    if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
+        .request = RADEON_INFO_ACTIVE_CU_COUNT,
+        .value = (uintptr_t) &value,
+    }) >= 0)
+        gpu->coreCount = (int32_t) value;
 
     if (options->temp)
     {
-        info.request = RADEON_INFO_CURRENT_GPU_TEMP; // millidegrees C
-        if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
-            gpu->temperature = (double) info.value / 1000.0;
+        if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
+            .request = RADEON_INFO_CURRENT_GPU_TEMP, // millidegrees C
+            .value = (uintptr_t) &value,
+        }) >= 0 && value != 0) // 0 means unavailable
+            gpu->temperature = (double) value / 1000.0;
     }
 
-    info.request = RADEON_INFO_MAX_SCLK; // MHz
-    if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
-        gpu->frequency = (uint32_t) (info.value / 1000u);
+    if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
+        .request = RADEON_INFO_MAX_SCLK, // MHz
+        .value = (uintptr_t) &value,
+    }) >= 0)
+        gpu->frequency = (uint32_t) (value / 1000u);
 
-    struct drm_radeon_gem_info gemInfo;
-    if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0 && gemInfo.vram_visible > 0)
+    if (options->driverSpecific)
     {
-        gpu->type = FF_GPU_TYPE_DISCRETE;
-        if (options->driverSpecific)
+        struct drm_radeon_gem_info gemInfo;
+        if (ioctl(fd, DRM_IOCTL_RADEON_GEM_INFO, &gemInfo) >= 0 && gemInfo.vram_visible > 0)
         {
             gpu->dedicated.total = gemInfo.vram_visible;
-            info.request = RADEON_INFO_VRAM_USAGE;
-            if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &info) >= 0)
-                gpu->dedicated.used = info.value;
+            uint64_t memSize;
+            if (ioctl(fd, DRM_IOCTL_RADEON_INFO, &(struct drm_radeon_info) {
+                .request = RADEON_INFO_VRAM_USAGE, // uint64_t
+                .value = (uintptr_t) &memSize,
+            }) >= 0)
+                gpu->dedicated.used = memSize;
         }
     }
 
