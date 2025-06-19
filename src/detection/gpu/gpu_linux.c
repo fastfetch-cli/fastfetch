@@ -249,7 +249,7 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     #if FF_HAVE_DRM
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
-    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return "Failed to open drm device";
 
     if (ffStrbufEqualS(&gpu->driver, "xe"))
@@ -412,7 +412,7 @@ FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, cons
     #if FF_HAVE_DRM_ASAHI
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
-    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd >= 0)
         return ffDrmDetectAsahi(gpu, fd);
     #endif

@@ -16,7 +16,7 @@
 
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath)
 {
-    FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY);
+    FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return "Failed to open DRM render device";
 
     uint32_t value;
@@ -85,7 +85,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_heap_info)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_deinitialize)
 
-    FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY);
+    FF_AUTO_CLOSE_FD int fd = open(renderPath, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return "Failed to open DRM render device";
 
     amdgpu_device_handle handle;
