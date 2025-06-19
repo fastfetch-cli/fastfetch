@@ -147,7 +147,7 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
 
 static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_AUTO_CLOSE_FD int fd = open("/dev/pci", O_RDONLY | O_CLOEXEC, 0);
+    FF_AUTO_CLOSE_FD int fd = open("/dev/pci", O_RDONLY | O_CLOEXEC);
     if (fd < 0)
         return "open(\"/dev/pci\", O_RDONLY | O_CLOEXEC, 0) failed";
 
