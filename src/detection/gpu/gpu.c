@@ -15,6 +15,11 @@ const char* FF_GPU_VENDOR_NAME_PARALLEL = "Parallel";
 const char* FF_GPU_VENDOR_NAME_MICROSOFT = "Microsoft";
 const char* FF_GPU_VENDOR_NAME_REDHAT = "RedHat";
 const char* FF_GPU_VENDOR_NAME_ORACLE = "Oracle";
+const char* FF_GPU_VENDOR_NAME_BROADCOM = "Broadcom";
+const char* FF_GPU_VENDOR_NAME_LOONGSON = "Loongson";
+const char* FF_GPU_VENDOR_NAME_JINGJIA_MICRO = "Jingjia Micro";
+const char* FF_GPU_VENDOR_NAME_HUAWEI = "Huawei";
+const char* FF_GPU_VENDOR_NAME_ZHAOXIN = "Zhaoxin";
 
 const char* ffGPUGetVendorString(unsigned vendorId)
 {
@@ -22,17 +27,22 @@ const char* ffGPUGetVendorString(unsigned vendorId)
     switch (vendorId)
     {
         case 0x106b: return FF_GPU_VENDOR_NAME_APPLE;
-        case 0x1002: case 0x1022: return FF_GPU_VENDOR_NAME_AMD;
+        case 0x1002: case 0x1022: case 0x1dd8: return FF_GPU_VENDOR_NAME_AMD;
         case 0x8086: case 0x8087: case 0x03e7: return FF_GPU_VENDOR_NAME_INTEL;
         case 0x0955: case 0x10de: case 0x12d2: return FF_GPU_VENDOR_NAME_NVIDIA;
         case 0x1ed5: return FF_GPU_VENDOR_NAME_MTHREADS;
-        case 0x5143: return FF_GPU_VENDOR_NAME_QUALCOMM;
+        case 0x17cb: case 0x5143: return FF_GPU_VENDOR_NAME_QUALCOMM;
         case 0x14c3: return FF_GPU_VENDOR_NAME_MTK;
         case 0x15ad: return FF_GPU_VENDOR_NAME_VMWARE;
         case 0x1af4: return FF_GPU_VENDOR_NAME_REDHAT;
         case 0x1ab8: return FF_GPU_VENDOR_NAME_PARALLEL;
         case 0x1414: return FF_GPU_VENDOR_NAME_MICROSOFT;
         case 0x108e: return FF_GPU_VENDOR_NAME_ORACLE;
+        case 0x182f: case 0x14e4: return FF_GPU_VENDOR_NAME_BROADCOM;
+        case 0x0014: return FF_GPU_VENDOR_NAME_LOONGSON;
+        case 0x0731: return FF_GPU_VENDOR_NAME_JINGJIA_MICRO;
+        case 0x19e5: return FF_GPU_VENDOR_NAME_HUAWEI;
+        case 0x1d17: return FF_GPU_VENDOR_NAME_ZHAOXIN;
         default: return NULL;
     }
 }

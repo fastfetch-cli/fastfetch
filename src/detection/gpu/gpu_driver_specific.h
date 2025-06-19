@@ -10,14 +10,6 @@ typedef enum __attribute__((__packed__)) FFGpuDriverConditionType
     FF_GPU_DRIVER_CONDITION_TYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFGpuDriverConditionType;
 
-typedef struct FFGpuDriverPciBusId
-{
-    uint32_t domain;
-    uint32_t bus;
-    uint32_t device;
-    uint32_t func;
-} FFGpuDriverPciBusId;
-
 typedef struct FFGpuDriverPciDeviceId
 {
     uint32_t deviceId;

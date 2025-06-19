@@ -1,6 +1,7 @@
 #include "logo/logo.h"
 #include "common/io/io.h"
 #include "common/printing.h"
+#include "common/processing.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "util/textModifier.h"
@@ -455,14 +456,13 @@ static inline void logoPrintDetected(FFLogoSize size)
     logoPrintStruct(logoGetBuiltinDetected(size));
 }
 
-static bool logoPrintData(bool doColorReplacement)
+static bool logoPrintData(bool doColorReplacement, FFstrbuf* source)
 {
-    FFOptionsLogo* options = &instance.config.logo;
-    if(options->source.length == 0)
+    if(source->length == 0)
         return false;
 
     logoApplyColors(logoGetBuiltinDetected(FF_LOGO_SIZE_NORMAL), doColorReplacement);
-    ffLogoPrintChars(options->source.chars, doColorReplacement);
+    ffLogoPrintChars(source->chars, doColorReplacement);
     return true;
 }
 
@@ -510,7 +510,7 @@ static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
     )
     {
         if (instance.config.display.showErrors)
-            fprintf(stderr, "Logo: Failed to load file content from logo source: %s \n", options->source.chars);
+            fprintf(stderr, "Logo: Failed to load file content from logo source: %s\n", options->source.chars);
         return false;
     }
 
@@ -548,10 +548,36 @@ static bool logoTryKnownType(void)
         return logoPrintBuiltinIfExists(&options->source, FF_LOGO_SIZE_SMALL);
 
     if(options->type == FF_LOGO_TYPE_DATA)
-        return logoPrintData(true);
+        return logoPrintData(true, &options->source);
 
     if(options->type == FF_LOGO_TYPE_DATA_RAW)
-        return logoPrintData(false);
+        return logoPrintData(false, &options->source);
+
+    if(options->type == FF_LOGO_TYPE_COMMAND_RAW)
+    {
+        FF_STRBUF_AUTO_DESTROY source = ffStrbufCreate();
+
+        FFCommandOptions* commandOptions = &instance.config.modules.command;
+        const char* error = ffProcessAppendStdOut(&source, commandOptions->param.length ? (char* const[]){
+            commandOptions->shell.chars,
+            commandOptions->param.chars,
+            options->source.chars,
+            NULL
+        } : (char* const[]){
+            commandOptions->shell.chars,
+            options->source.chars,
+            NULL
+        });
+
+        if (error)
+        {
+            if (instance.config.display.showErrors)
+                fprintf(stderr, "Logo: failed to execute command `%s`: %s\n", options->source.chars, error);
+            return false;
+        }
+
+        return logoPrintData(false, &source);
+    }
 
     updateLogoPath(); //We sure have a file, resolve relative paths
 
@@ -603,7 +629,7 @@ void ffLogoPrint(void)
             {
                 // Image logo should have been handled
                 if(options->type == FF_LOGO_TYPE_BUILTIN || options->type == FF_LOGO_TYPE_SMALL)
-                    fprintf(stderr, "Logo: Failed to load %s logo: %s \n", options->type == FF_LOGO_TYPE_BUILTIN ? "builtin" : "builtin small", options->source.chars);
+                    fprintf(stderr, "Logo: Failed to load %s logo: %s\n", options->type == FF_LOGO_TYPE_BUILTIN ? "builtin" : "builtin small", options->source.chars);
             }
 
             logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);

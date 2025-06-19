@@ -20,7 +20,7 @@
 
 const char* ffDetectBootmgr(FFBootmgrResult* result)
 {
-    FF_AUTO_CLOSE_FD int efifd = open("/dev/efi", O_RDWR);
+    FF_AUTO_CLOSE_FD int efifd = open("/dev/efi", O_RDWR | O_CLOEXEC);
     if (efifd < 0) return "open(/dev/efi) failed";
 
     uint8_t buffer[2048];

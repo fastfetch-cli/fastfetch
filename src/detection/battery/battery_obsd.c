@@ -8,9 +8,9 @@
 
 const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* result)
 {
-    FF_AUTO_CLOSE_FD int devfd = open("/dev/apm", O_RDONLY);
+    FF_AUTO_CLOSE_FD int devfd = open("/dev/apm", O_RDONLY | O_CLOEXEC);
 
-    if (devfd < 0) return "open(dev/apm, O_RDONLY) failed";
+    if (devfd < 0) return "open(dev/apm, O_RDONLY | O_CLOEXEC) failed";
 
     struct apm_power_info info = {};
 

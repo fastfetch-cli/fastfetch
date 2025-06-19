@@ -99,9 +99,6 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         wchar_t diskName[MAX_PATH + 1], diskFileSystem[MAX_PATH + 1];
 
-        //https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumeinformationa#remarks
-        UINT errorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-
         DWORD diskFlags;
         BOOL result = GetVolumeInformationW(mountpoint,
             diskName, ARRAY_SIZE(diskName), //Volume name
@@ -110,7 +107,6 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
             &diskFlags, //File system flags
             diskFileSystem, ARRAY_SIZE(diskFileSystem)
         );
-        SetErrorMode(errorMode);
 
         if(result)
         {

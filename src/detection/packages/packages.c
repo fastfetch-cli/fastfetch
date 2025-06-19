@@ -100,22 +100,23 @@ uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir)
     {
         bool ok = false;
 
-#if !defined(__sun) && !defined(__HAIKU__)
-        if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
-            ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
-        else
-#endif
+        if (entry->d_name[0] != '.')
         {
-            struct stat stbuf;
-            if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0)
-                ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+#if !defined(__sun) && !defined(__HAIKU__)
+            if(entry->d_type != DT_UNKNOWN && entry->d_type != DT_LNK)
+                ok = entry->d_type == (isdir ? DT_DIR : DT_REG);
+            else
+#endif
+            {
+                struct stat stbuf;
+                if (fstatat(dirfd(dirp), entry->d_name, &stbuf, 0) == 0)
+                    ok = isdir ? S_ISDIR(stbuf.st_mode) : S_ISREG(stbuf.st_mode);
+            }
         }
 
         if(ok) ++num_elements;
     }
 
-    if(isdir && num_elements >= 2)
-        num_elements -= 2; // accounting for . and ..
 
     return num_elements;
 }

@@ -36,6 +36,10 @@ const char* getOthersByIokit(FFHostResult* host)
     if (manufacturer)
         ffCfStrGetString(manufacturer, &host->vendor);
 
+    FF_CFTYPE_AUTO_RELEASE CFStringRef version = IORegistryEntryCreateCFProperty(registryEntry, CFSTR("version"), kCFAllocatorDefault, kNilOptions);
+    if (version)
+        ffCfStrGetString(version, &host->version);
+
     return NULL;
 }
 

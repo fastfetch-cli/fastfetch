@@ -1,4 +1,5 @@
 #include "swap.h"
+#include "util/FFlist.h"
 #include "util/mallocHelper.h"
 
 #include <sys/types.h>
@@ -6,7 +7,7 @@
 #include <sys/param.h>
 #include <unistd.h>
 
-const char* ffDetectSwap(FFSwapResult* swap)
+const char* ffDetectSwap(FFlist* result)
 {
     int nswap = swapctl(SWAP_NSWAP, 0, 0);
     if (nswap < 0) return "swapctl(SWAP_NSWAP) failed";
@@ -17,17 +18,16 @@ const char* ffDetectSwap(FFSwapResult* swap)
     if (swapctl(SWAP_STATS, swdev, nswap) < 0)
         return "swapctl(SWAP_STATS) failed";
 
-    uint64_t swapTotal = 0, swapUsed = 0;
     for (int i = 0; i < nswap; i++)
     {
         if (swdev[i].se_flags & SWF_ENABLE)
         {
-            swapUsed += (uint64_t) swdev[i].se_inuse;
-            swapTotal += (uint64_t) swdev[i].se_nblks;
+            FFSwapResult* swap = ffListAdd(result);
+            ffStrbufInitS(&swap->name, swdev[i].se_path);
+            swap->bytesUsed = (uint64_t) swdev[i].se_inuse * DEV_BSIZE;
+            swap->bytesTotal = (uint64_t) swdev[i].se_nblks * DEV_BSIZE;
         }
     }
-    swap->bytesUsed = swapUsed * DEV_BSIZE;
-    swap->bytesTotal = swapTotal * DEV_BSIZE;
 
     return NULL;
 }

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.43.0
+    VERSION 2.45.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -61,7 +61,7 @@ cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeB
 cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku" OFF)
@@ -529,6 +529,7 @@ if(LINUX)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_linux.c
+        src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_linux.c
@@ -676,6 +677,7 @@ elseif(FreeBSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_bsd.c
+        src/detection/gpu/gpu_drm.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_bsd.c
@@ -787,7 +789,7 @@ elseif(NetBSD)
         src/detection/netio/netio_bsd.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_nbsd.c
-        src/detection/packages/packages_obsd.c
+        src/detection/packages/packages_nbsd.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_nbsd.c
         src/detection/gtk_qt/qt.c
@@ -802,7 +804,7 @@ elseif(NetBSD)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_nbsd.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_linux.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
@@ -884,7 +886,7 @@ elseif(OpenBSD)
         src/detection/users/users_obsd.c
         src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_obsd.c
-        src/detection/wm/wm_nosupport.c
+        src/detection/wm/wm_linux.c
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
@@ -1593,7 +1595,6 @@ elseif(WIN32)
         PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
-        PRIVATE "pdh"
     )
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
         # WoA only works on Windows 10 or higher
@@ -1925,17 +1926,17 @@ install(
 ##################
 
 set(CPACK_GENERATOR "TGZ;ZIP")
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(CMAKE_SYSTEM_PROCESSOR "amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
+endif()
 if(APPLE)
-    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-universal" CPACK_PACKAGE_FILE_NAME)
-else() # We don't use this in Windows
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-        set(CMAKE_SYSTEM_PROCESSOR "amd64")
-    endif()
-    if(IS_MUSL)
-        string(TOLOWER "${CMAKE_PROJECT_NAME}-musl-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
-    else()
-        string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
-    endif()
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
+elseif(IS_MUSL)
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-musl-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
+else()
+    string(TOLOWER "${CMAKE_PROJECT_NAME}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME)
 endif()
 
 if(LINUX)
@@ -1961,12 +1962,17 @@ if(LINUX)
         endif()
     endif()
 
-    find_program(HAVE_RPMBUILD "rpmbuild")
-    if(HAVE_RPMBUILD)
-        set(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
+    if(NOT IS_MUSL)
+        find_program(HAVE_RPMBUILD "rpmbuild")
+        if(HAVE_RPMBUILD)
+            set(CPACK_GENERATOR "${CPACK_GENERATOR};RPM")
 
-        set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+            set(CPACK_RPM_PACKAGE_LICENSE "MIT")
+        endif()
     endif()
+elseif(FreeBSD)
+    set(CPACK_FREEBSD_PACKAGE_LICENSE "MIT")
+    set(CPACK_GENERATOR "${CPACK_GENERATOR};FREEBSD")
 endif()
 
 set(CPACK_SET_DESTDIR ON)

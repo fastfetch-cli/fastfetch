@@ -5,7 +5,7 @@
 
 enum { FFMaxNSwap = 8 };
 
-const char* ffDetectSwap(FFSwapResult* swap)
+const char* ffDetectSwap(FFlist* result)
 {
     char strings[FFMaxNSwap][PATH_MAX];
     uint8_t buffer[sizeof(swaptbl_t) + sizeof(swapent_t) * (FFMaxNSwap - 1)] = {};
@@ -18,16 +18,14 @@ const char* ffDetectSwap(FFSwapResult* swap)
     if (size < 0)
         return "swapctl() failed";
 
-    swap->bytesTotal = swap->bytesUsed = 0;
-
+    uint32_t pageSize = instance.state.platform.sysinfo.pageSize;
     for (int i = 0; i < size; ++i)
     {
-        swap->bytesTotal += (uint64_t) table->swt_ent[i].ste_pages;
-        swap->bytesUsed += (uint64_t) table->swt_ent[i].ste_free;
+        FFSwapResult* swap = ffListAdd(result);
+        ffStrbufInitS(&swap->name, table->swt_ent[i].ste_path);
+        swap->bytesTotal = (uint64_t) table->swt_ent[i].ste_pages * pageSize;
+        swap->bytesUsed = swap->bytesTotal - (uint64_t) table->swt_ent[i].ste_free * pageSize;
     }
-    swap->bytesUsed = swap->bytesTotal - swap->bytesUsed;
-    swap->bytesTotal *= instance.state.platform.sysinfo.pageSize;
-    swap->bytesUsed *= instance.state.platform.sysinfo.pageSize;
 
     return NULL;
 }

@@ -18,8 +18,8 @@ static void freePropDict(prop_dictionary_t* pdict)
 
 static const char* detectCpuTemp(double* current)
 {
-    FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY);
-    if (fd < 0) return "open(_PATH_SYSMON, O_RDONLY) failed";
+    FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
 
     __attribute__((__cleanup__(freePropDict))) prop_dictionary_t root = NULL;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0)
@@ -51,7 +51,8 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     if (ffSysctlGetString("machdep.cpu_brand", &cpu->name) != NULL &&
         ffSysctlGetString("machdep.dmi.processor-version", &cpu->name) != NULL &&
-        ffSysctlGetString("hw.cpu0.name", &cpu->name) != NULL)
+        ffSysctlGetString("hw.cpu0.name", &cpu->name) != NULL &&
+        ffSysctlGetString("hw.model", &cpu->name) != NULL)
     {
         ffStrbufSetS(&cpu->name, "Unknown CPU");
     }

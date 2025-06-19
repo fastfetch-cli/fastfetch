@@ -143,7 +143,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
     {
         FF_DEBUG("Initializing SMBIOS buffer");
         ffStrbufInit(&buffer);
-        #if !__HAIKU__ && !__OpenBSD__
+        #if !__HAIKU__ && !__OpenBSD__ && !__DragonFly__
         #ifdef __linux__
         FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
@@ -183,7 +183,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
             }
             FF_DEBUG("Parsed SMBIOS entry address: 0x%lx", (unsigned long)entryAddress);
 
-            FF_AUTO_CLOSE_FD int fd = open("/dev/mem", O_RDONLY);
+            FF_AUTO_CLOSE_FD int fd = open("/dev/mem", O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
                 FF_DEBUG("Failed to open /dev/mem: %s", strerror(errno));
                 return NULL;
@@ -219,7 +219,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 #endif
             );
 
-            FF_AUTO_CLOSE_FD int fd = open("/dev/smbios", O_RDONLY);
+            FF_AUTO_CLOSE_FD int fd = open("/dev/smbios", O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
                 FF_DEBUG("Failed to open /dev/smbios: %s", strerror(errno));
                 return NULL;
@@ -328,7 +328,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
                 #else
                 "/dev/mem" // kern.securelevel must be -1
                 #endif
-            , O_RDONLY);
+            , O_RDONLY | O_CLOEXEC);
             if (fd < 0) {
                 FF_DEBUG("Failed to open memory device: %s", strerror(errno));
                 return NULL;

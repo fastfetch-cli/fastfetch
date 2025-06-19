@@ -63,7 +63,7 @@ const char* ffBinaryExtractStrings(const char* elfFile, bool (*cb)(const char* s
         return "load libelf failed";
 
     // Open the ELF file
-    FF_AUTO_CLOSE_FD int fd = open(elfFile, O_RDONLY, 0);
+    FF_AUTO_CLOSE_FD int fd = open(elfFile, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return "open() failed";
 
     Elf* elf = elfData.ffelf_begin(fd, ELF_C_READ, NULL);

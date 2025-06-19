@@ -243,6 +243,29 @@ static bool detectContour(const FFstrbuf* exe, FFTerminalFontResult* result)
     return true;
 }
 
+static bool detectRio(FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
+
+    FFpropquery fontQueryToml[] = {
+        {"family =", &fontName},
+        {"size =", &fontSize},
+    };
+
+    ffParsePropFileConfigValues("rio/config.toml", 2, fontQueryToml);
+
+    if(fontName.length == 0)
+        ffStrbufAppendS(&fontName, "Cascadia Code");
+
+    if(fontSize.length == 0)
+        ffStrbufAppendS(&fontSize, "18");
+
+    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+
+    return true;
+}
+
 void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
 
 static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
@@ -257,6 +280,8 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
         detectContour(&terminal->exe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ghostty"))
         detectGhostty(terminalFont);
+    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "rio"))
+        detectRio(terminalFont);
 
     #ifndef _WIN32
     else if(ffStrbufStartsWithIgnCaseS(&terminal->exe, "/dev/pts/"))

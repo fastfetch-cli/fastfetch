@@ -10,18 +10,29 @@
 #include "util/stringUtils.h"
 
 #include <ctype.h>
+#ifdef __FreeBSD__
+    #include <paths.h>
+    #ifndef _PATH_LOCALBASE
+        #define _PATH_LOCALBASE "/usr/local"
+    #endif
+#elif __OpenBSD__
+    #define _PATH_LOCALBASE "/usr/local"
+#elif __NetBSD__
+    #define _PATH_LOCALBASE "/usr/pkg"
+#endif
 
 static void getKDE(FFstrbuf* result, FFDEOptions* options)
 {
-    ffParsePropFileValues(FASTFETCH_TARGET_DIR_USR "/share/wayland-sessions/plasma.desktop", 1, (FFpropquery[]) {
-        {"X-KDE-PluginInfo-Version =", result}
-    });
+#ifdef _PATH_LOCALBASE
+    ffParsePropFile(_PATH_LOCALBASE "/share/wayland-sessions/plasma.desktop", "X-KDE-PluginInfo-Version =", result);
     if(result->length == 0)
-    {
-        ffParsePropFileValues(FASTFETCH_TARGET_DIR_USR "/share/xsessions/plasmax11.desktop", 1, (FFpropquery[]) {
-            {"X-KDE-PluginInfo-Version =", result}
-        });
-    }
+        ffParsePropFile(_PATH_LOCALBASE "/share/xsessions/plasmax11.desktop", "X-KDE-PluginInfo-Version =", result);
+#else
+    ffParsePropFile(FASTFETCH_TARGET_DIR_USR "/share/wayland-sessions/plasma.desktop", "X-KDE-PluginInfo-Version =", result);
+    if(result->length == 0)
+        ffParsePropFile(FASTFETCH_TARGET_DIR_USR "/share/xsessions/plasmax11.desktop", "X-KDE-PluginInfo-Version =", result);
+#endif
+
     if(result->length == 0)
         ffParsePropFileData("xsessions/plasma.desktop", "X-KDE-PluginInfo-Version =", result);
     if(result->length == 0)

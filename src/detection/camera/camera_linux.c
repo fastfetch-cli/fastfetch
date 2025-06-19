@@ -20,7 +20,7 @@ const char* ffDetectCamera(FFlist* result)
     for (uint32_t i = 0; i <= 9; ++i)
     {
         path[ARRAY_SIZE(path) - 2] = (char) (i + '0');
-        FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY);
+        FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0)
         {
             if (errno == ENOENT)
