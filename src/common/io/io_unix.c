@@ -290,7 +290,7 @@ bool ffSuppressIO(bool suppress)
 
 void listFilesRecursively(uint32_t baseLength, FFstrbuf* folder, uint8_t indentation, const char* folderName, bool pretty)
 {
-    FF_AUTO_CLOSE_FD int dfd = open(folder->chars, O_RDONLY);
+    FF_AUTO_CLOSE_FD int dfd = open(folder->chars, O_RDONLY | O_CLOEXEC);
     if (dfd < 0)
         return;
 

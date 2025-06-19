@@ -32,7 +32,7 @@ const char* ffDetectSound(FFlist* devices)
     for (int idev = 0; idev <= info.nummixers; ++idev)
     {
         path[strlen("/dev/mixer")] = (char) ('0' + idev);
-        FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR);
+        FF_AUTO_CLOSE_FD int fd = open(path, O_RDWR | O_CLOEXEC);
         if (fd < 0) break;
 
         if (idev == 0)

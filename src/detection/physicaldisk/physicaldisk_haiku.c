@@ -10,7 +10,7 @@
 
 static const char* detectDisk(FFstrbuf* path, const char* diskType, FFlist* result)
 {
-    FF_AUTO_CLOSE_FD int rawfd = open(path->chars, O_RDONLY);
+    FF_AUTO_CLOSE_FD int rawfd = open(path->chars, O_RDONLY | O_CLOEXEC);
     if (rawfd < 0) return "detectDisk: open(rawfd) failed";
 
     device_geometry geometry;

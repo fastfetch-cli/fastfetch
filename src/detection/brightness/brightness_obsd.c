@@ -12,7 +12,7 @@ const char* ffDetectBrightness(FF_MAYBE_UNUSED FFBrightnessOptions* options, FFl
     for (char i = '0'; i <= '9'; ++i) {
         path[strlen("/dev/ttyC")] = i;
 
-        FF_AUTO_CLOSE_FD int devfd = open(path, O_RDONLY);
+        FF_AUTO_CLOSE_FD int devfd = open(path, O_RDONLY | O_CLOEXEC);
 
         if (devfd < 0) {
             if (errno == EACCES && i == '0')

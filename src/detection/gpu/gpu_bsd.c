@@ -96,7 +96,7 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
             break;
         }
 
-        FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY);
+        FF_AUTO_CLOSE_FD int fd = open(path, O_RDONLY | O_CLOEXEC);
         if (fd < 0) continue;
 
         char driverName[64];
@@ -147,9 +147,9 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
 
 static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus)
 {
-    FF_AUTO_CLOSE_FD int fd = open("/dev/pci", O_RDONLY, 0);
+    FF_AUTO_CLOSE_FD int fd = open("/dev/pci", O_RDONLY | O_CLOEXEC, 0);
     if (fd < 0)
-        return "open(\"/dev/pci\", O_RDONLY, 0) failed";
+        return "open(\"/dev/pci\", O_RDONLY | O_CLOEXEC, 0) failed";
 
     struct pci_conf confs[128];
     struct pci_match_conf match = {

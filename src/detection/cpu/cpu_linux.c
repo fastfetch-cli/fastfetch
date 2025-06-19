@@ -474,7 +474,7 @@ FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFC
 
 static const char* detectPhysicalCores(FFCPUResult* cpu)
 {
-    int dfd = open("/sys/devices/system/cpu/", O_RDONLY | O_DIRECTORY);
+    int dfd = open("/sys/devices/system/cpu/", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (dfd < 0) return "open(\"/sys/devices/system/cpu/\") failed";
 
     FF_AUTO_CLOSE_DIR DIR* dir = fdopendir(dfd);
