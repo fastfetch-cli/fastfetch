@@ -77,10 +77,11 @@ const char* ffDetectHost(FFHostResult* host)
         //On WSL, the real host can't be detected. Instead use WSL as host.
         if(wslDistroName != NULL || getenv("WSL_DISTRO") != NULL || getenv("WSL_INTEROP") != NULL)
         {
-            ffStrbufAppendS(&host->name, "Windows Subsystem for Linux");
+            ffStrbufSetStatic(&host->name, "Windows Subsystem for Linux");
             if (wslDistroName)
                 ffStrbufAppendF(&host->name, " - %s", wslDistroName);
-            ffStrbufAppendS(&host->family, "WSL");
+            ffStrbufSetStatic(&host->family, "WSL");
+            ffStrbufSetStatic(&host->vendor, "Microsoft Corporation");
 
             if (instance.config.general.detectVersion)
             {
@@ -90,6 +91,17 @@ const char* ffDetectHost(FFHostResult* host)
                     "-n",
                     NULL,
                 }); // supported in 2.2.3 and later
+            }
+        }
+        else if (ffStrbufStartsWithS(&instance.state.platform.sysinfo.version, "FreeBSD "))
+        {
+            ffStrbufSetStatic(&host->name, "Linux Binary Compatibility on FreeBSD");
+            ffStrbufSetStatic(&host->family, "FreeBSD");
+            ffStrbufSetStatic(&host->vendor, "FreeBSD Foundation");
+            if (instance.config.general.detectVersion)
+            {
+                ffStrbufSetS(&host->version, instance.state.platform.sysinfo.version.chars + strlen("FreeBSD "));
+                ffStrbufSubstrBeforeFirstC(&host->version, ' ');
             }
         }
     }

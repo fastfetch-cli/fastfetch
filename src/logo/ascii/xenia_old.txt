@@ -1,0 +1,21 @@
+$2      ,c.                       .c;
+$2    .$1KMMMk$2....             ....$1kMMMK$2.
+$2   .$1WMMMMMX$2.....         .....$1KMMMMMW.
+$1   XMMMMMMM0$2.....        ....$1OMMMMMMMN
+$1  dMMMMMMMMM;$2.... ..... ....,$1MMMMMMMMMd
+$1  WMMMMMMMMMl;$3okKKKKKKKKKOo$1;cMMMMMMMMMM
+$1 'MMMMMMMNX$2K0$3KKKKKKKKKKKKKKK$20K$1XNMMMMMMM;
+$1 oMMMMMMM$2Oxo$3KKKKKKKKKKKKKKKKK$2oxO$1MMMMMMMd
+$1 dMMMMMMM$2dxxx$3KKKKKKKKKKKKKKK$2xxxd$1NMMMMMMk
+$1 :MMMMX0$2xxxxxx$30KKKKKKKK0KK0$2xxxxxx0$1XMMMMc
+$1  MMMO$2xxxxxxxxdx$3kdd$20x0$3ddk$2xdxxxxxxxx$1OMMM
+$1 ;$2xxkxddxxxxdodxxxxdxdxxxxdodxxxxddxkxx$1;
+$1dxd$2KMMMWXo$1'.....'$2cdxxxdc$1'.....'$2lXWMMMX$1dxd
+$1cxd$2XMMMN$1,..........$2dxd$1'.........'$2XMMMN$1dxl
+$1 .xx$2WMMl$1...''....'.;k:.'....''...$2lMMW$1xx.
+$1..:kXMMx..'....''..kMk..''....'..xMMXkc..
+$1 dMMMMMMd.....'...xMMMx...''....dMMMMMMx
+$1    kMMMMWOoc:coOkolllokOoc:coOWMMMMO
+$1         .MMMMMMMMl$2...$1lNMMMMMMM.
+$1            KMMMMMMX$2l$1KMMMMMMX
+$1               .MMMMMMMMM.

@@ -105,93 +105,23 @@ FF_MAYBE_UNUSED static const char* drmFindRenderFromCard(const char* drmCardKey,
 
 static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
 {
-    #if FF_HAVE_DRM_AMDGPU
-
-    FF_LIBRARY_LOAD(libdrm, "dlopen libdrm_amdgpu" FF_LIBRARY_EXTENSION " failed", "libdrm_amdgpu" FF_LIBRARY_EXTENSION, 1)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_initialize)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_get_marketing_name)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_gpu_info)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_sensor_info)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_query_heap_info)
-    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libdrm, amdgpu_device_deinitialize)
-
+    #if FF_HAVE_DRM
+    const char* error = drmFindRenderFromCard(drmKey, buffer);
+    if (error) return error;
+    if (ffStrbufEqualS(&gpu->driver, "radeon"))
+        return ffDrmDetectRadeon(options, gpu, buffer->chars);
+    else
     {
-        const char* error = drmFindRenderFromCard(drmKey, buffer);
-        if (error) return error;
+        #if FF_HAVE_DRM_AMDGPU
+        return ffDrmDetectAmdgpu(options, gpu, buffer->chars);
+        #else
+        FF_UNUSED(options, gpu, drmKey, buffer);
+        return "Fastfetch is not compiled with libdrm_amdgpu support";
+        #endif
     }
-    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
-    if (fd < 0) return "Failed to open DRM device";
-
-    amdgpu_device_handle handle;
-    uint32_t majorVersion, minorVersion;
-    if (ffamdgpu_device_initialize(fd, &majorVersion, &minorVersion, &handle) < 0)
-        return "Failed to initialize AMDGPU device";
-
-    ffStrbufAppendF(&gpu->driver, " %u.%u", (unsigned) majorVersion, (unsigned) minorVersion);
-
-    uint32_t value;
-
-    if (options->temp)
-    {
-        if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_TEMP, sizeof(value), &value) >= 0)
-            gpu->temperature = value / 1000.;
-    }
-
-    ffStrbufSetS(&gpu->name, ffamdgpu_get_marketing_name(handle));
-
-    struct amdgpu_gpu_info gpuInfo;
-    if (ffamdgpu_query_gpu_info(handle, &gpuInfo) >= 0)
-    {
-        gpu->coreCount = (int32_t) gpuInfo.cu_active_number;
-        gpu->frequency = (uint32_t) (gpuInfo.max_engine_clk / 1000u);
-        gpu->index = FF_GPU_INDEX_UNSET;
-        gpu->type = gpuInfo.ids_flags & AMDGPU_IDS_FLAGS_FUSION ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
-        #define FF_VRAM_CASE(name, value) case value /* AMDGPU_VRAM_TYPE_ ## name */: ffStrbufSetStatic(&gpu->memoryType, #name); break
-        switch (gpuInfo.vram_type)
-        {
-            FF_VRAM_CASE(UNKNOWN, 0);
-            FF_VRAM_CASE(GDDR1, 1);
-            FF_VRAM_CASE(DDR2, 2);
-            FF_VRAM_CASE(GDDR3, 3);
-            FF_VRAM_CASE(GDDR4, 4);
-            FF_VRAM_CASE(GDDR5, 5);
-            FF_VRAM_CASE(HBM, 6);
-            FF_VRAM_CASE(DDR3, 7);
-            FF_VRAM_CASE(DDR4, 8);
-            FF_VRAM_CASE(GDDR6, 9);
-            FF_VRAM_CASE(DDR5, 10);
-            FF_VRAM_CASE(LPDDR4, 11);
-            FF_VRAM_CASE(LPDDR5, 12);
-            default:
-                ffStrbufAppendF(&gpu->memoryType, "Unknown (%u)", gpuInfo.vram_type);
-                break;
-        }
-
-        struct amdgpu_heap_info heapInfo;
-        if (ffamdgpu_query_heap_info(handle, AMDGPU_GEM_DOMAIN_VRAM, 0, &heapInfo) >= 0)
-        {
-            if (gpu->type == FF_GPU_TYPE_DISCRETE)
-            {
-                gpu->dedicated.total = heapInfo.heap_size;
-                gpu->dedicated.used = heapInfo.heap_usage;
-            }
-            else
-            {
-                gpu->shared.total = heapInfo.heap_size;
-                gpu->shared.used = heapInfo.heap_usage;
-            }
-        }
-    }
-
-    if (ffamdgpu_query_sensor_info(handle, AMDGPU_INFO_SENSOR_GPU_LOAD, sizeof(value), &value) >= 0)
-        gpu->coreUsage = value;
-
-    ffamdgpu_device_deinitialize(handle);
-
-    return NULL;
     #else
-    FF_UNUSED(options, gpu, drmKey, buffer);
-    return "Fastfetch is compiled without libdrm support";
+    FF_UNUSED(gpu, drmKey, buffer);
+    return "Fastfetch is not compiled with drm support";
     #endif
 }
 
@@ -215,47 +145,50 @@ static void pciDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult* gpu, 
     ffStrbufAppendC(pciDir, '/');
 
     const uint32_t hwmonLen = pciDir->length;
-    ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
-    if (ffPathExists(pciDir->chars, FF_PATHTYPE_ANY))
-        gpu->type = FF_GPU_TYPE_INTEGRATED;
-    else
-        gpu->type = FF_GPU_TYPE_DISCRETE;
-
     uint64_t value = 0;
     if (options->temp)
     {
-        ffStrbufSubstrBefore(pciDir, hwmonLen);
         ffStrbufAppendS(pciDir, "temp1_input"); // The on die GPU temperature in millidegrees Celsius
         if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
             gpu->temperature = (double) value / 1000;
     }
 
-    if (options->driverSpecific)
+    if (ffStrbufEqualS(&gpu->driver, "amdgpu")) // Ancient radeon drivers don't have these files
     {
-        ffStrbufSubstrBefore(pciDir, pciDirLen);
-        ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
-        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-        {
-            if (gpu->type == FF_GPU_TYPE_DISCRETE)
-                gpu->dedicated.total = value;
-            else
-                gpu->shared.total = value;
+        ffStrbufSubstrBefore(pciDir, hwmonLen);
+        ffStrbufAppendS(pciDir, "in1_input"); // Northbridge voltage in millivolts (APUs only)
+        if (ffPathExists(pciDir->chars, FF_PATHTYPE_ANY))
+            gpu->type = FF_GPU_TYPE_INTEGRATED;
+        else
+            gpu->type = FF_GPU_TYPE_DISCRETE;
 
-            ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
-            ffStrbufAppendS(pciDir, "/mem_info_vis_vram_used");
+        if (options->driverSpecific)
+        {
+            ffStrbufSubstrBefore(pciDir, pciDirLen);
+            ffStrbufAppendS(pciDir, "/mem_info_vis_vram_total");
             if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
             {
                 if (gpu->type == FF_GPU_TYPE_DISCRETE)
-                    gpu->dedicated.used = value;
+                    gpu->dedicated.total = value;
                 else
-                    gpu->shared.used = value;
-            }
-        }
+                    gpu->shared.total = value;
 
-        ffStrbufSubstrBefore(pciDir, pciDirLen);
-        ffStrbufAppendS(pciDir, "/gpu_busy_percent");
-        if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
-            gpu->coreUsage = (double) value;
+                ffStrbufSubstrBefore(pciDir, pciDir->length - (uint32_t) strlen("/mem_info_vis_vram_total"));
+                ffStrbufAppendS(pciDir, "/mem_info_vis_vram_used");
+                if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+                {
+                    if (gpu->type == FF_GPU_TYPE_DISCRETE)
+                        gpu->dedicated.used = value;
+                    else
+                        gpu->shared.used = value;
+                }
+            }
+
+            ffStrbufSubstrBefore(pciDir, pciDirLen);
+            ffStrbufAppendS(pciDir, "/gpu_busy_percent");
+            if (ffReadFileBuffer(pciDir->chars, buffer) && (value = ffStrbufToUInt(buffer, 0)))
+                gpu->coreUsage = (double) value;
+        }
     }
 }
 
@@ -311,150 +244,19 @@ static void pciDetectIntelSpecific(const FFGPUOptions* options, FFGPUResult* gpu
     }
 }
 
-static inline int popcountBytes(uint8_t* bytes, uint32_t length)
-{
-    int count = 0;
-    while (length >= 8)
-    {
-        count += __builtin_popcountll(*(uint64_t*) bytes);
-        bytes += 8;
-        length -= 8;
-    }
-    if (length >= 4)
-    {
-        count += __builtin_popcountl(*(uint32_t*) bytes);
-        bytes += 4;
-        length -= 4;
-    }
-    if (length >= 2)
-    {
-        count += __builtin_popcountl(*(uint16_t*) bytes);
-        bytes += 2;
-        length -= 2;
-    }
-    if (length)
-    {
-        count += __builtin_popcountl(*(uint8_t*) bytes);
-    }
-    return count;
-}
-
 static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
 {
     #if FF_HAVE_DRM
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
-    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return "Failed to open drm device";
 
     if (ffStrbufEqualS(&gpu->driver, "xe"))
-    {
-        {
-            struct drm_xe_device_query query = {
-                .query = DRM_XE_DEVICE_QUERY_GT_TOPOLOGY,
-            };
-            if (ioctl(fd, DRM_IOCTL_XE_DEVICE_QUERY, &query) >= 0)
-            {
-                FF_AUTO_FREE uint8_t* buffer = malloc(query.size);
-                query.data = (uintptr_t) buffer;
-                if (ioctl(fd, DRM_IOCTL_XE_DEVICE_QUERY, &query) >= 0)
-                {
-                    int dssCount = 0, euPerDssCount = 0;
-                    for (struct drm_xe_query_topology_mask* topo = (void*) buffer;
-                        (uint8_t*) topo < buffer + query.size;
-                        topo = (void*) (topo->mask + topo->num_bytes)
-                    ) {
-                        switch (topo->type)
-                        {
-                            case DRM_XE_TOPO_DSS_COMPUTE:
-                            case DRM_XE_TOPO_DSS_GEOMETRY:
-                                dssCount += popcountBytes(topo->mask, topo->num_bytes);
-                                break;
-                            case DRM_XE_TOPO_EU_PER_DSS:
-                                euPerDssCount += popcountBytes(topo->mask, topo->num_bytes);
-                                break;
-                        }
-                    }
-                    gpu->coreCount = dssCount * euPerDssCount;
-                }
-            }
-        }
-
-        {
-            struct drm_xe_device_query query = {
-                .query = DRM_XE_DEVICE_QUERY_MEM_REGIONS,
-            };
-            if (ioctl(fd, DRM_IOCTL_XE_DEVICE_QUERY, &query) >= 0)
-            {
-                FF_AUTO_FREE uint8_t* buffer = malloc(query.size);
-                query.data = (uintptr_t) buffer;
-                if (ioctl(fd, DRM_IOCTL_XE_DEVICE_QUERY, &query) >= 0)
-                {
-                    gpu->dedicated.total = gpu->shared.total = gpu->dedicated.used = gpu->shared.used = 0;
-                    struct drm_xe_query_mem_regions* regionInfo = (void*) buffer;
-                    for (uint32_t i = 0; i < regionInfo->num_mem_regions; i++)
-                    {
-                        struct drm_xe_mem_region* region = regionInfo->mem_regions + i;
-                        switch (region->mem_class)
-                        {
-                            case DRM_XE_MEM_REGION_CLASS_SYSMEM:
-                                gpu->shared.total += region->total_size;
-                                gpu->shared.used += region->used;
-                                break;
-                            case DRM_XE_MEM_REGION_CLASS_VRAM:
-                                gpu->dedicated.total += region->total_size;
-                                gpu->dedicated.used += region->used;
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-    }
+        return ffDrmDetectXe(gpu, fd);
     else if (ffStrbufEqualS(&gpu->driver, "i915"))
-    {
-        {
-            int value;
-            drm_i915_getparam_t getparam = { .param = I915_PARAM_EU_TOTAL, .value = &value };
-            if (ioctl(fd, DRM_IOCTL_I915_GETPARAM, &getparam) >= 0)
-                gpu->coreCount = value;
-        }
-        {
-            struct drm_i915_query_item queryItem = {
-                .query_id = DRM_I915_QUERY_MEMORY_REGIONS,
-            };
-            struct drm_i915_query query = {
-                .items_ptr = (uintptr_t) &queryItem,
-                .num_items = 1,
-            };
-            if (ioctl(fd, DRM_IOCTL_I915_QUERY, &query) >= 0 )
-            {
-                FF_AUTO_FREE uint8_t* buffer = calloc(1, (size_t) queryItem.length);
-                queryItem.data_ptr = (uintptr_t) buffer;
-                if (ioctl(fd, DRM_IOCTL_I915_QUERY, &query) >= 0)
-                {
-                    gpu->dedicated.total = gpu->shared.total = gpu->dedicated.used = gpu->shared.used = 0;
-                    struct drm_i915_query_memory_regions* regionInfo = (void*) buffer;
-                    for (uint32_t i = 0; i < regionInfo->num_regions; i++)
-                    {
-                        struct drm_i915_memory_region_info* region = regionInfo->regions + i;
-                        switch (region->region.memory_class)
-                        {
-                            case I915_MEMORY_CLASS_SYSTEM:
-                                gpu->shared.total += region->probed_size;
-                                gpu->shared.used += region->probed_size - region->unallocated_size;
-                                break;
-                            case I915_MEMORY_CLASS_DEVICE:
-                                gpu->dedicated.total += region->probed_size;
-                                gpu->dedicated.used += region->probed_size - region->unallocated_size;
-                                break;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return NULL;
+        return ffDrmDetectI915(gpu, fd);
+    return "Unknown Intel GPU driver";
     #else
     FF_UNUSED(gpu, drmKey, buffer);
     return "Fastfetch is not compiled with drm support";
@@ -569,29 +371,12 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else
     {
-        __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
-        const char* soName;
-        if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &soName) && (options->temp || options->driverSpecific))
-        {
-            detectFn(&(FFGpuDriverCondition) {
-                .type = FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID,
-                .pciBusId = {
-                    .domain = pciDomain,
-                    .bus = pciBus,
-                    .device = pciDevice,
-                    .func = pciFunc,
-                },
-            }, (FFGpuDriverResult) {
-                .index = &gpu->index,
-                .temp = options->temp ? &gpu->temperature : NULL,
-                .memory = options->driverSpecific ? &gpu->dedicated : NULL,
-                .coreCount = options->driverSpecific ? (uint32_t*) &gpu->coreCount : NULL,
-                .coreUsage = options->driverSpecific ? &gpu->coreUsage : NULL,
-                .type = &gpu->type,
-                .frequency = options->driverSpecific ? &gpu->frequency : NULL,
-                .name = &gpu->name,
-            }, soName);
-        }
+        ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId) {
+            .domain = pciDomain,
+            .bus = pciBus,
+            .device = pciDevice,
+            .func = pciFunc,
+        });
     }
 
     if (gpu->name.length == 0)
@@ -627,45 +412,9 @@ FF_MAYBE_UNUSED static const char* drmDetectAsahiSpecific(FFGPUResult* gpu, cons
     #if FF_HAVE_DRM_ASAHI
     ffStrbufSetS(buffer, "/dev/dri/");
     ffStrbufAppendS(buffer, drmKey);
-    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
     if (fd >= 0)
-    {
-        struct drm_asahi_params_global paramsGlobal = {};
-        if (ioctl(fd, DRM_IOCTL_ASAHI_GET_PARAMS, &(struct drm_asahi_get_params) {
-            .param_group = DRM_ASAHI_GET_PARAMS,
-            .pointer = (uint64_t) &paramsGlobal,
-            .size = sizeof(paramsGlobal),
-        }) >= 0)
-        {
-            // They removed `unstable_uabi_version` from the struct. Hopefully they won't introduce new ABI changes.
-            gpu->coreCount = (int32_t) (paramsGlobal.num_clusters_total * paramsGlobal.num_cores_per_cluster);
-            gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
-            gpu->deviceId = paramsGlobal.chip_id;
-
-            if (!gpu->name.length)
-            {
-                const char* variant = " Unknown";
-                switch (paramsGlobal.gpu_variant) {
-                case 'G':
-                    variant = "";
-                    break;
-                case 'S':
-                    variant = " Pro";
-                    break;
-                case 'C':
-                    variant = " Max";
-                    break;
-                case 'D':
-                    variant = " Ultra";
-                    break;
-                }
-                ffStrbufSetF(&gpu->name, "Apple M%d%s (G%d%c %02X)",
-                    paramsGlobal.gpu_generation - 12, variant,
-                    paramsGlobal.gpu_generation, paramsGlobal.gpu_variant,
-                    paramsGlobal.gpu_revision + 0xA0);
-            }
-        }
-    }
+        return ffDrmDetectAsahi(gpu, fd);
     #endif
 
     return NULL;

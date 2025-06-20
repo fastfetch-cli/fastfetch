@@ -1144,11 +1144,11 @@
             "arg": {
                 "type": "enum",
                 "enum": {
-                    "auto": "Query platform-specific graphics APIs. Requires proper GPU drivers to be installed. Not supported on BSDs",
+                    "auto": "Query platform-specific graphics APIs. Requires proper GPU drivers to be installed. Supported on Linux, FreeBSD, Windows and macOS",
                     "pci": "Search PCI devices, which does not require GPU drivers to be installed. Not supported on Windows and macOS",
                     "vulkan": "Use Vulkan API. Slow and requires proper Vulkan drivers to be installed. Used for Android",
                     "opencl": "Use OpenCL API. Slow and requires proper OpenCL drivers to be installed",
-                    "opengl": "Use OpenGL API. Slow and only detects one GPU"
+                    "opengl": "Use OpenGL API. Slow and only detects one GPU. Used for OpenBSD"
                 },
                 "default": "auto"
             }

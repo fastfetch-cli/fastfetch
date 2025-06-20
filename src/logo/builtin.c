@@ -252,6 +252,20 @@ static const FFlogo A[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+   // AnushOS
+    {
+        .names = {"AnushOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ANUSHOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_WHITE,
+    },
     // AoscOsRetro
     {
         .names = {"Aosc OS/Retro", "aoscosretro"},
@@ -706,10 +720,10 @@ static const FFlogo B[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK,
         .colors = {
             FF_COLOR_FG_LIGHT_BLACK, //grey
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // BedrockSmall
     {
@@ -717,10 +731,11 @@ static const FFlogo B[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_BEDROCK_SMALL,
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .colors = {
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_LIGHT_BLACK, //grey
+            FF_COLOR_FG_DEFAULT,
         },
-        .colorKeys = FF_COLOR_FG_WHITE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorKeys = FF_COLOR_FG_LIGHT_BLACK, //grey
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // BigLinux
     {
@@ -1731,6 +1746,16 @@ static const FFlogo F[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_BLUE,
     },
+    {
+        .names = {"Fedora2_small"},
+        .type = FF_LOGO_LINE_TYPE_SMALL_BIT | FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .lines = FASTFETCH_DATATEXT_LOGO_FEDORA2_SMALL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // FedoraOld
     {
         .names = {"Fedora_old"},
@@ -1989,6 +2014,16 @@ static const FFlogo G[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // GhostFreak
+    {
+        .names = {"GhostFreak"},
+        .lines = FASTFETCH_DATATEXT_LOGO_GHOSTFREAK,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_DEFAULT,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Glaucus
     {
         .names = {"Glaucus"},
@@ -2175,6 +2210,17 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // HarmonyOS
+    {
+        .names = {"HarmonyOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HARMONYOS,
+        .colors = {
+            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // Hash
     {
         .names = {"Hash"},
@@ -2267,13 +2313,13 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
-    // Hydra Framework
+    // HydraPWK
     {
-        .names = {"Hydra"},
-        .lines = FASTFETCH_DATATEXT_LOGO_HYDRA,
+        .names = {"HydraPWK"},
+        .lines = FASTFETCH_DATATEXT_LOGO_HYDRAPWK,
         .colors = {
-                FF_COLOR_FG_RED,
-                FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_DEFAULT,
         },
     },
     // LAST
@@ -2378,18 +2424,18 @@ static const FFlogo K[] = {
     },
     // Kali
     {
-        .names = {"Kali", "Kalilinux"},
+        .names = {"Kali"},
         .lines = FASTFETCH_DATATEXT_LOGO_KALI,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_LIGHT_BLACK,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // KaliSmall
     {
-        .names = {"Kali_small", "Kalilinux_small"},
+        .names = {"Kali_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_KALI_SMALL,
         .colors = {
@@ -2397,7 +2443,17 @@ static const FFlogo K[] = {
             FF_COLOR_FG_LIGHT_BLACK,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
+    // Kalpa Desktop
+    {
+        .names = {"kalpa-desktop"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KALPA_DESKTOP,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // KaOS
     {
@@ -4728,6 +4784,18 @@ static const FFlogo T[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // TrueNAS Scale
+    {
+        .names = {"TrueNAS-Scale"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TRUENAS_SCALE,
+        .colors = {
+            FF_COLOR_FG_256 "39",
+            FF_COLOR_FG_256 "32",
+            FF_COLOR_FG_256 "248",
+        },
+        .colorKeys = FF_COLOR_FG_256 "248",
+        .colorTitle = FF_COLOR_FG_256 "32",
+    },
     // TuxedoOS
     {
         .names = {"Tuxedo OS", "tuxedo"},
@@ -5256,15 +5324,6 @@ static const FFlogo W[] = {
 };
 
 static const FFlogo X[] = {
-    // Xenia
-    {
-        .names = {"Xenia"},
-        .lines = FASTFETCH_DATATEXT_LOGO_XENIA,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
-        }
-    },
     // XCP-ng
     {
         .names = {"XCP-ng", "xenenterprise"},
@@ -5278,14 +5337,27 @@ static const FFlogo X[] = {
             FF_COLOR_FG_YELLOW,
         }
     },
-    // Xferience
+    // Xenia
     {
-        .names = {"Xferience"},
-        .lines = FASTFETCH_DATATEXT_LOGO_XFERIENCE,
+        .names = {"Xenia"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XENIA,
         .colors = {
-            FF_COLOR_FG_CYAN,
-            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_BLACK,
         },
+        .colorKeys = FF_COLOR_FG_DEFAULT,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
+    // Xenia_old
+    {
+        .names = {"Xenia_old"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XENIA_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_RED,
+        }
     },
     //XeroArch
     {
@@ -5299,6 +5371,15 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "16",
             FF_COLOR_FG_256 "15",
         }
+    },
+    // Xferience
+    {
+        .names = {"Xferience"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XFERIENCE,
+        .colors = {
+            FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_CYAN,
+        },
     },
     // LAST
     {},

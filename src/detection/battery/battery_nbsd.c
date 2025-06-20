@@ -16,8 +16,8 @@
 
 const char* ffDetectBattery(FF_MAYBE_UNUSED FFBatteryOptions* options, FFlist* results)
 {
-    FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY);
-    if (fd < 0) return "open(_PATH_SYSMON, O_RDONLY) failed";
+    FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
 
     prop_dictionary_t root = NULL;
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0)

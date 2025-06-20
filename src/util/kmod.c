@@ -51,7 +51,6 @@ bool ffKmodLoaded(const char* modName)
     {
         struct iovec iov = {};
 
-        // 初始尝试分配的内存大小
         for (size_t len = 8192;; len = iov.iov_len)
         {
             iov.iov_len = len;

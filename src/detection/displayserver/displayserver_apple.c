@@ -2,6 +2,7 @@
 #include "util/apple/cf_helpers.h"
 #include "util/stringUtils.h"
 #include "util/edidHelper.h"
+#include "detection/os/os.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -194,7 +195,22 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
             ffStrbufSetStatic(&ds->wmPrettyName, "Quartz Compositor");
         }
     }
-    ffStrbufSetStatic(&ds->dePrettyName, "Aqua");
+
+    const FFOSResult* os = ffDetectOS();
+
+    char* str_end;
+    const char* version = os->version.chars;
+    unsigned long osNum = strtoul(version, &str_end, 10);
+    if (str_end != version)
+    {
+        if (osNum > 15) { // Tahoe
+            ffStrbufSetStatic(&ds->dePrettyName, "Liquid Glass");
+        } else if (osNum < 10) {
+            ffStrbufSetStatic(&ds->dePrettyName, "Platinum");
+        } else {
+            ffStrbufSetStatic(&ds->dePrettyName, "Aqua");
+        }
+    }
 
     detectDisplays(ds);
 }
