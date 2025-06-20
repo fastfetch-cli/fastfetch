@@ -34,6 +34,7 @@ Logos:
 * Add Fedora2_small (#1785)
 * Add xenia_old; update colors of xenia (#1797)
 * Improve colors of bedrock_small (#1790)
+* Add Kalpa Desktop (#1807)
 
 # 2.45.0
 
