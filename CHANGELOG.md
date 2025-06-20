@@ -1,3 +1,40 @@
+# 2.46.0
+
+Features:
+* Support Rio terminal font detection (#1789, TerminalFont, Linux)
+* Support GPU detection by DRM on FreeBSD (GPU, FreeBSD)
+    * Enable by `--gpu-detection-method auto`
+    * Require proper DRM drivers installed and loaded
+* Support PowerPC CPU detection on NetBSD (#1802, CPU, NetBSD)
+* Support Aerospace WM detection (#1796, WM, macOS)
+* Improve Raspberry Pi OS for RPI5 detection (#1773, OS, Linux)
+* Support Linux Binary Compatibility detection on FreeBSD (#1786, Host, Linux)
+* Use `board-id` as board name if available (Board, macOS)
+    * Intel only
+* Support shared VRAM usage detection for AMD GPUs (GPU, Linux)
+* Use `perflib.h` instead of `pdh.h` for CPU temperature querying to get rid of pdh.dll (#1787, CPU, Windows)
+* Support GPU info detection for old ATI radeon driver (#1810, GPU, Linux)
+* Add macOS 26 Tahoe support (macOS)
+    * Report macOS 26 code name (OS)
+    * Report Liquid Glass DE on macOS 26+ (DE)
+    * Detect Metal 4 support (GPU)
+
+Bugfixes:
+* Fix packages counting by ignoring hidden folders (Packages, OpenBSD)
+* Fix Hyprland version detection (WM, FreeBSD)
+* Don't show `Please insert a disk into drive D:` error dialogs (#1805, Disk, Windows)
+* Hide `/boot/firmware` by default (Disk, Linux)
+
+Logos:
+* Rename Hydra Framework to HydraPwk (#1812)
+* Add AnushOS (#1806)
+* Add HarmonyOS (#1804)
+* Add GhostFreak (#1801)
+* Add TrueNAS Scale (#1795)
+* Add Fedora2_small (#1785)
+* Add xenia_old; update colors of xenia (#1797)
+* Improve colors of bedrock_small (#1790)
+
 # 2.45.0
 
 Features:
