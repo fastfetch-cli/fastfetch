@@ -2424,18 +2424,18 @@ static const FFlogo K[] = {
     },
     // Kali
     {
-        .names = {"Kali", "Kalilinux"},
+        .names = {"Kali"},
         .lines = FASTFETCH_DATATEXT_LOGO_KALI,
         .colors = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_LIGHT_BLACK,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // KaliSmall
     {
-        .names = {"Kali_small", "Kalilinux_small"},
+        .names = {"Kali_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_KALI_SMALL,
         .colors = {
@@ -2443,7 +2443,7 @@ static const FFlogo K[] = {
             FF_COLOR_FG_LIGHT_BLACK,
         },
         .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // Kalpa Desktop
     {
