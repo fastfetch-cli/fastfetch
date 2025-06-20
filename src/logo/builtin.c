@@ -2445,6 +2445,16 @@ static const FFlogo K[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_WHITE,
     },
+    // Kalpa Desktop
+    {
+        .names = {"kalpa-desktop"},
+        .lines = FASTFETCH_DATATEXT_LOGO_KALPA_DESKTOP,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // KaOS
     {
         .names = {"KaOS"},
