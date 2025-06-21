@@ -3455,7 +3455,7 @@ static const FFlogo O[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_OPENINDIANA,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
         },
     },
     // OpenMamba
