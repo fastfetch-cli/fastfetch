@@ -32,6 +32,10 @@ typedef struct _SYSTEM_BOOT_ENVIRONMENT_INFORMATION
 
 #include <fcntl.h>
 #include <unistd.h>
+
+#elif __sun
+#include <libdevinfo.h>
+#include <sys/sunddi.h>
 #endif
 
 typedef struct FFSmbiosBios
@@ -58,6 +62,7 @@ typedef struct FFSmbiosBios
 
 static_assert(offsetof(FFSmbiosBios, ExtendedBiosRomSize) == 0x18,
     "FFSmbiosBios: Wrong struct alignment");
+
 
 const char* ffDetectBios(FFBiosResult* bios)
 {
@@ -94,6 +99,17 @@ const char* ffDetectBios(FFBiosResult* bios)
             default: break;
         }
     }
+    #elif __sun
+    di_node_t rootNode = di_init("/", DINFOPROP);
+    if (rootNode != DI_NODE_NIL)
+    {
+        char* efiVersion = NULL;
+        if (di_prop_lookup_strings(DDI_DEV_T_ANY, rootNode, "efi-version", &efiVersion) > 0)
+            ffStrbufSetStatic(&bios->type, "UEFI");
+        else
+            ffStrbufSetStatic(&bios->type, "BIOS");
+    }
+    di_fini(rootNode);
     #elif __HAIKU__ || __OpenBSD__
     // Currently SMBIOS detection is supported in legancy BIOS only
     ffStrbufSetStatic(&bios->type, "BIOS");

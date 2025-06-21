@@ -1637,6 +1637,7 @@ elseif(SunOS)
         PRIVATE "proc"
         PRIVATE "zfs"
         PRIVATE "nvpair"
+        PRIVATE "devinfo"
     )
 elseif(ANDROID)
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
