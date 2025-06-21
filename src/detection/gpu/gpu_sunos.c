@@ -1,83 +1,60 @@
 #include "gpu.h"
-#include "common/io/io.h"
-#include "common/processing.h"
+#include "util/stringUtils.h"
+
+#include <libdevinfo.h>
+
+static int walkDevTree(di_node_t node, FFlist* gpus)
+{
+    if (ffStrEquals(di_node_name(node), "display"))
+    {
+        int* vendorId;
+        int* deviceId;
+        if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "vendor-id", &vendorId) > 0
+            && di_prop_lookup_ints(DDI_DEV_T_ANY, node, "device-id", &deviceId) > 0)
+        {
+            FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
+            ffStrbufInitS(&gpu->vendor, ffGPUGetVendorString((uint16_t) *vendorId));
+            ffStrbufInit(&gpu->name);
+            ffStrbufInitS(&gpu->driver, di_driver_name(node));
+            ffStrbufInitStatic(&gpu->platformApi, "libdevinfo");
+            ffStrbufInit(&gpu->memoryType);
+            gpu->index = FF_GPU_INDEX_UNSET;
+            gpu->temperature = FF_GPU_TEMP_UNSET;
+            gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
+            gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
+            gpu->type = FF_GPU_TYPE_UNKNOWN;
+            gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
+            gpu->deviceId = strtoul(di_bus_addr(node), NULL, 16);
+            gpu->frequency = FF_GPU_FREQUENCY_UNSET;
+
+            if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
+            {
+                int* revId;
+                if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "revision-id", &revId) > 0)
+                    ffGPUQueryAmdGpuName((uint16_t) *deviceId, (uint8_t) *revId, gpu);
+            }
+
+            if (gpu->name.length == 0)
+            {
+                uint8_t subclass = 0; // assume VGA
+                int* classCode;
+                if (di_prop_lookup_ints(DDI_DEV_T_ANY, node, "class-code", &classCode) > 0)
+                    subclass = (uint8_t) (*classCode & 0xFFFF);
+                ffGPUFillVendorAndName(subclass, (uint16_t) *vendorId, (uint16_t) *deviceId, gpu);
+            }
+        }
+    }
+
+    return DI_WALK_CONTINUE;
+}
 
 const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
 {
-    // SunOS requires root permission to query PCI device list, except `/usr/bin/scanpci`
-    // Same behavior can be observed with `cp $(which scanpci) /tmp/ && /tmp/scanpci`
-
-    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) {
-        "/usr/bin/scanpci",
-        "-v",
-        NULL,
-    });
-    if (error)
-        return error;
-
-    if (!ffStrbufStartsWithS(&buffer, "\npci "))
-        return "Invalid scanpci result";
-
-    // pci bus 0x0000 cardnum 0x00 function 0x00: vendor 0x1414 device 0x008e
-    //  Device unknown
-    //  CardVendor 0x0000 card 0x0000 (Card unknown)
-    //   STATUS    0x0010  COMMAND 0x0007
-    //   CLASS     0x03 0x02 0x00  REVISION 0x00
-    //   BIST      0x00  HEADER 0x00  LATENCY 0x00  CACHE 0x00
-    //   MAX_LAT   0x00  MIN_GNT 0x00  INT_PIN 0x00  INT_LINE 0x00
-
-    for (
-        const char* pclass = strstr(buffer.chars, "\n  CLASS     0x03 ");
-        pclass;
-        pclass = strstr(pclass, "\n  CLASS     0x03 ")
-    )
-    {
-        // find the start of device entry
-        const char* pstart = memrchr(buffer.chars, '\n', (size_t) (pclass - buffer.chars));
-        if (pstart == NULL)
-            return "PCI info not found, invalid scanpci result";
-        while (pstart[1] != 'p')
-        {
-            pstart = memrchr(buffer.chars, '\n', (size_t) (pstart - buffer.chars - 1));
-            if (pstart == NULL)
-                return "PCI info not found, invalid scanpci result";
-        }
-        ++pstart;
-
-        uint32_t vendorId, deviceId;
-        if (sscanf(pstart, "pci %*[^:]: vendor %x device %x",
-            &vendorId, &deviceId) != 2)
-            return "PCI info not found, invalid scanpci result";
-
-        pclass += strlen("\n  CLASS     0x03 ");
-        uint32_t subclass = (uint32_t) strtoul(pclass, NULL, 16);
-        pclass += strlen("0x02 0x00  REVISION ");
-        uint32_t revision = (uint32_t) strtoul(pclass, NULL, 16);
-
-        FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
-        ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(vendorId));
-        ffStrbufInit(&gpu->memoryType);
-        ffStrbufInit(&gpu->name);
-        ffStrbufInit(&gpu->driver);
-        ffStrbufInitStatic(&gpu->platformApi, "/usr/bin/scanpci");
-        gpu->index = FF_GPU_INDEX_UNSET;
-        gpu->temperature = FF_GPU_TEMP_UNSET;
-        gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
-        gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
-        gpu->type = FF_GPU_TYPE_UNKNOWN;
-        gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = 0;
-        gpu->frequency = FF_GPU_FREQUENCY_UNSET;
-
-        if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_AMD)
-            ffGPUQueryAmdGpuName((uint16_t) deviceId, (uint8_t) revision, gpu);
-
-        if (gpu->name.length == 0)
-        {
-            ffGPUFillVendorAndName((uint8_t) subclass, (uint16_t) vendorId, (uint16_t) deviceId, gpu);
-        }
-    }
+    di_node_t rootNode = di_init("/", DINFOCPYALL);
+    if (rootNode == DI_NODE_NIL)
+        return "di_init() failed";
+    di_walk_node(rootNode, DI_WALK_CLDFIRST, gpus, (void*) walkDevTree);
+    di_fini(rootNode);
 
     return NULL;
 }
