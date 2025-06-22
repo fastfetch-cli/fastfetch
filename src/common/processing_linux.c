@@ -279,8 +279,10 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     psinfo_t proc;
     if (ffReadFileData(filePath, sizeof(proc), &proc) == sizeof(proc))
     {
-        ffStrbufSetS(exe, proc.pr_psargs);
-        ffStrbufSubstrBeforeFirstC(exe, ' ');
+        const char* args = proc.pr_psargs;
+        if (args[0] == '-') ++args;
+        const char* end = strchr(args, ' ');
+        ffStrbufSetNS(exe, end ? (uint32_t) (end - args) : (uint32_t) strlen(args), args);
     }
 
     if (exePath)
