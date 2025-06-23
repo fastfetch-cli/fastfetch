@@ -231,31 +231,30 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetF(&result->prettyName, "Proxmox VE %s", result->versionID.chars);
         return true;
     }
-    else if (ffStrbufContainS(&instance.state.platform.sysinfo.release, "+rpt-rpi-"))
+    else if (ffPathExists("/etc/rpi-issue", FF_PATHTYPE_FILE))
     {
-        ffStrbufSetS(&result->idLike, "debian");
-        if (ffPathExists("/boot/dietpi/.version", FF_PATHTYPE_FILE))
-        {
-            // DietPi
-            ffStrbufSetStatic(&result->id, "dietpi");
-            ffStrbufSetStatic(&result->name, "DietPi");
-            ffStrbufSetStatic(&result->prettyName, "DietPi");
-            FF_STRBUF_AUTO_DESTROY core = ffStrbufCreate();
-            FF_STRBUF_AUTO_DESTROY sub = ffStrbufCreate();
-            FF_STRBUF_AUTO_DESTROY rc = ffStrbufCreate();
-            if (ffParsePropFileValues("/boot/dietpi/.version", 3, (FFpropquery[]) {
-                {"G_DIETPI_VERSION_CORE=", &core},
-                {"G_DIETPI_VERSION_SUB=", &sub},
-                {"G_DIETPI_VERSION_RC=", &rc},
-            })) ffStrbufAppendF(&result->prettyName, " %s.%s.%s", core.chars, sub.chars, rc.chars);
-        }
-        else
-        {
-            // Raspberry Pi OS
-            ffStrbufSetStatic(&result->id, "raspbian");
-            ffStrbufSetStatic(&result->name, "Raspberry Pi OS");
-            ffStrbufSetStatic(&result->prettyName, "Raspberry Pi OS");
-        }
+        // Raspberry Pi OS
+        ffStrbufSetStatic(&result->id, "raspbian");
+        ffStrbufSetStatic(&result->idLike, "debian");
+        ffStrbufSetStatic(&result->name, "Raspberry Pi OS");
+        ffStrbufSetStatic(&result->prettyName, "Raspberry Pi OS");
+        return true;
+    }
+    else if (ffPathExists("/boot/dietpi/.version", FF_PATHTYPE_FILE))
+    {
+        // DietPi
+        ffStrbufSetStatic(&result->id, "dietpi");
+        ffStrbufSetStatic(&result->name, "DietPi");
+        ffStrbufSetStatic(&result->prettyName, "DietPi");
+        ffStrbufSetStatic(&result->idLike, "debian");
+        FF_STRBUF_AUTO_DESTROY core = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY sub = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY rc = ffStrbufCreate();
+        if (ffParsePropFileValues("/boot/dietpi/.version", 3, (FFpropquery[]) {
+            {"G_DIETPI_VERSION_CORE=", &core},
+            {"G_DIETPI_VERSION_SUB=", &sub},
+            {"G_DIETPI_VERSION_RC=", &rc},
+        })) ffStrbufAppendF(&result->prettyName, " %s.%s.%s", core.chars, sub.chars, rc.chars);
         return true;
     }
     else if (ffStrbufEndsWithS(&instance.state.platform.sysinfo.release, "+truenas"))
