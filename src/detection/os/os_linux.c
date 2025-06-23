@@ -233,12 +233,31 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
     }
     else if (ffStrbufContainS(&instance.state.platform.sysinfo.release, "+rpt-rpi-"))
     {
-        // Raspberry Pi OS
-        ffStrbufSetS(&result->id, "raspbian");
         ffStrbufSetS(&result->idLike, "debian");
-        ffStrbufSetS(&result->name, "Raspberry Pi OS");
-        ffStrbufSetS(&result->prettyName, "Raspberry Pi OS");
-        return true;
+        if (ffPathExists("/boot/dietpi/.version", FF_PATHTYPE_FILE))
+        {
+            // DietPi
+            ffStrbufSetS(&result->id, "dietpi");
+            ffStrbufSetS(&result->name, "DietPi");
+            ffStrbufClear(&result->version);
+            FF_STRBUF_AUTO_DESTROY sub = ffStrbufCreate();
+            FF_STRBUF_AUTO_DESTROY rc = ffStrbufCreate();
+            if (ffParsePropFileValues("/boot/dietpi/.version", 3, (FFpropquery[]) {
+                {"G_DIETPI_VERSION_CORE=", &result->version},
+                {"G_DIETPI_VERSION_SUB=", &sub},
+                {"G_DIETPI_VERSION_RC=", &rc},
+            })) ffStrbufAppendF(&result->version, ".%s.%s", sub.chars, rc.chars);
+            ffStrbufSet(&result->versionID, &result->version);
+            ffStrbufSetF(&result->prettyName, "DietPi %s", result->version.chars);
+        }
+        else
+        {
+            // Raspberry Pi OS
+            ffStrbufSetS(&result->id, "raspbian");
+            ffStrbufSetS(&result->name, "Raspberry Pi OS");
+            ffStrbufSetS(&result->prettyName, "Raspberry Pi OS");
+            return true;
+        }
     }
     else if (ffStrbufEndsWithS(&instance.state.platform.sysinfo.release, "+truenas"))
     {
