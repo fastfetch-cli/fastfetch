@@ -25,6 +25,11 @@ static void parseSystemVersion(FFOSResult* os)
         ffStrbufInitS(&os->version, value.UTF8String);
     if((value = dict[@"ProductBuildVersion"]))
         ffStrbufInitS(&os->buildID, value.UTF8String);
+    if (ffStrbufStartsWithS(&os->version, "16."))
+    {
+        // macOS 26 Tahoe. #1809
+        os->version.chars[0] = '2';
+    }
 }
 
 static bool detectOSCodeName(FFOSResult* os)
