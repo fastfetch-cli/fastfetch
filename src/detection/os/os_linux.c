@@ -92,7 +92,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Kubuntu");
-        ffStrbufSetStatic(&result->prettyName, "Kubuntu");
+        ffStrbufSetF(&result->prettyName, "Kubuntu %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "kubuntu");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -101,7 +101,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "xfce") || ffStrContains(xdgConfigDirs, "xubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Xubuntu");
-        ffStrbufSetStatic(&result->prettyName, "Xubuntu");
+        ffStrbufSetF(&result->prettyName, "Xubuntu %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "xubuntu");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -110,7 +110,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "lxqt") || ffStrContains(xdgConfigDirs, "lubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Lubuntu");
-        ffStrbufSetStatic(&result->prettyName, "Lubuntu");
+        ffStrbufSetF(&result->prettyName, "Lubuntu %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "lubuntu");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -119,7 +119,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "budgie"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Budgie");
-        ffStrbufSetStatic(&result->prettyName, "Ubuntu Budgie");
+        ffStrbufSetF(&result->prettyName, "Ubuntu Budgie %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-budgie");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -128,7 +128,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "cinnamon"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Cinnamon");
-        ffStrbufSetStatic(&result->prettyName, "Ubuntu Cinnamon");
+        ffStrbufSetF(&result->prettyName, "Ubuntu Cinnamon %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-cinnamon");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -137,7 +137,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "mate"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu MATE");
-        ffStrbufSetStatic(&result->prettyName, "Ubuntu MATE");
+        ffStrbufSetF(&result->prettyName, "Ubuntu MATE %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-mate");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -146,7 +146,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "studio"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Studio");
-        ffStrbufSetStatic(&result->prettyName, "Ubuntu Studio");
+        ffStrbufSetF(&result->prettyName, "Ubuntu Studio %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-studio");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -155,7 +155,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "sway"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Sway");
-        ffStrbufSetStatic(&result->prettyName, "Ubuntu Sway");
+        ffStrbufSetF(&result->prettyName, "Ubuntu Sway %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-sway");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -164,7 +164,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "touch"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Touch");
-        ffStrbufSetStatic(&result->prettyName, "Ubuntu Touch");
+        ffStrbufSetF(&result->prettyName, "Ubuntu Touch %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-touch");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
@@ -173,7 +173,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     if(ffStrContains(xdgConfigDirs, "lliurex"))
     {
         ffStrbufSetStatic(&result->name, "LliureX");
-        ffStrbufSetStatic(&result->prettyName, "LliureX");
+        ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "lliurex");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
