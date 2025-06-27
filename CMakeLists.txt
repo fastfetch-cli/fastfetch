@@ -326,11 +326,6 @@ endif()
 fastfetch_encode_c_string("${DATATEXT_JSON_HELP}" DATATEXT_JSON_HELP)
 fastfetch_load_text(src/data/structure.txt DATATEXT_STRUCTURE)
 
-if(APPLE)
-    # See src/detection/media/media_apple.m
-    fastfetch_load_text(src/data/nowPlaying.scptd DATATEXT_NOWPLAYING)
-endif()
-
 configure_file(src/fastfetch_config.h.in fastfetch_config.h @ONLY)
 configure_file(src/fastfetch_datatext.h.in fastfetch_datatext.h @ONLY)
 if(APPLE)
