@@ -1,45 +1,73 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
 #include "common/processing.h"
+#include "util/apple/cf_helpers.h"
 
 #import <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
 
-@interface MRContentItem : NSObject <NSCopying>
-@property (nonatomic, readonly, copy) NSDictionary<NSString*, NSString*>* nowPlayingInfo;
-@end
-
-@interface MRClient : NSObject <NSCopying, NSSecureCoding>
-@property (nonatomic, copy) NSString* bundleIdentifier;
-@property (nonatomic, copy) NSString* displayName;
-@end
-
-@interface MRPlayerPath : NSObject <NSCopying, NSSecureCoding>
-@property (nonatomic, copy) MRClient* client;
-@end
-
-@interface MRNowPlayingRequest
-+ (bool)localIsPlaying;
-+ (MRContentItem*)localNowPlayingItem;
-+ (MRPlayerPath*)localNowPlayingPlayerPath;
-@end
+// https://github.com/andrewwiik/iOS-Blocks/blob/master/Widgets/Music/MediaRemote.h
+extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void(^callback)(_Nullable CFDictionaryRef info)) __attribute__((weak_import));
+extern void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queue, void (^callback)(BOOL playing)) __attribute__((weak_import));
+extern void MRMediaRemoteGetNowPlayingApplicationDisplayID(dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef displayID)) __attribute__((weak_import));
+extern void MRMediaRemoteGetNowPlayingApplicationDisplayName(int unknown, dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef name)) __attribute__((weak_import));
 
 static const char* getMediaByMediaRemote(FFMediaResult* result)
 {
-    if (!NSClassFromString(@"MRNowPlayingRequest"))
-        return "MediaRemote framework is not available";
-    if (!MRNowPlayingRequest.localNowPlayingItem)
-        return "No media found";
-    ffStrbufSetStatic(&result->status, MRNowPlayingRequest.localIsPlaying ? "Playing" : "Paused");
+    #define FF_TEST_FN_EXISTANCE(fn) if (!fn) return "MediaRemote function " #fn " is not available"
+    FF_TEST_FN_EXISTANCE(MRMediaRemoteGetNowPlayingInfo);
+    FF_TEST_FN_EXISTANCE(MRMediaRemoteGetNowPlayingApplicationIsPlaying);
+    #undef FF_TEST_FN_EXISTANCE
 
-    NSDictionary<NSString*, NSString*>* infoDict = MRNowPlayingRequest.localNowPlayingItem.nowPlayingInfo;
-    ffStrbufSetS(&result->song, infoDict[@"kMRMediaRemoteNowPlayingInfoTitle"].UTF8String);
-    ffStrbufSetS(&result->artist, infoDict[@"kMRMediaRemoteNowPlayingInfoArtist"].UTF8String);
-    ffStrbufSetS(&result->album, infoDict[@"kMRMediaRemoteNowPlayingInfoAlbum"].UTF8String);
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
 
-    MRClient* bundleObj = MRNowPlayingRequest.localNowPlayingPlayerPath.client;
-    ffStrbufSetS(&result->playerId, bundleObj.bundleIdentifier.UTF8String);
-    ffStrbufSetS(&result->player, bundleObj.displayName.UTF8String);
-    return NULL;
+    dispatch_group_enter(group);
+    __block const char* error = NULL;
+    MRMediaRemoteGetNowPlayingInfo(queue, ^(_Nullable CFDictionaryRef info) {
+        if(info != nil)
+        {
+            ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
+            ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
+            ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
+        }
+        else
+            error = "MRMediaRemoteGetNowPlayingInfo() failed";
+
+        dispatch_group_leave(group);
+    });
+
+    dispatch_group_enter(group);
+    MRMediaRemoteGetNowPlayingApplicationIsPlaying(queue, ^(BOOL playing) {
+        ffStrbufSetStatic(&result->status, playing ? "Playing" : "Paused");
+        dispatch_group_leave(group);
+    });
+
+    if (MRMediaRemoteGetNowPlayingApplicationDisplayID)
+    {
+        dispatch_group_enter(group);
+        MRMediaRemoteGetNowPlayingApplicationDisplayID(queue, ^(_Nullable CFStringRef displayID) {
+            ffCfStrGetString(displayID, &result->playerId);
+            dispatch_group_leave(group);
+        });
+    }
+
+    if (MRMediaRemoteGetNowPlayingApplicationDisplayName)
+    {
+        dispatch_group_enter(group);
+        MRMediaRemoteGetNowPlayingApplicationDisplayName(0, queue, ^(_Nullable CFStringRef name) {
+            ffCfStrGetString(name, &result->player);
+            dispatch_group_leave(group);
+        });
+    }
+
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    // Don't dispatch_release because we are using ARC
+
+    if(result->song.length > 0)
+        return NULL;
+
+    return error;
 }
 
 __attribute__((visibility("default"), used))
@@ -101,5 +129,13 @@ void ffDetectMediaImpl(FFMediaResult* media)
         error = getMediaByAuthorizedProcess(media);
     else
         error = getMediaByMediaRemote(media);
-    if (error) ffStrbufAppendS(&media->error, error);
+    if (error)
+        ffStrbufAppendS(&media->error, error);
+    else if (media->player.length == 0 && media->playerId.length > 0)
+    {
+        ffStrbufSet(&media->player, &media->playerId);
+        if (ffStrbufStartsWithIgnCaseS(&media->player, "com."))
+            ffStrbufSubstrAfter(&media->player, strlen("com.") - 1);
+        ffStrbufReplaceAllC(&media->player, '.', ' ');
+    }
 }
