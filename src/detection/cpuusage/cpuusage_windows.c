@@ -20,11 +20,8 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
     {
         SYSTEM_PROCESSOR_PERFORMANCE_INFORMATION* coreInfo = pinfo + i;
 
-        // KernelTime includes idle time.
-        LONGLONG dpcTime = coreInfo->Reserved1[0].QuadPart;
-        LONGLONG interruptTime = coreInfo->Reserved1[1].QuadPart;
+        // KernelTime includes IdleTime and DpcTime.
         coreInfo->KernelTime.QuadPart -= coreInfo->IdleTime.QuadPart;
-        coreInfo->KernelTime.QuadPart += dpcTime + interruptTime;
 
         uint64_t inUse = (uint64_t) (coreInfo->UserTime.QuadPart + coreInfo->KernelTime.QuadPart);
         uint64_t total = inUse + (uint64_t)coreInfo->IdleTime.QuadPart;
