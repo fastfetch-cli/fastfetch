@@ -83,7 +83,7 @@ cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR Dragon
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
-cmake_dependent_option(ENABLE_CPUUSAGE_PERFLIB "Use perflib (Processor Information) to calcuate CPU usage (used by task manager) instead of CPU times (used by all other *nix platforms)" ON "WIN32" OFF)
+cmake_dependent_option(ENABLE_CPUUSAGE_PERFLIB "Use perflib (Processor Information) to calculate CPU usage (used by task manager) instead of CPU times (used by all other *nix platforms)" ON "WIN32" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
