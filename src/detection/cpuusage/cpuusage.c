@@ -5,12 +5,14 @@
 #include <stdint.h>
 
 static FFlist cpuTimes1;
+static uint64_t startTime;
 
 void ffPrepareCPUUsage(void)
 {
     assert(cpuTimes1.elementSize == 0);
     ffListInit(&cpuTimes1, sizeof(FFCpuUsageInfo));
     ffGetCpuUsageInfo(&cpuTimes1);
+    startTime = ffTimeGetNow();
 }
 
 const char* ffGetCpuUsageResult(FFCPUUsageOptions* options, FFlist* result)
@@ -22,6 +24,12 @@ const char* ffGetCpuUsageResult(FFCPUUsageOptions* options, FFlist* result)
         error = ffGetCpuUsageInfo(&cpuTimes1);
         if(error) return error;
         ffTimeSleep(options->waitTime);
+    }
+    else
+    {
+        uint64_t elapsedTime = ffTimeGetNow() - startTime;
+        if (elapsedTime < options->waitTime)
+            ffTimeSleep(options->waitTime - (uint32_t)elapsedTime);
     }
 
     if(cpuTimes1.length == 0) return "No CPU cores found";
@@ -57,5 +65,6 @@ retry:
         cpuTime1->inUseAll = cpuTime2->inUseAll;
         cpuTime1->totalAll = cpuTime2->totalAll;
     }
+    startTime = ffTimeGetNow();
     return NULL;
 }

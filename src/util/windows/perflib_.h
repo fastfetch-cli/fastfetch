@@ -63,6 +63,13 @@ typedef struct _PERF_COUNTER_HEADER {
     // If dwType == PERF_COUNTERSET:         PERF_MULTI_COUNTERS block + PERF_MULTI_INSTANCES block.
 } PERF_COUNTER_HEADER, * PPERF_COUNTER_HEADER;
 
+typedef struct _PERF_MULTI_INSTANCES {
+    ULONG      dwTotalSize; // = sizeof(PERF_MULTI_INSTANCES) + sizeof(instance data blocks...)
+    ULONG      dwInstances; // Number of instance data blocks.
+    // Followed by:
+    // Instance data blocks...;
+} PERF_MULTI_INSTANCES, * PPERF_MULTI_INSTANCES;
+
 typedef struct _PERF_MULTI_COUNTERS {
     ULONG      dwSize;     // sizeof(PERF_MULTI_COUNTERS) + sizeof(CounterIds)
     ULONG      dwCounters; // Number of counter ids.
