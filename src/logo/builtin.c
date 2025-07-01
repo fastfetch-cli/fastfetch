@@ -5378,7 +5378,20 @@ static const FFlogo X[] = {
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_CYAN,
-        },
+        }
+    },
+    // Xubuntu
+    {
+        .names = {"Xubuntu"},
+            .lines = FASTFETCH_DATATEXT_LOGO_XUBUNTU,
+            .colors = {
+                FF_COLOR_FG_RGB "85;137;165",
+                FF_COLOR_FG_RGB "124;133;136",
+                FF_COLOR_FG_RGB "149;168;184",
+                FF_COLOR_FG_DEFAULT,
+            },
+            .colorKeys = FF_COLOR_FG_RGB "85;137;165",
+            .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // LAST
     {},
@@ -5393,19 +5406,6 @@ static const FFlogo Y[] = {
             FF_COLOR_FG_256 "93",
             FF_COLOR_FG_256 "92",
         },
-    },
-    // Xubuntu
-    {
-        .names = {"Xubuntu"},
-            .lines = FASTFETCH_DATATEXT_LOGO_XUBUNTU,
-            .colors = {
-                FF_COLOR_FG_RGB "85;137;165",
-                FF_COLOR_FG_RGB "124;133;136",
-                FF_COLOR_FG_RGB "149;168;184",
-                FF_COLOR_FG_DEFAULT,
-            },
-            .colorKeys = FF_COLOR_FG_RGB "85;137;165",
-            .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // LAST
     {},
