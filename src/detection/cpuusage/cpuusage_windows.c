@@ -129,8 +129,11 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
             pCounterData = (PERF_COUNTER_DATA*)((BYTE*)pCounterData + pCounterData->dwSize);
         }
 
-        if (wcschr(instanceName, L'_') == NULL /* ignore `_Total` */ && processorUtility != UINT64_MAX && utilityBase != UINT64_MAX)
+        if (wcschr(instanceName, L'_') == NULL /* ignore `_Total` */)
         {
+            if (processorUtility == UINT64_MAX)
+                return "Counter \"% Processor Utility\" are not supported";
+
             FFCpuUsageInfo* info = (FFCpuUsageInfo*) ffListAdd(cpuTimes);
             *info = (FFCpuUsageInfo) {
                 .inUseAll = processorUtility,
