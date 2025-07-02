@@ -3,11 +3,13 @@
 
 #include "util/mallocHelper.h"
 
-#if !FF_ENABLE_CPUUSAGE_PERFLIB
 #include <ntstatus.h>
 #include <winternl.h>
+#include <windows.h>
+#include <wchar.h>
+#include "util/windows/perflib_.h"
 
-const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
+static const char* getInfoByNqsi(FFlist* cpuTimes)
 {
     ULONG size = 0;
     if(NtQuerySystemInformation(SystemProcessorPerformanceInformation, NULL, 0, &size) != STATUS_INFO_LENGTH_MISMATCH)
@@ -36,49 +38,53 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 
     return NULL;
 }
-#else
-#include <windows.h>
-#include "util/windows/perflib_.h"
-#include <wchar.h>
 
-static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)
+static const char* getInfoByPerflib(FFlist* cpuTimes)
 {
-    if (*phQuery != NULL)
+    static HANDLE hQuery = NULL;
+
+    if (hQuery == NULL)
     {
-        PerfCloseQueryHandle(*phQuery);
-        *phQuery = NULL;
+        struct FFPerfQuerySpec
+        {
+            PERF_COUNTER_IDENTIFIER Identifier;
+            WCHAR Name[16];
+        } querySpec = {
+            .Identifier = {
+                // Processor Information GUID
+                // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib\_V2Providers\{383487a6-3676-4870-a4e7-d45b30c35629}\{b4fc721a-0378-476f-89ba-a5a79f810b36}
+                .CounterSetGuid = { 0xb4fc721a, 0x0378, 0x476f, {0x89, 0xba, 0xa5, 0xa7, 0x9f, 0x81, 0x0b, 0x36} },
+                .Size = sizeof(querySpec),
+                .CounterId = PERF_WILDCARD_COUNTER, // https://learn.microsoft.com/en-us/windows/win32/perfctrs/using-the-perflib-functions-to-consume-counter-data
+                .InstanceId = PERF_WILDCARD_COUNTER,
+            },
+            .Name = PERF_WILDCARD_INSTANCE,
+        };
+
+        if (PerfOpenQueryHandle(NULL, &hQuery) != ERROR_SUCCESS)
+        {
+            PerfCloseQueryHandle(hQuery);
+            hQuery = INVALID_HANDLE_VALUE;
+            return "PerfOpenQueryHandle() failed";
+        }
+
+        if (PerfAddCounters(hQuery, &querySpec.Identifier, sizeof(querySpec)) != ERROR_SUCCESS)
+        {
+            PerfCloseQueryHandle(hQuery);
+            hQuery = INVALID_HANDLE_VALUE;
+            return "PerfAddCounters() failed";
+        }
+
+        if (querySpec.Identifier.Status != ERROR_SUCCESS)
+        {
+            PerfCloseQueryHandle(hQuery);
+            hQuery = INVALID_HANDLE_VALUE;
+            return "PerfAddCounters() reports invalid identifier";
+        }
     }
-}
 
-const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
-{
-    struct FFPerfQuerySpec
-    {
-        PERF_COUNTER_IDENTIFIER Identifier;
-        WCHAR Name[16];
-    } querySpec = {
-        .Identifier = {
-            // Processor Information GUID
-            // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Perflib\_V2Providers\{383487a6-3676-4870-a4e7-d45b30c35629}\{b4fc721a-0378-476f-89ba-a5a79f810b36}
-            .CounterSetGuid = { 0xb4fc721a, 0x0378, 0x476f, {0x89, 0xba, 0xa5, 0xa7, 0x9f, 0x81, 0x0b, 0x36} },
-            .Size = sizeof(querySpec),
-            .CounterId = PERF_WILDCARD_COUNTER, // https://learn.microsoft.com/en-us/windows/win32/perfctrs/using-the-perflib-functions-to-consume-counter-data
-            .InstanceId = PERF_WILDCARD_COUNTER,
-        },
-        .Name = PERF_WILDCARD_INSTANCE,
-    };
-
-    __attribute__((__cleanup__(ffPerfCloseQueryHandle)))
-        HANDLE hQuery = NULL;
-
-    if (PerfOpenQueryHandle(NULL, &hQuery) != ERROR_SUCCESS)
-        return "PerfOpenQueryHandle() failed";
-
-    if (PerfAddCounters(hQuery, &querySpec.Identifier, sizeof(querySpec)) != ERROR_SUCCESS)
-        return "PerfAddCounters() failed";
-
-    if (querySpec.Identifier.Status != ERROR_SUCCESS)
-        return "PerfAddCounters() reports invalid identifier";
+    if (hQuery == INVALID_HANDLE_VALUE)
+        return "Init hQuery failed";
 
     DWORD dataSize = 0;
     if (PerfQueryCounterData(hQuery, NULL, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY)
@@ -146,4 +152,23 @@ const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
 
     return NULL;
 }
-#endif
+
+const char* ffGetCpuUsageInfo(FFlist* cpuTimes)
+{
+    #if __aarch64__
+    static uint8_t winver = 10; // Assume Windows 10 or later for WoA
+    #else
+    static uint8_t winver = 0;
+    if (winver == 0)
+        winver = (uint8_t) ffStrbufToUInt(&instance.state.platform.sysinfo.release, 1);
+    #endif
+
+    if (winver >= 10)
+    {
+        if (getInfoByPerflib(cpuTimes) == NULL) return NULL;
+        ffListClear(cpuTimes);
+        winver = 1; // Fall back to NQSI
+    }
+
+    return getInfoByNqsi(cpuTimes);
+}

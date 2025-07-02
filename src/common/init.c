@@ -265,9 +265,6 @@ void ffListFeatures(void)
         #if FF_HAVE_EMBEDDED_PCIIDS
             "Embedded pciids\n"
         #endif
-        #if FF_ENABLE_CPUUSAGE_PERFLIB
-            "CPUUsage perflib\n"
-        #endif
         ""
     , stdout);
 }

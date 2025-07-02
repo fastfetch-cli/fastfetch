@@ -28,10 +28,11 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         {
             sumValue += *percent;
 
-            #if FF_ENABLE_CPUUSAGE_PERFLIB
+            #if WIN32
             // Windows may return values greater than 100%, cap them to 100%
             if (*percent > 100) *percent = 100;
             #endif
+
             if (*percent > maxValue)
             {
                 maxValue = *percent;
@@ -47,7 +48,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         ++index;
     }
     double avgValue = sumValue / (double) valueCount;
-    #if FF_ENABLE_CPUUSAGE_PERFLIB
+    #if WIN32
     // See above comment
     if (avgValue > 100) avgValue = 100;
     #endif
