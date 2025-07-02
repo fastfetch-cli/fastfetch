@@ -5,7 +5,7 @@
 #include "util/smbiosHelper.h"
 
 #include <windows.h>
-#include "perflib_.h"
+#include "util/windows/perflib_.h"
 #include <wchar.h>
 
 static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)

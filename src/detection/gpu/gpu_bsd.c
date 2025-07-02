@@ -212,11 +212,13 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus)
 
 const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
 {
+    #if FF_HAVE_DRM
     if (options->detectionMethod == FF_GPU_DETECTION_METHOD_AUTO)
     {
         detectByDrm(options, gpus);
         if (gpus->length > 0) return NULL;
     }
+    #endif
 
     return detectByPci(options, gpus);
 }

@@ -69,13 +69,12 @@ If fastfetch is not packaged for your distribution or an outdated version is pac
 
 You may also download the program directly from [the GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) in the form of an archive file.
 
-### FreeBSD
+### BSD systems
 
-* `pkg install fastfetch`
-
-### NetBSD
-
-* `pkgin in fastfetch`
+* FreeBSD: `pkg install fastfetch`
+* NetBSD: `pkgin in fastfetch`
+* OpenBSD: `pkg_add fastfetch` (Snapshots only)
+* DragonFly BSD: `pkg install fastfetch` (Snapshots only)
 
 ### Android (Termux)
 
