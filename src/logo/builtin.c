@@ -5380,6 +5380,15 @@ static const FFlogo X[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // Xubuntu
+    {
+        .names = {"Xubuntu"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XUBUNTU,
+        .colors = {
+            FF_COLOR_FG_256 "25",
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // LAST
     {},
 };
