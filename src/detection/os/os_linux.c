@@ -170,15 +170,6 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         return;
     }
 
-    if(ffStrContains(xdgConfigDirs, "xubuntu"))
-    {
-        ffStrbufSetStatic(&result->name, "Xubuntu");
-        ffStrbufSetF(&result->prettyName, "Xubuntu %s", result->version.chars);
-        ffStrbufSetStatic(&result->id, "xubuntu");
-        ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
-    }
-
     if(ffStrContains(xdgConfigDirs, "lliurex"))
     {
         ffStrbufSetStatic(&result->name, "LliureX");
