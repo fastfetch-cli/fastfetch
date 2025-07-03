@@ -1439,10 +1439,10 @@ static const FFlogo D[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_DRAGONFLY,
         .colors = {
             FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_RED,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // DragonFlySmall
     {
@@ -1451,10 +1451,10 @@ static const FFlogo D[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_DRAGONFLY_SMALL,
         .colors = {
             FF_COLOR_FG_RED,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_DEFAULT,
         },
         .colorKeys = FF_COLOR_FG_RED,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // DragonFlyOld
     {
