@@ -1,3 +1,30 @@
+# 2.47.0
+
+Features:
+* Various improvements for Solaris / OpenIndiana support
+    * Support BIOS (UEFI or legency) type detection (BIOS)
+    * Support physical disk detection (PhysicalDisk)
+    * Remove leading `-` for login shells (Shell)
+    * Improve performance of GPU detection (GPU)
+        * Drop `libpciaccess` dependency
+    * Use native API to detect sound devices (Sound)
+        * Drop `PulseAudio` dependency
+* Improve DietPi OS and Raspberry Pi OS detection (#1816, OS, Linux)
+* Force reporting 26 on macOS Tahoe (OS, macOS)
+* Fix pci.ids file location (#1819, GPU, OpenBSD)
+* Append version string for Ubuntu variants (OS, Linux)
+* Improve visibility on white-background terminals (Logo)
+* Improve performance of now playing handling (Media, macOS)
+* Increase `PROC_FILE_BUFFSIZ` to avoid possible short reads (Linux)
+    * Fix potential bugs for `DiskIO`, `NetIO` and `CPUUsage` modules
+* Improve accuracy of CPU usage calculations by include interrupt and softirq times (CPUUsage, Linux / *BSD)
+* Ignore `init` and `systemd` processes when detecting terminal (Terminal, Linux)
+* Improve accuracy of CPU usage detection on Windows 10+ with perflib which matches values reported by taskmgr well (CPUUsage, Windows)
+
+Logos:
+* Improve colors of OpenIndiana
+* Add Xubuntu
+
 # 2.46.0
 
 Features:
