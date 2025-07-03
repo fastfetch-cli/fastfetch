@@ -11,7 +11,6 @@ Features:
         * Drop `PulseAudio` dependency
 * Improve DietPi OS and Raspberry Pi OS detection (#1816, OS, Linux)
 * Force reporting version 26 on macOS Tahoe (OS, macOS)
-* Fix `pci.ids` file location (#1819, GPU, OpenBSD)
 * Append version string to Ubuntu variants (OS, Linux)
 * Improve performance of media detection for macOS 15.4+ (Media, macOS)
 * Increase `PROC_FILE_BUFFSIZ` to avoid possible short reads (Linux)
@@ -19,6 +18,10 @@ Features:
 * Improve accuracy of CPU usage calculations by including interrupt and softirq times (CPUUsage, Linux / *BSD)
 * Ignore `init` and `systemd` processes when detecting terminals (Terminal, Linux)
 * Improve accuracy of CPU usage detection on Windows 10+ with perflib, which matches values reported by Task Manager (CPUUsage, Windows)
+
+Bugfixes:
+* Fix `pci.ids` file location (#1819, GPU, OpenBSD)
+* Fix compiling on FreeBSD when `libdrm` support is disabled (#1820, GPU, FreeBSD)
 
 Logos:
 * Improve visibility on white-background terminals for some logos by replacing white with the default foreground color
