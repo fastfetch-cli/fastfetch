@@ -2684,11 +2684,11 @@ static const FFlogo L[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_LINUX,
         .colors = {
             FF_COLOR_FG_WHITE,
-            FF_COLOR_FG_BLACK,
+            FF_COLOR_FG_LIGHT_BLACK,
             FF_COLOR_FG_YELLOW,
         },
-        .colorKeys = FF_COLOR_FG_WHITE,
-        .colorTitle = FF_COLOR_FG_WHITE,
+        .colorKeys = FF_COLOR_FG_DEFAULT,
+        .colorTitle = FF_COLOR_FG_YELLOW,
     },
     // LinuxFromScratch
     {
