@@ -19,8 +19,7 @@
     #define FF_INVALID_FD (-1)
     // procfs's file can be changed between read calls such as /proc/meminfo and /proc/uptime.
     // one safe way to read correct data is reading the whole file in a single read syscall
-    // 8192 comes from procps-ng: https://gitlab.com/procps-ng/procps/-/blob/master/library/meminfo.c?ref_type=heads#L39
-    #define PROC_FILE_BUFFSIZ 8192
+    #define PROC_FILE_BUFFSIZ (32 * 1024)
 #endif
 
 static inline FFNativeFD FFUnixFD2NativeFD(int unixfd)

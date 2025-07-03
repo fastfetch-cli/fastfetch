@@ -19,7 +19,7 @@ FFLogoImageResult ffLogoPrintImageIM7(FFLogoRequestData* requestData)
         "libMagickCore-7.Q16" FF_LIBRARY_EXTENSION, 11,
         "libMagickCore-7.Q16HDRI-10" FF_LIBRARY_EXTENSION, -1 // Required for Windows
     )
-    FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR);
+    FF_LIBRARY_LOAD_SYMBOL_ADDRESS(imageMagick, ffResizeImage, ResizeImage, FF_LOGO_IMAGE_RESULT_INIT_ERROR)
 
     FFLogoImageResult result = ffLogoPrintImageImpl(requestData, &(FFIMData) {
         .resizeFunc = logoResize,

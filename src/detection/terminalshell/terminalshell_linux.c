@@ -109,6 +109,8 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             ffStrbufEqualS(&result->processName, "proot")      ||
             ffStrbufEqualS(&result->processName, "script")     ||
+            ffStrbufEqualS(&result->processName, "init")       ||
+            ffStrbufEqualS(&result->processName, "systemd")    ||
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif

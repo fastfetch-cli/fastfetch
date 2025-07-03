@@ -1,3 +1,33 @@
+# 2.47.0
+
+Features:
+* Various improvements for Solaris / OpenIndiana support
+    * Support BIOS (UEFI or legacy) type detection (BIOS)
+    * Support physical disk detection (PhysicalDisk)
+    * Remove leading `-` from login shells (Shell)
+    * Improve GPU detection performance (GPU)
+        * Drop `libpciaccess` dependency
+    * Use native API to detect sound devices (Sound)
+        * Drop `PulseAudio` dependency
+* Improve DietPi OS and Raspberry Pi OS detection (#1816, OS, Linux)
+* Force reporting version 26 on macOS Tahoe (OS, macOS)
+* Append version string to Ubuntu variants (OS, Linux)
+* Improve performance of media detection for macOS 15.4+ (Media, macOS)
+* Increase `PROC_FILE_BUFFSIZ` to avoid possible short reads (Linux)
+    * Fix potential bugs in `DiskIO`, `NetIO` and `CPUUsage` modules
+* Improve accuracy of CPU usage calculations by including interrupt and softirq times (CPUUsage, Linux / *BSD)
+* Ignore `init` and `systemd` processes when detecting terminals (Terminal, Linux)
+* Improve accuracy of CPU usage detection on Windows 10+ with perflib, which matches values reported by Task Manager (CPUUsage, Windows)
+
+Bugfixes:
+* Fix `pci.ids` file location (#1819, GPU, OpenBSD)
+* Fix compiling on FreeBSD when `libdrm` support is disabled (#1820, GPU, FreeBSD)
+
+Logos:
+* Improve visibility on white-background terminals for some logos by replacing white with the default foreground color
+    * According to Wikipedia, the default foreground color is implementation-defined. It's usually black for white themes and white for dark themes. However, some terminals, notably Konsole with the default theme, use a different color, which may cause issues with some logos.
+* Add Xubuntu
+
 # 2.46.0
 
 Features:
@@ -12,7 +42,7 @@ Features:
 * Use `board-id` as board name if available (Board, macOS)
     * Intel only
 * Support shared VRAM usage detection for AMD GPUs (GPU, Linux)
-* Use `perflib.h` instead of `pdh.h` for CPU temperature querying to get rid of pdh.dll (#1787, CPU, Windows)
+* Use `perflib.h` instead of `pdh.h` for CPU temperature querying to get rid of `pdh.dll` dependency (#1787, CPU, Windows)
 * Support GPU info detection for old ATI radeon driver (#1810, GPU, Linux)
 * Add macOS 26 Tahoe support (macOS)
     * Report macOS 26 code name (OS)
