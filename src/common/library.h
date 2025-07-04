@@ -74,7 +74,7 @@ void* ffLibraryLoad(const char* path, int maxVersion, ...);
     FF_MAYBE_UNUSED void* libraryObjectName = NULL; // Placeholder
 
 #define FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, symbolMapping, symbolName, returnValue) \
-    symbolMapping = (__typeof__(&symbolName)) &symbolName
+    symbolMapping = (__typeof__(&symbolName)) &symbolName;
 
 #define FF_LIBRARY_LOAD_SYMBOL(library, symbolName, returnValue) \
     FF_MAYBE_UNUSED __typeof__(&symbolName) FF_LIBRARY_LOAD_SYMBOL_ADDRESS(library, ff ## symbolName, symbolName, returnValue);
