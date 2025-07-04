@@ -1771,8 +1771,7 @@ static const FFlogo F[] = {
     },
     // FedoraSilverblue
     {
-        .names = {"Fedora_silverblue", "fedora-silverblue"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .names = {"Fedora-Silverblue"},
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_SILVERBLUE,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1784,8 +1783,7 @@ static const FFlogo F[] = {
     },
     // FedoraKinoite
     {
-        .names = {"Fedora_kinoite", "fedora-kinoite"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .names = {"Fedora-Kinoite"},
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_KINOITE,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1796,8 +1794,7 @@ static const FFlogo F[] = {
     },
     // FedoraSericea
     {
-        .names = {"Fedora_sericea", "fedora-sericea"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .names = {"Fedora-Sericea"},
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_SERICEA,
         .colors = {
             FF_COLOR_FG_BLUE,
@@ -1808,8 +1805,7 @@ static const FFlogo F[] = {
     },
     // FedoraCoreOS
     {
-        .names = {"Fedora_coreos", "fedora-coreos"},
-        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .names = {"Fedora-CoreOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_FEDORA_COREOS,
         .colors = {
             FF_COLOR_FG_BLUE,
