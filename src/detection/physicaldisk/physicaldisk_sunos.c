@@ -36,9 +36,15 @@ static int walkDevTree(di_node_t node, di_minor_t minor, struct FFWalkTreeBundle
 
         char* buf;
         if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "inquiry-serial-no", &buf) > 0)
+        {
             ffStrbufSetS(&device->serial, buf);
+            ffStrbufTrimSpace(&device->serial);
+        }
         if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "inquiry-revision-id", &buf) > 0)
+        {
             ffStrbufSetS(&device->revision, buf);
+            ffStrbufTrimRightSpace(&device->revision);
+        }
         if (di_prop_lookup_strings(DDI_DEV_T_ANY, node, "class", &buf) > 0)
             ffStrbufSetS(&device->interconnect, buf);
 

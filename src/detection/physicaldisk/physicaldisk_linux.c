@@ -153,7 +153,7 @@ static void parsePhysicalDisk(int dfd, const char* devName, FFPhysicalDiskOption
     {
         ffStrbufInit(&device->serial);
         if (ffReadFileBufferRelative(devfd, "serial", &device->serial))
-            ffStrbufTrim(&device->serial, ' ');
+            ffStrbufTrimSpace(&device->serial);
     }
 
     {
