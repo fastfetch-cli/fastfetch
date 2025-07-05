@@ -12,6 +12,7 @@ set(PROJECT_LICENSE "MIT license")
 ###################
 # Target Platform #
 ###################
+
 if(ANDROID)
     set(LINUX FALSE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
@@ -58,14 +59,14 @@ include(CMakeDependentOption)
 
 cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku" OFF)
 cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
-cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR ANDROID" OFF)
+cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD" OFF)
 cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
+cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR ANDROID" OFF)
 cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR WIN32 OR SunOS OR Haiku" OFF)
@@ -591,9 +592,22 @@ elseif(ANDROID)
         src/detection/physicaldisk/physicaldisk_linux.c
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
-        src/detection/displayserver/displayserver_android.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/drm.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/kde-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wayland/kde-output-device-v2-protocol.c
+        src/detection/displayserver/linux/wayland/kde-output-order-v1-protocol.c
+        src/detection/displayserver/linux/wayland/xdg-output-unstable-v1-protocol.c
         src/detection/font/font_nosupport.c
         src/detection/gpu/gpu_nosupport.c
+        src/detection/gtk_qt/gtk.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c
@@ -613,6 +627,7 @@ elseif(ANDROID)
         src/detection/packages/packages_linux.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
+        src/detection/gtk_qt/qt.c
         src/detection/sound/sound_nosupport.c
         src/detection/swap/swap_linux.c
         src/detection/terminalfont/terminalfont_android.c
@@ -624,9 +639,9 @@ elseif(ANDROID)
         src/detection/users/users_linux.c
         src/detection/wallpaper/wallpaper_nosupport.c
         src/detection/wifi/wifi_android.c
-        src/detection/wm/wm_nosupport.c
-        src/detection/de/de_nosupport.c
-        src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/wm/wm_linux.c
+        src/detection/de/de_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
         src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
