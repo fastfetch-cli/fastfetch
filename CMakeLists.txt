@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.46.0
+    VERSION 2.47.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -83,7 +83,6 @@ cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR Dragon
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
 cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
-cmake_dependent_option(ENABLE_CPUUSAGE_PERFLIB "Use perflib (Processor Information) to calculate CPU usage (used by task manager) instead of CPU times (used by all other *nix platforms)" OFF "WIN32" OFF)
 
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
@@ -1231,10 +1230,6 @@ endif()
 add_library(libfastfetch OBJECT
     ${LIBFASTFETCH_SRC}
 )
-
-if(ENABLE_CPUUSAGE_PERFLIB)
-    target_compile_definitions(libfastfetch PUBLIC FF_ENABLE_CPUUSAGE_PERFLIB)
-endif()
 
 if(yyjson_FOUND)
     target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)

@@ -65,7 +65,7 @@ const char* ffDetectPhysicalDisk(FFlist* result, FFPhysicalDiskOptions* options)
         FFPhysicalDiskResult* device = (FFPhysicalDiskResult*) ffListAdd(result);
         ffStrbufInitF(&device->devPath, "/dev/%s", provider->lg_name);
         ffStrbufInitMove(&device->serial, &identifier);
-        ffStrbufTrim(&device->serial, ' ');
+        ffStrbufTrimSpace(&device->serial);
         ffStrbufInit(&device->revision);
         ffStrbufInit(&device->interconnect);
         switch (snapIter->device_type & DEVSTAT_TYPE_IF_MASK)

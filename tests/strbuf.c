@@ -371,6 +371,22 @@ int main(void)
     VERIFY(strbuf.allocated > 0);
     ffStrbufDestroy(&strbuf);
 
+    //ffStrbufCreateStatic / TrimSpace
+    ffStrbufInitStatic(&strbuf, "\n TEST\n ");
+    ffStrbufTrimSpace(&strbuf);
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated > 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
+    ffStrbufDestroy(&strbuf);
+
+    //ffStrbufCreate / TrimSpace
+    ffStrbufInitS(&strbuf, "\n TEST\n ");
+    ffStrbufTrimSpace(&strbuf);
+    VERIFY(strbuf.length == 4);
+    VERIFY(strbuf.allocated > 0);
+    VERIFY(ffStrbufEqualS(&strbuf, "TEST"));
+    ffStrbufDestroy(&strbuf);
+
     //ffStrbufEnsureFixedLengthFree / empty buffer
     ffStrbufInit(&strbuf);
     ffStrbufEnsureFixedLengthFree(&strbuf, 10);

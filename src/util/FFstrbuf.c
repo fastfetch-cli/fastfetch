@@ -272,6 +272,31 @@ void ffStrbufTrimRight(FFstrbuf* strbuf, char c)
     strbuf->chars[strbuf->length] = '\0';
 }
 
+void ffStrbufTrimLeftSpace(FFstrbuf* strbuf)
+{
+    if(strbuf->length == 0)
+        return;
+
+    uint32_t index = 0;
+    while(index < strbuf->length && isspace(strbuf->chars[index]))
+        ++index;
+
+    if(index == 0)
+        return;
+
+    if(strbuf->allocated == 0)
+    {
+        //static string
+        strbuf->length -= index;
+        strbuf->chars += index;
+        return;
+    }
+
+    memmove(strbuf->chars, strbuf->chars + index, strbuf->length - index);
+    strbuf->length -= index;
+    strbuf->chars[strbuf->length] = '\0';
+}
+
 void ffStrbufTrimRightSpace(FFstrbuf* strbuf)
 {
     if (strbuf->length == 0)
