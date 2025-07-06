@@ -1582,7 +1582,6 @@ elseif(WIN32)
         PRIVATE "ws2_32"
         PRIVATE "ntdll"
         PRIVATE "version"
-        PRIVATE "setupapi"
         PRIVATE "hid"
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
