@@ -154,6 +154,17 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         else if (ffStrbufContainS(&gpu->vendor, "AMD") || ffStrbufContainS(&gpu->vendor, "ATI"))
                             ffStrbufSetStatic(&gpu->vendor, FF_GPU_VENDOR_NAME_AMD);
                     }
+                    if (gpu->driver.length == 0)
+                        ffRegReadStrbuf(hRegDriverKey, L"DriverVersion", &gpu->driver, NULL);
+                    if (gpu->dedicated.total == FF_GPU_VMEM_SIZE_UNSET)
+                    {
+                        if (!ffRegReadUint64(hRegDriverKey, L"HardwareInformation.qwMemorySize", &gpu->dedicated.total, NULL))
+                        {
+                            uint32_t memorySize = 0;
+                            if (ffRegReadUint(hRegDriverKey, L"HardwareInformation.MemorySize", &memorySize, NULL))
+                                gpu->dedicated.total = memorySize;
+                        }
+                    }
                 }
             }
         }
