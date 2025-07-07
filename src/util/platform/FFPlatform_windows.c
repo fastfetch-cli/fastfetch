@@ -170,13 +170,13 @@ static void getUserShell(FFPlatform* platform)
 
 static void detectWine(FFstrbuf* buf)
 {
-    static const char *(__cdecl *pwine_get_version)(void);
+    const char * __cdecl wine_get_version(void);
     HMODULE hntdll = GetModuleHandleW(L"ntdll.dll");
     if (!hntdll) return;
-    pwine_get_version = (void *)GetProcAddress(hntdll, "wine_get_version");
-    if (!pwine_get_version) return;
+    FF_LIBRARY_LOAD_SYMBOL_LAZY(hntdll, wine_get_version);
+    if (!ffwine_get_version) return;
     ffStrbufAppendS(buf, buf->length ? " - wine " : "wine ");
-    ffStrbufAppendS(buf, pwine_get_version());
+    ffStrbufAppendS(buf, ffwine_get_version());
 }
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
