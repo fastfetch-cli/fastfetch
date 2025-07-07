@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "common/library.h"
 #include "detection/gpu/gpu_driver_specific.h"
 #include "util/windows/unicode.h"
 #include "util/windows/registry.h"
@@ -126,22 +127,30 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         if (adapterLuid > 0)
         {
-            D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = { .AdapterLuid = *(LUID*)&adapterLuid };
-            if (NT_SUCCESS(D3DKMTOpenAdapterFromLuid(&openAdapterFromLuid)))
+            HMODULE hgdi32 = GetModuleHandleW(L"gdi32.dll");
+            if (hgdi32)
             {
-                D3DKMT_ADAPTERTYPE adapterType = {};
-                D3DKMT_QUERYADAPTERINFO queryAdapterInfo = {
-                    .hAdapter = openAdapterFromLuid.hAdapter,
-                    .Type = KMTQAITYPE_ADAPTERTYPE,
-                    .pPrivateDriverData = &adapterType,
-                    .PrivateDriverDataSize = sizeof(adapterType),
-                };
-                if (NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo)))
+                FF_LIBRARY_LOAD_SYMBOL_LAZY(hgdi32, D3DKMTOpenAdapterFromLuid);
+                if (ffD3DKMTOpenAdapterFromLuid) // Windows 8 and later
                 {
-                    if (adapterType.HybridDiscrete)
-                        gpu->type = FF_GPU_TYPE_DISCRETE;
-                    else if (adapterType.HybridIntegrated)
-                        gpu->type = FF_GPU_TYPE_INTEGRATED;
+                    D3DKMT_OPENADAPTERFROMLUID openAdapterFromLuid = { .AdapterLuid = *(LUID*)&adapterLuid };
+                    if (NT_SUCCESS(ffD3DKMTOpenAdapterFromLuid(&openAdapterFromLuid)))
+                    {
+                        D3DKMT_ADAPTERTYPE adapterType = {};
+                        D3DKMT_QUERYADAPTERINFO queryAdapterInfo = {
+                            .hAdapter = openAdapterFromLuid.hAdapter,
+                            .Type = KMTQAITYPE_ADAPTERTYPE,
+                            .pPrivateDriverData = &adapterType,
+                            .PrivateDriverDataSize = sizeof(adapterType),
+                        };
+                        if (NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo))) // Vista and later
+                        {
+                            if (adapterType.HybridDiscrete)
+                                gpu->type = FF_GPU_TYPE_DISCRETE;
+                            else if (adapterType.HybridIntegrated)
+                                gpu->type = FF_GPU_TYPE_INTEGRATED;
+                        }
+                    }
                 }
             }
         }
