@@ -3107,13 +3107,13 @@ static const FFlogo M[] = {
     },
     // Minimal System
     {
-	.names = {"Minimal_System"},
-	.lines = FASTFETCH_DATATEXT_LOGO_MINIMAL,
-	.colors = {
-	    FF_COLOR_FG_RED,
-	},
-	.colorKeys = FF_COLOR_FG_CYAN,
-	.colorTitle = FF_COLOR_FG_DEFAULT,
+        .names = {"Minimal_System"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MINIMAL,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
     },
     // Minix
     {
