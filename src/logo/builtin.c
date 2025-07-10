@@ -3105,6 +3105,16 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    // Minimal System
+    {
+        .names = {"Minimal_System"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MINIMAL,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // Minix
     {
         .names = {"Minix"},
