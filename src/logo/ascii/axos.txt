@@ -1,25 +1,25 @@
-$1.                    +++++*
-$1.                +*   +  +    *
-$1.           ++       *    *       **
-$1.       ++++     +            +     ****
-$1.      +    ++                    +*    *
-$1.     ++  +                          *  **
-$1.    + + +        ++++++++++++        * * *
-$1.      + *       +++++++++++++        * *
-$1.   *  ++        ++++++++++++++        ++  *
-$1.  +   +         +++++*  ++++++         +   *
-$1. +    +        *++++     *++++         +    *
-$1.    +*         ++++       *++++         *+
-$2.*              +++***   ***++++              +
-$2.    **        ++++          +++*        *+
-$2. *    *       ++++          ++++       +    +
-$2.  *   *       +++            +++       +   +
-$2.   *  **     ++++            +++*     ++  *
-$2.      * *  *++++*            *+++++  * +
-$2.    * * *                            + + +
-$2.     **  *                          +  ++
-$2.      *    **                    ++    +
-$2.       #***     *            +     ++++
-$2.           **       *    *       ++
-$2.                **   *  +    +
-$2.                    ******
+$1.                    ooooos
+$1.                os   o  o    s
+$1.           oo       s    s       ss
+$1.       oooo     o            o     ssss
+$1.      o    oo                    os    s
+$1.     oo  o                          s  ss
+$1.    o o o        oooooooooooo        s s s
+$1.      o s       ooooooooooooo        s s
+$1.   s  oo        oooooooooooooo        oo  s
+$1.  o   o         ooooos  oooooo         o   s
+$1. o    o        soooo     soooo         o    s
+$1.    os         oooo       soooo         so
+$2.s              ooosss   sssoooo              o
+$2.    ss        oooo          ooos        so
+$2. s    s       oooo          oooo       o    o
+$2.  s   s       ooo            ooo       o   o
+$2.   s  ss     oooo            ooos     oo  s
+$2.      s s  soooos            sooooo  s o
+$2.    s s s                            o o o
+$2.     ss  s                          o  oo
+$2.      s    ss                    oo    o
+$2.       #sss     s            o     oooo
+$2.           ss       s    s       oo
+$2.                ss   s  o    o
+$2.                    ssssss
