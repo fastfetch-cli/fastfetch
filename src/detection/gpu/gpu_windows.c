@@ -164,7 +164,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         __typeof__(&ffDetectNvidiaGpuInfo) detectFn;
         const char* dllName;
 
-        if (getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName) && (options->temp || options->driverSpecific))
+        if (options->driverSpecific && getDriverSpecificDetectionFn(gpu->vendor.chars, &detectFn, &dllName))
         {
             unsigned vendorId = 0, deviceId = 0, subSystemId = 0, revId = 0;
             bufferLen = sizeof(buffer);
@@ -242,6 +242,20 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                                 gpu->type = FF_GPU_TYPE_INTEGRATED;
                         }
                     }
+
+                    if (options->temp && gpu->temperature != gpu->temperature)
+                    {
+                        D3DKMT_QUERYSTATISTICS queryStatistics = {
+                            .Type = D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER,
+                            .AdapterLuid = *(LUID*)&adapterLuid,
+                            .QueryPhysAdapter = { .PhysicalAdapterIndex = 0 },
+                        };
+                        if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
+                            gpu->temperature = queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature / 10.0;
+                    }
+
+                    D3DKMT_CLOSEADAPTER closeAdapter = { .hAdapter = openAdapterFromLuid.hAdapter };
+                    (void) D3DKMTCloseAdapter(&closeAdapter);
                 }
             }
         }
