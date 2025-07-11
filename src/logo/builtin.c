@@ -701,6 +701,15 @@ static const FFlogo A[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // AxOS
+    {
+        .names = {"AxOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AXOS,
+        .colors = {
+            FF_COLOR_FG_RGB "222;6;255",
+            FF_COLOR_FG_RGB "222;6;255",
+        },
+    },
     // Azos
     {
         .names = {"Azos"},
