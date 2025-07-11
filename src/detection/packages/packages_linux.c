@@ -673,6 +673,10 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
         ffStrbufSet(&profilePath, &stateDir);
         ffStrbufAppendS(&profilePath, "nix/profile");
         result->nixUser += getNixPackages(&stateDir, "nix/profile");
+
+        // check if /etc/profiles/per-user/$USER exists
+        FF_STRBUF_AUTO_DESTROY userPkgsDir = ffStrbufCreateStatic("/etc/profiles/per-user/");
+        result->nixUser += getNixPackages(&userPkgsDir, instance.state.platform.userName.chars);
     }
 
     if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
