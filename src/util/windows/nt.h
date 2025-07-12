@@ -72,7 +72,8 @@ typedef struct _D3DKMT_ADAPTERTYPE
 
 typedef enum _KMTQUERYADAPTERINFOTYPE
 {
-    KMTQAITYPE_ADAPTERTYPE = 15,
+    KMTQAITYPE_ADAPTERTYPE = 15,  // WDDM 1.2, Windows 8
+    KMTQAITYPE_NODEMETADATA = 25, // WDDM 2.0, Windows 10
 } KMTQUERYADAPTERINFOTYPE;
 typedef struct _D3DKMT_QUERYADAPTERINFO
 {
@@ -82,16 +83,21 @@ typedef struct _D3DKMT_QUERYADAPTERINFO
     UINT                    PrivateDriverDataSize;
 } D3DKMT_QUERYADAPTERINFO;
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryAdapterInfo(_Inout_ CONST D3DKMT_QUERYADAPTERINFO*);
-#endif
 
 typedef enum _D3DKMT_QUERYSTATISTICS_TYPE
 {
     D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER       = 10, // WDDM 2.4, Windows 10 April 2018 Update (version 1803)
+    D3DKMT_QUERYSTATISTICS_NODE2                  = 18, // WDDM 3.1, Windows 11 2022 Update (version 22H2)
 } D3DKMT_QUERYSTATISTICS_TYPE;
 typedef struct _D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER
 {
     ULONG PhysicalAdapterIndex;
 } D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER;
+typedef struct _D3DKMT_QUERYSTATISTICS_QUERY_NODE2
+{
+    UINT16 PhysicalAdapterIndex;
+    UINT16 NodeOrdinal;
+} D3DKMT_QUERYSTATISTICS_QUERY_NODE2;
 typedef struct _D3DKMT_ADAPTER_PERFDATA
 {
     UINT32          PhysicalAdapterIndex;   // in: The physical adapter index, in an LDA chain
@@ -128,9 +134,32 @@ typedef struct _D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION
     D3DKMT_ADAPTER_PERFDATACAPS  AdapterPerfDataCaps;
     D3DKMT_GPUVERSION            GpuVersion;
 } D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION;
+typedef struct _D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION {
+    D3DKMT_ALIGN64 UINT64                         Reserved[34];
+} D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION;
+typedef struct _D3DKMT_NODE_PERFDATA
+{
+    UINT32          NodeOrdinal;            // in: Node ordinal of the requested engine.
+    UINT32          PhysicalAdapterIndex;   // in: The physical adapter index, in an LDA chain
+    D3DKMT_ALIGN64 ULONGLONG Frequency;     // out: Clock frequency of the engine in hertz
+    D3DKMT_ALIGN64 ULONGLONG MaxFrequency;  // out: Max engine clock frequency
+    D3DKMT_ALIGN64 ULONGLONG MaxFrequencyOC;// out: Max engine over clock frequency
+    ULONG           Voltage;                // out: Voltage of the engine in milli volts mV
+    ULONG           VoltageMax;             // out: Max voltage levels in milli volts.
+    ULONG           VoltageMaxOC;           // out: Max voltage level while overclocked in milli volts.
+    // WDDM 2.5
+    D3DKMT_ALIGN64 ULONGLONG MaxTransitionLatency;   // out: Max transition latency to change the frequency in 100 nanoseconds
+} D3DKMT_NODE_PERFDATA;
+typedef struct _D3DKMT_QUERYSTATISTICS_NODE_INFORMATION {
+    D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION GlobalInformation; //Global statistics
+    D3DKMT_QUERYSTATISTICS_PROCESS_NODE_INFORMATION SystemInformation; //Statistics for system thread
+    D3DKMT_NODE_PERFDATA                            NodePerfData;
+    UINT32                                          Reserved[3];
+} D3DKMT_QUERYSTATISTICS_NODE_INFORMATION;
 typedef union _D3DKMT_QUERYSTATISTICS_RESULT
 {
-    D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION PhysAdapterInformation; // in: id of physical adapter to get statistics for
+    D3DKMT_QUERYSTATISTICS_PHYSICAL_ADAPTER_INFORMATION PhysAdapterInformation;
+    D3DKMT_QUERYSTATISTICS_NODE_INFORMATION NodeInformation;
     uint8_t Padding[776];
 } D3DKMT_QUERYSTATISTICS_RESULT;
 typedef struct _D3DKMT_QUERYSTATISTICS
@@ -142,8 +171,58 @@ typedef struct _D3DKMT_QUERYSTATISTICS
 
     union
     {
-        D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER QueryPhysAdapter;
+        D3DKMT_QUERYSTATISTICS_QUERY_PHYSICAL_ADAPTER QueryPhysAdapter; // in: id of physical adapter to get statistics for
+        D3DKMT_QUERYSTATISTICS_QUERY_NODE2 QueryNode2; // in: id of node to get statistics for
     };
 } D3DKMT_QUERYSTATISTICS;
 static_assert(sizeof(D3DKMT_QUERYSTATISTICS) == 0x328, "D3DKMT_QUERYSTATISTICS structure size mismatch");
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryStatistics(_In_ CONST D3DKMT_QUERYSTATISTICS*);
+
+#define DXGK_MAX_METADATA_NAME_LENGTH 32
+typedef enum
+{
+    DXGK_ENGINE_TYPE_OTHER,
+    DXGK_ENGINE_TYPE_3D,
+    DXGK_ENGINE_TYPE_VIDEO_DECODE,
+    DXGK_ENGINE_TYPE_VIDEO_ENCODE,
+    DXGK_ENGINE_TYPE_VIDEO_PROCESSING,
+    DXGK_ENGINE_TYPE_SCENE_ASSEMBLY,
+    DXGK_ENGINE_TYPE_COPY,
+    DXGK_ENGINE_TYPE_OVERLAY,
+    DXGK_ENGINE_TYPE_CRYPTO,
+    DXGK_ENGINE_TYPE_VIDEO_CODEC,
+    DXGK_ENGINE_TYPE_MAX
+} DXGK_ENGINE_TYPE;
+typedef struct _DXGK_NODEMETADATA_FLAGS
+{
+    union
+    {
+        struct
+        {
+            UINT ContextSchedulingSupported :  1; // WDDM 2.2
+            UINT RingBufferFenceRelease     :  1; // WDDM 2.5
+            UINT SupportTrackedWorkload     :  1;
+            UINT UserModeSubmission         :  1;
+            UINT SupportBuildTestCommandBuffer :  1; // WDDM 3.2
+            UINT Reserved                   : 11;
+            UINT MaxInFlightHwQueueBuffers  : 16;
+        };
+        UINT32 Value;
+    };
+} DXGK_NODEMETADATA_FLAGS;
+typedef struct _DXGK_NODEMETADATA
+{
+    DXGK_ENGINE_TYPE EngineType;
+    WCHAR            FriendlyName[DXGK_MAX_METADATA_NAME_LENGTH];
+    DXGK_NODEMETADATA_FLAGS Flags; // WDDM 2.2
+    BOOLEAN          GpuMmuSupported; // WDDM 2.0 ???
+    BOOLEAN          IoMmuSupported;
+} __attribute__((packed))  DXGK_NODEMETADATA;
+typedef struct _D3DKMT_NODEMETADATA
+{
+    _In_ UINT NodeOrdinalAndAdapterIndex;     // WDDMv2: High word is physical adapter index, low word is node ordinal
+    _Out_ DXGK_NODEMETADATA NodeData;
+} __attribute__((packed))  D3DKMT_NODEMETADATA;
+static_assert(sizeof(D3DKMT_NODEMETADATA) == 0x4E, "D3DKMT_NODEMETADATA structure size mismatch");
+
+#endif

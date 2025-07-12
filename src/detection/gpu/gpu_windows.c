@@ -241,6 +241,39 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             else if (adapterType.HybridIntegrated)
                                 gpu->type = FF_GPU_TYPE_INTEGRATED;
                         }
+
+                        if (gpu->frequency == FF_GPU_FREQUENCY_UNSET)
+                        {
+                            for (ULONG nodeIdx = 0; ; nodeIdx++)
+                            {
+                                D3DKMT_NODEMETADATA nodeMetadata = {
+                                    .NodeOrdinalAndAdapterIndex = (0 << 16) | nodeIdx,
+                                };
+                                queryAdapterInfo = (D3DKMT_QUERYADAPTERINFO) {
+                                    .hAdapter = openAdapterFromLuid.hAdapter,
+                                    .Type = KMTQAITYPE_NODEMETADATA,
+                                    .pPrivateDriverData = &nodeMetadata,
+                                    .PrivateDriverDataSize = sizeof(nodeMetadata),
+                                };
+                                if (!NT_SUCCESS(D3DKMTQueryAdapterInfo(&queryAdapterInfo))) break; // Windows 10 and later
+                                if (nodeMetadata.NodeData.EngineType != DXGK_ENGINE_TYPE_3D) continue;
+
+                                D3DKMT_QUERYSTATISTICS queryStatistics = {
+                                    .Type = D3DKMT_QUERYSTATISTICS_NODE2,
+                                    .AdapterLuid = *(LUID*)&adapterLuid,
+                                    .QueryNode2 = { .PhysicalAdapterIndex = 0, .NodeOrdinal = (UINT16) nodeIdx },
+                                };
+                                if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics))) // Windows 11 (22H2) and later
+                                {
+                                    gpu->frequency = (uint32_t) (queryStatistics.QueryResult.NodeInformation.NodePerfData.MaxFrequency / 1000 / 1000);
+                                    break;
+                                }
+                            }
+                        }
+
+                        D3DKMT_CLOSEADAPTER closeAdapter = { .hAdapter = openAdapterFromLuid.hAdapter };
+                        (void) D3DKMTCloseAdapter(&closeAdapter);
+                        openAdapterFromLuid.hAdapter = 0;
                     }
 
                     if (options->temp && gpu->temperature != gpu->temperature)
@@ -254,9 +287,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature != 0)
                             gpu->temperature = queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature / 10.0;
                     }
-
-                    D3DKMT_CLOSEADAPTER closeAdapter = { .hAdapter = openAdapterFromLuid.hAdapter };
-                    (void) D3DKMTCloseAdapter(&closeAdapter);
                 }
             }
         }
