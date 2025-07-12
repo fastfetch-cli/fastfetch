@@ -250,7 +250,8 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                             .AdapterLuid = *(LUID*)&adapterLuid,
                             .QueryPhysAdapter = { .PhysicalAdapterIndex = 0 },
                         };
-                        if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)))
+                        if (NT_SUCCESS(D3DKMTQueryStatistics(&queryStatistics)) &&
+                            queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature != 0)
                             gpu->temperature = queryStatistics.QueryResult.PhysAdapterInformation.AdapterPerfData.Temperature / 10.0;
                     }
 
