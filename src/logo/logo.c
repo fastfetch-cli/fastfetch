@@ -651,6 +651,12 @@ void ffLogoPrint(void)
     //Make sure the logo path is set correctly.
     updateLogoPath();
 
+    if (ffStrbufEndsWithIgnCaseS(&options->source, ".raw"))
+    {
+        if(logoPrintFileIfExists(false, true))
+            return;
+    }
+
     if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt"))
     {
         const FFTerminalResult* terminal = ffDetectTerminal();
