@@ -651,25 +651,28 @@ void ffLogoPrint(void)
     //Make sure the logo path is set correctly.
     updateLogoPath();
 
-    const FFTerminalResult* terminal = ffDetectTerminal();
+    if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt"))
+    {
+        const FFTerminalResult* terminal = ffDetectTerminal();
 
-    //Terminal emulators that support kitty graphics protocol.
-    bool supportsKitty =
-        ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
-        #ifdef __APPLE__
-        ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
-        #else
-        ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
-        #endif
-        false;
+        //Terminal emulators that support kitty graphics protocol.
+        bool supportsKitty =
+            ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
+            ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
+            ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
+            ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
+            ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
+            #ifdef __APPLE__
+            ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
+            #else
+            ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
+            #endif
+            false;
 
-    //Try to load the logo as an image. If it succeeds, print it and return.
-    if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
-        return;
+        //Try to load the logo as an image. If it succeeds, print it and return.
+        if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
+            return;
+    }
 
     //Try to load the logo as a file. If it succeeds, print it and return.
     if(logoPrintFileIfExists(true, false))
