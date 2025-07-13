@@ -473,21 +473,22 @@ static bool logoPrintData(bool doColorReplacement, FFstrbuf* source)
     return true;
 }
 
-static void updateLogoPath(void)
+static bool updateLogoPath(void)
 {
     FFOptionsLogo* options = &instance.config.logo;
 
     if(ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
-        return;
+        return true;
 
     if (ffStrbufEqualS(&options->source, "-")) // stdin
-        return;
+        return true;
 
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
     {
-        ffStrbufSet(&options->source, &fullPath);
-        return;
+        ffStrbufDestroy(&options->source);
+        ffStrbufInitMove(&options->source, &fullPath);
+        return true;
     }
 
     FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance.state.platform.dataDirs)
@@ -499,10 +500,13 @@ static void updateLogoPath(void)
 
         if(ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
         {
-            ffStrbufSet(&options->source, &fullPath);
-            break;
+            ffStrbufDestroy(&options->source);
+            ffStrbufInitMove(&options->source, &fullPath);
+            return true;
         }
     }
+
+    return false;
 }
 
 static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
@@ -586,7 +590,13 @@ static bool logoTryKnownType(void)
         return logoPrintData(false, &source);
     }
 
-    updateLogoPath(); //We sure have a file, resolve relative paths
+    //We sure have a file, resolve relative paths
+    if (!updateLogoPath())
+    {
+        if (instance.config.display.showErrors)
+            fprintf(stderr, "Logo: Failed to resolve logo source: %s\n", options->source.chars);
+        return false;
+    }
 
     if(options->type == FF_LOGO_TYPE_FILE)
         return logoPrintFileIfExists(true, false);
@@ -649,7 +659,12 @@ void ffLogoPrint(void)
         return;
 
     //Make sure the logo path is set correctly.
-    updateLogoPath();
+    if (!updateLogoPath())
+    {
+        if (instance.config.display.showErrors)
+            fprintf(stderr, "Logo: Failed to resolve logo source: %s\n", options->source.chars);
+        return;
+    }
 
     if (ffStrbufEndsWithIgnCaseS(&options->source, ".raw"))
     {
