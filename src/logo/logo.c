@@ -436,6 +436,13 @@ static void logoPrintNone(void)
 
 static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
 {
+    if(name->chars[0] == '~' || name->chars[0] == '.' || name->chars[0] == '/'
+        #if _WIN32
+        || (ffCharIsEnglishAlphabet(name->chars[0]) && name->chars[1] == ':') // Windows drive letter
+        #endif
+    )
+        return false; // Paths
+
     if(ffStrbufIgnCaseEqualS(name, "none"))
     {
         logoPrintNone();
