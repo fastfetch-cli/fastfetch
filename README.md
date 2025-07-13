@@ -162,7 +162,11 @@ See `fastfetch -h format` for information on basic usage. For module-specific fo
 
 ### Q: I have my own ASCII art / image file. How can I show it with fastfetch?
 
-Try `fastfetch -l /path/to/logo`. See the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for details.
+Try :
+  - `fastfetch --logo /path/to/logo` for an image.
+  - `fastfetch --file /path/to/ascii.txt` for an ASCII art file.
+  
+See the [logo documentation](https://github.com/fastfetch-cli/fastfetch/wiki/Logo-options) for details.
 
 If you just want to display the distro name in [FIGlet text](https://github.com/pwaller/pyfiglet):
 
