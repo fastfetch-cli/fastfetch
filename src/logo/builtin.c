@@ -5399,7 +5399,7 @@ static const FFlogo X[] = {
     //Xray_OS
     {
         .names = {"Xray_OS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_ADA,
+        .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
         .colors = {
             FF_COLOR_FG_256 "15",
             FF_COLOR_FG_256 "14",
