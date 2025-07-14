@@ -5443,6 +5443,16 @@ static const FFlogo Z[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    // Zraxyl
+    {
+        .names = {"Zraxyl" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZRAXYL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
+    },
     // LAST
     {},
 };
