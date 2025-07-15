@@ -305,7 +305,7 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd)
     struct drm_asahi_params_global paramsGlobal = {};
     if (ioctl(fd, DRM_IOCTL_ASAHI_GET_PARAMS, &(struct drm_asahi_get_params) {
         .param_group = DRM_ASAHI_GET_PARAMS,
-        .pointer = (uint64_t) &paramsGlobal,
+        .pointer = (uintptr_t) &paramsGlobal,
         .size = sizeof(paramsGlobal),
     }) >= 0)
     {
