@@ -53,6 +53,8 @@ static inline int ffPipe2(int* fds, int flags)
     #endif
 }
 
+
+// Not thread-safe
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
     int pipes[2];
@@ -67,16 +69,40 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     posix_spawn_file_actions_addopen(&file_actions, useStdErr ? STDOUT_FILENO : STDERR_FILENO, "/dev/null", O_WRONLY, 0);
     pid_t childPid = -1;
 
-    char* oldLang = NULL;
-    int langIndex = -1;
-    for (int i = 0; environ[i] != NULL; i++)
+    static char* oldLang = NULL;
+    static int langIndex = -1;
+
+    if (langIndex >= 0)
     {
-        if (ffStrStartsWith(environ[i], "LANG="))
+        // Found before
+        if (oldLang) // oldLang was set only if it needed to be changed
         {
-            oldLang = environ[i];
-            environ[i] = (char*) "LANG=C";
-            langIndex = i;
-            break;
+            if (environ[langIndex] != oldLang)
+            {
+                // environ is changed outside of this function
+                langIndex = -1;
+            }
+            else
+                environ[langIndex] = (char*) "LANG=C.UTF-8";
+        }
+    }
+    if (langIndex < 0)
+    {
+        for (int i = 0; environ[i] != NULL; i++)
+        {
+            if (ffStrStartsWith(environ[i], "LANG="))
+            {
+                langIndex = i;
+                const char* langValue = environ[i] + 5; // Skip "LANG="
+                if (ffStrEqualsIgnCase(langValue, "C") ||
+                    ffStrStartsWithIgnCase(environ[i], "C.") ||
+                    ffStrEqualsIgnCase(langValue, "en_US") ||
+                    ffStrStartsWithIgnCase(langValue, "en_US."))
+                    break; // No need to change LANG
+                oldLang = environ[i];
+                environ[i] = (char*) "LANG=C.UTF-8"; // Set LANG to C.UTF-8 for consistent output
+                break;
+            }
         }
     }
 
