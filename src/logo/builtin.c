@@ -11,16 +11,6 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
-    //Ada
-    {
-        .names = {"Ada"},
-        .lines = FASTFETCH_DATATEXT_LOGO_ADA,
-        .colors = {
-            FF_COLOR_FG_256 "15",
-            FF_COLOR_FG_256 "14",
-            FF_COLOR_FG_256 "16",
-        }
-    },
     // Adélie
     {
         .names = {"Adélie", "Adelie"},
@@ -5405,6 +5395,16 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "25",
             FF_COLOR_FG_DEFAULT,
         },
+    },
+    //Xray_OS
+    {
+        .names = {"Xray_OS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+        }
     },
     // LAST
     {},
