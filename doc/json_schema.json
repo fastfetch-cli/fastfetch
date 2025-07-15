@@ -183,7 +183,7 @@
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)",
+            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation",
             "type": "string"
         },
         "diskioFormat": {
@@ -319,7 +319,7 @@
             "type": "string"
         },
         "swapFormat": {
-            "description": "Output format of the module `Swap`. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)",
+            "description": "Output format of the module `Swap`. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name",
             "type": "string"
         },
         "terminalFormat": {
