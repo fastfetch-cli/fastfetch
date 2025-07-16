@@ -188,11 +188,6 @@ static FFModuleBaseInfo ffModuleInfo = {
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Separator string", "string"},
-        {"Output color", "outputColor"},
-        {"Length", "length"},
-    }))
 };
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)

@@ -306,10 +306,6 @@
             "description": "Output format of the module `PublicIp`. See Wiki for formatting syntax\n    1. {ip}: Public IP address\n    2. {location}: Location",
             "type": "string"
         },
-        "separatorFormat": {
-            "description": "Output format of the module `Separator`. See Wiki for formatting syntax\n    1. {string}: Separator string\n    2. {outputColor}: Output color\n    3. {length}: Length",
-            "type": "string"
-        },
         "shellFormat": {
             "description": "Output format of the module `Shell`. See Wiki for formatting syntax\n    1. {process-name}: Shell process name\n    2. {exe}: The first argument of the command line when running the shell\n    3. {exe-name}: Shell base name of arg0\n    4. {version}: Shell version\n    5. {pid}: Shell pid\n    6. {pretty-name}: Shell pretty name\n    7. {exe-path}: Shell full exe path\n    8. {tty}: Shell tty used",
             "type": "string"
