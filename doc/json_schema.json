@@ -351,11 +351,11 @@
             "type": "string"
         },
         "uptimeFormat": {
-            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days\n    2. {hours}: Hours\n    3. {minutes}: Minutes\n    4. {seconds}: Seconds\n    5. {milliseconds}: Milliseconds\n    6. {boot-time}: Boot time in local timezone",
+            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot",
             "type": "string"
         },
         "usersFormat": {
-            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login",
+            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
             "type": "string"
         },
         "versionFormat": {

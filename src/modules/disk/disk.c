@@ -137,33 +137,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         duration /= 24;
         uint32_t days = (uint32_t) duration;
 
-        time_t past_s = (time_t) (disk->createTime / 1000);
-        struct tm past_tm;
-        #ifdef _WIN32
-        localtime_s(&past_tm, &past_s);
-        #else
-        localtime_r(&past_s, &past_tm);
-        #endif
-
-        time_t now_s = (time_t) (now / 1000);
-        struct tm now_tm;
-        #ifdef _WIN32
-        localtime_s(&now_tm, &now_s);
-        #else
-        localtime_r(&now_s, &now_tm);
-        #endif
-
-        uint32_t years = (uint32_t) (now_tm.tm_year - past_tm.tm_year);
-        if (now_tm.tm_yday < past_tm.tm_yday)
-            years--;
-        past_tm.tm_year += years;
-        uint32_t gap_s = (uint32_t) (now_s - mktime(&past_tm));
-        uint32_t daysOfYear = gap_s / (24 * 60 * 60);
-
-        uint32_t pastYear = past_tm.tm_year + 1900;
-        bool isLeapYear = (pastYear % 4 == 0 && pastYear % 100 != 0) || (pastYear % 400 == 0);
-        double yearsFraction = (double) daysOfYear / (isLeapYear ? 366 : 365) + years;
-
+        FFTimeGetAgeResult age = ffTimeGetAge(disk->createTime, now);
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(usedPretty, "size-used"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
@@ -186,9 +160,9 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             FF_FORMAT_ARG(milliseconds, "milliseconds"),
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
-            FF_FORMAT_ARG(years, "years"),
-            FF_FORMAT_ARG(daysOfYear, "days-of-year"),
-            FF_FORMAT_ARG(yearsFraction, "years-fraction"),
+            FF_FORMAT_ARG(age.years, "years"),
+            FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
+            FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
         }));
     }
 }

@@ -97,3 +97,47 @@ static inline const char* ffTimeToTimeStr(uint64_t msec)
 #ifdef _WIN32
     #pragma GCC diagnostic pop
 #endif
+
+typedef struct FFTimeGetAgeResult
+{
+    uint32_t years;
+    uint32_t daysOfYear;
+    double yearsFraction;
+} FFTimeGetAgeResult;
+
+static inline FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
+{
+    FFTimeGetAgeResult result = {};
+    if (__builtin_expect(birthMs == 0 || nowMs < birthMs, 0))
+        return result;
+
+    time_t birth_s = (time_t) (birthMs / 1000);
+    struct tm birth_tm;
+    #ifdef _WIN32
+    localtime_s(&birth_tm, &birth_s);
+    #else
+    localtime_r(&birth_s, &birth_tm);
+    #endif
+
+    time_t now_s = (time_t) (nowMs / 1000);
+    struct tm now_tm;
+    #ifdef _WIN32
+    localtime_s(&now_tm, &now_s);
+    #else
+    localtime_r(&now_s, &now_tm);
+    #endif
+
+    result.years = (uint32_t) (now_tm.tm_year - birth_tm.tm_year);
+    if (now_tm.tm_yday < birth_tm.tm_yday)
+        result.years--;
+
+    birth_tm.tm_year += result.years;
+    birth_s = mktime(&birth_tm);
+    uint32_t diff_s = (uint32_t) (now_s - birth_s);
+    result.daysOfYear = diff_s / (24 * 60 * 60);
+
+    birth_tm.tm_year += 1;
+    result.yearsFraction = (double) diff_s / (double) (mktime(&birth_tm) - birth_s) + result.years;
+
+    return result;
+}
