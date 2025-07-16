@@ -934,6 +934,28 @@
                         }
                     }
                 },
+                "fraction": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Set how ordinary fraction numbers should be displayed",
+                    "properties": {
+                        "ndigits": {
+                            "oneOf": [
+                                {
+                                    "type": "number",
+                                    "description": "Set the number of digits to keep after the decimal point when formatting ordinary fraction numbers",
+                                    "minimum": 0,
+                                    "maximum": 9
+                                },
+                                {
+                                    "type": "null",
+                                    "description": "The number of digits will be automatically determined based on the value"
+                                }
+                            ],
+                            "default": null
+                        }
+                    }
+                },
                 "noBuffer": {
                     "type": "boolean",
                     "description": "Whether to disable the stdout application buffer",

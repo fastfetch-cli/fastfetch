@@ -60,6 +60,7 @@ typedef struct FFOptionsDisplay
     uint16_t keyWidth;
     uint16_t keyPaddingLeft;
     int8_t freqNdigits;
+    int8_t fractionNdigits;
     FFlist constants; // list of FFstrbuf
 } FFOptionsDisplay;
 

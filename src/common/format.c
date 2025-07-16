@@ -32,10 +32,16 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
             ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_FLOAT:
-            ffStrbufAppendF(buffer, "%f", *(float*)formatarg->value);
+            if (instance.config.display.fractionNdigits >= 0)
+                ffStrbufAppendF(buffer, "%.*f", instance.config.display.fractionNdigits, *(float*)formatarg->value);
+            else
+                ffStrbufAppendF(buffer, "%g", *(float*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_DOUBLE:
-            ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+            if (instance.config.display.fractionNdigits >= 0)
+                ffStrbufAppendF(buffer, "%.*f", instance.config.display.fractionNdigits, *(double*)formatarg->value);
+            else
+                ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_BOOL:
             ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
@@ -108,6 +114,7 @@ static inline bool formatArgSet(const FFformatarg* arg)
 {
     return arg->value != NULL && (
         (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0.0) || //Also is false for NaN
+        (arg->type == FF_FORMAT_ARG_TYPE_FLOAT && *(float*)arg->value > 0.0) || //Also is false for NaN
         (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet((char*)arg->value)) ||
