@@ -1,3 +1,35 @@
+# 2.48.0
+
+Features:
+* Add support for detecting Fedora variants (#1830, OS, Linux)
+    * Currently supported variants: CoreOS, Kinoite, Sericea, Silverblue
+* Optimize GPU detection on Windows when `--gpu-driver-specific` is not used (GPU, Windows)
+    * Improve accuracy of GPU type detection. Previously it was guessed based on the dedicated vmem size, which causes issues on newer AMD integrated GPUs such as 9000 HX and AI 9 HX series. Supported on Windows 8.1 or later.
+    * Add support for generic frequency detection of GPU 3D engine on Windows 11 22H2 or later.
+    * Improve performance. GPU temperature detection is significantly improved when `--gpu-driver-specific` is not used.
+* Improve performance and security when spawning child processes by replacing `fork-exec` with `posix_spawn` (*nix)
+* Improve accuracy of sound device detection on macOS (Sound, macOS)
+* Trim leading and trailing whitespaces in disk serial numbers (PhysicalDisk)
+* Add `/etc/profiles/per-user` detection for Nix user packages (#1782, Packages, Linux)
+* Introduce `years` (whole years as integer), `days-of-year` (days since the last anniversary) and `years-fraction` (years as fraction, e.g. 1.5 means 1 year and 6 months) formatting placeholder to `Disk` (since disk creation), `Users` (since user login) and `Uptime` (since system boot) modules
+    * For example: `fastfetch -s disk --disk-key 'OS Installation' --disk-format '{years} years {days-of-year} days'`
+* Add `--fraction-ndigits` option to specify the number of digits after the decimal point when displaying ordinary fractional values
+    * Typically used with `{years-fraction}` above
+    * This option does not affect percentage values, sizes, etc, which are controlled by individual options.
+
+Bugfixes:
+* Fix compilation issues when not using `-DBINARY_LINK_TYPE=dlopen`
+    * Regression from v2.47.0
+    * Note: this option was added for debugging purposes only and is not recommended for production use
+* Replace `MTLDevice::hasUnifiedMemory` with `MTLDevice::location` for GPU type Detection (GPU, macOS)
+    * This should resolve the issue where discrete GPUs were detected as integrated GPUs on Intel MacBooks with multi-GPU configurations.
+* Prevent text files from being loaded as image files (#1843, Logo)
+
+Logos:
+* Add Minimal System
+* Add AxOS
+* Rename Ada to Xray OS
+
 # 2.47.0
 
 Features:

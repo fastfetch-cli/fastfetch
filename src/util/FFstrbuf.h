@@ -53,6 +53,7 @@ FF_C_PRINTF(2, 3) void ffStrbufSetF(FFstrbuf* strbuf, const char* format, ...);
 
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c);
 void ffStrbufTrimRight(FFstrbuf* strbuf, char c);
+void ffStrbufTrimLeftSpace(FFstrbuf* strbuf);
 void ffStrbufTrimRightSpace(FFstrbuf* strbuf);
 
 bool ffStrbufRemoveSubstr(FFstrbuf* strbuf, uint32_t startIndex, uint32_t endIndex);
@@ -473,7 +474,7 @@ static inline FF_C_NODISCARD bool ffStrbufEndsWithS(const FFstrbuf* strbuf, cons
     return ffStrbufEndsWithNS(strbuf, (uint32_t) strlen(end), end);
 }
 
-static inline FF_C_NODISCARD bool ffStrbufEndsWithFn(const FFstrbuf* strbuf, int (*fn)(int))
+static inline FF_C_NODISCARD bool ffStrbufEndsWithFn(const FFstrbuf* strbuf, int (*const fn)(int))
 {
     return strbuf->length == 0 ? false :
         fn(strbuf->chars[strbuf->length - 1]);
@@ -505,6 +506,12 @@ static inline void ffStrbufTrim(FFstrbuf* strbuf, char c)
 {
     ffStrbufTrimRight(strbuf, c);
     ffStrbufTrimLeft(strbuf, c);
+}
+
+static inline void ffStrbufTrimSpace(FFstrbuf* strbuf)
+{
+    ffStrbufTrimRightSpace(strbuf);
+    ffStrbufTrimLeftSpace(strbuf);
 }
 
 static inline bool ffStrbufMatchSeparatedS(const FFstrbuf* strbuf, const char* comp, char separator)

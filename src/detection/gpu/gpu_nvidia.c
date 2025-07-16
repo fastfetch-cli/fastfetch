@@ -29,11 +29,12 @@ struct FFNvapiData {
     FF_LIBRARY_SYMBOL(nvapi_Unload)
     FF_LIBRARY_SYMBOL(nvapi_EnumPhysicalGPUs)
     FF_LIBRARY_SYMBOL(nvapi_GPU_GetRamType)
+    FF_LIBRARY_SYMBOL(nvapi_GPU_GetGPUType)
 
     bool inited;
 } nvapiData;
 
-static const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
+static const char* detectMoreByNvapi(FFGpuDriverResult* result)
 {
     if (!nvapiData.inited)
     {
@@ -55,6 +56,7 @@ static const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
         FF_NVAPI_INTERFACE(nvapi_Unload, NVAPI_INTERFACE_OFFSET_UNLOAD)
         FF_NVAPI_INTERFACE(nvapi_EnumPhysicalGPUs, NVAPI_INTERFACE_OFFSET_ENUM_PHYSICAL_GPUS)
         FF_NVAPI_INTERFACE(nvapi_GPU_GetRamType, NVAPI_INTERFACE_OFFSET_GPU_GET_RAM_TYPE)
+        FF_NVAPI_INTERFACE(nvapi_GPU_GetGPUType, NVAPI_INTERFACE_OFFSET_GPU_GET_GPU_TYPE)
         #undef FF_NVAPI_INTERFACE
 
         if (ffnvapi_Initialize() < 0)
@@ -62,6 +64,7 @@ static const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
 
         nvapiData.ffnvapi_EnumPhysicalGPUs = ffnvapi_EnumPhysicalGPUs;
         nvapiData.ffnvapi_GPU_GetRamType = ffnvapi_GPU_GetRamType;
+        nvapiData.ffnvapi_GPU_GetGPUType = ffnvapi_GPU_GetGPUType;
         nvapiData.ffnvapi_Unload = ffnvapi_Unload;
 
         atexit((void*) ffnvapi_Unload);
@@ -86,36 +89,53 @@ static const char* detectMemTypeByNvapi(FFGpuDriverResult* result)
     NvPhysicalGpuHandle gpuHandle = handles[gpuIndex];
 
     NvApiGPUMemoryType memType;
-    if (nvapiData.ffnvapi_GPU_GetRamType(gpuHandle, &memType) < 0)
-        return "NvAPI_GPU_GetRamType() failed";
-
-    switch (memType)
+    if (result->memoryType && nvapiData.ffnvapi_GPU_GetRamType(gpuHandle, &memType) == 0)
     {
-        #define FF_NVAPI_MEMORY_TYPE(type) \
-            case NVAPI_GPU_MEMORY_TYPE_##type: \
-                ffStrbufSetStatic(result->memoryType, #type); \
+        switch (memType)
+        {
+            #define FF_NVAPI_MEMORY_TYPE(type) \
+                case NVAPI_GPU_MEMORY_TYPE_##type: \
+                    ffStrbufSetStatic(result->memoryType, #type); \
+                    break;
+            FF_NVAPI_MEMORY_TYPE(UNKNOWN)
+            FF_NVAPI_MEMORY_TYPE(SDRAM)
+            FF_NVAPI_MEMORY_TYPE(DDR1)
+            FF_NVAPI_MEMORY_TYPE(DDR2)
+            FF_NVAPI_MEMORY_TYPE(GDDR2)
+            FF_NVAPI_MEMORY_TYPE(GDDR3)
+            FF_NVAPI_MEMORY_TYPE(GDDR4)
+            FF_NVAPI_MEMORY_TYPE(DDR3)
+            FF_NVAPI_MEMORY_TYPE(GDDR5)
+            FF_NVAPI_MEMORY_TYPE(LPDDR2)
+            FF_NVAPI_MEMORY_TYPE(GDDR5X)
+            FF_NVAPI_MEMORY_TYPE(LPDDR3)
+            FF_NVAPI_MEMORY_TYPE(LPDDR4)
+            FF_NVAPI_MEMORY_TYPE(LPDDR5)
+            FF_NVAPI_MEMORY_TYPE(GDDR6)
+            FF_NVAPI_MEMORY_TYPE(GDDR6X)
+            FF_NVAPI_MEMORY_TYPE(GDDR7)
+            #undef FF_NVAPI_MEMORY_TYPE
+            default:
+                ffStrbufSetF(result->memoryType, "Unknown (%d)", memType);
                 break;
-        FF_NVAPI_MEMORY_TYPE(UNKNOWN)
-        FF_NVAPI_MEMORY_TYPE(SDRAM)
-        FF_NVAPI_MEMORY_TYPE(DDR1)
-        FF_NVAPI_MEMORY_TYPE(DDR2)
-        FF_NVAPI_MEMORY_TYPE(GDDR2)
-        FF_NVAPI_MEMORY_TYPE(GDDR3)
-        FF_NVAPI_MEMORY_TYPE(GDDR4)
-        FF_NVAPI_MEMORY_TYPE(DDR3)
-        FF_NVAPI_MEMORY_TYPE(GDDR5)
-        FF_NVAPI_MEMORY_TYPE(LPDDR2)
-        FF_NVAPI_MEMORY_TYPE(GDDR5X)
-        FF_NVAPI_MEMORY_TYPE(LPDDR3)
-        FF_NVAPI_MEMORY_TYPE(LPDDR4)
-        FF_NVAPI_MEMORY_TYPE(LPDDR5)
-        FF_NVAPI_MEMORY_TYPE(GDDR6)
-        FF_NVAPI_MEMORY_TYPE(GDDR6X)
-        FF_NVAPI_MEMORY_TYPE(GDDR7)
-        #undef FF_NVAPI_MEMORY_TYPE
-        default:
-            ffStrbufSetF(result->memoryType, "Unknown (%d)", memType);
-            break;
+        }
+    }
+
+    NvApiGPUType gpuType;
+    if (result->type && nvapiData.ffnvapi_GPU_GetGPUType(gpuHandle, &gpuType) == 0)
+    {
+        switch (gpuType)
+        {
+            case NV_SYSTEM_TYPE_IGPU:
+                *result->type = FF_GPU_TYPE_INTEGRATED;
+                break;
+            case NV_SYSTEM_TYPE_DGPU:
+                *result->type = FF_GPU_TYPE_DISCRETE;
+                break;
+            default:
+                *result->type = FF_GPU_TYPE_UNKNOWN;
+                break;
+        }
     }
 
     return NULL;
@@ -222,12 +242,12 @@ const char* ffDetectNvidiaGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverR
         {
             *result.index = value;
             #ifdef _WIN32
+            // Don't bother loading nvapi for GPU type detection only
             if (result.memoryType)
-                detectMemTypeByNvapi(&result);
+                detectMoreByNvapi(&result);
             #endif
         }
     }
-
 
     if (result.temp)
     {

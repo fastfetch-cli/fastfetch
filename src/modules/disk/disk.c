@@ -125,7 +125,8 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
-        uint64_t duration = ffTimeGetNow() - disk->createTime;
+        uint64_t now = ffTimeGetNow();
+        uint64_t duration = now - disk->createTime;
         uint32_t milliseconds = (uint32_t) (duration % 1000);
         duration /= 1000;
         uint32_t seconds = (uint32_t) (duration % 60);
@@ -136,6 +137,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         duration /= 24;
         uint32_t days = (uint32_t) duration;
 
+        FFTimeGetAgeResult age = ffTimeGetAge(disk->createTime, now);
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(usedPretty, "size-used"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
@@ -158,6 +160,9 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             FF_FORMAT_ARG(milliseconds, "milliseconds"),
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
+            FF_FORMAT_ARG(age.years, "years"),
+            FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
+            FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
         }));
     }
 }
@@ -523,6 +528,9 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Milliseconds after creation", "milliseconds"},
         {"Mount point / drive letter", "mountpoint"},
         {"Mount from (device path)", "mount-from"},
+        {"Years integer after creation", "years"},
+        {"Days of year after creation", "days-of-year"},
+        {"Years fraction after creation", "years-fraction"},
     }))
 };
 

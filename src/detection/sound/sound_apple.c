@@ -32,15 +32,6 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
     {
         AudioDeviceID deviceId = deviceIds[index];
 
-        FF_CFTYPE_AUTO_RELEASE CFStringRef name = NULL;
-        dataSize = sizeof(name);
-        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
-            kAudioObjectPropertyName,
-            kAudioObjectPropertyScopeOutput,
-            kAudioObjectPropertyElementMain
-        }, 0, NULL, &dataSize, &name) != kAudioHardwareNoError)
-            continue;
-
         // Ignore input devices
         if(AudioObjectGetPropertyDataSize(deviceId, &(AudioObjectPropertyAddress){
             kAudioDevicePropertyStreams,
@@ -71,10 +62,31 @@ const char* ffDetectSound(FFlist* devices /* List of FFSoundDevice */)
         device->main = deviceId == mainDeviceId;
         device->active = false;
         device->volume = FF_SOUND_VOLUME_UNKNOWN;
-        ffStrbufInitF(&device->identifier, "%u", (unsigned) deviceId);
+        ffStrbufInit(&device->identifier);
         ffStrbufInit(&device->name);
         ffStrbufInitStatic(&device->platformApi, "Core Audio");
-        ffCfStrGetString(name, &device->name);
+
+        FF_CFTYPE_AUTO_RELEASE CFStringRef uid = NULL;
+        dataSize = sizeof(uid);
+        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress) {
+            kAudioDevicePropertyDeviceUID,
+            kAudioObjectPropertyScopeOutput,
+            kAudioObjectPropertyElementMain
+        }, 0, NULL, &dataSize, &uid) == kAudioHardwareNoError)
+            ffCfStrGetString(uid, &device->identifier);
+        else
+            ffStrbufAppendF(&device->identifier, "ID-%u", (unsigned) deviceId);
+
+        FF_CFTYPE_AUTO_RELEASE CFStringRef name = NULL;
+        dataSize = sizeof(name);
+        if(AudioObjectGetPropertyData(deviceId, &(AudioObjectPropertyAddress){
+            kAudioObjectPropertyName,
+            kAudioObjectPropertyScopeOutput,
+            kAudioObjectPropertyElementMain
+        }, 0, NULL, &dataSize, &name) == kAudioHardwareNoError)
+            ffCfStrGetString(name, &device->name);
+        else
+            ffStrbufSet(&device->name, &device->identifier);
 
         uint32_t muted;
         dataSize = sizeof(muted);

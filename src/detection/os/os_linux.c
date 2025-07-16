@@ -291,6 +291,21 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
     return false;
 }
 
+FF_MAYBE_UNUSED static bool detectFedoraVariant(FFOSResult* result)
+{
+    if (ffStrbufEqualS(&result->variantID, "coreos")
+        || ffStrbufEqualS(&result->variantID, "kinoite")
+        || ffStrbufEqualS(&result->variantID, "sericea")
+        || ffStrbufEqualS(&result->variantID, "silverblue"))
+    {
+        ffStrbufAppendC(&result->id, '-');
+        ffStrbufAppend(&result->id, &result->variantID);
+        ffStrbufSetStatic(&result->idLike, "fedora");
+        return true;
+    }
+    return false;
+}
+
 static void detectOS(FFOSResult* os)
 {
     #ifdef FF_CUSTOM_OS_RELEASE_PATH
@@ -341,13 +356,15 @@ void ffDetectOSImpl(FFOSResult* os)
     detectOS(os);
 
     #ifdef __linux__
-    if(ffStrbufIgnCaseEqualS(&os->id, "ubuntu"))
+    if(ffStrbufEqualS(&os->id, "ubuntu"))
         getUbuntuFlavour(os);
-    else if(ffStrbufIgnCaseEqualS(&os->id, "debian"))
+    else if(ffStrbufEqualS(&os->id, "debian"))
     {
         if (!detectDebianDerived(os))
             getDebianVersion(os);
     }
+    else if(ffStrbufEqualS(&os->id, "fedora"))
+        detectFedoraVariant(os);
     else if(ffStrbufEqualS(&os->id, "linuxmint"))
     {
         if (ffStrbufEqualS(&os->name, "LMDE"))

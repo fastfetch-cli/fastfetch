@@ -283,7 +283,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
     while((device = getmntent(mountsFile)))
     {
-        if (__builtin_expect(options->folders.length, 0))
+        if (__builtin_expect(options->folders.length > 0, false))
         {
             if (!ffDiskMatchMountpoint(&options->folders, device->mnt_dir))
                 continue;

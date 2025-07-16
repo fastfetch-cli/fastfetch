@@ -720,6 +720,15 @@
             }
         },
         {
+            "long": "fraction-ndigits",
+            "desc": "Set the number of digits to keep after the decimal point when printing ordinary fraction numbers",
+            "remark": "If negative, the number of digits will be automatically determined based on the value",
+            "arg": {
+                "type": "num",
+                "default": -1
+            }
+        },
+        {
             "long": "temp-unit",
             "desc": "Set the temperature unit",
             "arg": {

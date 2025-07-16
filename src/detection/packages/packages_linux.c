@@ -646,33 +646,30 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
     #endif
 
     ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
+
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
-        // check if ~/.nix-profile exists
-        FF_STRBUF_AUTO_DESTROY profilePath = ffStrbufCreateCopy(&baseDir);
-        ffStrbufAppendS(&profilePath, ".nix-profile");
-        if (ffPathExists(profilePath.chars, FF_PATHTYPE_DIRECTORY))
-        {
-            result->nixUser += getNixPackages(&baseDir, ".nix-profile");
-        }
+        // Count packages from $HOME/.nix-profile
+        result->nixUser += getNixPackages(&baseDir, ".nix-profile");
 
-        // check if $XDG_STATE_HOME/nix/profile exists
-        FF_STRBUF_AUTO_DESTROY stateDir = ffStrbufCreate();
-        const char* stateHome = getenv("XDG_STATE_HOME");
-        if(ffStrSet(stateHome))
+        // Check in $XDG_STATE_HOME/nix/profile
+        FF_STRBUF_AUTO_DESTROY stateHome = ffStrbufCreate();
+        const char* stateHomeEnv = getenv("XDG_STATE_HOME");
+        if (ffStrSet(stateHomeEnv))
         {
-            ffStrbufSetS(&stateDir, stateHome);
-            ffStrbufEnsureEndsWithC(&stateDir, '/');
+            ffStrbufSetS(&stateHome, stateHomeEnv);
+            ffStrbufEnsureEndsWithC(&stateHome, '/');
         }
         else
         {
-            ffStrbufSet(&stateDir, &instance.state.platform.homeDir);
-            ffStrbufAppendS(&stateDir, ".local/state/");
+            ffStrbufSet(&stateHome, &instance.state.platform.homeDir);
+            ffStrbufAppendS(&stateHome, ".local/state/");
         }
+        result->nixUser += getNixPackages(&stateHome, "nix/profile");
 
-        ffStrbufSet(&profilePath, &stateDir);
-        ffStrbufAppendS(&profilePath, "nix/profile");
-        result->nixUser += getNixPackages(&stateDir, "nix/profile");
+        // Check in /etc/profiles/per-user/$USER
+        FF_STRBUF_AUTO_DESTROY userPkgsDir = ffStrbufCreateStatic("/etc/profiles/per-user/");
+        result->nixUser += getNixPackages(&userPkgsDir, instance.state.platform.userName.chars);
     }
 
     if (!(options->disabled & FF_PACKAGES_FLAG_GUIX_BIT))
