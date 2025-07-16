@@ -131,7 +131,7 @@ static inline FFTimeGetAgeResult ffTimeGetAge(uint64_t birthMs, uint64_t nowMs)
     if (now_tm.tm_yday < birth_tm.tm_yday)
         result.years--;
 
-    birth_tm.tm_year += result.years;
+    birth_tm.tm_year += (int) result.years;
     birth_s = mktime(&birth_tm);
     uint32_t diff_s = (uint32_t) (now_s - birth_s);
     result.daysOfYear = diff_s / (24 * 60 * 60);
