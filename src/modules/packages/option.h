@@ -49,4 +49,5 @@ typedef struct FFPackagesOptions
     FFModuleArgs moduleArgs;
 
     FFPackagesFlags disabled;
+    bool combined;
 } FFPackagesOptions;

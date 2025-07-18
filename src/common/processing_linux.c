@@ -11,7 +11,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <spawn.h>
+
+#if !(__ANDROID__ || __OpenBSD__)
+    #include <spawn.h>
+#endif
 
 #if defined(__FreeBSD__) || defined(__APPLE__)
     #include <sys/types.h>
@@ -63,11 +66,21 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if(ffPipe2(pipes, O_CLOEXEC) == -1)
         return "pipe() failed";
 
+    pid_t childPid = -1;
+    int nullFile = ffGetNullFD();
+
+    #if !(__ANDROID__ || __OpenBSD__)
+
+    // NetBSD / Darwin: native syscall
+    // Linux (glibc): clone3-execve
+    // FreeBSD: vfork-execve
+    // illumos: vforkx-execve
+    // OpenBSD / Android (bionic): fork-execve
+
     posix_spawn_file_actions_t file_actions;
     posix_spawn_file_actions_init(&file_actions);
     posix_spawn_file_actions_adddup2(&file_actions, pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
-    posix_spawn_file_actions_addopen(&file_actions, useStdErr ? STDOUT_FILENO : STDERR_FILENO, "/dev/null", O_WRONLY, 0);
-    pid_t childPid = -1;
+    posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
 
     static char* oldLang = NULL;
     static int langIndex = -1;
@@ -113,12 +126,37 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     posix_spawn_file_actions_destroy(&file_actions);
 
-    close(pipes[1]);
     if (ret != 0)
     {
         close(pipes[0]);
+        close(pipes[1]);
         return "posix_spawnp() failed";
     }
+
+    #else
+
+    // https://github.com/termux/termux-packages/issues/25369
+    childPid = fork();
+    if(childPid == -1)
+    {
+        close(pipes[0]);
+        close(pipes[1]);
+        return "fork() failed";
+    }
+
+    if(childPid == 0)
+    {
+        //Child
+        dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
+        dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+        putenv("LANG=C.UTF-8");
+        execvp(argv[0], argv);
+        _exit(127);
+    }
+
+    #endif
+
+    close(pipes[1]);
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
     char str[FF_PIPE_BUFSIZ];

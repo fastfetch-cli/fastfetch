@@ -175,7 +175,7 @@ bool ffSuppressIO(bool suppress)
     static bool init = false;
     static HANDLE hOrigOut = INVALID_HANDLE_VALUE;
     static HANDLE hOrigErr = INVALID_HANDLE_VALUE;
-    static HANDLE hNullFile = INVALID_HANDLE_VALUE;
+    HANDLE hNullFile = ffGetNullFD();
     static int fOrigOut = -1;
     static int fOrigErr = -1;
     static int fNullFile = -1;
@@ -187,7 +187,6 @@ bool ffSuppressIO(bool suppress)
 
         hOrigOut = GetStdHandle(STD_OUTPUT_HANDLE);
         hOrigErr = GetStdHandle(STD_ERROR_HANDLE);
-        hNullFile = CreateFileW(L"NUL", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
         fOrigOut = _dup(STDOUT_FILENO);
         fOrigErr = _dup(STDERR_FILENO);
         fNullFile = _open_osfhandle((intptr_t) hNullFile, 0);
@@ -351,4 +350,24 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     va_end(args);
 
     return NULL;
+}
+
+FFNativeFD ffGetNullFD(void)
+{
+    static FFNativeFD hNullFile = INVALID_HANDLE_VALUE;
+    if (hNullFile != INVALID_HANDLE_VALUE)
+        return hNullFile;
+    hNullFile = CreateFileW(
+        L"NUL",
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_WRITE,
+        0,
+        OPEN_EXISTING,
+        0,
+        &(SECURITY_ATTRIBUTES){
+            .nLength = sizeof(SECURITY_ATTRIBUTES),
+            .lpSecurityDescriptor = NULL,
+            .bInheritHandle = TRUE,
+        });
+    return hNullFile;
 }

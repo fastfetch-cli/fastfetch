@@ -108,6 +108,128 @@
                 }
             ]
         },
+        "systems": {
+            "type": "string",
+            "enum": [
+                "Android",
+                "Linux",
+                "DragonFly",
+                "MidnightBSD",
+                "FreeBSD",
+                "macOS",
+                "Windows",
+                "SunOS",
+                "OpenBSD",
+                "NetBSD",
+                "Haiku"
+            ]
+        },
+        "architectures": {
+            "type": "string",
+            "enum": [
+                "x86_64",
+                "i386",
+                "ia64",
+                "aarch64",
+                "arm",
+                "mips",
+                "powerpc",
+                "riscv",
+                "s390x",
+                "loongarch",
+                "sparc",
+                "alpha",
+                "hppa",
+                "m68k"
+            ]
+        },
+        "conditions": {
+            "description": "Only show the module if conditions are met",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "system": {
+                    "description": "System name to match",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/systems"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/systems"
+                            },
+                            "description": "Array of system names to match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "!system": {
+                    "description": "System name to not match",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/systems"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/systems"
+                            },
+                            "description": "Array of system names to not match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "arch": {
+                    "description": "Architecture to match",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/architectures"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/architectures"
+                            },
+                            "description": "Array of architectures to match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "!arch": {
+                    "description": "Architecture to not match",
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/architectures"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/architectures"
+                            },
+                            "description": "Array of architectures to not match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                }
+            }
+        },
 
 
         "batteryFormat": {
@@ -1005,6 +1127,7 @@
                             "host",
                             "icons",
                             "initsystem",
+                            "keyboard",
                             "kernel",
                             "lm",
                             "loadavg",
@@ -1013,6 +1136,7 @@
                             "media",
                             "memory",
                             "monitor",
+                            "mouse",
                             "netio",
                             "opencl",
                             "opengl",
@@ -1067,6 +1191,9 @@
                                     "type": {
                                         "const": "break",
                                         "description": "Print a empty line"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1107,6 +1234,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/batteryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1136,6 +1266,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/biosFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1173,6 +1306,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/bluetoothFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1202,6 +1338,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/bluetoothradioFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1231,6 +1370,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/boardFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1260,6 +1402,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/bootmgrFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1304,6 +1449,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/brightnessFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1336,6 +1484,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/btrfsFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1365,6 +1516,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cameraFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1394,6 +1548,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/chassisFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1431,6 +1588,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cpuFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1463,6 +1623,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cpucacheFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1506,6 +1669,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cpuusageFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1567,6 +1733,9 @@
                                     },
                                     "keyIcon": {
                                         "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1608,6 +1777,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/commandFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1640,6 +1812,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cursorFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1671,6 +1846,9 @@
                                     "format": {
                                         "description": "Text to print",
                                         "type": "string"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1703,6 +1881,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/datetimeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1757,6 +1938,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/displayFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1831,6 +2015,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/diskFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1875,6 +2062,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/diskioFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1909,6 +2099,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/deFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1947,6 +2140,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/dnsFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1979,6 +2175,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/editorFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2011,6 +2210,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/fontFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2043,6 +2245,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/gamepadFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2102,6 +2307,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/gpuFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2131,6 +2339,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/hostFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2160,6 +2371,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/iconsFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2189,6 +2403,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/initsystemFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2218,6 +2435,38 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/kernelFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Keyboard",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "keyboard",
+                                        "description": "List (connected) keyboards"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/memoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2247,6 +2496,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/lmFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2335,6 +2587,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/localipFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2379,6 +2634,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/loadavgFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2408,6 +2666,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/localeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2437,6 +2698,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/mediaFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2469,6 +2733,38 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/memoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Mouse",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "mouse",
+                                        "description": "List connected mouses"
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/memoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2498,6 +2794,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/monitorFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2547,6 +2846,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/netioFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2576,6 +2878,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/openclFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2614,6 +2919,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/openglFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2643,6 +2951,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/osFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2696,6 +3007,11 @@
                                         },
                                         "default": ["winget"]
                                     },
+                                    "combined": {
+                                        "description": "Whether to combine related package managers into single counts (e.g., nix-system + nix-user = nix)",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2713,6 +3029,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/packagesFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2749,6 +3068,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/physicaldiskFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2778,6 +3100,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/physicalmemoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2807,6 +3132,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/playerFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2836,6 +3164,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/poweradapterFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2865,6 +3196,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/processesFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2911,6 +3245,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/publicipFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2937,6 +3274,9 @@
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2966,6 +3306,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/shellFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3008,6 +3351,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/soundFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3045,6 +3391,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/swapFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3074,6 +3423,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3103,6 +3455,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalfontFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3132,6 +3487,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalsizeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3161,6 +3519,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalthemeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3190,6 +3551,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/themeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3243,6 +3607,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/titleFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3272,6 +3639,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/tpmFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3311,6 +3681,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/usersFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3340,6 +3713,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/uptimeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3369,6 +3745,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/versionFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3398,6 +3777,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/vulkanFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3427,6 +3809,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wallpaperFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3471,6 +3856,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/weatherFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3500,6 +3888,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wifiFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3534,6 +3925,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wmFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3563,6 +3957,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wmthemeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3595,6 +3992,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/zpoolFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             }
