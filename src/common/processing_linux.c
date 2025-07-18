@@ -11,7 +11,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <spawn.h>
+
+#if !(__ANDROID__ || __OpenBSD__)
+    #include <spawn.h>
+#endif
 
 #if defined(__FreeBSD__) || defined(__APPLE__)
     #include <sys/types.h>
