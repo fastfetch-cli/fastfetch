@@ -217,10 +217,23 @@
             "key": "│{#magenta}│ {icon}  Login     │{$4}│{#keys}│{$2}"
         },
         {
+            "condition": {
+                "!system": "macOS"
+            },
             "type": "disk",
             "keyIcon": "",
             "key": "│{#magenta}│ {icon}  OS Age    │{$4}│{#keys}│{$2}",
-            "folders": "/", // On macOS, "/System/Volumes/VM" works for me
+            "folders": "/",
+            "format": "{create-time:10} [{days} days]"
+        },
+        {
+            "condition": {
+                "system": "macOS"
+            },
+            "type": "disk",
+            "keyIcon": "",
+            "key": "│{#magenta}│ {icon}  OS Age    │{$4}│{#keys}│{$2}",
+            "folders": "/System/Volumes/VM",
             "format": "{create-time:10} [{days} days]"
         },
         {
