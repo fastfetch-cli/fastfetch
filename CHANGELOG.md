@@ -1,3 +1,28 @@
+# 2.48.1
+
+Features:
+* Add support for detecting Openbox WM version (WM, Linux)
+* Improve reliability of child process spawning on Windows (Windows)
+* Add a new option `--packages-combined`, which combines related package managers into single counts (#1851, Packages)
+    * For example: if you have both `flatpak-system` and `flatpak-user` packages installed, they will be combined into a single `flatpak` count with `--packages-combined` enabled.
+* Add `modules[n].condition` to conditionally enable modules on different platforms
+    * Useful when sharing configuration files across platforms
+    * For example:
+```jsonc
+{
+    "type": "custom",
+    "format": "This string will be printed on Intel macOS only",
+    "condition": {
+        "system": "macOS", // Can be an array, optional
+        "arch": "x86_64"  // Can be an array, optional too
+    }
+}
+```
+
+Bugfixes:
+* Revert the change of `posix_spawn` in v2.48.0 for Android and OpenBSD (Android / OpenBSD)
+    * Fix completion for Android 7 (Required by Termux)
+
 # 2.48.0
 
 Features:
