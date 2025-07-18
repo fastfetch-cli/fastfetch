@@ -17,19 +17,36 @@ void ffPrintPackages(FFPackagesOptions* options)
         return;
     }
 
+    uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
+    uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
+    uint32_t brewAll = counts.brew + counts.brewCask;
+    uint32_t guixAll = counts.guixSystem + counts.guixUser + counts.guixHome;
+    uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
+    uint32_t amAll = counts.amSystem + counts.amUser;
+
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
-        #define FF_PRINT_PACKAGE_NAME(var, name) \
+        #define FF_PRINT_PACKAGE_NAME(var, name) {\
             if(counts.var > 0) \
             { \
                 printf("%u (%s)", counts.var, (name)); \
                 if((all -= counts.var) > 0) \
                     fputs(", ", stdout); \
-            };
+            } \
+        }
 
         #define FF_PRINT_PACKAGE(name) FF_PRINT_PACKAGE_NAME(name, #name)
+
+        #define FF_PRINT_PACKAGE_ALL(name) {\
+            if(name ## All > 0) \
+            { \
+                printf("%u (%s)", name ## All, #name); \
+                if((all -= name ## All) > 0) \
+                    fputs(", ", stdout); \
+            } \
+        }
 
         uint32_t all = counts.all;
         if(counts.pacman > 0)
@@ -45,19 +62,47 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(emerge)
         FF_PRINT_PACKAGE(eopkg)
         FF_PRINT_PACKAGE(xbps)
-        FF_PRINT_PACKAGE_NAME(nixSystem, "nix-system")
-        FF_PRINT_PACKAGE_NAME(nixUser, "nix-user")
-        FF_PRINT_PACKAGE_NAME(nixDefault, "nix-default")
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(nix);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(nixSystem, "nix-system")
+            FF_PRINT_PACKAGE_NAME(nixUser, "nix-user")
+            FF_PRINT_PACKAGE_NAME(nixDefault, "nix-default")
+        }
         FF_PRINT_PACKAGE(apk)
         FF_PRINT_PACKAGE(pkg)
         FF_PRINT_PACKAGE(pkgsrc)
-        FF_PRINT_PACKAGE_NAME(hpkgSystem, counts.hpkgUser ? "hpkg-system" : "hpkg")
-        FF_PRINT_PACKAGE_NAME(hpkgUser, "hpkg-user")
-        FF_PRINT_PACKAGE_NAME(flatpakSystem, counts.flatpakUser ? "flatpak-system" : "flatpak")
-        FF_PRINT_PACKAGE_NAME(flatpakUser, "flatpak-user")
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(hpkg)
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(hpkgSystem, counts.hpkgUser ? "hpkg-system" : "hpkg")
+            FF_PRINT_PACKAGE_NAME(hpkgUser, "hpkg-user")
+        }
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(flatpak);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(flatpakSystem, counts.flatpakUser ? "flatpak-system" : "flatpak")
+            FF_PRINT_PACKAGE_NAME(flatpakUser, "flatpak-user")
+        }
         FF_PRINT_PACKAGE(snap)
-        FF_PRINT_PACKAGE(brew)
-        FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(brew);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(brew, "brew")
+            FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
+        }
         FF_PRINT_PACKAGE(macports)
         FF_PRINT_PACKAGE(scoop)
         FF_PRINT_PACKAGE(choco)
@@ -65,14 +110,28 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(paludis)
         FF_PRINT_PACKAGE(winget)
         FF_PRINT_PACKAGE(opkg)
-        FF_PRINT_PACKAGE_NAME(amSystem, "am")
-        FF_PRINT_PACKAGE_NAME(amUser, "appman")
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(am);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(amSystem, "am")
+            FF_PRINT_PACKAGE_NAME(amUser, "appman")
+        }
         FF_PRINT_PACKAGE(sorcery)
         FF_PRINT_PACKAGE(lpkg)
         FF_PRINT_PACKAGE(lpkgbuild)
-        FF_PRINT_PACKAGE_NAME(guixSystem, "guix-system")
-        FF_PRINT_PACKAGE_NAME(guixUser, "guix-user")
-        FF_PRINT_PACKAGE_NAME(guixHome, "guix-home")
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(guix);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(guixSystem, "guix-system")
+            FF_PRINT_PACKAGE_NAME(guixUser, "guix-user")
+            FF_PRINT_PACKAGE_NAME(guixHome, "guix-home")
+        }
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(pacstall)
         FF_PRINT_PACKAGE(mport)
@@ -84,11 +143,6 @@ void ffPrintPackages(FFPackagesOptions* options)
     }
     else
     {
-        uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
-        uint32_t flatpakAll = counts.flatpakSystem + counts.flatpakUser;
-        uint32_t brewAll = counts.brew + counts.brewCask;
-        uint32_t guixAll = counts.guixSystem + counts.guixUser + counts.guixHome;
-        uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
         FF_PRINT_FORMAT_CHECKED(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(counts.all, "all"),
             FF_FORMAT_ARG(counts.pacman, "pacman"),
@@ -248,6 +302,12 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
         return true;
     }
 
+    if (ffStrEqualsIgnCase(subKey, "combined"))
+    {
+        options->combined = ffOptionParseBoolean(value);
+        return true;
+    }
+
     return false;
 }
 
@@ -360,6 +420,12 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
             }
         }
 
+        if (ffStrEqualsIgnCase(key, "combined"))
+        {
+            options->combined = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
     }
 }
@@ -410,6 +476,9 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(XBPS)
         #undef FF_TEST_PACKAGE_NAME
     }
+
+    if (options->combined != defaultOptions.combined)
+        yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
 }
 
 void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -536,6 +605,7 @@ void ffInitPackagesOptions(FFPackagesOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
     options->disabled = FF_PACKAGES_DISABLE_LIST;
+    options->combined = false;
 }
 
 void ffDestroyPackagesOptions(FFPackagesOptions* options)

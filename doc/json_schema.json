@@ -3007,6 +3007,11 @@
                                         },
                                         "default": ["winget"]
                                     },
+                                    "combined": {
+                                        "description": "Whether to combine related package managers into single counts (e.g., nix-system + nix-user = nix)",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

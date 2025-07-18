@@ -991,6 +991,16 @@
             }
         },
         {
+            "long": "packages-combined",
+            "desc": "Whether to combine related package managers into single counts",
+            "remark": "e.g., nix-system + nix-user = nix",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
             "long": "display-compact-type",
             "desc": "Specify whether all displays should be printed in one line",
             "arg": {

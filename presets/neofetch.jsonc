@@ -16,7 +16,10 @@
             "format": "{release}"
         },
         "uptime",
-        "packages",
+        {
+            "type": "packages",
+            "combined": true
+        },
         "shell",
         {
             "type": "display",
