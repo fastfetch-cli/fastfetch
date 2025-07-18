@@ -243,7 +243,7 @@ static const char* getOpenbox(FFstrbuf* result)
 
     if (ffProcessAppendStdOut(result, (char* const[]){
         path.chars,
-        "-version",
+        "--version",
         NULL
     }) == NULL)
     { // Openbox 3.6.1\n...
@@ -252,7 +252,7 @@ static const char* getOpenbox(FFstrbuf* result)
         return NULL;
     }
 
-    return "Failed to run command `fvwm -version`";
+    return "Failed to run command `openbox --version`";
 }
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
