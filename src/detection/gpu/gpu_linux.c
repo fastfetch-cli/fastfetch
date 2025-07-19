@@ -263,6 +263,34 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     #endif
 }
 
+static const char* pciDetectNouveauSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+{
+    if (options->temp)
+    {
+        const uint32_t pciDirLen = pciDir->length;
+        ffStrbufAppendS(pciDir, "/hwmon/");
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+        if (dirp)
+        {
+            struct dirent* entry;
+            while ((entry = readdir(dirp)))
+            {
+                if (entry->d_name[0] == '.') continue;
+                ffStrbufAppendS(pciDir, entry->d_name);
+                ffStrbufAppendS(pciDir, "/temp1_input");
+                if (ffReadFileBuffer(pciDir->chars, buffer))
+                {
+                    uint64_t value = ffStrbufToUInt(buffer, 0);
+                    if (value > 0) gpu->temperature = (double) value / 1000.0;
+                }
+                break;
+            }
+        }
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+    }
+    return NULL;
+}
+
 static const char* drmDetectNouveauSpecific(FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
 {
     #if FF_HAVE_DRM
@@ -386,6 +414,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     }
     else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && ffStrbufEqualS(&gpu->driver, "nouveau"))
     {
+        pciDetectNouveauSpecific(options, gpu, deviceDir, buffer);
         if (options->driverSpecific && drmKey)
             drmDetectNouveauSpecific(gpu, drmKey, buffer);
     }
