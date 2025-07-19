@@ -67,6 +67,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
 const char* ffDrmDetectI915(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectXe(FFGPUResult* gpu, int fd);
 const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd);
+const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd);
 #endif // FF_HAVE_DRM
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);

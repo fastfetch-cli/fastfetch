@@ -118,6 +118,8 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
             ffDrmDetectXe(gpu, fd);
         else if (ffStrStartsWith(driverName, "asahi"))
             ffDrmDetectAsahi(gpu, fd);
+        else if (ffStrStartsWith(driverName, "nouveau"))
+            ffDrmDetectNouveau(gpu, fd);
         else if (dev->bustype == DRM_BUS_PCI)
         {
             ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId) {

@@ -263,6 +263,21 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     #endif
 }
 
+static const char* drmDetectNouveauSpecific(FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
+{
+    #if FF_HAVE_DRM
+    ffStrbufSetS(buffer, "/dev/dri/");
+    ffStrbufAppendS(buffer, drmKey);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return "Failed to open drm device";
+
+    return ffDrmDetectNouveau(gpu, fd);
+    #else
+    FF_UNUSED(gpu, drmKey, buffer);
+    return "Fastfetch is not compiled with drm support";
+    #endif
+}
+
 static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* deviceDir, const char* drmKey)
 {
     const uint32_t drmDirPathLength = deviceDir->length;
@@ -368,6 +383,11 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
         if (options->driverSpecific && drmKey)
             drmDetectIntelSpecific(gpu, drmKey, buffer);
+    }
+    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && ffStrbufEqualS(&gpu->driver, "nouveau"))
+    {
+        if (options->driverSpecific && drmKey)
+            drmDetectNouveauSpecific(gpu, drmKey, buffer);
     }
     else
     {
