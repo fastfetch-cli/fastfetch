@@ -938,3 +938,12 @@ jobs:
           commit: ${{ github.sha }}
           bodyFile: fastfetch-release-notes.md
           allowUpdates: true
+
+      - name: publish to winget
+        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
+        uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: Fastfetch-cli.Fastfetch
+          release-tag: ${{ needs.linux-amd64.outputs.ffversion }}
+          installers-regex: '-windows-\w+\.zip$'
+          token: ${{ secrets.WINGET_TOKEN }}
