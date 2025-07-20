@@ -30,6 +30,15 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // Aeon
+    {
+        .names = {"Aeon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AEON,
+        .colors = {
+            FF_COLOR_FG_256 "36",
+            FF_COLOR_FG_256 "36",
+        },
+    },
     // Afterglow
     {
         .names = {"Afterglow"},
