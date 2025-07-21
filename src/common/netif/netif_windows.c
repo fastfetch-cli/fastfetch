@@ -18,6 +18,8 @@ bool ffNetifGetDefaultRouteImpl(FF_MAYBE_UNUSED char iface[IF_NAMESIZE + 1], uin
     {
         MIB_IPFORWARD_ROW2* row = &pIpForwardTable->Table[i];
 
+        if (row->Age > row->ValidLifetime) continue;
+
         if ((row->DestinationPrefix.PrefixLength == 0) &&
             ((row->DestinationPrefix.Prefix.Ipv4.sin_family == AF_INET &&
               row->DestinationPrefix.Prefix.Ipv4.sin_addr.S_un.S_addr == 0) ||
