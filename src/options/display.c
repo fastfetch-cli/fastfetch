@@ -221,6 +221,23 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             else
                 return "display.bar must be an object";
         }
+        else if (ffStrEqualsIgnCase(key, "fraction"))
+        {
+            if (yyjson_is_obj(val))
+            {
+                yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
+                if (ndigits)
+                {
+                    if (yyjson_is_null(ndigits))
+                        options->fractionNdigits = -1;
+                    else if (!yyjson_is_int(ndigits))
+                        return "display.fraction.ndigits must be an integer";
+                    options->fractionNdigits = (int8_t) yyjson_get_int(ndigits);
+                }
+            }
+            else
+                return "display.fraction must be an object";
+        }
         else if (ffStrEqualsIgnCase(key, "noBuffer"))
             options->noBuffer = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "keyWidth"))
@@ -462,6 +479,8 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         else
             return false;
     }
+    else if(ffStrEqualsIgnCase(key, "--fraction-ndigits"))
+        options->fractionNdigits = (int8_t) ffOptionParseInt32(key, value);
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         options->noBuffer = ffOptionParseBoolean(value);
     else if(ffStrStartsWithIgnCase(key, "--bar-"))
@@ -539,6 +558,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->freqNdigits = 2;
+    options->fractionNdigits = -1;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));
 }

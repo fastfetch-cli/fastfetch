@@ -11,16 +11,6 @@ const FFlogo ffLogoUnknown = {
 };
 
 static const FFlogo A[] = {
-    //Ada
-    {
-        .names = {"Ada"},
-        .lines = FASTFETCH_DATATEXT_LOGO_ADA,
-        .colors = {
-            FF_COLOR_FG_256 "15",
-            FF_COLOR_FG_256 "14",
-            FF_COLOR_FG_256 "16",
-        }
-    },
     // Adélie
     {
         .names = {"Adélie", "Adelie"},
@@ -38,6 +28,15 @@ static const FFlogo A[] = {
         .colors = {
             FF_COLOR_FG_CYAN,
             FF_COLOR_FG_CYAN,
+        },
+    },
+    // Aeon
+    {
+        .names = {"Aeon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AEON,
+        .colors = {
+            FF_COLOR_FG_256 "36",
+            FF_COLOR_FG_256 "36",
         },
     },
     // Afterglow
@@ -699,6 +698,15 @@ static const FFlogo A[] = {
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_RED,
             FF_COLOR_FG_WHITE,
+        },
+    },
+    // AxOS
+    {
+        .names = {"AxOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AXOS,
+        .colors = {
+            FF_COLOR_FG_RGB "222;6;255",
+            FF_COLOR_FG_RGB "222;6;255",
         },
     },
     // Azos
@@ -3105,6 +3113,16 @@ static const FFlogo M[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
+    // Minimal System
+    {
+        .names = {"Minimal_System"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MINIMAL,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_CYAN,
+        .colorTitle = FF_COLOR_FG_DEFAULT,
+    },
     // Minix
     {
         .names = {"Minix"},
@@ -5386,6 +5404,16 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "25",
             FF_COLOR_FG_DEFAULT,
         },
+    },
+    //Xray_OS
+    {
+        .names = {"Xray_OS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+        }
     },
     // LAST
     {},

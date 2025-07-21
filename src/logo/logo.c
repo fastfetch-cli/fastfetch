@@ -436,6 +436,13 @@ static void logoPrintNone(void)
 
 static bool logoPrintBuiltinIfExists(const FFstrbuf* name, FFLogoSize size)
 {
+    if(name->chars[0] == '~' || name->chars[0] == '.' || name->chars[0] == '/'
+        #if _WIN32
+        || (ffCharIsEnglishAlphabet(name->chars[0]) && name->chars[1] == ':') // Windows drive letter
+        #endif
+    )
+        return false; // Paths
+
     if(ffStrbufIgnCaseEqualS(name, "none"))
     {
         logoPrintNone();
@@ -466,21 +473,22 @@ static bool logoPrintData(bool doColorReplacement, FFstrbuf* source)
     return true;
 }
 
-static void updateLogoPath(void)
+static bool updateLogoPath(void)
 {
     FFOptionsLogo* options = &instance.config.logo;
 
     if(ffPathExists(options->source.chars, FF_PATHTYPE_FILE))
-        return;
+        return true;
 
     if (ffStrbufEqualS(&options->source, "-")) // stdin
-        return;
+        return true;
 
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
     {
-        ffStrbufSet(&options->source, &fullPath);
-        return;
+        ffStrbufDestroy(&options->source);
+        ffStrbufInitMove(&options->source, &fullPath);
+        return true;
     }
 
     FF_LIST_FOR_EACH(FFstrbuf, dataDir, instance.state.platform.dataDirs)
@@ -492,10 +500,13 @@ static void updateLogoPath(void)
 
         if(ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
         {
-            ffStrbufSet(&options->source, &fullPath);
-            break;
+            ffStrbufDestroy(&options->source);
+            ffStrbufInitMove(&options->source, &fullPath);
+            return true;
         }
     }
+
+    return false;
 }
 
 static bool logoPrintFileIfExists(bool doColorReplacement, bool raw)
@@ -579,7 +590,13 @@ static bool logoTryKnownType(void)
         return logoPrintData(false, &source);
     }
 
-    updateLogoPath(); //We sure have a file, resolve relative paths
+    //We sure have a file, resolve relative paths
+    if (!updateLogoPath())
+    {
+        if (instance.config.display.showErrors)
+            fprintf(stderr, "Logo: Failed to resolve logo source: %s\n", options->source.chars);
+        return false;
+    }
 
     if(options->type == FF_LOGO_TYPE_FILE)
         return logoPrintFileIfExists(true, false);
@@ -642,31 +659,46 @@ void ffLogoPrint(void)
         return;
 
     //Make sure the logo path is set correctly.
-    updateLogoPath();
+    if (updateLogoPath())
+    {
+        if (ffStrbufEndsWithIgnCaseS(&options->source, ".raw"))
+        {
+            if(logoPrintFileIfExists(false, true))
+                return;
+        }
 
-    const FFTerminalResult* terminal = ffDetectTerminal();
+        if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt"))
+        {
+            const FFTerminalResult* terminal = ffDetectTerminal();
 
-    //Terminal emulators that support kitty graphics protocol.
-    bool supportsKitty =
-        ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
-        ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
-        #ifdef __APPLE__
-        ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
-        #else
-        ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
-        #endif
-        false;
+            //Terminal emulators that support kitty graphics protocol.
+            bool supportsKitty =
+                ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
+                #ifdef __APPLE__
+                ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
+                #else
+                ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
+                #endif
+                false;
 
-    //Try to load the logo as an image. If it succeeds, print it and return.
-    if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
-        return;
+            //Try to load the logo as an image. If it succeeds, print it and return.
+            if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
+                return;
+        }
 
-    //Try to load the logo as a file. If it succeeds, print it and return.
-    if(logoPrintFileIfExists(true, false))
-        return;
+        //Try to load the logo as a file. If it succeeds, print it and return.
+        if(logoPrintFileIfExists(true, false))
+            return;
+    }
+    else
+    {
+        if (instance.config.display.showErrors)
+            fprintf(stderr, "Logo: Failed to resolve logo source: %s\n", options->source.chars);
+    }
 
     logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
 }

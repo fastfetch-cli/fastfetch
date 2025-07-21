@@ -358,3 +358,12 @@ void ffListFilesRecursively(const char* path, bool pretty)
     ffStrbufEnsureEndsWithC(&folder, '/');
     listFilesRecursively(folder.length, &folder, 0, NULL, pretty);
 }
+
+FFNativeFD ffGetNullFD(void)
+{
+    static FFNativeFD hNullFile = -1;
+    if (hNullFile != -1)
+        return hNullFile;
+    hNullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
+    return hNullFile;
+}

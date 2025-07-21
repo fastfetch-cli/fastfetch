@@ -89,19 +89,19 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         if (properties.device_type != CTL_DEVICE_TYPE_GRAPHICS)
             continue;
 
-        if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_LUID)
+        if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
         {
-            if (cond->luid == deviceId)
+            if (cond->pciBusId.bus == properties.adapter_bdf.bus &&
+                cond->pciBusId.device == properties.adapter_bdf.device &&
+                cond->pciBusId.func == properties.adapter_bdf.function)
             {
                 device = devices[iDev];
                 break;
             }
         }
-        else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_BUS_ID)
+        else if (cond->type & FF_GPU_DRIVER_CONDITION_TYPE_LUID)
         {
-            if (cond->pciBusId.bus == properties.adapter_bdf.bus &&
-                cond->pciBusId.device == properties.adapter_bdf.device &&
-                cond->pciBusId.func == properties.adapter_bdf.function)
+            if (cond->luid == deviceId)
             {
                 device = devices[iDev];
                 break;

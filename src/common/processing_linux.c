@@ -12,6 +12,10 @@
 #include <errno.h>
 #include <sys/wait.h>
 
+#if !(__ANDROID__ || __OpenBSD__)
+    #include <spawn.h>
+#endif
+
 #if defined(__FreeBSD__) || defined(__APPLE__)
     #include <sys/types.h>
     #include <sys/user.h>
@@ -33,6 +37,10 @@
     #include <image.h>
 #endif
 
+#ifndef environ
+extern char** environ;
+#endif
+
 enum { FF_PIPE_BUFSIZ = 8192 };
 
 static inline int ffPipe2(int* fds, int flags)
@@ -48,6 +56,8 @@ static inline int ffPipe2(int* fds, int flags)
     #endif
 }
 
+
+// Not thread-safe
 const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
 {
     int pipes[2];
@@ -56,7 +66,77 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if(ffPipe2(pipes, O_CLOEXEC) == -1)
         return "pipe() failed";
 
-    pid_t childPid = fork();
+    pid_t childPid = -1;
+    int nullFile = ffGetNullFD();
+
+    #if !(__ANDROID__ || __OpenBSD__)
+
+    // NetBSD / Darwin: native syscall
+    // Linux (glibc): clone3-execve
+    // FreeBSD: vfork-execve
+    // illumos: vforkx-execve
+    // OpenBSD / Android (bionic): fork-execve
+
+    posix_spawn_file_actions_t file_actions;
+    posix_spawn_file_actions_init(&file_actions);
+    posix_spawn_file_actions_adddup2(&file_actions, pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
+    posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+
+    static char* oldLang = NULL;
+    static int langIndex = -1;
+
+    if (langIndex >= 0)
+    {
+        // Found before
+        if (oldLang) // oldLang was set only if it needed to be changed
+        {
+            if (environ[langIndex] != oldLang)
+            {
+                // environ is changed outside of this function
+                langIndex = -1;
+            }
+            else
+                environ[langIndex] = (char*) "LANG=C.UTF-8";
+        }
+    }
+    if (langIndex < 0)
+    {
+        for (int i = 0; environ[i] != NULL; i++)
+        {
+            if (ffStrStartsWith(environ[i], "LANG="))
+            {
+                langIndex = i;
+                const char* langValue = environ[i] + 5; // Skip "LANG="
+                if (ffStrEqualsIgnCase(langValue, "C") ||
+                    ffStrStartsWithIgnCase(environ[i], "C.") ||
+                    ffStrEqualsIgnCase(langValue, "en_US") ||
+                    ffStrStartsWithIgnCase(langValue, "en_US."))
+                    break; // No need to change LANG
+                oldLang = environ[i];
+                environ[i] = (char*) "LANG=C.UTF-8"; // Set LANG to C.UTF-8 for consistent output
+                break;
+            }
+        }
+    }
+
+    int ret = posix_spawnp(&childPid, argv[0], &file_actions, NULL, argv, environ);
+
+    if (oldLang)
+        environ[langIndex] = oldLang;
+
+    posix_spawn_file_actions_destroy(&file_actions);
+
+    if (ret != 0)
+    {
+        close(pipes[0]);
+        close(pipes[1]);
+        return "posix_spawnp() failed";
+    }
+
+    #else
+
+    // https://github.com/termux/termux-packages/issues/25369
+    childPid = fork();
     if(childPid == -1)
     {
         close(pipes[0]);
@@ -64,18 +144,18 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         return "fork() failed";
     }
 
-    //Child
     if(childPid == 0)
     {
-        int nullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
+        //Child
         dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
-        setenv("LANG", "C", 1);
+        putenv("LANG=C.UTF-8");
         execvp(argv[0], argv);
         _exit(127);
     }
 
-    //Parent
+    #endif
+
     close(pipes[1]);
 
     int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
@@ -86,20 +166,30 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         if (timeout >= 0)
         {
             struct pollfd pollfd = { childPipeFd, POLLIN, 0 };
-            if (poll(&pollfd, 1, timeout) == 0)
+            int pollret = poll(&pollfd, 1, timeout);
+            if (pollret == 0)
             {
                 kill(childPid, SIGTERM);
                 waitpid(childPid, NULL, 0);
                 return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
             }
-            else if (errno == EINTR)
+            else if (pollret < 0)
             {
-                // The child process has been terminated. See `chldSignalHandler` in `common/init.c`
-                if (waitpid(childPid, NULL, WNOHANG) == childPid)
+                if (errno == EINTR)
                 {
-                    // Read remaining data from the pipe
-                    fcntl(childPipeFd, F_SETFL, O_CLOEXEC | O_NONBLOCK);
-                    childPid = -1;
+                    // The child process has been terminated. See `chldSignalHandler` in `common/init.c`
+                    if (waitpid(childPid, NULL, WNOHANG) == childPid)
+                    {
+                        // Read remaining data from the pipe
+                        fcntl(childPipeFd, F_SETFL, O_CLOEXEC | O_NONBLOCK);
+                        childPid = -1;
+                    }
+                }
+                else
+                {
+                    kill(childPid, SIGTERM);
+                    waitpid(childPid, NULL, 0);
+                    return "poll(&pollfd, 1, timeout) error";
                 }
             }
             else if (pollfd.revents & POLLERR)

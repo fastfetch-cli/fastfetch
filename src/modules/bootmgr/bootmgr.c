@@ -67,7 +67,7 @@ void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module)
     yyjson_obj_foreach(module, idx, max, key_, val)
     {
         const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
+        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
             continue;
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))

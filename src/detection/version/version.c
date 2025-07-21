@@ -43,9 +43,9 @@
 #elif defined(__FreeBSD__)
     #define FF_SYSNAME "FreeBSD"
 #elif defined(__APPLE__)
-    #define FF_SYSNAME "Darwin"
+    #define FF_SYSNAME "macOS"
 #elif defined(_WIN32)
-    #define FF_SYSNAME "WIN32"
+    #define FF_SYSNAME "Windows"
 #elif defined(__sun)
     #define FF_SYSNAME "SunOS"
 #elif defined(__OpenBSD__)

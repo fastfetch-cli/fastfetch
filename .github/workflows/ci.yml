@@ -683,7 +683,6 @@ jobs:
   haiku-amd64:
     name: Haiku-amd64
     runs-on: ubuntu-latest
-    if: false
     permissions:
       security-events: write
       contents: read
@@ -691,17 +690,45 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
+      - name: Fixup VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: haiku
+          version: 'r1beta5'
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          sync_files: false
+          shutdown_vm: false
+          run: |
+            mv '/home/runner/work' '/boot/home/work'
+            ln -sf '/boot/home/work' '/home/runner/work'
+
+      - name: Sync files to VM
+        uses: cross-platform-actions/action@master
+        with:
+          operating_system: haiku
+          version: 'r1beta5'
+          architecture: x86-64
+          cpu_count: 4
+          shell: bash
+          sync_files: runner-to-vm
+          shutdown_vm: false
+          run: |
+            chown -R $(id -u):$(id -g) $(pwd)
+            ls -l
+
       - name: run VM
         uses: cross-platform-actions/action@master
         with:
           operating_system: haiku
+          version: 'r1beta5'
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          version: 'r1beta5'
+          sync_files: vm-to-runner
           run: |
             uname -a
-            ls -l
             pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake gcc make pkgconfig python3.10
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
@@ -709,7 +736,6 @@ jobs:
             time ./fastfetch -c presets/ci.jsonc --stat false
             time ./fastfetch -c presets/ci.jsonc --format json
             time ./flashfetch
-            ldd fastfetch
             ctest --output-on-failure
 
       - name: upload artifacts
@@ -861,6 +887,7 @@ jobs:
       - openbsd-amd64
       - netbsd-amd64
       - sunos-amd64
+      - haiku-amd64
       - windows-amd64
       - windows-aarch64
     permissions:

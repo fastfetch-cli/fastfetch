@@ -176,7 +176,7 @@ static const char* getWslg(FFstrbuf* result)
     return NULL;
 }
 
-static bool extractCtFvWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+static bool extractCommonWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
     int count = 0;
     sscanf(line, "%*d.%*d.%*d%n", &count);
@@ -192,7 +192,7 @@ static const char* getCtwm(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("ctwm", &path);
     if (error) return "Failed to find ctwm executable path";
 
-    ffBinaryExtractStrings(path.chars, extractCtFvWmVersion, result, (uint32_t) strlen("0.0.0"));
+    ffBinaryExtractStrings(path.chars, extractCommonWmVersion, result, (uint32_t) strlen("0.0.0"));
     if (result->length > 0) return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
@@ -215,7 +215,7 @@ static const char* getFvwm(FFstrbuf* result)
     const char* error = ffFindExecutableInPath("fvwm", &path);
     if (error) return "Failed to find fvwm executable path";
 
-    ffBinaryExtractStrings(path.chars, extractCtFvWmVersion, result, (uint32_t) strlen("0.0.0"));
+    ffBinaryExtractStrings(path.chars, extractCommonWmVersion, result, (uint32_t) strlen("0.0.0"));
     if (result->length > 0) return NULL;
 
     if (ffProcessAppendStdOut(result, (char* const[]){
@@ -230,6 +230,29 @@ static const char* getFvwm(FFstrbuf* result)
     }
 
     return "Failed to run command `fvwm -version`";
+}
+
+static const char* getOpenbox(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("openbox", &path);
+    if (error) return "Failed to find openbox executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCommonWmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "--version",
+        NULL
+    }) == NULL)
+    { // Openbox 3.6.1\n...
+        ffStrbufSubstrBeforeFirstC(result, '\n');
+        ffStrbufSubstrAfterLastC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `openbox --version`";
 }
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
@@ -254,6 +277,9 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "fvwm"))
         return getFvwm(result);
+
+    if (ffStrbufEqualS(wmName, "Openbox"))
+        return getOpenbox(result);
 
     return "Unsupported WM";
 }
