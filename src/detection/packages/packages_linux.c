@@ -519,6 +519,31 @@ static inline uint32_t getFlatpakRuntimePackages(FFstrbuf* baseDir)
     return num_elements;
 }
 
+static inline uint32_t getFlatpakAppPackages(FFstrbuf* baseDir)
+{
+    ffStrbufAppendS(baseDir, "app/");
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    if (dirp == NULL)
+        return 0;
+
+    uint32_t appDirLength = baseDir->length;
+    uint32_t num_elements = 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if(entry->d_type == DT_DIR && entry->d_name[0] != '.')
+        {
+            ffStrbufAppendS(baseDir, entry->d_name);
+            ffStrbufAppendS(baseDir, "/current");
+            if (ffPathExists(baseDir->chars, FF_PATHTYPE_ANY)) // Exclude deleted apps, #1856
+                ++num_elements;
+            ffStrbufSubstrBefore(baseDir, appDirLength);
+        }
+    }
+    return num_elements;
+}
+
 static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
 {
     uint32_t num_elements = 0;
@@ -527,8 +552,7 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     ffStrbufAppendS(baseDir, "/flatpak/");
     uint32_t flatpakDirLength = baseDir->length;
 
-    ffStrbufAppendS(baseDir, "app");
-    num_elements += ffPackagesGetNumElements(baseDir->chars, true);
+    num_elements += getFlatpakAppPackages(baseDir);
     ffStrbufSubstrBefore(baseDir, flatpakDirLength);
 
     num_elements += getFlatpakRuntimePackages(baseDir);
