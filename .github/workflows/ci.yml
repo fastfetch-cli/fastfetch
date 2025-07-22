@@ -690,34 +690,6 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-      - name: Fixup VM
-        uses: cross-platform-actions/action@master
-        with:
-          operating_system: haiku
-          version: 'r1beta5'
-          architecture: x86-64
-          cpu_count: 4
-          shell: bash
-          sync_files: false
-          shutdown_vm: false
-          run: |
-            mv '/home/runner/work' '/boot/home/work'
-            ln -sf '/boot/home/work' '/home/runner/work'
-
-      - name: Sync files to VM
-        uses: cross-platform-actions/action@master
-        with:
-          operating_system: haiku
-          version: 'r1beta5'
-          architecture: x86-64
-          cpu_count: 4
-          shell: bash
-          sync_files: runner-to-vm
-          shutdown_vm: false
-          run: |
-            chown -R $(id -u):$(id -g) $(pwd)
-            ls -l
-
       - name: run VM
         uses: cross-platform-actions/action@master
         with:
@@ -726,7 +698,6 @@ jobs:
           architecture: x86-64
           cpu_count: 4
           shell: bash
-          sync_files: vm-to-runner
           run: |
             uname -a
             pkgman install -y git dbus_devel mesa_devel libelf_devel imagemagick_devel opencl_headers ocl_icd_devel vulkan_devel zlib_devel chafa_devel cmake gcc make pkgconfig python3.10
