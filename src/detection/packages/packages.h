@@ -36,7 +36,6 @@ typedef struct FFPackagesResult
     uint32_t pkg;
     uint32_t pkgsrc;
     uint32_t pkgtool;
-    uint32_t qi;
     uint32_t rpm;
     uint32_t scoop;
     uint32_t snap;

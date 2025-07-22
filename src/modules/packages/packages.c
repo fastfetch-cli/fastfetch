@@ -135,7 +135,6 @@ void ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(linglong)
         FF_PRINT_PACKAGE(pacstall)
         FF_PRINT_PACKAGE(mport)
-        FF_PRINT_PACKAGE(qi)
         FF_PRINT_PACKAGE(pisi)
         FF_PRINT_PACKAGE(soar)
 
@@ -179,7 +178,6 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.linglong, "linglong"),
             FF_FORMAT_ARG(counts.pacstall, "pacstall"),
             FF_FORMAT_ARG(counts.mport, "mport"),
-            FF_FORMAT_ARG(counts.qi, "qi"),
             FF_FORMAT_ARG(counts.amUser, "am-user"),
             FF_FORMAT_ARG(counts.pkgsrc, "pkgsrc"),
             FF_FORMAT_ARG(counts.hpkgSystem, "hpkg-system"),
@@ -268,9 +266,6 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
                     FF_TEST_PACKAGE_NAME(PKG)
                     FF_TEST_PACKAGE_NAME(PKGTOOL)
                     FF_TEST_PACKAGE_NAME(PKGSRC)
-                    break;
-                case 'Q': if (false);
-                    FF_TEST_PACKAGE_NAME(QI)
                     break;
                 case 'R': if (false);
                     FF_TEST_PACKAGE_NAME(RPM)
@@ -395,9 +390,6 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                             FF_TEST_PACKAGE_NAME(PKGTOOL)
                             FF_TEST_PACKAGE_NAME(PKGSRC)
                             break;
-                        case 'Q': if (false);
-                            FF_TEST_PACKAGE_NAME(QI)
-                            break;
                         case 'R': if (false);
                             FF_TEST_PACKAGE_NAME(RPM)
                             break;
@@ -466,7 +458,6 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
         FF_TEST_PACKAGE_NAME(PKG)
         FF_TEST_PACKAGE_NAME(PKGTOOL)
         FF_TEST_PACKAGE_NAME(PKGSRC)
-        FF_TEST_PACKAGE_NAME(QI)
         FF_TEST_PACKAGE_NAME(RPM)
         FF_TEST_PACKAGE_NAME(SCOOP)
         FF_TEST_PACKAGE_NAME(SNAP)
@@ -528,7 +519,6 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(pkg)
     FF_APPEND_PACKAGE_COUNT(pkgtool)
     FF_APPEND_PACKAGE_COUNT(pkgsrc)
-    FF_APPEND_PACKAGE_COUNT(qi)
     FF_APPEND_PACKAGE_COUNT(macports)
     FF_APPEND_PACKAGE_COUNT(rpm)
     FF_APPEND_PACKAGE_COUNT(scoop)
@@ -584,7 +574,6 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of linglong packages", "linglong"},
         {"Number of pacstall packages", "pacstall"},
         {"Number of mport packages", "mport"},
-        {"Number of qi packages", "qi"},
         {"Number of am-user (aka appman) packages", "am-user"},
         {"Number of pkgsrc packages", "pkgsrc"},
         {"Number of hpkg-system packages", "hpkg-system"},

@@ -628,7 +628,7 @@ jobs:
           version: '10.1'
           run: |
             uname -a
-            sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick opencl-headers ocl-icd
+            sudo pkgin -y install cmake git pkgconf wayland vulkan-headers dconf dbus sqlite3 ImageMagick
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
