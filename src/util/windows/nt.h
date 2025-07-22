@@ -175,7 +175,13 @@ typedef struct _D3DKMT_QUERYSTATISTICS
         D3DKMT_QUERYSTATISTICS_QUERY_NODE2 QueryNode2; // in: id of node to get statistics for
     };
 } D3DKMT_QUERYSTATISTICS;
-static_assert(sizeof(D3DKMT_QUERYSTATISTICS) == 0x328, "D3DKMT_QUERYSTATISTICS structure size mismatch");
+static_assert(sizeof(D3DKMT_QUERYSTATISTICS) ==
+    #if _WIN64
+    0x328
+    #else
+    0x320
+    #endif
+, "D3DKMT_QUERYSTATISTICS structure size mismatch");
 EXTERN_C _Check_return_ NTSTATUS APIENTRY D3DKMTQueryStatistics(_In_ CONST D3DKMT_QUERYSTATISTICS*);
 
 #define DXGK_MAX_METADATA_NAME_LENGTH 32

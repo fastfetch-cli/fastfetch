@@ -81,7 +81,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     if (hChildPipeWrite == INVALID_HANDLE_VALUE)
         return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
 
-    PROCESS_INFORMATION piProcInfo = {0};
+    PROCESS_INFORMATION piProcInfo = {};
 
     BOOL success;
 
@@ -91,9 +91,15 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             .dwFlags = STARTF_USESTDHANDLES,
         };
         if (useStdErr)
+        {
+            siStartInfo.hStdOutput = ffGetNullFD();
             siStartInfo.hStdError = hChildPipeWrite;
+        }
         else
+        {
             siStartInfo.hStdOutput = hChildPipeWrite;
+            siStartInfo.hStdError = ffGetNullFD();
+        }
 
         FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreate();
         argvToCmdline(argv, &cmdline);

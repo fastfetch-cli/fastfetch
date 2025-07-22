@@ -659,45 +659,46 @@ void ffLogoPrint(void)
         return;
 
     //Make sure the logo path is set correctly.
-    if (!updateLogoPath())
+    if (updateLogoPath())
+    {
+        if (ffStrbufEndsWithIgnCaseS(&options->source, ".raw"))
+        {
+            if(logoPrintFileIfExists(false, true))
+                return;
+        }
+
+        if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt"))
+        {
+            const FFTerminalResult* terminal = ffDetectTerminal();
+
+            //Terminal emulators that support kitty graphics protocol.
+            bool supportsKitty =
+                ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
+                ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
+                #ifdef __APPLE__
+                ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
+                #else
+                ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
+                #endif
+                false;
+
+            //Try to load the logo as an image. If it succeeds, print it and return.
+            if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
+                return;
+        }
+
+        //Try to load the logo as a file. If it succeeds, print it and return.
+        if(logoPrintFileIfExists(true, false))
+            return;
+    }
+    else
     {
         if (instance.config.display.showErrors)
             fprintf(stderr, "Logo: Failed to resolve logo source: %s\n", options->source.chars);
-        return;
     }
-
-    if (ffStrbufEndsWithIgnCaseS(&options->source, ".raw"))
-    {
-        if(logoPrintFileIfExists(false, true))
-            return;
-    }
-
-    if (!ffStrbufEndsWithIgnCaseS(&options->source, ".txt"))
-    {
-        const FFTerminalResult* terminal = ffDetectTerminal();
-
-        //Terminal emulators that support kitty graphics protocol.
-        bool supportsKitty =
-            ffStrbufIgnCaseEqualS(&terminal->processName, "kitty") ||
-            ffStrbufIgnCaseEqualS(&terminal->processName, "konsole") ||
-            ffStrbufIgnCaseEqualS(&terminal->processName, "wezterm") ||
-            ffStrbufIgnCaseEqualS(&terminal->processName, "wayst") ||
-            ffStrbufIgnCaseEqualS(&terminal->processName, "ghostty") ||
-            #ifdef __APPLE__
-            ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal") ||
-            #else
-            ffStrbufIgnCaseEqualS(&terminal->processName, "warp") ||
-            #endif
-            false;
-
-        //Try to load the logo as an image. If it succeeds, print it and return.
-        if(logoPrintImageIfExists(supportsKitty ? FF_LOGO_TYPE_IMAGE_KITTY : FF_LOGO_TYPE_IMAGE_CHAFA, false))
-            return;
-    }
-
-    //Try to load the logo as a file. If it succeeds, print it and return.
-    if(logoPrintFileIfExists(true, false))
-        return;
 
     logoPrintDetected(FF_LOGO_SIZE_UNKNOWN);
 }

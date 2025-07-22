@@ -4,6 +4,7 @@
 #include "common/printing.h"
 #include "common/io/io.h"
 #include "common/time.h"
+#include "detection/version/version.h"
 #include "modules/modules.h"
 #include "util/stringUtils.h"
 
@@ -170,6 +171,25 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
     }
 }
 
+static bool matchesJsonArray(const char* str, yyjson_val* val)
+{
+    assert(val);
+
+    if (unsafe_yyjson_is_str(val))
+        return ffStrEqualsIgnCase(str, unsafe_yyjson_get_str(val));
+
+    if (!unsafe_yyjson_is_arr(val)) return false;
+
+    size_t idx, max;
+    yyjson_val* item;
+    yyjson_arr_foreach(val, idx, max, item)
+    {
+        if (yyjson_is_str(item) && ffStrEqualsIgnCase(str, unsafe_yyjson_get_str(item)))
+            return true;
+    }
+    return false;
+}
+
 static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
 {
     yyjson_val* const root = yyjson_doc_get_root(instance.state.configDoc);
@@ -197,6 +217,29 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
             module = NULL;
         else if (yyjson_is_obj(module))
         {
+            yyjson_val* conditions = yyjson_obj_get(module, "condition");
+            if (conditions)
+            {
+                if (!yyjson_is_obj(conditions))
+                    return "Property 'conditions' must be an object";
+
+                yyjson_val* system = yyjson_obj_get(conditions, "system");
+                if (system && !matchesJsonArray(ffVersionResult.sysName, system))
+                    continue;
+
+                system = yyjson_obj_get(conditions, "!system");
+                if (system && matchesJsonArray(ffVersionResult.sysName, system))
+                    continue;
+
+                yyjson_val* arch = yyjson_obj_get(conditions, "arch");
+                if (arch && !matchesJsonArray(ffVersionResult.architecture, arch))
+                    continue;
+
+                arch = yyjson_obj_get(conditions, "!arch");
+                if (arch && matchesJsonArray(ffVersionResult.architecture, arch))
+                    continue;
+            }
+
             type = yyjson_get_str(yyjson_obj_get(module, "type"));
             if (!type) return "module object must contain a \"type\" key ( case sensitive )";
             if (yyjson_obj_size(module) == 1) // contains only Property type

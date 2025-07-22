@@ -78,6 +78,8 @@ void ffPrintUsers(FFUsersOptions* options)
             duration /= 24;
             uint32_t days = (uint32_t) duration;
 
+            FFTimeGetAgeResult age = ffTimeGetAge(user->loginTime, ffTimeGetNow());
+
             FF_PRINT_FORMAT_CHECKED(FF_USERS_MODULE_NAME, users.length == 1 ? 0 : (uint8_t) (i + 1), &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
                 FF_FORMAT_ARG(user->name, "name"),
                 FF_FORMAT_ARG(user->hostName, "host-name"),
@@ -89,6 +91,9 @@ void ffPrintUsers(FFUsersOptions* options)
                 FF_FORMAT_ARG(minutes, "minutes"),
                 FF_FORMAT_ARG(seconds, "seconds"),
                 FF_FORMAT_ARG(milliseconds, "milliseconds"),
+                FF_FORMAT_ARG(age.years, "years"),
+                FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
+                FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
             }));
         }
     }
@@ -131,7 +136,7 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
     yyjson_obj_foreach(module, idx, max, key_, val)
     {
         const char* key = yyjson_get_str(key_);
-        if (ffStrEqualsIgnCase(key, "type"))
+        if (ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
             continue;
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
@@ -222,6 +227,9 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Minutes after login", "minutes"},
         {"Seconds after login", "seconds"},
         {"Milliseconds after login", "milliseconds"},
+        {"Years integer after login", "years"},
+        {"Days of year after login", "days-of-year"},
+        {"Years fraction after login", "years-fraction"},
     }))
 };
 

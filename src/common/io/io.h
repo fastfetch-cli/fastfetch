@@ -222,6 +222,8 @@ static inline bool ffSearchUserConfigFile(const FFlist* configDirs, const char* 
     return false;
 }
 
+FFNativeFD ffGetNullFD(void);
+
 #ifdef _WIN32
 // Only O_RDONLY is supported
 HANDLE openat(HANDLE dfd, const char* fileName, bool directory);

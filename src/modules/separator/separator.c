@@ -147,7 +147,7 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
     yyjson_obj_foreach(module, idx, max, key_, val)
     {
         const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
+        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
             continue;
 
         if (ffStrEqualsIgnCase(key, "string"))
@@ -188,11 +188,6 @@ static FFModuleBaseInfo ffModuleInfo = {
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Separator string", "string"},
-        {"Output color", "outputColor"},
-        {"Length", "length"},
-    }))
 };
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
