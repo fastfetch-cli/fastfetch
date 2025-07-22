@@ -317,7 +317,7 @@
             "type": "string"
         },
         "editorFormat": {
-            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {full-path}: Full path of real path\n    5. {version}: Version",
+            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {path}: Full path of real path\n    5. {version}: Version",
             "type": "string"
         },
         "fontFormat": {

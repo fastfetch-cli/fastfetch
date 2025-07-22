@@ -130,7 +130,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Type (Visual / Editor)", "type"},
         {"Name", "name"},
         {"Exe name of real path", "exe-name"},
-        {"Full path of real path", "full-path"},
+        {"Full path of real path", "path"},
         {"Version", "version"},
     }))
 };
