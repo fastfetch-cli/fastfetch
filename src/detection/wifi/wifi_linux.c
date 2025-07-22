@@ -554,20 +554,47 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
         item->conn.channel = 0;
         item->conn.frequency = 0;
 
+        char operstate;
         ffStrbufSetF(&buffer, "/sys/class/net/%s/operstate", i->if_name);
-        if (!ffAppendFileBuffer(buffer.chars, &item->inf.status))
+        if (!ffReadFileData(buffer.chars, 1, &operstate))
         {
             FF_DEBUG("Failed to read operstate file");
             continue;
         }
 
-        ffStrbufTrimRightSpace(&item->inf.status);
-        FF_DEBUG("Interface status: %s", item->inf.status.chars);
-        if (!ffStrbufEqualS(&item->inf.status, "up"))
+        FF_DEBUG("Connection status: %c", operstate);
+        if (operstate != 'u')
         {
             FF_DEBUG("Skipping interface as it's not up");
+            ffStrbufSetStatic(&item->conn.status, "disconnected");
+
+            ffStrbufSetF(&buffer, "/sys/class/net/%s/flags", i->if_name);
+            char flags[16];
+            ssize_t len = ffReadFileData(buffer.chars, sizeof(flags), flags);
+            if (len <= 0)
+            {
+                FF_DEBUG("Failed to read flags file");
+                ffStrbufSetStatic(&item->inf.status, "unknown");
+                continue;
+            }
+            flags[len] = '\0';
+            FF_DEBUG("Interface flags: %s", flags);
+            unsigned flagsVal = (unsigned) strtoul(flags, NULL, 16);
+            if (flagsVal & IFF_UP)
+            {
+                ffStrbufSetStatic(&item->inf.status, "up");
+                FF_DEBUG("Interface is up but not connected");
+            }
+            else
+            {
+                ffStrbufSetStatic(&item->inf.status, "down");
+                FF_DEBUG("Interface is down");
+            }
+
             continue;
         }
+
+        ffStrbufSetStatic(&item->inf.status, "up");
 
         FF_DEBUG("Trying to detect wifi with iw");
         if (detectWifiWithIw(item, &buffer) != NULL)
