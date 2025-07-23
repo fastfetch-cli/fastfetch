@@ -3,7 +3,8 @@
     "$defs": {
         "colors": {
             "type": "string",
-            "enum": [
+            "description": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
+            "examples": [
                 "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
                 "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
             ]
@@ -52,6 +53,7 @@
                             "bar-monochrome"
                         ]
                     },
+                    "uniqueItems": true,
                     "default": [
                         "num",
                         "num-color"
@@ -150,13 +152,13 @@
             "properties": {
                 "system": {
                     "description": "System name to match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
@@ -170,13 +172,13 @@
                 },
                 "!system": {
                     "description": "System name to not match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
@@ -190,13 +192,13 @@
                 },
                 "arch": {
                     "description": "Architecture to match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
@@ -210,13 +212,13 @@
                 },
                 "!arch": {
                     "description": "Architecture to not match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
