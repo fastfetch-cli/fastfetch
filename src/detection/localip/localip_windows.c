@@ -95,6 +95,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
+        if (adapter->OperStatus != IfOperStatusUp)
+            continue;
+
         bool isDefaultRoute = adapter->IfIndex == defaultRouteIfIndex;
         if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
             continue;
