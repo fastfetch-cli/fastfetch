@@ -10,7 +10,7 @@ typedef struct FFLocalIpResult
     FFstrbuf mac;
     FFstrbuf flags;
     int32_t mtu;
-    int32_t speed;
+    int32_t speed; // in Mbps
     bool defaultRoute;
 } FFLocalIpResult;
 
