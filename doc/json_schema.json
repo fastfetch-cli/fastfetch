@@ -479,7 +479,7 @@
             "type": "string"
         },
         "versionFormat": {
-            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
+            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {project-name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
             "type": "string"
         },
         "vulkanFormat": {
