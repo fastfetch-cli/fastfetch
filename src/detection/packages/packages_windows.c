@@ -1,6 +1,7 @@
 #include "packages.h"
 #include "common/processing.h"
 #include "util/stringUtils.h"
+#include "util/path.h"
 
 #include <handleapi.h>
 #include <fileapi.h>
@@ -37,10 +38,11 @@ static void detectScoop(FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY scoopPath = ffStrbufCreateA(MAX_PATH + 3);
 
-    const char* scoopEnv = getenv("SCOOP");
-    if(ffStrSet(scoopEnv))
+    if(ffFindExecutableInPath("scoop.cmd", &scoopPath) == NULL)
     {
-        ffStrbufAppendS(&scoopPath, scoopEnv);
+        // C:\Users\$USER\scoop\shims\scoop.cmd
+        ffStrbufSubstrBeforeLastC(&scoopPath, '\\');
+        ffStrbufSubstrBeforeLastC(&scoopPath, '\\');
         ffStrbufAppendS(&scoopPath, "/apps/*");
     }
     else
