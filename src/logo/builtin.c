@@ -1623,16 +1623,6 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
-    // Evolinx
-    {
-        .names = {"Evolinx"},
-        .lines = FASTFETCH_DATATEXT_LOGO_EVOLINX,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-        },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_BLUE,
-    },
     // EvolutionOS
     {
         .names = {"EvolutionOS"},
