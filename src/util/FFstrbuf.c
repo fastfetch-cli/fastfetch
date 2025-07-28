@@ -398,7 +398,8 @@ bool ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
     if(strbuf->allocated == 0)
     {
         //static string
-        ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
+        if (index < strbuf->length)
+            ffStrbufInitNS(strbuf, index, strbuf->chars);
         return true;
     }
 
@@ -458,6 +459,26 @@ bool ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
         return false;
 
     ffStrbufSubstrAfter(strbuf, index);
+    return true;
+}
+
+bool ffStrbufSubstr(FFstrbuf* strbuf, uint32_t start, uint32_t end)
+{
+    if (__builtin_expect(start >= end, false))
+    {
+        ffStrbufClear(strbuf);
+        return false;
+    }
+
+    if (__builtin_expect(start == 0, false)) return ffStrbufSubstrBefore(strbuf, end);
+    if (__builtin_expect(end >= strbuf->length, false)) return ffStrbufSubstrAfter(strbuf, start - 1);
+
+    uint32_t len = end - start;
+    ffStrbufEnsureFixedLengthFree(strbuf, len); // In case of static string
+    memmove(strbuf->chars, strbuf->chars + start, len);
+
+    strbuf->length = len;
+    strbuf->chars[len] = '\0';
     return true;
 }
 

@@ -73,6 +73,7 @@ bool ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index); // Not including the
 bool ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
 bool ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
 bool ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c);
+bool ffStrbufSubstr(FFstrbuf* strbuf, uint32_t start, uint32_t end);
 
 FF_C_NODISCARD uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
 
