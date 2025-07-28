@@ -1961,7 +1961,8 @@
                                     },
                                     "hideFolders": {
                                         "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output\nDefault: /efi:/boot:/boot/efi"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
+                                        "default": "/efi:/boot:/boot/efi:/boot/firmware"
                                     },
                                     "hideFS": {
                                         "type": "string",

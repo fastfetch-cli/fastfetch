@@ -854,7 +854,7 @@
             "desc": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
             "arg": {
                 "type": "path",
-                "default": "/efi:/boot:/boot/efi"
+                "default": "/efi:/boot:/boot/efi:/boot/firmware"
             }
         },
         {
