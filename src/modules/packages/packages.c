@@ -23,6 +23,7 @@ void ffPrintPackages(FFPackagesOptions* options)
     uint32_t guixAll = counts.guixSystem + counts.guixUser + counts.guixHome;
     uint32_t hpkgAll = counts.hpkgSystem + counts.hpkgUser;
     uint32_t amAll = counts.amSystem + counts.amUser;
+    uint32_t scoopAll = counts.scoopUser + counts.scoopGlobal;
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -104,7 +105,15 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_PRINT_PACKAGE_NAME(brewCask, "brew-cask")
         }
         FF_PRINT_PACKAGE(macports)
-        FF_PRINT_PACKAGE(scoop)
+        if (options->combined)
+        {
+            FF_PRINT_PACKAGE_ALL(scoop);
+        }
+        else
+        {
+            FF_PRINT_PACKAGE_NAME(scoopUser, counts.scoopGlobal ? "scoop-user" : "scoop")
+            FF_PRINT_PACKAGE_NAME(scoopGlobal, "scoop-global")
+        }
         FF_PRINT_PACKAGE(choco)
         FF_PRINT_PACKAGE(pkgtool)
         FF_PRINT_PACKAGE(paludis)
@@ -162,7 +171,8 @@ void ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.brew, "brew"),
             FF_FORMAT_ARG(counts.brewCask, "brew-cask"),
             FF_FORMAT_ARG(counts.macports, "macports"),
-            FF_FORMAT_ARG(counts.scoop, "scoop"),
+            FF_FORMAT_ARG(counts.scoopUser, "scoop-user"),
+            FF_FORMAT_ARG(counts.scoopGlobal, "scoop-global"),
             FF_FORMAT_ARG(counts.choco, "choco"),
             FF_FORMAT_ARG(counts.pkgtool, "pkgtool"),
             FF_FORMAT_ARG(counts.paludis, "paludis"),
@@ -521,7 +531,8 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(pkgsrc)
     FF_APPEND_PACKAGE_COUNT(macports)
     FF_APPEND_PACKAGE_COUNT(rpm)
-    FF_APPEND_PACKAGE_COUNT(scoop)
+    FF_APPEND_PACKAGE_COUNT(scoopUser)
+    FF_APPEND_PACKAGE_COUNT(scoopGlobal)
     FF_APPEND_PACKAGE_COUNT(snap)
     FF_APPEND_PACKAGE_COUNT(soar)
     FF_APPEND_PACKAGE_COUNT(sorcery)
@@ -558,7 +569,8 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of brew packages", "brew"},
         {"Number of brew-cask packages", "brew-cask"},
         {"Number of macports packages", "macports"},
-        {"Number of scoop packages", "scoop"},
+        {"Number of scoop-user packages", "scoop-user"},
+        {"Number of scoop-global packages", "scoop-global"},
         {"Number of choco packages", "choco"},
         {"Number of pkgtool packages", "pkgtool"},
         {"Number of paludis packages", "paludis"},
