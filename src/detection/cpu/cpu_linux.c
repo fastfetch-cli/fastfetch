@@ -100,7 +100,9 @@ static void detectQualcomm(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips
 
-    if (ffStrbufEqualS(&cpu->name, "SM8750-AC"))
+    if (ffStrbufEqualS(&cpu->name, "SM8735"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8s Gen 4 [SM8735]");
+    else if (ffStrbufEqualS(&cpu->name, "SM8750-AC"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite for Galaxy [SM8750-AC]");
     else if (ffStrbufEqualS(&cpu->name, "SM8750-3"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750-3]");
@@ -121,6 +123,8 @@ static void detectQualcomm(FFCPUResult* cpu)
     else if (ffStrbufEqualS(&cpu->name, "SM8450"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 1 [SM8450]");
 
+    else if (ffStrbufEqualS(&cpu->name, "SM7750"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 4 [SM7750]");
     else if (ffStrbufEqualS(&cpu->name, "SM7675"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 3 [SM7675]");
     else if (ffStrbufEqualS(&cpu->name, "SM7635"))
@@ -134,6 +138,8 @@ static void detectQualcomm(FFCPUResult* cpu)
     else if (ffStrbufEqualS(&cpu->name, "SM7450"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 1 [SM7450]");
 
+    else if (ffStrbufEqualS(&cpu->name, "SM6650"))
+        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 4 [SM6650]");
     else if (ffStrbufEqualS(&cpu->name, "SM6375-AC"))
         ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6s Gen 3 [SM6375-AC]");
     else if (ffStrbufEqualS(&cpu->name, "SM6475"))
