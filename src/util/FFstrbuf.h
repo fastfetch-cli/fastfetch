@@ -96,6 +96,8 @@ void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
 
+int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint);
+
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 {
     FFstrbuf strbuf;

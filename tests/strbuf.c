@@ -711,6 +711,15 @@ int main(void)
         ffStrbufDestroy(&strbuf);
     }
 
+    {
+        ffStrbufAppendUtf32CodePoint(&strbuf, 0x6587);
+        ffStrbufAppendUtf32CodePoint(&strbuf, 0x6cc9);
+        ffStrbufAppendUtf32CodePoint(&strbuf, 0x9a7f);
+        VERIFY(ffStrbufEqualS(&strbuf, u8"文泉驿"));
+
+        ffStrbufDestroy(&strbuf);
+    }
+
     //Success
     puts("\e[32mAll tests passed!" FASTFETCH_TEXT_MODIFIER_RESET);
 }

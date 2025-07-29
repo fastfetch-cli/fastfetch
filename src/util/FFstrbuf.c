@@ -682,3 +682,35 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
 
     return false;
 }
+
+int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint)
+{
+    if (codepoint <= 0x7F) {
+        ffStrbufAppendC(strbuf, (char)codepoint);
+        return 1;
+    } else if (codepoint <= 0x7FF) {
+        ffStrbufAppendNS(strbuf, 2, (char[]){
+            (char) (0xC0 | (codepoint >> 6)),
+            (char) (0x80 | (codepoint & 0x3F))
+        });
+        return 2;
+    } else if (codepoint <= 0xFFFF) {
+        ffStrbufAppendNS(strbuf, 3, (char[]){
+            (char) (0xE0 | (codepoint >> 12)),
+            (char) (0x80 | ((codepoint >> 6) & 0x3F)),
+            (char) (0x80 | (codepoint & 0x3F))
+        });
+        return 3;
+    } else if (codepoint <= 0x10FFFF) {
+        ffStrbufAppendNS(strbuf, 4, (char[]){
+            (char) (0xF0 | (codepoint >> 18)),
+            (char) (0x80 | ((codepoint >> 12) & 0x3F)),
+            (char) (0x80 | ((codepoint >> 6) & 0x3F)),
+            (char) (0x80 | (codepoint & 0x3F))
+        });
+        return 4;
+    }
+
+    ffStrbufAppendS(strbuf, "�"); // U+FFFD REPLACEMENT CHARACTER
+    return 1;
+}
