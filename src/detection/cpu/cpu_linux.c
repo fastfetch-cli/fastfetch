@@ -100,91 +100,75 @@ static void detectQualcomm(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips
 
-    if (ffStrbufEqualS(&cpu->name, "SM8735"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8s Gen 4 [SM8735]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8750-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite for Galaxy [SM8750-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8750-3"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750-3]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8750"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8635"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8s Gen 3 [SM8635]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8650-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 3 for Galaxy [SM8650-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8650"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 3 [SM8650]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8550-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 2 for Galaxy [SM8550-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8550"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 2 [SM8550]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8475"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8+ Gen 1 [SM8475]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 1 [SM8450]");
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 2, NULL, 10);
+    const char* name = NULL;
 
-    else if (ffStrbufEqualS(&cpu->name, "SM7750"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 4 [SM7750]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7675"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 3 [SM7675]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7635"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7s Gen 3 [SM7635]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7550"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 3 [SM7550]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7475"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 2 [SM7550]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7435"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7s Gen 2 [SM7435]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 1 [SM7450]");
+    switch (code)
+    {
+        case 8735: name = "8s Gen 4"; break;
+        case 8750: name = "8 Elite"; break;
+        case 8635: name = "8s Gen 3"; break;
+        case 8650: name = "8 Gen 3"; break;
+        case 8550: name = "8 Gen 2"; break;
+        case 8475: name = "8+ Gen 1"; break;
+        case 8450: name = "8 Gen 1"; break;
+        case 7750: name = "7 Gen 4"; break;
+        case 7675: name = "7+ Gen 3"; break;
+        case 7635: name = "7s Gen 3"; break;
+        case 7550: name = "7 Gen 3"; break;
+        case 7475: name = "7+ Gen 2"; break;
+        case 7435: name = "7s Gen 2"; break;
+        case 7450: name = "7 Gen 1"; break;
+        case 6650: name = "6 Gen 4"; break;
+        case 6375: name = "6s Gen 3"; break;
+        case 6475: name = "6 Gen 3"; break;
+        case 6115: name = "6s Gen 1"; break;
+        case 6450: name = "6 Gen 1"; break;
+        case 4635: name = "4s Gen 2"; break;
+        case 4450: name = "4 Gen 2"; break;
+        case 4375: name = "4 Gen 1"; break;
+    }
 
-    else if (ffStrbufEqualS(&cpu->name, "SM6650"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 4 [SM6650]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6375-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6s Gen 3 [SM6375-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6475"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 3 [SM6475]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6115"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6s Gen 1 [SM6115]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 1 [SM6450]");
-
-    else if (ffStrbufEqualS(&cpu->name, "SM4635"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4s Gen 2 [SM4635]");
-    else if (ffStrbufEqualS(&cpu->name, "SM4450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 2 [SM4450]");
-    else if (ffStrbufEqualS(&cpu->name, "SM4375"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 1 [SM4375]");
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "Qualcomm Snapdragon %s [%s]", name, str);
+        return;
+    }
 }
 
 static void detectMediaTek(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_MediaTek_systems_on_chips
 
-    if (ffStrbufEqualS(&cpu->name, "MT6991"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6991Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6989Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT6989Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8796Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT8796Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6989"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT6989]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8796"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT8796]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6985W"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200+ [MT6985W]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6985"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200 [MT6985]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6983W"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT6983W]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/T"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT8798Z/T]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6983Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT6983Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/C"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT8798Z/C]");
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 2, NULL, 10);
+    const char* name = NULL;
+
+    switch (code) // The SOC code of MTK Dimensity series is full of mess
+    {
+        case 6991: name = "9400"; break;
+        case 6989:
+        case 8796: name = "9300"; break;
+        case 6985: name = "9200"; break;
+        case 6983:
+        case 8798: name = "9000"; break;
+
+        case 6899: name = "8400"; break;
+        case 6897:
+        case 8792: name = "8300"; break;
+        case 6896: name = "8200"; break;
+        case 8795: name = "8100"; break;
+        case 6895: name = "8000"; break;
+    }
+
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "MediaTek Dimensity %s [%s]", name, str);
+        return;
+    }
 }
 
 static void detectAndroid(FFCPUResult* cpu)
