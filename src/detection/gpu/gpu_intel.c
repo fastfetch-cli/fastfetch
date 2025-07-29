@@ -10,7 +10,7 @@ struct FFIgclData {
     FF_LIBRARY_SYMBOL(ctlEnumerateDevices)
     FF_LIBRARY_SYMBOL(ctlGetDeviceProperties)
     FF_LIBRARY_SYMBOL(ctlEnumTemperatureSensors)
-    FF_LIBRARY_SYMBOL(ctlTemperatureGetState)
+    FF_LIBRARY_SYMBOL(ctlTemperatureGetProperties)
     FF_LIBRARY_SYMBOL(ctlEnumMemoryModules)
     FF_LIBRARY_SYMBOL(ctlMemoryGetProperties)
     FF_LIBRARY_SYMBOL(ctlMemoryGetState)
@@ -41,7 +41,7 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumerateDevices)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlGetDeviceProperties)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumTemperatureSensors)
-        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlTemperatureGetState)
+        FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlTemperatureGetProperties)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlEnumMemoryModules)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetProperties)
         FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libigcl, igclData, ctlMemoryGetState)
@@ -204,19 +204,20 @@ const char* ffDetectIntelGpuInfo(const FFGpuDriverCondition* cond, FFGpuDriverRe
         uint32_t sensorCount = ARRAY_SIZE(sensors);
         if (igclData.ffctlEnumTemperatureSensors(device, &sensorCount, sensors) == CTL_RESULT_SUCCESS && sensorCount > 0)
         {
-            double sumValue = 0;
-            uint32_t availableCount = 0;
             for (uint32_t iSensor = 0; iSensor < sensorCount; iSensor++)
             {
-                double value;
-                if (igclData.ffctlTemperatureGetState(sensors[iSensor], &value) == CTL_RESULT_SUCCESS)
+                ctl_temp_properties_t props = { .Size = sizeof(props) };
+                // The official sample code does not set Version
+                // https://github.com/intel/drivers.gpu.control-library/blob/1bbacbf3814f2fd0d2b930cdf42fad83f3628db9/Samples/Telemetry_Samples/Sample_TelemetryAPP.cpp#L256
+                if (igclData.ffctlTemperatureGetProperties(sensors[iSensor], &props) == CTL_RESULT_SUCCESS)
                 {
-                    sumValue += value;
-                    availableCount++;
+                    if (props.type == CTL_TEMP_SENSORS_GPU)
+                    {
+                        *result.temp = props.maxTemperature;
+                        break;
+                    }
                 }
             }
-            if (availableCount > 0)
-                *result.temp = sumValue / availableCount;
         }
     }
 
