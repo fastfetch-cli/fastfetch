@@ -255,6 +255,29 @@ static const char* getOpenbox(FFstrbuf* result)
     return "Failed to run command `openbox --version`";
 }
 
+static const char* getLabwc(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("labwc", &path);
+    if (error) return "Failed to find labwc executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCommonWmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "--version",
+        NULL
+    }) == NULL)
+    { // labwc 0.9.0 (+xwayland +nls +rsvg +libsfdo)
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `openbox --version`";
+}
+
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 {
     if (!wmName)
@@ -280,6 +303,9 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "Openbox"))
         return getOpenbox(result);
+
+    if (ffStrbufEqualS(wmName, "labwc"))
+        return getLabwc(result);
 
     return "Unsupported WM";
 }
