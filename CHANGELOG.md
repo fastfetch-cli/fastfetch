@@ -1,3 +1,35 @@
+# 2.49.0
+
+Changes:
+* Due to more restricted permissions of macOS Tahoe, SSID detection on macOS 26+ requires root privileges. `<redacted>` will be displayed otherwise.
+
+Features:
+* Improve `nouveau` driver support for `--gpu-driver-specific` (GPU, Linux)
+    * VRAM size detection
+    * GPU temperature detection
+    * Core count detection
+* Improve scoop package manager detection (Packages, Windows)
+    * Support `scoop-global`
+    * Read scoop's config file to find the installation path of scoop
+* Detect more Snapdragon SOCs (CPU, Android)
+* 
+
+Bugfixes:
+* Improve accuracy of flatpak count detection (#1856, Packages, Linux)
+* Remove qi package manager support (#1858, Packages, Linux)
+* Improve LocalIP module on Windows (LocalIP, Windows)
+    * Improve default route detection when multiple network interfaces are connected
+    * Fix link speed calcuation
+* Fix interface status when the interface is up but not connected (Wifi, Linux)
+* Fix variable names in custom format
+    * `full-path` to `path` (Editor)
+    * `session` to `session-name` (Users)
+    * `name` to `project-name` (Version)
+
+Logos:
+* Add `Aeon`
+* Remove `Evolinx`
+
 # 2.48.1
 
 Features:
