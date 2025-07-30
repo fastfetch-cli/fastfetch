@@ -68,11 +68,11 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
         }
         else
         {
-            ffStrbufClear(&buffer2);
             ffParseSize(dev->bytesRead, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
+            ffStrbufClear(&buffer2);
             ffParseSize(dev->bytesWritten, &buffer2);
-            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
+            if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
                 FF_FORMAT_ARG(buffer, "size-read"),
