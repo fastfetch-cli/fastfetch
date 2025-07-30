@@ -1064,6 +1064,12 @@
                         },
                         "spaceBeforeUnit": {
                             "$ref": "#/$defs/spaceBeforeUnit"
+                        },
+                        "width": {
+                            "type": "integer",
+                            "description": "Set the width of the percentage number, in number of characters",
+                            "minimum": 0,
+                            "default": 0
                         }
                     }
                 },

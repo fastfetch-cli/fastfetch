@@ -186,7 +186,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConf
                 ffStrbufAppendF(buffer, "\e[%sm", colorGreen);
         }
     }
-    ffStrbufAppendF(buffer, "%.*f%s%%", options->percentNdigits, percent,
+    ffStrbufAppendF(buffer, "%*.*f%s%%", options->percentWidth, options->percentNdigits, percent,
         options->percentSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
 
     if (colored && !options->pipe)

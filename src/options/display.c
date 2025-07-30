@@ -257,6 +257,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (error) return error;
                 options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
+
+            yyjson_val* width = yyjson_obj_get(val, "width");
+            if (width) options->percentWidth = (uint8_t) yyjson_get_uint(width);
         }
         else if (ffStrEqualsIgnCase(key, "bar"))
         {
@@ -598,6 +601,8 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
                 {},
             });
         }
+        else if(ffStrEqualsIgnCase(subkey, "width"))
+            options->percentWidth = (uint8_t) ffOptionParseUInt32(key, value);
         else
             return false;
     }
@@ -695,6 +700,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
     options->percentSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
+    options->percentWidth = 0;
 
     options->freqNdigits = 2;
     options->freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;

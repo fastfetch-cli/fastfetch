@@ -659,6 +659,15 @@
             }
         },
         {
+            "long": "percent-width",
+            "desc": "Specify the width of the percentage number, in number of characters",
+            "remark": "This option affects only percentage numbers, not bars",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
             "long": "bar-char-elapsed",
             "desc": "Set the character to use in the elapsed part of percentage bars",
             "arg": {
