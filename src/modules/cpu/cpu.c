@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
 #include "common/temps.h"
+#include "common/frequency.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
@@ -77,7 +78,7 @@ void ffPrintCPU(FFCPUOptions* options)
             if(freq > 0)
             {
                 ffStrbufAppendS(&str, " @ ");
-                ffParseFrequency(freq, &str);
+                ffFreqAppendNum(freq, &str);
             }
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
@@ -91,9 +92,9 @@ void ffPrintCPU(FFCPUOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY freqBase = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyBase, &freqBase);
+            ffFreqAppendNum(cpu.frequencyBase, &freqBase);
             FF_STRBUF_AUTO_DESTROY freqMax = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyMax, &freqMax);
+            ffFreqAppendNum(cpu.frequencyMax, &freqMax);
 
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);

@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/swap/swap.h"
 #include "modules/swap/swap.h"
 #include "util/stringUtils.h"
@@ -28,10 +28,10 @@ void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage)
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(storage->bytesUsed, &usedPretty);
+    ffSizeAppendNum(storage->bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(storage->bytesTotal, &totalPretty);
+    ffSizeAppendNum(storage->bytesTotal, &totalPretty);
 
     double percentage = storage->bytesTotal == 0
         ? 0

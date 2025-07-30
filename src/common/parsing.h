@@ -24,7 +24,3 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
 
 void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty);
 int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2);
-
-void ffParseSize(uint64_t bytes, FFstrbuf* result);
-bool ffParseFrequency(uint32_t mhz, FFstrbuf* result);
-void ffParseDuration(uint64_t totalSeconds, FFstrbuf* result);

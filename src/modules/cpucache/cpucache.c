@@ -1,5 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/size.h"
 #include "detection/cpucache/cpucache.h"
 #include "modules/cpucache/cpucache.h"
 #include "util/stringUtils.h"
@@ -45,7 +46,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
                 ffStrbufAppendS(&buffer, ", ");
             if (src->num > 1)
                 ffStrbufAppendF(&buffer, "%ux", src->num);
-            ffParseSize(src->size, &buffer);
+            ffSizeAppendNum(src->size, &buffer);
             ffStrbufAppendF(&buffer, " (%c)", typeStr);
 
             sum += src->size * src->num;
@@ -59,7 +60,7 @@ static void printCPUCacheNormal(const FFCPUCacheResult* result, FFCPUCacheOption
         else
         {
             FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
-            ffParseSize(sum, &buffer2);
+            ffSizeAppendNum(sum, &buffer2);
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                 FF_FORMAT_ARG(buffer, "result"),
                 FF_FORMAT_ARG(buffer2, "sum"),
@@ -79,7 +80,7 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
         uint32_t value = 0;
         FF_LIST_FOR_EACH(FFCPUCache, src, result->caches[i])
             value += src->size * src->num;
-        ffParseSize(value, &buffer);
+        ffSizeAppendNum(value, &buffer);
         ffStrbufAppendF(&buffer, " (L%u)", i + 1);
         sum += value;
     }
@@ -92,7 +93,7 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
     else
     {
         FF_STRBUF_AUTO_DESTROY buffer2 = ffStrbufCreate();
-        ffParseSize(sum, &buffer2);
+        ffSizeAppendNum(sum, &buffer2);
         FF_PRINT_FORMAT_CHECKED(FF_CPUCACHE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
             FF_FORMAT_ARG(buffer, "result"),
             FF_FORMAT_ARG(buffer2, "sum"),

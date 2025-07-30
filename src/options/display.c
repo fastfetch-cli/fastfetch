@@ -78,6 +78,28 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             options->brightColor = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
             return "`display.binaryPrefix` has been renamed to `display.size.binaryPrefix`. Sorry for another break change.";
+        else if (ffStrEqualsIgnCase(key, "duration"))
+        {
+            if (!yyjson_is_obj(val))
+                return "display.duration must be an object";
+
+            yyjson_val* abbreviation = yyjson_obj_get(val, "abbreviation");
+            if (abbreviation) options->durationAbbreviation = yyjson_get_bool(abbreviation);
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
+        }
         else if (ffStrEqualsIgnCase(key, "size"))
         {
             if (!yyjson_is_obj(val))
@@ -119,6 +141,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->sizeNdigits = (uint8_t) yyjson_get_uint(ndigits);
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         }
         else if (ffStrEqualsIgnCase(key, "temp"))
         {
@@ -162,6 +198,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 yyjson_val* red = yyjson_obj_get(color, "red");
                 if (red) ffOptionParseColor(yyjson_get_str(red), &options->tempColorRed);
             }
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         }
         else if (ffStrEqualsIgnCase(key, "percent"))
         {
@@ -192,6 +242,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
                 yyjson_val* red = yyjson_obj_get(color, "red");
                 if (red) ffOptionParseColor(yyjson_get_str(red), &options->percentColorRed);
+            }
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
         }
         else if (ffStrEqualsIgnCase(key, "bar"))
@@ -288,6 +352,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         }
         else
             return "Unknown display property";
@@ -403,6 +481,23 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         fprintf(stderr, "--binary-prefix has been renamed to --size-binary-prefix\n");
         exit(477);
     }
+    else if(ffStrStartsWithIgnCase(key, "--duration-"))
+    {
+        const char* subkey = key + strlen("--duration-");
+        if(ffStrEqualsIgnCase(subkey, "abbreviation"))
+            options->durationAbbreviation = ffOptionParseBoolean(value);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
+        else
+            return false;
+    }
     else if(ffStrStartsWithIgnCase(key, "--size-"))
     {
         const char* subkey = key + strlen("--size-");
@@ -430,6 +525,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
                 { "ZB", 7 },
                 { "YB", 8 },
                 {}
+            });
+        }
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
             });
         }
         else
@@ -460,6 +564,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseColor(value, &options->tempColorYellow);
         else if(ffStrEqualsIgnCase(subkey, "color-red"))
             ffOptionParseColor(value, &options->tempColorRed);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -476,6 +589,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseColor(value, &options->percentColorYellow);
         else if(ffStrEqualsIgnCase(subkey, "color-red"))
             ffOptionParseColor(value, &options->percentColorRed);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -504,6 +626,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         const char* subkey = key + strlen("--freq-");
         if(ffStrEqualsIgnCase(subkey, "ndigits"))
             options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -531,10 +662,13 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->debugMode = false;
     #endif
 
+    options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->hideCursor = false;
     options->sizeBinaryPrefix = FF_SIZE_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
     options->sizeMaxPrefix = UINT8_MAX;
+    options->sizeSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
+
     options->stat = -1;
     options->noBuffer = false;
     options->keyWidth = 0;
@@ -546,18 +680,24 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->tempColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    options->tempSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
     ffStrbufInitStatic(&options->barCharTotal, "-");
     ffStrbufInitStatic(&options->barBorderLeft, "[ ");
     ffStrbufInitStatic(&options->barBorderRight, " ]");
     options->barWidth = 10;
+    options->durationAbbreviation = false;
+    options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentType = 9;
     options->percentNdigits = 0;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    options->percentSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
+
     options->freqNdigits = 2;
+    options->freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->fractionNdigits = -1;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));

@@ -1,3 +1,4 @@
+#include "common/duration.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
@@ -23,7 +24,7 @@ void ffPrintUptime(FFUptimeOptions* options)
     {
         ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        ffParseDuration((uptime + 500) / 1000, &buffer);
+        ffDurationAppendNum((uptime + 500) / 1000, &buffer);
 
         ffStrbufPutTo(&buffer, stdout);
     }

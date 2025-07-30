@@ -1,5 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/size.h"
 #include "modules/kernel/kernel.h"
 #include "util/stringUtils.h"
 
@@ -19,7 +20,7 @@ void ffPrintKernel(FFKernelOptions* options)
     else
     {
         FF_STRBUF_AUTO_DESTROY str = ffStrbufCreate();
-        ffParseSize(info->pageSize, &str);
+        ffSizeAppendNum(info->pageSize, &str);
         FF_PRINT_FORMAT_CHECKED(FF_KERNEL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
             FF_FORMAT_ARG(info->name, "sysname"),
             FF_FORMAT_ARG(info->release, "release"),

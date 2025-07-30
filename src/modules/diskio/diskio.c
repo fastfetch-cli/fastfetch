@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
+#include "common/size.h"
 #include "detection/diskio/diskio.h"
 #include "modules/diskio/diskio.h"
 #include "util/stringUtils.h"
@@ -57,21 +57,21 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            ffParseSize(dev->bytesRead, &buffer);
+            ffSizeAppendNum(dev->bytesRead, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (R) - ");
 
-            ffParseSize(dev->bytesWritten, &buffer);
+            ffSizeAppendNum(dev->bytesWritten, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (W)");
             ffStrbufPutTo(&buffer, stdout);
         }
         else
         {
-            ffParseSize(dev->bytesRead, &buffer);
+            ffSizeAppendNum(dev->bytesRead, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufClear(&buffer2);
-            ffParseSize(dev->bytesWritten, &buffer2);
+            ffSizeAppendNum(dev->bytesWritten, &buffer2);
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){

@@ -351,10 +351,11 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/common/percent.c
     src/common/commandoption.c
+    src/common/duration.c
     src/common/font.c
     src/common/format.c
+    src/common/frequency.c
     src/common/init.c
     src/common/jsonconfig.c
     src/common/library.c
@@ -363,9 +364,11 @@ set(LIBFASTFETCH_SRC
     src/common/networking/networking_common.c
     src/common/option.c
     src/common/parsing.c
+    src/common/percent.c
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/common/size.c
     src/common/temps.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c

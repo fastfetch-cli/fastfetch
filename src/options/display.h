@@ -17,6 +17,13 @@ typedef enum __attribute__((__packed__)) FFTemperatureUnit
     FF_TEMPERATURE_UNIT_KELVIN,
 } FFTemperatureUnit;
 
+typedef enum __attribute__((__packed__)) FFSpaceBeforeUnitType
+{
+    FF_SPACE_BEFORE_UNIT_DEFAULT,
+    FF_SPACE_BEFORE_UNIT_ALWAYS,
+    FF_SPACE_BEFORE_UNIT_NEVER,
+} FFSpaceBeforeUnitType;
+
 typedef struct FFOptionsDisplay
 {
     //If one of those is empty, ffLogoPrint will set them
@@ -36,15 +43,19 @@ typedef struct FFOptionsDisplay
     bool debugMode;
     #endif
     bool disableLinewrap;
+    bool durationAbbreviation;
+    FFSpaceBeforeUnitType durationSpaceBeforeUnit;
     bool hideCursor;
     FFSizeBinaryPrefixType sizeBinaryPrefix;
     uint8_t sizeNdigits;
     uint8_t sizeMaxPrefix;
+    FFSpaceBeforeUnitType sizeSpaceBeforeUnit;
     FFTemperatureUnit tempUnit;
     uint8_t tempNdigits;
     FFstrbuf tempColorGreen;
     FFstrbuf tempColorYellow;
     FFstrbuf tempColorRed;
+    FFSpaceBeforeUnitType tempSpaceBeforeUnit;
     FFstrbuf barCharElapsed;
     FFstrbuf barCharTotal;
     FFstrbuf barBorderLeft;
@@ -55,12 +66,15 @@ typedef struct FFOptionsDisplay
     FFstrbuf percentColorGreen;
     FFstrbuf percentColorYellow;
     FFstrbuf percentColorRed;
+    FFSpaceBeforeUnitType percentSpaceBeforeUnit;
     bool noBuffer;
     FFModuleKeyType keyType;
     uint16_t keyWidth;
     uint16_t keyPaddingLeft;
     int8_t freqNdigits;
+    FFSpaceBeforeUnitType freqSpaceBeforeUnit;
     int8_t fractionNdigits;
+
     FFlist constants; // list of FFstrbuf
 } FFOptionsDisplay;
 

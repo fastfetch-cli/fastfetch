@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
-#include "common/parsing.h"
+#include "common/duration.h"
 #include "common/temps.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
@@ -59,7 +59,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 if(str.length > 0)
                     ffStrbufAppendS(&str, " (");
 
-                ffParseDuration((uint32_t) result->timeRemaining, &str);
+                ffDurationAppendNum((uint32_t) result->timeRemaining, &str);
                 ffStrbufAppendS(&str, " remaining)");
             }
         }

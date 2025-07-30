@@ -1,8 +1,9 @@
 #include "common/percent.h"
-#include "common/parsing.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/temps.h"
+#include "common/size.h"
+#include "common/frequency.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
@@ -42,7 +43,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if(gpu->frequency > 0)
         {
             ffStrbufAppendS(&output, " @ ");
-            ffParseFrequency(gpu->frequency, &output);
+            ffFreqAppendNum(gpu->frequency, &output);
         }
 
         if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
@@ -59,10 +60,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {
                 if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
                 {
-                    ffParseSize(gpu->dedicated.used, &output);
+                    ffSizeAppendNum(gpu->dedicated.used, &output);
                     ffStrbufAppendS(&output, " / ");
                 }
-                ffParseSize(gpu->dedicated.total, &output);
+                ffSizeAppendNum(gpu->dedicated.total, &output);
             }
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
@@ -94,8 +95,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY dUsed = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY dPercentNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY dPercentBar = ffStrbufCreate();
-        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.total, &dTotal);
-        if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.used, &dUsed);
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->dedicated.total, &dTotal);
+        if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->dedicated.used, &dUsed);
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
         {
             double percent = (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0;
@@ -109,8 +110,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY sUsed = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY sPercentNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY sPercentBar = ffStrbufCreate();
-        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.total, &sTotal);
-        if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.used, &sUsed);
+        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->shared.total, &sTotal);
+        if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->shared.used, &sUsed);
         if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET && gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
         {
             double percent = (double) gpu->shared.used / (double) gpu->shared.total * 100.0;
@@ -121,7 +122,7 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         }
 
         FF_STRBUF_AUTO_DESTROY frequency = ffStrbufCreate();
-        ffParseFrequency(gpu->frequency, &frequency);
+        ffFreqAppendNum(gpu->frequency, &frequency);
 
         FF_STRBUF_AUTO_DESTROY coreUsageNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY coreUsageBar = ffStrbufCreate();

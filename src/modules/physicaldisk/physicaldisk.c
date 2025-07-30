@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/temps.h"
+#include "common/size.h"
 #include "detection/physicaldisk/physicaldisk.h"
 #include "modules/physicaldisk/physicaldisk.h"
 #include "util/stringUtils.h"
@@ -52,7 +52,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
     {
         formatKey(options, dev, result.length == 1 ? 0 : index + 1, &key);
         ffStrbufClear(&buffer);
-        ffParseSize(dev->size, &buffer);
+        ffSizeAppendNum(dev->size, &buffer);
 
         const char* physicalType = dev->type & FF_PHYSICALDISK_TYPE_HDD
             ? "HDD"

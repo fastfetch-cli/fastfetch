@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/btrfs/btrfs.h"
 #include "modules/btrfs/btrfs.h"
 #include "util/stringUtils.h"
@@ -34,11 +35,11 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(used, &usedPretty);
+    ffSizeAppendNum(used, &usedPretty);
     FF_STRBUF_AUTO_DESTROY allocatedPretty = ffStrbufCreate();
-    ffParseSize(allocated, &allocatedPretty);
+    ffSizeAppendNum(allocated, &allocatedPretty);
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(total, &totalPretty);
+    ffSizeAppendNum(total, &totalPretty);
 
     double usedPercentage = total > 0 ? (double) used / (double) total * 100.0 : 0;
     double allocatedPercentage = total > 0 ? (double) allocated / (double) total * 100.0 : 0;
@@ -74,9 +75,9 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
             ffPercentAppendBar(&allocatedPercentageBar, allocatedPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY nodeSizePretty = ffStrbufCreate();
-        ffParseSize(result->nodeSize, &nodeSizePretty);
+        ffSizeAppendNum(result->nodeSize, &nodeSizePretty);
         FF_STRBUF_AUTO_DESTROY sectorSizePretty = ffStrbufCreate();
-        ffParseSize(result->sectorSize, &sectorSizePretty);
+        ffSizeAppendNum(result->sectorSize, &sectorSizePretty);
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),

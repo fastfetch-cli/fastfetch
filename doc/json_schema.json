@@ -232,6 +232,24 @@
                 }
             }
         },
+        "spaceBeforeUnit": {
+            "type": "string",
+            "description": "Whether to put a space before the unit",
+            "oneOf": [
+                {
+                    "const": "default",
+                    "description": "Use the default behavior of the module"
+                },
+                {
+                    "const": "always",
+                    "description": "Always add a space before the unit"
+                },
+                {
+                    "const": "never",
+                    "description": "Never add a space before the unit"
+                }
+            ]
+        },
 
 
         "batteryFormat": {
@@ -923,6 +941,9 @@
                             "minimum": 0,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -965,6 +986,9 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -1037,6 +1061,9 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -1051,6 +1078,23 @@
                             "minimum": -1,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        }
+                    }
+                },
+                "duration": {
+                    "type": "object",
+                    "description": "Set how duration values should be displayed",
+                    "properties": {
+                        "abbreviation": {
+                            "type": "boolean",
+                            "description": "Set whether to abbreviate duration values\nIf true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+                            "default": false
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
