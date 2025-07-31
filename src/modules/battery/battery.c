@@ -120,7 +120,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             FF_FORMAT_ARG(hours, "time-hours"),
             FF_FORMAT_ARG(minutes, "time-minutes"),
             FF_FORMAT_ARG(seconds, "time-seconds"),
-            FF_FORMAT_ARG(result->timeRemaining, "time-formatted"),
+            FF_FORMAT_ARG(timeStr, "time-formatted"),
         }));
     }
 }
