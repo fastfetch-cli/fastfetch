@@ -296,6 +296,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Battery time remaining hours", "time-hours"},
         {"Battery time remaining minutes", "time-minutes"},
         {"Battery time remaining seconds", "time-seconds"},
+        {"Battery time remaining (formatted)", "time-formatted"},
     }))
 };
 

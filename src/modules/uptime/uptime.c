@@ -125,6 +125,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Years integer after boot", "years"},
         {"Days of year after boot", "days-of-year"},
         {"Years fraction after boot", "years-fraction"},
+        {"Formatted uptime", "formatted"},
     }))
 };
 
