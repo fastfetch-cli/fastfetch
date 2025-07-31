@@ -275,7 +275,7 @@ static const char* getLabwc(FFstrbuf* result)
         return NULL;
     }
 
-    return "Failed to run command `openbox --version`";
+    return "Failed to run command `labwc --version`";
 }
 
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
