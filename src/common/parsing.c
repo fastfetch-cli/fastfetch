@@ -2,7 +2,6 @@
 #include "common/parsing.h"
 
 #include <ctype.h>
-#include <inttypes.h>
 
 #ifdef _WIN32
     #pragma GCC diagnostic push
@@ -58,56 +57,6 @@ void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty)
 
     if(version->patch > 0)
         ffStrbufAppendF(pretty, ".%u", version->patch);
-}
-
-static void parseSize(FFstrbuf* result, uint64_t bytes, uint32_t base, const char** prefixes)
-{
-    double size = (double) bytes;
-    uint8_t counter = 0;
-
-    while(size >= base && counter < instance.config.display.sizeMaxPrefix && prefixes[counter + 1])
-    {
-        size /= base;
-        counter++;
-    }
-
-    if(counter == 0)
-        ffStrbufAppendF(result, "%" PRIu64 " %s", bytes, prefixes[0]);
-    else
-        ffStrbufAppendF(result, "%.*f %s", instance.config.display.sizeNdigits, size, prefixes[counter]);
-}
-
-void ffParseSize(uint64_t bytes, FFstrbuf* result)
-{
-    switch (instance.config.display.sizeBinaryPrefix)
-    {
-        case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
-            parseSize(result, bytes, 1024, (const char*[]) {"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", NULL});
-            break;
-        case FF_SIZE_BINARY_PREFIX_TYPE_SI:
-            parseSize(result, bytes, 1000, (const char*[]) {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", NULL});
-            break;
-        case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
-            parseSize(result, bytes, 1024, (const char*[]) {"B", "KB", "MB", "GB", "TB", NULL});
-            break;
-        default:
-            parseSize(result, bytes, 1024, (const char*[]) {"B", NULL});
-            break;
-    }
-}
-
-bool ffParseFrequency(uint32_t mhz, FFstrbuf* result)
-{
-    if (mhz == 0)
-        return false;
-
-    int8_t ndigits = instance.config.display.freqNdigits;
-
-    if (ndigits >= 0)
-        ffStrbufAppendF(result, "%.*f GHz", ndigits, mhz / 1000.);
-    else
-        ffStrbufAppendF(result, "%u MHz", (unsigned) mhz);
-    return true;
 }
 
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)
@@ -187,61 +136,6 @@ void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, co
     {
         ffStrbufAppend(buffer, gtk4);
         ffStrbufAppendS(buffer, " [GTK4]");
-    }
-}
-
-void ffParseDuration(uint64_t totalSeconds, FFstrbuf* result)
-{
-    if(totalSeconds < 60)
-    {
-        ffStrbufAppendF(result, "%u second", (unsigned) totalSeconds);
-        if (totalSeconds != 1)
-            ffStrbufAppendC(result, 's');
-        return;
-    }
-
-    uint32_t seconds = (uint32_t) (totalSeconds % 60);
-    totalSeconds /= 60;
-    if (seconds >= 30)
-        totalSeconds++;
-
-    uint32_t minutes = (uint32_t) (totalSeconds % 60);
-    totalSeconds /= 60;
-    uint32_t hours = (uint32_t) (totalSeconds % 24);
-    totalSeconds /= 24;
-    uint32_t days = (uint32_t) totalSeconds;
-
-    if(days > 0)
-    {
-        ffStrbufAppendF(result, "%u day", days);
-
-        if(days > 1)
-            ffStrbufAppendC(result, 's');
-
-        if(days >= 100)
-            ffStrbufAppendS(result, "(!)");
-
-        if(hours > 0 || minutes > 0)
-            ffStrbufAppendS(result, ", ");
-    }
-
-    if(hours > 0)
-    {
-        ffStrbufAppendF(result, "%u hour", hours);
-
-        if(hours > 1)
-            ffStrbufAppendC(result, 's');
-
-        if(minutes > 0)
-            ffStrbufAppendS(result, ", ");
-    }
-
-    if(minutes > 0)
-    {
-        ffStrbufAppendF(result, "%u min", minutes);
-
-        if(minutes > 1)
-            ffStrbufAppendC(result, 's');
     }
 }
 

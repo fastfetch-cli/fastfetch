@@ -74,7 +74,10 @@ void ffPrintWifi(FFWifiOptions* options)
                         ffStrbufAppend(&buffer, &item->conn.protocol);
                     }
                     if (bandStr[0])
-                        ffStrbufAppendF(&buffer, " - %s GHz", bandStr);
+                    {
+                        ffStrbufAppendF(&buffer, " - %s%sGHz", bandStr,
+                            instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ");
+                    }
                     if(item->conn.security.length)
                     {
                         ffStrbufAppendS(&buffer, " - ");

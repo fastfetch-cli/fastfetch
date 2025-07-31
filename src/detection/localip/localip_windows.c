@@ -95,6 +95,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
     {
+        if (adapter->OperStatus != IfOperStatusUp)
+            continue;
+
         bool isDefaultRoute = adapter->IfIndex == defaultRouteIfIndex;
         if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
             continue;
@@ -170,7 +173,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         {
             FFLocalIpResult* result = FF_LIST_GET(FFLocalIpResult, *results, results->length - 1);
             if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
-                result->speed = (int32_t) (adapter->ReceiveLinkSpeed / 1000);
+                result->speed = (int32_t) (adapter->ReceiveLinkSpeed / 1000000);
             if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
                 result->mtu = (int32_t) adapter->Mtu;
             if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)

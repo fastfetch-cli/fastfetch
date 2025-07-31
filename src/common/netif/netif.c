@@ -3,7 +3,8 @@
 #ifndef _WIN32
     #include <net/if.h>
 #else
-    #define IF_NAMESIZE 0
+    #include <ws2tcpip.h>
+    #include <iphlpapi.h>
 #endif
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex);

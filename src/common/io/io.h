@@ -31,6 +31,7 @@ static inline FFNativeFD FFUnixFD2NativeFD(int unixfd)
     #endif
 }
 
+FF_C_NONNULL(3)
 static inline bool ffWriteFDData(FFNativeFD fd, size_t dataSize, const void* data)
 {
     #ifndef _WIN32
@@ -41,18 +42,22 @@ static inline bool ffWriteFDData(FFNativeFD fd, size_t dataSize, const void* dat
     #endif
 }
 
+FF_C_NONNULL(2)
 static inline bool ffWriteFDBuffer(FFNativeFD fd, const FFstrbuf* content)
 {
     return ffWriteFDData(fd, content->length, content->chars);
 }
 
+FF_C_NONNULL(1, 3)
 bool ffWriteFileData(const char* fileName, size_t dataSize, const void* data);
 
+FF_C_NONNULL(1, 2)
 static inline bool ffWriteFileBuffer(const char* fileName, const FFstrbuf* buffer)
 {
     return ffWriteFileData(fileName, buffer->length, buffer->chars);
 }
 
+FF_C_NONNULL(3)
 static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
 {
     #ifndef _WIN32
@@ -66,26 +71,32 @@ static inline ssize_t ffReadFDData(FFNativeFD fd, size_t dataSize, void* data)
     #endif
 }
 
+FF_C_NONNULL(1, 3)
 ssize_t ffReadFileData(const char* fileName, size_t dataSize, void* data);
+FF_C_NONNULL(2, 4)
 ssize_t ffReadFileDataRelative(FFNativeFD dfd, const char* fileName, size_t dataSize, void* data);
 
+FF_C_NONNULL(2)
 bool ffAppendFDBuffer(FFNativeFD fd, FFstrbuf* buffer);
+FF_C_NONNULL(1, 2)
 bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
+FF_C_NONNULL(2, 3)
 bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
 
+FF_C_NONNULL(1, 2)
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
     return ffAppendFileBuffer(fileName, buffer);
 }
 
+FF_C_NONNULL(2, 3)
 static inline bool ffReadFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer)
 {
     ffStrbufClear(buffer);
     return ffAppendFileBufferRelative(dfd, fileName, buffer);
 }
 
-//Bit flags, combine with |
 typedef enum __attribute__((__packed__)) FFPathType
 {
     FF_PATHTYPE_FILE = 1 << 0,
@@ -94,6 +105,7 @@ typedef enum __attribute__((__packed__)) FFPathType
     FF_PATHTYPE_FORCE_UNSIGNED = UINT8_MAX,
 } FFPathType;
 
+FF_C_NONNULL(1)
 static inline bool ffPathExists(const char* path, FFPathType pathType)
 {
     #ifdef _WIN32
@@ -136,11 +148,13 @@ static inline bool ffPathExists(const char* path, FFPathType pathType)
     return false;
 }
 
+FF_C_NONNULL(1, 2)
 bool ffPathExpandEnv(const char* in, FFstrbuf* out);
 
 #define FF_IO_TERM_RESP_WAIT_MS 100 // #554
 
 FF_C_SCANF(3, 4)
+FF_C_NONNULL(1, 3)
 const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...);
 
 // Not thread safe!
@@ -157,6 +171,7 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 void ffListFilesRecursively(const char* path, bool pretty);
 
+FF_C_NONNULL(1)
 static inline bool wrapClose(FFNativeFD* pfd)
 {
     assert(pfd);
@@ -176,6 +191,7 @@ static inline bool wrapClose(FFNativeFD* pfd)
 }
 #define FF_AUTO_CLOSE_FD __attribute__((__cleanup__(wrapClose)))
 
+FF_C_NONNULL(1)
 static inline bool wrapFclose(FILE** pfile)
 {
     assert(pfile);
@@ -186,6 +202,7 @@ static inline bool wrapFclose(FILE** pfile)
 }
 #define FF_AUTO_CLOSE_FILE __attribute__((__cleanup__(wrapFclose)))
 
+FF_C_NONNULL(1)
 #ifndef _WIN32
 static inline bool wrapClosedir(DIR** pdir)
 {
@@ -207,6 +224,7 @@ static inline bool wrapClosedir(HANDLE* pdir)
 #endif
 #define FF_AUTO_CLOSE_DIR __attribute__((__cleanup__(wrapClosedir)))
 
+FF_C_NONNULL(1, 2, 3)
 static inline bool ffSearchUserConfigFile(const FFlist* configDirs, const char* fileSubpath, FFstrbuf* result)
 {
     // configDirs is a list of FFstrbufs include the trailing slash

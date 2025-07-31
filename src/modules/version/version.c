@@ -120,7 +120,7 @@ static FFModuleBaseInfo ffModuleInfo = {
     .generateJsonResult = (void*) ffGenerateVersionJsonResult,
     .generateJsonConfig = (void*) ffGenerateVersionJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Project name", "name"},
+        {"Project name", "project-name"},
         {"Version", "version"},
         {"Version tweak", "version-tweak"},
         {"Build type (debug or release)", "build-type"},

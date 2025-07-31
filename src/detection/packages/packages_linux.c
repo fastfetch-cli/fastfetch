@@ -519,6 +519,31 @@ static inline uint32_t getFlatpakRuntimePackages(FFstrbuf* baseDir)
     return num_elements;
 }
 
+static inline uint32_t getFlatpakAppPackages(FFstrbuf* baseDir)
+{
+    ffStrbufAppendS(baseDir, "app/");
+    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir->chars);
+    if (dirp == NULL)
+        return 0;
+
+    uint32_t appDirLength = baseDir->length;
+    uint32_t num_elements = 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(dirp)) != NULL)
+    {
+        if(entry->d_type == DT_DIR && entry->d_name[0] != '.')
+        {
+            ffStrbufAppendS(baseDir, entry->d_name);
+            ffStrbufAppendS(baseDir, "/current");
+            if (ffPathExists(baseDir->chars, FF_PATHTYPE_ANY)) // Exclude deleted apps, #1856
+                ++num_elements;
+            ffStrbufSubstrBefore(baseDir, appDirLength);
+        }
+    }
+    return num_elements;
+}
+
 static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
 {
     uint32_t num_elements = 0;
@@ -527,8 +552,7 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
     ffStrbufAppendS(baseDir, "/flatpak/");
     uint32_t flatpakDirLength = baseDir->length;
 
-    ffStrbufAppendS(baseDir, "app");
-    num_elements += ffPackagesGetNumElements(baseDir->chars, true);
+    num_elements += getFlatpakAppPackages(baseDir);
     ffStrbufSubstrBefore(baseDir, flatpakDirLength);
 
     num_elements += getFlatpakRuntimePackages(baseDir);
@@ -576,7 +600,6 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/heads/main", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
-    if (!(options->disabled & FF_PACKAGES_FLAG_QI_BIT)) packageCounts->qi += getNumStrings(baseDir, "/var/qi/installed_packages.list", "\n", "qi");
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
 }

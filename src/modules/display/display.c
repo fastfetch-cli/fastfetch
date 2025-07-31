@@ -1,5 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/size.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
 #include "util/stringUtils.h"
@@ -51,10 +52,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
             {
                 if (result->refreshRate > 0)
                 {
+                    const char* space = instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "";
                     if (options->preciseRefreshRate)
-                        ffStrbufAppendF(&buffer, " @ %gHz", result->refreshRate);
+                        ffStrbufAppendF(&buffer, " @ %g%sHz", result->refreshRate, space);
                     else
-                        ffStrbufAppendF(&buffer, " @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+                        ffStrbufAppendF(&buffer, " @ %i%sHz", (uint32_t) (result->refreshRate + 0.5), space);
                 }
                 ffStrbufAppendS(&buffer, ", ");
             }
@@ -108,10 +110,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
             if(result->refreshRate > 0)
             {
+                const char* space = instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ";
                 if(options->preciseRefreshRate)
-                    ffStrbufAppendF(&buffer, " @ %g Hz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
+                    ffStrbufAppendF(&buffer, " @ %g%sHz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0, space);
                 else
-                    ffStrbufAppendF(&buffer, " @ %i Hz", (uint32_t) (result->refreshRate + 0.5));
+                    ffStrbufAppendF(&buffer, " @ %i%sHz", (uint32_t) (result->refreshRate + 0.5), space);
             }
 
             if(

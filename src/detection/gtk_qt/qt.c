@@ -140,18 +140,45 @@ static void detectQtCt(char qver, FFQtResult* result)
     // by the same author and qt6ct understands qt5ct in qt6 applications as well.
     char file[] = "qtXct/qtXct.conf";
     file[2] = file[8] = qver;
+
+    FF_STRBUF_AUTO_DESTROY font = ffStrbufCreate();
+
     ffParsePropFileConfigValues(file, 3, (FFpropquery[]) {
         {"style=", &result->widgetStyle},
         {"icon_theme=", &result->icons},
-        {"general=", &result->font}
+        {"general=", &font}
     });
 
-    if (ffStrbufStartsWithC(&result->font, '@'))
+    if (ffStrbufStartsWithC(&font, '@'))
     {
         // See QVariant notes on https://doc.qt.io/qt-5/qsettings.html and
         // https://github.com/fastfetch-cli/fastfetch/issues/1053#issuecomment-2197254769
         // Thankfully, newer versions use the more common font encoding.
-        ffStrbufSetNS(&result->font, 5, file);
+        ffStrbufSetNS(&font, 5, file);
+    }
+    else if (qver == '5')
+    {
+        // #1864
+        const char *p = font.chars;
+
+        while (*p)
+        {
+            if (p[0] == '\\' && p[1] == 'x' && isxdigit(p[2]) && isxdigit(p[3]) && isxdigit(p[4]) && isxdigit(p[5]))
+            {
+                uint32_t codepoint = (uint32_t)strtoul((char[]) { p[2], p[3], p[4], p[5], '\0' }, NULL, 16);
+                ffStrbufAppendUtf32CodePoint(&result->font, codepoint);
+                p += 6;
+            }
+            else
+            {
+                ffStrbufAppendC(&result->font, *p++);
+            }
+        }
+    }
+    else
+    {
+        ffStrbufDestroy(&result->font);
+        ffStrbufInitMove(&result->font, &font);
     }
 }
 
@@ -178,14 +205,17 @@ const FFQtResult* ffDetectQt(void)
     ffStrbufInit(&result.wallpaper);
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
-    const char *qplatformtheme = getenv("QT_QPA_PLATFORMTHEME");
 
     if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_PLASMA))
         detectPlasma(&result);
     else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_LXQT))
         detectLXQt(&result);
-    else if(ffStrSet(qplatformtheme) && (ffStrEquals(qplatformtheme, "qt5ct") || ffStrEquals(qplatformtheme, "qt6ct")))
-        detectQtCt(qplatformtheme[2], &result);
+    else
+    {
+        const char *qPlatformTheme = getenv("QT_QPA_PLATFORMTHEME");
+        if(qPlatformTheme && (ffStrEquals(qPlatformTheme, "qt5ct") || ffStrEquals(qPlatformTheme, "qt6ct")))
+            detectQtCt(qPlatformTheme[2], &result);
+    }
 
     if(ffStrbufEqualS(&result.widgetStyle, "kvantum") || ffStrbufEqualS(&result.widgetStyle, "kvantum-dark"))
     {

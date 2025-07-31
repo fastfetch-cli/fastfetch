@@ -73,6 +73,7 @@ bool ffStrbufSubstrAfter(FFstrbuf* strbuf, uint32_t index); // Not including the
 bool ffStrbufSubstrAfterFirstC(FFstrbuf* strbuf, char c);
 bool ffStrbufSubstrAfterFirstS(FFstrbuf* strbuf, const char* str);
 bool ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c);
+bool ffStrbufSubstr(FFstrbuf* strbuf, uint32_t start, uint32_t end);
 
 FF_C_NODISCARD uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c);
 
@@ -94,6 +95,8 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
 void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
+
+int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint);
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 {

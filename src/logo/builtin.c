@@ -30,6 +30,15 @@ static const FFlogo A[] = {
             FF_COLOR_FG_CYAN,
         },
     },
+    // Aeon
+    {
+        .names = {"Aeon"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AEON,
+        .colors = {
+            FF_COLOR_FG_256 "36",
+            FF_COLOR_FG_256 "36",
+        },
+    },
     // Afterglow
     {
         .names = {"Afterglow"},
@@ -1613,16 +1622,6 @@ static const FFlogo E[] = {
         },
         .colorKeys = FF_COLOR_FG_BLUE,
         .colorTitle = FF_COLOR_FG_DEFAULT,
-    },
-    // Evolinx
-    {
-        .names = {"Evolinx"},
-        .lines = FASTFETCH_DATATEXT_LOGO_EVOLINX,
-        .colors = {
-            FF_COLOR_FG_BLUE,
-        },
-        .colorKeys = FF_COLOR_FG_BLUE,
-        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // EvolutionOS
     {

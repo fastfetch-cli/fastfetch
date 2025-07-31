@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "common/time.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
@@ -44,10 +44,10 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesUsed, &usedPretty);
+    ffSizeAppendNum(disk->bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesTotal, &totalPretty);
+    ffSizeAppendNum(disk->bytesTotal, &totalPretty);
 
     double bytesPercentage = disk->bytesTotal > 0 ? (double) disk->bytesUsed / (double) disk->bytesTotal * 100.0 : 0;
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;

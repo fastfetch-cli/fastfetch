@@ -13,6 +13,7 @@
 #include "intel_drm.h"
 #include "asahi_drm.h"
 #include <radeon_drm.h>
+#include <nouveau_drm.h>
 
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath)
 {
@@ -341,6 +342,29 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd)
     }
 
     return "Failed to query Asahi GPU information";
+}
+
+#ifndef DRM_IOCTL_NOUVEAU_GETPARAM
+#define DRM_IOCTL_NOUVEAU_GETPARAM DRM_IOWR(DRM_COMMAND_BASE + DRM_NOUVEAU_GETPARAM, struct drm_nouveau_getparam)
+#endif
+
+const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd)
+{
+    struct drm_nouveau_getparam getparam = { };
+
+    getparam.param = NOUVEAU_GETPARAM_FB_SIZE;
+    if (ioctl(fd, DRM_IOCTL_NOUVEAU_GETPARAM, &getparam) == 0)
+        gpu->dedicated.total = getparam.value;
+
+    getparam.param = NOUVEAU_GETPARAM_AGP_SIZE;
+    if (ioctl(fd, DRM_IOCTL_NOUVEAU_GETPARAM, &getparam) == 0)
+        gpu->shared.total = getparam.value;
+
+    getparam.param = NOUVEAU_GETPARAM_GRAPH_UNITS;
+    if (ioctl(fd, DRM_IOCTL_NOUVEAU_GETPARAM, &getparam) == 0 && getparam.value < INT32_MAX)
+        gpu->coreCount = (int32_t) getparam.value;
+
+    return NULL;
 }
 
 #endif // FF_HAVE_DRM

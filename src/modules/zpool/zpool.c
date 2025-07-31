@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/zpool/zpool.h"
 #include "modules/zpool/zpool.h"
 #include "util/stringUtils.h"
@@ -26,10 +27,10 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(result->used, &usedPretty);
+    ffSizeAppendNum(result->used, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(result->total, &totalPretty);
+    ffSizeAppendNum(result->total, &totalPretty);
 
     double bytesPercentage = result->total > 0 ? (double) result->used / (double) result->total * 100.0 : 0;
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;

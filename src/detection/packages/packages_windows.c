@@ -1,6 +1,7 @@
 #include "packages.h"
 #include "common/processing.h"
 #include "util/stringUtils.h"
+#include "util/path.h"
 
 #include <handleapi.h>
 #include <fileapi.h>
@@ -33,22 +34,53 @@ static uint32_t getNumElements(const char* searchPath /* including `\*` suffix *
     return counter;
 }
 
+static inline void wrapYyjsonFree(yyjson_doc** doc)
+{
+    assert(doc);
+    if (*doc)
+        yyjson_doc_free(*doc);
+}
+
 static void detectScoop(FFPackagesResult* result)
 {
     FF_STRBUF_AUTO_DESTROY scoopPath = ffStrbufCreateA(MAX_PATH + 3);
+    ffStrbufAppendS(&scoopPath, instance.state.platform.homeDir.chars);
+    ffStrbufAppendS(&scoopPath, ".config/scoop/config.json");
 
-    const char* scoopEnv = getenv("SCOOP");
-    if(ffStrSet(scoopEnv))
+    yyjson_val* root = NULL;
+
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_file(scoopPath.chars, 0, NULL, NULL);
+    if (doc)
     {
-        ffStrbufAppendS(&scoopPath, scoopEnv);
+        root = yyjson_doc_get_root(doc);
+        if (!yyjson_is_obj(root)) root = NULL;
+    }
+
+    {
+        ffStrbufClear(&scoopPath);
+        if (root)
+            ffStrbufSetS(&scoopPath, yyjson_get_str(yyjson_obj_get(root, "root_path")));
+        if (scoopPath.length == 0)
+        {
+            ffStrbufSet(&scoopPath, &instance.state.platform.homeDir);
+            ffStrbufAppendS(&scoopPath, "/scoop");
+        }
         ffStrbufAppendS(&scoopPath, "/apps/*");
+        result->scoopUser = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY, "scoop");
     }
-    else
+
     {
-        ffStrbufAppendS(&scoopPath, instance.state.platform.homeDir.chars);
-        ffStrbufAppendS(&scoopPath, "/scoop/apps/*");
+        ffStrbufClear(&scoopPath);
+        if (root)
+            ffStrbufSetS(&scoopPath, yyjson_get_str(yyjson_obj_get(root, "global_path")));
+        if (scoopPath.length == 0)
+        {
+            ffStrbufSetS(&scoopPath, getenv("ProgramData"));
+            ffStrbufAppendS(&scoopPath, "/scoop");
+        }
+        ffStrbufAppendS(&scoopPath, "/apps/*");
+        result->scoopGlobal = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY, "scoop");
     }
-    result->scoop = getNumElements(scoopPath.chars, FILE_ATTRIBUTE_DIRECTORY, "scoop");
 }
 
 static void detectChoco(FF_MAYBE_UNUSED FFPackagesResult* result)

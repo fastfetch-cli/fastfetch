@@ -219,7 +219,7 @@ static FFModuleBaseInfo ffModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"User name", "name"},
         {"Host name", "host-name"},
-        {"Session name", "session"},
+        {"Session name", "session-name"},
         {"Client IP", "client-ip"},
         {"Login Time in local timezone", "login-time"},
         {"Days after login", "days"},

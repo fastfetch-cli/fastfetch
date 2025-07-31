@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
+#include "common/size.h"
 #include "detection/netio/netio.h"
 #include "modules/netio/netio.h"
 #include "util/stringUtils.h"
@@ -59,11 +59,11 @@ void ffPrintNetIO(FFNetIOOptions* options)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            ffParseSize(inf->rxBytes, &buffer);
+            ffSizeAppendNum(inf->rxBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (IN) - ");
 
-            ffParseSize(inf->txBytes, &buffer);
+            ffSizeAppendNum(inf->txBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (OUT)");
 
@@ -74,9 +74,9 @@ void ffPrintNetIO(FFNetIOOptions* options)
         else
         {
             ffStrbufClear(&buffer2);
-            ffParseSize(inf->rxBytes, &buffer);
+            ffSizeAppendNum(inf->rxBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
-            ffParseSize(inf->txBytes, &buffer2);
+            ffSizeAppendNum(inf->txBytes, &buffer2);
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){

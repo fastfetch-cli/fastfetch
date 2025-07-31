@@ -3,7 +3,8 @@
     "$defs": {
         "colors": {
             "type": "string",
-            "enum": [
+            "description": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
+            "examples": [
                 "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
                 "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
             ]
@@ -52,6 +53,7 @@
                             "bar-monochrome"
                         ]
                     },
+                    "uniqueItems": true,
                     "default": [
                         "num",
                         "num-color"
@@ -150,13 +152,13 @@
             "properties": {
                 "system": {
                     "description": "System name to match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
@@ -170,13 +172,13 @@
                 },
                 "!system": {
                     "description": "System name to not match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
@@ -190,13 +192,13 @@
                 },
                 "arch": {
                     "description": "Architecture to match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
@@ -210,13 +212,13 @@
                 },
                 "!arch": {
                     "description": "Architecture to not match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
@@ -230,10 +232,28 @@
                 }
             }
         },
+        "spaceBeforeUnit": {
+            "type": "string",
+            "description": "Whether to put a space before the unit",
+            "oneOf": [
+                {
+                    "const": "default",
+                    "description": "Use the default behavior of the module"
+                },
+                {
+                    "const": "always",
+                    "description": "Always add a space before the unit"
+                },
+                {
+                    "const": "never",
+                    "description": "Never add a space before the unit"
+                }
+            ]
+        },
 
 
         "batteryFormat": {
-            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds",
+            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
@@ -317,7 +337,7 @@
             "type": "string"
         },
         "editorFormat": {
-            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {full-path}: Full path of real path\n    5. {version}: Version",
+            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {path}: Full path of real path\n    5. {version}: Version",
             "type": "string"
         },
         "fontFormat": {
@@ -401,7 +421,7 @@
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop}: Number of scoop packages\n    21. {choco}: Number of choco packages\n    22. {pkgtool}: Number of pkgtool packages\n    23. {paludis}: Number of paludis packages\n    24. {winget}: Number of winget packages\n    25. {opkg}: Number of opkg packages\n    26. {am-system}: Number of am-system packages\n    27. {sorcery}: Number of sorcery packages\n    28. {lpkg}: Number of lpkg packages\n    29. {lpkgbuild}: Number of lpkgbuild packages\n    30. {guix-system}: Number of guix-system packages\n    31. {guix-user}: Number of guix-user packages\n    32. {guix-home}: Number of guix-home packages\n    33. {linglong}: Number of linglong packages\n    34. {pacstall}: Number of pacstall packages\n    35. {mport}: Number of mport packages\n    36. {qi}: Number of qi packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {nix-all}: Total number of all nix packages\n    44. {flatpak-all}: Total number of all flatpak app packages\n    45. {brew-all}: Total number of all brew packages\n    46. {guix-all}: Total number of all guix packages\n    47. {hpkg-all}: Total number of all hpkg packages",
+            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop-user}: Number of scoop-user packages\n    21. {scoop-global}: Number of scoop-global packages\n    22. {choco}: Number of choco packages\n    23. {pkgtool}: Number of pkgtool packages\n    24. {paludis}: Number of paludis packages\n    25. {winget}: Number of winget packages\n    26. {opkg}: Number of opkg packages\n    27. {am-system}: Number of am-system packages\n    28. {sorcery}: Number of sorcery packages\n    29. {lpkg}: Number of lpkg packages\n    30. {lpkgbuild}: Number of lpkgbuild packages\n    31. {guix-system}: Number of guix-system packages\n    32. {guix-user}: Number of guix-user packages\n    33. {guix-home}: Number of guix-home packages\n    34. {linglong}: Number of linglong packages\n    35. {pacstall}: Number of pacstall packages\n    36. {mport}: Number of mport packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {nix-all}: Total number of all nix packages\n    44. {flatpak-all}: Total number of all flatpak app packages\n    45. {brew-all}: Total number of all brew packages\n    46. {guix-all}: Total number of all guix packages\n    47. {hpkg-all}: Total number of all hpkg packages",
             "type": "string"
         },
         "physicaldiskFormat": {
@@ -469,15 +489,15 @@
             "type": "string"
         },
         "uptimeFormat": {
-            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot",
+            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot\n    10. {formatted}: Formatted uptime",
             "type": "string"
         },
         "usersFormat": {
-            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
+            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session-name}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
             "type": "string"
         },
         "versionFormat": {
-            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
+            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {project-name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
             "type": "string"
         },
         "vulkanFormat": {
@@ -921,6 +941,9 @@
                             "minimum": 0,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -963,6 +986,9 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -1035,6 +1061,15 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        },
+                        "width": {
+                            "type": "integer",
+                            "description": "Set the width of the percentage number, in number of characters",
+                            "minimum": 0,
+                            "default": 0
                         }
                     }
                 },
@@ -1049,6 +1084,23 @@
                             "minimum": -1,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        }
+                    }
+                },
+                "duration": {
+                    "type": "object",
+                    "description": "Set how duration values should be displayed",
+                    "properties": {
+                        "abbreviation": {
+                            "type": "boolean",
+                            "description": "Set whether to abbreviate duration values\nIf true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+                            "default": false
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -1959,7 +2011,8 @@
                                     },
                                     "hideFolders": {
                                         "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output\nDefault: /efi:/boot:/boot/efi"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
+                                        "default": "/efi:/boot:/boot/efi:/boot/firmware"
                                     },
                                     "hideFS": {
                                         "type": "string",
