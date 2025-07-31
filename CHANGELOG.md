@@ -26,8 +26,8 @@ Features:
 * Add `--{duration,percent,size,freq,temp}-space-before-unit [always|never]` options to add a space before the unit when printing duration, percent, size, frequency and temperature values
 * Add `--duration-abbreviation` to abbreviate duration values in custom format
     * For example: `1 day, 2 hours, 3 mins` will be displayed as `1d 2h 3m`
-* Add `--percent-with` to pad the percent value with spaces to a fixed width
-    * For example: `--percent-with 3` will display ` 50%` instead of `50%`; useful for aligning percent values in custom format
+* Add `--percent-width` to pad the percent value with spaces to a fixed width
+    * For example: `--percent-width 3` will display ` 50%` instead of `50%`; useful for aligning percent values in custom format
 
 Bugfixes:
 * Improve accuracy of Flatpak count detection (#1856, Packages, Linux)
