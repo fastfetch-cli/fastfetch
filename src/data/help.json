@@ -716,6 +716,31 @@
             }
         },
         {
+            "long": "bar-color-elapsed",
+            "desc": "Set the color to use in the elapsed part of percentage bars",
+            "remark": "By default, auto selected by percent-color-{green,yellow,red}",
+            "arg": {
+                "type": "color",
+                "default": "<auto>"
+            }
+        },
+        {
+            "long": "bar-color-total",
+            "desc": "Set the color to use in the total part of percentage bars",
+            "arg": {
+                "type": "color",
+                "default": "light_white"
+            }
+        },
+        {
+            "long": "bar-color-border",
+            "desc": "Set the color to use in the borders of percentage bars",
+            "arg": {
+                "type": "color",
+                "default": "light_white"
+            }
+        },
+        {
             "long": "bar-width",
             "desc": "Set the width of percentage bars in characters",
             "arg": {

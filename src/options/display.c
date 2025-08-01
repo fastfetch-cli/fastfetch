@@ -289,6 +289,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (borderRightElapsed)
                     ffStrbufSetS(&options->barBorderRightElapsed, yyjson_get_str(borderRightElapsed));
 
+                yyjson_val* colorElapsed = yyjson_obj_get(val, "colorElapsed");
+                if (colorElapsed) ffOptionParseColor(yyjson_get_str(colorElapsed), &options->barColorElapsed);
+
+                yyjson_val* colorTotal = yyjson_obj_get(val, "colorTotal");
+                if (colorTotal) ffOptionParseColor(yyjson_get_str(colorTotal), &options->barColorTotal);
+
+                yyjson_val* colorBorder = yyjson_obj_get(val, "colorBorder");
+                if (colorBorder) ffOptionParseColor(yyjson_get_str(colorBorder), &options->barColorBorder);
+
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width)
                     options->barWidth = (uint8_t) yyjson_get_uint(width);
@@ -635,6 +644,12 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseString(key, value, &options->barBorderLeftElapsed);
         else if(ffStrEqualsIgnCase(subkey, "border-right-elapsed"))
             ffOptionParseString(key, value, &options->barBorderRightElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "color-elapsed"))
+            ffOptionParseColor(value, &options->barColorElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "color-total"))
+            ffOptionParseColor(value, &options->barColorTotal);
+        else if(ffStrEqualsIgnCase(subkey, "color-border"))
+            ffOptionParseColor(value, &options->barColorBorder);
         else
             return false;
     }
@@ -705,7 +720,11 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->barBorderRight, " ]");
     ffStrbufInit(&options->barBorderLeftElapsed);
     ffStrbufInit(&options->barBorderRightElapsed);
+    ffStrbufInit(&options->barColorElapsed);
+    ffStrbufInitStatic(&options->barColorTotal, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
+    ffStrbufInitStatic(&options->barColorBorder, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
     options->barWidth = 10;
+
     options->durationAbbreviation = false;
     options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentType = 9;

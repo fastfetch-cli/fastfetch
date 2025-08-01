@@ -1027,6 +1027,20 @@
                             "description": "If both borderLeftElapsed and borderRightElapsed are set, the border will be used as parts of bar content",
                             "default": ""
                         },
+                        "colorElapsed": {
+                            "description": "Color to use in the elapsed part of percentage bars",
+                            "$ref": "#/$defs/colors"
+                        },
+                        "colorTotal": {
+                            "description": "Color to use in the total part of percentage bars",
+                            "$ref": "#/$defs/colors",
+                            "default": "light_white"
+                        },
+                        "colorBorder": {
+                            "description": "Color to use in the borders of percentage bars",
+                            "$ref": "#/$defs/colors",
+                            "default": "light_white"
+                        },
                         "width": {
                             "type": "integer",
                             "description": "Set the width of the bar, in number of characters",

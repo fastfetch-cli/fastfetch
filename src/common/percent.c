@@ -68,7 +68,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
     if(!borderAsValue && options->barBorderLeft.length)
     {
         if(!options->pipe)
-            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
+            ffStrbufAppendF(buffer, "\e[%sm", options->barColorBorder.chars);
         ffStrbufAppend(buffer, &options->barBorderLeft);
     }
 
@@ -78,11 +78,13 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
 
         for (uint32_t i = 0; i < options->barWidth; ++i)
+        {
             ffStrbufAppend(buffer, borderAsValue && i == 0
                 ? &options->barBorderLeft
                 : borderAsValue && i == options->barWidth - 1
                     ? &options->barBorderRight
                     : &options->barCharTotal);
+        }
     }
     else
     {
@@ -91,7 +93,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         const char* colorRed = options->percentColorRed.chars;
 
         FFPercentageTypeFlags percentType = config.type == 0 ? options->percentType : config.type;
-        bool monochrome = !!(percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT);
+        bool monochrome = !!(percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT) || options->barColorElapsed.length;
 
         for (uint32_t i = 0; i < blocksPercent; ++i)
         {
@@ -100,7 +102,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
                 if (monochrome)
                 {
                     const char* color = NULL;
-                    if (green <= yellow)
+                    if (options->barColorElapsed.length)
+                        color = options->barColorElapsed.chars;
+                    else if (green <= yellow)
                     {
                         if (percent < green) color = colorGreen;
                         else if (percent < yellow) color = colorYellow;
@@ -136,20 +140,22 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         if (blocksPercent < options->barWidth)
         {
             if(!options->pipe)
-                ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
+                ffStrbufAppendF(buffer, "\e[%sm", options->barColorTotal.chars);
             for (uint32_t i = blocksPercent; i < options->barWidth; ++i)
+            {
                 ffStrbufAppend(buffer, borderAsValue && i == 0
                     ? &options->barBorderLeft
                     : borderAsValue && i == options->barWidth - 1
                         ? &options->barBorderRight
                         : &options->barCharTotal);
+            }
         }
     }
 
     if(!borderAsValue && options->barBorderRight.length)
     {
         if(!options->pipe)
-            ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
+            ffStrbufAppendF(buffer, "\e[%sm", options->barColorBorder.chars);
         ffStrbufAppend(buffer, &options->barBorderRight);
     }
 
