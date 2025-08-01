@@ -1,3 +1,18 @@
+# 2.50.0 (expected release date: 2025-08-14)
+
+Changes:
+* Percent bar config `display.bar.*` options have been replaced with a more organized, nested object structure.
+    * `display.bar.charElapsed` has been renamed to `display.bar.char.elapsed`.
+    * `display.bar.charTotal` has been renamed to `display.bar.char.total`.
+    * `display.bar.borderLeft` has been renamed to `display.bar.border.left`.
+    * `display.bar.borderRight` has been renamed to `display.bar.border.right`.
+
+Features:
+* Add `display.bar.border.{leftElapsed,rightElapsed}` for using border as parts of bar content. (#1875)
+    * `display.bar.border: null` has been added as a shortand to disable bar borders.
+* Add `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total and border sections of the percent bar.
+    * `display.bar.color: null` has been added as a shorthand to disable bar colors.
+
 # 2.49.0
 
 Deprecation Notice:
