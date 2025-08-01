@@ -11,9 +11,9 @@ static inline double rssiToSignalQuality(int rssi)
 
 static bool queryIpconfig(const char* ifName, FFstrbuf* result)
 {
-    if (@available(macOS 26.0, *))
+    if (@available(macOS 15.6, *))
     {
-        // ipconfig no longer work in Tahoe
+        // ipconfig reports <redacted> too
         return false;
     }
 
@@ -385,7 +385,7 @@ static const char* detectByCoreWlan(FFlist* result)
 
 const char* ffDetectWifi(FFlist* result)
 {
-    if (@available(macOS 26.0, *))
+    if (@available(macOS 15.6, *))
     {
         if (detectByWdutil(result) == NULL)
             return NULL;
