@@ -281,6 +281,14 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 if (borderRight)
                     ffStrbufSetS(&options->barBorderRight, yyjson_get_str(borderRight));
 
+                yyjson_val* borderLeftElapsed = yyjson_obj_get(val, "borderLeftElapsed");
+                if (borderLeftElapsed)
+                    ffStrbufSetS(&options->barBorderLeftElapsed, yyjson_get_str(borderLeftElapsed));
+
+                yyjson_val* borderRightElapsed = yyjson_obj_get(val, "borderRightElapsed");
+                if (borderRightElapsed)
+                    ffStrbufSetS(&options->barBorderRightElapsed, yyjson_get_str(borderRightElapsed));
+
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width)
                     options->barWidth = (uint8_t) yyjson_get_uint(width);
@@ -623,6 +631,10 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseString(key, value, &options->barBorderLeft);
         else if(ffStrEqualsIgnCase(subkey, "border-right"))
             ffOptionParseString(key, value, &options->barBorderRight);
+        else if(ffStrEqualsIgnCase(subkey, "border-left-elapsed"))
+            ffOptionParseString(key, value, &options->barBorderLeftElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "border-right-elapsed"))
+            ffOptionParseString(key, value, &options->barBorderRightElapsed);
         else
             return false;
     }
@@ -691,6 +703,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->barCharTotal, "-");
     ffStrbufInitStatic(&options->barBorderLeft, "[ ");
     ffStrbufInitStatic(&options->barBorderRight, " ]");
+    ffStrbufInit(&options->barBorderLeftElapsed);
+    ffStrbufInit(&options->barBorderRightElapsed);
     options->barWidth = 10;
     options->durationAbbreviation = false;
     options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;

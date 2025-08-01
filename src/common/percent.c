@@ -60,10 +60,12 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
 
     const FFOptionsDisplay* options = &instance.config.display;
 
+    const bool borderAsValue = options->barBorderLeftElapsed.length && options->barBorderRightElapsed.length;
+
     uint32_t blocksPercent = (uint32_t) (percent / 100.0 * options->barWidth + 0.5);
     assert(blocksPercent <= options->barWidth);
 
-    if(options->barBorderLeft.length)
+    if(!borderAsValue && options->barBorderLeft.length)
     {
         if(!options->pipe)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
@@ -76,7 +78,11 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
 
         for (uint32_t i = 0; i < options->barWidth; ++i)
-            ffStrbufAppend(buffer, &options->barCharElapsed);
+            ffStrbufAppend(buffer, borderAsValue && i == 0
+                ? &options->barBorderLeft
+                : borderAsValue && i == options->barWidth - 1
+                    ? &options->barBorderRight
+                    : &options->barCharTotal);
     }
     else
     {
@@ -120,7 +126,11 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
                         ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
                 }
             }
-            ffStrbufAppend(buffer, &options->barCharElapsed);
+            ffStrbufAppend(buffer, borderAsValue && i == 0
+                ? &options->barBorderLeftElapsed
+                : borderAsValue && i == options->barWidth - 1
+                    ? &options->barBorderRightElapsed
+                    : &options->barCharElapsed);
         }
 
         if (blocksPercent < options->barWidth)
@@ -128,11 +138,15 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             if(!options->pipe)
                 ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");
             for (uint32_t i = blocksPercent; i < options->barWidth; ++i)
-                ffStrbufAppend(buffer, &options->barCharTotal);
+                ffStrbufAppend(buffer, borderAsValue && i == 0
+                    ? &options->barBorderLeft
+                    : borderAsValue && i == options->barWidth - 1
+                        ? &options->barBorderRight
+                        : &options->barCharTotal);
         }
     }
 
-    if(options->barBorderRight.length)
+    if(!borderAsValue && options->barBorderRight.length)
     {
         if(!options->pipe)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_WHITE "m");

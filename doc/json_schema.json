@@ -1017,6 +1017,16 @@
                             "description": "Set the string to use at right border",
                             "default": " ]"
                         },
+                        "borderLeftElapsed": {
+                            "type": "string",
+                            "description": "If both borderLeftElapsed and borderRightElapsed are set, the border will be used as parts of bar content",
+                            "default": ""
+                        },
+                        "borderRightElapsed": {
+                            "type": "string",
+                            "description": "If both borderLeftElapsed and borderRightElapsed are set, the border will be used as parts of bar content",
+                            "default": ""
+                        },
                         "width": {
                             "type": "integer",
                             "description": "Set the width of the bar, in number of characters",
