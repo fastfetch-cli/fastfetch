@@ -1,0 +1,63 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "type": "small"
+    },
+    "display": {
+        "separator": " ",
+        "key": {
+            "type": "both"
+        },
+        "bar": {
+            "border": {
+                "left": "\uee00",
+                "leftElapsed": "\uee03",
+                "right": "\uee02",
+                "rightElapsed": "\uee05"
+            },
+            "char": {
+                "total": "\uee01",
+                "elapsed": "\uee04"
+            },
+            "color": {
+                "total": null
+            }
+        },
+        "percent": {
+            "type": [
+                "bar",
+                "bar-monochrome"
+            ]
+        }
+    },
+    "modules": [
+        "title",
+        "separator",
+        {
+            "type": "memory",
+            "key": "MEM"
+        },
+        {
+            "type": "swap",
+            "key": "SWP"
+        },
+        {
+            "type": "disk",
+            "folders": "/",
+            "key": "DSK"
+        },
+        {
+            "type": "battery",
+            "key": "BAT"
+        },
+        {
+            "type": "brightness",
+            "key": "BGT"
+        },
+        {
+            "type": "colors",
+            "paddingLeft": 6,
+            "symbol": "circle"
+        }
+    ]
+}
