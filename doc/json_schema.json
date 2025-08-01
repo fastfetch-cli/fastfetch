@@ -997,49 +997,107 @@
                     "additionalProperties": false,
                     "description": "Set the bar configuration",
                     "properties": {
+                        "char": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "Set the characters used in the bar",
+                            "properties": {
+                                "elapsed": {
+                                    "type": "string",
+                                    "description": "Set the character to use in elapsed part",
+                                    "default": "■"
+                                },
+                                "total": {
+                                    "type": "string",
+                                    "description": "Set the character to use in total part",
+                                    "default": "-"
+                                }
+                            }
+                        },
+                        "border": {
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Disable bar borders"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "Set the string to use of borders of percentage bars",
+                                    "properties": {
+                                        "left": {
+                                            "type": "string",
+                                            "description": "Set the string to use at left border",
+                                            "default": "[ "
+                                        },
+                                        "right": {
+                                            "type": "string",
+                                            "description": "Set the string to use at right border",
+                                            "default": " ]"
+                                        },
+                                        "leftElapsed": {
+                                            "type": "string",
+                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "default": ""
+                                        },
+                                        "rightElapsed": {
+                                            "type": "string",
+                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "default": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "color": {
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Disable color in percentage bars"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "Set the color to use of percentage bars",
+                                    "properties": {
+                                        "elapsed": {
+                                            "description": "Color to use in the elapsed part of percentage bars\nBy default, auto selected by percent.color.{green,yellow,red}",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "auto"
+                                        },
+                                        "total": {
+                                            "description": "Color to use in the total part of percentage bars",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "light_white"
+                                        },
+                                        "border": {
+                                            "description": "Color to use in the borders of percentage bars",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "light_white"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
                         "charElapsed": {
                             "type": "string",
-                            "description": "Set the character to use in elapsed part",
+                            "description": "Set the character to use in elapsed part. Deprecated in v2.50.0",
                             "default": "■"
                         },
                         "charTotal": {
                             "type": "string",
-                            "description": "Set the character to use in total part",
+                            "description": "Set the character to use in total part. Deprecated in v2.50.0",
                             "default": "-"
                         },
                         "borderLeft": {
                             "type": "string",
-                            "description": "Set the string to use at left border",
+                            "description": "Set the string to use at left border. Deprecated in v2.50.0",
                             "default": "[ "
                         },
                         "borderRight": {
                             "type": "string",
-                            "description": "Set the string to use at right border",
+                            "description": "Set the string to use at right border. Deprecated in v2.50.0",
                             "default": " ]"
-                        },
-                        "borderLeftElapsed": {
-                            "type": "string",
-                            "description": "If both borderLeftElapsed and borderRightElapsed are set, the border will be used as parts of bar content",
-                            "default": ""
-                        },
-                        "borderRightElapsed": {
-                            "type": "string",
-                            "description": "If both borderLeftElapsed and borderRightElapsed are set, the border will be used as parts of bar content",
-                            "default": ""
-                        },
-                        "colorElapsed": {
-                            "description": "Color to use in the elapsed part of percentage bars",
-                            "$ref": "#/$defs/colors"
-                        },
-                        "colorTotal": {
-                            "description": "Color to use in the total part of percentage bars",
-                            "$ref": "#/$defs/colors",
-                            "default": "light_white"
-                        },
-                        "colorBorder": {
-                            "description": "Color to use in the borders of percentage bars",
-                            "$ref": "#/$defs/colors",
-                            "default": "light_white"
                         },
                         "width": {
                             "type": "integer",

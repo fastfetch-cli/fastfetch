@@ -76,8 +76,6 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         }
         else if (ffStrEqualsIgnCase(key, "brightColor"))
             options->brightColor = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
-            return "`display.binaryPrefix` has been renamed to `display.size.binaryPrefix`. Sorry for another break change.";
         else if (ffStrEqualsIgnCase(key, "duration"))
         {
             if (!yyjson_is_obj(val))
@@ -265,38 +263,95 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         {
             if (yyjson_is_obj(val))
             {
-                const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
-                if (charElapsed)
-                    ffStrbufSetS(&options->barCharElapsed, charElapsed);
+                yyjson_val* char_ = yyjson_obj_get(val, "char");
+                if (char_)
+                {
+                    if (!yyjson_is_obj(char_)) return "display.bar.char must be an object";
 
-                const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
-                if (charTotal)
-                    ffStrbufSetS(&options->barCharTotal, charTotal);
+                    const char* charElapsed = yyjson_get_str(yyjson_obj_get(char_, "elapsed"));
+                    if (charElapsed)
+                        ffStrbufSetS(&options->barCharElapsed, charElapsed);
 
-                yyjson_val* borderLeft = yyjson_obj_get(val, "borderLeft");
-                if (borderLeft)
-                    ffStrbufSetS(&options->barBorderLeft, yyjson_get_str(borderLeft));
+                    const char* charTotal = yyjson_get_str(yyjson_obj_get(char_, "total"));
+                    if (charTotal)
+                        ffStrbufSetS(&options->barCharTotal, charTotal);
+                }
+                else
+                {
+                    const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
+                    if (charElapsed)
+                        return "display.bar.charElapsed has been renamed to display.bar.char.elapsed.";
 
-                yyjson_val* borderRight = yyjson_obj_get(val, "borderRight");
-                if (borderRight)
-                    ffStrbufSetS(&options->barBorderRight, yyjson_get_str(borderRight));
+                    const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
+                    if (charTotal)
+                        return "display.bar.charTotal has been renamed to display.bar.char.total.";
+                }
 
-                yyjson_val* borderLeftElapsed = yyjson_obj_get(val, "borderLeftElapsed");
-                if (borderLeftElapsed)
-                    ffStrbufSetS(&options->barBorderLeftElapsed, yyjson_get_str(borderLeftElapsed));
+                yyjson_val* border = yyjson_obj_get(val, "border");
+                if (border)
+                {
+                    if (yyjson_is_null(border))
+                    {
+                        ffStrbufClear(&options->barBorderLeft);
+                        ffStrbufClear(&options->barBorderRight);
+                        ffStrbufClear(&options->barBorderLeftElapsed);
+                        ffStrbufClear(&options->barBorderRightElapsed);
+                    }
+                    else
+                    {
+                        if (!yyjson_is_obj(border)) return "display.bar.border must be an object";
 
-                yyjson_val* borderRightElapsed = yyjson_obj_get(val, "borderRightElapsed");
-                if (borderRightElapsed)
-                    ffStrbufSetS(&options->barBorderRightElapsed, yyjson_get_str(borderRightElapsed));
+                        yyjson_val* borderLeft = yyjson_obj_get(border, "left");
+                        if (borderLeft)
+                            ffStrbufSetS(&options->barBorderLeft, yyjson_get_str(borderLeft));
 
-                yyjson_val* colorElapsed = yyjson_obj_get(val, "colorElapsed");
-                if (colorElapsed) ffOptionParseColor(yyjson_get_str(colorElapsed), &options->barColorElapsed);
+                        yyjson_val* borderRight = yyjson_obj_get(border, "right");
+                        if (borderRight)
+                            ffStrbufSetS(&options->barBorderRight, yyjson_get_str(borderRight));
 
-                yyjson_val* colorTotal = yyjson_obj_get(val, "colorTotal");
-                if (colorTotal) ffOptionParseColor(yyjson_get_str(colorTotal), &options->barColorTotal);
+                        yyjson_val* borderLeftElapsed = yyjson_obj_get(border, "leftElapsed");
+                        if (borderLeftElapsed)
+                            ffStrbufSetS(&options->barBorderLeftElapsed, yyjson_get_str(borderLeftElapsed));
 
-                yyjson_val* colorBorder = yyjson_obj_get(val, "colorBorder");
-                if (colorBorder) ffOptionParseColor(yyjson_get_str(colorBorder), &options->barColorBorder);
+                        yyjson_val* borderRightElapsed = yyjson_obj_get(border, "rightElapsed");
+                        if (borderRightElapsed)
+                            ffStrbufSetS(&options->barBorderRightElapsed, yyjson_get_str(borderRightElapsed));
+                    }
+                }
+                else
+                {
+                    yyjson_val* borderLeft = yyjson_obj_get(val, "borderLeft");
+                    if (borderLeft)
+                        return "display.bar.borderLeft has been renamed to display.bar.border.left.";
+
+                    yyjson_val* borderRight = yyjson_obj_get(val, "borderRight");
+                    if (borderRight)
+                        return "display.bar.borderRight has been renamed to display.bar.border.right.";
+                }
+
+                yyjson_val* color = yyjson_obj_get(val, "color");
+                if (color)
+                {
+                    if (yyjson_is_null(color))
+                    {
+                        ffStrbufClear(&options->barColorElapsed);
+                        ffStrbufClear(&options->barColorTotal);
+                        ffStrbufClear(&options->barColorBorder);
+                    }
+                    else
+                    {
+                        if (!yyjson_is_obj(color)) return "display.bar.color must be an object";
+
+                        yyjson_val* colorElapsed = yyjson_obj_get(color, "elapsed");
+                        if (colorElapsed) ffOptionParseColor(yyjson_get_str(colorElapsed), &options->barColorElapsed);
+
+                        yyjson_val* colorTotal = yyjson_obj_get(color, "total");
+                        if (colorTotal) ffOptionParseColor(yyjson_get_str(colorTotal), &options->barColorTotal);
+
+                        yyjson_val* colorBorder = yyjson_obj_get(color, "border");
+                        if (colorBorder) ffOptionParseColor(yyjson_get_str(colorBorder), &options->barColorBorder);
+                    }
+                }
 
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width)
@@ -720,7 +775,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->barBorderRight, " ]");
     ffStrbufInit(&options->barBorderLeftElapsed);
     ffStrbufInit(&options->barBorderRightElapsed);
-    ffStrbufInit(&options->barColorElapsed);
+    ffStrbufInitStatic(&options->barColorElapsed, "auto");
     ffStrbufInitStatic(&options->barColorTotal, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
     ffStrbufInitStatic(&options->barColorBorder, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
     options->barWidth = 10;

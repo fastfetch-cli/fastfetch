@@ -62,9 +62,9 @@ typedef struct FFOptionsDisplay
     FFstrbuf barBorderRight;
     FFstrbuf barBorderLeftElapsed;
     FFstrbuf barBorderRightElapsed;
-    FFstrbuf barColorElapsed;
-    FFstrbuf barColorTotal;
-    FFstrbuf barColorBorder;
+    FFstrbuf barColorElapsed; // "auto" for auto selection from percent config; empty for no custom color (inherits)
+    FFstrbuf barColorTotal; // empty for no custom color (inherits)
+    FFstrbuf barColorBorder; // empty for no custom color (inherits)
     uint8_t barWidth;
     FFPercentageTypeFlags percentType;
     uint8_t percentNdigits;
