@@ -157,7 +157,7 @@ bool ffOptionParseBoolean(const char* str)
 
 void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
 {
-    if (value[0] == '\0') return;
+    if (!value || value[0] == '\0') return;
 
     // If value is already an ANSI escape code, use it
     if (value[0] == '\e' && value[1] == '[')
