@@ -84,7 +84,7 @@ const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* resul
         if (doc)
         {
             yyjson_val* root = yyjson_doc_get_root(doc);
-            ffStrbufAppendS(&result->ip, yyjson_get_str(yyjson_obj_get(root, "ip")));
+            ffStrbufAppendJsonVal(&result->ip, yyjson_obj_get(root, "ip"));
             ffStrbufDestroy(&result->location);
             ffStrbufInitF(&result->location, "%s, %s", yyjson_get_str(yyjson_obj_get(root, "city")), yyjson_get_str(yyjson_obj_get(root, "country")));
             return NULL;

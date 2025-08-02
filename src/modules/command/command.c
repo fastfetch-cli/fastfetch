@@ -86,19 +86,19 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
 
         if (ffStrEqualsIgnCase(key, "shell"))
         {
-            ffStrbufSetS(&options->shell, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->shell, val);
             continue;
         }
 
         if (ffStrEqualsIgnCase(key, "param"))
         {
-            ffStrbufSetS(&options->param, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->param, val);
             continue;
         }
 
         if (ffStrEqualsIgnCase(key, "text"))
         {
-            ffStrbufSetS(&options->text, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->text, val);
             continue;
         }
 

@@ -345,7 +345,12 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                 size_t flagIdx, flagMax;
                 yyjson_arr_foreach(val, flagIdx, flagMax, flagObj)
                 {
-                    const char* flag = yyjson_get_str(flagObj);
+                    if (!yyjson_is_str(flagObj))
+                    {
+                        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", key);
+                        continue;
+                    }
+                    const char* flag = unsafe_yyjson_get_str(flagObj);
 
                     #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(flag, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
                     switch (toupper(flag[0]))

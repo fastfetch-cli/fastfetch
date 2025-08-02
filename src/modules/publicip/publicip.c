@@ -82,7 +82,7 @@ void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
 
         if (ffStrEqualsIgnCase(key, "url"))
         {
-            ffStrbufSetS(&options->url, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->url, val);
             continue;
         }
 

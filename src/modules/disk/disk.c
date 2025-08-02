@@ -312,19 +312,19 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 
         if (ffStrEqualsIgnCase(key, "folders"))
         {
-            ffStrbufSetS(&options->folders, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->folders, val);
             continue;
         }
 
         if (ffStrEqualsIgnCase(key, "hideFolders"))
         {
-            ffStrbufSetS(&options->hideFolders, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->hideFolders, val);
             continue;
         }
 
         if (ffStrEqualsIgnCase(key, "hideFS"))
         {
-            ffStrbufSetS(&options->hideFS, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->hideFS, val);
             continue;
         }
 

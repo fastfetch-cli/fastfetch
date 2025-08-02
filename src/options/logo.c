@@ -263,8 +263,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
 
     if (yyjson_is_str(object))
     {
-        const char* value = yyjson_get_str(object);
-        ffStrbufSetS(&options->source, value);
+        ffStrbufSetJsonVal(&options->source, object);
         return NULL;
     }
 
@@ -305,7 +304,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         }
         else if (ffStrEqualsIgnCase(key, "source"))
         {
-            ffStrbufSetS(&options->source, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->source, val);
             continue;
         }
         else if (ffStrEqualsIgnCase(key, "color"))
@@ -403,7 +402,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
 
             yyjson_val* symbols = yyjson_obj_get(val, "symbols");
             if (symbols)
-                ffStrbufSetS(&options->chafaSymbols, yyjson_get_str(symbols));
+                ffStrbufSetJsonVal(&options->chafaSymbols, symbols);
 
             yyjson_val* canvasMode = yyjson_obj_get(val, "canvasMode");
             if (canvasMode)

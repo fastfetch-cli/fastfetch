@@ -16,12 +16,12 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
 {
     if(ffStrEqualsIgnCase(key, "key"))
     {
-        ffStrbufSetNS(&moduleArgs->key, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        ffStrbufSetJsonVal(&moduleArgs->key, val);
         return true;
     }
     else if(ffStrEqualsIgnCase(key, "format"))
     {
-        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        ffStrbufSetJsonVal(&moduleArgs->outputFormat, val);
         return true;
     }
     else if(ffStrEqualsIgnCase(key, "outputColor"))
@@ -41,7 +41,7 @@ bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs*
     }
     else if(ffStrEqualsIgnCase(key, "keyIcon"))
     {
-        ffStrbufSetS(&moduleArgs->keyIcon, yyjson_get_str(val));
+        ffStrbufSetJsonVal(&moduleArgs->keyIcon, val);
         return true;
     }
     return false;

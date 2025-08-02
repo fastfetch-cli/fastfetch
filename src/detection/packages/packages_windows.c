@@ -59,7 +59,7 @@ static void detectScoop(FFPackagesResult* result)
     {
         ffStrbufClear(&scoopPath);
         if (root)
-            ffStrbufSetS(&scoopPath, yyjson_get_str(yyjson_obj_get(root, "root_path")));
+            ffStrbufSetJsonVal(&scoopPath, yyjson_obj_get(root, "root_path"));
         if (scoopPath.length == 0)
         {
             ffStrbufSet(&scoopPath, &instance.state.platform.homeDir);
@@ -72,7 +72,7 @@ static void detectScoop(FFPackagesResult* result)
     {
         ffStrbufClear(&scoopPath);
         if (root)
-            ffStrbufSetS(&scoopPath, yyjson_get_str(yyjson_obj_get(root, "global_path")));
+            ffStrbufSetJsonVal(&scoopPath, yyjson_obj_get(root, "global_path"));
         if (scoopPath.length == 0)
         {
             ffStrbufSetS(&scoopPath, getenv("ProgramData"));

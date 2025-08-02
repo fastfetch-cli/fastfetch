@@ -152,7 +152,7 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 
         if (ffStrEqualsIgnCase(key, "string"))
         {
-            ffStrbufSetS(&options->string, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->string, val);
             continue;
         }
 

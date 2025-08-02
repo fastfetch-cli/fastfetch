@@ -72,13 +72,13 @@ void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 
         if (ffStrEqualsIgnCase(key, "location"))
         {
-            ffStrbufSetS(&options->location, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->location, val);
             continue;
         }
 
         if (ffStrEqualsIgnCase(key, "outputFormat"))
         {
-            ffStrbufSetS(&options->outputFormat, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->outputFormat, val);
             continue;
         }
 
