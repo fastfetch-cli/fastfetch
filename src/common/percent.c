@@ -62,7 +62,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
 
     const bool borderAsValue = options->barBorderLeftElapsed.length && options->barBorderRightElapsed.length;
 
-    uint32_t blocksPercent = (uint32_t) (percent / 100.0 * options->barWidth + 0.5);
+    uint8_t blocksPercent = (uint8_t) (percent / 100.0 * options->barWidth + 0.5);
     assert(blocksPercent <= options->barWidth);
 
     if(!borderAsValue && options->barBorderLeft.length)
@@ -78,7 +78,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         if(!options->pipe && options->barColorTotal.length > 0)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
 
-        for (uint32_t i = 0; i < options->barWidth; ++i)
+        for (uint8_t i = 0; i < options->barWidth; ++i)
         {
             ffStrbufAppend(buffer, borderAsValue && i == 0
                 ? &options->barBorderLeft
@@ -97,7 +97,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
 
         bool autoColorElapsed = ffStrbufIgnCaseEqualS(&options->barColorElapsed, "auto");
 
-        for (uint32_t i = 0; i < blocksPercent; ++i)
+        for (uint8_t i = 0; i < blocksPercent; ++i)
         {
             if(!options->pipe && options->barColorElapsed.length > 0)
             {
@@ -143,7 +143,7 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         {
             if(!options->pipe && options->barColorTotal.length > 0)
                 ffStrbufAppendF(buffer, "\e[%sm", options->barColorTotal.chars);
-            for (uint32_t i = blocksPercent; i < options->barWidth; ++i)
+            for (uint8_t i = blocksPercent; i < options->barWidth; ++i)
             {
                 ffStrbufAppend(buffer, borderAsValue && i == 0
                     ? &options->barBorderLeft
