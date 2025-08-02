@@ -4,6 +4,15 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
+static uint32_t countAurPackages() {
+    FFstrbuf result;
+    ffStrbufInit(&result);
+    ffProcessAppendStdOut(&result, (char*[]){"sh", "-c", "pacman -Qm | wc -l", NULL});
+    uint32_t count = (uint32_t) strtoul(result.chars, NULL, 10);
+    ffStrbufDestroy(&result);
+    return count;
+}
+
 void ffPrintPackages(FFPackagesOptions* options)
 {
     FFPackagesResult counts = {};
@@ -25,6 +34,10 @@ void ffPrintPackages(FFPackagesOptions* options)
     uint32_t amAll = counts.amSystem + counts.amUser;
     uint32_t scoopAll = counts.scoopUser + counts.scoopGlobal;
 
+    uint32_t aur = 0;
+    if(counts.pacman > 0)
+        aur = countAurPackages();
+    
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
@@ -58,6 +71,14 @@ void ffPrintPackages(FFPackagesOptions* options)
             if((all -= counts.pacman) > 0)
                 printf(", ");
         };
+
+        if(aur > 0)
+        {
+            printf("%u (aur)", aur);
+            if((all -= aur) > 0)
+                printf(", ");
+        }
+
         FF_PRINT_PACKAGE(dpkg)
         FF_PRINT_PACKAGE(rpm)
         FF_PRINT_PACKAGE(emerge)
