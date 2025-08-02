@@ -299,36 +299,32 @@ bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const ch
 
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "folders"))
+        if (unsafe_yyjson_equals_str(key, "folders"))
         {
             ffStrbufSetJsonVal(&options->folders, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hideFolders"))
+        if (unsafe_yyjson_equals_str(key, "hideFolders"))
         {
             ffStrbufSetJsonVal(&options->hideFolders, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hideFS"))
+        if (unsafe_yyjson_equals_str(key, "hideFS"))
         {
             ffStrbufSetJsonVal(&options->hideFS, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showExternal"))
+        if (unsafe_yyjson_equals_str(key, "showExternal"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
@@ -337,7 +333,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showHidden"))
+        if (unsafe_yyjson_equals_str(key, "showHidden"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
@@ -346,7 +342,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showSubvolumes"))
+        if (unsafe_yyjson_equals_str(key, "showSubvolumes"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
@@ -355,7 +351,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showReadOnly"))
+        if (unsafe_yyjson_equals_str(key, "showReadOnly"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
@@ -364,7 +360,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showUnknown"))
+        if (unsafe_yyjson_equals_str(key, "showUnknown"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
@@ -373,7 +369,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "useAvailable"))
+        if (unsafe_yyjson_equals_str(key, "useAvailable"))
         {
             if (yyjson_get_bool(val))
                 options->calcType = FF_DISK_CALC_TYPE_AVAILABLE;
@@ -385,7 +381,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 

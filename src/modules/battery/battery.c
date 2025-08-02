@@ -185,19 +185,15 @@ bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, co
 
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         #ifdef _WIN32
-        if (ffStrEqualsIgnCase(key, "useSetupApi"))
+        if (unsafe_yyjson_equals_str(key, "useSetupApi"))
         {
             options->useSetupApi = yyjson_get_bool(val);
             continue;
@@ -210,7 +206,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 

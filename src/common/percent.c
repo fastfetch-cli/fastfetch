@@ -261,14 +261,14 @@ bool ffPercentParseCommandOptions(const char* key, const char* subkey, const cha
     return false;
 }
 
-bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentageModuleConfig* config)
+bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageModuleConfig* config)
 {
-    if (!ffStrEqualsIgnCase(key, "percent"))
+    if (!unsafe_yyjson_equals_str(key, "percent"))
         return false;
 
     if (!yyjson_is_obj(value))
     {
-        fprintf(stderr, "Error: usage: %s must be an object\n", key);
+        fprintf(stderr, "Error: usage: %s must be an object\n", unsafe_yyjson_get_str(key));
         exit(480);
     }
 

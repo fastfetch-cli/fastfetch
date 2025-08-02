@@ -15,6 +15,15 @@ bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYB
 
 void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
 {
+    yyjson_val *key, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key, val)
+    {
+        if (unsafe_yyjson_equals_str(key, "type") || unsafe_yyjson_equals_str(key, "condition"))
+            continue;
+
+        ffPrintError(FF_BREAK_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+    }
 }
 
 static FFModuleBaseInfo ffModuleInfo = {

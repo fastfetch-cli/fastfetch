@@ -107,9 +107,9 @@ bool ffTempsParseCommandOptions(const char* key, const char* subkey, const char*
     return false;
 }
 
-bool ffTempsParseJsonObject(const char* key, yyjson_val* value, bool* useTemp, FFColorRangeConfig* config)
+bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, FFColorRangeConfig* config)
 {
-    if (!ffStrEqualsIgnCase(key, "temp"))
+    if (!unsafe_yyjson_equals_str(key, "temp"))
         return false;
 
     if (yyjson_is_bool(value))
@@ -126,7 +126,7 @@ bool ffTempsParseJsonObject(const char* key, yyjson_val* value, bool* useTemp, F
 
     if (!yyjson_is_obj(value))
     {
-        fprintf(stderr, "Error: usage: %s must be an object or a boolean\n", key);
+        fprintf(stderr, "Error: usage: %s must be an object or a boolean\n", unsafe_yyjson_get_str(key));
         exit(480);
     }
 

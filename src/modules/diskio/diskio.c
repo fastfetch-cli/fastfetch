@@ -125,36 +125,32 @@ bool ffParseDiskIOCommandOptions(FFDiskIOOptions* options, const char* key, cons
 
 void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        if (unsafe_yyjson_equals_str(key, "namePrefix"))
         {
             ffStrbufSetJsonVal(&options->namePrefix, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "detectTotal"))
+        if (unsafe_yyjson_equals_str(key, "detectTotal"))
         {
             options->detectTotal = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "waitTime"))
+        if (unsafe_yyjson_equals_str(key, "waitTime"))
         {
             options->waitTime = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        ffPrintError(FF_DISKIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISKIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 

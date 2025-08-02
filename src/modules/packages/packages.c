@@ -318,22 +318,18 @@ bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, 
 
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if (ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "disabled"))
+        if (unsafe_yyjson_equals_str(key, "disabled"))
         {
             if (!yyjson_is_null(val) && !yyjson_is_arr(val))
             {
-                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", key);
+                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
                 continue;
             }
 
@@ -347,7 +343,7 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                 {
                     if (!yyjson_is_str(flagObj))
                     {
-                        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", key);
+                        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
                         continue;
                     }
                     const char* flag = unsafe_yyjson_get_str(flagObj);
@@ -427,13 +423,13 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
             }
         }
 
-        if (ffStrEqualsIgnCase(key, "combined"))
+        if (unsafe_yyjson_equals_str(key, "combined"))
         {
             options->combined = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 

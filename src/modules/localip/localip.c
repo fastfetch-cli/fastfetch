@@ -295,18 +295,14 @@ bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, co
 
 void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "showIpv4"))
+        if (unsafe_yyjson_equals_str(key, "showIpv4"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_IPV4_BIT;
@@ -315,7 +311,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showIpv6"))
+        if (unsafe_yyjson_equals_str(key, "showIpv6"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
@@ -324,7 +320,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showMac"))
+        if (unsafe_yyjson_equals_str(key, "showMac"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
@@ -333,7 +329,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showLoop"))
+        if (unsafe_yyjson_equals_str(key, "showLoop"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_LOOP_BIT;
@@ -342,7 +338,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showPrefixLen"))
+        if (unsafe_yyjson_equals_str(key, "showPrefixLen"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
@@ -351,7 +347,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showMtu"))
+        if (unsafe_yyjson_equals_str(key, "showMtu"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_MTU_BIT;
@@ -360,7 +356,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showSpeed"))
+        if (unsafe_yyjson_equals_str(key, "showSpeed"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_SPEED_BIT;
@@ -369,7 +365,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showFlags"))
+        if (unsafe_yyjson_equals_str(key, "showFlags"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_FLAGS_BIT;
@@ -378,7 +374,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "compact"))
+        if (unsafe_yyjson_equals_str(key, "compact"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
@@ -387,7 +383,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+        if (unsafe_yyjson_equals_str(key, "defaultRouteOnly"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
@@ -396,7 +392,7 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showAllIps"))
+        if (unsafe_yyjson_equals_str(key, "showAllIps"))
         {
             if (yyjson_get_bool(val))
                 options->showType |= FF_LOCALIP_TYPE_ALL_IPS_BIT;
@@ -405,13 +401,13 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        if (unsafe_yyjson_equals_str(key, "namePrefix"))
         {
             ffStrbufSetJsonVal(&options->namePrefix, val);
             continue;
         }
 
-        ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
