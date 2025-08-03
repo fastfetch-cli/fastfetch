@@ -63,22 +63,6 @@ void ffPrintWM(FFWMOptions* options)
     }
 }
 
-bool ffParseWMCommandOptions(FFWMOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "detect-plugin"))
-    {
-        options->detectPlugin = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -138,7 +122,6 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WM_MODULE_NAME,
     .description = "Print window manager name and version",
-    .parseCommandOptions = (void*) ffParseWMCommandOptions,
     .parseJsonObject = (void*) ffParseWMJsonObject,
     .printModule = (void*) ffPrintWM,
     .generateJsonResult = (void*) ffGenerateWMJsonResult,

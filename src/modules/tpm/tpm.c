@@ -38,16 +38,6 @@ void ffPrintTPM(FFTPMOptions* options)
     ffStrbufDestroy(&result.description);
 }
 
-bool ffParseTPMCommandOptions(FFTPMOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_TPM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -94,7 +84,6 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TPM_MODULE_NAME,
     .description = "Print info of Trusted Platform Module (TPM) Security Device",
-    .parseCommandOptions = (void*) ffParseTPMCommandOptions,
     .parseJsonObject = (void*) ffParseTPMJsonObject,
     .printModule = (void*) ffPrintTPM,
     .generateJsonResult = (void*) ffGenerateTPMJsonResult,

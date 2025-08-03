@@ -132,22 +132,6 @@ exit:
     ffListDestroy(&result.caches[3]);
 }
 
-bool ffParseCPUCacheCommandOptions(FFCPUCacheOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CPUCACHE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseCPUCacheJsonObject(FFCPUCacheOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -227,7 +211,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CPUCACHE_MODULE_NAME,
     .description = "Print CPU cache sizes",
-    .parseCommandOptions = (void*) ffParseCPUCacheCommandOptions,
     .parseJsonObject = (void*) ffParseCPUCacheJsonObject,
     .printModule = (void*) ffPrintCPUCache,
     .generateJsonResult = (void*) ffGenerateCPUCacheJsonResult,

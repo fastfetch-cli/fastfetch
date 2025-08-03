@@ -178,121 +178,6 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
     }
 }
 
-bool ffParseLocalIpCommandOptions(FFLocalIpOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_LOCALIP_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "show-ipv4"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_IPV4_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_IPV4_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-ipv6"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-mac"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_MAC_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_MAC_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-loop"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_LOOP_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_LOOP_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-prefix-len"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_PREFIX_LEN_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-mtu"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_MTU_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_MTU_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-speed"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_SPEED_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_SPEED_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-flags"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_FLAGS_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_FLAGS_BIT;
-        return true;
-    }
-
-    if(ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_COMPACT_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_COMPACT_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-all-ips"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showType |= FF_LOCALIP_TYPE_ALL_IPS_BIT;
-        else
-            options->showType &= ~FF_LOCALIP_TYPE_ALL_IPS_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
-    {
-        ffOptionParseString(key, value, &options->namePrefix);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -503,7 +388,6 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LOCALIP_MODULE_NAME,
     .description = "List local IP addresses (v4 or v6), MAC addresses, etc",
-    .parseCommandOptions = (void*) ffParseLocalIpCommandOptions,
     .parseJsonObject = (void*) ffParseLocalIpJsonObject,
     .printModule = (void*) ffPrintLocalIp,
     .generateJsonResult = (void*) ffGenerateLocalIpJsonResult,

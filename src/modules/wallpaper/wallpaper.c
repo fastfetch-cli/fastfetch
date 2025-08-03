@@ -40,16 +40,6 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
     }
 }
 
-bool ffParseWallpaperCommandOptions(FFWallpaperOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WALLPAPER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -86,7 +76,6 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
     .description = "Print image file path of current wallpaper",
-    .parseCommandOptions = (void*) ffParseWallpaperCommandOptions,
     .parseJsonObject = (void*) ffParseWallpaperJsonObject,
     .printModule = (void*) ffPrintWallpaper,
     .generateJsonResult = (void*) ffGenerateWallpaperJsonResult,

@@ -71,19 +71,6 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
 }
 
-bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MEMORY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -129,7 +116,6 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
     .description = "Print system memory usage info",
-    .parseCommandOptions = (void*) ffParseMemoryCommandOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,
     .printModule = (void*) ffPrintMemory,
     .generateJsonResult = (void*) ffGenerateMemoryJsonResult,

@@ -39,34 +39,6 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     ffStrbufDestroy(&result.location);
 }
 
-bool ffParsePublicIpCommandOptions(FFPublicIpOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PUBLICIP_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "url"))
-    {
-        ffOptionParseString(key, value, &options->url);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "timeout"))
-    {
-        options->timeout = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "ipv6"))
-    {
-        options->ipv6 = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -139,7 +111,6 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PUBLICIP_MODULE_NAME,
     .description = "Print your public IP address, etc",
-    .parseCommandOptions = (void*) ffParsePublicIpCommandOptions,
     .parseJsonObject = (void*) ffParsePublicIpJsonObject,
     .printModule = (void*) ffPrintPublicIp,
     .generateJsonResult = (void*) ffGeneratePublicIpJsonResult,

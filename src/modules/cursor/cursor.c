@@ -48,16 +48,6 @@ void ffPrintCursor(FFCursorOptions* options)
     ffStrbufDestroy(&result.size);
 }
 
-bool ffParseCursorCommandOptions(FFCursorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CURSOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -107,7 +97,6 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CURSOR_MODULE_NAME,
     .description = "Print cursor style name",
-    .parseCommandOptions = (void*) ffParseCursorCommandOptions,
     .parseJsonObject = (void*) ffParseCursorJsonObject,
     .printModule = (void*) ffPrintCursor,
     .generateJsonResult = (void*) ffGenerateCursorJsonResult,

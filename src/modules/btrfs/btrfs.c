@@ -130,19 +130,6 @@ void ffPrintBtrfs(FFBtrfsOptions* options)
     }
 }
 
-bool ffParseBtrfsCommandOptions(FFBtrfsOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BTRFS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBtrfsJsonObject(FFBtrfsOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -216,7 +203,6 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BTRFS_MODULE_NAME,
     .description = "Print Linux BTRFS volumes",
-    .parseCommandOptions = (void*) ffParseBtrfsCommandOptions,
     .parseJsonObject = (void*) ffParseBtrfsJsonObject,
     .printModule = (void*) ffPrintBtrfs,
     .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,

@@ -131,25 +131,6 @@ void ffPrintSwap(FFSwapOptions* options)
     }
 }
 
-bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SWAP_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "separate"))
-    {
-        options->separate = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -211,7 +192,6 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SWAP_MODULE_NAME,
     .description = "Print swap (paging file) space usage",
-    .parseCommandOptions = (void*) ffParseSwapCommandOptions,
     .parseJsonObject = (void*) ffParseSwapJsonObject,
     .printModule = (void*) ffPrintSwap,
     .generateJsonResult = (void*) ffGenerateSwapJsonResult,

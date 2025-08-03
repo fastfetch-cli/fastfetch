@@ -159,30 +159,6 @@ void ffPrintBattery(FFBatteryOptions* options)
     }
 }
 
-bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BATTERY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
-        return true;
-
-    #ifdef _WIN32
-        if (ffStrEqualsIgnCase(subKey, "use-setup-api"))
-        {
-            options->useSetupApi = ffOptionParseBoolean(value);
-            return true;
-        }
-    #endif
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -272,7 +248,6 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BATTERY_MODULE_NAME,
     .description = "Print battery capacity, status, etc",
-    .parseCommandOptions = (void*) ffParseBatteryCommandOptions,
     .parseJsonObject = (void*) ffParseBatteryJsonObject,
     .printModule = (void*) ffPrintBattery,
     .generateJsonResult = (void*) ffGenerateBatteryJsonResult,

@@ -81,16 +81,6 @@ void ffPrintPlayer(FFPlayerOptions* options)
     }
 }
 
-bool ffParsePlayerCommandOptions(FFPlayerOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PLAYER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -120,7 +110,6 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PLAYER_MODULE_NAME,
     .description = "Print music player name",
-    .parseCommandOptions = (void*) ffParsePlayerCommandOptions,
     .parseJsonObject = (void*) ffParsePlayerJsonObject,
     .printModule = (void*) ffPrintPlayer,
     .generateJsonResult = (void*) ffGeneratePlayerJsonResult,

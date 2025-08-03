@@ -86,16 +86,6 @@ void ffPrintMonitor(FFMonitorOptions* options)
     }
 }
 
-bool ffParseMonitorCommandOptions(FFMonitorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MONITOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseMonitorJsonObject(FFMonitorOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -125,7 +115,6 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MONITOR_MODULE_NAME,
     .description = "Alias of Display module",
-    .parseCommandOptions = (void*) ffParseMonitorCommandOptions,
     .parseJsonObject = (void*) ffParseMonitorJsonObject,
     .printModule = (void*) ffPrintMonitor,
     .generateJsonResult = (void*) ffGenerateMonitorJsonResult,

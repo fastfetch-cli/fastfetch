@@ -203,100 +203,6 @@ void ffPrintDisk(FFDiskOptions* options)
     }
 }
 
-bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DISK_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "folders"))
-    {
-        ffOptionParseString(key, value, &options->folders);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "hide-folders"))
-    {
-        ffOptionParseString(key, value, &options->hideFolders);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "hide-fs"))
-    {
-        ffOptionParseString(key, value, &options->hideFS);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-regular"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-external"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-hidden"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-subvolumes"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-readonly"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_READONLY_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-unknown"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "use-available"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->calcType = FF_DISK_CALC_TYPE_AVAILABLE;
-        else
-            options->calcType = FF_DISK_CALC_TYPE_FREE;
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -509,7 +415,6 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISK_MODULE_NAME,
     .description = "Print partitions, space usage, file system, etc",
-    .parseCommandOptions = (void*) ffParseDiskCommandOptions,
     .parseJsonObject = (void*) ffParseDiskJsonObject,
     .printModule = (void*) ffPrintDisk,
     .generateJsonResult = (void*) ffGenerateDiskJsonResult,

@@ -114,32 +114,6 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     putchar('\n');
 }
 
-bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SEPARATOR_MODULE_NAME);
-    if (!subKey) return false;
-
-    if (ffStrEqualsIgnCase(subKey, "string"))
-    {
-        ffOptionParseString(key, value, &options->string);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "output-color"))
-    {
-        ffOptionParseColor(value, &options->outputColor);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "length"))
-    {
-        options->length = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -183,7 +157,6 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SEPARATOR_MODULE_NAME,
     .description = "Print a separator line",
-    .parseCommandOptions = (void*) ffParseSeparatorCommandOptions,
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,

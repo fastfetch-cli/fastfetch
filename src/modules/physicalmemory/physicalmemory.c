@@ -80,16 +80,6 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
     }
 }
 
-bool ffParsePhysicalMemoryCommandOptions(FFPhysicalMemoryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PHYSICALMEMORY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParsePhysicalMemoryJsonObject(FFPhysicalMemoryOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -152,7 +142,6 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PHYSICALMEMORY_MODULE_NAME,
     .description = "Print system physical memory devices",
-    .parseCommandOptions = (void*) ffParsePhysicalMemoryCommandOptions,
     .parseJsonObject = (void*) ffParsePhysicalMemoryJsonObject,
     .printModule = (void*) ffPrintPhysicalMemory,
     .generateJsonConfig = (void*) ffGeneratePhysicalMemoryJsonConfig,

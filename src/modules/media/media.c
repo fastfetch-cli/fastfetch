@@ -106,16 +106,6 @@ void ffPrintMedia(FFMediaOptions* options)
     }
 }
 
-bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MEDIA_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -164,7 +154,6 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
     .description = "Print playing song name",
-    .parseCommandOptions = (void*) ffParseMediaCommandOptions,
     .parseJsonObject = (void*) ffParseMediaJsonObject,
     .printModule = (void*) ffPrintMedia,
     .generateJsonResult = (void*) ffGenerateMediaJsonResult,

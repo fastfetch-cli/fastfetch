@@ -116,31 +116,6 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     }
 }
 
-bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CPUUSAGE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "separate"))
-    {
-        options->separate = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "wait-time"))
-    {
-        options->waitTime = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -202,7 +177,6 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
     .description = "Print CPU usage. Costs some time to collect data",
-    .parseCommandOptions = (void*) ffParseCPUUsageCommandOptions,
     .parseJsonObject = (void*) ffParseCPUUsageJsonObject,
     .printModule = (void*) ffPrintCPUUsage,
     .generateJsonResult = (void*) ffGenerateCPUUsageJsonResult,

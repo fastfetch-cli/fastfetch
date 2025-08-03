@@ -68,40 +68,6 @@ void ffPrintTitle(FFTitleOptions* options)
     }
 }
 
-bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_TITLE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "fqdn"))
-    {
-        options->fqdn = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "color-user"))
-    {
-        ffOptionParseColor(value, &options->colorUser);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "color-at"))
-    {
-        ffOptionParseColor(value, &options->colorAt);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "color-host"))
-    {
-        ffOptionParseColor(value, &options->colorHost);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -177,7 +143,6 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
     .description = "Print title, which contains your user name, hostname",
-    .parseCommandOptions = (void*) ffParseTitleCommandOptions,
     .parseJsonObject = (void*) ffParseTitleJsonObject,
     .printModule = (void*) ffPrintTitle,
     .generateJsonResult = (void*) ffGenerateTitleJsonResult,

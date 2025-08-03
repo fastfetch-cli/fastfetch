@@ -57,27 +57,6 @@ void ffPrintDNS(FFDNSOptions* options)
     }
 }
 
-bool ffParseDNSCommandOptions(FFDNSOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DNS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "show-type"))
-    {
-        options->showType = (FFDNSShowType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "both", FF_DNS_TYPE_BOTH },
-            { "ipv4", FF_DNS_TYPE_IPV4_BIT },
-            { "ipv6", FF_DNS_TYPE_IPV6_BIT },
-            {},
-        });
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -163,7 +142,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DNS_MODULE_NAME,
     .description = "Print configured DNS servers",
-    .parseCommandOptions = (void*) ffParseDNSCommandOptions,
     .parseJsonObject = (void*) ffParseDNSJsonObject,
     .printModule = (void*) ffPrintDNS,
     .generateJsonResult = (void*) ffGenerateDNSJsonResult,

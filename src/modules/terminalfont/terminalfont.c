@@ -46,16 +46,6 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
     ffFontDestroy(&terminalFont.fallback);
 }
 
-bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_TERMINALFONT_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -119,7 +109,6 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TERMINALFONT_MODULE_NAME,
     .description = "Print font name and size used by current terminal",
-    .parseCommandOptions = (void*) ffParseTerminalFontCommandOptions,
     .parseJsonObject = (void*) ffParseTerminalFontJsonObject,
     .printModule = (void*) ffPrintTerminalFont,
     .generateJsonResult = (void*) ffGenerateTerminalFontJsonResult,

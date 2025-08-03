@@ -50,16 +50,6 @@ void ffPrintBootmgr(FFBootmgrOptions* options)
     ffStrbufDestroy(&bootmgr.firmware);
 }
 
-bool ffParseBootmgrCommandOptions(FFBootmgrOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BOOTMGR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -110,7 +100,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BOOTMGR_MODULE_NAME,
     .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
-    .parseCommandOptions = (void*) ffParseBootmgrCommandOptions,
     .parseJsonObject = (void*) ffParseBootmgrJsonObject,
     .printModule = (void*) ffPrintBootmgr,
     .generateJsonResult = (void*) ffGenerateBootmgrJsonResult,

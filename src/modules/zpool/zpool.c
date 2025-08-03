@@ -107,19 +107,6 @@ void ffPrintZpool(FFZpoolOptions* options)
     }
 }
 
-bool ffParseZpoolCommandOptions(FFZpoolOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_ZPOOL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -180,7 +167,6 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_ZPOOL_MODULE_NAME,
     .description = "Print ZFS storage pools",
-    .parseCommandOptions = (void*) ffParseZpoolCommandOptions,
     .parseJsonObject = (void*) ffParseZpoolJsonObject,
     .printModule = (void*) ffPrintZpool,
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,

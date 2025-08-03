@@ -43,34 +43,6 @@ void ffPrintCommand(FFCommandOptions* options)
     }
 }
 
-bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_COMMAND_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if(ffStrEqualsIgnCase(subKey, "shell"))
-    {
-        ffOptionParseString(key, value, &options->shell);
-        return true;
-    }
-
-    if(ffStrEqualsIgnCase(subKey, "param"))
-    {
-        ffOptionParseString(key, value, &options->param);
-        return true;
-    }
-
-    if(ffStrEqualsIgnCase(subKey, "text"))
-    {
-        ffOptionParseString(key, value, &options->text);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -151,7 +123,6 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_COMMAND_MODULE_NAME,
     .description = "Run custom shell scripts",
-    .parseCommandOptions = (void*) ffParseCommandCommandOptions,
     .parseJsonObject = (void*) ffParseCommandJsonObject,
     .printModule = (void*) ffPrintCommand,
     .generateJsonResult = (void*) ffGenerateCommandJsonResult,

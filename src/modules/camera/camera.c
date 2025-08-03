@@ -67,16 +67,6 @@ void ffPrintCamera(FFCameraOptions* options)
     }
 }
 
-bool ffParseCameraCommandOptions(FFCameraOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CAMERA_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -133,7 +123,6 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CAMERA_MODULE_NAME,
     .description = "Print available cameras",
-    .parseCommandOptions = (void*) ffParseCameraCommandOptions,
     .parseJsonObject = (void*) ffParseCameraJsonObject,
     .printModule = (void*) ffPrintCamera,
     .generateJsonResult = (void*) ffGenerateCameraJsonResult,

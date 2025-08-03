@@ -105,16 +105,6 @@ void ffPrintBluetoothRadio(FFBluetoothRadioOptions* options)
     }
 }
 
-bool ffParseBluetoothRadioCommandOptions(FFBluetoothRadioOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BLUETOOTHRADIO_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -179,7 +169,6 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
     .description = "List bluetooth radios width supported version and vendor",
-    .parseCommandOptions = (void*) ffParseBluetoothRadioCommandOptions,
     .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,
     .printModule = (void*) ffPrintBluetoothRadio,
     .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,

@@ -56,16 +56,6 @@ void ffPrintUptime(FFUptimeOptions* options)
     }
 }
 
-bool ffParseUptimeCommandOptions(FFUptimeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_UPTIME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -106,7 +96,6 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_UPTIME_MODULE_NAME,
     .description = "Print how long system has been running",
-    .parseCommandOptions = (void*) ffParseUptimeCommandOptions,
     .parseJsonObject = (void*) ffParseUptimeJsonObject,
     .printModule = (void*) ffPrintUptime,
     .generateJsonResult = (void*) ffGenerateUptimeJsonResult,

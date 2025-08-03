@@ -28,16 +28,6 @@ void ffPrintLocale(FFLocaleOptions* options)
     }
 }
 
-bool ffParseLocaleCommandOptions(FFLocaleOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_LOCALE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -76,7 +66,6 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LOCALE_MODULE_NAME,
     .description = "Print system locale name",
-    .parseCommandOptions = (void*) ffParseLocaleCommandOptions,
     .parseJsonObject = (void*) ffParseLocaleJsonObject,
     .printModule = (void*) ffPrintLocale,
     .generateJsonResult = (void*) ffGenerateLocaleJsonResult,

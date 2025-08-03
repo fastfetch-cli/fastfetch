@@ -42,16 +42,6 @@ void ffPrintShell(FFShellOptions* options)
     }
 }
 
-bool ffParseShellCommandOptions(FFShellOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SHELL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -101,7 +91,6 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
     .description = "Print current shell name and version",
-    .parseCommandOptions = (void*) ffParseShellCommandOptions,
     .parseJsonObject = (void*) ffParseShellJsonObject,
     .printModule = (void*) ffPrintShell,
     .generateJsonResult = (void*) ffGenerateShellJsonResult,

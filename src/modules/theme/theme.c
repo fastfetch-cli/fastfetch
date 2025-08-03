@@ -43,16 +43,6 @@ void ffPrintTheme(FFThemeOptions* options)
     ffStrbufDestroy(&result.theme2);
 }
 
-bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_THEME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -99,7 +89,6 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
     .description = "Print current theme of desktop environment",
-    .parseCommandOptions = (void*) ffParseThemeCommandOptions,
     .parseJsonObject = (void*) ffParseThemeJsonObject,
     .printModule = (void*) ffPrintTheme,
     .generateJsonResult = (void*) ffGenerateThemeJsonResult,

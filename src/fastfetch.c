@@ -644,8 +644,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(
         ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
         ffOptionsParseLogoCommandLine(&instance.config.logo, key, value) ||
-        ffOptionsParseDisplayCommandLine(&instance.config.display, key, value) ||
-        ffParseModuleOptions(key, value)
+        ffOptionsParseDisplayCommandLine(&instance.config.display, key, value)
     ) {}
 
     else

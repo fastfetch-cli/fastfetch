@@ -56,16 +56,6 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
     }
 }
 
-bool ffParsePowerAdapterCommandOptions(FFPowerAdapterOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_POWERADAPTER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffGeneratePowerAdapterJsonConfig(FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     __attribute__((__cleanup__(ffDestroyPowerAdapterOptions))) FFPowerAdapterOptions defaultOptions;
@@ -124,7 +114,6 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_POWERADAPTER_MODULE_NAME,
     .description = "Print power adapter name and charging watts",
-    .parseCommandOptions = (void*) ffParsePowerAdapterCommandOptions,
     .parseJsonObject = (void*) ffParsePowerAdapterJsonObject,
     .printModule = (void*) ffPrintPowerAdapter,
     .generateJsonResult = (void*) ffGeneratePowerAdapterJsonResult,

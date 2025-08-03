@@ -48,16 +48,6 @@ void ffPrintKeyboard(FFKeyboardOptions* options)
     }
 }
 
-bool ffParseKeyboardCommandOptions(FFKeyboardOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_KEYBOARD_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -109,7 +99,6 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_KEYBOARD_MODULE_NAME,
     .description = "List (connected) keyboards",
-    .parseCommandOptions = (void*) ffParseKeyboardCommandOptions,
     .parseJsonObject = (void*) ffParseKeyboardJsonObject,
     .printModule = (void*) ffPrintKeyboard,
     .generateJsonResult = (void*) ffGenerateKeyboardJsonResult,

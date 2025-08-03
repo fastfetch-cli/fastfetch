@@ -112,31 +112,6 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     }
 }
 
-bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BRIGHTNESS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "ddcci-sleep"))
-    {
-        options->ddcciSleep = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -215,7 +190,6 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
-    .parseCommandOptions = (void*) ffParseBrightnessCommandOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,
     .printModule = (void*) ffPrintBrightness,
     .generateJsonResult = (void*) ffGenerateBrightnessJsonResult,

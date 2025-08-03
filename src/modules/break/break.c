@@ -8,11 +8,6 @@ void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
     putchar('\n');
 }
 
-bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED const char* key, FF_MAYBE_UNUSED const char* value)
-{
-    return false;
-}
-
 void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -29,7 +24,6 @@ void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UN
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BREAK_MODULE_NAME,
     .description = "Print a empty line",
-    .parseCommandOptions = (void*) ffParseBreakCommandOptions,
     .parseJsonObject = (void*) ffParseBreakJsonObject,
     .printModule = (void*) ffPrintBreak,
 };

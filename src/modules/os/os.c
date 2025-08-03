@@ -115,16 +115,6 @@ void ffPrintOS(FFOSOptions* options)
     }
 }
 
-bool ffParseOSCommandOptions(FFOSOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_OS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -172,7 +162,6 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OS_MODULE_NAME,
     .description = "Print operating system name and version",
-    .parseCommandOptions = (void*) ffParseOSCommandOptions,
     .parseJsonObject = (void*) ffParseOSJsonObject,
     .printModule = (void*) ffPrintOS,
     .generateJsonResult = (void*) ffGenerateOSJsonResult,

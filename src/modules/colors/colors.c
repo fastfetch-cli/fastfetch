@@ -125,55 +125,6 @@ void ffPrintColors(FFColorsOptions* options)
     }
 }
 
-bool ffParseColorsCommandOptions(FFColorsOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_COLORS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "symbol"))
-    {
-        options->symbol = (FFColorsSymbol) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "block", FF_COLORS_SYMBOL_BLOCK },
-            { "background", FF_COLORS_SYMBOL_BACKGROUND },
-            { "circle", FF_COLORS_SYMBOL_CIRCLE },
-            { "diamond", FF_COLORS_SYMBOL_DIAMOND },
-            { "triangle", FF_COLORS_SYMBOL_TRIANGLE },
-            { "square", FF_COLORS_SYMBOL_SQUARE },
-            { "star", FF_COLORS_SYMBOL_STAR },
-            {},
-        });
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "padding-left"))
-    {
-        options->paddingLeft = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "block-width"))
-    {
-        options->block.width = (uint8_t) ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "block-range-start"))
-    {
-        options->block.range[0] = min((uint8_t) ffOptionParseUInt32(key, value), 15);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "block-range-end"))
-    {
-        options->block.range[1] = min((uint8_t) ffOptionParseUInt32(key, value), 15);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -291,7 +242,6 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_COLORS_MODULE_NAME,
     .description = "Print some colored blocks",
-    .parseCommandOptions = (void*) ffParseColorsCommandOptions,
     .parseJsonObject = (void*) ffParseColorsJsonObject,
     .printModule = (void*) ffPrintColors,
     .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,

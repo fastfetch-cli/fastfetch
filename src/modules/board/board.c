@@ -50,16 +50,6 @@ exit:
     ffStrbufDestroy(&result.serial);
 }
 
-bool ffParseBoardCommandOptions(FFBoardOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BOARD_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -119,7 +109,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BOARD_MODULE_NAME,
     .description = "Print motherboard name and other info",
-    .parseCommandOptions = (void*) ffParseBoardCommandOptions,
     .parseJsonObject = (void*) ffParseBoardJsonObject,
     .printModule = (void*) ffPrintBoard,
     .generateJsonResult = (void*) ffGenerateBoardJsonResult,

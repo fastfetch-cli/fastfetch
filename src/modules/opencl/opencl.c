@@ -30,16 +30,6 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
     }
 }
 
-bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_OPENCL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -127,7 +117,6 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OPENCL_MODULE_NAME,
     .description = "Print highest OpenCL version supported by the GPU",
-    .parseCommandOptions = (void*) ffParseOpenCLCommandOptions,
     .parseJsonObject = (void*) ffParseOpenCLJsonObject,
     .printModule = (void*) ffPrintOpenCL,
     .generateJsonResult = (void*) ffGenerateOpenCLJsonResult,

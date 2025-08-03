@@ -43,27 +43,6 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufDestroy(&result.library);
 }
 
-bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_OPENGL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "library"))
-    {
-        options->library = (FFOpenGLLibrary) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "auto", FF_OPENGL_LIBRARY_AUTO },
-            { "egl", FF_OPENGL_LIBRARY_EGL },
-            { "glx", FF_OPENGL_LIBRARY_GLX },
-            {}
-        });
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -151,7 +130,6 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OPENGL_MODULE_NAME,
     .description = "Print highest OpenGL version supported by the GPU",
-    .parseCommandOptions = (void*) ffParseOpenGLCommandOptions,
     .parseJsonObject = (void*) ffParseOpenGLJsonObject,
     .printModule = (void*) ffPrintOpenGL,
     .generateJsonResult = (void*) ffGenerateOpenGLJsonResult,

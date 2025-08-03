@@ -29,34 +29,6 @@ void ffPrintWeather(FFWeatherOptions* options)
     }
 }
 
-bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WEATHER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "location"))
-    {
-        ffOptionParseString(key, value, &options->location);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "output-format"))
-    {
-        ffOptionParseString(key, value, &options->outputFormat);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "timeout"))
-    {
-        options->timeout = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -122,7 +94,6 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WEATHER_MODULE_NAME,
     .description = "Print weather information",
-    .parseCommandOptions = (void*) ffParseWeatherCommandOptions,
     .parseJsonObject = (void*) ffParseWeatherJsonObject,
     .printModule = (void*) ffPrintWeather,
     .generateJsonResult = (void*) ffGenerateWeatherJsonResult,

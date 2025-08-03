@@ -136,19 +136,6 @@ void ffPrintWifi(FFWifiOptions* options)
     }
 }
 
-bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WIFI_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -222,7 +209,6 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WIFI_MODULE_NAME,
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
-    .parseCommandOptions = (void*) ffParseWifiCommandOptions,
     .parseJsonObject = (void*) ffParseWifiJsonObject,
     .printModule = (void*) ffPrintWifi,
     .generateJsonResult = (void*) ffGenerateWifiJsonResult,

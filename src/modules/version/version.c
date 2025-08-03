@@ -44,16 +44,6 @@ void ffPrintVersion(FFVersionOptions* options)
     }
 }
 
-bool ffParseVersionCommandOptions(FFVersionOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_VERSION_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -110,7 +100,6 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_VERSION_MODULE_NAME,
     .description = "Print Fastfetch version",
-    .parseCommandOptions = (void*) ffParseVersionCommandOptions,
     .parseJsonObject = (void*) ffParseVersionJsonObject,
     .printModule = (void*) ffPrintVersion,
     .generateJsonResult = (void*) ffGenerateVersionJsonResult,

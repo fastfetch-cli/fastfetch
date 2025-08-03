@@ -9,16 +9,6 @@ void ffPrintCustom(FFCustomOptions* options)
     ffPrintFormat(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, 0, ((FFformatarg[]) {}));
 }
 
-bool ffParseCustomCommandOptions(FFCustomOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CUSTOM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     __attribute__((__cleanup__(ffDestroyCustomOptions))) FFCustomOptions defaultOptions;
@@ -43,7 +33,6 @@ void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CUSTOM_MODULE_NAME,
     .description = "Print a custom string, with or without key",
-    .parseCommandOptions = (void*) ffParseCustomCommandOptions,
     .parseJsonObject = (void*) ffParseCustomJsonObject,
     .printModule = (void*) ffPrintCustom,
     .generateJsonConfig = (void*) ffGenerateCustomJsonConfig,

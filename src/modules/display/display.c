@@ -217,46 +217,6 @@ void ffPrintDisplay(FFDisplayOptions* options)
     }
 }
 
-bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DISPLAY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "compact-type"))
-    {
-        options->compactType = (FFDisplayCompactType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-            { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-            { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-            { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-            { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-            {},
-        });
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "precise-refresh-rate"))
-    {
-        options->preciseRefreshRate = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "order"))
-    {
-        options->order = (FFDisplayOrder) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "asc", FF_DISPLAY_ORDER_ASC },
-            { "desc", FF_DISPLAY_ORDER_DESC },
-            { "none", FF_DISPLAY_ORDER_NONE },
-            {},
-        });
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -271,20 +231,20 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
             if (yyjson_is_null(val))
                 options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
             else
-        {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-                { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-                { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-                { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-                { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-                {},
-            });
-            if (error)
-                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
-            else
-                options->compactType = (FFDisplayCompactType) value;
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
+                    { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
+                    { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                    { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+                    { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                    options->compactType = (FFDisplayCompactType) value;
             }
             continue;
         }
@@ -440,7 +400,6 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISPLAY_MODULE_NAME,
     .description = "Print resolutions, refresh rates, etc",
-    .parseCommandOptions = (void*) ffParseDisplayCommandOptions,
     .parseJsonObject = (void*) ffParseDisplayJsonObject,
     .printModule = (void*) ffPrintDisplay,
     .generateJsonResult = (void*) ffGenerateDisplayJsonResult,

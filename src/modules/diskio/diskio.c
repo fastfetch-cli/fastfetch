@@ -95,34 +95,6 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
     }
 }
 
-bool ffParseDiskIOCommandOptions(FFDiskIOOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DISKIO_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
-    {
-        ffOptionParseString(key, value, &options->namePrefix);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detect-total"))
-    {
-        options->detectTotal = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "wait-time"))
-    {
-        options->waitTime = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -201,7 +173,6 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISKIO_MODULE_NAME,
     .description = "Print physical disk I/O throughput",
-    .parseCommandOptions = (void*) ffParseDiskIOCommandOptions,
     .parseJsonObject = (void*) ffParseDiskIOJsonObject,
     .printModule = (void*) ffPrintDiskIO,
     .generateJsonResult = (void*) ffGenerateDiskIOJsonResult,

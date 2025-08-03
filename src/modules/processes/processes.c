@@ -29,16 +29,6 @@ void ffPrintProcesses(FFProcessesOptions* options)
     }
 }
 
-bool ffParseProcessesCommandOptions(FFProcessesOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PROCESSES_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -77,7 +67,6 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PROCESSES_MODULE_NAME,
     .description = "Print number of running processes",
-    .parseCommandOptions = (void*) ffParseProcessesCommandOptions,
     .parseJsonObject = (void*) ffParseProcessesJsonObject,
     .printModule = (void*) ffPrintProcesses,
     .generateJsonResult = (void*) ffGenerateProcessesJsonResult,

@@ -103,40 +103,6 @@ void ffPrintNetIO(FFNetIOOptions* options)
     }
 }
 
-bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_NETIO_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
-    {
-        ffOptionParseString(key, value, &options->namePrefix);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
-    {
-        options->defaultRouteOnly = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detect-total"))
-    {
-        options->detectTotal = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "wait-time"))
-    {
-        options->waitTime = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -227,7 +193,6 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_NETIO_MODULE_NAME,
     .description = "Print network I/O throughput",
-    .parseCommandOptions = (void*) ffParseNetIOCommandOptions,
     .parseJsonObject = (void*) ffParseNetIOJsonObject,
     .printModule = (void*) ffPrintNetIO,
     .generateJsonResult = (void*) ffGenerateNetIOJsonResult,

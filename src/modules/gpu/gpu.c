@@ -202,53 +202,6 @@ void ffPrintGPU(FFGPUOptions* options)
     }
 }
 
-bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_GPU_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "driver-specific"))
-    {
-        options->driverSpecific = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detection-method"))
-    {
-        options->detectionMethod = (FFGPUDetectionMethod) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "auto", FF_GPU_DETECTION_METHOD_AUTO },
-            { "pci", FF_GPU_DETECTION_METHOD_PCI },
-            { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
-            { "opencl", FF_GPU_DETECTION_METHOD_OPENCL },
-            { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
-            {},
-        });
-        return true;
-    }
-
-    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "hide-type"))
-    {
-        options->hideType = (FFGPUType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "none", FF_GPU_TYPE_NONE },
-            { "unknown", FF_GPU_TYPE_UNKNOWN },
-            { "integrated", FF_GPU_TYPE_INTEGRATED },
-            { "discrete", FF_GPU_TYPE_DISCRETE },
-            {},
-        });
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -459,7 +412,6 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_GPU_MODULE_NAME,
     .description = "Print GPU names, graphic memory size, type, etc",
-    .parseCommandOptions = (void*) ffParseGPUCommandOptions,
     .parseJsonObject = (void*) ffParseGPUJsonObject,
     .printModule = (void*) ffPrintGPU,
     .generateJsonResult = (void*) ffGenerateGPUJsonResult,

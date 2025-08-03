@@ -90,31 +90,6 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     }
 }
 
-bool ffParseLoadavgCommandOptions(FFLoadavgOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_LOADAVG_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "ndigits"))
-    {
-        options->ndigits = (uint8_t) ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -178,7 +153,6 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LOADAVG_MODULE_NAME,
     .description = "Print system load averages",
-    .parseCommandOptions = (void*) ffParseLoadavgCommandOptions,
     .parseJsonObject = (void*) ffParseLoadavgJsonObject,
     .printModule = (void*) ffPrintLoadavg,
     .generateJsonResult = (void*) ffGenerateLoadavgJsonResult,

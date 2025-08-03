@@ -77,19 +77,6 @@ void ffPrintGamepad(FFGamepadOptions* options)
     }
 }
 
-bool ffParseGamepadCommandOptions(FFGamepadOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_GAMEPAD_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -146,7 +133,6 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_GAMEPAD_MODULE_NAME,
     .description = "List (connected) gamepads",
-    .parseCommandOptions = (void*) ffParseGamepadCommandOptions,
     .parseJsonObject = (void*) ffParseGamepadJsonObject,
     .printModule = (void*) ffPrintGamepad,
     .generateJsonResult = (void*) ffGenerateGamepadJsonResult,

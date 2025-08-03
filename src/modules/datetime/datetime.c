@@ -117,16 +117,6 @@ void ffPrintDateTime(FFDateTimeOptions* options)
     puts(buffer);
 }
 
-bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DATETIME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -156,7 +146,6 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DATETIME_MODULE_NAME,
     .description = "Print current date and time",
-    .parseCommandOptions = (void*) ffParseDateTimeCommandOptions,
     .parseJsonObject = (void*) ffParseDateTimeJsonObject,
     .printModule = (void*) ffPrintDateTime,
     .generateJsonResult = (void*) ffGenerateDateTimeJsonResult,

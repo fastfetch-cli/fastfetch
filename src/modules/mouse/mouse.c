@@ -48,16 +48,6 @@ void ffPrintMouse(FFMouseOptions* options)
     }
 }
 
-bool ffParseMouseCommandOptions(FFMouseOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MOUSE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseMouseJsonObject(FFMouseOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -109,7 +99,6 @@ void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MOUSE_MODULE_NAME,
     .description = "List connected mouses",
-    .parseCommandOptions = (void*) ffParseMouseCommandOptions,
     .parseJsonObject = (void*) ffParseMouseJsonObject,
     .printModule = (void*) ffPrintMouse,
     .generateJsonResult = (void*) ffGenerateMouseJsonResult,

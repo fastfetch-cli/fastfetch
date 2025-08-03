@@ -29,16 +29,6 @@ void ffPrintWMTheme(FFWMThemeOptions* options)
     }
 }
 
-bool ffParseWMThemeCommandOptions(FFWMThemeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WMTHEME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseWMThemeJsonObject(FFWMThemeOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -75,7 +65,6 @@ void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WMTHEME_MODULE_NAME,
     .description = "Print current theme of window manager",
-    .parseCommandOptions = (void*) ffParseWMThemeCommandOptions,
     .parseJsonObject = (void*) ffParseWMThemeJsonObject,
     .printModule = (void*) ffPrintWMTheme,
     .generateJsonResult = (void*) ffGenerateWMThemeJsonResult,

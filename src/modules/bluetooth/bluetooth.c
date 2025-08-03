@@ -97,25 +97,6 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
     }
 }
 
-bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BLUETOOTH_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "show-disconnected"))
-    {
-        options->showDisconnected = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -185,7 +166,6 @@ void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BLUETOOTH_MODULE_NAME,
     .description = "List (connected) bluetooth devices",
-    .parseCommandOptions = (void*) ffParseBluetoothCommandOptions,
     .parseJsonObject = (void*) ffParseBluetoothJsonObject,
     .printModule = (void*) ffPrintBluetooth,
     .generateJsonResult = (void*) ffGenerateBluetoothJsonResult,

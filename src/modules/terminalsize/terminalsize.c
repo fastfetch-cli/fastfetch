@@ -38,16 +38,6 @@ void ffPrintTerminalSize(FFTerminalSizeOptions* options)
     }
 }
 
-bool ffParseTerminalSizeCommandOptions(FFTerminalSizeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_TERMINALSIZE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -89,7 +79,6 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TERMINALSIZE_MODULE_NAME,
     .description = "Print current terminal size",
-    .parseCommandOptions = (void*) ffParseTerminalSizeCommandOptions,
     .parseJsonObject = (void*) ffParseTerminalSizeJsonObject,
     .printModule = (void*) ffPrintTerminalSize,
     .generateJsonResult = (void*) ffGenerateTerminalSizeJsonResult,

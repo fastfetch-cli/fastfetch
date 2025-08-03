@@ -43,16 +43,6 @@ void ffPrintIcons(FFIconsOptions* options)
     ffStrbufDestroy(&result.icons2);
 }
 
-bool ffParseIconsCommandOptions(FFIconsOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_ICONS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -99,7 +89,6 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_ICONS_MODULE_NAME,
     .description = "Print icon style name",
-    .parseCommandOptions = (void*) ffParseIconsCommandOptions,
     .parseJsonObject = (void*) ffParseIconsJsonObject,
     .printModule = (void*) ffPrintIcons,
     .generateJsonResult = (void*) ffGenerateIconsJsonResult,

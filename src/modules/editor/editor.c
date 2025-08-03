@@ -54,16 +54,6 @@ void ffPrintEditor(FFEditorOptions* options)
     ffStrbufDestroy(&result.version);
 }
 
-bool ffParseEditorCommandOptions(FFEditorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_EDITOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -117,7 +107,6 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
-    .parseCommandOptions = (void*) ffParseEditorCommandOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
     .printModule = (void*) ffPrintEditor,
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,

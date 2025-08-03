@@ -112,30 +112,6 @@ void ffPrintSound(FFSoundOptions* options)
     }
 }
 
-bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SOUND_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "sound-type"))
-    {
-        options->soundType = (FFSoundType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "main", FF_SOUND_TYPE_MAIN },
-            { "active", FF_SOUND_TYPE_ACTIVE },
-            { "all", FF_SOUND_TYPE_ALL },
-            {},
-        });
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -233,7 +209,6 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
     .description = "Print sound devices, volume, etc",
-    .parseCommandOptions = (void*) ffParseSoundCommandOptions,
     .parseJsonObject = (void*) ffParseSoundJsonObject,
     .printModule = (void*) ffPrintSound,
     .generateJsonResult = (void*) ffGenerateSoundJsonResult,

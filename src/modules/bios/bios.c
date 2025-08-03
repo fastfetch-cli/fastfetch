@@ -75,16 +75,6 @@ exit:
     ffStrbufDestroy(&bios.type);
 }
 
-bool ffParseBiosCommandOptions(FFBiosOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BIOS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -141,7 +131,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BIOS_MODULE_NAME,
     .description = "Print information of 1st-stage bootloader (name, version, release date, etc)",
-    .parseCommandOptions = (void*) ffParseBiosCommandOptions,
     .parseJsonObject = (void*) ffParseBiosJsonObject,
     .printModule = (void*) ffPrintBios,
     .generateJsonResult = (void*) ffGenerateBiosJsonResult,

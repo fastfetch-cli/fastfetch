@@ -67,16 +67,6 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_HOST_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -144,7 +134,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
-    .parseCommandOptions = (void*) ffParseHostCommandOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,
     .printModule = (void*) ffPrintHost,
     .generateJsonResult = (void*) ffGenerateHostJsonResult,

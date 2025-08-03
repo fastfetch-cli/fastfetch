@@ -48,16 +48,6 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-bool ffParseInitSystemCommandOptions(FFInitSystemOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_INITSYSTEM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseInitSystemJsonObject(FFInitSystemOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -111,7 +101,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_INITSYSTEM_MODULE_NAME,
     .description = "Print init system (pid 1) name and version",
-    .parseCommandOptions = (void*) ffParseInitSystemCommandOptions,
     .parseJsonObject = (void*) ffParseInitSystemJsonObject,
     .printModule = (void*) ffPrintInitSystem,
     .generateJsonResult = (void*) ffGenerateInitSystemJsonResult,

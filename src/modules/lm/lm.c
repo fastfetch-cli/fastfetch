@@ -47,16 +47,6 @@ void ffPrintLM(FFLMOptions* options)
     ffStrbufDestroy(&result.version);
 }
 
-bool ffParseLMCommandOptions(FFLMOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_LM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -112,7 +102,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LM_MODULE_NAME,
     .description = "Print login manager (desktop manager) name and version",
-    .parseCommandOptions = (void*) ffParseLMCommandOptions,
     .parseJsonObject = (void*) ffParseLMJsonObject,
     .printModule = (void*) ffPrintLM,
     .generateJsonResult = (void*) ffGenerateLMJsonResult,

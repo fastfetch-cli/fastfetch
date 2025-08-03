@@ -50,16 +50,6 @@ void ffPrintVulkan(FFVulkanOptions* options)
     }
 }
 
-bool ffParseVulkanCommandOptions(FFVulkanOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_VULKAN_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -141,7 +131,6 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_VULKAN_MODULE_NAME,
     .description = "Print highest Vulkan version supported by the GPU",
-    .parseCommandOptions = (void*) ffParseVulkanCommandOptions,
     .parseJsonObject = (void*) ffParseVulkanJsonObject,
     .printModule = (void*) ffPrintVulkan,
     .generateJsonResult = (void*) ffGenerateVulkanJsonResult,
