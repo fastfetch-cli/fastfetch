@@ -324,6 +324,15 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "showRegular"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+            else
+                options->showTypes &= ~FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+            continue;
+        }
+
         if (unsafe_yyjson_equals_str(key, "showExternal"))
         {
             if (yyjson_get_bool(val))
@@ -394,6 +403,9 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 
     if (defaultOptions.showTypes != options->showTypes)
     {
+        if (options->showTypes & FF_DISK_VOLUME_TYPE_REGULAR_BIT)
+            yyjson_mut_obj_add_bool(doc, module, "showRegular", true);
+
         if (options->showTypes & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
             yyjson_mut_obj_add_bool(doc, module, "showExternal", true);
 

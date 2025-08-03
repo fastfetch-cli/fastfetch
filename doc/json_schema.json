@@ -2100,6 +2100,11 @@
                                         "type": "string",
                                         "description": "A colon separated file systems to hide from the disk output"
                                     },
+                                    "showRegular": {
+                                        "type": "boolean",
+                                        "description": "Set if regular volume should be printed",
+                                        "default": true
+                                    },
                                     "showExternal": {
                                         "type": "boolean",
                                         "description": "Set if external volume should be printed",
