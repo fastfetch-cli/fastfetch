@@ -21,6 +21,7 @@
         "processes",
         "packages",
         "shell",
+        "dotfileManager",
         "editor",
         "display",
         "brightness",

@@ -332,6 +332,10 @@
             "description": "Output format of the module `DiskIO`. See Wiki for formatting syntax\n    1. {size-read}: Size of data read [per second] (formatted)\n    2. {size-written}: Size of data written [per second] (formatted)\n    3. {name}: Device name\n    4. {dev-path}: Device raw file path\n    5. {bytes-read}: Size of data read [per second] (in bytes)\n    6. {bytes-written}: Size of data written [per second] (in bytes)\n    7. {read-count}: Number of reads\n    8. {write-count}: Number of writes",
             "type": "string"
         },
+        "dotfileManagerFormat": {
+            "description": "Output format of the module `DotfileManager`. See Wiki for formatting syntax\n    1. {name}: Name",
+            "type": "string"
+        },
         "dnsFormat": {
             "description": "Output format of the module `DNS`. See Wiki for formatting syntax\n    1. {result}: DNS result",
             "type": "string"
@@ -1365,6 +1369,7 @@
                             "disk",
                             "diskio",
                             "de",
+                            "dotfileManager",
                             "dns",
                             "editor",
                             "font",

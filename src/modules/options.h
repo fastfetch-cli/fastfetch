@@ -25,6 +25,7 @@
 #include "modules/disk/option.h"
 #include "modules/diskio/option.h"
 #include "modules/display/option.h"
+#include "modules/dotfilemanager/option.h"
 #include "modules/dns/option.h"
 #include "modules/editor/option.h"
 #include "modules/font/option.h"
