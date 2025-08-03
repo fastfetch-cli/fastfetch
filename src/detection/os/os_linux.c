@@ -306,16 +306,10 @@ FF_MAYBE_UNUSED static bool detectFedoraVariant(FFOSResult* result)
     return false;
 }
 
-static void detectOS(FFOSResult* os)
+static bool detectBedrock(FFOSResult* os)
 {
-    #ifdef FF_CUSTOM_OS_RELEASE_PATH
-    parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
-        #ifdef FF_CUSTOM_LSB_RELEASE_PATH
-        parseLsbRelease(FF_STR(FF_CUSTOM_LSB_RELEASE_PATH), os);
-        #endif
-    return;
-    #endif
-
+    const char* bedrockRestrict = getenv("BEDROCK_RESTRICT");
+    if(bedrockRestrict && bedrockRestrict[0] == '1') return false;
     if(parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
     {
         if(os->id.length == 0)
@@ -328,8 +322,23 @@ static void detectOS(FFOSResult* os)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
 
         parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os);
-        return;
+        return true;
     }
+    return false;
+}
+
+static void detectOS(FFOSResult* os)
+{
+    #ifdef FF_CUSTOM_OS_RELEASE_PATH
+    parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+        #ifdef FF_CUSTOM_LSB_RELEASE_PATH
+        parseLsbRelease(FF_STR(FF_CUSTOM_LSB_RELEASE_PATH), os);
+        #endif
+    return;
+    #endif
+
+    if (detectBedrock(os))
+        return;
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 
