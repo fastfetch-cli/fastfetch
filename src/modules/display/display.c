@@ -257,17 +257,22 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "order"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "asc", FF_DISPLAY_ORDER_ASC },
-                { "desc", FF_DISPLAY_ORDER_DESC },
-                { "none", FF_DISPLAY_ORDER_NONE },
-                {},
-            });
-            if (error)
-                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+            if (yyjson_is_null(val))
+                options->order = FF_DISPLAY_ORDER_NONE;
             else
-                options->order = (FFDisplayOrder) value;
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "asc", FF_DISPLAY_ORDER_ASC },
+                    { "desc", FF_DISPLAY_ORDER_DESC },
+                    { "none", FF_DISPLAY_ORDER_NONE },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                    options->order = (FFDisplayOrder) value;
+            }
             continue;
         }
 

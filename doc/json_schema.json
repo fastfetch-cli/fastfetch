@@ -2067,12 +2067,25 @@
                                     },
                                     "order": {
                                         "description": "Set the order should be used when printing",
-                                        "enum": [
-                                            "none",
-                                            "asc",
-                                            "desc"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Use the default order"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Use the detected order (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "asc",
+                                                "description": "Sort by display name in ascending order"
+                                            },
+                                            {
+                                                "const": "desc",
+                                                "description": "Sort by display name in descending order"
+                                            }
                                         ],
-                                        "default": "none"
+                                        "default": null
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
