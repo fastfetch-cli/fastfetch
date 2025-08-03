@@ -2151,7 +2151,7 @@
                                     },
                                     "useAvailable": {
                                         "type": "boolean",
-                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
+                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes\nMay be required for macOS to display correct results",
                                         "default": false
                                     },
                                     "percent": {
@@ -3126,44 +3126,51 @@
                                         "description": "List installed package managers and count of installed packages"
                                     },
                                     "disabled": {
-                                        "description": "List of package managers to be disabled when detecting",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "am",
-                                                "apk",
-                                                "brew",
-                                                "choco",
-                                                "dpkg",
-                                                "emerge",
-                                                "eopkg",
-                                                "flatpak",
-                                                "guix",
-                                                "hpkg",
-                                                "linglong",
-                                                "lpkg",
-                                                "lpkgbuild",
-                                                "macports",
-                                                "mport",
-                                                "nix",
-                                                "opkg",
-                                                "pacman",
-                                                "pacstall",
-                                                "paludis",
-                                                "pisi",
-                                                "pkg",
-                                                "pkgtool",
-                                                "qi",
-                                                "rpm",
-                                                "scoop",
-                                                "snap",
-                                                "sorcery",
-                                                "winget",
-                                                "xbps"
-                                            ],
-                                            "uniqueItems": true
-                                        },
+                                        "oneOf": [
+                                            {
+                                                "description": "List of package managers to be disabled when detecting\nWarning: Some detection methods can be very slow.",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "am",
+                                                        "apk",
+                                                        "brew",
+                                                        "choco",
+                                                        "dpkg",
+                                                        "emerge",
+                                                        "eopkg",
+                                                        "flatpak",
+                                                        "guix",
+                                                        "hpkg",
+                                                        "linglong",
+                                                        "lpkg",
+                                                        "lpkgbuild",
+                                                        "macports",
+                                                        "mport",
+                                                        "nix",
+                                                        "opkg",
+                                                        "pacman",
+                                                        "pacstall",
+                                                        "paludis",
+                                                        "pisi",
+                                                        "pkg",
+                                                        "pkgtool",
+                                                        "rpm",
+                                                        "scoop",
+                                                        "snap",
+                                                        "sorcery",
+                                                        "winget",
+                                                        "xbps"
+                                                    ],
+                                                    "uniqueItems": true
+                                                }
+                                            },
+                                            {
+                                                "description": "Enable all package managers",
+                                                "type": "null"
+                                            }
+                                        ],
                                         "default": ["winget"]
                                     },
                                     "combined": {
