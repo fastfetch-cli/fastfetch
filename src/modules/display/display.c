@@ -268,6 +268,10 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "compactType"))
         {
+            if (yyjson_is_null(val))
+                options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+            else
+        {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
                 { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
@@ -281,6 +285,7 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
                 ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             else
                 options->compactType = (FFDisplayCompactType) value;
+            }
             continue;
         }
 

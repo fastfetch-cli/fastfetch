@@ -2031,15 +2031,34 @@
                                         "const": "display"
                                     },
                                     "compactType": {
-                                        "enum": [
-                                            "none",
-                                            "original",
-                                            "scaled",
-                                            "original-with-refresh-rate",
-                                            "scaled-with-refresh-rate"
-                                        ],
                                         "description": "Set if all displays should be printed in one line",
-                                        "default": "none"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Disable compact mode"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Disable compact mode (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "original",
+                                                "description": "Print original resolutions"
+                                            },
+                                            {
+                                                "const": "scaled",
+                                                "description": "Print scaled resolutions"
+                                            },
+                                            {
+                                                "const": "original-with-refresh-rate",
+                                                "description": "Print original resolutions with refresh rates"
+                                            },
+                                            {
+                                                "const": "scaled-with-refresh-rate",
+                                                "description": "Print scaled resolutions with refresh rates"
+                                            }
+                                        ],
+                                        "default": null
                                     },
                                     "preciseRefreshRate": {
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",
