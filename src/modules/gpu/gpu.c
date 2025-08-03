@@ -240,18 +240,23 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "hideType"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "none", FF_GPU_TYPE_NONE },
-                { "unknown", FF_GPU_TYPE_UNKNOWN },
-                { "integrated", FF_GPU_TYPE_INTEGRATED },
-                { "discrete", FF_GPU_TYPE_DISCRETE },
-                {},
-            });
-            if (error)
-                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+            if (yyjson_is_null(val))
+                options->hideType = FF_GPU_TYPE_NONE;
             else
-                options->hideType = (FFGPUType) value;
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "none", FF_GPU_TYPE_NONE },
+                    { "unknown", FF_GPU_TYPE_UNKNOWN },
+                    { "integrated", FF_GPU_TYPE_INTEGRATED },
+                    { "discrete", FF_GPU_TYPE_DISCRETE },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                    options->hideType = (FFGPUType) value;
+            }
             continue;
         }
 
