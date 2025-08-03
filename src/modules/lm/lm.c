@@ -99,7 +99,7 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffLMModuleInfo = {
     .name = FF_LM_MODULE_NAME,
     .description = "Print login manager (desktop manager) name and version",
     .initOptions = (void*) ffInitLMOptions,
@@ -117,7 +117,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitLMOptions(FFLMOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffLMModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
 }
 

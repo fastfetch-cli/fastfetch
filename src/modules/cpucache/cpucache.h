@@ -7,3 +7,5 @@
 void ffPrintCPUCache(FFCPUCacheOptions* options);
 void ffInitCPUCacheOptions(FFCPUCacheOptions* options);
 void ffDestroyCPUCacheOptions(FFCPUCacheOptions* options);
+
+extern FFModuleBaseInfo ffCPUCacheModuleInfo;

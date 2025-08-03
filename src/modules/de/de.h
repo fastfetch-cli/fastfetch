@@ -7,3 +7,5 @@
 void ffPrintDE(FFDEOptions* options);
 void ffInitDEOptions(FFDEOptions* options);
 void ffDestroyDEOptions(FFDEOptions* options);
+
+extern FFModuleBaseInfo ffDEModuleInfo;

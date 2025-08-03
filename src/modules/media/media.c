@@ -151,7 +151,7 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, player, "url", &media->url);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffMediaModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
     .description = "Print playing song name",
     .initOptions = (void*) ffInitMediaOptions,
@@ -171,7 +171,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitMediaOptions(FFMediaOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffMediaModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

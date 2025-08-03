@@ -154,7 +154,7 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
         yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffSeparatorModuleInfo = {
     .name = FF_SEPARATOR_MODULE_NAME,
     .description = "Print a separator line",
     .initOptions = (void*) ffInitSeparatorOptions,
@@ -166,7 +166,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffSeparatorModuleInfo;
     ffStrbufInitStatic(&options->string, "-");
     ffStrbufInit(&options->outputColor);
     options->length = 0;

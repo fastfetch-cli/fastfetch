@@ -402,7 +402,7 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffDisplayModuleInfo = {
     .name = FF_DISPLAY_MODULE_NAME,
     .description = "Print resolutions, refresh rates, etc",
     .initOptions = (void*) ffInitDisplayOptions,
@@ -441,7 +441,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitDisplayOptions(FFDisplayOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffDisplayModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;

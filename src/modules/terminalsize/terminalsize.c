@@ -76,7 +76,7 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     yyjson_mut_obj_add_uint(doc, obj, "height", result.height);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffTerminalSizeModuleInfo = {
     .name = FF_TERMINALSIZE_MODULE_NAME,
     .description = "Print current terminal size",
     .initOptions = (void*) ffInitTerminalSizeOptions,
@@ -95,7 +95,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffTerminalSizeModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰲎");
 }
 

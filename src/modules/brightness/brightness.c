@@ -187,7 +187,7 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffBrightnessModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
     .initOptions = (void*) ffInitBrightnessOptions,
@@ -209,7 +209,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffBrightnessModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
 
     options->ddcciSleep = 10;

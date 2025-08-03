@@ -9,3 +9,5 @@ void ffPrepareNetIO(FFNetIOOptions* options);
 void ffPrintNetIO(FFNetIOOptions* options);
 void ffInitNetIOOptions(FFNetIOOptions* options);
 void ffDestroyNetIOOptions(FFNetIOOptions* options);
+
+extern FFModuleBaseInfo ffNetIOModuleInfo;

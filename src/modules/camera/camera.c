@@ -120,7 +120,7 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffCameraModuleInfo = {
     .name = FF_CAMERA_MODULE_NAME,
     .description = "Print available cameras",
     .initOptions = (void*) ffInitCameraOptions,
@@ -141,7 +141,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitCameraOptions(FFCameraOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffCameraModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
 }
 

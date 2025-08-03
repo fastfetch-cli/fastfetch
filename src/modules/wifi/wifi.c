@@ -206,7 +206,7 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffWifiModuleInfo = {
     .name = FF_WIFI_MODULE_NAME,
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
     .initOptions = (void*) ffInitWifiOptions,
@@ -234,7 +234,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitWifiOptions(FFWifiOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffWifiModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };

@@ -96,7 +96,7 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffKeyboardModuleInfo = {
     .name = FF_KEYBOARD_MODULE_NAME,
     .description = "List (connected) keyboards",
     .initOptions = (void*) ffInitKeyboardOptions,
@@ -113,7 +113,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitKeyboardOptions(FFKeyboardOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffKeyboardModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

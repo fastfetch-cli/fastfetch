@@ -7,3 +7,5 @@
 void ffPrintGamepad(FFGamepadOptions* options);
 void ffInitGamepadOptions(FFGamepadOptions* options);
 void ffDestroyGamepadOptions(FFGamepadOptions* options);
+
+extern FFModuleBaseInfo ffGamepadModuleInfo;

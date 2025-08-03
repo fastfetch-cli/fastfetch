@@ -88,7 +88,7 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
         yyjson_mut_obj_add_null(doc, obj, "tty");
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffShellModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
     .description = "Print current shell name and version",
     .initOptions = (void*) ffInitShellOptions,
@@ -111,7 +111,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitShellOptions(FFShellOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffShellModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

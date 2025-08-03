@@ -128,7 +128,7 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffVulkanModuleInfo = {
     .name = FF_VULKAN_MODULE_NAME,
     .description = "Print highest Vulkan version supported by the GPU",
     .initOptions = (void*) ffInitVulkanOptions,
@@ -147,7 +147,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitVulkanOptions(FFVulkanOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffVulkanModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

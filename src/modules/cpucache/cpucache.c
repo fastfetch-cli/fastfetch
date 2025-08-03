@@ -208,7 +208,7 @@ exit:
     ffListDestroy(&result.caches[3]);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffCPUCacheModuleInfo = {
     .name = FF_CPUCACHE_MODULE_NAME,
     .description = "Print CPU cache sizes",
     .initOptions = (void*) ffInitCPUCacheOptions,
@@ -225,7 +225,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffCPUCacheModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;

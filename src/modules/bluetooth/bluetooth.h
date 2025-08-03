@@ -7,3 +7,5 @@
 void ffPrintBluetooth(FFBluetoothOptions* options);
 void ffInitBluetoothOptions(FFBluetoothOptions* options);
 void ffDestroyBluetoothOptions(FFBluetoothOptions* options);
+
+extern FFModuleBaseInfo ffBluetoothModuleInfo;

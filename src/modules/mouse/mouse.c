@@ -96,7 +96,7 @@ void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffMouseModuleInfo = {
     .name = FF_MOUSE_MODULE_NAME,
     .description = "List connected mouses",
     .initOptions = (void*) ffInitMouseOptions,
@@ -113,7 +113,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitMouseOptions(FFMouseOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffMouseModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
 }
 

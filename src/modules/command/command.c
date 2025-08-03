@@ -120,7 +120,7 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffCommandModuleInfo = {
     .name = FF_COMMAND_MODULE_NAME,
     .description = "Run custom shell scripts",
     .initOptions = (void*) ffInitCommandOptions,
@@ -136,7 +136,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffCommandModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInitStatic(&options->shell,

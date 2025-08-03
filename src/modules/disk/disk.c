@@ -412,7 +412,7 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffDiskModuleInfo = {
     .name = FF_DISK_MODULE_NAME,
     .description = "Print partitions, space usage, file system, etc",
     .initOptions = (void*) ffInitDiskOptions,
@@ -451,7 +451,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitDiskOptions(FFDiskOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffDiskModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInit(&options->folders);

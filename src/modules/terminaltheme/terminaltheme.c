@@ -89,7 +89,7 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* option
     yyjson_mut_obj_add_bool(doc, bg, "dark", result.bg.dark);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffTerminalThemeModuleInfo = {
     .name = FF_TERMINALTHEME_MODULE_NAME,
     .description = "Print current terminal theme (foreground and background colors)",
     .initOptions = (void*) ffInitTerminalThemeOptions,
@@ -108,7 +108,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitTerminalThemeOptions(FFTerminalThemeOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffTerminalThemeModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰔎");
 }
 

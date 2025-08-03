@@ -140,7 +140,7 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffTitleModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
     .description = "Print title, which contains your user name, hostname",
     .initOptions = (void*) ffInitTitleOptions,
@@ -164,7 +164,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffTitleModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 

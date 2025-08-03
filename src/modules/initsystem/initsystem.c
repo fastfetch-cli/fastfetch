@@ -98,7 +98,7 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffInitSystemModuleInfo = {
     .name = FF_INITSYSTEM_MODULE_NAME,
     .description = "Print init system (pid 1) name and version",
     .initOptions = (void*) ffInitInitSystemOptions,
@@ -117,7 +117,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitInitSystemOptions(FFInitSystemOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffInitSystemModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
 }
 

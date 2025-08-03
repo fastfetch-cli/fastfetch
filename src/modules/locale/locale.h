@@ -7,3 +7,5 @@
 void ffPrintLocale(FFLocaleOptions* options);
 void ffInitLocaleOptions(FFLocaleOptions* options);
 void ffDestroyLocaleOptions(FFLocaleOptions* options);
+
+extern FFModuleBaseInfo ffLocaleModuleInfo;

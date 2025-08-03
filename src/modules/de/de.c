@@ -91,7 +91,7 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffDEModuleInfo = {
     .name = FF_DE_MODULE_NAME,
     .description = "Print desktop environment name",
     .initOptions = (void*) ffInitDEOptions,
@@ -109,7 +109,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitDEOptions(FFDEOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffDEModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->slowVersionDetection = false;

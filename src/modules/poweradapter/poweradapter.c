@@ -111,7 +111,7 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffPowerAdapterModuleInfo = {
     .name = FF_POWERADAPTER_MODULE_NAME,
     .description = "Print power adapter name and charging watts",
     .initOptions = (void*) ffInitPowerAdapterOptions,
@@ -132,7 +132,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffPowerAdapterModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
 }
 

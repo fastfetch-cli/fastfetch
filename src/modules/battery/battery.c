@@ -245,7 +245,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffBatteryModuleInfo = {
     .name = FF_BATTERY_MODULE_NAME,
     .description = "Print battery capacity, status, etc",
     .initOptions = (void*) ffInitBatteryOptions,
@@ -275,7 +275,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitBatteryOptions(FFBatteryOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffBatteryModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };

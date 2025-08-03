@@ -7,3 +7,5 @@
 void ffPrintBluetoothRadio(FFBluetoothRadioOptions* options);
 void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options);
 void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options);
+
+extern FFModuleBaseInfo ffBluetoothRadioModuleInfo;

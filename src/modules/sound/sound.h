@@ -7,3 +7,5 @@
 void ffPrintSound(FFSoundOptions* options);
 void ffInitSoundOptions(FFSoundOptions* options);
 void ffDestroySoundOptions(FFSoundOptions* options);
+
+extern FFModuleBaseInfo ffSoundModuleInfo;

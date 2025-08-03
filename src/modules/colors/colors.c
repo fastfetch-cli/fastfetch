@@ -239,7 +239,7 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffColorsModuleInfo = {
     .name = FF_COLORS_MODULE_NAME,
     .description = "Print some colored blocks",
     .initOptions = (void*) ffInitColorsOptions,
@@ -251,7 +251,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffColorsModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
     options->symbol = FF_COLORS_SYMBOL_BACKGROUND;

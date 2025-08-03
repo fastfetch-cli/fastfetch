@@ -7,3 +7,5 @@
 void ffPrintTerminal(FFTerminalOptions* options);
 void ffInitTerminalOptions(FFTerminalOptions* options);
 void ffDestroyTerminalOptions(FFTerminalOptions* options);
+
+extern FFModuleBaseInfo ffTerminalModuleInfo;

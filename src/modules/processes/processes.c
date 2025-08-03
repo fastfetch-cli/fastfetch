@@ -64,7 +64,7 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
     yyjson_mut_obj_add_uint(doc, module, "result", result);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffProcessesModuleInfo = {
     .name = FF_PROCESSES_MODULE_NAME,
     .description = "Print number of running processes",
     .initOptions = (void*) ffInitProcessesOptions,
@@ -80,7 +80,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitProcessesOptions(FFProcessesOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffProcessesModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

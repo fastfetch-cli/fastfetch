@@ -7,3 +7,5 @@
 void ffPrintBattery(FFBatteryOptions* options);
 void ffInitBatteryOptions(FFBatteryOptions* options);
 void ffDestroyBatteryOptions(FFBatteryOptions* options);
+
+extern FFModuleBaseInfo ffBatteryModuleInfo;

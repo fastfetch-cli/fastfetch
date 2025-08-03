@@ -7,3 +7,5 @@
 void ffPrintBreak(FFBreakOptions* options);
 void ffInitBreakOptions(FFBreakOptions* options);
 void ffDestroyBreakOptions(FFBreakOptions* options);
+
+extern FFModuleBaseInfo ffBreakModuleInfo;

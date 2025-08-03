@@ -128,7 +128,7 @@ exit:
     ffStrbufDestroy(&bios.type);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffBiosModuleInfo = {
     .name = FF_BIOS_MODULE_NAME,
     .description = "Print information of 1st-stage bootloader (name, version, release date, etc)",
     .initOptions = (void*) ffInitBiosOptions,
@@ -148,7 +148,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitBiosOptions(FFBiosOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffBiosModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

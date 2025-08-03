@@ -91,7 +91,7 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffWeatherModuleInfo = {
     .name = FF_WEATHER_MODULE_NAME,
     .description = "Print weather information",
     .initOptions = (void*) ffInitWeatherOptions,
@@ -107,7 +107,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffWeatherModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰖙");
 
     ffStrbufInit(&options->location);

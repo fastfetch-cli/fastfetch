@@ -226,7 +226,7 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
     .name = FF_PHYSICALDISK_MODULE_NAME,
     .description = "Print physical disk information",
     .initOptions = (void*) ffInitPhysicalDiskOptions,
@@ -251,7 +251,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffPhysicalDiskModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰋊");
 
     ffStrbufInit(&options->namePrefix);

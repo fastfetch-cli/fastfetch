@@ -7,3 +7,5 @@
 void ffPrintDisplay(FFDisplayOptions* options);
 void ffInitDisplayOptions(FFDisplayOptions* options);
 void ffDestroyDisplayOptions(FFDisplayOptions* options);
+
+extern FFModuleBaseInfo ffDisplayModuleInfo;

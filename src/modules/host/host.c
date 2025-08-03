@@ -131,7 +131,7 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffHostModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
     .initOptions = (void*) ffInitHostOptions,
@@ -153,7 +153,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitHostOptions(FFHostOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffHostModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
 }
 

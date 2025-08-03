@@ -127,7 +127,7 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
     ffStrbufDestroy(&result.library);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffOpenGLModuleInfo = {
     .name = FF_OPENGL_MODULE_NAME,
     .description = "Print highest OpenGL version supported by the GPU",
     .initOptions = (void*) ffInitOpenGLOptions,
@@ -147,7 +147,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitOpenGLOptions(FFOpenGLOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffOpenGLModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->library = FF_OPENGL_LIBRARY_AUTO;

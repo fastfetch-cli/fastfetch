@@ -86,7 +86,7 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
     ffStrbufDestroy(&result.theme2);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffThemeModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
     .description = "Print current theme of desktop environment",
     .initOptions = (void*) ffInitThemeOptions,
@@ -103,7 +103,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitThemeOptions(FFThemeOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffThemeModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰉼");
 }
 

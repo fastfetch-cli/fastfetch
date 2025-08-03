@@ -7,3 +7,5 @@
 void ffPrintTerminalFont(FFTerminalFontOptions* options);
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options);
 void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options);
+
+extern FFModuleBaseInfo ffTerminalFontModuleInfo;

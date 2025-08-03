@@ -206,7 +206,7 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffSoundModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
     .description = "Print sound devices, volume, etc",
     .initOptions = (void*) ffInitSoundOptions,
@@ -227,7 +227,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitSoundOptions(FFSoundOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffSoundModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->soundType = FF_SOUND_TYPE_MAIN;

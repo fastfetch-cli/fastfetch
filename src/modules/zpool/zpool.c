@@ -164,7 +164,7 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffZpoolModuleInfo = {
     .name = FF_ZPOOL_MODULE_NAME,
     .description = "Print ZFS storage pools",
     .initOptions = (void*) ffInitZpoolOptions,
@@ -187,7 +187,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitZpoolOptions(FFZpoolOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffZpoolModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

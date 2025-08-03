@@ -86,7 +86,7 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
     ffStrbufDestroy(&result.icons2);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffIconsModuleInfo = {
     .name = FF_ICONS_MODULE_NAME,
     .description = "Print icon style name",
     .initOptions = (void*) ffInitIconsOptions,
@@ -103,7 +103,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitIconsOptions(FFIconsOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffIconsModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

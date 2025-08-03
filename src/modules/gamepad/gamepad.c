@@ -130,7 +130,7 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffGamepadModuleInfo = {
     .name = FF_GAMEPAD_MODULE_NAME,
     .description = "List (connected) gamepads",
     .initOptions = (void*) ffInitGamepadOptions,
@@ -149,7 +149,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffGamepadModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }

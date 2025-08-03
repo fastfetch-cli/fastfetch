@@ -7,3 +7,5 @@
 void ffPrintPowerAdapter(FFPowerAdapterOptions* options);
 void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options);
 void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options);
+
+extern FFModuleBaseInfo ffPowerAdapterModuleInfo;

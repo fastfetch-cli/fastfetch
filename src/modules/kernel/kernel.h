@@ -7,3 +7,5 @@
 void ffPrintKernel(FFKernelOptions* options);
 void ffInitKernelOptions(FFKernelOptions* options);
 void ffDestroyKernelOptions(FFKernelOptions* options);
+
+extern FFModuleBaseInfo ffKernelModuleInfo;

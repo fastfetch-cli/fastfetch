@@ -431,7 +431,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffPackagesModuleInfo = {
     .name = FF_PACKAGES_MODULE_NAME,
     .description = "List installed package managers and count of installed packages",
     .initOptions = (void*) ffInitPackagesOptions,
@@ -493,7 +493,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitPackagesOptions(FFPackagesOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffPackagesModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
 
     options->disabled = FF_PACKAGES_DISABLE_LIST;

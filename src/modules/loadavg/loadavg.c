@@ -150,7 +150,7 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
         yyjson_mut_arr_add_real(doc, arr, result[i]);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffLoadavgModuleInfo = {
     .name = FF_LOADAVG_MODULE_NAME,
     .description = "Print system load averages",
     .initOptions = (void*) ffInitLoadavgOptions,
@@ -168,7 +168,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitLoadavgOptions(FFLoadavgOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffLoadavgModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };

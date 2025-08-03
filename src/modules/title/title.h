@@ -7,3 +7,5 @@
 void ffPrintTitle(FFTitleOptions* options);
 void ffInitTitleOptions(FFTitleOptions* options);
 void ffDestroyTitleOptions(FFTitleOptions* options);
+
+extern FFModuleBaseInfo ffTitleModuleInfo;

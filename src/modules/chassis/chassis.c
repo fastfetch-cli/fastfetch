@@ -107,7 +107,7 @@ exit:
     ffStrbufDestroy(&result.serial);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffChassisModuleInfo = {
     .name = FF_CHASSIS_MODULE_NAME,
     .description = "Print chassis type (desktop, laptop, etc)",
     .initOptions = (void*) ffInitChassisOptions,
@@ -126,7 +126,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitChassisOptions(FFChassisOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffChassisModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

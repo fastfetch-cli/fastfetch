@@ -7,3 +7,5 @@
 void ffPrintLocalIp(FFLocalIpOptions* options);
 void ffInitLocalIpOptions(FFLocalIpOptions* options);
 void ffDestroyLocalIpOptions(FFLocalIpOptions* options);
+
+extern FFModuleBaseInfo ffLocalIPModuleInfo;

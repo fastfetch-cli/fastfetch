@@ -159,7 +159,7 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "versionID", &os->versionID);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffOSModuleInfo = {
     .name = FF_OS_MODULE_NAME,
     .description = "Print operating system name and version",
     .initOptions = (void*) ffInitOSOptions,
@@ -186,7 +186,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitOSOptions(FFOSOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffOSModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs,
         #ifdef _WIN32
             ""
@@ -202,6 +202,8 @@ void ffInitOSOptions(FFOSOptions* options)
             ""
         #elif __OpenBSD__
             ""
+        #elif __Haiku__
+            ""
         #else
             "?"
         #endif

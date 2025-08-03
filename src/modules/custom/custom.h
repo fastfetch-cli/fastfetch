@@ -7,3 +7,5 @@
 void ffPrintCustom(FFCustomOptions* options);
 void ffInitCustomOptions(FFCustomOptions* options);
 void ffDestroyCustomOptions(FFCustomOptions* options);
+
+extern FFModuleBaseInfo ffCustomModuleInfo;

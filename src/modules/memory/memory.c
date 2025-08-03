@@ -113,7 +113,7 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffMemoryModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
     .description = "Print system memory usage info",
     .initOptions = (void*) ffInitMemoryOptions,
@@ -132,7 +132,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitMemoryOptions(FFMemoryOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffMemoryModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

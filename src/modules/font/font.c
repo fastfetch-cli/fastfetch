@@ -88,7 +88,7 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
         ffStrbufDestroy(&font.fonts[i]);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffFontModuleInfo = {
     .name = FF_FONT_MODULE_NAME,
     .description = "Print system font names",
     .initOptions = (void*) ffInitFontOptions,
@@ -108,7 +108,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitFontOptions(FFFontOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffFontModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

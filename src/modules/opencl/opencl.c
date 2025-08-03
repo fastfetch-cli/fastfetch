@@ -114,7 +114,7 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffOpenCLModuleInfo = {
     .name = FF_OPENCL_MODULE_NAME,
     .description = "Print highest OpenCL version supported by the GPU",
     .initOptions = (void*) ffInitOpenCLOptions,
@@ -132,7 +132,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffOpenCLModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

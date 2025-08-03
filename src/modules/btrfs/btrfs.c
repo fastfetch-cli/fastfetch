@@ -200,7 +200,7 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffBtrfsModuleInfo = {
     .name = FF_BTRFS_MODULE_NAME,
     .description = "Print Linux BTRFS volumes",
     .initOptions = (void*) ffInitBtrfsOptions,
@@ -228,7 +228,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitBtrfsOptions(FFBtrfsOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffBtrfsModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
 }

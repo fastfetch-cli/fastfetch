@@ -106,7 +106,7 @@ exit:
     ffStrbufDestroy(&board.serial);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffBoardModuleInfo = {
     .name = FF_BOARD_MODULE_NAME,
     .description = "Print motherboard name and other info",
     .initOptions = (void*) ffInitBoardOptions,
@@ -125,7 +125,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitBoardOptions(FFBoardOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffBoardModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

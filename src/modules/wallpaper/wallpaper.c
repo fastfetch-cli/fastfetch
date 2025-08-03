@@ -73,7 +73,7 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffWallpaperModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
     .description = "Print image file path of current wallpaper",
     .initOptions = (void*) ffInitWallpaperOptions,
@@ -90,7 +90,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffWallpaperModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
 }
 

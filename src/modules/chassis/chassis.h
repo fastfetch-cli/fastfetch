@@ -7,3 +7,5 @@
 void ffPrintChassis(FFChassisOptions* options);
 void ffInitChassisOptions(FFChassisOptions* options);
 void ffDestroyChassisOptions(FFChassisOptions* options);
+
+extern FFModuleBaseInfo ffChassisModuleInfo;

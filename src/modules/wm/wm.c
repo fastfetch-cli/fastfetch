@@ -119,7 +119,7 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffWMModuleInfo = {
     .name = FF_WM_MODULE_NAME,
     .description = "Print window manager name and version",
     .initOptions = (void*) ffInitWMOptions,
@@ -139,7 +139,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitWMOptions(FFWMOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffWMModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->detectPlugin = false;
 }

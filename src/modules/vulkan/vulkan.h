@@ -7,3 +7,5 @@
 void ffPrintVulkan(FFVulkanOptions* options);
 void ffInitVulkanOptions(FFVulkanOptions* options);
 void ffDestroyVulkanOptions(FFVulkanOptions* options);
+
+extern FFModuleBaseInfo ffVulkanModuleInfo;

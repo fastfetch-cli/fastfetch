@@ -143,7 +143,7 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
     yyjson_mut_obj_add_strcpy(doc, module, "result", ffTimeToFullStr(ffTimeGetNow()));
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffDateTimeModuleInfo = {
     .name = FF_DATETIME_MODULE_NAME,
     .description = "Print current date and time",
     .initOptions = (void*) ffInitDateTimeOptions,
@@ -181,7 +181,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffDateTimeModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

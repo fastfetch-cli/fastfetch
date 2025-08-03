@@ -62,7 +62,7 @@ void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, module, "result", &themeOrError);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffWMThemeModuleInfo = {
     .name = FF_WMTHEME_MODULE_NAME,
     .description = "Print current theme of window manager",
     .initOptions = (void*) ffInitWMThemeOptions,
@@ -78,7 +78,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitWMThemeOptions(FFWMThemeOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffWMThemeModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰓸");
 }
 

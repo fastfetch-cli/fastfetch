@@ -414,7 +414,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffGPUModuleInfo = {
     .name = FF_GPU_MODULE_NAME,
     .description = "Print GPU names, graphic memory size, type, etc",
     .initOptions = (void*) ffInitGPUOptions,
@@ -449,7 +449,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitGPUOptions(FFGPUOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffGPUModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
 
     options->driverSpecific = false;

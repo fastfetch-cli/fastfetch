@@ -139,7 +139,7 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
     .name = FF_PHYSICALMEMORY_MODULE_NAME,
     .description = "Print system physical memory devices",
     .initOptions = (void*) ffInitPhysicalMemoryOptions,
@@ -165,7 +165,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffPhysicalMemoryModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰑭");
 }
 

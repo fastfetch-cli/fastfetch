@@ -9,3 +9,5 @@ void ffPreparePublicIp(FFPublicIpOptions* options);
 void ffPrintPublicIp(FFPublicIpOptions* options);
 void ffInitPublicIpOptions(FFPublicIpOptions* options);
 void ffDestroyPublicIpOptions(FFPublicIpOptions* options);
+
+extern FFModuleBaseInfo ffPublicIPModuleInfo;

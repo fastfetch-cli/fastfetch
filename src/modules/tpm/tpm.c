@@ -81,7 +81,7 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
     ffStrbufDestroy(&result.description);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffTPMModuleInfo = {
     .name = FF_TPM_MODULE_NAME,
     .description = "Print info of Trusted Platform Module (TPM) Security Device",
     .initOptions = (void*) ffInitTPMOptions,
@@ -98,7 +98,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitTPMOptions(FFTPMOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffTPMModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

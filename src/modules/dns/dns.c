@@ -139,7 +139,7 @@ exit:
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffDNSModuleInfo = {
     .name = FF_DNS_MODULE_NAME,
     .description = "Print configured DNS servers",
     .initOptions = (void*) ffInitDNSOptions,
@@ -155,7 +155,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitDNSOptions(FFDNSOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffDNSModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰇖");
 
     options->showType = FF_DNS_TYPE_BOTH;

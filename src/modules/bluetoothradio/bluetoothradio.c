@@ -166,7 +166,7 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
     .description = "List bluetooth radios width supported version and vendor",
     .initOptions = (void*) ffInitBluetoothRadioOptions,
@@ -189,7 +189,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffBluetoothRadioModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
 }
 

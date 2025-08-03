@@ -7,3 +7,5 @@
 void ffPrintCommand(FFCommandOptions* options);
 void ffInitCommandOptions(FFCommandOptions* options);
 void ffDestroyCommandOptions(FFCommandOptions* options);
+
+extern FFModuleBaseInfo ffCommandModuleInfo;

@@ -7,3 +7,5 @@
 void ffPrintEditor(FFEditorOptions* options);
 void ffInitEditorOptions(FFEditorOptions* options);
 void ffDestroyEditorOptions(FFEditorOptions* options);
+
+extern FFModuleBaseInfo ffEditorModuleInfo;

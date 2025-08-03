@@ -190,7 +190,7 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffNetIOModuleInfo = {
     .name = FF_NETIO_MODULE_NAME,
     .description = "Print network I/O throughput",
     .initOptions = (void*) ffInitNetIOOptions,
@@ -217,12 +217,12 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitNetIOOptions(FFNetIOOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffNetIOModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰾆");
 
     ffStrbufInit(&options->namePrefix);
     options->defaultRouteOnly =
-        #if __ANDROID__ || __OpenBSD__
+        #if __ANDROID__
             false
         #else
             true

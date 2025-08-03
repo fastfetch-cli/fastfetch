@@ -108,7 +108,7 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
     ffStrbufDestroy(&result.location);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffPublicIPModuleInfo = {
     .name = FF_PUBLICIP_MODULE_NAME,
     .description = "Print your public IP address, etc",
     .initOptions = (void*) ffInitPublicIpOptions,
@@ -125,7 +125,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitPublicIpOptions(FFPublicIpOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffPublicIPModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰩠");
 
     ffStrbufInit(&options->url);

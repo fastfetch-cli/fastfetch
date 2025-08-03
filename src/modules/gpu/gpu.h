@@ -7,3 +7,5 @@
 void ffPrintGPU(FFGPUOptions* options);
 void ffInitGPUOptions(FFGPUOptions* options);
 void ffDestroyGPUOptions(FFGPUOptions* options);
+
+extern FFModuleBaseInfo ffGPUModuleInfo;

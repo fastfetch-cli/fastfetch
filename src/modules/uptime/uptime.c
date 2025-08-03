@@ -93,7 +93,7 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
     yyjson_mut_obj_add_strcpy(doc, obj, "bootTime", ffTimeToFullStr(result.bootTime));
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffUptimeModuleInfo = {
     .name = FF_UPTIME_MODULE_NAME,
     .description = "Print how long system has been running",
     .initOptions = (void*) ffInitUptimeOptions,
@@ -118,7 +118,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitUptimeOptions(FFUptimeOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffUptimeModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

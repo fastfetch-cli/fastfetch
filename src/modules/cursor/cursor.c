@@ -94,7 +94,7 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
     ffStrbufDestroy(&result.size);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffCursorModuleInfo = {
     .name = FF_CURSOR_MODULE_NAME,
     .description = "Print cursor style name",
     .initOptions = (void*) ffInitCursorOptions,
@@ -111,7 +111,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitCursorOptions(FFCursorOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffCursorModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
 }
 

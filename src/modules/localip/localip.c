@@ -385,7 +385,7 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffLocalIPModuleInfo = {
     .name = FF_LOCALIP_MODULE_NAME,
     .description = "List local IP addresses (v4 or v6), MAC addresses, etc",
     .initOptions = (void*) ffInitLocalIpOptions,
@@ -408,7 +408,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffLocalIPModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰩟");
 
     options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT

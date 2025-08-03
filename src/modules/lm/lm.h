@@ -7,3 +7,5 @@
 void ffPrintLM(FFLMOptions* options);
 void ffInitLMOptions(FFLMOptions* options);
 void ffDestroyLMOptions(FFLMOptions* options);
+
+extern FFModuleBaseInfo ffLMModuleInfo;

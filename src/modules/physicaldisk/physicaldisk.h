@@ -7,3 +7,5 @@
 void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options);
 void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options);
 void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options);
+
+extern FFModuleBaseInfo ffPhysicalDiskModuleInfo;

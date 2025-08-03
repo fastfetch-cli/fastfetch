@@ -104,7 +104,7 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffEditorModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
     .initOptions = (void*) ffInitEditorOptions,
@@ -124,7 +124,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitEditorOptions(FFEditorOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffEditorModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
 }
 

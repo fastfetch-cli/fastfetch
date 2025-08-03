@@ -7,3 +7,5 @@
 void ffPrintHost(FFHostOptions* options);
 void ffInitHostOptions(FFHostOptions* options);
 void ffDestroyHostOptions(FFHostOptions* options);
+
+extern FFModuleBaseInfo ffHostModuleInfo;

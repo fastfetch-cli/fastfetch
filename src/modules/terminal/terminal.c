@@ -81,7 +81,7 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "tty", &result->tty);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffTerminalModuleInfo = {
     .name = FF_TERMINAL_MODULE_NAME,
     .description = "Print current terminal name and version",
     .initOptions = (void*) ffInitTerminalOptions,
@@ -104,7 +104,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitTerminalOptions(FFTerminalOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffTerminalModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

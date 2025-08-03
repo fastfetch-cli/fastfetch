@@ -212,7 +212,7 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
     ffStrbufDestroy(&cpu.vendor);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffCPUModuleInfo = {
     .name = FF_CPU_MODULE_NAME,
     .description = "Print CPU name, frequency, etc",
     .initOptions = (void*) ffInitCPUOptions,
@@ -237,7 +237,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitCPUOptions(FFCPUOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffCPUModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };

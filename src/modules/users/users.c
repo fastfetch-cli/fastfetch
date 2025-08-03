@@ -185,7 +185,7 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffUsersModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
     .description = "Print users currently logged in",
     .initOptions = (void*) ffInitUsersOptions,
@@ -213,7 +213,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitUsersOptions(FFUsersOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffUsersModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;

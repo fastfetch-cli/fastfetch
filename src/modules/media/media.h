@@ -7,3 +7,5 @@
 void ffPrintMedia(FFMediaOptions* options);
 void ffInitMediaOptions(FFMediaOptions* options);
 void ffDestroyMediaOptions(FFMediaOptions* options);
+
+extern FFModuleBaseInfo ffMediaModuleInfo;

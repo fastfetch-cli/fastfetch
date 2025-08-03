@@ -7,3 +7,5 @@
 void ffPrintOpenCL(FFOpenCLOptions* options);
 void ffInitOpenCLOptions(FFOpenCLOptions* options);
 void ffDestroyOpenCLOptions(FFOpenCLOptions* options);
+
+extern FFModuleBaseInfo ffOpenCLModuleInfo;

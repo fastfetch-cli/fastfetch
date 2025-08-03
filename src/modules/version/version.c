@@ -97,7 +97,7 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffVersionModuleInfo = {
     .name = FF_VERSION_MODULE_NAME,
     .description = "Print Fastfetch version",
     .initOptions = (void*) ffInitVersionOptions,
@@ -122,7 +122,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitVersionOptions(FFVersionOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffVersionModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

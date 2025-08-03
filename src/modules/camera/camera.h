@@ -7,3 +7,5 @@
 void ffPrintCamera(FFCameraOptions* options);
 void ffInitCameraOptions(FFCameraOptions* options);
 void ffDestroyCameraOptions(FFCameraOptions* options);
+
+extern FFModuleBaseInfo ffCameraModuleInfo;

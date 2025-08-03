@@ -174,7 +174,7 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffCPUUsageModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
     .description = "Print CPU usage. Costs some time to collect data",
     .initOptions = (void*) ffInitCPUUsageOptions,
@@ -197,7 +197,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffCPUUsageModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
     options->separate = false;
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };

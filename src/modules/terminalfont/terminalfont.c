@@ -106,7 +106,7 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     ffFontDestroy(&result.fallback);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffTerminalFontModuleInfo = {
     .name = FF_TERMINALFONT_MODULE_NAME,
     .description = "Print font name and size used by current terminal",
     .initOptions = (void*) ffInitTerminalFontOptions,
@@ -125,7 +125,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffTerminalFontModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 }
 

@@ -112,7 +112,7 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
     yyjson_mut_obj_add_str(doc, module, "error", "Monitor module is an alias of Display module");
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+FFModuleBaseInfo ffMonitorModuleInfo = {
     .name = FF_MONITOR_MODULE_NAME,
     .description = "Alias of Display module",
     .initOptions = (void*) ffInitMonitorOptions,
@@ -139,7 +139,7 @@ static FFModuleBaseInfo ffModuleInfo = {
 
 void ffInitMonitorOptions(FFMonitorOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
+    options->moduleInfo = ffMonitorModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰹑");
 }
 

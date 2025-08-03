@@ -9,3 +9,5 @@ void ffPrepareDiskIO(FFDiskIOOptions* options);
 void ffPrintDiskIO(FFDiskIOOptions* options);
 void ffInitDiskIOOptions(FFDiskIOOptions* options);
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options);
+
+extern FFModuleBaseInfo ffDiskIOModuleInfo;

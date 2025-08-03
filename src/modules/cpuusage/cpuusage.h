@@ -9,3 +9,5 @@ void ffPrepareCPUUsage();
 void ffPrintCPUUsage(FFCPUUsageOptions* options);
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options);
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options);
+
+extern FFModuleBaseInfo ffCPUUsageModuleInfo;
