@@ -33,6 +33,8 @@ void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CUSTOM_MODULE_NAME,
     .description = "Print a custom string, with or without key",
+    .initOptions = (void*) ffInitCustomOptions,
+    .destroyOptions = (void*) ffDestroyCustomOptions,
     .parseJsonObject = (void*) ffParseCustomJsonObject,
     .printModule = (void*) ffPrintCustom,
     .generateJsonConfig = (void*) ffGenerateCustomJsonConfig,

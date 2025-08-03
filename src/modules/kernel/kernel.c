@@ -69,6 +69,8 @@ void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_KERNEL_MODULE_NAME,
     .description = "Print system kernel version",
+    .initOptions = (void*) ffInitKernelOptions,
+    .destroyOptions = (void*) ffDestroyKernelOptions,
     .parseJsonObject = (void*) ffParseKernelJsonObject,
     .printModule = (void*) ffPrintKernel,
     .generateJsonResult = (void*) ffGenerateKernelJsonResult,

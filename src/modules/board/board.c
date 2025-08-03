@@ -109,6 +109,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BOARD_MODULE_NAME,
     .description = "Print motherboard name and other info",
+    .initOptions = (void*) ffInitBoardOptions,
+    .destroyOptions = (void*) ffDestroyBoardOptions,
     .parseJsonObject = (void*) ffParseBoardJsonObject,
     .printModule = (void*) ffPrintBoard,
     .generateJsonResult = (void*) ffGenerateBoardJsonResult,

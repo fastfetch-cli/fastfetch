@@ -157,6 +157,8 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SEPARATOR_MODULE_NAME,
     .description = "Print a separator line",
+    .initOptions = (void*) ffInitSeparatorOptions,
+    .destroyOptions = (void*) ffDestroySeparatorOptions,
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,

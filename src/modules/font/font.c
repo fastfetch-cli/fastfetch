@@ -91,6 +91,8 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_FONT_MODULE_NAME,
     .description = "Print system font names",
+    .initOptions = (void*) ffInitFontOptions,
+    .destroyOptions = (void*) ffDestroyFontOptions,
     .parseJsonObject = (void*) ffParseFontJsonObject,
     .printModule = (void*) ffPrintFont,
     .generateJsonResult = (void*) ffGenerateFontJsonResult,

@@ -109,6 +109,8 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TERMINALFONT_MODULE_NAME,
     .description = "Print font name and size used by current terminal",
+    .initOptions = (void*) ffInitTerminalFontOptions,
+    .destroyOptions = (void*) ffDestroyTerminalFontOptions,
     .parseJsonObject = (void*) ffParseTerminalFontJsonObject,
     .printModule = (void*) ffPrintTerminalFont,
     .generateJsonResult = (void*) ffGenerateTerminalFontJsonResult,

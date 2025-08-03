@@ -188,6 +188,8 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
     .description = "Print users currently logged in",
+    .initOptions = (void*) ffInitUsersOptions,
+    .destroyOptions = (void*) ffDestroyUsersOptions,
     .parseJsonObject = (void*) ffParseUsersJsonObject,
     .printModule = (void*) ffPrintUsers,
     .generateJsonResult = (void*) ffGenerateUsersJsonResult,

@@ -153,6 +153,8 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LOADAVG_MODULE_NAME,
     .description = "Print system load averages",
+    .initOptions = (void*) ffInitLoadavgOptions,
+    .destroyOptions = (void*) ffDestroyLoadavgOptions,
     .parseJsonObject = (void*) ffParseLoadavgJsonObject,
     .printModule = (void*) ffPrintLoadavg,
     .generateJsonResult = (void*) ffGenerateLoadavgJsonResult,

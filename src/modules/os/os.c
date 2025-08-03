@@ -162,6 +162,8 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OS_MODULE_NAME,
     .description = "Print operating system name and version",
+    .initOptions = (void*) ffInitOSOptions,
+    .destroyOptions = (void*) ffDestroyOSOptions,
     .parseJsonObject = (void*) ffParseOSJsonObject,
     .printModule = (void*) ffPrintOS,
     .generateJsonResult = (void*) ffGenerateOSJsonResult,

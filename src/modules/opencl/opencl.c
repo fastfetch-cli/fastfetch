@@ -117,6 +117,8 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OPENCL_MODULE_NAME,
     .description = "Print highest OpenCL version supported by the GPU",
+    .initOptions = (void*) ffInitOpenCLOptions,
+    .destroyOptions = (void*) ffDestroyOpenCLOptions,
     .parseJsonObject = (void*) ffParseOpenCLJsonObject,
     .printModule = (void*) ffPrintOpenCL,
     .generateJsonResult = (void*) ffGenerateOpenCLJsonResult,

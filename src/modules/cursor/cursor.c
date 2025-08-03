@@ -97,6 +97,8 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CURSOR_MODULE_NAME,
     .description = "Print cursor style name",
+    .initOptions = (void*) ffInitCursorOptions,
+    .destroyOptions = (void*) ffDestroyCursorOptions,
     .parseJsonObject = (void*) ffParseCursorJsonObject,
     .printModule = (void*) ffPrintCursor,
     .generateJsonResult = (void*) ffGenerateCursorJsonResult,

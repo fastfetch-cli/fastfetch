@@ -211,6 +211,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CPUCACHE_MODULE_NAME,
     .description = "Print CPU cache sizes",
+    .initOptions = (void*) ffInitCPUCacheOptions,
+    .destroyOptions = (void*) ffDestroyCPUCacheOptions,
     .parseJsonObject = (void*) ffParseCPUCacheJsonObject,
     .printModule = (void*) ffPrintCPUCache,
     .generateJsonResult = (void*) ffGenerateCPUCacheJsonResult,

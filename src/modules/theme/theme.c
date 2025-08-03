@@ -89,6 +89,8 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
     .description = "Print current theme of desktop environment",
+    .initOptions = (void*) ffInitThemeOptions,
+    .destroyOptions = (void*) ffDestroyThemeOptions,
     .parseJsonObject = (void*) ffParseThemeJsonObject,
     .printModule = (void*) ffPrintTheme,
     .generateJsonResult = (void*) ffGenerateThemeJsonResult,

@@ -99,6 +99,8 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_KEYBOARD_MODULE_NAME,
     .description = "List (connected) keyboards",
+    .initOptions = (void*) ffInitKeyboardOptions,
+    .destroyOptions = (void*) ffDestroyKeyboardOptions,
     .parseJsonObject = (void*) ffParseKeyboardJsonObject,
     .printModule = (void*) ffPrintKeyboard,
     .generateJsonResult = (void*) ffGenerateKeyboardJsonResult,

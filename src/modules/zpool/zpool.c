@@ -167,6 +167,8 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_ZPOOL_MODULE_NAME,
     .description = "Print ZFS storage pools",
+    .initOptions = (void*) ffInitZpoolOptions,
+    .destroyOptions = (void*) ffDestroyZpoolOptions,
     .parseJsonObject = (void*) ffParseZpoolJsonObject,
     .printModule = (void*) ffPrintZpool,
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,

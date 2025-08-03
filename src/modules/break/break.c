@@ -24,6 +24,8 @@ void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UN
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BREAK_MODULE_NAME,
     .description = "Print a empty line",
+    .initOptions = (void*) ffInitBreakOptions,
+    .destroyOptions = (void*) ffDestroyBreakOptions,
     .parseJsonObject = (void*) ffParseBreakJsonObject,
     .printModule = (void*) ffPrintBreak,
 };

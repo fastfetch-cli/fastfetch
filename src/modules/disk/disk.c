@@ -415,6 +415,8 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISK_MODULE_NAME,
     .description = "Print partitions, space usage, file system, etc",
+    .initOptions = (void*) ffInitDiskOptions,
+    .destroyOptions = (void*) ffDestroyDiskOptions,
     .parseJsonObject = (void*) ffParseDiskJsonObject,
     .printModule = (void*) ffPrintDisk,
     .generateJsonResult = (void*) ffGenerateDiskJsonResult,

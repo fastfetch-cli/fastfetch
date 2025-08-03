@@ -115,6 +115,8 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MONITOR_MODULE_NAME,
     .description = "Alias of Display module",
+    .initOptions = (void*) ffInitMonitorOptions,
+    .destroyOptions = (void*) ffDestroyMonitorOptions,
     .parseJsonObject = (void*) ffParseMonitorJsonObject,
     .printModule = (void*) ffPrintMonitor,
     .generateJsonResult = (void*) ffGenerateMonitorJsonResult,

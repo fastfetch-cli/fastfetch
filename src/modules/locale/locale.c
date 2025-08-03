@@ -66,6 +66,8 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LOCALE_MODULE_NAME,
     .description = "Print system locale name",
+    .initOptions = (void*) ffInitLocaleOptions,
+    .destroyOptions = (void*) ffDestroyLocaleOptions,
     .parseJsonObject = (void*) ffParseLocaleJsonObject,
     .printModule = (void*) ffPrintLocale,
     .generateJsonResult = (void*) ffGenerateLocaleJsonResult,

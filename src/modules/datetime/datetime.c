@@ -146,6 +146,8 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DATETIME_MODULE_NAME,
     .description = "Print current date and time",
+    .initOptions = (void*) ffInitDateTimeOptions,
+    .destroyOptions = (void*) ffDestroyDateTimeOptions,
     .parseJsonObject = (void*) ffParseDateTimeJsonObject,
     .printModule = (void*) ffPrintDateTime,
     .generateJsonResult = (void*) ffGenerateDateTimeJsonResult,

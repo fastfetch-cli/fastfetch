@@ -110,6 +110,8 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PLAYER_MODULE_NAME,
     .description = "Print music player name",
+    .initOptions = (void*) ffInitPlayerOptions,
+    .destroyOptions = (void*) ffDestroyPlayerOptions,
     .parseJsonObject = (void*) ffParsePlayerJsonObject,
     .printModule = (void*) ffPrintPlayer,
     .generateJsonResult = (void*) ffGeneratePlayerJsonResult,

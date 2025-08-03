@@ -84,6 +84,8 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TERMINAL_MODULE_NAME,
     .description = "Print current terminal name and version",
+    .initOptions = (void*) ffInitTerminalOptions,
+    .destroyOptions = (void*) ffDestroyTerminalOptions,
     .parseJsonObject = (void*) ffParseTerminalJsonObject,
     .printModule = (void*) ffPrintTerminal,
     .generateJsonResult = (void*) ffGenerateTerminalJsonResult,

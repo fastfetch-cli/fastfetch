@@ -417,6 +417,8 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_GPU_MODULE_NAME,
     .description = "Print GPU names, graphic memory size, type, etc",
+    .initOptions = (void*) ffInitGPUOptions,
+    .destroyOptions = (void*) ffDestroyGPUOptions,
     .parseJsonObject = (void*) ffParseGPUJsonObject,
     .printModule = (void*) ffPrintGPU,
     .generateJsonResult = (void*) ffGenerateGPUJsonResult,

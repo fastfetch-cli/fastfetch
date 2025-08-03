@@ -94,6 +94,8 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DE_MODULE_NAME,
     .description = "Print desktop environment name",
+    .initOptions = (void*) ffInitDEOptions,
+    .destroyOptions = (void*) ffDestroyDEOptions,
     .parseJsonObject = (void*) ffParseDEJsonObject,
     .printModule = (void*) ffPrintDE,
     .generateJsonResult = (void*) ffGenerateDEJsonResult,

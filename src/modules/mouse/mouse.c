@@ -99,6 +99,8 @@ void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MOUSE_MODULE_NAME,
     .description = "List connected mouses",
+    .initOptions = (void*) ffInitMouseOptions,
+    .destroyOptions = (void*) ffDestroyMouseOptions,
     .parseJsonObject = (void*) ffParseMouseJsonObject,
     .printModule = (void*) ffPrintMouse,
     .generateJsonResult = (void*) ffGenerateMouseJsonResult,

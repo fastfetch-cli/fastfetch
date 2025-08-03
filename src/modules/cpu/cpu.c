@@ -215,6 +215,8 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CPU_MODULE_NAME,
     .description = "Print CPU name, frequency, etc",
+    .initOptions = (void*) ffInitCPUOptions,
+    .destroyOptions = (void*) ffDestroyCPUOptions,
     .parseJsonObject = (void*) ffParseCPUJsonObject,
     .printModule = (void*) ffPrintCPU,
     .generateJsonResult = (void*) ffGenerateCPUJsonResult,

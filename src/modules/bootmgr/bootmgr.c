@@ -100,6 +100,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BOOTMGR_MODULE_NAME,
     .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
+    .initOptions = (void*) ffInitBootmgrOptions,
+    .destroyOptions = (void*) ffDestroyBootmgrOptions,
     .parseJsonObject = (void*) ffParseBootmgrJsonObject,
     .printModule = (void*) ffPrintBootmgr,
     .generateJsonResult = (void*) ffGenerateBootmgrJsonResult,

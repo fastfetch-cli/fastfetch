@@ -100,6 +100,8 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_VERSION_MODULE_NAME,
     .description = "Print Fastfetch version",
+    .initOptions = (void*) ffInitVersionOptions,
+    .destroyOptions = (void*) ffDestroyVersionOptions,
     .parseJsonObject = (void*) ffParseVersionJsonObject,
     .printModule = (void*) ffPrintVersion,
     .generateJsonResult = (void*) ffGenerateVersionJsonResult,

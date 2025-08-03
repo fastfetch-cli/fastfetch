@@ -173,6 +173,8 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISKIO_MODULE_NAME,
     .description = "Print physical disk I/O throughput",
+    .initOptions = (void*) ffInitDiskIOOptions,
+    .destroyOptions = (void*) ffDestroyDiskIOOptions,
     .parseJsonObject = (void*) ffParseDiskIOJsonObject,
     .printModule = (void*) ffPrintDiskIO,
     .generateJsonResult = (void*) ffGenerateDiskIOJsonResult,

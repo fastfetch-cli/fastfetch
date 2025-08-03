@@ -192,6 +192,8 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SWAP_MODULE_NAME,
     .description = "Print swap (paging file) space usage",
+    .initOptions = (void*) ffInitSwapOptions,
+    .destroyOptions = (void*) ffDestroySwapOptions,
     .parseJsonObject = (void*) ffParseSwapJsonObject,
     .printModule = (void*) ffPrintSwap,
     .generateJsonResult = (void*) ffGenerateSwapJsonResult,

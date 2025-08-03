@@ -102,6 +102,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LM_MODULE_NAME,
     .description = "Print login manager (desktop manager) name and version",
+    .initOptions = (void*) ffInitLMOptions,
+    .destroyOptions = (void*) ffDestroyLMOptions,
     .parseJsonObject = (void*) ffParseLMJsonObject,
     .printModule = (void*) ffPrintLM,
     .generateJsonResult = (void*) ffGenerateLMJsonResult,

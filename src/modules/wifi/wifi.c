@@ -209,6 +209,8 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WIFI_MODULE_NAME,
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
+    .initOptions = (void*) ffInitWifiOptions,
+    .destroyOptions = (void*) ffDestroyWifiOptions,
     .parseJsonObject = (void*) ffParseWifiJsonObject,
     .printModule = (void*) ffPrintWifi,
     .generateJsonResult = (void*) ffGenerateWifiJsonResult,

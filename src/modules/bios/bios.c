@@ -131,6 +131,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BIOS_MODULE_NAME,
     .description = "Print information of 1st-stage bootloader (name, version, release date, etc)",
+    .initOptions = (void*) ffInitBiosOptions,
+    .destroyOptions = (void*) ffDestroyBiosOptions,
     .parseJsonObject = (void*) ffParseBiosJsonObject,
     .printModule = (void*) ffPrintBios,
     .generateJsonResult = (void*) ffGenerateBiosJsonResult,

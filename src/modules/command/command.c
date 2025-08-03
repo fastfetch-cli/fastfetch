@@ -123,6 +123,8 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_COMMAND_MODULE_NAME,
     .description = "Run custom shell scripts",
+    .initOptions = (void*) ffInitCommandOptions,
+    .destroyOptions = (void*) ffDestroyCommandOptions,
     .parseJsonObject = (void*) ffParseCommandJsonObject,
     .printModule = (void*) ffPrintCommand,
     .generateJsonResult = (void*) ffGenerateCommandJsonResult,

@@ -133,6 +133,8 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_GAMEPAD_MODULE_NAME,
     .description = "List (connected) gamepads",
+    .initOptions = (void*) ffInitGamepadOptions,
+    .destroyOptions = (void*) ffDestroyGamepadOptions,
     .parseJsonObject = (void*) ffParseGamepadJsonObject,
     .printModule = (void*) ffPrintGamepad,
     .generateJsonResult = (void*) ffGenerateGamepadJsonResult,

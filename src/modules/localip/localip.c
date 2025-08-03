@@ -388,6 +388,8 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_LOCALIP_MODULE_NAME,
     .description = "List local IP addresses (v4 or v6), MAC addresses, etc",
+    .initOptions = (void*) ffInitLocalIpOptions,
+    .destroyOptions = (void*) ffDestroyLocalIpOptions,
     .parseJsonObject = (void*) ffParseLocalIpJsonObject,
     .printModule = (void*) ffPrintLocalIp,
     .generateJsonResult = (void*) ffGenerateLocalIpJsonResult,

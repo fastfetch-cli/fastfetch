@@ -111,6 +111,8 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PUBLICIP_MODULE_NAME,
     .description = "Print your public IP address, etc",
+    .initOptions = (void*) ffInitPublicIpOptions,
+    .destroyOptions = (void*) ffDestroyPublicIpOptions,
     .parseJsonObject = (void*) ffParsePublicIpJsonObject,
     .printModule = (void*) ffPrintPublicIp,
     .generateJsonResult = (void*) ffGeneratePublicIpJsonResult,

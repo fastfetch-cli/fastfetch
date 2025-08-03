@@ -242,6 +242,8 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_COLORS_MODULE_NAME,
     .description = "Print some colored blocks",
+    .initOptions = (void*) ffInitColorsOptions,
+    .destroyOptions = (void*) ffDestroyColorsOptions,
     .parseJsonObject = (void*) ffParseColorsJsonObject,
     .printModule = (void*) ffPrintColors,
     .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,

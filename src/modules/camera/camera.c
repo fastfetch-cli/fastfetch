@@ -123,6 +123,8 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CAMERA_MODULE_NAME,
     .description = "Print available cameras",
+    .initOptions = (void*) ffInitCameraOptions,
+    .destroyOptions = (void*) ffDestroyCameraOptions,
     .parseJsonObject = (void*) ffParseCameraJsonObject,
     .printModule = (void*) ffPrintCamera,
     .generateJsonResult = (void*) ffGenerateCameraJsonResult,

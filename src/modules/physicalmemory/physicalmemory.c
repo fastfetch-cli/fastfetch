@@ -142,6 +142,8 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PHYSICALMEMORY_MODULE_NAME,
     .description = "Print system physical memory devices",
+    .initOptions = (void*) ffInitPhysicalMemoryOptions,
+    .destroyOptions = (void*) ffDestroyPhysicalMemoryOptions,
     .parseJsonObject = (void*) ffParsePhysicalMemoryJsonObject,
     .printModule = (void*) ffPrintPhysicalMemory,
     .generateJsonConfig = (void*) ffGeneratePhysicalMemoryJsonConfig,

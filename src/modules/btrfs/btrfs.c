@@ -203,6 +203,8 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BTRFS_MODULE_NAME,
     .description = "Print Linux BTRFS volumes",
+    .initOptions = (void*) ffInitBtrfsOptions,
+    .destroyOptions = (void*) ffDestroyBtrfsOptions,
     .parseJsonObject = (void*) ffParseBtrfsJsonObject,
     .printModule = (void*) ffPrintBtrfs,
     .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,

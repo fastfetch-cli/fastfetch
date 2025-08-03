@@ -130,6 +130,8 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OPENGL_MODULE_NAME,
     .description = "Print highest OpenGL version supported by the GPU",
+    .initOptions = (void*) ffInitOpenGLOptions,
+    .destroyOptions = (void*) ffDestroyOpenGLOptions,
     .parseJsonObject = (void*) ffParseOpenGLJsonObject,
     .printModule = (void*) ffPrintOpenGL,
     .generateJsonResult = (void*) ffGenerateOpenGLJsonResult,

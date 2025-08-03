@@ -248,6 +248,8 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BATTERY_MODULE_NAME,
     .description = "Print battery capacity, status, etc",
+    .initOptions = (void*) ffInitBatteryOptions,
+    .destroyOptions = (void*) ffDestroyBatteryOptions,
     .parseJsonObject = (void*) ffParseBatteryJsonObject,
     .printModule = (void*) ffPrintBattery,
     .generateJsonResult = (void*) ffGenerateBatteryJsonResult,

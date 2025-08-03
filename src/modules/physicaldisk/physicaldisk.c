@@ -229,6 +229,8 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PHYSICALDISK_MODULE_NAME,
     .description = "Print physical disk information",
+    .initOptions = (void*) ffInitPhysicalDiskOptions,
+    .destroyOptions = (void*) ffDestroyPhysicalDiskOptions,
     .parseJsonObject = (void*) ffParsePhysicalDiskJsonObject,
     .printModule = (void*) ffPrintPhysicalDisk,
     .generateJsonResult = (void*) ffGeneratePhysicalDiskJsonResult,

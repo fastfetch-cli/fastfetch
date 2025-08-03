@@ -405,6 +405,8 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISPLAY_MODULE_NAME,
     .description = "Print resolutions, refresh rates, etc",
+    .initOptions = (void*) ffInitDisplayOptions,
+    .destroyOptions = (void*) ffDestroyDisplayOptions,
     .parseJsonObject = (void*) ffParseDisplayJsonObject,
     .printModule = (void*) ffPrintDisplay,
     .generateJsonResult = (void*) ffGenerateDisplayJsonResult,

@@ -76,6 +76,8 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
     .description = "Print image file path of current wallpaper",
+    .initOptions = (void*) ffInitWallpaperOptions,
+    .destroyOptions = (void*) ffDestroyWallpaperOptions,
     .parseJsonObject = (void*) ffParseWallpaperJsonObject,
     .printModule = (void*) ffPrintWallpaper,
     .generateJsonResult = (void*) ffGenerateWallpaperJsonResult,

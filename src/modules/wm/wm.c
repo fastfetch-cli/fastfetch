@@ -122,6 +122,8 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WM_MODULE_NAME,
     .description = "Print window manager name and version",
+    .initOptions = (void*) ffInitWMOptions,
+    .destroyOptions = (void*) ffDestroyWMOptions,
     .parseJsonObject = (void*) ffParseWMJsonObject,
     .printModule = (void*) ffPrintWM,
     .generateJsonResult = (void*) ffGenerateWMJsonResult,

@@ -94,6 +94,8 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WEATHER_MODULE_NAME,
     .description = "Print weather information",
+    .initOptions = (void*) ffInitWeatherOptions,
+    .destroyOptions = (void*) ffDestroyWeatherOptions,
     .parseJsonObject = (void*) ffParseWeatherJsonObject,
     .printModule = (void*) ffPrintWeather,
     .generateJsonResult = (void*) ffGenerateWeatherJsonResult,

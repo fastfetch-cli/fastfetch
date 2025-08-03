@@ -84,6 +84,8 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TPM_MODULE_NAME,
     .description = "Print info of Trusted Platform Module (TPM) Security Device",
+    .initOptions = (void*) ffInitTPMOptions,
+    .destroyOptions = (void*) ffDestroyTPMOptions,
     .parseJsonObject = (void*) ffParseTPMJsonObject,
     .printModule = (void*) ffPrintTPM,
     .generateJsonResult = (void*) ffGenerateTPMJsonResult,

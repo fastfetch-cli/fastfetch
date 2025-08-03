@@ -29,6 +29,8 @@ typedef struct FFModuleBaseInfo
     // This is UB, because `void*` is not compatible with `FF*Options*`.
     // However we can't do it better unless we move to C++, so that `option` becomes a `this` pointer
     // https://stackoverflow.com/questions/559581/casting-a-function-pointer-to-another-type
+    void (*initOptions)(void* options);
+    void (*destroyOptions)(void* options);
     void (*parseJsonObject)(void* options, struct yyjson_val *module);
     void (*printModule)(void* options);
     void (*generateJsonResult)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* module);

@@ -143,6 +143,8 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
     .description = "Print title, which contains your user name, hostname",
+    .initOptions = (void*) ffInitTitleOptions,
+    .destroyOptions = (void*) ffDestroyTitleOptions,
     .parseJsonObject = (void*) ffParseTitleJsonObject,
     .printModule = (void*) ffPrintTitle,
     .generateJsonResult = (void*) ffGenerateTitleJsonResult,

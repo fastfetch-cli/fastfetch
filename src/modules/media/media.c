@@ -154,6 +154,8 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
     .description = "Print playing song name",
+    .initOptions = (void*) ffInitMediaOptions,
+    .destroyOptions = (void*) ffDestroyMediaOptions,
     .parseJsonObject = (void*) ffParseMediaJsonObject,
     .printModule = (void*) ffPrintMedia,
     .generateJsonResult = (void*) ffGenerateMediaJsonResult,

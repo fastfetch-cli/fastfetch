@@ -190,6 +190,8 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
+    .initOptions = (void*) ffInitBrightnessOptions,
+    .destroyOptions = (void*) ffDestroyBrightnessOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,
     .printModule = (void*) ffPrintBrightness,
     .generateJsonResult = (void*) ffGenerateBrightnessJsonResult,

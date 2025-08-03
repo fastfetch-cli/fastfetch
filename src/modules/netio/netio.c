@@ -193,6 +193,8 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_NETIO_MODULE_NAME,
     .description = "Print network I/O throughput",
+    .initOptions = (void*) ffInitNetIOOptions,
+    .destroyOptions = (void*) ffDestroyNetIOOptions,
     .parseJsonObject = (void*) ffParseNetIOJsonObject,
     .printModule = (void*) ffPrintNetIO,
     .generateJsonResult = (void*) ffGenerateNetIOJsonResult,

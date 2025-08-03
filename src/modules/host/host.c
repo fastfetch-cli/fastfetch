@@ -134,6 +134,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
+    .initOptions = (void*) ffInitHostOptions,
+    .destroyOptions = (void*) ffDestroyHostOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,
     .printModule = (void*) ffPrintHost,
     .generateJsonResult = (void*) ffGenerateHostJsonResult,

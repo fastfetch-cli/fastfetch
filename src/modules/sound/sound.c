@@ -209,6 +209,8 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
     .description = "Print sound devices, volume, etc",
+    .initOptions = (void*) ffInitSoundOptions,
+    .destroyOptions = (void*) ffDestroySoundOptions,
     .parseJsonObject = (void*) ffParseSoundJsonObject,
     .printModule = (void*) ffPrintSound,
     .generateJsonResult = (void*) ffGenerateSoundJsonResult,

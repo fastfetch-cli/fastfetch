@@ -114,6 +114,8 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_POWERADAPTER_MODULE_NAME,
     .description = "Print power adapter name and charging watts",
+    .initOptions = (void*) ffInitPowerAdapterOptions,
+    .destroyOptions = (void*) ffDestroyPowerAdapterOptions,
     .parseJsonObject = (void*) ffParsePowerAdapterJsonObject,
     .printModule = (void*) ffPrintPowerAdapter,
     .generateJsonResult = (void*) ffGeneratePowerAdapterJsonResult,

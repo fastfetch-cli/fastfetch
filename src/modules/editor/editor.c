@@ -107,6 +107,8 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
+    .initOptions = (void*) ffInitEditorOptions,
+    .destroyOptions = (void*) ffDestroyEditorOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
     .printModule = (void*) ffPrintEditor,
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,

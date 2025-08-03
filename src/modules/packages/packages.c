@@ -434,6 +434,8 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PACKAGES_MODULE_NAME,
     .description = "List installed package managers and count of installed packages",
+    .initOptions = (void*) ffInitPackagesOptions,
+    .destroyOptions = (void*) ffDestroyPackagesOptions,
     .parseJsonObject = (void*) ffParsePackagesJsonObject,
     .printModule = (void*) ffPrintPackages,
     .generateJsonResult = (void*) ffGeneratePackagesJsonResult,

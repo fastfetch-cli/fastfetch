@@ -142,6 +142,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DNS_MODULE_NAME,
     .description = "Print configured DNS servers",
+    .initOptions = (void*) ffInitDNSOptions,
+    .destroyOptions = (void*) ffDestroyDNSOptions,
     .parseJsonObject = (void*) ffParseDNSJsonObject,
     .printModule = (void*) ffPrintDNS,
     .generateJsonResult = (void*) ffGenerateDNSJsonResult,

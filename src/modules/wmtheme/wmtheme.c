@@ -65,6 +65,8 @@ void ffGenerateWMThemeJsonResult(FF_MAYBE_UNUSED FFWMThemeOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WMTHEME_MODULE_NAME,
     .description = "Print current theme of window manager",
+    .initOptions = (void*) ffInitWMThemeOptions,
+    .destroyOptions = (void*) ffDestroyWMThemeOptions,
     .parseJsonObject = (void*) ffParseWMThemeJsonObject,
     .printModule = (void*) ffPrintWMTheme,
     .generateJsonResult = (void*) ffGenerateWMThemeJsonResult,

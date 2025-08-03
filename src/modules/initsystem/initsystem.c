@@ -101,6 +101,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_INITSYSTEM_MODULE_NAME,
     .description = "Print init system (pid 1) name and version",
+    .initOptions = (void*) ffInitInitSystemOptions,
+    .destroyOptions = (void*) ffDestroyInitSystemOptions,
     .parseJsonObject = (void*) ffParseInitSystemJsonObject,
     .printModule = (void*) ffPrintInitSystem,
     .generateJsonResult = (void*) ffGenerateInitSystemJsonResult,

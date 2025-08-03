@@ -89,6 +89,8 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_ICONS_MODULE_NAME,
     .description = "Print icon style name",
+    .initOptions = (void*) ffInitIconsOptions,
+    .destroyOptions = (void*) ffDestroyIconsOptions,
     .parseJsonObject = (void*) ffParseIconsJsonObject,
     .printModule = (void*) ffPrintIcons,
     .generateJsonResult = (void*) ffGenerateIconsJsonResult,

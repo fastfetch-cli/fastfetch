@@ -116,6 +116,8 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
     .description = "Print system memory usage info",
+    .initOptions = (void*) ffInitMemoryOptions,
+    .destroyOptions = (void*) ffDestroyMemoryOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,
     .printModule = (void*) ffPrintMemory,
     .generateJsonResult = (void*) ffGenerateMemoryJsonResult,

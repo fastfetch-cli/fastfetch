@@ -96,6 +96,8 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_UPTIME_MODULE_NAME,
     .description = "Print how long system has been running",
+    .initOptions = (void*) ffInitUptimeOptions,
+    .destroyOptions = (void*) ffDestroyUptimeOptions,
     .parseJsonObject = (void*) ffParseUptimeJsonObject,
     .printModule = (void*) ffPrintUptime,
     .generateJsonResult = (void*) ffGenerateUptimeJsonResult,

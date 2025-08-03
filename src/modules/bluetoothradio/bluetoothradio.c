@@ -169,6 +169,8 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
     .description = "List bluetooth radios width supported version and vendor",
+    .initOptions = (void*) ffInitBluetoothRadioOptions,
+    .destroyOptions = (void*) ffDestroyBluetoothRadioOptions,
     .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,
     .printModule = (void*) ffPrintBluetoothRadio,
     .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,

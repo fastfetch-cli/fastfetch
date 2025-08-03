@@ -177,6 +177,8 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
     .description = "Print CPU usage. Costs some time to collect data",
+    .initOptions = (void*) ffInitCPUUsageOptions,
+    .destroyOptions = (void*) ffDestroyCPUUsageOptions,
     .parseJsonObject = (void*) ffParseCPUUsageJsonObject,
     .printModule = (void*) ffPrintCPUUsage,
     .generateJsonResult = (void*) ffGenerateCPUUsageJsonResult,

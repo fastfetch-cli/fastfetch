@@ -92,6 +92,8 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* option
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TERMINALTHEME_MODULE_NAME,
     .description = "Print current terminal theme (foreground and background colors)",
+    .initOptions = (void*) ffInitTerminalThemeOptions,
+    .destroyOptions = (void*) ffDestroyTerminalThemeOptions,
     .parseJsonObject = (void*) ffParseTerminalThemeJsonObject,
     .printModule = (void*) ffPrintTerminalTheme,
     .generateJsonResult = (void*) ffGenerateTerminalThemeJsonResult,

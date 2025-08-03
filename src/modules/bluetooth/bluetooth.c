@@ -166,6 +166,8 @@ void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BLUETOOTH_MODULE_NAME,
     .description = "List (connected) bluetooth devices",
+    .initOptions = (void*) ffInitBluetoothOptions,
+    .destroyOptions = (void*) ffDestroyBluetoothOptions,
     .parseJsonObject = (void*) ffParseBluetoothJsonObject,
     .printModule = (void*) ffPrintBluetooth,
     .generateJsonResult = (void*) ffGenerateBluetoothJsonResult,

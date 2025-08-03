@@ -79,6 +79,8 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TERMINALSIZE_MODULE_NAME,
     .description = "Print current terminal size",
+    .initOptions = (void*) ffInitTerminalSizeOptions,
+    .destroyOptions = (void*) ffDestroyTerminalSizeOptions,
     .parseJsonObject = (void*) ffParseTerminalSizeJsonObject,
     .printModule = (void*) ffPrintTerminalSize,
     .generateJsonResult = (void*) ffGenerateTerminalSizeJsonResult,

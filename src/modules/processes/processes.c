@@ -67,6 +67,8 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PROCESSES_MODULE_NAME,
     .description = "Print number of running processes",
+    .initOptions = (void*) ffInitProcessesOptions,
+    .destroyOptions = (void*) ffDestroyProcessesOptions,
     .parseJsonObject = (void*) ffParseProcessesJsonObject,
     .printModule = (void*) ffPrintProcesses,
     .generateJsonResult = (void*) ffGenerateProcessesJsonResult,

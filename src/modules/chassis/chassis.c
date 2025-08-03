@@ -110,6 +110,8 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CHASSIS_MODULE_NAME,
     .description = "Print chassis type (desktop, laptop, etc)",
+    .initOptions = (void*) ffInitChassisOptions,
+    .destroyOptions = (void*) ffDestroyChassisOptions,
     .parseJsonObject = (void*) ffParseChassisJsonObject,
     .printModule = (void*) ffPrintChassis,
     .generateJsonResult = (void*) ffGenerateChassisJsonResult,

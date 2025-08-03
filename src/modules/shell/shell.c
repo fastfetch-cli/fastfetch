@@ -91,6 +91,8 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
     .description = "Print current shell name and version",
+    .initOptions = (void*) ffInitShellOptions,
+    .destroyOptions = (void*) ffDestroyShellOptions,
     .parseJsonObject = (void*) ffParseShellJsonObject,
     .printModule = (void*) ffPrintShell,
     .generateJsonResult = (void*) ffGenerateShellJsonResult,
