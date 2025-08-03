@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/btrfs/btrfs.h"
 #include "modules/btrfs/btrfs.h"
 #include "util/stringUtils.h"
@@ -34,11 +35,11 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(used, &usedPretty);
+    ffSizeAppendNum(used, &usedPretty);
     FF_STRBUF_AUTO_DESTROY allocatedPretty = ffStrbufCreate();
-    ffParseSize(allocated, &allocatedPretty);
+    ffSizeAppendNum(allocated, &allocatedPretty);
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(total, &totalPretty);
+    ffSizeAppendNum(total, &totalPretty);
 
     double usedPercentage = total > 0 ? (double) used / (double) total * 100.0 : 0;
     double allocatedPercentage = total > 0 ? (double) allocated / (double) total * 100.0 : 0;
@@ -74,9 +75,9 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
             ffPercentAppendBar(&allocatedPercentageBar, allocatedPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY nodeSizePretty = ffStrbufCreate();
-        ffParseSize(result->nodeSize, &nodeSizePretty);
+        ffSizeAppendNum(result->nodeSize, &nodeSizePretty);
         FF_STRBUF_AUTO_DESTROY sectorSizePretty = ffStrbufCreate();
-        ffParseSize(result->sectorSize, &sectorSizePretty);
+        ffSizeAppendNum(result->sectorSize, &sectorSizePretty);
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),
@@ -129,36 +130,19 @@ void ffPrintBtrfs(FFBtrfsOptions* options)
     }
 }
 
-bool ffParseBtrfsCommandOptions(FFBtrfsOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BTRFS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBtrfsJsonObject(FFBtrfsOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BTRFS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BTRFS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -219,7 +203,6 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BTRFS_MODULE_NAME,
     .description = "Print Linux BTRFS volumes",
-    .parseCommandOptions = (void*) ffParseBtrfsCommandOptions,
     .parseJsonObject = (void*) ffParseBtrfsJsonObject,
     .printModule = (void*) ffPrintBtrfs,
     .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,

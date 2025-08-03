@@ -43,41 +43,16 @@ void ffPrintOpenGL(FFOpenGLOptions* options)
     ffStrbufDestroy(&result.library);
 }
 
-bool ffParseOpenGLCommandOptions(FFOpenGLOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_OPENGL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "library"))
-    {
-        options->library = (FFOpenGLLibrary) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "auto", FF_OPENGL_LIBRARY_AUTO },
-            { "egl", FF_OPENGL_LIBRARY_EGL },
-            { "glx", FF_OPENGL_LIBRARY_GLX },
-            {}
-        });
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "library"))
+        if (unsafe_yyjson_equals_str(key, "library"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -87,13 +62,13 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             else
                 options->library = (FFOpenGLLibrary) value;
             continue;
         }
 
-        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_OPENGL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -155,7 +130,6 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_OPENGL_MODULE_NAME,
     .description = "Print highest OpenGL version supported by the GPU",
-    .parseCommandOptions = (void*) ffParseOpenGLCommandOptions,
     .parseJsonObject = (void*) ffParseOpenGLJsonObject,
     .printModule = (void*) ffPrintOpenGL,
     .generateJsonResult = (void*) ffGenerateOpenGLJsonResult,

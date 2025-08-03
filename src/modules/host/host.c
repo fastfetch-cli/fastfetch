@@ -67,30 +67,16 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_HOST_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -148,7 +134,6 @@ exit:
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
-    .parseCommandOptions = (void*) ffParseHostCommandOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,
     .printModule = (void*) ffPrintHost,
     .generateJsonResult = (void*) ffGenerateHostJsonResult,

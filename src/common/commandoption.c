@@ -10,18 +10,6 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-bool ffParseModuleOptions(const char* key, const char* value)
-{
-    if (!ffStrStartsWith(key, "--") || !ffCharIsEnglishAlphabet(key[2])) return false;
-
-    for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(key[2]) - 'A']; *modules; ++modules)
-    {
-        FFModuleBaseInfo* baseInfo = *modules;
-        if (baseInfo->parseCommandOptions(baseInfo, key, value)) return true;
-    }
-    return false;
-}
-
 void ffPrepareCommandOption(FFdata* data)
 {
     FFOptionsModules* const options = &instance.config.modules;

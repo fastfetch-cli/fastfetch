@@ -454,7 +454,8 @@
             "remark": "Auto-detected based on isatty(1) by default",
             "arg": {
                 "type": "bool",
-                "optional": true
+                "optional": true,
+                "default": false
             }
         },
         {
@@ -498,6 +499,28 @@
             "remark": "See `-h color` for the list of available colors",
             "arg": {
                 "type": "color"
+            }
+        },
+        {
+            "long": "duration-abbreviation",
+            "desc": "Specify whether to abbreviate duration values",
+            "remark": "If true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+            "arg": {
+                "type": "bool",
+                "optional": true,
+                "default": false
+            }
+        },
+        {
+            "long": "duration-space-before-unit",
+            "desc": "Specify whether to put a space before the unit in duration values",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "default": "Use the default behavior of the module",
+                    "always": "Always put a space before the unit",
+                    "never": "Never put a space before the unit"
+                }
             }
         },
         {
@@ -624,6 +647,27 @@
             }
         },
         {
+            "long": "percent-space-before-unit",
+            "desc": "Specify whether to put a space before the percentage symbol",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "default": "Use the default behavior of the module",
+                    "always": "Always put a space before the unit",
+                    "never": "Never put a space before the unit"
+                }
+            }
+        },
+        {
+            "long": "percent-width",
+            "desc": "Specify the width of the percentage number, in number of characters",
+            "remark": "This option affects only percentage numbers, not bars",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
+        },
+        {
             "long": "bar-char-elapsed",
             "desc": "Set the character to use in the elapsed part of percentage bars",
             "arg": {
@@ -653,6 +697,47 @@
             "arg": {
                 "type": "string",
                 "default": " ]"
+            }
+        },
+        {
+            "long": "bar-border-left-elapsed",
+            "desc": "If both bar-border-left-elapsed and bar-border-right-elapsed are set, the border will be used as parts of bar content",
+            "arg": {
+                "type": "string",
+                "default": ""
+            }
+        },
+        {
+            "long": "bar-border-right-elapsed",
+            "desc": "If both bar-border-left-elapsed and bar-border-right-elapsed are set, the border will be used as parts of bar content",
+            "arg": {
+                "type": "string",
+                "default": ""
+            }
+        },
+        {
+            "long": "bar-color-elapsed",
+            "desc": "Set the color to use in the elapsed part of percentage bars",
+            "remark": "By default, auto selected by percent-color-{green,yellow,red}",
+            "arg": {
+                "type": "color",
+                "default": "<auto>"
+            }
+        },
+        {
+            "long": "bar-color-total",
+            "desc": "Set the color to use in the total part of percentage bars",
+            "arg": {
+                "type": "color",
+                "default": "light_white"
+            }
+        },
+        {
+            "long": "bar-color-border",
+            "desc": "Set the color to use in the borders of percentage bars",
+            "arg": {
+                "type": "color",
+                "default": "light_white"
             }
         },
         {
@@ -712,11 +797,35 @@
             }
         },
         {
+            "long": "size-space-before-unit",
+            "desc": "Specify whether to put a space before the unit",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "default": "Use the default behavior of the module",
+                    "always": "Always put a space before the unit",
+                    "never": "Never put a space before the unit"
+                }
+            }
+        },
+        {
             "long": "freq-ndigits",
             "desc": "Set the number of digits to keep after the decimal point when printing CPU/GPU frequency in GHz",
             "arg": {
                 "type": "num",
                 "default": 2
+            }
+        },
+        {
+            "long": "freq-space-before-unit",
+            "desc": "Specify whether to put a space before the unit",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "default": "Use the default behavior of the module",
+                    "always": "Always put a space before the unit",
+                    "never": "Never put a space before the unit"
+                }
             }
         },
         {
@@ -775,6 +884,18 @@
             "arg": {
                 "type": "color",
                 "default": "light_red"
+            }
+        },
+        {
+            "long": "temp-space-before-unit",
+            "desc": "Specify whether to put a space before the unit",
+            "arg": {
+                "type": "enum",
+                "enum": {
+                    "default": "Use the default behavior of the module",
+                    "always": "Always put a space before the unit",
+                    "never": "Never put a space before the unit"
+                }
             }
         }
     ],
@@ -854,7 +975,7 @@
             "desc": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
             "arg": {
                 "type": "path",
-                "default": "/efi:/boot:/boot/efi"
+                "default": "/efi:/boot:/boot/efi:/boot/firmware"
             }
         },
         {

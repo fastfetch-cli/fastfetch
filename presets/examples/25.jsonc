@@ -6,11 +6,13 @@
             "keys": "blue"
         },
         "separator": "",
+        // Constants are reusable strings referenced by {$1}, {$2}, etc.
+        // These contain ANSI escape codes for cursor positioning
         "constants": [
-            "──────────────────────────────────────────────",
-            "\u001b[47D",
-            "\u001b[47C",
-            "\u001b[46C"
+            "──────────────────────────────────────────────", // {$1} - horizontal line for borders
+            "\u001b[47D",                                     // {$2} - move cursor left 47 columns
+            "\u001b[47C",                                     // {$3} - move cursor right 47 columns
+            "\u001b[46C"                                      // {$4} - move cursor right 46 columns
         ],
         "brightColor": false
     },
@@ -22,6 +24,24 @@
         },
         {
             "type": "os",
+            // Key format breakdown for OS module:
+            // "│  {icon}  \u001b[s{sysname}\u001b[u\u001b[10C│{$3}│{$2}"
+            //
+            // │                    - Left border of key block
+            //   {icon}             - OS icon (defined internally by fastfetch)
+            //   \u001b[s           - ANSI escape: save cursor position (ESC[s)
+            // {sysname}            - Format variable: system name (e.g., "Linux", "Darwin")
+            // \u001b[u             - ANSI escape: restore cursor to saved position (ESC[u)
+            //                        Necessary because the length of `{sysname}` differs between different platforms
+            // \u001b[10C           - ANSI escape: move cursor right 10 columns (ESC[10C)
+            // │                    - Right border of key block (always 10 columns from left border)
+            // {$3}                 - Reference to constants[2]: move cursor right 47 columns
+            // │                    - Right border of value block
+            // {$2}                 - Reference to constants[1]: move cursor left 47 columns
+            //
+            // This creates a fixed-width layout where the key block is exactly 10 columns wide,
+            // regardless of the actual content length. The cursor manipulation ensures proper
+            // alignment for the table-like structure.
             "key": "│  {icon}  \u001b[s{sysname}\u001b[u\u001b[10C│{$3}│{$2}"
         },
         {
@@ -34,7 +54,7 @@
             "key": "│  {icon}  Locale    │{$3}│{$2}"
         },
 
-        // Hardware
+        // Hardware section with cyan color theme
         {
             "type": "custom",
             "key": "│{#cyan}┌──────────────┬{$1}┐{#keys}│\u001b[37D",
@@ -42,6 +62,11 @@
         },
         {
             "type": "chassis",
+            // Similar structure but with cyan color formatting:
+            // │{#cyan}│             - Left border with cyan color
+            //  {icon}               - Chassis icon
+            //  Chassis             - Fixed label text
+            // │{$4}│{#keys}│{$2}    - Positioning and borders for value area
             "key": "│{#cyan}│ {icon}  Chassis   │{$4}│{#keys}│{$2}"
         },
         {
@@ -76,7 +101,7 @@
             "format": ""
         },
 
-        // Desktop
+        // Desktop section with green color theme
         {
             "type": "custom",
             "key": "│{#green}┌──────────────┬{$1}┐{#keys}│\u001b[37D",
@@ -106,7 +131,7 @@
             "format": ""
         },
 
-        // Terminal
+        // Terminal section with yellow color theme
         {
             "type": "custom",
             "key": "│{#yellow}┌──────────────┬{$1}┐{#keys}│\u001b[37D",
@@ -138,7 +163,7 @@
             "format": ""
         },
 
-        // Development
+        // Development section with red color theme
         {
             "type": "custom",
             "key": "│{#red}┌──────────────┬{$1}┐{#keys}│\u001b[39D",
@@ -146,13 +171,16 @@
         },
         {
             "type": "command",
-            "keyIcon": "",
+            "keyIcon": "",                                   // Custom icon override
             "key": "│{#red}│ {icon}  Rust      │{$4}│{#keys}│{$2}",
-            "text": "rustc --version | cut -d' ' -f2",
-            "format": "rustc {}"
+            "text": "rustc --version",
+            "format": "rustc {~6,13}"                         // Print 6th to 13th characters (version number)
         },
         {
             "type": "command",
+            "condition": {
+                "!system": "Windows"                          // Posix version
+            },
             "keyIcon": "",
             "key": "│{#red}│ {icon}  Clang     │{$4}│{#keys}│{$2}",
             "text": "clang --version | head -1 | awk '{print $NF}'",
@@ -160,17 +188,27 @@
         },
         {
             "type": "command",
+            "condition": {
+                "system": "Windows"                           // Windows version
+            },
+            "keyIcon": "",
+            "key": "│{#red}│ {icon}  Clang     │{$4}│{#keys}│{$2}",
+            "text": "clang --version | findstr version",      // Finds the line with "version"
+            "format": "clang {~-6}"                           // Prints the last 6 characters (version number)
+        },
+        {
+            "type": "command",
             "keyIcon": "",
             "key": "│{#red}│ {icon}  NodeJS    │{$4}│{#keys}│{$2}",
             "text": "node --version",
-            "format": "node {~1}"
+            "format": "node {~1}"                             // {~1} removes first character (v)
         },
         {
             "type": "command",
             "keyIcon": "",
             "key": "│{#red}│ {icon}  Go        │{$4}│{#keys}│{$2}",
             "text": "go version | cut -d' ' -f3",
-            "format": "go {~2}"
+            "format": "go {~2}"                               // {~2} removes first 2 characters (go)
         },
         {
             "type": "command",
@@ -200,7 +238,7 @@
             "format": ""
         },
 
-        // Uptime
+        // Uptime section with magenta color theme
         {
             "type": "custom",
             "key": "│{#magenta}┌──────────────┬{$1}┐{#keys}│\u001b[36D",
@@ -212,28 +250,28 @@
         },
         {
             "type": "users",
-            "myselfOnly": true,
+            "myselfOnly": true,                               // Only show current user
             "keyIcon": "",
             "key": "│{#magenta}│ {icon}  Login     │{$4}│{#keys}│{$2}"
         },
         {
-            "condition": {
+            "condition": {                                    // Conditional module: only show on non-macOS
                 "!system": "macOS"
             },
             "type": "disk",
             "keyIcon": "",
             "key": "│{#magenta}│ {icon}  OS Age    │{$4}│{#keys}│{$2}",
-            "folders": "/",
-            "format": "{create-time:10} [{days} days]"
+            "folders": "/",                                   // Check root filesystem
+            "format": "{create-time:10} [{days} days]"        // Show creation time and age in days
         },
         {
-            "condition": {
+            "condition": {                                    // Conditional module: only show on macOS
                 "system": "macOS"
             },
             "type": "disk",
             "keyIcon": "",
             "key": "│{#magenta}│ {icon}  OS Age    │{$4}│{#keys}│{$2}",
-            "folders": "/System/Volumes/VM",
+            "folders": "/System/Volumes/VM",                 // Work around for APFS on macOS
             "format": "{create-time:10} [{days} days]"
         },
         {
@@ -243,12 +281,35 @@
         },
         {
             "type": "custom",
-            "key": "└─────────────────{$1}┘",
+            "key": "└─────────────────{$1}┘",                // Bottom border of the entire layout
             "format": ""
         },
 
-        // End
-        "break",
-        "colors"
+        // End with color palette and line break
+        "break",                                             // Add a blank line
+        "colors"                                             // Display color palette
     ]
 }
+
+/*
+Key Format Structure Explanation:
+
+The key format uses a combination of:
+1. Unicode box drawing characters (│ ┌ ┐ └ ┘ ┬ ┴) for borders
+2. ANSI escape codes for cursor positioning (\u001b[...)
+3. Format variables ({icon}, {sysname}, etc.)
+4. Constant references ({$1}, {$2}, etc.)
+5. Color formatting ({#color})
+
+ANSI Escape Codes Used:
+- \u001b[s      - Save cursor position (ESC[s)
+- \u001b[u      - Restore cursor position (ESC[u)
+- \u001b[nC     - Move cursor right n columns (ESC[nC)
+- \u001b[nD     - Move cursor left n columns (ESC[nD)
+
+This creates a table-like layout with fixed column widths and proper alignment,
+regardless of the actual content length in each field.
+
+For more ANSI escape code reference, see:
+https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#cursor-controls
+*/

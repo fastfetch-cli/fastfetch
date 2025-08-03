@@ -40,6 +40,6 @@ typedef struct yyjson_val yyjson_val;
 typedef struct yyjson_mut_doc yyjson_mut_doc;
 typedef struct yyjson_mut_val yyjson_mut_val;
 bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentageModuleConfig* config);
-bool ffPercentParseJsonObject(const char* key, yyjson_val* value, FFPercentageModuleConfig* config);
+bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageModuleConfig* config);
 void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig defaultConfig, FFPercentageModuleConfig config);
 const char* ffPercentParseTypeJsonConfig(yyjson_val* value, FFPercentageTypeFlags* result);

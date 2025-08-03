@@ -12,36 +12,39 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-bool ffJsonConfigParseModuleArgs(const char* key, yyjson_val* val, FFModuleArgs* moduleArgs)
+bool ffJsonConfigParseModuleArgs(yyjson_val* key, yyjson_val* val, FFModuleArgs* moduleArgs)
 {
-    if(ffStrEqualsIgnCase(key, "key"))
+    if (unsafe_yyjson_equals_str(key, "type") || unsafe_yyjson_equals_str(key, "condition"))
+        return true;
+
+    if (unsafe_yyjson_equals_str(key, "key"))
     {
-        ffStrbufSetNS(&moduleArgs->key, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        ffStrbufSetJsonVal(&moduleArgs->key, val);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "format"))
+    else if (unsafe_yyjson_equals_str(key, "format"))
     {
-        ffStrbufSetNS(&moduleArgs->outputFormat, (uint32_t) yyjson_get_len(val), yyjson_get_str(val));
+        ffStrbufSetJsonVal(&moduleArgs->outputFormat, val);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "outputColor"))
+    else if (unsafe_yyjson_equals_str(key, "outputColor"))
     {
         ffOptionParseColor(yyjson_get_str(val), &moduleArgs->outputColor);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "keyColor"))
+    else if (unsafe_yyjson_equals_str(key, "keyColor"))
     {
         ffOptionParseColor(yyjson_get_str(val), &moduleArgs->keyColor);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "keyWidth"))
+    else if (unsafe_yyjson_equals_str(key, "keyWidth"))
     {
         moduleArgs->keyWidth = (uint32_t) yyjson_get_uint(val);
         return true;
     }
-    else if(ffStrEqualsIgnCase(key, "keyIcon"))
+    else if (unsafe_yyjson_equals_str(key, "keyIcon"))
     {
-        ffStrbufSetS(&moduleArgs->keyIcon, yyjson_get_str(val));
+        ffStrbufSetJsonVal(&moduleArgs->keyIcon, val);
         return true;
     }
     return false;

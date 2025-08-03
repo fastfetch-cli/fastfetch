@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.48.1
+    VERSION 2.49.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -351,10 +351,11 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/common/percent.c
     src/common/commandoption.c
+    src/common/duration.c
     src/common/font.c
     src/common/format.c
+    src/common/frequency.c
     src/common/init.c
     src/common/jsonconfig.c
     src/common/library.c
@@ -363,9 +364,11 @@ set(LIBFASTFETCH_SRC
     src/common/networking/networking_common.c
     src/common/option.c
     src/common/parsing.c
+    src/common/percent.c
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/common/size.c
     src/common/temps.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c

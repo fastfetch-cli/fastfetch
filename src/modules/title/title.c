@@ -68,60 +68,22 @@ void ffPrintTitle(FFTitleOptions* options)
     }
 }
 
-bool ffParseTitleCommandOptions(FFTitleOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_TITLE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "fqdn"))
-    {
-        options->fqdn = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "color-user"))
-    {
-        ffOptionParseColor(value, &options->colorUser);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "color-at"))
-    {
-        ffOptionParseColor(value, &options->colorAt);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "color-host"))
-    {
-        ffOptionParseColor(value, &options->colorHost);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "fqdn"))
+        if (unsafe_yyjson_equals_str(key, "fqdn"))
         {
             options->fqdn = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "color"))
+        if (unsafe_yyjson_equals_str(key, "color"))
         {
             if (!yyjson_is_obj(val))
                 continue;
@@ -138,7 +100,7 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
             continue;
         }
 
-        ffPrintError(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+        ffPrintError(FF_TITLE_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -181,7 +143,6 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
     .description = "Print title, which contains your user name, hostname",
-    .parseCommandOptions = (void*) ffParseTitleCommandOptions,
     .parseJsonObject = (void*) ffParseTitleJsonObject,
     .printModule = (void*) ffPrintTitle,
     .generateJsonResult = (void*) ffGenerateTitleJsonResult,

@@ -114,61 +114,34 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     putchar('\n');
 }
 
-bool ffParseSeparatorCommandOptions(FFSeparatorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SEPARATOR_MODULE_NAME);
-    if (!subKey) return false;
-
-    if (ffStrEqualsIgnCase(subKey, "string"))
-    {
-        ffOptionParseString(key, value, &options->string);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "output-color"))
-    {
-        ffOptionParseColor(value, &options->outputColor);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "length"))
-    {
-        options->length = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
+        if (unsafe_yyjson_equals_str(key, "type") || unsafe_yyjson_equals_str(key, "condition"))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "string"))
+        if (unsafe_yyjson_equals_str(key, "string"))
         {
-            ffStrbufSetS(&options->string, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->string, val);
             continue;
         }
 
-        if (ffStrEndsWithIgnCase(key, "outputColor"))
+        if (unsafe_yyjson_equals_str(key, "outputColor"))
         {
             ffOptionParseColor(yyjson_get_str(val), &options->outputColor);
             continue;
         }
 
-        if (ffStrEndsWithIgnCase(key, "length"))
+        if (unsafe_yyjson_equals_str(key, "length"))
         {
             options->length = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", key);
+        ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -184,7 +157,6 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SEPARATOR_MODULE_NAME,
     .description = "Print a separator line",
-    .parseCommandOptions = (void*) ffParseSeparatorCommandOptions,
     .parseJsonObject = (void*) ffParseSeparatorJsonObject,
     .printModule = (void*) ffPrintSeparator,
     .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,

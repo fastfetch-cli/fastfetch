@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/temps.h"
+#include "common/size.h"
 #include "detection/physicaldisk/physicaldisk.h"
 #include "modules/physicaldisk/physicaldisk.h"
 #include "util/stringUtils.h"
@@ -52,7 +52,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
     {
         formatKey(options, dev, result.length == 1 ? 0 : index + 1, &key);
         ffStrbufClear(&buffer);
-        ffParseSize(dev->size, &buffer);
+        ffSizeAppendNum(dev->size, &buffer);
 
         const char* physicalType = dev->type & FF_PHYSICALDISK_TYPE_HDD
             ? "HDD"
@@ -133,48 +133,25 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
     }
 }
 
-bool ffParsePhysicalDiskCommandOptions(FFPhysicalDiskOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PHYSICALDISK_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
-    {
-        ffOptionParseString(key, value, &options->namePrefix);
-        return true;
-    }
-
-    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
-        return true;
-
-    return false;
-}
-
 void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        if (unsafe_yyjson_equals_str(key, "namePrefix"))
         {
-            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->namePrefix, val);
             continue;
         }
 
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
 
-        ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_PHYSICALDISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -252,7 +229,6 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_PHYSICALDISK_MODULE_NAME,
     .description = "Print physical disk information",
-    .parseCommandOptions = (void*) ffParsePhysicalDiskCommandOptions,
     .parseJsonObject = (void*) ffParsePhysicalDiskJsonObject,
     .printModule = (void*) ffPrintPhysicalDisk,
     .generateJsonResult = (void*) ffGeneratePhysicalDiskJsonResult,

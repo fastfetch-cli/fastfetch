@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
-#include "common/parsing.h"
+#include "common/duration.h"
 #include "common/temps.h"
 #include "detection/battery/battery.h"
 #include "modules/battery/battery.h"
@@ -59,7 +59,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 if(str.length > 0)
                     ffStrbufAppendS(&str, " (");
 
-                ffParseDuration((uint32_t) result->timeRemaining, &str);
+                ffDurationAppendNum((uint32_t) result->timeRemaining, &str);
                 ffStrbufAppendS(&str, " remaining)");
             }
         }
@@ -101,6 +101,9 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             ffPercentAppendBar(&capacityBar, result->capacity, options->percent, &options->moduleArgs);
         FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
         ffTempsAppendNum(result->temperature, &tempStr, options->tempConfig, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY timeStr = ffStrbufCreate();
+        if (result->timeRemaining > 0)
+            ffDurationAppendNum((uint32_t) result->timeRemaining, &timeStr);
 
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->manufacturer, "manufacturer"),
@@ -117,6 +120,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
             FF_FORMAT_ARG(hours, "time-hours"),
             FF_FORMAT_ARG(minutes, "time-minutes"),
             FF_FORMAT_ARG(seconds, "time-seconds"),
+            FF_FORMAT_ARG(timeStr, "time-formatted"),
         }));
     }
 }
@@ -155,45 +159,17 @@ void ffPrintBattery(FFBatteryOptions* options)
     }
 }
 
-bool ffParseBatteryCommandOptions(FFBatteryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BATTERY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
-        return true;
-
-    #ifdef _WIN32
-        if (ffStrEqualsIgnCase(subKey, "use-setup-api"))
-        {
-            options->useSetupApi = ffOptionParseBoolean(value);
-            return true;
-        }
-    #endif
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         #ifdef _WIN32
-        if (ffStrEqualsIgnCase(key, "useSetupApi"))
+        if (unsafe_yyjson_equals_str(key, "useSetupApi"))
         {
             options->useSetupApi = yyjson_get_bool(val);
             continue;
@@ -206,7 +182,7 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -254,6 +230,8 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_uint(doc, obj, "cycleCount", battery->cycleCount);
         if (battery->timeRemaining > 0)
             yyjson_mut_obj_add_int(doc, obj, "timeRemaining", battery->timeRemaining);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "timeRemaining");
     }
 
     FF_LIST_FOR_EACH(FFBatteryResult, battery, results)
@@ -270,7 +248,6 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_BATTERY_MODULE_NAME,
     .description = "Print battery capacity, status, etc",
-    .parseCommandOptions = (void*) ffParseBatteryCommandOptions,
     .parseJsonObject = (void*) ffParseBatteryJsonObject,
     .printModule = (void*) ffPrintBattery,
     .generateJsonResult = (void*) ffGenerateBatteryJsonResult,
@@ -290,6 +267,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Battery time remaining hours", "time-hours"},
         {"Battery time remaining minutes", "time-minutes"},
         {"Battery time remaining seconds", "time-seconds"},
+        {"Battery time remaining (formatted)", "time-formatted"},
     }))
 };
 

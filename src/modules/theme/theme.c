@@ -43,30 +43,16 @@ void ffPrintTheme(FFThemeOptions* options)
     ffStrbufDestroy(&result.theme2);
 }
 
-bool ffParseThemeCommandOptions(FFThemeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_THEME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -103,7 +89,6 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
     .description = "Print current theme of desktop environment",
-    .parseCommandOptions = (void*) ffParseThemeCommandOptions,
     .parseJsonObject = (void*) ffParseThemeJsonObject,
     .printModule = (void*) ffPrintTheme,
     .generateJsonResult = (void*) ffGenerateThemeJsonResult,

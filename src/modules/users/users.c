@@ -107,54 +107,31 @@ void ffPrintUsers(FFUsersOptions* options)
     }
 }
 
-bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_USERS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "myself-only"))
-    {
-        options->myselfOnly = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if (ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
+        if (unsafe_yyjson_equals_str(key, "type") || unsafe_yyjson_equals_str(key, "condition"))
             continue;
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "compact"))
+        if (unsafe_yyjson_equals_str(key, "compact"))
         {
             options->compact = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "myselfOnly"))
+        if (unsafe_yyjson_equals_str(key, "myselfOnly"))
         {
             options->myselfOnly = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -211,7 +188,6 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
     .description = "Print users currently logged in",
-    .parseCommandOptions = (void*) ffParseUsersCommandOptions,
     .parseJsonObject = (void*) ffParseUsersJsonObject,
     .printModule = (void*) ffPrintUsers,
     .generateJsonResult = (void*) ffGenerateUsersJsonResult,
@@ -219,7 +195,7 @@ static FFModuleBaseInfo ffModuleInfo = {
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"User name", "name"},
         {"Host name", "host-name"},
-        {"Session name", "session"},
+        {"Session name", "session-name"},
         {"Client IP", "client-ip"},
         {"Login Time in local timezone", "login-time"},
         {"Days after login", "days"},

@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
+#include "common/size.h"
 #include "detection/diskio/diskio.h"
 #include "modules/diskio/diskio.h"
 #include "util/stringUtils.h"
@@ -57,22 +57,22 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            ffParseSize(dev->bytesRead, &buffer);
+            ffSizeAppendNum(dev->bytesRead, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (R) - ");
 
-            ffParseSize(dev->bytesWritten, &buffer);
+            ffSizeAppendNum(dev->bytesWritten, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (W)");
             ffStrbufPutTo(&buffer, stdout);
         }
         else
         {
+            ffSizeAppendNum(dev->bytesRead, &buffer);
+            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufClear(&buffer2);
-            ffParseSize(dev->bytesRead, &buffer);
-            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
-            ffParseSize(dev->bytesWritten, &buffer2);
-            if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
+            ffSizeAppendNum(dev->bytesWritten, &buffer2);
+            if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
                 FF_FORMAT_ARG(buffer, "size-read"),
@@ -95,66 +95,34 @@ void ffPrintDiskIO(FFDiskIOOptions* options)
     }
 }
 
-bool ffParseDiskIOCommandOptions(FFDiskIOOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DISKIO_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
-    {
-        ffOptionParseString(key, value, &options->namePrefix);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detect-total"))
-    {
-        options->detectTotal = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "wait-time"))
-    {
-        options->waitTime = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        if (unsafe_yyjson_equals_str(key, "namePrefix"))
         {
-            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->namePrefix, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "detectTotal"))
+        if (unsafe_yyjson_equals_str(key, "detectTotal"))
         {
             options->detectTotal = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "waitTime"))
+        if (unsafe_yyjson_equals_str(key, "waitTime"))
         {
             options->waitTime = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        ffPrintError(FF_DISKIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISKIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -205,7 +173,6 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISKIO_MODULE_NAME,
     .description = "Print physical disk I/O throughput",
-    .parseCommandOptions = (void*) ffParseDiskIOCommandOptions,
     .parseJsonObject = (void*) ffParseDiskIOJsonObject,
     .printModule = (void*) ffPrintDiskIO,
     .generateJsonResult = (void*) ffGenerateDiskIOJsonResult,

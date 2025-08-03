@@ -1,6 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
+#include "common/size.h"
 #include "detection/netio/netio.h"
 #include "modules/netio/netio.h"
 #include "util/stringUtils.h"
@@ -59,11 +59,11 @@ void ffPrintNetIO(FFNetIOOptions* options)
         {
             ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
 
-            ffParseSize(inf->rxBytes, &buffer);
+            ffSizeAppendNum(inf->rxBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (IN) - ");
 
-            ffParseSize(inf->txBytes, &buffer);
+            ffSizeAppendNum(inf->txBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
             ffStrbufAppendS(&buffer, " (OUT)");
 
@@ -74,9 +74,9 @@ void ffPrintNetIO(FFNetIOOptions* options)
         else
         {
             ffStrbufClear(&buffer2);
-            ffParseSize(inf->rxBytes, &buffer);
+            ffSizeAppendNum(inf->rxBytes, &buffer);
             if (!options->detectTotal) ffStrbufAppendS(&buffer, "/s");
-            ffParseSize(inf->txBytes, &buffer2);
+            ffSizeAppendNum(inf->txBytes, &buffer2);
             if (!options->detectTotal) ffStrbufAppendS(&buffer2, "/s");
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]){
@@ -103,78 +103,40 @@ void ffPrintNetIO(FFNetIOOptions* options)
     }
 }
 
-bool ffParseNetIOCommandOptions(FFNetIOOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_NETIO_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "name-prefix"))
-    {
-        ffOptionParseString(key, value, &options->namePrefix);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "default-route-only"))
-    {
-        options->defaultRouteOnly = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detect-total"))
-    {
-        options->detectTotal = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "wait-time"))
-    {
-        options->waitTime = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "namePrefix"))
+        if (unsafe_yyjson_equals_str(key, "namePrefix"))
         {
-            ffStrbufSetS(&options->namePrefix, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->namePrefix, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "defaultRouteOnly"))
+        if (unsafe_yyjson_equals_str(key, "defaultRouteOnly"))
         {
             options->defaultRouteOnly = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "detectTotal"))
+        if (unsafe_yyjson_equals_str(key, "detectTotal"))
         {
             options->detectTotal = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "waitTime"))
+        if (unsafe_yyjson_equals_str(key, "waitTime"))
         {
             options->waitTime = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_NETIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -231,7 +193,6 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_NETIO_MODULE_NAME,
     .description = "Print network I/O throughput",
-    .parseCommandOptions = (void*) ffParseNetIOCommandOptions,
     .parseJsonObject = (void*) ffParseNetIOJsonObject,
     .printModule = (void*) ffPrintNetIO,
     .generateJsonResult = (void*) ffGenerateNetIOJsonResult,

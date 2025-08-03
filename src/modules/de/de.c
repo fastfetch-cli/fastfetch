@@ -42,42 +42,22 @@ void ffPrintDE(FFDEOptions* options)
     }
 }
 
-bool ffParseDECommandOptions(FFDEOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "slow-version-detection"))
-    {
-        options->slowVersionDetection = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "slowVersionDetection"))
+        if (unsafe_yyjson_equals_str(key, "slowVersionDetection"))
         {
             options->slowVersionDetection = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -114,7 +94,6 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DE_MODULE_NAME,
     .description = "Print desktop environment name",
-    .parseCommandOptions = (void*) ffParseDECommandOptions,
     .parseJsonObject = (void*) ffParseDEJsonObject,
     .printModule = (void*) ffPrintDE,
     .generateJsonResult = (void*) ffGenerateDEJsonResult,

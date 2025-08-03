@@ -3,7 +3,8 @@
     "$defs": {
         "colors": {
             "type": "string",
-            "enum": [
+            "description": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
+            "examples": [
                 "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
                 "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
             ]
@@ -52,6 +53,7 @@
                             "bar-monochrome"
                         ]
                     },
+                    "uniqueItems": true,
                     "default": [
                         "num",
                         "num-color"
@@ -150,13 +152,13 @@
             "properties": {
                 "system": {
                     "description": "System name to match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
@@ -170,13 +172,13 @@
                 },
                 "!system": {
                     "description": "System name to not match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/systems"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/systems"
                             },
@@ -190,13 +192,13 @@
                 },
                 "arch": {
                     "description": "Architecture to match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
@@ -210,13 +212,13 @@
                 },
                 "!arch": {
                     "description": "Architecture to not match",
-                    "type": "string",
                     "oneOf": [
                         {
                             "$ref": "#/$defs/architectures"
                         },
                         {
                             "type": "array",
+                            "uniqueItems": true,
                             "items": {
                                 "$ref": "#/$defs/architectures"
                             },
@@ -230,10 +232,28 @@
                 }
             }
         },
+        "spaceBeforeUnit": {
+            "type": "string",
+            "description": "Whether to put a space before the unit",
+            "oneOf": [
+                {
+                    "const": "default",
+                    "description": "Use the default behavior of the module"
+                },
+                {
+                    "const": "always",
+                    "description": "Always add a space before the unit"
+                },
+                {
+                    "const": "never",
+                    "description": "Never add a space before the unit"
+                }
+            ]
+        },
 
 
         "batteryFormat": {
-            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds",
+            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
@@ -317,7 +337,7 @@
             "type": "string"
         },
         "editorFormat": {
-            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {full-path}: Full path of real path\n    5. {version}: Version",
+            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {path}: Full path of real path\n    5. {version}: Version",
             "type": "string"
         },
         "fontFormat": {
@@ -401,7 +421,7 @@
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop}: Number of scoop packages\n    21. {choco}: Number of choco packages\n    22. {pkgtool}: Number of pkgtool packages\n    23. {paludis}: Number of paludis packages\n    24. {winget}: Number of winget packages\n    25. {opkg}: Number of opkg packages\n    26. {am-system}: Number of am-system packages\n    27. {sorcery}: Number of sorcery packages\n    28. {lpkg}: Number of lpkg packages\n    29. {lpkgbuild}: Number of lpkgbuild packages\n    30. {guix-system}: Number of guix-system packages\n    31. {guix-user}: Number of guix-user packages\n    32. {guix-home}: Number of guix-home packages\n    33. {linglong}: Number of linglong packages\n    34. {pacstall}: Number of pacstall packages\n    35. {mport}: Number of mport packages\n    36. {am-user}: Number of am-user (aka appman) packages\n    37. {pkgsrc}: Number of pkgsrc packages\n    38. {hpkg-system}: Number of hpkg-system packages\n    39. {hpkg-user}: Number of hpkg-user packages\n    40. {pisi}: Number of pisi packages\n    41. {soar}: Number of soar packages\n    42. {nix-all}: Total number of all nix packages\n    43. {flatpak-all}: Total number of all flatpak app packages\n    44. {brew-all}: Total number of all brew packages\n    45. {guix-all}: Total number of all guix packages\n    46. {hpkg-all}: Total number of all hpkg packages",
+            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop-user}: Number of scoop-user packages\n    21. {scoop-global}: Number of scoop-global packages\n    22. {choco}: Number of choco packages\n    23. {pkgtool}: Number of pkgtool packages\n    24. {paludis}: Number of paludis packages\n    25. {winget}: Number of winget packages\n    26. {opkg}: Number of opkg packages\n    27. {am-system}: Number of am-system packages\n    28. {sorcery}: Number of sorcery packages\n    29. {lpkg}: Number of lpkg packages\n    30. {lpkgbuild}: Number of lpkgbuild packages\n    31. {guix-system}: Number of guix-system packages\n    32. {guix-user}: Number of guix-user packages\n    33. {guix-home}: Number of guix-home packages\n    34. {linglong}: Number of linglong packages\n    35. {pacstall}: Number of pacstall packages\n    36. {mport}: Number of mport packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {nix-all}: Total number of all nix packages\n    44. {flatpak-all}: Total number of all flatpak app packages\n    45. {brew-all}: Total number of all brew packages\n    46. {guix-all}: Total number of all guix packages\n    47. {hpkg-all}: Total number of all hpkg packages",
             "type": "string"
         },
         "physicaldiskFormat": {
@@ -469,15 +489,15 @@
             "type": "string"
         },
         "uptimeFormat": {
-            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot",
+            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot\n    10. {formatted}: Formatted uptime",
             "type": "string"
         },
         "usersFormat": {
-            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
+            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session-name}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
             "type": "string"
         },
         "versionFormat": {
-            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
+            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {project-name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
             "type": "string"
         },
         "vulkanFormat": {
@@ -539,23 +559,67 @@
                     "properties": {
                         "type": {
                             "description": "Set the type of the logo",
-                            "enum": [
-                                "auto",
-                                "builtin",
-                                "small",
-                                "file",
-                                "file-raw",
-                                "data",
-                                "data-raw",
-                                "command-raw",
-                                "sixel",
-                                "kitty",
-                                "kitty-direct",
-                                "kitty-icat",
-                                "iterm",
-                                "chafa",
-                                "raw",
-                                "none"
+                            "oneOf": [
+                                {
+                                    "const": "auto",
+                                    "description": "If something is given, first try built-in, then file. Otherwise detect logo"
+                                },
+                                {
+                                    "const": "builtin",
+                                    "description": "Built-in ASCII art"
+                                },
+                                {
+                                    "const": "small",
+                                    "description": "Built-in ASCII art, small version (not all logos support this option)"
+                                },
+                                {
+                                    "const": "file",
+                                    "description": "Text file, printed with color code replacement"
+                                },
+                                {
+                                    "const": "file-raw",
+                                    "description": "Text file, printed as is"
+                                },
+                                {
+                                    "const": "data",
+                                    "description": "Text data, printed with color code replacement"
+                                },
+                                {
+                                    "const": "data-raw",
+                                    "description": "Text data, printed as is"
+                                },
+                                {
+                                    "const": "sixel",
+                                    "description": "Image file, printed as sixel codes"
+                                },
+                                {
+                                    "const": "kitty",
+                                    "description": "Image file, printed using kitty graphics protocol"
+                                },
+                                {
+                                    "const": "kitty-direct",
+                                    "description": "Image file, tells the terminal emulator to read image data from the specified file"
+                                },
+                                {
+                                    "const": "kitty-icat",
+                                    "description": "Image file, uses `kitten icat` to display the image. Requires binary `kitten` to be installed"
+                                },
+                                {
+                                    "const": "iterm",
+                                    "description": "Image file, uses `iTerm` image protocol"
+                                },
+                                {
+                                    "const": "chafa",
+                                    "description": "Image file, prints `ASCII` art image generated by `libchafa`"
+                                },
+                                {
+                                    "const": "raw",
+                                    "description": "Image file, printed as `raw` binary string image"
+                                },
+                                {
+                                    "const": "none",
+                                    "description": "Disable logo printing"
+                                }
                             ],
                             "default": "auto"
                         },
@@ -680,32 +744,71 @@
                                 "canvasMode": {
                                     "type": "string",
                                     "description": "Determine how colors are used in the output. This value maps to enum ChafaCanvasMode.",
-                                    "enum": [
-                                        "TRUECOLOR",
-                                        "INDEXED_256",
-                                        "INDEXED_240",
-                                        "INDEXED_16",
-                                        "FGBG_BGFG",
-                                        "FGBG",
-                                        "INDEXED_8",
-                                        "INDEXED_16_8"
+                                    "oneOf": [
+                                        {
+                                            "const": "TRUECOLOR",
+                                            "description": "Use 24-bit true colors"
+                                        },
+                                        {
+                                            "const": "INDEXED_256",
+                                            "description": "Use 256 colors"
+                                        },
+                                        {
+                                            "const": "INDEXED_240",
+                                            "description": "Use 240 colors, but avoid using the lower 16 whose values vary between terminal environments"
+                                        },
+                                        {
+                                            "const": "INDEXED_16",
+                                            "description": "Use 16 colors using the aixterm ANSI extension"
+                                        },
+                                        {
+                                            "const": "FGBG_BGFG",
+                                            "description": "Use default foreground and background colors, plus inversion"
+                                        },
+                                        {
+                                            "const": "FGBG",
+                                            "description": "Use default foreground and background colors. No ANSI codes will be used"
+                                        },
+                                        {
+                                            "const": "INDEXED_8",
+                                            "description": "Use 8 colors, compatible with original ANSI X3.64"
+                                        },
+                                        {
+                                            "const": "INDEXED_16_8",
+                                            "description": "Use 16 FG colors (8 of which enabled with bold/bright) and 8 BG colors"
+                                        }
                                     ]
                                 },
                                 "colorSpace": {
                                     "type": "string",
                                     "description": "Set color space used for quantization. This value maps to enum ChafaColorSpace.",
-                                    "enum": [
-                                        "RGB",
-                                        "DIN99D"
+                                    "oneOf": [
+                                        {
+                                            "const": "RGB",
+                                            "description": "RGB color space. Fast but imprecise"
+                                        },
+                                        {
+                                            "const": "DIN99D",
+                                            "description": "DIN99d color space. Slower, but good perceptual color precision"
+                                        }
                                     ]
                                 },
                                 "ditherMode": {
                                     "type": "string",
                                     "description": "Set output dither mode (No effect with 24-bit color). This value maps to enum ChafaDitherMode.",
-                                    "enum": [
-                                        "NONE",
-                                        "ORDERED",
-                                        "DIFFUSION"
+                                    "oneOf": [
+                                        {
+                                            "const": "NONE",
+                                            "description": "No dithering"
+                                        },
+                                        {
+                                            "const": "ORDERED",
+                                            "description": "Ordered dithering (Bayer or similar)"
+                                        },
+                                        {
+                                            "const": "DIFFUSION",
+                                            "description": "Error diffusion dithering (Floyd-Steinberg or similar)"
+                                        }
                                     ]
                                 }
                             }
@@ -869,11 +972,23 @@
                         "type": {
                             "type": "string",
                             "description": "Set whether to show icon before string keys",
-                            "enum": [
-                                "none",
-                                "string",
-                                "icon",
-                                "both"
+                            "oneOf": [
+                                {
+                                    "const": "none",
+                                    "description": "Disable keys"
+                                },
+                                {
+                                    "const": "string",
+                                    "description": "Show string keys"
+                                },
+                                {
+                                    "const": "icon",
+                                    "description": "Show icon keys (requires newest nerd font)"
+                                },
+                                {
+                                    "const": "both",
+                                    "description": "Show both icon and string keys"
+                                }
                             ],
                             "default": "string"
                         },
@@ -921,6 +1036,9 @@
                             "minimum": 0,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -932,7 +1050,24 @@
                         "unit": {
                             "type": "string",
                             "description": "Set the unit of temperature",
-                            "enum": ["D", "Default", "Celsius", "C", "Fahrenheit", "F", "Kelvin", "K"],
+                            "oneOf": [
+                                {
+                                    "const": "C",
+                                    "description": "Celsius"
+                                },
+                                {
+                                    "const": "F",
+                                    "description": "Fahrenheit"
+                                },
+                                {
+                                    "const": "K",
+                                    "description": "Kelvin"
+                                },
+                                {
+                                    "const": "D",
+                                    "description": "Default (alias for Celsius)"
+                                }
+                            ],
                             "default": "D"
                         },
                         "ndigits": {
@@ -963,6 +1098,9 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -971,24 +1109,106 @@
                     "additionalProperties": false,
                     "description": "Set the bar configuration",
                     "properties": {
+                        "char": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "Set the characters used in the bar",
+                            "properties": {
+                                "elapsed": {
+                                    "type": "string",
+                                    "description": "Set the character to use in elapsed part",
+                                    "default": "■"
+                                },
+                                "total": {
+                                    "type": "string",
+                                    "description": "Set the character to use in total part",
+                                    "default": "-"
+                                }
+                            }
+                        },
+                        "border": {
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Disable bar borders"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "Set the string to use of borders of percentage bars",
+                                    "properties": {
+                                        "left": {
+                                            "type": "string",
+                                            "description": "Set the string to use at left border",
+                                            "default": "[ "
+                                        },
+                                        "right": {
+                                            "type": "string",
+                                            "description": "Set the string to use at right border",
+                                            "default": " ]"
+                                        },
+                                        "leftElapsed": {
+                                            "type": "string",
+                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "default": ""
+                                        },
+                                        "rightElapsed": {
+                                            "type": "string",
+                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "default": ""
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "color": {
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Disable color in percentage bars"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "Set the color to use of percentage bars",
+                                    "properties": {
+                                        "elapsed": {
+                                            "description": "Color to use in the elapsed part of percentage bars\nBy default, auto selected by percent.color.{green,yellow,red}",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "auto"
+                                        },
+                                        "total": {
+                                            "description": "Color to use in the total part of percentage bars",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "light_white"
+                                        },
+                                        "border": {
+                                            "description": "Color to use in the borders of percentage bars",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "light_white"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
                         "charElapsed": {
                             "type": "string",
-                            "description": "Set the character to use in elapsed part",
+                            "description": "Set the character to use in elapsed part. Deprecated in v2.50.0",
                             "default": "■"
                         },
                         "charTotal": {
                             "type": "string",
-                            "description": "Set the character to use in total part",
+                            "description": "Set the character to use in total part. Deprecated in v2.50.0",
                             "default": "-"
                         },
                         "borderLeft": {
                             "type": "string",
-                            "description": "Set the string to use at left border",
+                            "description": "Set the string to use at left border. Deprecated in v2.50.0",
                             "default": "[ "
                         },
                         "borderRight": {
                             "type": "string",
-                            "description": "Set the string to use at right border",
+                            "description": "Set the string to use at right border. Deprecated in v2.50.0",
                             "default": " ]"
                         },
                         "width": {
@@ -1035,6 +1255,15 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        },
+                        "width": {
+                            "type": "integer",
+                            "description": "Set the width of the percentage number, in number of characters",
+                            "minimum": 0,
+                            "default": 0
                         }
                     }
                 },
@@ -1049,6 +1278,23 @@
                             "minimum": -1,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        }
+                    }
+                },
+                "duration": {
+                    "type": "object",
+                    "description": "Set how duration values should be displayed",
+                    "properties": {
+                        "abbreviation": {
+                            "type": "boolean",
+                            "description": "Set whether to abbreviate duration values\nIf true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+                            "default": false
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -1687,14 +1933,35 @@
                                     "symbol": {
                                         "description": "Set the symbol to use",
                                         "type": "string",
-                                        "enum": [
-                                            "block",
-                                            "background",
-                                            "circle",
-                                            "diamond",
-                                            "triangle",
-                                            "square",
-                                            "star"
+                                        "oneOf": [
+                                            {
+                                                "const": "block",
+                                                "description": "\u2588\u2588\u2588"
+                                            },
+                                            {
+                                                "const": "background",
+                                                "description": "(whitespaces with background)"
+                                            },
+                                            {
+                                                "const": "circle",
+                                                "description": "\u25cf"
+                                            },
+                                            {
+                                                "const": "diamond",
+                                                "description": "\u25c6"
+                                            },
+                                            {
+                                                "const": "triangle",
+                                                "description": "\u25b2"
+                                            },
+                                            {
+                                                "const": "square",
+                                                "description": "\u25a0"
+                                            },
+                                            {
+                                                "const": "star",
+                                                "description": "\u2605"
+                                            }
                                         ],
                                         "default": "background"
                                     },
@@ -1753,7 +2020,7 @@
                                         "type": "string"
                                     },
                                     "param": {
-                                        "description": "Set the parameter used when starting the shell\nDefault: /c for Windows, -c for *nix",
+                                        "description": "Set the parameter used when starting the shell\nIf set to an empty string, it will be ignored\nDefault: /c for Windows, -c for *nix",
                                         "type": "string"
                                     },
                                     "text": {
@@ -1897,15 +2164,34 @@
                                         "const": "display"
                                     },
                                     "compactType": {
-                                        "enum": [
-                                            "none",
-                                            "original",
-                                            "scaled",
-                                            "original-with-refresh-rate",
-                                            "scaled-with-refresh-rate"
-                                        ],
                                         "description": "Set if all displays should be printed in one line",
-                                        "default": "none"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Disable compact mode"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Disable compact mode (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "original",
+                                                "description": "Print original resolutions"
+                                            },
+                                            {
+                                                "const": "scaled",
+                                                "description": "Print scaled resolutions"
+                                            },
+                                            {
+                                                "const": "original-with-refresh-rate",
+                                                "description": "Print original resolutions with refresh rates"
+                                            },
+                                            {
+                                                "const": "scaled-with-refresh-rate",
+                                                "description": "Print scaled resolutions with refresh rates"
+                                            }
+                                        ],
+                                        "default": null
                                     },
                                     "preciseRefreshRate": {
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",
@@ -1914,12 +2200,25 @@
                                     },
                                     "order": {
                                         "description": "Set the order should be used when printing",
-                                        "enum": [
-                                            "none",
-                                            "asc",
-                                            "desc"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Use the default order"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Use the detected order (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "asc",
+                                                "description": "Sort by display name in ascending order"
+                                            },
+                                            {
+                                                "const": "desc",
+                                                "description": "Sort by display name in descending order"
+                                            }
                                         ],
-                                        "default": "none"
+                                        "default": null
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1959,11 +2258,17 @@
                                     },
                                     "hideFolders": {
                                         "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output\nDefault: /efi:/boot:/boot/efi"
+                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
+                                        "default": "/efi:/boot:/boot/efi:/boot/firmware"
                                     },
                                     "hideFS": {
                                         "type": "string",
                                         "description": "A colon separated file systems to hide from the disk output"
+                                    },
+                                    "showRegular": {
+                                        "type": "boolean",
+                                        "description": "Set if regular volume should be printed",
+                                        "default": true
                                     },
                                     "showExternal": {
                                         "type": "boolean",
@@ -1992,7 +2297,7 @@
                                     },
                                     "useAvailable": {
                                         "type": "boolean",
-                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
+                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes\nMay be required for macOS to display correct results",
                                         "default": false
                                     },
                                     "percent": {
@@ -2079,8 +2384,8 @@
                                     },
                                     "slowVersionDetection": {
                                         "type": "boolean",
-                                        "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.",
-                                        "default": "false"
+                                        "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.\nThis is only used as a fallback method. Please file a bug report if you encounter any issues.",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2115,10 +2420,19 @@
                                         "description": "Print DNS servers"
                                     },
                                     "showType": {
-                                        "enum": [
-                                            "ipv4",
-                                            "ipv6",
-                                            "both"
+                                        "oneOf": [
+                                            {
+                                                "const": "ipv4",
+                                                "description": "Show IPv4 addresses only"
+                                            },
+                                            {
+                                                "const": "ipv6",
+                                                "description": "Show IPv6 addresses only"
+                                            },
+                                            {
+                                                "const": "both",
+                                                "description": "Show both IPv4 and IPv6 addresses"
+                                            }
                                         ],
                                         "default": "both",
                                         "description": "Specify the type of DNS servers should be detected"
@@ -2264,31 +2578,62 @@
                                         "$ref": "#/$defs/temperature"
                                     },
                                     "driverSpecific": {
-                                        "description": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
+                                        "description": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)\nRequires the latest GPU drivers to be installed.",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "detectionMethod": {
                                         "description": "Force using a specified method to detect GPUs",
                                         "type": "string",
-                                        "enum": [
-                                            "auto",
-                                            "pci",
-                                            "vulkan",
-                                            "opencl",
-                                            "opengl"
+                                        "oneOf": [
+                                            {
+                                                "const": "auto",
+                                                "description": "Query platform-specific graphics APIs.\nRequires proper GPU drivers to be installed.\nSupported on Linux, FreeBSD, Windows and macOS"
+                                            },
+                                            {
+                                                "const": "pci",
+                                                "description": "Search PCI devices, which does not require GPU drivers to be installed.\nNot supported on Windows and macOS"
+                                            },
+                                            {
+                                                "const": "vulkan",
+                                                "description": "Use Vulkan API.\nSlow and requires proper Vulkan drivers to be installed.\nUsed for Android"
+                                            },
+                                            {
+                                                "const": "opencl",
+                                                "description": "Use OpenCL API.\nSlow and requires proper OpenCL drivers to be installed"
+                                            },
+                                            {
+                                                "const": "opengl",
+                                                "description": "Use OpenGL API.\nSlow and only detects one GPU.\nUsed for OpenBSD"
+                                            }
                                         ],
-                                        "default": "auto"
+                                        "default": "<varies-by-platform>"
                                     },
                                     "hideType": {
                                         "description": "Specify the type of GPUs should not be printed",
-                                        "enum": [
-                                            "integrated",
-                                            "discrete",
-                                            "unknown",
-                                            "none"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Do not hide any GPUs"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Do not hide any GPUs (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "integrated",
+                                                "description": "Hide integrated GPUs"
+                                            },
+                                            {
+                                                "const": "discrete",
+                                                "description": "Hide discrete GPUs"
+                                            },
+                                            {
+                                                "const": "unknown",
+                                                "description": "Hide unknown (unrecognized) GPUs"
+                                            }
                                         ],
-                                        "default": "none"
+                                        "default": null
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2547,7 +2892,7 @@
                                         "default": true
                                     },
                                     "showAllIps": {
-                                        "description": "Show all IPs bound to the same interface.\nBy default only the first IP is shown",
+                                        "description": "Show all IPs bound to the same interface.\nBy default only the firstly detected IP is shown",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -2566,7 +2911,7 @@
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "description": "Show ips that are used for default routing only",
+                                        "description": "Show ips that are used for default routing only\nDoesn't work on Android",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -2814,7 +3159,7 @@
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "description": "Show ips that are used for default routing only",
+                                        "description": "Show ips that are used for default routing only\nDoesn't work on Android",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -2825,7 +3170,7 @@
                                     },
                                     "waitTime": {
                                         "type": "integer",
-                                        "description": "Wait time (in ms). Disk I/O = (totalBytesEnd - totalBytesStart) / waitTime",
+                                        "description": "Wait time (in ms). Net I/O = (totalBytesEnd - totalBytesStart) / waitTime",
                                         "default": 200,
                                         "minimum": 1
                                     },
@@ -2895,10 +3240,19 @@
                                     },
                                     "library": {
                                         "description": "Set the OpenGL context creation library to use",
-                                        "enum": [
-                                            "auto",
-                                            "egl",
-                                            "glx"
+                                        "oneOf": [
+                                            {
+                                                "const": "auto",
+                                                "description": "Prefer EGL on *nix; prefer platform-specific implementation on others"
+                                            },
+                                            {
+                                                "const": "egl",
+                                                "description": "Use EGL, which works on TTY"
+                                            },
+                                            {
+                                                "const": "glx",
+                                                "description": "Use GLX, requires X session (*nix only)"
+                                            }
                                         ],
                                         "default": "auto"
                                     },
@@ -2967,44 +3321,51 @@
                                         "description": "List installed package managers and count of installed packages"
                                     },
                                     "disabled": {
-                                        "description": "List of package managers to be disabled when detecting",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "am",
-                                                "apk",
-                                                "brew",
-                                                "choco",
-                                                "dpkg",
-                                                "emerge",
-                                                "eopkg",
-                                                "flatpak",
-                                                "guix",
-                                                "hpkg",
-                                                "linglong",
-                                                "lpkg",
-                                                "lpkgbuild",
-                                                "macports",
-                                                "mport",
-                                                "nix",
-                                                "opkg",
-                                                "pacman",
-                                                "pacstall",
-                                                "paludis",
-                                                "pisi",
-                                                "pkg",
-                                                "pkgtool",
-                                                "qi",
-                                                "rpm",
-                                                "scoop",
-                                                "snap",
-                                                "sorcery",
-                                                "winget",
-                                                "xbps"
-                                            ],
-                                            "uniqueItems": true
-                                        },
+                                        "oneOf": [
+                                            {
+                                                "description": "List of package managers to be disabled when detecting\nWarning: Some detection methods can be very slow.",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "am",
+                                                        "apk",
+                                                        "brew",
+                                                        "choco",
+                                                        "dpkg",
+                                                        "emerge",
+                                                        "eopkg",
+                                                        "flatpak",
+                                                        "guix",
+                                                        "hpkg",
+                                                        "linglong",
+                                                        "lpkg",
+                                                        "lpkgbuild",
+                                                        "macports",
+                                                        "mport",
+                                                        "nix",
+                                                        "opkg",
+                                                        "pacman",
+                                                        "pacstall",
+                                                        "paludis",
+                                                        "pisi",
+                                                        "pkg",
+                                                        "pkgtool",
+                                                        "rpm",
+                                                        "scoop",
+                                                        "snap",
+                                                        "sorcery",
+                                                        "winget",
+                                                        "xbps"
+                                                    ],
+                                                    "uniqueItems": true
+                                                }
+                                            },
+                                            {
+                                                "description": "Enable all package managers",
+                                                "type": "null"
+                                            }
+                                        ],
                                         "default": ["winget"]
                                     },
                                     "combined": {
@@ -3218,10 +3579,10 @@
                                         "default": "http://ipinfo.io/ip"
                                     },
                                     "timeout": {
-                                        "description": "Time in milliseconds to wait for the public ip server to respond",
+                                        "description": "Time in milliseconds to wait for the public ip server to respond.\n0 to disable timeout",
                                         "type": "integer",
                                         "minimum": 0,
-                                        "default": "disabled (0)"
+                                        "default": 0
                                     },
                                     "ipv6": {
                                         "description": "Whether to use IPv6 for public IP detection server",
@@ -3324,10 +3685,19 @@
                                     "soundType": {
                                         "description": "Set what type of sound devices should be printed",
                                         "type": "string",
-                                        "enum": [
-                                            "main",
-                                            "active",
-                                            "all"
+                                        "oneOf": [
+                                            {
+                                                "const": "main",
+                                                "description": "Print only main sound devices"
+                                            },
+                                            {
+                                                "const": "active",
+                                                "description": "Print only active sound devices"
+                                            },
+                                            {
+                                                "const": "all",
+                                                "description": "Print all sound devices"
+                                            }
                                         ],
                                         "default": "main"
                                     },
@@ -3825,14 +4195,14 @@
                                         "const": "weather"
                                     },
                                     "location": {
-                                        "description": "The location to display",
+                                        "description": "The location to display\nMust be URI encoded (e.g., a whitespace must be encoded as \"+\")",
                                         "type": "string"
                                     },
                                     "timeout": {
-                                        "description": "Time in milliseconds to wait for the weather server to respond",
+                                        "description": "Time in milliseconds to wait for the weather server to respond.\n0 to disable timeout",
                                         "type": "integer",
                                         "minimum": 0,
-                                        "default": "disabled (0)"
+                                        "default": 0
                                     },
                                     "outputFormat": {
                                         "description": "The output weather format to be used (must be URI encoded)",

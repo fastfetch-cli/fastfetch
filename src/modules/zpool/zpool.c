@@ -1,6 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/zpool/zpool.h"
 #include "modules/zpool/zpool.h"
 #include "util/stringUtils.h"
@@ -26,10 +27,10 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(result->used, &usedPretty);
+    ffSizeAppendNum(result->used, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(result->total, &totalPretty);
+    ffSizeAppendNum(result->total, &totalPretty);
 
     double bytesPercentage = result->total > 0 ? (double) result->used / (double) result->total * 100.0 : 0;
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -106,36 +107,19 @@ void ffPrintZpool(FFZpoolOptions* options)
     }
 }
 
-bool ffParseZpoolCommandOptions(FFZpoolOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_ZPOOL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -183,7 +167,6 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_ZPOOL_MODULE_NAME,
     .description = "Print ZFS storage pools",
-    .parseCommandOptions = (void*) ffParseZpoolCommandOptions,
     .parseJsonObject = (void*) ffParseZpoolJsonObject,
     .printModule = (void*) ffPrintZpool,
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,

@@ -1,5 +1,6 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
+#include "common/size.h"
 #include "detection/displayserver/displayserver.h"
 #include "modules/display/display.h"
 #include "util/stringUtils.h"
@@ -51,10 +52,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
             {
                 if (result->refreshRate > 0)
                 {
+                    const char* space = instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "";
                     if (options->preciseRefreshRate)
-                        ffStrbufAppendF(&buffer, " @ %gHz", result->refreshRate);
+                        ffStrbufAppendF(&buffer, " @ %g%sHz", result->refreshRate, space);
                     else
-                        ffStrbufAppendF(&buffer, " @ %iHz", (uint32_t) (result->refreshRate + 0.5));
+                        ffStrbufAppendF(&buffer, " @ %i%sHz", (uint32_t) (result->refreshRate + 0.5), space);
                 }
                 ffStrbufAppendS(&buffer, ", ");
             }
@@ -108,10 +110,11 @@ void ffPrintDisplay(FFDisplayOptions* options)
 
             if(result->refreshRate > 0)
             {
+                const char* space = instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ";
                 if(options->preciseRefreshRate)
-                    ffStrbufAppendF(&buffer, " @ %g Hz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0);
+                    ffStrbufAppendF(&buffer, " @ %g%sHz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0, space);
                 else
-                    ffStrbufAppendF(&buffer, " @ %i Hz", (uint32_t) (result->refreshRate + 0.5));
+                    ffStrbufAppendF(&buffer, " @ %i%sHz", (uint32_t) (result->refreshRate + 0.5), space);
             }
 
             if(
@@ -214,100 +217,66 @@ void ffPrintDisplay(FFDisplayOptions* options)
     }
 }
 
-bool ffParseDisplayCommandOptions(FFDisplayOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DISPLAY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "compact-type"))
-    {
-        options->compactType = (FFDisplayCompactType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-            { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-            { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-            { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-            { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-            {},
-        });
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "precise-refresh-rate"))
-    {
-        options->preciseRefreshRate = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "order"))
-    {
-        options->order = (FFDisplayOrder) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "asc", FF_DISPLAY_ORDER_ASC },
-            { "desc", FF_DISPLAY_ORDER_DESC },
-            { "none", FF_DISPLAY_ORDER_NONE },
-            {},
-        });
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "compactType"))
+        if (unsafe_yyjson_equals_str(key, "compactType"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
-                { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
-                { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
-                { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-                { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
-                {},
-            });
-            if (error)
-                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+            if (yyjson_is_null(val))
+                options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
             else
-                options->compactType = (FFDisplayCompactType) value;
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "none", FF_DISPLAY_COMPACT_TYPE_NONE },
+                    { "original", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT },
+                    { "scaled", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT },
+                    { "original-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+                    { "scaled-with-refresh-rate", FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                    options->compactType = (FFDisplayCompactType) value;
+            }
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "preciseRefreshRate"))
+        if (unsafe_yyjson_equals_str(key, "preciseRefreshRate"))
         {
             options->preciseRefreshRate = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "order"))
+        if (unsafe_yyjson_equals_str(key, "order"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "asc", FF_DISPLAY_ORDER_ASC },
-                { "desc", FF_DISPLAY_ORDER_DESC },
-                { "none", FF_DISPLAY_ORDER_NONE },
-                {},
-            });
-            if (error)
-                ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+            if (yyjson_is_null(val))
+                options->order = FF_DISPLAY_ORDER_NONE;
             else
-                options->order = (FFDisplayOrder) value;
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "asc", FF_DISPLAY_ORDER_ASC },
+                    { "desc", FF_DISPLAY_ORDER_DESC },
+                    { "none", FF_DISPLAY_ORDER_NONE },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                    options->order = (FFDisplayOrder) value;
+            }
             continue;
         }
 
-        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -436,7 +405,6 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_DISPLAY_MODULE_NAME,
     .description = "Print resolutions, refresh rates, etc",
-    .parseCommandOptions = (void*) ffParseDisplayCommandOptions,
     .parseJsonObject = (void*) ffParseDisplayJsonObject,
     .printModule = (void*) ffPrintDisplay,
     .generateJsonResult = (void*) ffGenerateDisplayJsonResult,

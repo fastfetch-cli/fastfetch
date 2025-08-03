@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/swap/swap.h"
 #include "modules/swap/swap.h"
 #include "util/stringUtils.h"
@@ -28,10 +28,10 @@ void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage)
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(storage->bytesUsed, &usedPretty);
+    ffSizeAppendNum(storage->bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(storage->bytesTotal, &totalPretty);
+    ffSizeAppendNum(storage->bytesTotal, &totalPretty);
 
     double percentage = storage->bytesTotal == 0
         ? 0
@@ -131,48 +131,25 @@ void ffPrintSwap(FFSwapOptions* options)
     }
 }
 
-bool ffParseSwapCommandOptions(FFSwapOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SWAP_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "separate"))
-    {
-        options->separate = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "separate"))
+        if (unsafe_yyjson_equals_str(key, "separate"))
         {
             options->separate = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -215,7 +192,6 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_SWAP_MODULE_NAME,
     .description = "Print swap (paging file) space usage",
-    .parseCommandOptions = (void*) ffParseSwapCommandOptions,
     .parseJsonObject = (void*) ffParseSwapJsonObject,
     .printModule = (void*) ffPrintSwap,
     .generateJsonResult = (void*) ffGenerateSwapJsonResult,

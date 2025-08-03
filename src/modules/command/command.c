@@ -43,66 +43,34 @@ void ffPrintCommand(FFCommandOptions* options)
     }
 }
 
-bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_COMMAND_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if(ffStrEqualsIgnCase(subKey, "shell"))
-    {
-        ffOptionParseString(key, value, &options->shell);
-        return true;
-    }
-
-    if(ffStrEqualsIgnCase(subKey, "param"))
-    {
-        ffOptionParseString(key, value, &options->param);
-        return true;
-    }
-
-    if(ffStrEqualsIgnCase(subKey, "text"))
-    {
-        ffOptionParseString(key, value, &options->text);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "shell"))
+        if (unsafe_yyjson_equals_str(key, "shell"))
         {
-            ffStrbufSetS(&options->shell, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->shell, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "param"))
+        if (unsafe_yyjson_equals_str(key, "param"))
         {
-            ffStrbufSetS(&options->param, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->param, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "text"))
+        if (unsafe_yyjson_equals_str(key, "text"))
         {
-            ffStrbufSetS(&options->text, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->text, val);
             continue;
         }
 
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -155,7 +123,6 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_COMMAND_MODULE_NAME,
     .description = "Run custom shell scripts",
-    .parseCommandOptions = (void*) ffParseCommandCommandOptions,
     .parseJsonObject = (void*) ffParseCommandJsonObject,
     .printModule = (void*) ffPrintCommand,
     .generateJsonResult = (void*) ffGenerateCommandJsonResult,

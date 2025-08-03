@@ -2,6 +2,7 @@
 #include "common/jsonconfig.h"
 #include "common/parsing.h"
 #include "common/temps.h"
+#include "common/frequency.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
 #include "util/stringUtils.h"
@@ -77,7 +78,7 @@ void ffPrintCPU(FFCPUOptions* options)
             if(freq > 0)
             {
                 ffStrbufAppendS(&str, " @ ");
-                ffParseFrequency(freq, &str);
+                ffFreqAppendNum(freq, &str);
             }
 
             if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
@@ -91,9 +92,9 @@ void ffPrintCPU(FFCPUOptions* options)
         else
         {
             FF_STRBUF_AUTO_DESTROY freqBase = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyBase, &freqBase);
+            ffFreqAppendNum(cpu.frequencyBase, &freqBase);
             FF_STRBUF_AUTO_DESTROY freqMax = ffStrbufCreate();
-            ffParseFrequency(cpu.frequencyMax, &freqMax);
+            ffFreqAppendNum(cpu.frequencyMax, &freqMax);
 
             FF_STRBUF_AUTO_DESTROY tempStr = ffStrbufCreate();
             ffTempsAppendNum(cpu.temperature, &tempStr, options->tempConfig, &options->moduleArgs);
@@ -116,54 +117,31 @@ void ffPrintCPU(FFCPUOptions* options)
     ffStrbufDestroy(&cpu.vendor);
 }
 
-bool ffParseCPUCommandOptions(FFCPUOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CPU_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "show-pe-core-count"))
-    {
-        options->showPeCoreCount = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "freqNdigits"))
+        if (unsafe_yyjson_equals_str(key, "freqNdigits"))
         {
             ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "modules.CPU.freqNdigits has been moved to display.freq.ndigits");
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showPeCoreCount"))
+        if (unsafe_yyjson_equals_str(key, "showPeCoreCount"))
         {
             options->showPeCoreCount = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -237,7 +215,6 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_CPU_MODULE_NAME,
     .description = "Print CPU name, frequency, etc",
-    .parseCommandOptions = (void*) ffParseCPUCommandOptions,
     .parseJsonObject = (void*) ffParseCPUJsonObject,
     .printModule = (void*) ffPrintCPU,
     .generateJsonResult = (void*) ffGenerateCPUJsonResult,

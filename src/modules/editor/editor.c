@@ -54,30 +54,16 @@ void ffPrintEditor(FFEditorOptions* options)
     ffStrbufDestroy(&result.version);
 }
 
-bool ffParseEditorCommandOptions(FFEditorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_EDITOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -121,7 +107,6 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
-    .parseCommandOptions = (void*) ffParseEditorCommandOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
     .printModule = (void*) ffPrintEditor,
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,
@@ -130,7 +115,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Type (Visual / Editor)", "type"},
         {"Name", "name"},
         {"Exe name of real path", "exe-name"},
-        {"Full path of real path", "full-path"},
+        {"Full path of real path", "path"},
         {"Version", "version"},
     }))
 };

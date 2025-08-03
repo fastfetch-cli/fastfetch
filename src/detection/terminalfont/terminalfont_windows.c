@@ -23,16 +23,14 @@ static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* 
 
     if (name->length == 0)
     {
-        yyjson_val* pface = yyjson_obj_get(font, "face");
-        if(yyjson_is_str(pface))
-            ffStrbufAppendS(name, unsafe_yyjson_get_str(pface));
+        ffStrbufAppendJsonVal(name, yyjson_obj_get(font, "face"));
     }
 
     if (*size < 0)
     {
         yyjson_val* psize = yyjson_obj_get(font, "size");
         if (yyjson_is_num(psize))
-            *size = yyjson_get_num(psize);
+            *size = unsafe_yyjson_get_num(psize);
     }
     return NULL;
 }

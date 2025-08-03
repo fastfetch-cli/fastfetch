@@ -74,7 +74,10 @@ void ffPrintWifi(FFWifiOptions* options)
                         ffStrbufAppend(&buffer, &item->conn.protocol);
                     }
                     if (bandStr[0])
-                        ffStrbufAppendF(&buffer, " - %s GHz", bandStr);
+                    {
+                        ffStrbufAppendF(&buffer, " - %s%sGHz", bandStr,
+                            instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ");
+                    }
                     if(item->conn.security.length)
                     {
                         ffStrbufAppendS(&buffer, " - ");
@@ -133,36 +136,19 @@ void ffPrintWifi(FFWifiOptions* options)
     }
 }
 
-bool ffParseWifiCommandOptions(FFWifiOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WIFI_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -223,7 +209,6 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WIFI_MODULE_NAME,
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
-    .parseCommandOptions = (void*) ffParseWifiCommandOptions,
     .parseJsonObject = (void*) ffParseWifiJsonObject,
     .printModule = (void*) ffPrintWifi,
     .generateJsonResult = (void*) ffGenerateWifiJsonResult,

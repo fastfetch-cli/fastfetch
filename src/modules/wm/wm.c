@@ -63,42 +63,22 @@ void ffPrintWM(FFWMOptions* options)
     }
 }
 
-bool ffParseWMCommandOptions(FFWMOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "detect-plugin"))
-    {
-        options->detectPlugin = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseWMJsonObject(FFWMOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "detectPlugin"))
+        if (unsafe_yyjson_equals_str(key, "detectPlugin"))
         {
             options->detectPlugin = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_WM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -142,7 +122,6 @@ void ffGenerateWMJsonResult(FF_MAYBE_UNUSED FFWMOptions* options, yyjson_mut_doc
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WM_MODULE_NAME,
     .description = "Print window manager name and version",
-    .parseCommandOptions = (void*) ffParseWMCommandOptions,
     .parseJsonObject = (void*) ffParseWMJsonObject,
     .printModule = (void*) ffPrintWM,
     .generateJsonResult = (void*) ffGenerateWMJsonResult,

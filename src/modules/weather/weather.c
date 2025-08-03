@@ -29,66 +29,34 @@ void ffPrintWeather(FFWeatherOptions* options)
     }
 }
 
-bool ffParseWeatherCommandOptions(FFWeatherOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WEATHER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "location"))
-    {
-        ffOptionParseString(key, value, &options->location);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "output-format"))
-    {
-        ffOptionParseString(key, value, &options->outputFormat);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "timeout"))
-    {
-        options->timeout = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "location"))
+        if (unsafe_yyjson_equals_str(key, "location"))
         {
-            ffStrbufSetS(&options->location, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->location, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "outputFormat"))
+        if (unsafe_yyjson_equals_str(key, "outputFormat"))
         {
-            ffStrbufSetS(&options->outputFormat, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->outputFormat, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "timeout"))
+        if (unsafe_yyjson_equals_str(key, "timeout"))
         {
             options->timeout = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -126,7 +94,6 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_WEATHER_MODULE_NAME,
     .description = "Print weather information",
-    .parseCommandOptions = (void*) ffParseWeatherCommandOptions,
     .parseJsonObject = (void*) ffParseWeatherJsonObject,
     .printModule = (void*) ffPrintWeather,
     .generateJsonResult = (void*) ffGenerateWeatherJsonResult,

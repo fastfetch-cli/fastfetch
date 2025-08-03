@@ -18,13 +18,15 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
     {
         const char* key = yyjson_get_str(key_);
 
-        if (ffStrEqualsIgnCase(key, "thread") || ffStrEqualsIgnCase(key, "multithreading"))
+        if (ffStrEqualsIgnCase(key, "thread"))
             options->multithreading = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "processingTimeout"))
             options->processingTimeout = (int32_t) yyjson_get_int(val);
         else if (ffStrEqualsIgnCase(key, "preRun"))
         {
-            if (system(yyjson_get_str(val)) < 0)
+            if (!yyjson_is_str(val))
+                return "general.preRun must be a string";
+            if (system(unsafe_yyjson_get_str(val)) < 0)
                 return "Failed to execute preRun command";
         }
         else if (ffStrEqualsIgnCase(key, "detectVersion"))
@@ -32,7 +34,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
 
         #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
         else if (ffStrEqualsIgnCase(key, "playerName"))
-            ffStrbufSetS(&options->playerName, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->playerName, val);
         else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
         {
             if (yyjson_is_str(val))

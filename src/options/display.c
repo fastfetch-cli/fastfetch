@@ -48,7 +48,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
         else if (ffStrEqualsIgnCase(key, "hideCursor"))
             options->hideCursor = yyjson_get_bool(val);
         else if (ffStrEqualsIgnCase(key, "separator"))
-            ffStrbufSetS(&options->keyValueSeparator, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->keyValueSeparator, val);
         else if (ffStrEqualsIgnCase(key, "color"))
         {
             if (yyjson_is_str(val))
@@ -58,26 +58,46 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
             else if (yyjson_is_obj(val))
             {
-                const char* colorKeys = yyjson_get_str(yyjson_obj_get(val, "keys"));
+                yyjson_val* colorKeys = yyjson_obj_get(val, "keys");
                 if (colorKeys)
-                    ffOptionParseColor(colorKeys, &options->colorKeys);
-                const char* colorTitle = yyjson_get_str(yyjson_obj_get(val, "title"));
+                    ffOptionParseColor(yyjson_get_str(colorKeys), &options->colorKeys);
+                yyjson_val* colorTitle = yyjson_obj_get(val, "title");
                 if (colorTitle)
-                    ffOptionParseColor(colorTitle, &options->colorTitle);
-                const char* colorOutput = yyjson_get_str(yyjson_obj_get(val, "output"));
+                    ffOptionParseColor(yyjson_get_str(colorTitle), &options->colorTitle);
+                yyjson_val* colorOutput = yyjson_obj_get(val, "output");
                 if (colorOutput)
-                    ffOptionParseColor(colorOutput, &options->colorOutput);
-                const char* colorSeparator = yyjson_get_str(yyjson_obj_get(val, "separator"));
+                    ffOptionParseColor(yyjson_get_str(colorOutput), &options->colorOutput);
+                yyjson_val* colorSeparator = yyjson_obj_get(val, "separator");
                 if (colorSeparator)
-                    ffOptionParseColor(colorSeparator, &options->colorSeparator);
+                    ffOptionParseColor(yyjson_get_str(colorSeparator), &options->colorSeparator);
             }
             else
                 return "display.color must be either a string or an object";
         }
         else if (ffStrEqualsIgnCase(key, "brightColor"))
             options->brightColor = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "binaryPrefix"))
-            return "`display.binaryPrefix` has been renamed to `display.size.binaryPrefix`. Sorry for another break change.";
+        else if (ffStrEqualsIgnCase(key, "duration"))
+        {
+            if (!yyjson_is_obj(val))
+                return "display.duration must be an object";
+
+            yyjson_val* abbreviation = yyjson_obj_get(val, "abbreviation");
+            if (abbreviation) options->durationAbbreviation = yyjson_get_bool(abbreviation);
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
+        }
         else if (ffStrEqualsIgnCase(key, "size"))
         {
             if (!yyjson_is_obj(val))
@@ -119,6 +139,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->sizeNdigits = (uint8_t) yyjson_get_uint(ndigits);
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         }
         else if (ffStrEqualsIgnCase(key, "temp"))
         {
@@ -162,6 +196,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 yyjson_val* red = yyjson_obj_get(color, "red");
                 if (red) ffOptionParseColor(yyjson_get_str(red), &options->tempColorRed);
             }
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         }
         else if (ffStrEqualsIgnCase(key, "percent"))
         {
@@ -193,26 +241,117 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 yyjson_val* red = yyjson_obj_get(color, "red");
                 if (red) ffOptionParseColor(yyjson_get_str(red), &options->percentColorRed);
             }
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
+
+            yyjson_val* width = yyjson_obj_get(val, "width");
+            if (width) options->percentWidth = (uint8_t) yyjson_get_uint(width);
         }
         else if (ffStrEqualsIgnCase(key, "bar"))
         {
             if (yyjson_is_obj(val))
             {
-                const char* charElapsed = yyjson_get_str(yyjson_obj_get(val, "charElapsed"));
-                if (charElapsed)
-                    ffStrbufSetS(&options->barCharElapsed, charElapsed);
+                yyjson_val* char_ = yyjson_obj_get(val, "char");
+                if (char_)
+                {
+                    if (!yyjson_is_obj(char_)) return "display.bar.char must be an object";
 
-                const char* charTotal = yyjson_get_str(yyjson_obj_get(val, "charTotal"));
-                if (charTotal)
-                    ffStrbufSetS(&options->barCharTotal, charTotal);
+                    yyjson_val* charElapsed = yyjson_obj_get(char_, "elapsed");
+                    if (charElapsed)
+                        ffStrbufSetJsonVal(&options->barCharElapsed, charElapsed);
 
-                yyjson_val* borderLeft = yyjson_obj_get(val, "borderLeft");
-                if (borderLeft)
-                    ffStrbufSetS(&options->barBorderLeft, yyjson_get_str(borderLeft));
+                    yyjson_val* charTotal = yyjson_obj_get(char_, "total");
+                    if (charTotal)
+                        ffStrbufSetJsonVal(&options->barCharTotal, charTotal);
+                }
+                else
+                {
+                    yyjson_val* charElapsed = yyjson_obj_get(val, "charElapsed");
+                    if (charElapsed)
+                        return "display.bar.charElapsed has been renamed to display.bar.char.elapsed.";
 
-                yyjson_val* borderRight = yyjson_obj_get(val, "borderRight");
-                if (borderRight)
-                    ffStrbufSetS(&options->barBorderRight, yyjson_get_str(borderRight));
+                    yyjson_val* charTotal = yyjson_obj_get(val, "charTotal");
+                    if (charTotal)
+                        return "display.bar.charTotal has been renamed to display.bar.char.total.";
+                }
+
+                yyjson_val* border = yyjson_obj_get(val, "border");
+                if (border)
+                {
+                    if (yyjson_is_null(border))
+                    {
+                        ffStrbufClear(&options->barBorderLeft);
+                        ffStrbufClear(&options->barBorderRight);
+                        ffStrbufClear(&options->barBorderLeftElapsed);
+                        ffStrbufClear(&options->barBorderRightElapsed);
+                    }
+                    else
+                    {
+                        if (!yyjson_is_obj(border)) return "display.bar.border must be an object";
+
+                        yyjson_val* borderLeft = yyjson_obj_get(border, "left");
+                        if (borderLeft)
+                            ffStrbufSetJsonVal(&options->barBorderLeft, borderLeft);
+
+                        yyjson_val* borderRight = yyjson_obj_get(border, "right");
+                        if (borderRight)
+                            ffStrbufSetJsonVal(&options->barBorderRight, borderRight);
+
+                        yyjson_val* borderLeftElapsed = yyjson_obj_get(border, "leftElapsed");
+                        if (borderLeftElapsed)
+                            ffStrbufSetJsonVal(&options->barBorderLeftElapsed, borderLeftElapsed);
+
+                        yyjson_val* borderRightElapsed = yyjson_obj_get(border, "rightElapsed");
+                        if (borderRightElapsed)
+                            ffStrbufSetJsonVal(&options->barBorderRightElapsed, borderRightElapsed);
+                    }
+                }
+                else
+                {
+                    yyjson_val* borderLeft = yyjson_obj_get(val, "borderLeft");
+                    if (borderLeft)
+                        return "display.bar.borderLeft has been renamed to display.bar.border.left.";
+
+                    yyjson_val* borderRight = yyjson_obj_get(val, "borderRight");
+                    if (borderRight)
+                        return "display.bar.borderRight has been renamed to display.bar.border.right.";
+                }
+
+                yyjson_val* color = yyjson_obj_get(val, "color");
+                if (color)
+                {
+                    if (yyjson_is_null(color))
+                    {
+                        ffStrbufClear(&options->barColorElapsed);
+                        ffStrbufClear(&options->barColorTotal);
+                        ffStrbufClear(&options->barColorBorder);
+                    }
+                    else
+                    {
+                        if (!yyjson_is_obj(color)) return "display.bar.color must be an object";
+
+                        yyjson_val* colorElapsed = yyjson_obj_get(color, "elapsed");
+                        if (colorElapsed) ffOptionParseColor(yyjson_get_str(colorElapsed), &options->barColorElapsed);
+
+                        yyjson_val* colorTotal = yyjson_obj_get(color, "total");
+                        if (colorTotal) ffOptionParseColor(yyjson_get_str(colorTotal), &options->barColorTotal);
+
+                        yyjson_val* colorBorder = yyjson_obj_get(color, "border");
+                        if (colorBorder) ffOptionParseColor(yyjson_get_str(colorBorder), &options->barColorBorder);
+                    }
+                }
 
                 yyjson_val* width = yyjson_obj_get(val, "width");
                 if (width)
@@ -279,7 +418,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* item;
             size_t idx, max;
             yyjson_arr_foreach(val, idx, max, item)
-                ffStrbufInitS(ffListAdd(&options->constants), yyjson_get_str(item));
+                ffStrbufInitJsonVal(ffListAdd(&options->constants), item);
         }
         else if (ffStrEqualsIgnCase(key, "freq"))
         {
@@ -288,6 +427,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
             if (ndigits) options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
+
+            yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
+            if (spaceBeforeUnit)
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(spaceBeforeUnit, &value, (FFKeyValuePair[]) {
+                    { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                    { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                    { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                    {},
+                });
+                if (error) return error;
+                options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
+            }
         }
         else
             return "Unknown display property";
@@ -403,6 +556,23 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         fprintf(stderr, "--binary-prefix has been renamed to --size-binary-prefix\n");
         exit(477);
     }
+    else if(ffStrStartsWithIgnCase(key, "--duration-"))
+    {
+        const char* subkey = key + strlen("--duration-");
+        if(ffStrEqualsIgnCase(subkey, "abbreviation"))
+            options->durationAbbreviation = ffOptionParseBoolean(value);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
+        else
+            return false;
+    }
     else if(ffStrStartsWithIgnCase(key, "--size-"))
     {
         const char* subkey = key + strlen("--size-");
@@ -430,6 +600,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
                 { "ZB", 7 },
                 { "YB", 8 },
                 {}
+            });
+        }
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
             });
         }
         else
@@ -460,6 +639,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseColor(value, &options->tempColorYellow);
         else if(ffStrEqualsIgnCase(subkey, "color-red"))
             ffOptionParseColor(value, &options->tempColorRed);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -476,6 +664,17 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseColor(value, &options->percentColorYellow);
         else if(ffStrEqualsIgnCase(subkey, "color-red"))
             ffOptionParseColor(value, &options->percentColorRed);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->percentSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
+        else if(ffStrEqualsIgnCase(subkey, "width"))
+            options->percentWidth = (uint8_t) ffOptionParseUInt32(key, value);
         else
             return false;
     }
@@ -496,6 +695,16 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
             ffOptionParseString(key, value, &options->barBorderLeft);
         else if(ffStrEqualsIgnCase(subkey, "border-right"))
             ffOptionParseString(key, value, &options->barBorderRight);
+        else if(ffStrEqualsIgnCase(subkey, "border-left-elapsed"))
+            ffOptionParseString(key, value, &options->barBorderLeftElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "border-right-elapsed"))
+            ffOptionParseString(key, value, &options->barBorderRightElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "color-elapsed"))
+            ffOptionParseColor(value, &options->barColorElapsed);
+        else if(ffStrEqualsIgnCase(subkey, "color-total"))
+            ffOptionParseColor(value, &options->barColorTotal);
+        else if(ffStrEqualsIgnCase(subkey, "color-border"))
+            ffOptionParseColor(value, &options->barColorBorder);
         else
             return false;
     }
@@ -504,6 +713,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         const char* subkey = key + strlen("--freq-");
         if(ffStrEqualsIgnCase(subkey, "ndigits"))
             options->freqNdigits = (int8_t) ffOptionParseInt32(key, value);
+        else if(ffStrEqualsIgnCase(subkey, "space-before-unit"))
+        {
+            options->freqSpaceBeforeUnit = (FFSpaceBeforeUnitType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+                { "default", FF_SPACE_BEFORE_UNIT_DEFAULT },
+                { "always", FF_SPACE_BEFORE_UNIT_ALWAYS },
+                { "never", FF_SPACE_BEFORE_UNIT_NEVER },
+                {},
+            });
+        }
         else
             return false;
     }
@@ -531,10 +749,13 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->debugMode = false;
     #endif
 
+    options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->hideCursor = false;
     options->sizeBinaryPrefix = FF_SIZE_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
     options->sizeMaxPrefix = UINT8_MAX;
+    options->sizeSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
+
     options->stat = -1;
     options->noBuffer = false;
     options->keyWidth = 0;
@@ -546,18 +767,31 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     ffStrbufInitStatic(&options->tempColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->tempColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->tempColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    options->tempSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
 
     ffStrbufInitStatic(&options->barCharElapsed, "■");
     ffStrbufInitStatic(&options->barCharTotal, "-");
     ffStrbufInitStatic(&options->barBorderLeft, "[ ");
     ffStrbufInitStatic(&options->barBorderRight, " ]");
+    ffStrbufInit(&options->barBorderLeftElapsed);
+    ffStrbufInit(&options->barBorderRightElapsed);
+    ffStrbufInitStatic(&options->barColorElapsed, "auto");
+    ffStrbufInitStatic(&options->barColorTotal, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
+    ffStrbufInitStatic(&options->barColorBorder, instance.state.terminalLightTheme ? FF_COLOR_FG_WHITE : FF_COLOR_FG_LIGHT_WHITE);
     options->barWidth = 10;
+
+    options->durationAbbreviation = false;
+    options->durationSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->percentType = 9;
     options->percentNdigits = 0;
     ffStrbufInitStatic(&options->percentColorGreen, FF_COLOR_FG_GREEN);
     ffStrbufInitStatic(&options->percentColorYellow, instance.state.terminalLightTheme ? FF_COLOR_FG_YELLOW : FF_COLOR_FG_LIGHT_YELLOW);
     ffStrbufInitStatic(&options->percentColorRed, instance.state.terminalLightTheme ? FF_COLOR_FG_RED : FF_COLOR_FG_LIGHT_RED);
+    options->percentSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
+    options->percentWidth = 0;
+
     options->freqNdigits = 2;
+    options->freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
     options->fractionNdigits = -1;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));

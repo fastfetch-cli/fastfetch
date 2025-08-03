@@ -1,3 +1,4 @@
+#include "common/duration.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/time.h"
@@ -18,13 +19,12 @@ void ffPrintUptime(FFUptimeOptions* options)
     }
 
     uint64_t uptime = result.uptime;
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+    ffDurationAppendNum((uptime + 500) / 1000, &buffer);
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        ffParseDuration((uptime + 500) / 1000, &buffer);
-
         ffStrbufPutTo(&buffer, stdout);
     }
     else
@@ -51,34 +51,21 @@ void ffPrintUptime(FFUptimeOptions* options)
             FF_FORMAT_ARG(age.years, "years"),
             FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
             FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
+            FF_FORMAT_ARG(buffer, "formatted")
         }));
     }
 }
 
-bool ffParseUptimeCommandOptions(FFUptimeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_UPTIME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_UPTIME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -109,7 +96,6 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_UPTIME_MODULE_NAME,
     .description = "Print how long system has been running",
-    .parseCommandOptions = (void*) ffParseUptimeCommandOptions,
     .parseJsonObject = (void*) ffParseUptimeJsonObject,
     .printModule = (void*) ffPrintUptime,
     .generateJsonResult = (void*) ffGenerateUptimeJsonResult,
@@ -124,6 +110,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Years integer after boot", "years"},
         {"Days of year after boot", "days-of-year"},
         {"Years fraction after boot", "years-fraction"},
+        {"Formatted uptime", "formatted"},
     }))
 };
 

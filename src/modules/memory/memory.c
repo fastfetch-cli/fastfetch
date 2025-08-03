@@ -1,7 +1,7 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "detection/memory/memory.h"
 #include "modules/memory/memory.h"
 #include "util/stringUtils.h"
@@ -18,10 +18,10 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesUsed, &usedPretty);
+    ffSizeAppendNum(storage.bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(storage.bytesTotal, &totalPretty);
+    ffSizeAppendNum(storage.bytesTotal, &totalPretty);
 
     double percentage = storage.bytesTotal == 0
         ? 0
@@ -71,36 +71,19 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
 }
 
-bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MEMORY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -133,7 +116,6 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
 static FFModuleBaseInfo ffModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
     .description = "Print system memory usage info",
-    .parseCommandOptions = (void*) ffParseMemoryCommandOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,
     .printModule = (void*) ffPrintMemory,
     .generateJsonResult = (void*) ffGenerateMemoryJsonResult,
