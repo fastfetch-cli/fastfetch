@@ -112,6 +112,16 @@ void ffGenerateMonitorJsonResult(FF_MAYBE_UNUSED FFMonitorOptions* options, yyjs
     yyjson_mut_obj_add_str(doc, module, "error", "Monitor module is an alias of Display module");
 }
 
+void ffInitMonitorOptions(FFMonitorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰹑");
+}
+
+void ffDestroyMonitorOptions(FFMonitorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffMonitorModuleInfo = {
     .name = FF_MONITOR_MODULE_NAME,
     .description = "Alias of Display module",
@@ -136,14 +146,3 @@ FFModuleBaseInfo ffMonitorModuleInfo = {
         {"True if the display is HDR compatible", "hdr-compatible"},
     }))
 };
-
-void ffInitMonitorOptions(FFMonitorOptions* options)
-{
-    options->moduleInfo = ffMonitorModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰹑");
-}
-
-void ffDestroyMonitorOptions(FFMonitorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

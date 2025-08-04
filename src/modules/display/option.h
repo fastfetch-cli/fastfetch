@@ -1,7 +1,5 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef enum __attribute__((__packed__)) FFDisplayCompactType
@@ -22,10 +20,11 @@ typedef enum __attribute__((__packed__)) FFDisplayOrder
 
 typedef struct FFDisplayOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFDisplayCompactType compactType;
     bool preciseRefreshRate;
     FFDisplayOrder order;
 } FFDisplayOptions;
+
+static_assert(sizeof(FFDisplayOptions) <= FF_OPTION_MAX_SIZE, "FFDisplayOptions size exceeds maximum allowed size");

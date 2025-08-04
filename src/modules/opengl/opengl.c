@@ -127,6 +127,18 @@ void ffGenerateOpenGLJsonResult(FF_MAYBE_UNUSED FFOpenGLOptions* options, yyjson
     ffStrbufDestroy(&result.library);
 }
 
+void ffInitOpenGLOptions(FFOpenGLOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->library = FF_OPENGL_LIBRARY_AUTO;
+}
+
+void ffDestroyOpenGLOptions(FFOpenGLOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffOpenGLModuleInfo = {
     .name = FF_OPENGL_MODULE_NAME,
     .description = "Print highest OpenGL version supported by the GPU",
@@ -144,16 +156,3 @@ FFModuleBaseInfo ffOpenGLModuleInfo = {
         {"OpenGL library used", "library"},
     }))
 };
-
-void ffInitOpenGLOptions(FFOpenGLOptions* options)
-{
-    options->moduleInfo = ffOpenGLModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->library = FF_OPENGL_LIBRARY_AUTO;
-}
-
-void ffDestroyOpenGLOptions(FFOpenGLOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

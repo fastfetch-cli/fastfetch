@@ -151,6 +151,16 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, player, "url", &media->url);
 }
 
+void ffInitMediaOptions(FFMediaOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyMediaOptions(FFMediaOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffMediaModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
     .description = "Print playing song name",
@@ -168,14 +178,3 @@ FFModuleBaseInfo ffMediaModuleInfo = {
         {"Status", "status"},
     }))
 };
-
-void ffInitMediaOptions(FFMediaOptions* options)
-{
-    options->moduleInfo = ffMediaModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyMediaOptions(FFMediaOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

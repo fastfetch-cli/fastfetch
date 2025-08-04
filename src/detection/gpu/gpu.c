@@ -2,6 +2,7 @@
 #include "detection/vulkan/vulkan.h"
 #include "detection/opencl/opencl.h"
 #include "detection/opengl/opengl.h"
+#include "modules/opengl/opengl.h"
 
 const char* FF_GPU_VENDOR_NAME_APPLE = "Apple";
 const char* FF_GPU_VENDOR_NAME_AMD = "AMD";
@@ -56,7 +57,10 @@ const char* detectByOpenGL(FFlist* gpus)
     ffStrbufInit(&result.slv);
     ffStrbufInit(&result.library);
 
-    const char* error = ffDetectOpenGL(&instance.config.modules.openGL, &result);
+    __attribute__((__cleanup__(ffDestroyOpenGLOptions))) FFOpenGLOptions options;
+    ffInitOpenGLOptions(&options);
+    const char* error = ffDetectOpenGL(&options, &result);
+
     if (!error)
     {
         FFGPUResult* gpu = (FFGPUResult*) ffListAdd(gpus);

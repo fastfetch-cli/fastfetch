@@ -91,23 +91,8 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
 
-FFModuleBaseInfo ffWeatherModuleInfo = {
-    .name = FF_WEATHER_MODULE_NAME,
-    .description = "Print weather information",
-    .initOptions = (void*) ffInitWeatherOptions,
-    .destroyOptions = (void*) ffDestroyWeatherOptions,
-    .parseJsonObject = (void*) ffParseWeatherJsonObject,
-    .printModule = (void*) ffPrintWeather,
-    .generateJsonResult = (void*) ffGenerateWeatherJsonResult,
-    .generateJsonConfig = (void*) ffGenerateWeatherJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Weather result", "result"},
-    }))
-};
-
 void ffInitWeatherOptions(FFWeatherOptions* options)
 {
-    options->moduleInfo = ffWeatherModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰖙");
 
     ffStrbufInit(&options->location);
@@ -121,3 +106,17 @@ void ffDestroyWeatherOptions(FFWeatherOptions* options)
 
     ffStrbufDestroy(&options->outputFormat);
 }
+
+FFModuleBaseInfo ffWeatherModuleInfo = {
+    .name = FF_WEATHER_MODULE_NAME,
+    .description = "Print weather information",
+    .initOptions = (void*) ffInitWeatherOptions,
+    .destroyOptions = (void*) ffDestroyWeatherOptions,
+    .parseJsonObject = (void*) ffParseWeatherJsonObject,
+    .printModule = (void*) ffPrintWeather,
+    .generateJsonResult = (void*) ffGenerateWeatherJsonResult,
+    .generateJsonConfig = (void*) ffGenerateWeatherJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Weather result", "result"},
+    }))
+};

@@ -131,6 +131,16 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
+void ffInitHostOptions(FFHostOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
+}
+
+void ffDestroyHostOptions(FFHostOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffHostModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
@@ -150,14 +160,3 @@ FFModuleBaseInfo ffHostModuleInfo = {
         {"Product uuid", "uuid"},
     }))
 };
-
-void ffInitHostOptions(FFHostOptions* options)
-{
-    options->moduleInfo = ffHostModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
-}
-
-void ffDestroyHostOptions(FFHostOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

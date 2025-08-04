@@ -190,6 +190,28 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
+void ffInitNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰾆");
+
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly =
+        #if __ANDROID__
+            false
+        #else
+            true
+        #endif
+    ;
+    options->detectTotal = false;
+    options->waitTime = 1000;
+}
+
+void ffDestroyNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
+}
+
 FFModuleBaseInfo ffNetIOModuleInfo = {
     .name = FF_NETIO_MODULE_NAME,
     .description = "Print network I/O throughput",
@@ -214,26 +236,3 @@ FFModuleBaseInfo ffNetIOModuleInfo = {
         {"Number of packets dropped when sending [per second]", "tx-drops"},
     }))
 };
-
-void ffInitNetIOOptions(FFNetIOOptions* options)
-{
-    options->moduleInfo = ffNetIOModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰾆");
-
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly =
-        #if __ANDROID__
-            false
-        #else
-            true
-        #endif
-    ;
-    options->detectTotal = false;
-    options->waitTime = 1000;
-}
-
-void ffDestroyNetIOOptions(FFNetIOOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
-}

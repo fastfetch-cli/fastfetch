@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/uptime/option.h"
 
 typedef struct FFUptimeResult
 {

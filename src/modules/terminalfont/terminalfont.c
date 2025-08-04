@@ -67,7 +67,7 @@ void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
 }
 
-void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalFontResult result;
     ffFontInit(&result.font);
@@ -106,6 +106,16 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     ffFontDestroy(&result.fallback);
 }
 
+void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffTerminalFontModuleInfo = {
     .name = FF_TERMINALFONT_MODULE_NAME,
     .description = "Print font name and size used by current terminal",
@@ -122,14 +132,3 @@ FFModuleBaseInfo ffTerminalFontModuleInfo = {
         {"Terminal font styles", "styles"},
     })),
 };
-
-void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    options->moduleInfo = ffTerminalFontModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/btrfs/option.h"
 
 typedef struct FFBtrfsDiskUsage
 {

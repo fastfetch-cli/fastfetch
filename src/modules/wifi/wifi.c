@@ -206,6 +206,18 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
     }
 }
 
+void ffInitWifiOptions(FFWifiOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+}
+
+void ffDestroyWifiOptions(FFWifiOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffWifiModuleInfo = {
     .name = FF_WIFI_MODULE_NAME,
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
@@ -231,16 +243,3 @@ FFModuleBaseInfo ffWifiModuleInfo = {
         {"Connection channel band in GHz", "band"},
     }))
 };
-
-void ffInitWifiOptions(FFWifiOptions* options)
-{
-    options->moduleInfo = ffWifiModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-}
-
-void ffDestroyWifiOptions(FFWifiOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

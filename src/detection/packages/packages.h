@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/packages/option.h"
 
 typedef struct FFPackagesResult
 {

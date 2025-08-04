@@ -86,6 +86,16 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
     ffStrbufDestroy(&result.icons2);
 }
 
+void ffInitIconsOptions(FFIconsOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyIconsOptions(FFIconsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffIconsModuleInfo = {
     .name = FF_ICONS_MODULE_NAME,
     .description = "Print icon style name",
@@ -100,14 +110,3 @@ FFModuleBaseInfo ffIconsModuleInfo = {
         {"Icons part 2", "icons2"},
     }))
 };
-
-void ffInitIconsOptions(FFIconsOptions* options)
-{
-    options->moduleInfo = ffIconsModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyIconsOptions(FFIconsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

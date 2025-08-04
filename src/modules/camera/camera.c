@@ -120,6 +120,16 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     }
 }
 
+void ffInitCameraOptions(FFCameraOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
+}
+
+void ffDestroyCameraOptions(FFCameraOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffCameraModuleInfo = {
     .name = FF_CAMERA_MODULE_NAME,
     .description = "Print available cameras",
@@ -138,14 +148,3 @@ FFModuleBaseInfo ffCameraModuleInfo = {
         {"Height (in px)", "height"},
     }))
 };
-
-void ffInitCameraOptions(FFCameraOptions* options)
-{
-    options->moduleInfo = ffCameraModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
-}
-
-void ffDestroyCameraOptions(FFCameraOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

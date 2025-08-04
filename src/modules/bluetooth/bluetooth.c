@@ -163,6 +163,18 @@ void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
     }
 }
 
+void ffInitBluetoothOptions(FFBluetoothOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->showDisconnected = false;
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+}
+
+void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBluetoothModuleInfo = {
     .name = FF_BLUETOOTH_MODULE_NAME,
     .description = "List (connected) bluetooth devices",
@@ -181,16 +193,3 @@ FFModuleBaseInfo ffBluetoothModuleInfo = {
         {"Battery percentage bar", "battery-percentage-bar"},
     }))
 };
-
-void ffInitBluetoothOptions(FFBluetoothOptions* options)
-{
-    options->moduleInfo = ffBluetoothModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->showDisconnected = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-}
-
-void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

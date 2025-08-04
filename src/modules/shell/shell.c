@@ -88,6 +88,16 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
         yyjson_mut_obj_add_null(doc, obj, "tty");
 }
 
+void ffInitShellOptions(FFShellOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyShellOptions(FFShellOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffShellModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
     .description = "Print current shell name and version",
@@ -108,14 +118,3 @@ FFModuleBaseInfo ffShellModuleInfo = {
         {"Shell tty used", "tty"},
     }))
 };
-
-void ffInitShellOptions(FFShellOptions* options)
-{
-    options->moduleInfo = ffShellModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyShellOptions(FFShellOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

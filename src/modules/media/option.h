@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFMediaOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFMediaOptions;
+
+static_assert(sizeof(FFMediaOptions) <= FF_OPTION_MAX_SIZE, "FFMediaOptions size exceeds maximum allowed size");

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/display/option.h"
 
 #define FF_DE_PRETTY_PLASMA "KDE Plasma"
 #define FF_DE_PRETTY_GNOME "GNOME"

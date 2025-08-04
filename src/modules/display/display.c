@@ -402,6 +402,18 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
     }
 }
 
+void ffInitDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
+    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+    options->preciseRefreshRate = false;
+}
+
+void ffDestroyDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffDisplayModuleInfo = {
     .name = FF_DISPLAY_MODULE_NAME,
     .description = "Print resolutions, refresh rates, etc",
@@ -438,16 +450,3 @@ FFModuleBaseInfo ffDisplayModuleInfo = {
         {"Screen preferred refresh rate (in Hz)", "preferred-refresh-rate"},
     }))
 };
-
-void ffInitDisplayOptions(FFDisplayOptions* options)
-{
-    options->moduleInfo = ffDisplayModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
-    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    options->preciseRefreshRate = false;
-}
-
-void ffDestroyDisplayOptions(FFDisplayOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

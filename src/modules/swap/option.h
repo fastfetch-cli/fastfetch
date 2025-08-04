@@ -1,15 +1,14 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 #include "common/percent.h"
 
 typedef struct FFSwapOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;
     bool separate;
 } FFSwapOptions;
+
+static_assert(sizeof(FFSwapOptions) <= FF_OPTION_MAX_SIZE, "FFSwapOptions size exceeds maximum allowed size");

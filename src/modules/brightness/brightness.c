@@ -187,6 +187,20 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     }
 }
 
+void ffInitBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
+
+    options->ddcciSleep = 10;
+    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
+    options->compact = false;
+}
+
+void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBrightnessModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
@@ -206,18 +220,3 @@ FFModuleBaseInfo ffBrightnessModuleInfo = {
         {"Is built-in screen", "is-builtin"},
     }))
 };
-
-void ffInitBrightnessOptions(FFBrightnessOptions* options)
-{
-    options->moduleInfo = ffBrightnessModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
-
-    options->ddcciSleep = 10;
-    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
-    options->compact = false;
-}
-
-void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

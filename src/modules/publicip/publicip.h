@@ -1,13 +1,13 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_PUBLICIP_MODULE_NAME "PublicIp"
 
-void ffPreparePublicIp(FFPublicIpOptions* options);
+void ffPreparePublicIp(FFPublicIPOptions* options);
 
-void ffPrintPublicIp(FFPublicIpOptions* options);
-void ffInitPublicIpOptions(FFPublicIpOptions* options);
-void ffDestroyPublicIpOptions(FFPublicIpOptions* options);
+void ffPrintPublicIp(FFPublicIPOptions* options);
+void ffInitPublicIpOptions(FFPublicIPOptions* options);
+void ffDestroyPublicIpOptions(FFPublicIPOptions* options);
 
 extern FFModuleBaseInfo ffPublicIPModuleInfo;

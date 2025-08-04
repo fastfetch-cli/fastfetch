@@ -95,3 +95,5 @@ static inline void ffOptionDestroyModuleArg(FFModuleArgs* args)
     ffStrbufDestroy(&args->outputFormat);
     ffStrbufDestroy(&args->outputColor);
 }
+
+enum { FF_OPTION_MAX_SIZE = 1 << 8 }; // Maximum size of a single option value, used for static allocation

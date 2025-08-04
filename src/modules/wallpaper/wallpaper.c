@@ -73,6 +73,16 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
 }
 
+void ffInitWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
+}
+
+void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffWallpaperModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
     .description = "Print image file path of current wallpaper",
@@ -87,14 +97,3 @@ FFModuleBaseInfo ffWallpaperModuleInfo = {
         {"Full path", "full-path"},
     }))
 };
-
-void ffInitWallpaperOptions(FFWallpaperOptions* options)
-{
-    options->moduleInfo = ffWallpaperModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
-}
-
-void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

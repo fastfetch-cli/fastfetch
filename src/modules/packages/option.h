@@ -1,7 +1,5 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef enum __attribute__((__packed__)) FFPackagesFlags
@@ -44,9 +42,10 @@ static_assert(sizeof(FFPackagesFlags) == sizeof(uint64_t), "");
 
 typedef struct FFPackagesOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFPackagesFlags disabled;
     bool combined;
 } FFPackagesOptions;
+
+static_assert(sizeof(FFPackagesOptions) <= FF_OPTION_MAX_SIZE, "FFPackagesOptions size exceeds maximum allowed size");

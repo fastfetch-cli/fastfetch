@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFCursorOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFCursorOptions;
+
+static_assert(sizeof(FFCursorOptions) <= FF_OPTION_MAX_SIZE, "FFCursorOptions size exceeds maximum allowed size");

@@ -431,6 +431,19 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
+void ffInitPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
+
+    options->disabled = FF_PACKAGES_DISABLE_LIST;
+    options->combined = false;
+}
+
+void ffDestroyPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffPackagesModuleInfo = {
     .name = FF_PACKAGES_MODULE_NAME,
     .description = "List installed package managers and count of installed packages",
@@ -490,17 +503,3 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Total number of all hpkg packages", "hpkg-all"},
     }))
 };
-
-void ffInitPackagesOptions(FFPackagesOptions* options)
-{
-    options->moduleInfo = ffPackagesModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
-
-    options->disabled = FF_PACKAGES_DISABLE_LIST;
-    options->combined = false;
-}
-
-void ffDestroyPackagesOptions(FFPackagesOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

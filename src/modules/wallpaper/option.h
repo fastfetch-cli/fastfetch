@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFWallpaperOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFWallpaperOptions;
+
+static_assert(sizeof(FFWallpaperOptions) <= FF_OPTION_MAX_SIZE, "FFWallpaperOptions size exceeds maximum allowed size");

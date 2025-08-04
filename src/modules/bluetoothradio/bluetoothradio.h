@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_BLUETOOTHRADIO_MODULE_NAME "BluetoothRadio"
 

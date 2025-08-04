@@ -568,14 +568,12 @@ static bool logoTryKnownType(void)
     {
         FF_STRBUF_AUTO_DESTROY source = ffStrbufCreate();
 
-        FFCommandOptions* commandOptions = &instance.config.modules.command;
-        const char* error = ffProcessAppendStdOut(&source, commandOptions->param.length ? (char* const[]){
-            commandOptions->shell.chars,
-            commandOptions->param.chars,
-            options->source.chars,
-            NULL
-        } : (char* const[]){
-            commandOptions->shell.chars,
+        const char* error = ffProcessAppendStdOut(&source, (char* const[]){
+            #ifdef _WIN32
+            "cmd.exe", "/c",
+            #else
+            "/bin/sh", "-c",
+            #endif
             options->source.chars,
             NULL
         });

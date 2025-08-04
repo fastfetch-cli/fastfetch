@@ -185,6 +185,19 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
+void ffInitUsersOptions(FFUsersOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->compact = false;
+    options->myselfOnly = false;
+}
+
+void ffDestroyUsersOptions(FFUsersOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffUsersModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
     .description = "Print users currently logged in",
@@ -210,17 +223,3 @@ FFModuleBaseInfo ffUsersModuleInfo = {
         {"Years fraction after login", "years-fraction"},
     }))
 };
-
-void ffInitUsersOptions(FFUsersOptions* options)
-{
-    options->moduleInfo = ffUsersModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->compact = false;
-    options->myselfOnly = false;
-}
-
-void ffDestroyUsersOptions(FFUsersOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

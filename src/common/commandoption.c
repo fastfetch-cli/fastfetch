@@ -12,7 +12,6 @@
 
 void ffPrepareCommandOption(FFdata* data)
 {
-    FFOptionsModules* const options = &instance.config.modules;
     //If we don't have a custom structure, use the default one
     if(data->structure.length == 0)
         ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
@@ -21,22 +20,38 @@ void ffPrepareCommandOption(FFdata* data)
         ffPrepareCPUUsage();
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME))
-        ffPrepareDiskIO(&options->diskIo);
+    {
+        __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions options;
+        ffInitDiskIOOptions(&options);
+        ffPrepareDiskIO(&options);
+    }
 
     if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
-        ffPrepareNetIO(&options->netIo);
+    {
+        __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions options;
+        ffInitNetIOOptions(&options);
+        ffPrepareNetIO(&options);
+    }
 
     if(instance.config.general.multithreading)
     {
         if(ffStrbufContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME))
-            ffPreparePublicIp(&options->publicIP);
+        {
+            __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
+            ffInitPublicIpOptions(&options);
+            ffPreparePublicIp(&options);
+        }
 
         if(ffStrbufContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME))
-            ffPrepareWeather(&options->weather);
+        {
+            __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
+            ffInitWeatherOptions(&options);
+            ffPrepareWeather(&options);
+        }
     }
 }
 
-static void genJsonConfig(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
+static void genJsonConfig(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
 {
     yyjson_mut_val* modules = yyjson_mut_obj_get(doc->root, "modules");
     if (!modules)
@@ -48,7 +63,7 @@ static void genJsonConfig(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
     yyjson_mut_obj_add_strbuf(doc, module, "type", &type);
 
     if (baseInfo->generateJsonConfig)
-        baseInfo->generateJsonConfig(baseInfo, doc, module);
+        baseInfo->generateJsonConfig(options, doc, module);
 
     if (yyjson_mut_obj_size(module) > 1)
         yyjson_mut_arr_add_val(modules, module);
@@ -56,19 +71,19 @@ static void genJsonConfig(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
         yyjson_mut_arr_add_strbuf(doc, modules, &type);
 }
 
-static void genJsonResult(FFModuleBaseInfo* baseInfo, yyjson_mut_doc* doc)
+static void genJsonResult(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
 {
     yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
     yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
     if (baseInfo->generateJsonResult)
-        baseInfo->generateJsonResult(baseInfo, doc, module);
+        baseInfo->generateJsonResult(options, doc, module);
     else
         yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
 }
 
 static void parseStructureCommand(
     const char* line,
-    void (*fn)(FFModuleBaseInfo *baseInfo, yyjson_mut_doc* jsonDoc),
+    void (*fn)(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* jsonDoc),
     yyjson_mut_doc* jsonDoc
 )
 {
@@ -79,10 +94,13 @@ static void parseStructureCommand(
             FFModuleBaseInfo* baseInfo = *modules;
             if (ffStrEqualsIgnCase(line, baseInfo->name))
             {
+                uint8_t optionBuf[FF_OPTION_MAX_SIZE];
+                baseInfo->initOptions(optionBuf);
                 if (__builtin_expect(jsonDoc != NULL, false))
-                    fn(baseInfo, jsonDoc);
+                    fn(baseInfo, optionBuf, jsonDoc);
                 else
-                    baseInfo->printModule(baseInfo);
+                    baseInfo->printModule(optionBuf);
+                baseInfo->destroyOptions(optionBuf);
                 return;
             }
         }

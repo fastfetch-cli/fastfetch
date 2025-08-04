@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_PLAYER_MODULE_NAME "Player"
 

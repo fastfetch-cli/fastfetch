@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFKeyboardOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFKeyboardOptions;
+
+static_assert(sizeof(FFKeyboardOptions) <= FF_OPTION_MAX_SIZE, "FFKeyboardOptions size exceeds maximum allowed size");

@@ -2,6 +2,7 @@
 
 #include "fastfetch.h"
 #include "common/font.h"
+#include "modules/font/option.h"
 
 typedef struct FFTerminalFontResult
 {

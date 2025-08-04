@@ -107,6 +107,16 @@ exit:
     ffStrbufDestroy(&result.serial);
 }
 
+void ffInitChassisOptions(FFChassisOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyChassisOptions(FFChassisOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffChassisModuleInfo = {
     .name = FF_CHASSIS_MODULE_NAME,
     .description = "Print chassis type (desktop, laptop, etc)",
@@ -123,14 +133,3 @@ FFModuleBaseInfo ffChassisModuleInfo = {
         {"Chassis serial number", "serial"},
     })),
 };
-
-void ffInitChassisOptions(FFChassisOptions* options)
-{
-    options->moduleInfo = ffChassisModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyChassisOptions(FFChassisOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

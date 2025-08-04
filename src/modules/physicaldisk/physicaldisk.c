@@ -226,6 +226,21 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
     }
 }
 
+void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰋊");
+
+    ffStrbufInit(&options->namePrefix);
+    options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 50, 70 };
+}
+
+void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
+}
+
 FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
     .name = FF_PHYSICALDISK_MODULE_NAME,
     .description = "Print physical disk information",
@@ -248,19 +263,3 @@ FFModuleBaseInfo ffPhysicalDiskModuleInfo = {
         {"Device temperature (formatted)", "temperature"},
     }))
 };
-
-void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)
-{
-    options->moduleInfo = ffPhysicalDiskModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰋊");
-
-    ffStrbufInit(&options->namePrefix);
-    options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) { 50, 70 };
-}
-
-void ffDestroyPhysicalDiskOptions(FFPhysicalDiskOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
-}

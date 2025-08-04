@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/localip/option.h"
 
 typedef struct FFLocalIpResult
 {

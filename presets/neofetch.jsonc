@@ -3,7 +3,12 @@
     "display": {
         "size": {
             "maxPrefix": "MB",
-            "ndigits": 0
+            "ndigits": 0,
+            "spaceBeforeUnit": "never"
+        },
+        "freq": {
+            "ndigits": 3,
+            "spaceBeforeUnit": "never"
         }
     },
     "modules": [
@@ -39,11 +44,12 @@
         "cpu",
         {
             "type": "gpu",
-            "key": "GPU"
+            "key": "GPU",
+            "format": "{name}"
         },
         {
             "type": "memory",
-            "format": "{} / {}"
+            "format": "{used} / {total}"
         },
         "break",
         "colors"

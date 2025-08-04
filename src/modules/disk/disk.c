@@ -412,6 +412,30 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     }
 }
 
+void ffInitDiskOptions(FFDiskOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    ffStrbufInit(&options->folders);
+    #if _WIN32 || __APPLE__ || __ANDROID__
+    ffStrbufInit(&options->hideFolders);
+    #else
+    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
+    #endif
+    ffStrbufInit(&options->hideFS);
+    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
+    options->calcType = FF_DISK_CALC_TYPE_FREE;
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyDiskOptions(FFDiskOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->folders);
+    ffStrbufDestroy(&options->hideFolders);
+    ffStrbufDestroy(&options->hideFS);
+}
+
 FFModuleBaseInfo ffDiskModuleInfo = {
     .name = FF_DISK_MODULE_NAME,
     .description = "Print partitions, space usage, file system, etc",
@@ -448,28 +472,3 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         {"Years fraction after creation", "years-fraction"},
     }))
 };
-
-void ffInitDiskOptions(FFDiskOptions* options)
-{
-    options->moduleInfo = ffDiskModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    ffStrbufInit(&options->folders);
-    #if _WIN32 || __APPLE__ || __ANDROID__
-    ffStrbufInit(&options->hideFolders);
-    #else
-    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
-    #endif
-    ffStrbufInit(&options->hideFS);
-    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
-    options->calcType = FF_DISK_CALC_TYPE_FREE;
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyDiskOptions(FFDiskOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->folders);
-    ffStrbufDestroy(&options->hideFolders);
-    ffStrbufDestroy(&options->hideFS);
-}

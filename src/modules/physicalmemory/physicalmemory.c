@@ -139,6 +139,16 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
     }
 }
 
+void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰑭");
+}
+
+void ffDestroyPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
     .name = FF_PHYSICALMEMORY_MODULE_NAME,
     .description = "Print system physical memory devices",
@@ -162,14 +172,3 @@ FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
         {"True if ECC enabled", "is-ecc-enabled"},
     }))
 };
-
-void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
-{
-    options->moduleInfo = ffPhysicalMemoryModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰑭");
-}
-
-void ffDestroyPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

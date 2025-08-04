@@ -164,6 +164,17 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
     }
 }
 
+void ffInitZpoolOptions(FFZpoolOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyZpoolOptions(FFZpoolOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffZpoolModuleInfo = {
     .name = FF_ZPOOL_MODULE_NAME,
     .description = "Print ZFS storage pools",
@@ -184,15 +195,3 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
         {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
     }))
 };
-
-void ffInitZpoolOptions(FFZpoolOptions* options)
-{
-    options->moduleInfo = ffZpoolModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyZpoolOptions(FFZpoolOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -96,6 +96,16 @@ void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_m
     }
 }
 
+void ffInitMouseOptions(FFMouseOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
+}
+
+void ffDestroyMouseOptions(FFMouseOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffMouseModuleInfo = {
     .name = FF_MOUSE_MODULE_NAME,
     .description = "List connected mouses",
@@ -110,14 +120,3 @@ FFModuleBaseInfo ffMouseModuleInfo = {
         {"Mouse serial number", "serial"},
     }))
 };
-
-void ffInitMouseOptions(FFMouseOptions* options)
-{
-    options->moduleInfo = ffMouseModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
-}
-
-void ffDestroyMouseOptions(FFMouseOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

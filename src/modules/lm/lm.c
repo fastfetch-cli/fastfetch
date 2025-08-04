@@ -99,6 +99,16 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
+void ffInitLMOptions(FFLMOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
+}
+
+void ffDestroyLMOptions(FFLMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffLMModuleInfo = {
     .name = FF_LM_MODULE_NAME,
     .description = "Print login manager (desktop manager) name and version",
@@ -114,14 +124,3 @@ FFModuleBaseInfo ffLMModuleInfo = {
         {"LM version", "version"},
     }))
 };
-
-void ffInitLMOptions(FFLMOptions* options)
-{
-    options->moduleInfo = ffLMModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
-}
-
-void ffDestroyLMOptions(FFLMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

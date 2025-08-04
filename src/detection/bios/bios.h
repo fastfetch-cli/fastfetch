@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/bios/option.h"
 
 typedef struct FFBiosResult
 {

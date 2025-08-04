@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/gpu/option.h"
 
 #define FF_GPU_TEMP_UNSET (0/0.0)
 #define FF_GPU_CORE_COUNT_UNSET -1

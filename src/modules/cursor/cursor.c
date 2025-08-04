@@ -94,6 +94,16 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
     ffStrbufDestroy(&result.size);
 }
 
+void ffInitCursorOptions(FFCursorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
+}
+
+void ffDestroyCursorOptions(FFCursorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffCursorModuleInfo = {
     .name = FF_CURSOR_MODULE_NAME,
     .description = "Print cursor style name",
@@ -108,14 +118,3 @@ FFModuleBaseInfo ffCursorModuleInfo = {
         {"Cursor size", "size"},
     })),
 };
-
-void ffInitCursorOptions(FFCursorOptions* options)
-{
-    options->moduleInfo = ffCursorModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
-}
-
-void ffDestroyCursorOptions(FFCursorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

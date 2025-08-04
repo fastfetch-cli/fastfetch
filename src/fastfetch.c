@@ -183,10 +183,11 @@ static void printFullHelp()
     yyjson_doc_free(doc);
 
     puts("\n\
-Parsing is not case sensitive. E.g. `--print-logos` is equal to `--Print-Logos`\n\
+Command flags are not case sensitive. E.g. `--print-logos` is equal to `--Print-Logos`\n\
 If a value starts with a ?, it is optional. An optional boolean value defaults to true if not specified.\n\
 More detailed help messages for each options can be printed with `-h <option_without_dash_prefix>`\n\
-All options can be made permanent with command `fastfetch <options> --gen-config`");
+For detailed information on logo options, module configuration, and formatting, visit:\n\
+      https://github.com/fastfetch-cli/fastfetch/wiki/Configuration");
 }
 
 static bool printSpecificCommandHelp(const char* command)

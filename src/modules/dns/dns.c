@@ -139,6 +139,18 @@ exit:
     }
 }
 
+void ffInitDNSOptions(FFDNSOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰇖");
+
+    options->showType = FF_DNS_TYPE_BOTH;
+}
+
+void ffDestroyDNSOptions(FFDNSOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffDNSModuleInfo = {
     .name = FF_DNS_MODULE_NAME,
     .description = "Print configured DNS servers",
@@ -152,16 +164,3 @@ FFModuleBaseInfo ffDNSModuleInfo = {
         {"DNS result", "result"},
     }))
 };
-
-void ffInitDNSOptions(FFDNSOptions* options)
-{
-    options->moduleInfo = ffDNSModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰇖");
-
-    options->showType = FF_DNS_TYPE_BOTH;
-}
-
-void ffDestroyDNSOptions(FFDNSOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

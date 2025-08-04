@@ -239,19 +239,8 @@ void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, y
     }
 }
 
-FFModuleBaseInfo ffColorsModuleInfo = {
-    .name = FF_COLORS_MODULE_NAME,
-    .description = "Print some colored blocks",
-    .initOptions = (void*) ffInitColorsOptions,
-    .destroyOptions = (void*) ffDestroyColorsOptions,
-    .parseJsonObject = (void*) ffParseColorsJsonObject,
-    .printModule = (void*) ffPrintColors,
-    .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,
-};
-
 void ffInitColorsOptions(FFColorsOptions* options)
 {
-    options->moduleInfo = ffColorsModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
     options->symbol = FF_COLORS_SYMBOL_BACKGROUND;
@@ -266,3 +255,13 @@ void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
+FFModuleBaseInfo ffColorsModuleInfo = {
+    .name = FF_COLORS_MODULE_NAME,
+    .description = "Print some colored blocks",
+    .initOptions = (void*) ffInitColorsOptions,
+    .destroyOptions = (void*) ffDestroyColorsOptions,
+    .parseJsonObject = (void*) ffParseColorsJsonObject,
+    .printModule = (void*) ffPrintColors,
+    .generateJsonConfig = (void*) ffGenerateColorsJsonConfig,
+};

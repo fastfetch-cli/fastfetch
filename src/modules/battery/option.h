@@ -1,13 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 #include "common/percent.h"
 
 typedef struct FFBatteryOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     bool temp;
@@ -18,3 +15,5 @@ typedef struct FFBatteryOptions
         bool useSetupApi;
     #endif
 } FFBatteryOptions;
+
+static_assert(sizeof(FFBatteryOptions) <= FF_OPTION_MAX_SIZE, "FFBatteryOptions size exceeds maximum allowed size");

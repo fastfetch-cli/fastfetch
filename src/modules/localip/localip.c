@@ -385,6 +385,24 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     }
 }
 
+void ffInitLocalIpOptions(FFLocalIpOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰩟");
+
+    options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT
+        #if !__ANDROID__ /*Permission denied*/
+            | FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT
+        #endif
+    ;
+    ffStrbufInit(&options->namePrefix);
+}
+
+void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
+}
+
 FFModuleBaseInfo ffLocalIPModuleInfo = {
     .name = FF_LOCALIP_MODULE_NAME,
     .description = "List local IP addresses (v4 or v6), MAC addresses, etc",
@@ -405,22 +423,3 @@ FFModuleBaseInfo ffLocalIPModuleInfo = {
         {"Interface flags", "flags"},
     }))
 };
-
-void ffInitLocalIpOptions(FFLocalIpOptions* options)
-{
-    options->moduleInfo = ffLocalIPModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰩟");
-
-    options->showType = FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_PREFIX_LEN_BIT
-        #if !__ANDROID__ /*Permission denied*/
-            | FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT
-        #endif
-    ;
-    ffStrbufInit(&options->namePrefix);
-}
-
-void ffDestroyLocalIpOptions(FFLocalIpOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
-}

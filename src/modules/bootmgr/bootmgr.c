@@ -97,6 +97,16 @@ exit:
     ffStrbufDestroy(&bootmgr.firmware);
 }
 
+void ffInitBootmgrOptions(FFBootmgrOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBootmgrModuleInfo = {
     .name = FF_BOOTMGR_MODULE_NAME,
     .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
@@ -114,14 +124,3 @@ FFModuleBaseInfo ffBootmgrModuleInfo = {
         {"Boot order", "order"},
     }))
 };
-
-void ffInitBootmgrOptions(FFBootmgrOptions* options)
-{
-    options->moduleInfo = ffBootmgrModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

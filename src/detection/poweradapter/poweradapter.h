@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/poweradapter/option.h"
 
 typedef struct FFPowerAdapterResult
 {
