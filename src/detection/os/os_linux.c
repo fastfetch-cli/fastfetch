@@ -98,7 +98,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
             "/usr/bin/lliurex-version",
             NULL,
         }) == NULL) // 8.2.2
-            ffStrbufTrimRightSpace(&result->versionID);
+            ffStrbufTrimRightSpace(&result->version);
         ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
