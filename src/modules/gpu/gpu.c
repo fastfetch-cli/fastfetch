@@ -269,58 +269,48 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 
 void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyGPUOptions))) FFGPUOptions defaultOptions;
-    ffInitGPUOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
 
-    if (options->driverSpecific != defaultOptions.driverSpecific)
-        yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
-
-    if (options->detectionMethod != defaultOptions.detectionMethod)
+    switch (options->detectionMethod)
     {
-        switch (options->detectionMethod)
-        {
-            case FF_GPU_DETECTION_METHOD_AUTO:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "auto");
-                break;
-            case FF_GPU_DETECTION_METHOD_PCI:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "pci");
-                break;
-            case FF_GPU_DETECTION_METHOD_VULKAN:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "vulkan");
-                break;
-            case FF_GPU_DETECTION_METHOD_OPENCL:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opencl");
-                break;
-            case FF_GPU_DETECTION_METHOD_OPENGL:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opengl");
-                break;
-        }
+        case FF_GPU_DETECTION_METHOD_AUTO:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "auto");
+            break;
+        case FF_GPU_DETECTION_METHOD_PCI:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "pci");
+            break;
+        case FF_GPU_DETECTION_METHOD_VULKAN:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "vulkan");
+            break;
+        case FF_GPU_DETECTION_METHOD_OPENCL:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opencl");
+            break;
+        case FF_GPU_DETECTION_METHOD_OPENGL:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opengl");
+            break;
     }
 
-    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
+    ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
 
-    if (options->hideType != defaultOptions.hideType)
+    switch (options->hideType)
     {
-        switch (options->hideType)
-        {
-            case FF_GPU_TYPE_NONE:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "none");
-                break;
-            case FF_GPU_TYPE_UNKNOWN:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "unknown");
-                break;
-            case FF_GPU_TYPE_INTEGRATED:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "integrated");
-                break;
-            case FF_GPU_TYPE_DISCRETE:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
-                break;
-        }
+        case FF_GPU_TYPE_NONE:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "none");
+            break;
+        case FF_GPU_TYPE_UNKNOWN:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "unknown");
+            break;
+        case FF_GPU_TYPE_INTEGRATED:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "integrated");
+            break;
+        case FF_GPU_TYPE_DISCRETE:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
+            break;
     }
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

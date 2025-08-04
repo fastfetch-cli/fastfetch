@@ -88,32 +88,23 @@ void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module)
 
 void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDNSOptions))) FFDNSOptions defaultOptions;
-    ffInitDNSOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (defaultOptions.showType != options->showType)
+    switch ((uint8_t) options->showType)
     {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wswitch" // FF_DNS_TYPE_FORCE_UNSIGNED
-        switch (options->showType)
-        {
-            case FF_DNS_TYPE_IPV4_BIT:
-                yyjson_mut_obj_add_str(doc, module, "showType", "ipv4");
-                break;
-            case FF_DNS_TYPE_IPV6_BIT:
-                yyjson_mut_obj_add_str(doc, module, "showType", "ipv6");
-                break;
-            case FF_DNS_TYPE_BOTH:
-                yyjson_mut_obj_add_str(doc, module, "showType", "both");
-                break;
-        }
-        #pragma GCC diagnostic pop
+        case FF_DNS_TYPE_IPV4_BIT:
+            yyjson_mut_obj_add_str(doc, module, "showType", "ipv4");
+            break;
+        case FF_DNS_TYPE_IPV6_BIT:
+            yyjson_mut_obj_add_str(doc, module, "showType", "ipv6");
+            break;
+        case FF_DNS_TYPE_BOTH:
+            yyjson_mut_obj_add_str(doc, module, "showType", "both");
+            break;
     }
 }
 
-void ffGenerateDNSJsonResult(FF_MAYBE_UNUSED FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
 

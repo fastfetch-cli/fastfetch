@@ -63,10 +63,7 @@ void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
 
 void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyKeyboardOptions))) FFKeyboardOptions defaultOptions;
-    ffInitKeyboardOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

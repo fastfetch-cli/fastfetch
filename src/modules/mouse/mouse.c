@@ -63,10 +63,7 @@ void ffParseMouseJsonObject(FFMouseOptions* options, yyjson_val* module)
 
 void ffGenerateMouseJsonConfig(FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyMouseOptions))) FFMouseOptions defaultOptions;
-    ffInitMouseOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

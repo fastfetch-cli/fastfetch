@@ -155,12 +155,10 @@ void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
 
 void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroySwapOptions))) FFSwapOptions defaultOptions;
-    ffInitSwapOptions(&defaultOptions);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
 }
 
 void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

@@ -11,10 +11,7 @@ void ffPrintCustom(FFCustomOptions* options)
 
 void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCustomOptions))) FFCustomOptions defaultOptions;
-    ffInitCustomOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffParseCustomJsonObject(FFCustomOptions* options, yyjson_val* module)

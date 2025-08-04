@@ -53,10 +53,7 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
 
 void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTerminalOptions))) FFTerminalOptions defaultOptions;
-    ffInitTerminalOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

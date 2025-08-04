@@ -58,10 +58,7 @@ void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
 
 void ffGenerateIconsJsonConfig(FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyIconsOptions))) FFIconsOptions defaultOptions;
-    ffInitIconsOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

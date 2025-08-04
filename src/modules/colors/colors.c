@@ -200,42 +200,30 @@ void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)
 
 void ffGenerateColorsJsonConfig(FFColorsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyColorsOptions))) FFColorsOptions defaultOptions;
-    ffInitColorsOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_remove_key(module, "format"); // Not supported
 
-    if (defaultOptions.symbol != options->symbol)
+    switch (options->symbol)
     {
-        switch (options->symbol)
-        {
-            case FF_COLORS_SYMBOL_CIRCLE: yyjson_mut_obj_add_str(doc, module, "symbol", "circle"); break;
-            case FF_COLORS_SYMBOL_DIAMOND: yyjson_mut_obj_add_str(doc, module, "symbol", "diamond"); break;
-            case FF_COLORS_SYMBOL_TRIANGLE: yyjson_mut_obj_add_str(doc, module, "symbol", "triangle"); break;
-            case FF_COLORS_SYMBOL_SQUARE: yyjson_mut_obj_add_str(doc, module, "symbol", "square"); break;
-            case FF_COLORS_SYMBOL_STAR: yyjson_mut_obj_add_str(doc, module, "symbol", "star"); break;
-            default: yyjson_mut_obj_add_str(doc, module, "symbol", "block"); break;
-        }
+        case FF_COLORS_SYMBOL_CIRCLE: yyjson_mut_obj_add_str(doc, module, "symbol", "circle"); break;
+        case FF_COLORS_SYMBOL_DIAMOND: yyjson_mut_obj_add_str(doc, module, "symbol", "diamond"); break;
+        case FF_COLORS_SYMBOL_TRIANGLE: yyjson_mut_obj_add_str(doc, module, "symbol", "triangle"); break;
+        case FF_COLORS_SYMBOL_SQUARE: yyjson_mut_obj_add_str(doc, module, "symbol", "square"); break;
+        case FF_COLORS_SYMBOL_STAR: yyjson_mut_obj_add_str(doc, module, "symbol", "star"); break;
+        default: yyjson_mut_obj_add_str(doc, module, "symbol", "block"); break;
     }
 
-    if (defaultOptions.paddingLeft != options->paddingLeft)
-        yyjson_mut_obj_add_uint(doc, module, "paddingLeft", options->paddingLeft);
+    yyjson_mut_obj_add_uint(doc, module, "paddingLeft", options->paddingLeft);
 
     {
-        yyjson_mut_val* block = yyjson_mut_obj(doc);
+        yyjson_mut_val* block = yyjson_mut_obj_add_obj(doc, module, "block");
 
-        if (defaultOptions.block.width != options->block.width)
-            yyjson_mut_obj_add_uint(doc, block, "width", options->block.width);
+        yyjson_mut_obj_add_uint(doc, block, "width", options->block.width);
 
-        if (memcmp(defaultOptions.block.range, options->block.range, sizeof(options->block.range)) != 0)
-        {
-            yyjson_mut_val* range = yyjson_mut_obj_add_arr(doc, block, "range");
-            for (uint8_t i = 0; i < 2; i++)
-                yyjson_mut_arr_add_uint(doc, range, options->block.range[i]);
-        }
-
-        if (yyjson_mut_obj_size(block) > 0)
-            yyjson_mut_obj_add_val(doc, module, "block", block);
+        yyjson_mut_val* range = yyjson_mut_obj_add_arr(doc, block, "range");
+        for (uint8_t i = 0; i < 2; i++)
+            yyjson_mut_arr_add_uint(doc, range, options->block.range[i]);
     }
 }
 
@@ -251,7 +239,7 @@ void ffInitColorsOptions(FFColorsOptions* options)
     };
 }
 
-void ffDestroyColorsOptions(FF_MAYBE_UNUSED FFColorsOptions* options)
+void ffDestroyColorsOptions(FFColorsOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }

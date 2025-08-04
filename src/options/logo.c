@@ -327,18 +327,28 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
         }
         else if (ffStrEqualsIgnCase(key, "width"))
         {
-            uint32_t value = (uint32_t) yyjson_get_uint(val);
-            if (value == 0)
-                return "Logo width must be a positive integer";
-            options->width = value;
+            if (yyjson_is_null(val))
+                options->width = 0;
+            else
+            {
+                uint32_t value = (uint32_t) yyjson_get_uint(val);
+                if (value == 0)
+                    return "Logo width must be a positive integer";
+                options->width = value;
+            }
             continue;
         }
         else if (ffStrEqualsIgnCase(key, "height"))
         {
-            uint32_t value = (uint32_t) yyjson_get_uint(val);
-            if (value == 0)
-                return "Logo height must be a positive integer";
-            options->height = value;
+            if (yyjson_is_null(val))
+                options->height = 0;
+            else
+            {
+                uint32_t value = (uint32_t) yyjson_get_uint(val);
+                if (value == 0)
+                    return "Logo height must be a positive integer";
+                options->height = value;
+            }
             continue;
         }
         else if (ffStrEqualsIgnCase(key, "padding"))
@@ -463,121 +473,106 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
 
 void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc)
 {
-    __attribute__((__cleanup__(ffOptionsDestroyLogo))) FFOptionsLogo defaultOptions;
-    ffOptionsInitLogo(&defaultOptions);
-
     yyjson_mut_val* obj = yyjson_mut_obj(doc);
 
-    if (options->type != defaultOptions.type)
+    switch (options->type)
     {
-        switch (options->type)
-        {
-            case FF_LOGO_TYPE_NONE:
-                yyjson_mut_obj_add_null(doc, doc->root, "logo");
-                return;
-            case FF_LOGO_TYPE_BUILTIN:
-                yyjson_mut_obj_add_str(doc, obj, "type", "builtin");
-                break;
-            case FF_LOGO_TYPE_SMALL:
-                yyjson_mut_obj_add_str(doc, obj, "type", "small");
-                break;
-            case FF_LOGO_TYPE_FILE:
-                yyjson_mut_obj_add_str(doc, obj, "type", "file");
-                break;
-            case FF_LOGO_TYPE_FILE_RAW:
-                yyjson_mut_obj_add_str(doc, obj, "type", "file-raw");
-                break;
-            case FF_LOGO_TYPE_DATA:
-                yyjson_mut_obj_add_str(doc, obj, "type", "data");
-                break;
-            case FF_LOGO_TYPE_DATA_RAW:
-                yyjson_mut_obj_add_str(doc, obj, "type", "data-raw");
-                break;
-            case FF_LOGO_TYPE_COMMAND_RAW:
-                yyjson_mut_obj_add_str(doc, obj, "type", "command-raw");
-                break;
-            case FF_LOGO_TYPE_IMAGE_SIXEL:
-                yyjson_mut_obj_add_str(doc, obj, "type", "sixel");
-                break;
-            case FF_LOGO_TYPE_IMAGE_KITTY:
-                yyjson_mut_obj_add_str(doc, obj, "type", "kitty");
-                break;
-            case FF_LOGO_TYPE_IMAGE_ITERM:
-                yyjson_mut_obj_add_str(doc, obj, "type", "iterm");
-                break;
-            case FF_LOGO_TYPE_IMAGE_CHAFA:
-                yyjson_mut_obj_add_str(doc, obj, "type", "chafa");
-                break;
-            case FF_LOGO_TYPE_IMAGE_RAW:
-                yyjson_mut_obj_add_str(doc, obj, "type", "raw");
-                break;
-            default:
-                yyjson_mut_obj_add_str(doc, obj, "type", "auto");
-                break;
-        }
+        case FF_LOGO_TYPE_NONE:
+            yyjson_mut_obj_add_null(doc, doc->root, "logo");
+            return;
+        case FF_LOGO_TYPE_BUILTIN:
+            yyjson_mut_obj_add_str(doc, obj, "type", "builtin");
+            break;
+        case FF_LOGO_TYPE_SMALL:
+            yyjson_mut_obj_add_str(doc, obj, "type", "small");
+            break;
+        case FF_LOGO_TYPE_FILE:
+            yyjson_mut_obj_add_str(doc, obj, "type", "file");
+            break;
+        case FF_LOGO_TYPE_FILE_RAW:
+            yyjson_mut_obj_add_str(doc, obj, "type", "file-raw");
+            break;
+        case FF_LOGO_TYPE_DATA:
+            yyjson_mut_obj_add_str(doc, obj, "type", "data");
+            break;
+        case FF_LOGO_TYPE_DATA_RAW:
+            yyjson_mut_obj_add_str(doc, obj, "type", "data-raw");
+            break;
+        case FF_LOGO_TYPE_COMMAND_RAW:
+            yyjson_mut_obj_add_str(doc, obj, "type", "command-raw");
+            break;
+        case FF_LOGO_TYPE_IMAGE_SIXEL:
+            yyjson_mut_obj_add_str(doc, obj, "type", "sixel");
+            break;
+        case FF_LOGO_TYPE_IMAGE_KITTY:
+            yyjson_mut_obj_add_str(doc, obj, "type", "kitty");
+            break;
+        case FF_LOGO_TYPE_IMAGE_KITTY_DIRECT:
+            yyjson_mut_obj_add_str(doc, obj, "type", "kitty-direct");
+            break;
+        case FF_LOGO_TYPE_IMAGE_KITTY_ICAT:
+            yyjson_mut_obj_add_str(doc, obj, "type", "kitty-icat");
+            break;
+        case FF_LOGO_TYPE_IMAGE_ITERM:
+            yyjson_mut_obj_add_str(doc, obj, "type", "iterm");
+            break;
+        case FF_LOGO_TYPE_IMAGE_CHAFA:
+            yyjson_mut_obj_add_str(doc, obj, "type", "chafa");
+            break;
+        case FF_LOGO_TYPE_IMAGE_RAW:
+            yyjson_mut_obj_add_str(doc, obj, "type", "raw");
+            break;
+        default:
+            yyjson_mut_obj_add_str(doc, obj, "type", "auto");
+            break;
     }
 
-    if (!ffStrbufEqual(&options->source, &defaultOptions.source))
-        yyjson_mut_obj_add_str(doc, obj, "source", options->source.chars);
+    yyjson_mut_obj_add_str(doc, obj, "source", options->source.chars);
 
     {
         yyjson_mut_val* color = yyjson_mut_obj(doc);
         for (int i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
         {
-            if (!ffStrbufEqual(&options->colors[i], &defaultOptions.colors[i]))
-            {
-                char c = (char)('1' + i);
-                yyjson_mut_obj_add(color, yyjson_mut_strncpy(doc, &c, 1), yyjson_mut_strbuf(doc, &options->colors[i]));
-            }
+            char c = (char)('1' + i);
+            yyjson_mut_obj_add(color, yyjson_mut_strncpy(doc, &c, 1), yyjson_mut_strbuf(doc, &options->colors[i]));
         }
-        if (yyjson_mut_obj_size(color) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "color", color);
+        yyjson_mut_obj_add_val(doc, obj, "color", color);
     }
 
-    if (options->width != defaultOptions.width)
+    if (options->width == 0)
+        yyjson_mut_obj_add_null(doc, obj, "width");
+    else
         yyjson_mut_obj_add_uint(doc, obj, "width", options->width);
 
-    if (options->height != defaultOptions.height)
+    if (options->height == 0)
+        yyjson_mut_obj_add_null(doc, obj, "height");
+    else
         yyjson_mut_obj_add_uint(doc, obj, "height", options->height);
 
     {
-        yyjson_mut_val* padding = yyjson_mut_obj(doc);
-        if (options->paddingTop != defaultOptions.paddingTop)
-            yyjson_mut_obj_add_uint(doc, padding, "top", options->paddingTop);
-        if (options->paddingLeft != defaultOptions.paddingLeft)
-            yyjson_mut_obj_add_uint(doc, padding, "left", options->paddingLeft);
-        if (options->paddingRight != defaultOptions.paddingRight)
-            yyjson_mut_obj_add_uint(doc, padding, "right", options->paddingRight);
-
-        if (yyjson_mut_obj_size(padding) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "padding", padding);
+        yyjson_mut_val* padding = yyjson_mut_obj_add_obj(doc, obj, "padding");
+        yyjson_mut_obj_add_uint(doc, padding, "top", options->paddingTop);
+        yyjson_mut_obj_add_uint(doc, padding, "left", options->paddingLeft);
+        yyjson_mut_obj_add_uint(doc, padding, "right", options->paddingRight);
     }
 
-    if (options->printRemaining != defaultOptions.printRemaining)
-        yyjson_mut_obj_add_bool(doc, obj, "printRemaining", options->printRemaining);
+    yyjson_mut_obj_add_bool(doc, obj, "printRemaining", options->printRemaining);
 
-    if (options->preserveAspectRatio != defaultOptions.preserveAspectRatio)
-        yyjson_mut_obj_add_bool(doc, obj, "preserveAspectRatio", options->preserveAspectRatio);
+    yyjson_mut_obj_add_bool(doc, obj, "preserveAspectRatio", options->preserveAspectRatio);
 
-    if (options->recache != defaultOptions.recache)
-        yyjson_mut_obj_add_bool(doc, obj, "recache", options->recache);
+    yyjson_mut_obj_add_bool(doc, obj, "recache", options->recache);
 
-    if (options->position != defaultOptions.position)
-    {
-        yyjson_mut_obj_add_str(doc, obj, "position", ((const char* []) {
-            "left",
-            "top",
-            "right",
-        })[options->position]);
-    }
+    yyjson_mut_obj_add_str(doc, obj, "position", ((const char* []) {
+        "left",
+        "top",
+        "right",
+    })[options->position]);
 
     {
         yyjson_mut_val* chafa = yyjson_mut_obj(doc);
-        if (options->chafaFgOnly != defaultOptions.chafaFgOnly)
-            yyjson_mut_obj_add_bool(doc, chafa, "fgOnly", options->chafaFgOnly);
-        if (!ffStrbufEqual(&options->chafaSymbols, &defaultOptions.chafaSymbols))
-            yyjson_mut_obj_add_strbuf(doc, chafa, "symbols", &options->chafaSymbols);
-        if (options->chafaCanvasMode != defaultOptions.chafaCanvasMode && options->chafaCanvasMode <= 7)
+        yyjson_mut_obj_add_bool(doc, chafa, "fgOnly", options->chafaFgOnly);
+        yyjson_mut_obj_add_strbuf(doc, chafa, "symbols", &options->chafaSymbols);
+        if (options->chafaCanvasMode <= 7)
         {
             yyjson_mut_obj_add_str(doc, chafa, "canvasMode", ((const char* []) {
                 "TRUECOLOR",
@@ -590,14 +585,14 @@ void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc
                 "INDEXED_16_8",
             })[options->chafaCanvasMode]);
         }
-        if (options->chafaColorSpace != defaultOptions.chafaColorSpace && options->chafaColorSpace <= 1)
+        if (options->chafaColorSpace <= 1)
         {
             yyjson_mut_obj_add_str(doc, chafa, "colorSpace", ((const char* []) {
                 "RGB",
                 "DIN99D",
             })[options->chafaColorSpace]);
         }
-        if (options->chafaDitherMode != defaultOptions.chafaDitherMode && options->chafaDitherMode <= 2)
+        if (options->chafaDitherMode <= 2)
         {
             yyjson_mut_obj_add_str(doc, chafa, "ditherMode", ((const char* []) {
                 "NONE",
@@ -606,10 +601,8 @@ void ffOptionsGenerateLogoJsonConfig(FFOptionsLogo* options, yyjson_mut_doc* doc
             })[options->chafaDitherMode]);
         }
 
-        if (yyjson_mut_obj_size(chafa) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "chafa", chafa);
+        yyjson_mut_obj_add_val(doc, obj, "chafa", chafa);
     }
 
-    if (yyjson_mut_obj_size(obj) > 0)
-        yyjson_mut_obj_add_val(doc, doc->root, "logo", obj);
+    yyjson_mut_obj_add_val(doc, doc->root, "logo", obj);
 }

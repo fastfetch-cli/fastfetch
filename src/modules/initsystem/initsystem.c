@@ -63,10 +63,7 @@ void ffParseInitSystemJsonObject(FFInitSystemOptions* options, yyjson_val* modul
 
 void ffGenerateInitSystemJsonConfig(FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyInitSystemOptions))) FFInitSystemOptions defaultOptions;
-    ffInitInitSystemOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

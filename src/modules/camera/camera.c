@@ -82,10 +82,7 @@ void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module)
 
 void ffGenerateCameraJsonConfig(FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCameraOptions))) FFCameraOptions defaultOptions;
-    ffInitCameraOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

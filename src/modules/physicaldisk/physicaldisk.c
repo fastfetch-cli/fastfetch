@@ -157,15 +157,11 @@ void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* m
 
 void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPhysicalDiskOptions))) FFPhysicalDiskOptions defaultOptions;
-    ffInitPhysicalDiskOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 
-    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
-        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
-
-    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
+    ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
 }
 
 void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

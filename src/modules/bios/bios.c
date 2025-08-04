@@ -90,10 +90,7 @@ void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
 
 void ffGenerateBiosJsonConfig(FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBiosOptions))) FFBiosOptions defaultOptions;
-    ffInitBiosOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

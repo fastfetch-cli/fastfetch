@@ -343,7 +343,16 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         if (!yyjson_is_obj(color)) return "display.bar.color must be an object";
 
                         yyjson_val* colorElapsed = yyjson_obj_get(color, "elapsed");
-                        if (colorElapsed) ffOptionParseColor(yyjson_get_str(colorElapsed), &options->barColorElapsed);
+                        if (colorElapsed)
+                        {
+                            const char* value = yyjson_get_str(colorElapsed);
+                            if (!value)
+                                ffStrbufClear(&options->barColorElapsed);
+                            else if (ffStrEqualsIgnCase(value, "auto"))
+                                ffStrbufSetStatic(&options->barColorElapsed, "auto");
+                            else
+                                ffOptionParseColor(value, &options->barColorElapsed);
+                        }
 
                         yyjson_val* colorTotal = yyjson_obj_get(color, "total");
                         if (colorTotal) ffOptionParseColor(yyjson_get_str(colorTotal), &options->barColorTotal);
@@ -700,7 +709,14 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         else if(ffStrEqualsIgnCase(subkey, "border-right-elapsed"))
             ffOptionParseString(key, value, &options->barBorderRightElapsed);
         else if(ffStrEqualsIgnCase(subkey, "color-elapsed"))
-            ffOptionParseColor(value, &options->barColorElapsed);
+        {
+            if (!value)
+                ffStrbufClear(&options->barColorElapsed);
+            else if (ffStrEqualsIgnCase(value, "auto"))
+                ffStrbufSetStatic(&options->barColorElapsed, "auto");
+            else
+                ffOptionParseColor(value, &options->barColorElapsed);
+        }
         else if(ffStrEqualsIgnCase(subkey, "color-total"))
             ffOptionParseColor(value, &options->barColorTotal);
         else if(ffStrEqualsIgnCase(subkey, "color-border"))
@@ -813,188 +829,239 @@ void ffOptionsDestroyDisplay(FFOptionsDisplay* options)
 
 void ffOptionsGenerateDisplayJsonConfig(FFOptionsDisplay* options, yyjson_mut_doc* doc)
 {
-    __attribute__((__cleanup__(ffOptionsDestroyDisplay))) FFOptionsDisplay defaultOptions;
-    ffOptionsInitDisplay(&defaultOptions);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, doc->root, "display");
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+    if (options->stat <= 0)
+        yyjson_mut_obj_add_bool(doc, obj, "stat", options->stat == 0);
+    else
+        yyjson_mut_obj_add_int(doc, obj, "stat", options->stat);
 
-    if (options->stat != defaultOptions.stat)
+    yyjson_mut_obj_add_bool(doc, obj, "pipe", options->pipe);
+
+    yyjson_mut_obj_add_bool(doc, obj, "showErrors", options->showErrors);
+
+    yyjson_mut_obj_add_bool(doc, obj, "disableLinewrap", options->disableLinewrap);
+
+    yyjson_mut_obj_add_bool(doc, obj, "hideCursor", options->hideCursor);
+
+    yyjson_mut_obj_add_strbuf(doc, obj, "separator", &options->keyValueSeparator);
+
     {
-        if (options->stat <= 0)
-            yyjson_mut_obj_add_bool(doc, obj, "stat", options->stat == 0);
+        yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, obj, "color");
+        yyjson_mut_obj_add_strbuf(doc, color, "keys", &options->colorKeys);
+        yyjson_mut_obj_add_strbuf(doc, color, "title", &options->colorTitle);
+        yyjson_mut_obj_add_strbuf(doc, color, "output", &options->colorOutput);
+        yyjson_mut_obj_add_strbuf(doc, color, "separator", &options->colorSeparator);
+    }
+
+    yyjson_mut_obj_add_bool(doc, obj, "brightColor", options->brightColor);
+
+    {
+        yyjson_mut_val* duration = yyjson_mut_obj_add_obj(doc, obj, "duration");
+        yyjson_mut_obj_add_bool(doc, duration, "abbreviation", options->durationAbbreviation);
+        switch (options->durationSpaceBeforeUnit)
+        {
+            case FF_SPACE_BEFORE_UNIT_DEFAULT:
+                yyjson_mut_obj_add_str(doc, duration, "spaceBeforeUnit", "default");
+                break;
+            case FF_SPACE_BEFORE_UNIT_ALWAYS:
+                yyjson_mut_obj_add_str(doc, duration, "spaceBeforeUnit", "always");
+                break;
+            case FF_SPACE_BEFORE_UNIT_NEVER:
+                yyjson_mut_obj_add_str(doc, duration, "spaceBeforeUnit", "never");
+                break;
+        }
+    }
+
+    {
+        yyjson_mut_val* size = yyjson_mut_obj_add_obj(doc, obj, "size");
+        yyjson_mut_obj_add_str(doc, size, "maxPrefix", ((const char* []) {
+            "B",
+            "kB",
+            "MB",
+            "GB",
+            "TB",
+            "PB",
+            "EB",
+            "ZB",
+            "YB",
+        })[options->sizeMaxPrefix]);
+        switch (options->sizeBinaryPrefix)
+        {
+            case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
+                yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "iec");
+                break;
+            case FF_SIZE_BINARY_PREFIX_TYPE_SI:
+                yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "si");
+                break;
+            case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
+                yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "jedec");
+                break;
+        }
+        yyjson_mut_obj_add_uint(doc, size, "ndigits", options->sizeNdigits);
+        switch (options->sizeSpaceBeforeUnit)
+        {
+            case FF_SPACE_BEFORE_UNIT_DEFAULT:
+                yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "default");
+                break;
+            case FF_SPACE_BEFORE_UNIT_ALWAYS:
+                yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "always");
+                break;
+            case FF_SPACE_BEFORE_UNIT_NEVER:
+                yyjson_mut_obj_add_str(doc, size, "spaceBeforeUnit", "never");
+                break;
+        }
+    }
+
+    {
+        yyjson_mut_val* temperature = yyjson_mut_obj_add_obj(doc, obj, "temp");
+        switch (options->tempUnit)
+        {
+            case FF_TEMPERATURE_UNIT_DEFAULT:
+                yyjson_mut_obj_add_str(doc, temperature, "unit", "D");
+                break;
+            case FF_TEMPERATURE_UNIT_CELSIUS:
+                yyjson_mut_obj_add_str(doc, obj, "unit", "C");
+                break;
+            case FF_TEMPERATURE_UNIT_FAHRENHEIT:
+                yyjson_mut_obj_add_str(doc, obj, "unit", "F");
+                break;
+            case FF_TEMPERATURE_UNIT_KELVIN:
+                yyjson_mut_obj_add_str(doc, obj, "unit", "K");
+                break;
+        }
+        yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
+        {
+            yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, temperature, "color");
+            yyjson_mut_obj_add_strbuf(doc, color, "green", &options->tempColorGreen);
+            yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->tempColorYellow);
+            yyjson_mut_obj_add_strbuf(doc, color, "red", &options->tempColorRed);
+        }
+        switch (options->tempSpaceBeforeUnit)
+        {
+            case FF_SPACE_BEFORE_UNIT_DEFAULT:
+                yyjson_mut_obj_add_str(doc, temperature, "spaceBeforeUnit", "default");
+                break;
+            case FF_SPACE_BEFORE_UNIT_ALWAYS:
+                yyjson_mut_obj_add_str(doc, temperature, "spaceBeforeUnit", "always");
+                break;
+            case FF_SPACE_BEFORE_UNIT_NEVER:
+                yyjson_mut_obj_add_str(doc, temperature, "spaceBeforeUnit", "never");
+                break;
+        }
+    }
+
+    {
+        yyjson_mut_val* percent = yyjson_mut_obj_add_obj(doc, obj, "percent");
+        {
+            yyjson_mut_val* type = yyjson_mut_obj_add_arr(doc, percent, "type");
+            if (options->percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+                yyjson_mut_arr_add_str(doc, type, "num");
+            if (options->percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+                yyjson_mut_arr_add_str(doc, type, "var");
+            if (options->percentType & FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT)
+                yyjson_mut_arr_add_str(doc, type, "hide-others");
+            if (options->percentType & FF_PERCENTAGE_TYPE_NUM_COLOR_BIT)
+                yyjson_mut_arr_add_str(doc, type, "num-color");
+            if (options->percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT)
+                yyjson_mut_arr_add_str(doc, type, "bar-monochrome");
+        }
+        yyjson_mut_obj_add_uint(doc, percent, "ndigits", options->percentNdigits);
+        {
+            yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, percent, "color");
+            yyjson_mut_obj_add_strbuf(doc, color, "green", &options->percentColorGreen);
+            yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->percentColorYellow);
+            yyjson_mut_obj_add_strbuf(doc, color, "red", &options->percentColorRed);
+        }
+        switch (options->percentSpaceBeforeUnit)
+        {
+            case FF_SPACE_BEFORE_UNIT_DEFAULT:
+                yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "default");
+                break;
+            case FF_SPACE_BEFORE_UNIT_ALWAYS:
+                yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "always");
+                break;
+            case FF_SPACE_BEFORE_UNIT_NEVER:
+                yyjson_mut_obj_add_str(doc, percent, "spaceBeforeUnit", "never");
+                break;
+        }
+        yyjson_mut_obj_add_uint(doc, percent, "width", options->percentWidth);
+    }
+
+    {
+        yyjson_mut_val* bar = yyjson_mut_obj_add_obj(doc, obj, "bar");
+
+        yyjson_mut_val* char_ = yyjson_mut_obj_add_obj(doc, bar, "char");
+        yyjson_mut_obj_add_strbuf(doc, char_, "elapsed", &options->barCharElapsed);
+        yyjson_mut_obj_add_strbuf(doc, char_, "total", &options->barCharTotal);
+
+        yyjson_mut_val* border = yyjson_mut_obj_add_obj(doc, bar, "border");
+        yyjson_mut_obj_add_strbuf(doc, border, "left", &options->barBorderLeft);
+        yyjson_mut_obj_add_strbuf(doc, border, "right", &options->barBorderRight);
+        yyjson_mut_obj_add_strbuf(doc, border, "leftElapsed", &options->barBorderLeftElapsed);
+        yyjson_mut_obj_add_strbuf(doc, border, "rightElapsed", &options->barBorderRightElapsed);
+
+        yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, bar, "color");
+        yyjson_mut_obj_add_strbuf(doc, color, "elapsed", &options->barColorElapsed);
+        yyjson_mut_obj_add_strbuf(doc, color, "total", &options->barColorTotal);
+        yyjson_mut_obj_add_strbuf(doc, color, "border", &options->barColorBorder);
+
+        yyjson_mut_obj_add_uint(doc, bar, "width", options->barWidth);
+    }
+
+    {
+        yyjson_mut_val* fraction = yyjson_mut_obj_add_obj(doc, obj, "fraction");
+
+        if (options->fractionNdigits < 0)
+            yyjson_mut_obj_add_null(doc, fraction, "ndigits");
         else
-            yyjson_mut_obj_add_int(doc, obj, "stat", options->stat);
+            yyjson_mut_obj_add_uint(doc, fraction, "ndigits", (uint8_t) options->fractionNdigits);
     }
 
-    if (options->pipe != defaultOptions.pipe)
-        yyjson_mut_obj_add_bool(doc, obj, "pipe", options->pipe);
-
-    if (options->showErrors != defaultOptions.showErrors)
-        yyjson_mut_obj_add_bool(doc, obj, "showErrors", options->showErrors);
-
-    if (options->disableLinewrap != defaultOptions.disableLinewrap)
-        yyjson_mut_obj_add_bool(doc, obj, "disableLinewrap", options->disableLinewrap);
-
-    if (options->hideCursor != defaultOptions.hideCursor)
-        yyjson_mut_obj_add_bool(doc, obj, "hideCursor", options->hideCursor);
-
-    if (!ffStrbufEqual(&options->keyValueSeparator, &defaultOptions.keyValueSeparator))
-        yyjson_mut_obj_add_strbuf(doc, obj, "separator", &options->keyValueSeparator);
+    yyjson_mut_obj_add_bool(doc, obj, "noBuffer", options->noBuffer);
 
     {
-        yyjson_mut_val* color = yyjson_mut_obj(doc);
-        if (!ffStrbufEqual(&options->colorKeys, &defaultOptions.colorKeys))
-            yyjson_mut_obj_add_strbuf(doc, color, "keys", &options->colorKeys);
-        if (!ffStrbufEqual(&options->colorTitle, &defaultOptions.colorTitle))
-            yyjson_mut_obj_add_strbuf(doc, color, "title", &options->colorTitle);
-        if (!ffStrbufEqual(&options->colorOutput, &defaultOptions.colorOutput))
-            yyjson_mut_obj_add_strbuf(doc, color, "output", &options->colorOutput);
-        if (!ffStrbufEqual(&options->colorSeparator, &defaultOptions.colorSeparator))
-            yyjson_mut_obj_add_strbuf(doc, color, "separator", &options->colorSeparator);
-        if (yyjson_mut_obj_size(color) > 0)
+        yyjson_mut_val* key = yyjson_mut_obj_add_obj(doc, obj, "key");
+        yyjson_mut_obj_add_uint(doc, key, "width", options->keyWidth);
+        switch ((uint8_t) options->keyType)
         {
-            if (yyjson_mut_obj_size(color) == 2 && ffStrbufEqual(&options->colorKeys, &options->colorTitle))
-                yyjson_mut_obj_add_strbuf(doc, obj, "color", &options->colorKeys);
-            else
-                yyjson_mut_obj_add_val(doc, obj, "color", color);
+            case FF_MODULE_KEY_TYPE_NONE:
+                yyjson_mut_obj_add_str(doc, key, "type", "none");
+                break;
+            case FF_MODULE_KEY_TYPE_STRING:
+                yyjson_mut_obj_add_str(doc, key, "type", "string");
+                break;
+            case FF_MODULE_KEY_TYPE_ICON:
+                yyjson_mut_obj_add_str(doc, key, "type", "icon");
+                break;
+            case FF_MODULE_KEY_TYPE_BOTH:
+                yyjson_mut_obj_add_str(doc, key, "type", "both");
+                break;
         }
-    }
 
-    if (options->brightColor != defaultOptions.brightColor)
-        yyjson_mut_obj_add_bool(doc, obj, "brightColor", options->brightColor);
-
-    {
-        yyjson_mut_val* size = yyjson_mut_obj(doc);
-        if (options->sizeNdigits != defaultOptions.sizeNdigits)
-            yyjson_mut_obj_add_uint(doc, size, "ndigits", options->sizeNdigits);
-        if (options->sizeMaxPrefix != defaultOptions.sizeMaxPrefix && options->sizeMaxPrefix <= 8)
-        {
-            yyjson_mut_obj_add_str(doc, size, "maxPrefix", ((const char* []) {
-                "B",
-                "kB",
-                "MB",
-                "GB",
-                "TB",
-                "PB",
-                "EB",
-                "ZB",
-                "YB",
-            })[options->sizeMaxPrefix]);
-        }
-        if (options->sizeBinaryPrefix != defaultOptions.sizeBinaryPrefix)
-        {
-            switch (options->sizeBinaryPrefix)
-            {
-                case FF_SIZE_BINARY_PREFIX_TYPE_IEC:
-                    yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "iec");
-                    break;
-                case FF_SIZE_BINARY_PREFIX_TYPE_SI:
-                    yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "si");
-                    break;
-                case FF_SIZE_BINARY_PREFIX_TYPE_JEDEC:
-                    yyjson_mut_obj_add_str(doc, size, "binaryPrefix", "jedec");
-                    break;
-            }
-        }
-        if (yyjson_mut_obj_size(size) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "size", size);
+        yyjson_mut_obj_add_uint(doc, key, "paddingLeft", options->keyPaddingLeft);
     }
 
     {
-        yyjson_mut_val* temperature = yyjson_mut_obj(doc);
-        if (options->tempUnit != defaultOptions.tempUnit)
+        yyjson_mut_val* freq = yyjson_mut_obj_add_obj(doc, obj, "freq");
+        yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
+        switch (options->percentSpaceBeforeUnit)
         {
-            switch (options->tempUnit)
-            {
-                case FF_TEMPERATURE_UNIT_DEFAULT:
-                    yyjson_mut_obj_add_str(doc, temperature, "unit", "DEFAULT");
-                    break;
-                case FF_TEMPERATURE_UNIT_CELSIUS:
-                    yyjson_mut_obj_add_str(doc, obj, "unit", "C");
-                    break;
-                case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-                    yyjson_mut_obj_add_str(doc, obj, "unit", "F");
-                    break;
-                case FF_TEMPERATURE_UNIT_KELVIN:
-                    yyjson_mut_obj_add_str(doc, obj, "unit", "K");
-                    break;
-            }
+            case FF_SPACE_BEFORE_UNIT_DEFAULT:
+                yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "default");
+                break;
+            case FF_SPACE_BEFORE_UNIT_ALWAYS:
+                yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "always");
+                break;
+            case FF_SPACE_BEFORE_UNIT_NEVER:
+                yyjson_mut_obj_add_str(doc, freq, "spaceBeforeUnit", "never");
+                break;
         }
-        if (options->tempNdigits != defaultOptions.tempNdigits)
-            yyjson_mut_obj_add_uint(doc, temperature, "ndigits", options->tempNdigits);
-        {
-            yyjson_mut_val* color = yyjson_mut_obj(doc);
-            if (!ffStrbufEqual(&options->tempColorGreen, &defaultOptions.tempColorGreen))
-                yyjson_mut_obj_add_strbuf(doc, color, "green", &options->tempColorGreen);
-            if (!ffStrbufEqual(&options->tempColorYellow, &defaultOptions.tempColorYellow))
-                yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->tempColorYellow);
-            if (!ffStrbufEqual(&options->tempColorRed, &defaultOptions.tempColorRed))
-                yyjson_mut_obj_add_strbuf(doc, color, "red", &options->tempColorRed);
-            if (yyjson_mut_obj_size(color) > 0)
-                yyjson_mut_obj_add_val(doc, temperature, "color", color);
-        }
-        if (yyjson_mut_obj_size(temperature) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "temp", temperature);
     }
 
     {
-        yyjson_mut_val* percent = yyjson_mut_obj(doc);
-        if (options->percentType != defaultOptions.percentType)
-            yyjson_mut_obj_add_uint(doc, percent, "type", options->percentType);
-        if (options->percentNdigits != defaultOptions.percentNdigits)
-            yyjson_mut_obj_add_uint(doc, percent, "ndigits", options->percentNdigits);
-        {
-            yyjson_mut_val* color = yyjson_mut_obj(doc);
-            if (!ffStrbufEqual(&options->percentColorGreen, &defaultOptions.percentColorGreen))
-                yyjson_mut_obj_add_strbuf(doc, color, "green", &options->percentColorGreen);
-            if (!ffStrbufEqual(&options->percentColorYellow, &defaultOptions.percentColorYellow))
-                yyjson_mut_obj_add_strbuf(doc, color, "yellow", &options->percentColorYellow);
-            if (!ffStrbufEqual(&options->percentColorRed, &defaultOptions.percentColorRed))
-                yyjson_mut_obj_add_strbuf(doc, color, "red", &options->percentColorRed);
-            if (yyjson_mut_obj_size(color) > 0)
-                yyjson_mut_obj_add_val(doc, percent, "color", color);
-        }
-        if (yyjson_mut_obj_size(percent) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "percent", percent);
+        yyjson_mut_val* constants = yyjson_mut_obj_add_arr(doc, obj, "constants");
+        FF_LIST_FOR_EACH(FFstrbuf, item, options->constants)
+            yyjson_mut_arr_add_strbuf(doc, constants, item);
     }
-
-    {
-        yyjson_mut_val* bar = yyjson_mut_obj(doc);
-        if (!ffStrbufEqual(&options->barCharElapsed, &defaultOptions.barCharElapsed))
-            yyjson_mut_obj_add_strbuf(doc, bar, "charElapsed", &options->barCharElapsed);
-        if (!ffStrbufEqual(&options->barCharTotal, &defaultOptions.barCharTotal))
-            yyjson_mut_obj_add_strbuf(doc, bar, "charTotal", &options->barCharTotal);
-        if (!ffStrbufEqual(&options->barBorderLeft, &defaultOptions.barBorderLeft))
-            yyjson_mut_obj_add_strbuf(doc, bar, "borderLeft", &options->barBorderLeft);
-        if (!ffStrbufEqual(&options->barBorderRight, &defaultOptions.barBorderRight))
-            yyjson_mut_obj_add_strbuf(doc, bar, "borderRight", &options->barBorderRight);
-        if (options->barWidth != defaultOptions.barWidth)
-            yyjson_mut_obj_add_uint(doc, bar, "width", options->barWidth);
-
-        if (yyjson_mut_obj_size(bar) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "bar", bar);
-    }
-
-    if (options->noBuffer != defaultOptions.noBuffer)
-        yyjson_mut_obj_add_bool(doc, obj, "noBuffer", options->noBuffer);
-
-    if (options->keyWidth != defaultOptions.keyWidth)
-        yyjson_mut_obj_add_uint(doc, obj, "keyWidth", options->keyWidth);
-
-    if (options->keyType != defaultOptions.keyType)
-        yyjson_mut_obj_add_uint(doc, obj, "keyType", options->keyType);
-
-    if (options->keyPaddingLeft != defaultOptions.keyPaddingLeft)
-        yyjson_mut_obj_add_uint(doc, obj, "keyPaddingLeft", options->keyPaddingLeft);
-
-    {
-        yyjson_mut_val* freq = yyjson_mut_obj(doc);
-        if (options->freqNdigits != defaultOptions.freqNdigits)
-            yyjson_mut_obj_add_int(doc, freq, "ndigits", options->freqNdigits);
-        if (yyjson_mut_obj_size(freq) > 0)
-            yyjson_mut_obj_add_val(doc, obj, "freq", freq);
-    }
-
-    if (yyjson_mut_obj_size(obj) > 0)
-        yyjson_mut_obj_add_val(doc, doc->root, "display", obj);
 }

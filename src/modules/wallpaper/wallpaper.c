@@ -55,10 +55,7 @@ void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
 
 void ffGenerateWallpaperJsonConfig(FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyWallpaperOptions))) FFWallpaperOptions defaultOptions;
-    ffInitWallpaperOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

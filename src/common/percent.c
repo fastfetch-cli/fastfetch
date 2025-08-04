@@ -310,16 +310,10 @@ bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageMo
     return true;
 }
 
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig defaultConfig, FFPercentageModuleConfig config)
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig config)
 {
-    if (config.green == defaultConfig.green && config.yellow == defaultConfig.yellow)
-        return;
-
     yyjson_mut_val* percent = yyjson_mut_obj_add_obj(doc, module, "percent");
-    if (config.green != defaultConfig.green)
-        yyjson_mut_obj_add_uint(doc, percent, "green", config.green);
-    if (config.yellow != defaultConfig.yellow)
-        yyjson_mut_obj_add_uint(doc, percent, "yellow", config.yellow);
-    if (config.type != defaultConfig.type)
-        yyjson_mut_obj_add_uint(doc, percent, "type", config.type);
+    yyjson_mut_obj_add_uint(doc, percent, "green", config.green);
+    yyjson_mut_obj_add_uint(doc, percent, "yellow", config.yellow);
+    yyjson_mut_obj_add_uint(doc, percent, "type", config.type);
 }

@@ -62,10 +62,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
 
 void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLMOptions))) FFLMOptions defaultOptions;
-    ffInitLMOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

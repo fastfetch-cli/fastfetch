@@ -132,10 +132,7 @@ void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 
 void ffGenerateDateTimeJsonConfig(FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDateTimeOptions))) FFDateTimeOptions defaultOptions;
-    ffInitDateTimeOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

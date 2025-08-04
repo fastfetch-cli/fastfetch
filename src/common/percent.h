@@ -11,7 +11,7 @@ typedef enum __attribute__((__packed__)) FFPercentageTypeFlags
     FF_PERCENTAGE_TYPE_BAR_BIT = 1 << 1,
     FF_PERCENTAGE_TYPE_HIDE_OTHERS_BIT = 1 << 2,
     FF_PERCENTAGE_TYPE_NUM_COLOR_BIT = 1 << 3,
-    FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT = FF_PERCENTAGE_TYPE_NUM_COLOR_BIT,
+    FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT = 1 << 4,
     FF_PERCENTAGE_TYPE_FORCE_UNSIGNED_ = UINT8_MAX,
 } FFPercentageTypeFlags;
 static_assert(sizeof(FFPercentageTypeFlags) == 1, "");
@@ -41,5 +41,5 @@ typedef struct yyjson_mut_doc yyjson_mut_doc;
 typedef struct yyjson_mut_val yyjson_mut_val;
 bool ffPercentParseCommandOptions(const char* key, const char* subkey, const char* value, FFPercentageModuleConfig* config);
 bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageModuleConfig* config);
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig defaultConfig, FFPercentageModuleConfig config);
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig config);
 const char* ffPercentParseTypeJsonConfig(yyjson_val* value, FFPercentageTypeFlags* result);

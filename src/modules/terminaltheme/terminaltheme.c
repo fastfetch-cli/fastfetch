@@ -58,10 +58,7 @@ void ffParseTerminalThemeJsonObject(FFTerminalThemeOptions* options, yyjson_val*
 
 void ffGenerateTerminalThemeJsonConfig(FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTerminalThemeOptions))) FFTerminalThemeOptions defaultOptions;
-    ffInitTerminalThemeOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

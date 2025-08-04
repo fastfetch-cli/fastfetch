@@ -65,10 +65,7 @@ void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
 
 void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBoardOptions))) FFBoardOptions defaultOptions;
-    ffInitBoardOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

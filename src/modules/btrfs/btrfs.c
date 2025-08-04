@@ -148,12 +148,9 @@ void ffParseBtrfsJsonObject(FFBtrfsOptions* options, yyjson_val* module)
 
 void ffGenerateBtrfsJsonConfig(FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBtrfsOptions))) FFBtrfsOptions defaultOptions;
-    ffInitBtrfsOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

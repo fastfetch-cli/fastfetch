@@ -128,16 +128,13 @@ void ffParseDiskIOJsonObject(FFDiskIOOptions* options, yyjson_val* module)
 
 void ffGenerateDiskIOJsonConfig(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions defaultOptions;
-    ffInitDiskIOOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 
-    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
-        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+    yyjson_mut_obj_add_bool(doc, module, "detectTotal", options->detectTotal);
 
-    if (defaultOptions.detectTotal != options->detectTotal)
-        yyjson_mut_obj_add_bool(doc, module, "detectTotal", options->detectTotal);
+    yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
 void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

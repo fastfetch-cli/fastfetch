@@ -65,10 +65,7 @@ void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module)
 
 void ffGenerateBootmgrJsonConfig(FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBootmgrOptions))) FFBootmgrOptions defaultOptions;
-    ffInitBootmgrOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

@@ -146,15 +146,13 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
 
 void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCPUUsageOptions))) FFCPUUsageOptions defaultOptions;
-    ffInitCPUUsageOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
 
-    if (options->separate != defaultOptions.separate)
-        yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
 void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

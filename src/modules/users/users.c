@@ -137,16 +137,11 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
 
 void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyUsersOptions))) FFUsersOptions defaultOptions;
-    ffInitUsersOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 
-    if (options->compact != defaultOptions.compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
-
-    if (options->myselfOnly != defaultOptions.myselfOnly)
-        yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
+    yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
 }
 
 void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

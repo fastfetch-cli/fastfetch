@@ -96,10 +96,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
 
 void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPlayerOptions))) FFPlayerOptions defaultOptions;
-    ffInitPlayerOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

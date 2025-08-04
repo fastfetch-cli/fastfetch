@@ -61,10 +61,7 @@ void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* m
 
 void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTerminalFontOptions))) FFTerminalFontOptions defaultOptions;
-    ffInitTerminalFontOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

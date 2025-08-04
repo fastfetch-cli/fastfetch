@@ -28,7 +28,6 @@ typedef struct FFGPUOptions
     FFGPUDetectionMethod detectionMethod;
     bool temp;
     bool driverSpecific;
-    bool forceMethod;
     FFColorRangeConfig tempConfig;
     FFPercentageModuleConfig percent;
 } FFGPUOptions;

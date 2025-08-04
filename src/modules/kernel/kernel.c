@@ -47,10 +47,7 @@ void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
 
 void ffGenerateKernelJsonConfig(FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyKernelOptions))) FFKernelOptions defaultOptions;
-    ffInitKernelOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

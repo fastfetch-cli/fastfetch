@@ -65,10 +65,7 @@ void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
 
 void ffGenerateVulkanJsonConfig(FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyVulkanOptions))) FFVulkanOptions defaultOptions;
-    ffInitVulkanOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

@@ -43,10 +43,7 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
 
 void ffGenerateLocaleJsonConfig(FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLocaleOptions))) FFLocaleOptions defaultOptions;
-    ffInitLocaleOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

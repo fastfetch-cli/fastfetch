@@ -53,10 +53,7 @@ void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module)
 
 void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTPMOptions))) FFTPMOptions defaultOptions;
-    ffInitTPMOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

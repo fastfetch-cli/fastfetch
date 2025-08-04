@@ -10,25 +10,25 @@
             ]
         },
         "key": {
-            "description": "Key of the module",
-            "type": "string"
+            "description": "Key of the module\nOne whitespace character (` `) can be used to hide the key",
+            "type": "string",
+            "minLength": 1
         },
         "keyColor": {
-            "description": "Color of the module key. Left empty to use `display.color.keys`",
+            "description": "Color of the module key to override the global setting `display.color.key`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "description": "Width of the module key. Use 0 to use `display.keyWidth`",
+            "description": "Width of the module key to override the global setting `display.keyWidth`",
             "type": "integer",
-            "minimum": 0,
-            "default": 0
+            "minimum": 1
         },
         "keyIcon": {
             "description": "Set the icon to be displayed by `display.keyType: \"icon\"`",
             "type": "string"
         },
         "outputColor": {
-            "description": "Output color of the module. Left empty to use `display.color.output`",
+            "description": "Output color of the module to override the global setting `display.color.output`",
             "$ref": "#/$defs/colors"
         },
         "percentType": {
@@ -549,7 +549,7 @@
                     "const": null
                 },
                 {
-                    "description": "Set the source file of the logo",
+                    "description": "Set the source file of the logo or built-in ASCII art name",
                     "type": "string"
                 },
                 {
@@ -671,14 +671,30 @@
                             }
                         },
                         "width": {
-                            "type": "integer",
-                            "description": "Set the width of the logo (in characters). Required for iTerm image protocol",
-                            "minimum": 1
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detect width (default)"
+                                },
+                                {
+                                    "type": "integer",
+                                    "description": "Set the width of the logo (in characters). Required for some image protocols",
+                                    "minimum": 1
+                                }
+                            ]
                         },
                         "height": {
-                            "type": "integer",
-                            "description": "Set the height of the logo (in characters). Required for iTerm image protocol",
-                            "minimum": 1
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detect width (default)"
+                                },
+                                {
+                                    "type": "integer",
+                                    "description": "Set the height of the logo (in characters). Required for some image protocols",
+                                    "minimum": 1
+                                }
+                            ]
                         },
                         "padding": {
                             "type": "object",
@@ -1998,8 +2014,14 @@
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
                                     "keyIcon": {
                                         "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -2634,6 +2656,9 @@
                                             }
                                         ],
                                         "default": null
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

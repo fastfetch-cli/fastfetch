@@ -50,17 +50,19 @@ bool ffJsonConfigParseModuleArgs(yyjson_val* key, yyjson_val* val, FFModuleArgs*
     return false;
 }
 
-void ffJsonConfigGenerateModuleArgsConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFModuleArgs* defaultModuleArgs, FFModuleArgs* moduleArgs)
+void ffJsonConfigGenerateModuleArgsConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFModuleArgs* moduleArgs)
 {
-    if (!ffStrbufEqual(&defaultModuleArgs->key, &moduleArgs->key))
+    if (moduleArgs->key.length > 0)
         yyjson_mut_obj_add_strbuf(doc, module, "key", &moduleArgs->key);
-    if (!ffStrbufEqual(&defaultModuleArgs->outputFormat, &moduleArgs->outputFormat))
+    if (moduleArgs->outputFormat.length > 0)
         yyjson_mut_obj_add_strbuf(doc, module, "format", &moduleArgs->outputFormat);
-    if (!ffStrbufEqual(&defaultModuleArgs->keyColor, &moduleArgs->keyColor))
+    if (moduleArgs->outputColor.length > 0)
+        yyjson_mut_obj_add_strbuf(doc, module, "outputColor", &moduleArgs->outputColor);
+    if (moduleArgs->keyColor.length > 0)
         yyjson_mut_obj_add_strbuf(doc, module, "keyColor", &moduleArgs->keyColor);
-    if (moduleArgs->keyWidth != defaultModuleArgs->keyWidth)
+    if (moduleArgs->keyWidth > 0)
         yyjson_mut_obj_add_uint(doc, module, "keyWidth", moduleArgs->keyWidth);
-    if (!ffStrbufEqual(&defaultModuleArgs->keyIcon, &moduleArgs->keyIcon))
+    if (moduleArgs->keyIcon.length > 0)
         yyjson_mut_obj_add_strbuf(doc, module, "keyIcon", &moduleArgs->keyIcon);
 }
 

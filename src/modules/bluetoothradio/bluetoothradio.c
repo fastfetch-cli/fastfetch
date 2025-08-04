@@ -120,10 +120,7 @@ void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_va
 
 void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBluetoothRadioOptions))) FFBluetoothRadioOptions defaultOptions;
-    ffInitBluetoothRadioOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

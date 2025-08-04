@@ -69,10 +69,7 @@ void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
 
 void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyEditorOptions))) FFEditorOptions defaultOptions;
-    ffInitEditorOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

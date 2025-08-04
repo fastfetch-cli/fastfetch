@@ -72,19 +72,13 @@ void ffParsePublicIpJsonObject(FFPublicIPOptions* options, yyjson_val* module)
 
 void ffGeneratePublicIpJsonConfig(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions defaultOptions;
-    ffInitPublicIpOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_strbuf(doc, module, "url", &options->url);
 
-    if (!ffStrbufEqual(&options->url, &defaultOptions.url))
-        yyjson_mut_obj_add_strbuf(doc, module, "url", &options->url);
+    yyjson_mut_obj_add_uint(doc, module, "timeout", options->timeout);
 
-    if (defaultOptions.timeout != options->timeout)
-        yyjson_mut_obj_add_uint(doc, module, "timeout", options->timeout);
-
-    if (defaultOptions.ipv6 != options->ipv6)
-        yyjson_mut_obj_add_bool(doc, module, "ipv6", options->ipv6);
+    yyjson_mut_obj_add_bool(doc, module, "ipv6", options->ipv6);
 }
 
 void ffGeneratePublicIpJsonResult(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

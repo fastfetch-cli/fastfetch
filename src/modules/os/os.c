@@ -130,10 +130,7 @@ void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
 
 void ffGenerateOSJsonConfig(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyOSOptions))) FFOSOptions defaultOptions;
-    ffInitOSOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

@@ -121,45 +121,32 @@ void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 
 void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_doc* doc)
 {
-    __attribute__((__cleanup__(ffOptionsDestroyGeneral))) FFOptionsGeneral defaultOptions;
-    ffOptionsInitGeneral(&defaultOptions);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, doc->root, "general");
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+    yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);
 
-    if (options->multithreading != defaultOptions.multithreading)
-        yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);
-
-    if (options->processingTimeout != defaultOptions.processingTimeout)
-        yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
+    yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 
-    if (!ffStrbufEqual(&options->playerName, &defaultOptions.playerName))
-        yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
 
-    if (options->dsForceDrm != defaultOptions.dsForceDrm)
+    switch (options->dsForceDrm)
     {
-        switch (options->dsForceDrm)
-        {
-            case FF_DS_FORCE_DRM_TYPE_FALSE:
-                yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", false);
-                break;
-            case FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY:
-                yyjson_mut_obj_add_str(doc, obj, "dsForceDrm", "sysfs-only");
-                break;
-            case FF_DS_FORCE_DRM_TYPE_TRUE:
-                yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
-                break;
-        }
+        case FF_DS_FORCE_DRM_TYPE_FALSE:
+            yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", false);
+            break;
+        case FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY:
+            yyjson_mut_obj_add_str(doc, obj, "dsForceDrm", "sysfs-only");
+            break;
+        case FF_DS_FORCE_DRM_TYPE_TRUE:
+            yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
+            break;
     }
 
     #elif defined(_WIN32)
 
-    if (options->wmiTimeout != defaultOptions.wmiTimeout)
-        yyjson_mut_obj_add_int(doc, obj, "wmiTimeout", options->wmiTimeout);
+    yyjson_mut_obj_add_int(doc, obj, "wmiTimeout", options->wmiTimeout);
 
     #endif
-
-    if (yyjson_mut_obj_size(obj) > 0)
-        yyjson_mut_obj_add_val(doc, doc->root, "general", obj);
 }

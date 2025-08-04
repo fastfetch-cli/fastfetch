@@ -188,19 +188,14 @@ void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
 
 void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBatteryOptions))) FFBatteryOptions defaultOptions;
-    ffInitBatteryOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
     #ifdef _WIN32
-    if (defaultOptions.useSetupApi != options->useSetupApi)
         yyjson_mut_obj_add_bool(doc, module, "useSetupApi", options->useSetupApi);
     #endif
 
-    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

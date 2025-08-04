@@ -74,25 +74,19 @@ void ffParseOpenGLJsonObject(FFOpenGLOptions* options, yyjson_val* module)
 
 void ffGenerateOpenGLJsonConfig(FFOpenGLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyOpenGLOptions))) FFOpenGLOptions defaultOptions;
-    ffInitOpenGLOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (options->library != defaultOptions.library)
+    switch (options->library)
     {
-        switch (options->library)
-        {
-        case FF_OPENGL_LIBRARY_AUTO:
-            yyjson_mut_obj_add_str(doc, module, "library", "auto");
-            break;
-        case FF_OPENGL_LIBRARY_EGL:
-            yyjson_mut_obj_add_str(doc, module, "library", "egl");
-            break;
-        case FF_OPENGL_LIBRARY_GLX:
-            yyjson_mut_obj_add_str(doc, module, "library", "glx");
-            break;
-        }
+    case FF_OPENGL_LIBRARY_AUTO:
+        yyjson_mut_obj_add_str(doc, module, "library", "auto");
+        break;
+    case FF_OPENGL_LIBRARY_EGL:
+        yyjson_mut_obj_add_str(doc, module, "library", "egl");
+        break;
+    case FF_OPENGL_LIBRARY_GLX:
+        yyjson_mut_obj_add_str(doc, module, "library", "glx");
+        break;
     }
 }
 

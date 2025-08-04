@@ -147,11 +147,9 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 
 void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroySeparatorOptions))) FFSeparatorOptions defaultOptions;
-    ffInitSeparatorOptions(&defaultOptions);
-
-    if (!ffStrbufEqual(&options->string, &defaultOptions.string))
-        yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
+    yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
+    yyjson_mut_obj_add_strbuf(doc, module, "outputColor", &options->outputColor);
+    yyjson_mut_obj_add_uint(doc, module, "length", options->length);
 }
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)

@@ -125,12 +125,9 @@ void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module)
 
 void ffGenerateZpoolJsonConfig(FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyZpoolOptions))) FFZpoolOptions defaultOptions;
-    ffInitZpoolOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

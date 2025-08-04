@@ -298,49 +298,31 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
 
 void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLocalIpOptions))) FFLocalIpOptions defaultOptions;
-    ffInitLocalIpOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "showIpv4", !!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT));
 
-    if (defaultOptions.showType != options->showType)
-    {
-        if (!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
-            yyjson_mut_obj_add_bool(doc, module, "showIpv4", false);
+    yyjson_mut_obj_add_bool(doc, module, "showIpv6", !!(options->showType & FF_LOCALIP_TYPE_IPV6_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showIpv6", true);
+    yyjson_mut_obj_add_bool(doc, module, "showMac", !!(options->showType & FF_LOCALIP_TYPE_MAC_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_MAC_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showMac", true);
+    yyjson_mut_obj_add_bool(doc, module, "showLoop", !!(options->showType & FF_LOCALIP_TYPE_LOOP_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_LOOP_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showLoop", true);
+    yyjson_mut_obj_add_bool(doc, module, "showPrefixLen", !!(options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showPrefixLen", true);
+    yyjson_mut_obj_add_bool(doc, module, "showMtu", !!(options->showType & FF_LOCALIP_TYPE_MTU_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showMtu", true);
+    yyjson_mut_obj_add_bool(doc, module, "showSpeed", !!(options->showType & FF_LOCALIP_TYPE_SPEED_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showSpeed", true);
+    yyjson_mut_obj_add_bool(doc, module, "showFlags", !!(options->showType & FF_LOCALIP_TYPE_FLAGS_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showFlags", true);
+    yyjson_mut_obj_add_bool(doc, module, "compact", !!(options->showType & FF_LOCALIP_TYPE_COMPACT_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_COMPACT_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "compact", true);
+    yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", !!(options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT));
 
-        if (!(options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT))
-            yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", false);
+    yyjson_mut_obj_add_bool(doc, module, "showAllIps", !!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
 
-        if (options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showAllIps", true);
-    }
-
-    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
-        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+    yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 }
 
 void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
