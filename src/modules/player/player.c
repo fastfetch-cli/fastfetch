@@ -107,6 +107,16 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
     yyjson_mut_obj_add_str(doc, module, "error", "Player module is an alias of Media module");
 }
 
+void ffInitPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰥠");
+}
+
+void ffDestroyPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffPlayerModuleInfo = {
     .name = FF_PLAYER_MODULE_NAME,
     .description = "Print music player name",
@@ -123,14 +133,3 @@ FFModuleBaseInfo ffPlayerModuleInfo = {
         {"URL name", "url"},
     }))
 };
-
-void ffInitPlayerOptions(FFPlayerOptions* options)
-{
-    options->moduleInfo = ffPlayerModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰥠");
-}
-
-void ffDestroyPlayerOptions(FFPlayerOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

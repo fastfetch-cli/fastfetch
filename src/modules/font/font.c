@@ -88,6 +88,16 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
         ffStrbufDestroy(&font.fonts[i]);
 }
 
+void ffInitFontOptions(FFFontOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyFontOptions(FFFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffFontModuleInfo = {
     .name = FF_FONT_MODULE_NAME,
     .description = "Print system font names",
@@ -105,14 +115,3 @@ FFModuleBaseInfo ffFontModuleInfo = {
         {"Combined fonts for display", "combined"},
     }))
 };
-
-void ffInitFontOptions(FFFontOptions* options)
-{
-    options->moduleInfo = ffFontModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyFontOptions(FFFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

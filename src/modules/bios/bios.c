@@ -128,6 +128,16 @@ exit:
     ffStrbufDestroy(&bios.type);
 }
 
+void ffInitBiosOptions(FFBiosOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyBiosOptions(FFBiosOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBiosModuleInfo = {
     .name = FF_BIOS_MODULE_NAME,
     .description = "Print information of 1st-stage bootloader (name, version, release date, etc)",
@@ -145,14 +155,3 @@ FFModuleBaseInfo ffBiosModuleInfo = {
         {"Firmware type", "type"},
     }))
 };
-
-void ffInitBiosOptions(FFBiosOptions* options)
-{
-    options->moduleInfo = ffBiosModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyBiosOptions(FFBiosOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

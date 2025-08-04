@@ -63,6 +63,16 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
     yyjson_mut_obj_add_strbuf(doc, module, "result", &locale);
 }
 
+void ffInitLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffLocaleModuleInfo = {
     .name = FF_LOCALE_MODULE_NAME,
     .description = "Print system locale name",
@@ -76,14 +86,3 @@ FFModuleBaseInfo ffLocaleModuleInfo = {
         {"Locale code", "result"},
     }))
 };
-
-void ffInitLocaleOptions(FFLocaleOptions* options)
-{
-    options->moduleInfo = ffLocaleModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyLocaleOptions(FFLocaleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

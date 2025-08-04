@@ -414,6 +414,29 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     }
 }
 
+void ffInitGPUOptions(FFGPUOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
+
+    options->driverSpecific = false;
+    options->detectionMethod =
+        #if defined(__x86_64__) || defined(__i386__)
+        FF_GPU_DETECTION_METHOD_PCI
+        #else
+        FF_GPU_DETECTION_METHOD_AUTO
+        #endif
+    ;
+    options->temp = false;
+    options->hideType = FF_GPU_TYPE_NONE;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyGPUOptions(FFGPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffGPUModuleInfo = {
     .name = FF_GPU_MODULE_NAME,
     .description = "Print GPU names, graphic memory size, type, etc",
@@ -446,27 +469,3 @@ FFModuleBaseInfo ffGPUModuleInfo = {
         {"Memory type (Windows only)", "memory-type"},
     })),
 };
-
-void ffInitGPUOptions(FFGPUOptions* options)
-{
-    options->moduleInfo = ffGPUModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
-
-    options->driverSpecific = false;
-    options->detectionMethod =
-        #if defined(__x86_64__) || defined(__i386__)
-        FF_GPU_DETECTION_METHOD_PCI
-        #else
-        FF_GPU_DETECTION_METHOD_AUTO
-        #endif
-    ;
-    options->temp = false;
-    options->hideType = FF_GPU_TYPE_NONE;
-    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyGPUOptions(FFGPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

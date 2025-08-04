@@ -189,6 +189,18 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
     }
 }
 
+void ffInitSwapOptions(FFSwapOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+    options->separate = false;
+}
+
+void ffDestroySwapOptions(FFSwapOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffSwapModuleInfo = {
     .name = FF_SWAP_MODULE_NAME,
     .description = "Print swap (paging file) space usage",
@@ -206,16 +218,3 @@ FFModuleBaseInfo ffSwapModuleInfo = {
         {"Name", "name"},
     }))
 };
-
-void ffInitSwapOptions(FFSwapOptions* options)
-{
-    options->moduleInfo = ffSwapModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰓡");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-    options->separate = false;
-}
-
-void ffDestroySwapOptions(FFSwapOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

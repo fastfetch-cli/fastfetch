@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_UPTIME_MODULE_NAME "Uptime"
 

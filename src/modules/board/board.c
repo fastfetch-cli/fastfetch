@@ -106,6 +106,16 @@ exit:
     ffStrbufDestroy(&board.serial);
 }
 
+void ffInitBoardOptions(FFBoardOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyBoardOptions(FFBoardOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBoardModuleInfo = {
     .name = FF_BOARD_MODULE_NAME,
     .description = "Print motherboard name and other info",
@@ -122,14 +132,3 @@ FFModuleBaseInfo ffBoardModuleInfo = {
         {"Board serial number", "serial"},
     }))
 };
-
-void ffInitBoardOptions(FFBoardOptions* options)
-{
-    options->moduleInfo = ffBoardModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyBoardOptions(FFBoardOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

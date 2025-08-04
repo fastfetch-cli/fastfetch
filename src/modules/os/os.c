@@ -159,34 +159,8 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "versionID", &os->versionID);
 }
 
-FFModuleBaseInfo ffOSModuleInfo = {
-    .name = FF_OS_MODULE_NAME,
-    .description = "Print operating system name and version",
-    .initOptions = (void*) ffInitOSOptions,
-    .destroyOptions = (void*) ffDestroyOSOptions,
-    .parseJsonObject = (void*) ffParseOSJsonObject,
-    .printModule = (void*) ffPrintOS,
-    .generateJsonResult = (void*) ffGenerateOSJsonResult,
-    .generateJsonConfig = (void*) ffGenerateOSJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Name of the kernel", "sysname"},
-        {"Name of the OS", "name"},
-        {"Pretty name of the OS, if available", "pretty-name"},
-        {"ID of the OS", "id"},
-        {"ID like of the OS", "id-like"},
-        {"Variant of the OS", "variant"},
-        {"Variant ID of the OS", "variant-id"},
-        {"Version of the OS", "version"},
-        {"Version ID of the OS", "version-id"},
-        {"Version codename of the OS", "codename"},
-        {"Build ID of the OS", "build-id"},
-        {"Architecture of the OS", "arch"},
-    }))
-};
-
 void ffInitOSOptions(FFOSOptions* options)
 {
-    options->moduleInfo = ffOSModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs,
         #ifdef _WIN32
             ""
@@ -214,3 +188,28 @@ void ffDestroyOSOptions(FFOSOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
+FFModuleBaseInfo ffOSModuleInfo = {
+    .name = FF_OS_MODULE_NAME,
+    .description = "Print operating system name and version",
+    .initOptions = (void*) ffInitOSOptions,
+    .destroyOptions = (void*) ffDestroyOSOptions,
+    .parseJsonObject = (void*) ffParseOSJsonObject,
+    .printModule = (void*) ffPrintOS,
+    .generateJsonResult = (void*) ffGenerateOSJsonResult,
+    .generateJsonConfig = (void*) ffGenerateOSJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Name of the kernel", "sysname"},
+        {"Name of the OS", "name"},
+        {"Pretty name of the OS, if available", "pretty-name"},
+        {"ID of the OS", "id"},
+        {"ID like of the OS", "id-like"},
+        {"Variant of the OS", "variant"},
+        {"Variant ID of the OS", "variant-id"},
+        {"Version of the OS", "version"},
+        {"Version ID of the OS", "version-id"},
+        {"Version codename of the OS", "codename"},
+        {"Build ID of the OS", "build-id"},
+        {"Architecture of the OS", "arch"},
+    }))
+};

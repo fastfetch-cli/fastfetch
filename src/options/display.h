@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/percent.h"
 #include "util/FFstrbuf.h"
 
 typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType

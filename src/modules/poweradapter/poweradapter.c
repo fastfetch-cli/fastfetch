@@ -111,6 +111,16 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
     }
 }
 
+void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
+}
+
+void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffPowerAdapterModuleInfo = {
     .name = FF_POWERADAPTER_MODULE_NAME,
     .description = "Print power adapter name and charging watts",
@@ -129,14 +139,3 @@ FFModuleBaseInfo ffPowerAdapterModuleInfo = {
         {"Power adapter serial number", "serial"},
     }))
 };
-
-void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
-{
-    options->moduleInfo = ffPowerAdapterModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
-}
-
-void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

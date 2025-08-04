@@ -474,7 +474,6 @@ set(LIBFASTFETCH_SRC
     src/modules/wmtheme/wmtheme.c
     src/modules/zpool/zpool.c
     src/options/display.c
-    src/options/modules.c
     src/options/logo.c
     src/options/general.c
     src/util/edidHelper.c

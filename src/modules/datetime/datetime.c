@@ -143,6 +143,16 @@ void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yy
     yyjson_mut_obj_add_strcpy(doc, module, "result", ffTimeToFullStr(ffTimeGetNow()));
 }
 
+void ffInitDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffDateTimeModuleInfo = {
     .name = FF_DATETIME_MODULE_NAME,
     .description = "Print current date and time",
@@ -178,14 +188,3 @@ FFModuleBaseInfo ffDateTimeModuleInfo = {
         {"Day in month with leading zero", "day-pretty"},
     }))
 };
-
-void ffInitDateTimeOptions(FFDateTimeOptions* options)
-{
-    options->moduleInfo = ffDateTimeModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

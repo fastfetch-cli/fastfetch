@@ -206,6 +206,19 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     }
 }
 
+void ffInitSoundOptions(FFSoundOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->soundType = FF_SOUND_TYPE_MAIN;
+    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
+}
+
+void ffDestroySoundOptions(FFSoundOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffSoundModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
     .description = "Print sound devices, volume, etc",
@@ -224,17 +237,3 @@ FFModuleBaseInfo ffSoundModuleInfo = {
         {"Platform API used", "platform-api"},
     }))
 };
-
-void ffInitSoundOptions(FFSoundOptions* options)
-{
-    options->moduleInfo = ffSoundModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->soundType = FF_SOUND_TYPE_MAIN;
-    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
-}
-
-void ffDestroySoundOptions(FFSoundOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

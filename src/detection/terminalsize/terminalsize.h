@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/terminalsize/option.h"
 
 typedef struct FFTerminalSizeResult
 {

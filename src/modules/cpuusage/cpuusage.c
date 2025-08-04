@@ -174,6 +174,19 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
     }
 }
 
+void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
+    options->separate = false;
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+    options->waitTime = 200;
+}
+
+void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffCPUUsageModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
     .description = "Print CPU usage. Costs some time to collect data",
@@ -194,17 +207,3 @@ FFModuleBaseInfo ffCPUUsageModuleInfo = {
         {"CPU usage (percentage bar, minimum)", "min-bar"},
     }))
 };
-
-void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    options->moduleInfo = ffCPUUsageModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
-    options->separate = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-    options->waitTime = 200;
-}
-
-void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

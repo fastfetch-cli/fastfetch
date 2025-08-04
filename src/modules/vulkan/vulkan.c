@@ -128,6 +128,16 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
     }
 }
 
+void ffInitVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffVulkanModuleInfo = {
     .name = FF_VULKAN_MODULE_NAME,
     .description = "Print highest Vulkan version supported by the GPU",
@@ -144,14 +154,3 @@ FFModuleBaseInfo ffVulkanModuleInfo = {
         {"Instance version", "instance-version"},
     }))
 };
-
-void ffInitVulkanOptions(FFVulkanOptions* options)
-{
-    options->moduleInfo = ffVulkanModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyVulkanOptions(FFVulkanOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

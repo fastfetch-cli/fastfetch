@@ -245,6 +245,23 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
     }
 }
 
+void ffInitBatteryOptions(FFBatteryOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+
+    #ifdef _WIN32
+        options->useSetupApi = false;
+    #endif
+}
+
+void ffDestroyBatteryOptions(FFBatteryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBatteryModuleInfo = {
     .name = FF_BATTERY_MODULE_NAME,
     .description = "Print battery capacity, status, etc",
@@ -272,21 +289,3 @@ FFModuleBaseInfo ffBatteryModuleInfo = {
         {"Battery time remaining (formatted)", "time-formatted"},
     }))
 };
-
-void ffInitBatteryOptions(FFBatteryOptions* options)
-{
-    options->moduleInfo = ffBatteryModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-
-    #ifdef _WIN32
-        options->useSetupApi = false;
-    #endif
-}
-
-void ffDestroyBatteryOptions(FFBatteryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

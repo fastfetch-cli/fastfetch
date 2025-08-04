@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_WM_MODULE_NAME "WM"
 

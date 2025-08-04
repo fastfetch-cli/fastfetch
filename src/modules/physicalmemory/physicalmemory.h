@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_PHYSICALMEMORY_MODULE_NAME "PhysicalMemory"
 

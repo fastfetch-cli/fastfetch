@@ -212,6 +212,19 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
     ffStrbufDestroy(&cpu.vendor);
 }
 
+void ffInitCPUOptions(FFCPUOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->showPeCoreCount = false;
+}
+
+void ffDestroyCPUOptions(FFCPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffCPUModuleInfo = {
     .name = FF_CPU_MODULE_NAME,
     .description = "Print CPU name, frequency, etc",
@@ -234,17 +247,3 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         {"Processor package count", "packages"},
     }))
 };
-
-void ffInitCPUOptions(FFCPUOptions* options)
-{
-    options->moduleInfo = ffCPUModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->showPeCoreCount = false;
-}
-
-void ffDestroyCPUOptions(FFCPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -20,7 +20,6 @@
 #include "util/platform/FFPlatform.h"
 #include "util/unused.h"
 
-#include "options/modules.h"
 #include "options/logo.h"
 #include "options/display.h"
 #include "options/general.h"
@@ -42,7 +41,6 @@ typedef struct FFconfig
     FFOptionsLogo logo;
     FFOptionsDisplay display;
     FFOptionsGeneral general;
-    FFOptionsModules modules;
 } FFconfig;
 
 typedef struct FFstate

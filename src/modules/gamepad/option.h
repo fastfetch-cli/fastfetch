@@ -1,13 +1,12 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFGamepadOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;
 } FFGamepadOptions;
+
+static_assert(sizeof(FFGamepadOptions) <= FF_OPTION_MAX_SIZE, "FFGamepadOptions size exceeds maximum allowed size");

@@ -81,6 +81,16 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "tty", &result->tty);
 }
 
+void ffInitTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffTerminalModuleInfo = {
     .name = FF_TERMINAL_MODULE_NAME,
     .description = "Print current terminal name and version",
@@ -101,14 +111,3 @@ FFModuleBaseInfo ffTerminalModuleInfo = {
         {"Terminal tty / pts used", "tty"},
     }))
 };
-
-void ffInitTerminalOptions(FFTerminalOptions* options)
-{
-    options->moduleInfo = ffTerminalModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyTerminalOptions(FFTerminalOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

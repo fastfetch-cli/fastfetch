@@ -86,6 +86,16 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
     ffStrbufDestroy(&result.theme2);
 }
 
+void ffInitThemeOptions(FFThemeOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰉼");
+}
+
+void ffDestroyThemeOptions(FFThemeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffThemeModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
     .description = "Print current theme of desktop environment",
@@ -100,14 +110,3 @@ FFModuleBaseInfo ffThemeModuleInfo = {
         {"Theme part 2", "theme2"},
     }))
 };
-
-void ffInitThemeOptions(FFThemeOptions* options)
-{
-    options->moduleInfo = ffThemeModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰉼");
-}
-
-void ffDestroyThemeOptions(FFThemeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

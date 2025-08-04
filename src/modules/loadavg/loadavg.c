@@ -150,6 +150,20 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
         yyjson_mut_arr_add_real(doc, arr, result[i]);
 }
 
+void ffInitLoadavgOptions(FFLoadavgOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+    options->ndigits = 2;
+    options->compact = true;
+}
+
+void ffDestroyLoadavgOptions(FFLoadavgOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffLoadavgModuleInfo = {
     .name = FF_LOADAVG_MODULE_NAME,
     .description = "Print system load averages",
@@ -165,18 +179,3 @@ FFModuleBaseInfo ffLoadavgModuleInfo = {
         {"Load average over 15min", "loadavg3"},
     }))
 };
-
-void ffInitLoadavgOptions(FFLoadavgOptions* options)
-{
-    options->moduleInfo = ffLoadavgModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-    options->ndigits = 2;
-    options->compact = true;
-}
-
-void ffDestroyLoadavgOptions(FFLoadavgOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

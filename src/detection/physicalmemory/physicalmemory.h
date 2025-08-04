@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/physicalmemory/option.h"
 
 typedef struct FFPhysicalMemoryResult
 {

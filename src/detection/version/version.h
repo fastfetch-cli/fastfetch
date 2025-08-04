@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/version/option.h"
 
 typedef struct FFVersionResult
 {

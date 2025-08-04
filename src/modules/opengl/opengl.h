@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_OPENGL_MODULE_NAME "OpenGL"
 

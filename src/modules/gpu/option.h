@@ -1,7 +1,5 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 #include "common/percent.h"
 
@@ -24,7 +22,6 @@ typedef enum __attribute__((__packed__)) FFGPUDetectionMethod
 
 typedef struct FFGPUOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFGPUType hideType;
@@ -35,3 +32,5 @@ typedef struct FFGPUOptions
     FFColorRangeConfig tempConfig;
     FFPercentageModuleConfig percent;
 } FFGPUOptions;
+
+static_assert(sizeof(FFGPUOptions) <= FF_OPTION_MAX_SIZE, "FFGPUOptions size exceeds maximum allowed size");

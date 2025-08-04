@@ -166,6 +166,16 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
     }
 }
 
+void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
+}
+
+void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
     .description = "List bluetooth radios width supported version and vendor",
@@ -186,14 +196,3 @@ FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
         {"Connectable / Pairable", "connectable"},
     }))
 };
-
-void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
-{
-    options->moduleInfo = ffBluetoothRadioModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
-}
-
-void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

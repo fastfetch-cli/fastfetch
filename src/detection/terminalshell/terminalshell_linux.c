@@ -53,7 +53,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufContainS(&result->processName, "hyfetch")           || //when hyfetch uses fastfetch as backend
                 ffStrbufEqualS(&result->processName, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
                 ffStrbufEqualS(&result->processName, "valgrind")            ||
-                ffStrbufEqualS(&result->processName, "fastfetch")           || //994
+                ffStrbufEqualS(&result->processName, "fastfetch")           || //#994
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
                 ffStrbufEqualS(&result->processName, "proot")               ||
                 ffStrbufEqualS(&result->processName, "script")              ||

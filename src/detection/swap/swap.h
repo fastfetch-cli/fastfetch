@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/swap/option.h"
 
 typedef struct FFSwapResult
 {

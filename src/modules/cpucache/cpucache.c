@@ -208,6 +208,18 @@ exit:
     ffListDestroy(&result.caches[3]);
 }
 
+void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->compact = false;
+}
+
+void ffDestroyCPUCacheOptions(FFCPUCacheOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffCPUCacheModuleInfo = {
     .name = FF_CPUCACHE_MODULE_NAME,
     .description = "Print CPU cache sizes",
@@ -222,16 +234,3 @@ FFModuleBaseInfo ffCPUCacheModuleInfo = {
         {"Sum result", "sum"},
     }))
 };
-
-void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
-{
-    options->moduleInfo = ffCPUCacheModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->compact = false;
-}
-
-void ffDestroyCPUCacheOptions(FFCPUCacheOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

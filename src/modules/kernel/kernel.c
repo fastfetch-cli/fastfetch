@@ -66,6 +66,16 @@ void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "pageSize", info->pageSize);
 }
 
+void ffInitKernelOptions(FFKernelOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyKernelOptions(FFKernelOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffKernelModuleInfo = {
     .name = FF_KERNEL_MODULE_NAME,
     .description = "Print system kernel version",
@@ -84,14 +94,3 @@ FFModuleBaseInfo ffKernelModuleInfo = {
         {"Page size", "page-size"},
     }))
 };
-
-void ffInitKernelOptions(FFKernelOptions* options)
-{
-    options->moduleInfo = ffKernelModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyKernelOptions(FFKernelOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -120,23 +120,8 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 }
 
-FFModuleBaseInfo ffCommandModuleInfo = {
-    .name = FF_COMMAND_MODULE_NAME,
-    .description = "Run custom shell scripts",
-    .initOptions = (void*) ffInitCommandOptions,
-    .destroyOptions = (void*) ffDestroyCommandOptions,
-    .parseJsonObject = (void*) ffParseCommandJsonObject,
-    .printModule = (void*) ffPrintCommand,
-    .generateJsonResult = (void*) ffGenerateCommandJsonResult,
-    .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Command result", "result"},
-    }))
-};
-
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    options->moduleInfo = ffCommandModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInitStatic(&options->shell,
@@ -163,3 +148,17 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
     ffStrbufDestroy(&options->param);
     ffStrbufDestroy(&options->text);
 }
+
+FFModuleBaseInfo ffCommandModuleInfo = {
+    .name = FF_COMMAND_MODULE_NAME,
+    .description = "Run custom shell scripts",
+    .initOptions = (void*) ffInitCommandOptions,
+    .destroyOptions = (void*) ffDestroyCommandOptions,
+    .parseJsonObject = (void*) ffParseCommandJsonObject,
+    .printModule = (void*) ffPrintCommand,
+    .generateJsonResult = (void*) ffGenerateCommandJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Command result", "result"},
+    }))
+};

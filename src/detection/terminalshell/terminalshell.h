@@ -1,6 +1,8 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/terminal/option.h"
+#include "modules/shell/option.h"
 
 typedef struct FFShellResult
 {

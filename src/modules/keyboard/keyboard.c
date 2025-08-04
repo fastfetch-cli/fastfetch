@@ -96,6 +96,16 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
     }
 }
 
+void ffInitKeyboardOptions(FFKeyboardOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyKeyboardOptions(FFKeyboardOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffKeyboardModuleInfo = {
     .name = FF_KEYBOARD_MODULE_NAME,
     .description = "List (connected) keyboards",
@@ -110,14 +120,3 @@ FFModuleBaseInfo ffKeyboardModuleInfo = {
         {"Serial number", "serial"},
     }))
 };
-
-void ffInitKeyboardOptions(FFKeyboardOptions* options)
-{
-    options->moduleInfo = ffKeyboardModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyKeyboardOptions(FFKeyboardOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_INITSYSTEM_MODULE_NAME "InitSystem"
 

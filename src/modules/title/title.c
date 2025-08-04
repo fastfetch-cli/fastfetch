@@ -140,6 +140,25 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }
 
+void ffInitTitleOptions(FFTitleOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    ffStrbufSetStatic(&options->moduleArgs.key, " ");
+
+    options->fqdn = false;
+    ffStrbufInit(&options->colorUser);
+    ffStrbufInit(&options->colorAt);
+    ffStrbufInit(&options->colorHost);
+}
+
+void ffDestroyTitleOptions(FFTitleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->colorUser);
+    ffStrbufDestroy(&options->colorAt);
+    ffStrbufDestroy(&options->colorHost);
+}
+
 FFModuleBaseInfo ffTitleModuleInfo = {
     .name = FF_TITLE_MODULE_NAME,
     .description = "Print title, which contains your user name, hostname",
@@ -161,23 +180,3 @@ FFModuleBaseInfo ffTitleModuleInfo = {
         {"Full user name", "full-user-name"},
     }))
 };
-
-void ffInitTitleOptions(FFTitleOptions* options)
-{
-    options->moduleInfo = ffTitleModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    ffStrbufSetStatic(&options->moduleArgs.key, " ");
-
-    options->fqdn = false;
-    ffStrbufInit(&options->colorUser);
-    ffStrbufInit(&options->colorAt);
-    ffStrbufInit(&options->colorHost);
-}
-
-void ffDestroyTitleOptions(FFTitleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->colorUser);
-    ffStrbufDestroy(&options->colorAt);
-    ffStrbufDestroy(&options->colorHost);
-}

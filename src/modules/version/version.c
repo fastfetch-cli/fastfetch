@@ -97,6 +97,16 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
     }
 }
 
+void ffInitVersionOptions(FFVersionOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyVersionOptions(FFVersionOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffVersionModuleInfo = {
     .name = FF_VERSION_MODULE_NAME,
     .description = "Print Fastfetch version",
@@ -119,14 +129,3 @@ FFModuleBaseInfo ffVersionModuleInfo = {
         {"Libc used when compiling", "libc"},
     }))
 };
-
-void ffInitVersionOptions(FFVersionOptions* options)
-{
-    options->moduleInfo = ffVersionModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyVersionOptions(FFVersionOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

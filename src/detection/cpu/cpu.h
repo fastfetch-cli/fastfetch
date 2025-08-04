@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/cpu/option.h"
 
 #define FF_CPU_TEMP_UNSET (0/0.0)
 

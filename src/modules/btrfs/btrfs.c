@@ -200,6 +200,17 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
     }
 }
 
+void ffInitBtrfsOptions(FFBtrfsOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyBtrfsOptions(FFBtrfsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffBtrfsModuleInfo = {
     .name = FF_BTRFS_MODULE_NAME,
     .description = "Print Linux BTRFS volumes",
@@ -225,15 +236,3 @@ FFModuleBaseInfo ffBtrfsModuleInfo = {
         {"Sector size", "sector-size"},
     }))
 };
-
-void ffInitBtrfsOptions(FFBtrfsOptions* options)
-{
-    options->moduleInfo = ffBtrfsModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyBtrfsOptions(FFBtrfsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

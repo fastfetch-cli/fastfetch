@@ -130,6 +130,17 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
     }
 }
 
+void ffInitGamepadOptions(FFGamepadOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+}
+
+void ffDestroyGamepadOptions(FFGamepadOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffGamepadModuleInfo = {
     .name = FF_GAMEPAD_MODULE_NAME,
     .description = "List (connected) gamepads",
@@ -146,15 +157,3 @@ FFModuleBaseInfo ffGamepadModuleInfo = {
         {"Battery percentage bar", "battery-percentage-bar"},
     }))
 };
-
-void ffInitGamepadOptions(FFGamepadOptions* options)
-{
-    options->moduleInfo = ffGamepadModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-}
-
-void ffDestroyGamepadOptions(FFGamepadOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

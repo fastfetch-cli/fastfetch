@@ -170,6 +170,21 @@ void ffGenerateDiskIOJsonResult(FFDiskIOOptions* options, yyjson_mut_doc* doc, y
     }
 }
 
+void ffInitDiskIOOptions(FFDiskIOOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
+
+    ffStrbufInit(&options->namePrefix);
+    options->detectTotal = false;
+    options->waitTime = 1000;
+}
+
+void ffDestroyDiskIOOptions(FFDiskIOOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
+}
+
 FFModuleBaseInfo ffDiskIOModuleInfo = {
     .name = FF_DISKIO_MODULE_NAME,
     .description = "Print physical disk I/O throughput",
@@ -190,19 +205,3 @@ FFModuleBaseInfo ffDiskIOModuleInfo = {
         {"Number of writes", "write-count"},
     }))
 };
-
-void ffInitDiskIOOptions(FFDiskIOOptions* options)
-{
-    options->moduleInfo = ffDiskIOModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
-
-    ffStrbufInit(&options->namePrefix);
-    options->detectTotal = false;
-    options->waitTime = 1000;
-}
-
-void ffDestroyDiskIOOptions(FFDiskIOOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
-}

@@ -98,6 +98,16 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
+void ffInitInitSystemOptions(FFInitSystemOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
+}
+
+void ffDestroyInitSystemOptions(FFInitSystemOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
 FFModuleBaseInfo ffInitSystemModuleInfo = {
     .name = FF_INITSYSTEM_MODULE_NAME,
     .description = "Print init system (pid 1) name and version",
@@ -114,14 +124,3 @@ FFModuleBaseInfo ffInitSystemModuleInfo = {
         {"Init system pid", "pid"},
     }))
 };
-
-void ffInitInitSystemOptions(FFInitSystemOptions* options)
-{
-    options->moduleInfo = ffInitSystemModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
-}
-
-void ffDestroyInitSystemOptions(FFInitSystemOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

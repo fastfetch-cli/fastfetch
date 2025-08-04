@@ -1,16 +1,15 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 #include "common/percent.h"
 
 typedef struct FFCPUUsageOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     bool separate;
     FFPercentageModuleConfig percent;
     uint32_t waitTime; // in ms
 } FFCPUUsageOptions;
+
+static_assert(sizeof(FFCPUUsageOptions) <= FF_OPTION_MAX_SIZE, "FFCPUUsageOptions size exceeds maximum allowed size");
