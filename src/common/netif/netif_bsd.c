@@ -52,6 +52,9 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
 {
+    if (preferredSourceAddr)
+        *preferredSourceAddr = 0;
+
     #if defined(__OpenBSD__) || defined(__DragonFly__)
     int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY};
     size_t needed;

@@ -101,6 +101,9 @@ static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
 
     ssize_t received = recvfrom(sock_fd, buffer, (size_t)peek_size, 0,
                                 (struct sockaddr*)&src_addr, &src_addr_len);
+    if (received != peek_size) {
+        return false;
+    }
 
     struct Route4Entry best_gw;
     memset(&best_gw, 0, sizeof(best_gw));
@@ -124,7 +127,7 @@ static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
         entry.prefix_length = rtm->rtm_dst_len;
 
         // Parse route attributes
-        uint64_t rtm_len = RTM_PAYLOAD(nlh);
+        size_t rtm_len = RTM_PAYLOAD(nlh);
         for (struct rtattr* rta = RTM_RTA(rtm);
             RTA_OK(rta, rtm_len);
             rta = RTA_NEXT(rta, rtm_len)) {

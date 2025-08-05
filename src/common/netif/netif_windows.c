@@ -6,6 +6,9 @@
 
 bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
 {
+    if (preferredSourceAddr)
+        *preferredSourceAddr = 0;
+
     PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
 
     if (!NETIO_SUCCESS(GetIpForwardTable2(AF_UNSPEC, &pIpForwardTable)))
