@@ -4,8 +4,11 @@
 #include <ws2tcpip.h> // AF_INET6, IN6_IS_ADDR_UNSPECIFIED
 #include <iphlpapi.h>
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
+bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
 {
+    if (preferredSourceAddr)
+        *preferredSourceAddr = 0;
+
     PMIB_IPFORWARD_TABLE2 pIpForwardTable = NULL;
 
     if (!NETIO_SUCCESS(GetIpForwardTable2(AF_UNSPEC, &pIpForwardTable)))

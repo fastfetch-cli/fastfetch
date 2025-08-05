@@ -11,8 +11,11 @@
 
 // loosely based on Haiku's src/bin/network/route/route.cpp
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
+bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
 {
+    if (preferredSourceAddr)
+        *preferredSourceAddr = 0;
+
     // TODO: AF_INET6
     FF_AUTO_CLOSE_FD int pfRoute = socket(AF_INET, SOCK_RAW, AF_INET);
     if (pfRoute < 0)
