@@ -53,7 +53,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
                 options->dsForceDrm = yyjson_get_bool(val) ? FF_DS_FORCE_DRM_TYPE_TRUE : FF_DS_FORCE_DRM_TYPE_FALSE;
         }
         #elif defined(_WIN32)
-        else if (ffStrEqualsIgnCase(key, "wmiTimeout"))
+        else if (unsafe_yyjson_equals_str(key, "wmiTimeout"))
             options->wmiTimeout = (int32_t) yyjson_get_int(val);
         #endif
 
