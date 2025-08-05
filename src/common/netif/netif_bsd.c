@@ -84,7 +84,7 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
                 // Get the preferred source address
                 struct sockaddr_in* src = (struct sockaddr_in*)get_rt_address(rtm, RTA_IFA);
                 if (preferredSourceAddr && src && src->sin_family == AF_INET)
-                    *preferredSourceAddr = src->sin_addr;
+                    *preferredSourceAddr = src->sin_addr.s_addr;
 
                 return true;
             }
@@ -149,7 +149,7 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
                 // Get the preferred source address
                 struct sockaddr_in* src = (struct sockaddr_in*)get_rt_address(&rtmsg.hdr, RTA_IFA);
                 if (preferredSourceAddr && src && src->sin_family == AF_INET)
-                    *preferredSourceAddr = src->sin_addr;
+                    *preferredSourceAddr = src->sin_addr.s_addr;
 
                 return true;
             }

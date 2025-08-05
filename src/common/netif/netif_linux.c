@@ -1,5 +1,6 @@
 #include "netif.h"
 #include "common/io/io.h"
+#include "util/mallocHelper.h"
 
 #include <arpa/inet.h>
 #include <linux/rtnetlink.h>
@@ -26,7 +27,7 @@ struct Route4Entry {
 
 static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
 {
-    int sock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
+    FF_AUTO_CLOSE_FD int sock_fd = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
     if (sock_fd < 0)
         return false;
 
@@ -38,7 +39,6 @@ static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
     addr.nl_groups = 0;
 
     if (bind(sock_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-        close(sock_fd);
         return false;
     }
 
@@ -78,7 +78,6 @@ static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
                           (struct sockaddr*)&dest_addr, sizeof(dest_addr));
 
     if (sent != sizeof(req)) {
-        close(sock_fd);
         return false;
     }
 
@@ -95,16 +94,13 @@ static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
 
     ssize_t peek_size = recvmsg(sock_fd, &msg, MSG_PEEK | MSG_TRUNC);
     if (peek_size < 0) {
-        close(sock_fd);
         return false;
     }
 
-    uint8_t *buffer = malloc((size_t)peek_size);
+    FF_AUTO_FREE uint8_t* buffer = malloc((size_t)peek_size);
 
     ssize_t received = recvfrom(sock_fd, buffer, (size_t)peek_size, 0,
                                 (struct sockaddr*)&src_addr, &src_addr_len);
-
-    close(sock_fd);
 
     struct Route4Entry best_gw;
     memset(&best_gw, 0, sizeof(best_gw));
@@ -159,8 +155,6 @@ static bool getDefaultRouteIPv4(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
             memcpy(&best_gw, &entry, sizeof(struct Route4Entry));
         }
     }
-
-    free(buffer);
 
     if (best_gw.gateway != 0) {
         if (ifIndex) {
