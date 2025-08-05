@@ -50,7 +50,7 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
     return NULL;
 }
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
+bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
 {
     #if defined(__OpenBSD__) || defined(__DragonFly__)
     int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY};
@@ -80,6 +80,12 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
                 memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);
                 iface[sdl->sdl_nlen] = '\0';
                 *ifIndex = sdl->sdl_index;
+
+                // Get the preferred source address
+                struct sockaddr_in* src = (struct sockaddr_in*)get_rt_address(rtm, RTA_IFA);
+                if (preferredSourceAddr && src && src->sin_family == AF_INET)
+                    *preferredSourceAddr = src->sin_addr;
+
                 return true;
             }
         }
@@ -108,7 +114,7 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
             .rtm_type = RTM_GET,
             .rtm_flags = RTF_UP | RTF_GATEWAY,
             .rtm_version = RTM_VERSION,
-            .rtm_addrs = RTA_DST | RTA_IFP,
+            .rtm_addrs = RTA_DST | RTA_IFP | RTA_IFA,
             .rtm_msglen = sizeof(rtmsg.hdr) + sizeof(rtmsg.dst),
             .rtm_pid = pid,
             .rtm_seq = 1,
@@ -139,6 +145,12 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex)
                 memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);
                 iface[sdl->sdl_nlen] = '\0';
                 *ifIndex = sdl->sdl_index;
+
+                // Get the preferred source address
+                struct sockaddr_in* src = (struct sockaddr_in*)get_rt_address(&rtmsg.hdr, RTA_IFA);
+                if (preferredSourceAddr && src && src->sin_family == AF_INET)
+                    *preferredSourceAddr = src->sin_addr;
+
                 return true;
             }
             return false;
