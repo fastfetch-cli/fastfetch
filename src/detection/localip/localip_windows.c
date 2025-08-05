@@ -127,6 +127,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
         {
+            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) && ifa->DadState != IpDadStatePreferred)
+                continue;
+
             if (ifa->Address.lpSockaddr->sa_family == AF_INET)
             {
                 if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) continue;
