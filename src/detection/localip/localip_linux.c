@@ -221,7 +221,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
             snprintf(addressBuffer, ARRAY_SIZE(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRouteIf, flags, false);
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
