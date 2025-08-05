@@ -166,7 +166,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
             struct sockaddr_in* ipv4 = (struct sockaddr_in*) ifa->ifa_addr;
 
-            bool isDefaultRoute = isDefaultRouteIf && preferredSourceAddr != 0 && ipv4->sin_addr.s_addr == preferredSourceAddr;
+            bool isDefaultRoute = isDefaultRouteIf && (preferredSourceAddr == 0 || ipv4->sin_addr.s_addr == preferredSourceAddr);
             if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
                 continue;
 
