@@ -12,30 +12,28 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
     if (!object) return NULL;
     if (!yyjson_is_obj(object)) return "Property 'general' must be an object";
 
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(object, idx, max, key_, val)
+    yyjson_obj_foreach(object, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-
-        if (ffStrEqualsIgnCase(key, "thread"))
+        if (unsafe_yyjson_equals_str(key, "thread"))
             options->multithreading = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "processingTimeout"))
+        else if (unsafe_yyjson_equals_str(key, "processingTimeout"))
             options->processingTimeout = (int32_t) yyjson_get_int(val);
-        else if (ffStrEqualsIgnCase(key, "preRun"))
+        else if (unsafe_yyjson_equals_str(key, "preRun"))
         {
             if (!yyjson_is_str(val))
                 return "general.preRun must be a string";
             if (system(unsafe_yyjson_get_str(val)) < 0)
                 return "Failed to execute preRun command";
         }
-        else if (ffStrEqualsIgnCase(key, "detectVersion"))
+        else if (unsafe_yyjson_equals_str(key, "detectVersion"))
             options->detectVersion = yyjson_get_bool(val);
 
         #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
-        else if (ffStrEqualsIgnCase(key, "playerName"))
+        else if (unsafe_yyjson_equals_str(key, "playerName"))
             ffStrbufSetJsonVal(&options->playerName, val);
-        else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
+        else if (unsafe_yyjson_equals_str(key, "dsForceDrm"))
         {
             if (yyjson_is_str(val))
             {
@@ -126,6 +124,8 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
     yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);
 
     yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
+
+    yyjson_mut_obj_add_bool(doc, obj, "detectVersion", options->detectVersion);
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 

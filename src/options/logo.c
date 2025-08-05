@@ -269,13 +269,11 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
 
     if (!yyjson_is_obj(object)) return "Property 'logo' must be an object";
 
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(object, idx, max, key_, val)
+    yyjson_obj_foreach(object, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-
-        if (ffStrEqualsIgnCase(key, "type"))
+        if (unsafe_yyjson_equals_str(key, "type"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -302,22 +300,21 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->type = (FFLogoType) value;
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "source"))
+        else if (unsafe_yyjson_equals_str(key, "source"))
         {
             ffStrbufSetJsonVal(&options->source, val);
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "color"))
+        else if (unsafe_yyjson_equals_str(key, "color"))
         {
             if (!yyjson_is_obj(val))
                 return "Property 'color' must be an object";
 
-            yyjson_val *key_c, *valc;
+            yyjson_val *keyc, *valc;
             size_t idxc, maxc;
-            yyjson_obj_foreach(val, idxc, maxc, key_c, valc)
+            yyjson_obj_foreach(val, idxc, maxc, keyc, valc)
             {
-                const char* keyc = yyjson_get_str(key_c);
-                uint32_t index = (uint32_t) strtoul(keyc, NULL, 10);
+                uint32_t index = (uint32_t) strtoul(unsafe_yyjson_get_str(keyc), NULL, 10);
                 if (index < 1 || index > FASTFETCH_LOGO_MAX_COLORS)
                     return "Keys of property 'color' must be a number between 1 to 9";
 
@@ -325,7 +322,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "width"))
+        else if (unsafe_yyjson_equals_str(key, "width"))
         {
             if (yyjson_is_null(val))
                 options->width = 0;
@@ -338,7 +335,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "height"))
+        else if (unsafe_yyjson_equals_str(key, "height"))
         {
             if (yyjson_is_null(val))
                 options->height = 0;
@@ -351,7 +348,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             }
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "padding"))
+        else if (unsafe_yyjson_equals_str(key, "padding"))
         {
             if (!yyjson_is_obj(val))
                 return "Logo padding must be an object";
@@ -370,24 +367,22 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             #undef FF_PARSE_PADDING_POSITON
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "printRemaining"))
+        else if (unsafe_yyjson_equals_str(key, "printRemaining"))
         {
             options->printRemaining = yyjson_get_bool(val);
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "preserveAspectRatio"))
+        else if (unsafe_yyjson_equals_str(key, "preserveAspectRatio"))
         {
             options->preserveAspectRatio = yyjson_get_bool(val);
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "recache"))
+        else if (unsafe_yyjson_equals_str(key, "recache"))
         {
             options->recache = yyjson_get_bool(val);
             continue;
         }
-        else if(ffStrEqualsIgnCase(key, "separate"))
-            return "logo.separate has been renamed to logo.position\n";
-        else if (ffStrEqualsIgnCase(key, "position"))
+        else if (unsafe_yyjson_equals_str(key, "position"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -401,7 +396,7 @@ const char* ffOptionsParseLogoJsonConfig(FFOptionsLogo* options, yyjson_val* roo
             options->position = (FFLogoPosition) value;
             continue;
         }
-        else if (ffStrEqualsIgnCase(key, "chafa"))
+        else if (unsafe_yyjson_equals_str(key, "chafa"))
         {
             if (!yyjson_is_obj(val))
                 return "Chafa config must be an object";

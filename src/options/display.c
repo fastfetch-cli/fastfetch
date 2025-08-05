@@ -13,13 +13,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
     if (!object) return NULL;
     if (!yyjson_is_obj(object)) return "Property 'display' must be an object";
 
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(object, idx, max, key_, val)
+    yyjson_obj_foreach(object, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-
-        if (ffStrEqualsIgnCase(key, "stat"))
+        if (unsafe_yyjson_equals_str(key, "stat"))
         {
             if (yyjson_is_bool(val))
             {
@@ -39,21 +37,21 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             else
                 return "display.stat must be a boolean or a positive integer";
         }
-        else if (ffStrEqualsIgnCase(key, "pipe"))
+        else if (unsafe_yyjson_equals_str(key, "pipe"))
             options->pipe = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "showErrors"))
+        else if (unsafe_yyjson_equals_str(key, "showErrors"))
             options->showErrors = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "disableLinewrap"))
+        else if (unsafe_yyjson_equals_str(key, "disableLinewrap"))
             options->disableLinewrap = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "hideCursor"))
+        else if (unsafe_yyjson_equals_str(key, "hideCursor"))
             options->hideCursor = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "separator"))
+        else if (unsafe_yyjson_equals_str(key, "separator"))
             ffStrbufSetJsonVal(&options->keyValueSeparator, val);
-        else if (ffStrEqualsIgnCase(key, "color"))
+        else if (unsafe_yyjson_equals_str(key, "color"))
         {
             if (yyjson_is_str(val))
             {
-                ffOptionParseColor(yyjson_get_str(val), &options->colorKeys);
+                ffOptionParseColor(unsafe_yyjson_get_str(val), &options->colorKeys);
                 ffStrbufSet(&options->colorTitle, &options->colorKeys);
             }
             else if (yyjson_is_obj(val))
@@ -74,9 +72,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             else
                 return "display.color must be either a string or an object";
         }
-        else if (ffStrEqualsIgnCase(key, "brightColor"))
+        else if (unsafe_yyjson_equals_str(key, "brightColor"))
             options->brightColor = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "duration"))
+        else if (unsafe_yyjson_equals_str(key, "duration"))
         {
             if (!yyjson_is_obj(val))
                 return "display.duration must be an object";
@@ -98,7 +96,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 options->durationSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
         }
-        else if (ffStrEqualsIgnCase(key, "size"))
+        else if (unsafe_yyjson_equals_str(key, "size"))
         {
             if (!yyjson_is_obj(val))
                 return "display.size must be an object";
@@ -154,7 +152,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 options->sizeSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
         }
-        else if (ffStrEqualsIgnCase(key, "temp"))
+        else if (unsafe_yyjson_equals_str(key, "temp"))
         {
             if (!yyjson_is_obj(val))
                 return "display.temp must be an object";
@@ -211,7 +209,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 options->tempSpaceBeforeUnit = (FFSpaceBeforeUnitType) value;
             }
         }
-        else if (ffStrEqualsIgnCase(key, "percent"))
+        else if (unsafe_yyjson_equals_str(key, "percent"))
         {
             if (!yyjson_is_obj(val))
                 return "display.percent must be an object";
@@ -259,7 +257,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_val* width = yyjson_obj_get(val, "width");
             if (width) options->percentWidth = (uint8_t) yyjson_get_uint(width);
         }
-        else if (ffStrEqualsIgnCase(key, "bar"))
+        else if (unsafe_yyjson_equals_str(key, "bar"))
         {
             if (yyjson_is_obj(val))
             {
@@ -369,7 +367,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             else
                 return "display.bar must be an object";
         }
-        else if (ffStrEqualsIgnCase(key, "fraction"))
+        else if (unsafe_yyjson_equals_str(key, "fraction"))
         {
             if (yyjson_is_obj(val))
             {
@@ -386,11 +384,9 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             else
                 return "display.fraction must be an object";
         }
-        else if (ffStrEqualsIgnCase(key, "noBuffer"))
+        else if (unsafe_yyjson_equals_str(key, "noBuffer"))
             options->noBuffer = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "keyWidth"))
-            return "display.keyWidth has been renamed to display.key.width";
-        else if (ffStrEqualsIgnCase(key, "key"))
+        else if (unsafe_yyjson_equals_str(key, "key"))
         {
             if (yyjson_is_obj(val))
             {
@@ -420,7 +416,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             else
                 return "display.key must be an object";
         }
-        else if (ffStrEqualsIgnCase(key, "constants"))
+        else if (unsafe_yyjson_equals_str(key, "constants"))
         {
             if (!yyjson_is_arr(val))
                 return "display.constants must be an array";
@@ -429,7 +425,7 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             yyjson_arr_foreach(val, idx, max, item)
                 ffStrbufInitJsonVal(ffListAdd(&options->constants), item);
         }
-        else if (ffStrEqualsIgnCase(key, "freq"))
+        else if (unsafe_yyjson_equals_str(key, "freq"))
         {
             if (!yyjson_is_obj(val))
                 return "display.freq must be an object";
