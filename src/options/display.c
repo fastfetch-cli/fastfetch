@@ -765,7 +765,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
     options->hideCursor = false;
     options->sizeBinaryPrefix = FF_SIZE_BINARY_PREFIX_TYPE_IEC;
     options->sizeNdigits = 2;
-    options->sizeMaxPrefix = UINT8_MAX;
+    options->sizeMaxPrefix = 8; // YB
     options->sizeSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
 
     options->stat = -1;
