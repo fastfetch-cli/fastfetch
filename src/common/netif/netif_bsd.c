@@ -42,11 +42,8 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
     return NULL;
 }
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
+bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 {
-    if (preferredSourceAddr)
-        *preferredSourceAddr = 0;
-
     //https://github.com/hashPirate/copenheimer-masscan-fork/blob/36f1ed9f7b751a7dccd5ed27874e2e703db7d481/src/rawsock-getif.c#L104
 
     FF_AUTO_CLOSE_FD int pfRoute = socket(PF_ROUTE, SOCK_RAW, AF_INET);
@@ -98,14 +95,80 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
             )
             {
                 assert(sdl->sdl_nlen <= IF_NAMESIZE);
-                memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);
-                iface[sdl->sdl_nlen] = '\0';
-                *ifIndex = sdl->sdl_index;
+                memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
+                result->ifName[sdl->sdl_nlen] = '\0';
+                result->ifIndex = sdl->sdl_index;
 
                 // Get the preferred source address
                 struct sockaddr_in* src = (struct sockaddr_in*)get_rt_address(&rtmsg.hdr, RTA_IFA);
-                if (preferredSourceAddr && src && src->sin_family == AF_INET)
-                    *preferredSourceAddr = src->sin_addr.s_addr;
+                if (src && src->sin_family == AF_INET)
+                    result->preferredSourceAddrV4 = src->sin_addr.s_addr;
+
+                return true;
+            }
+            return false;
+        }
+    }
+
+    return false;
+}
+
+bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
+{
+    //https://github.com/hashPirate/copenheimer-masscan-fork/blob/36f1ed9f7b751a7dccd5ed27874e2e703db7d481/src/rawsock-getif.c#L104
+
+    FF_AUTO_CLOSE_FD int pfRoute = socket(PF_ROUTE, SOCK_RAW, AF_INET6);
+    if (pfRoute < 0)
+        return false;
+
+    {
+        struct timeval timeout = {1, 0};
+        setsockopt(pfRoute, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout));
+        setsockopt(pfRoute, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout, sizeof(timeout));
+    }
+
+    int pid = getpid();
+
+    struct {
+        struct rt_msghdr hdr;
+        struct sockaddr_in6 dst;
+        uint8_t data[512];
+    } rtmsg = {
+        .hdr = {
+            .rtm_type = RTM_GET,
+            .rtm_flags = RTF_UP | RTF_GATEWAY,
+            .rtm_version = RTM_VERSION,
+            .rtm_addrs = RTA_DST | RTA_IFP | RTA_IFA,
+            .rtm_msglen = sizeof(rtmsg.hdr) + sizeof(rtmsg.dst),
+            .rtm_pid = pid,
+            .rtm_seq = 1,
+        },
+        .dst = {
+            .sin6_family = AF_INET6,
+            #ifndef __sun
+            .sin6_len = sizeof(rtmsg.dst),
+            #endif
+        },
+    };
+
+    if (write(pfRoute, &rtmsg, rtmsg.hdr.rtm_msglen) != rtmsg.hdr.rtm_msglen)
+        return false;
+
+    while (read(pfRoute, &rtmsg, sizeof(rtmsg)) > 0)
+    {
+        if (rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == pid)
+        {
+            struct sockaddr_dl* sdl = (struct sockaddr_dl *)get_rt_address(&rtmsg.hdr, RTA_IFP);
+            if (sdl
+                #ifndef __sun
+                && sdl->sdl_len
+                #endif
+            )
+            {
+                assert(sdl->sdl_nlen <= IF_NAMESIZE);
+                memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
+                result->ifName[sdl->sdl_nlen] = '\0';
+                result->ifIndex = sdl->sdl_index;
 
                 return true;
             }

@@ -11,12 +11,8 @@
 
 // loosely based on Haiku's src/bin/network/route/route.cpp
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
+bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 {
-    if (preferredSourceAddr)
-        *preferredSourceAddr = 0;
-
-    // TODO: AF_INET6
     FF_AUTO_CLOSE_FD int pfRoute = socket(AF_INET, SOCK_RAW, AF_INET);
     if (pfRoute < 0)
         return false;
@@ -45,8 +41,9 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
 
     while (interface < end) {
         if (interface->ifr_route.flags & RTF_DEFAULT) {
-            strlcpy(iface, interface->ifr_name, IF_NAMESIZE);
-            *ifIndex = if_nametoindex(interface->ifr_name);
+            strlcpy(result->ifName, interface->ifr_name, IF_NAMESIZE);
+            result->ifIndex = if_nametoindex(interface->ifr_name);
+            // TODO: Get the preferred source address
             return true;
         }
 
@@ -62,5 +59,11 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
             + sizeof(struct route_entry) + addressSize);
     }
 
+    return false;
+}
+
+bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
+{
+    // TODO: AF_INET6
     return false;
 }

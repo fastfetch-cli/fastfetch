@@ -7,6 +7,7 @@
 #include <net/if_dl.h>
 #include <net/route.h>
 #include <netinet/in.h>
+#include <netinet6/in6.h>
 #include <sys/socket.h>
 #include <sys/sysctl.h>
 
@@ -35,11 +36,8 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
     return NULL;
 }
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, uint32_t* preferredSourceAddr)
+bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 {
-    if (preferredSourceAddr)
-        *preferredSourceAddr = 0;
-
     int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET, NET_RT_FLAGS, RTF_GATEWAY};
     size_t needed;
 
@@ -64,14 +62,52 @@ bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex, 
             if (sdl->sdl_family == AF_LINK)
             {
                 assert(sdl->sdl_nlen <= IF_NAMESIZE);
-                memcpy(iface, sdl->sdl_data, sdl->sdl_nlen);
-                iface[sdl->sdl_nlen] = '\0';
-                *ifIndex = sdl->sdl_index;
+                memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
+                result->ifName[sdl->sdl_nlen] = '\0';
+                result->ifIndex = sdl->sdl_index;
 
                 // Get the preferred source address
                 struct sockaddr_in* src = (struct sockaddr_in*)get_rt_address(rtm, RTA_IFA);
-                if (preferredSourceAddr && src && src->sin_family == AF_INET)
-                    *preferredSourceAddr = src->sin_addr.s_addr;
+                if (src && src->sin_family == AF_INET)
+                    result->preferredSourceAddrV4 = src->sin_addr.s_addr;
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
+{
+    int mib[6] = {CTL_NET, PF_ROUTE, 0, AF_INET6, NET_RT_FLAGS, RTF_GATEWAY};
+    size_t needed;
+
+    if (sysctl(mib, 6, NULL, &needed, NULL, 0) < 0)
+        return false;
+
+    FF_AUTO_FREE char* buf = malloc(needed);
+
+    if (sysctl(mib, 6, buf, &needed, NULL, 0) < 0)
+        return false;
+
+    char* lim = buf + needed;
+    struct rt_msghdr* rtm;
+    for (char* next = buf; next < lim; next += rtm->rtm_msglen)
+    {
+        rtm = (struct rt_msghdr *)next;
+        struct sockaddr* sa = (struct sockaddr *)(rtm + 1);
+
+        if ((rtm->rtm_flags & RTF_GATEWAY) && (sa->sa_family == AF_INET6))
+        {
+            struct sockaddr_dl* sdl = (struct sockaddr_dl *)get_rt_address(rtm, RTA_IFP);
+            if (sdl && sdl->sdl_family == AF_LINK)
+            {
+                assert(sdl->sdl_nlen <= IF_NAMESIZE);
+                memcpy(result->ifName, sdl->sdl_data, sdl->sdl_nlen);
+                result->ifName[sdl->sdl_nlen] = '\0';
+                result->ifIndex = sdl->sdl_index;
 
                 return true;
             }

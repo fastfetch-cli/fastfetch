@@ -16,7 +16,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
     if (!kc)
         return "kstat_open() failed";
 
-    const char* defaultRoute = ffNetifGetDefaultRouteIfName();
+    const char* defaultRouteIfName = ffNetifGetDefaultRouteV4()->ifName;
 
     for (kstat_t* ks = kc->kc_chain; ks; ks = ks->ks_next)
     {
