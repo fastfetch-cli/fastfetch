@@ -7,7 +7,6 @@
 #include <net/if_dl.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include <netinet6/in6.h>
 #include <sys/socket.h>
 #include <sys/sysctl.h>
 

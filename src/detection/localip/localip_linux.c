@@ -157,7 +157,7 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
     if (ioctl(sockfd, SIOCGIFAFLAG_IN6, &ifr6) != 0)
         return true;
 
-    return !(ifr6.ifr_flags & IN6_IFF_DEPRECATED) && !(ifr6.ifr_flags & IN6_IFF_TEMPORARY);
+    return !(ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_DEPRECATED) && !(ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_TEMPORARY);
 #elif __linux__
     FF_UNUSED(ifname);
 
