@@ -25,7 +25,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
         if (options->namePrefix.length && strncmp(ks->ks_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        bool isDefaultRoute = ffStrEquals(ks->ks_name, defaultRoute);
+        bool isDefaultRoute = ffStrEquals(ks->ks_name, defaultRouteIfName);
         if (options->defaultRouteOnly && !isDefaultRoute)
             continue;
 
