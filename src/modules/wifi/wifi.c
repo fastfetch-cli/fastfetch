@@ -207,7 +207,7 @@ void ffInitWifiOptions(FFWifiOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+    options->percent = (FFPercentageModuleConfig) { 75, 50, 0 };
 }
 
 void ffDestroyWifiOptions(FFWifiOptions* options)
