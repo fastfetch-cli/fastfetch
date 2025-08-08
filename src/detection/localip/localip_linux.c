@@ -171,8 +171,15 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
 
     if (ioctl(sockfd, SIOCGIFAFLAG_IN6, &ifr6) != 0)
         return true;
-
-    return !(ifr6.ifr_ifru.ifru_flags6 & (IN6_IFF_DEPRECATED | IN6_IFF_TEMPORARY | IN6_IFF_TENTATIVE | IN6_IFF_DUPLICATED | IN6_IFF_OPTIMISTIC));
+    #ifdef IN6_IFF_PREFER_SOURCE
+        if (ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_PREFER_SOURCE)
+            return true;
+    #endif
+    return !(ifr6.ifr_ifru.ifru_flags6 & (IN6_IFF_DEPRECATED | IN6_IFF_TEMPORARY | IN6_IFF_TENTATIVE | IN6_IFF_DUPLICATED
+        #ifdef IN6_IFF_OPTIMISTIC
+             | IN6_IFF_OPTIMISTIC
+        #endif
+    ));
 #elif __linux__
     FF_UNUSED(ifname);
 
