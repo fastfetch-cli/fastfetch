@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <inttypes.h>
+#include <fcntl.h>
 
 #ifdef __linux__
 #include <linux/ethtool.h>
@@ -142,12 +143,26 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
 #define IN6_IS_ADDR_GLOBAL(a) \
         ((((const uint32_t *) (a))[0] & htonl(0x70000000)) == htonl(0x20000000))
 #endif
-    if (!IN6_IS_ADDR_GLOBAL(&addr->sin6_addr))
+#ifndef IN6_IS_ADDR_UNIQUE_LOCAL
+#define IN6_IS_ADDR_UNIQUE_LOCAL(a) \
+        ((((const uint32_t *) (a))[0] & htonl(0xfe000000)) == htonl(0xfc000000))
+#endif
+    if (!IN6_IS_ADDR_GLOBAL(&addr->sin6_addr) && !IN6_IS_ADDR_UNIQUE_LOCAL(&addr->sin6_addr))
         return false;
 
 #ifdef SIOCGIFAFLAG_IN6
     static int sockfd = 0;
-    if (sockfd == 0) sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (sockfd == 0)
+    {
+        sockfd = socket(AF_INET6, SOCK_DGRAM
+            #ifdef SOCK_CLOEXEC
+            | SOCK_CLOEXEC
+            #endif
+        , 0);
+        #ifndef SOCK_CLOEXEC
+        if (sockfd > 0) fcntl(sockfd, F_SETFD, FD_CLOEXEC);
+        #endif
+    }
     if (sockfd < 0) return true; // Give up
 
     struct in6_ifreq ifr6 = {};
@@ -157,7 +172,7 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
     if (ioctl(sockfd, SIOCGIFAFLAG_IN6, &ifr6) != 0)
         return true;
 
-    return !(ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_DEPRECATED) && !(ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_TEMPORARY);
+    return !(ifr6.ifr_ifru.ifru_flags6 & (IN6_IFF_DEPRECATED | IN6_IFF_TEMPORARY | IN6_IFF_TENTATIVE | IN6_IFF_DUPLICATED | IN6_IFF_OPTIMISTIC));
 #elif __linux__
     FF_UNUSED(ifname);
 
@@ -181,9 +196,8 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
                     &entry->s6_addr[8], &entry->s6_addr[9], &entry->s6_addr[10], &entry->s6_addr[11],
                     &entry->s6_addr[12], &entry->s6_addr[13], &entry->s6_addr[14], &entry->s6_addr[15],
                     &flags) != 17 ||
-                !IN6_IS_ADDR_GLOBAL(entry) ||
-                (flags & IFA_F_DEPRECATED) ||
-                (flags & IFA_F_TEMPORARY)
+                (!IN6_IS_ADDR_GLOBAL(entry) && !IN6_IS_ADDR_UNIQUE_LOCAL(entry)) ||
+                (flags & (IFA_F_DEPRECATED | IFA_F_TEMPORARY | IFA_F_TENTATIVE | IFA_F_DADFAILED | IFA_F_OPTIMISTIC))
             )
                 --addresses.length;
         }
