@@ -148,7 +148,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
     }
 }
 
-static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr)
+static bool isIPv6AddressPreferred(struct ifaddrs* ifa, struct sockaddr_in6* addr)
 {
 #ifndef IN6_IS_ADDR_GLOBAL
 #define IN6_IS_ADDR_GLOBAL(a) \
@@ -177,7 +177,7 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
     if (sockfd < 0) return true; // Give up
 
     struct in6_ifreq ifr6 = {};
-    ffStrCopy(ifr6.ifr_name, ifname, IFNAMSIZ);
+    ffStrCopy(ifr6.ifr_name, ifa->ifa_name, IFNAMSIZ);
     ifr6.ifr_addr = *addr;
 
     if (ioctl(sockfd, SIOCGIFAFLAG_IN6, &ifr6) != 0)
@@ -228,6 +228,10 @@ static bool isIPv6AddressPreferred(const char* ifname, struct sockaddr_in6* addr
             return true;
     }
     return false;
+#elif __sun
+    if (ifa->ifa_flags & IFF_PREFERRED)
+        return true;
+    return !(ifa->ifa_flags & (IFF_DEPRECATED | IFF_TEMPORARY | IFF_DUPLICATE));
 #else
     return true;
 #endif
@@ -306,7 +310,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
-            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) && !isIPv6AddressPreferred(ifa->ifa_name, ipv6))
+            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) && !isIPv6AddressPreferred(ifa, ipv6))
                 continue;
 
             char addressBuffer[INET6_ADDRSTRLEN + 16];
