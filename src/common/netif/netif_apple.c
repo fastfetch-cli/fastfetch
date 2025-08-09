@@ -41,12 +41,16 @@ get_rt_address(struct rt_msghdr *rtm, int desired)
             switch (sa->sa_family) {
             case AF_INET:
                 salen = sizeof (struct sockaddr_in);
+                break;
             case AF_LINK:
                 salen = sizeof (struct sockaddr_dl);
+                break;
             case AF_INET6:
                 salen = sizeof (struct sockaddr_in6);
+                break;
             default:
                 salen = sizeof (struct sockaddr);
+                break;
             }
             #endif
             sa = (struct sockaddr *)(ROUNDUP(salen) + (char *)sa);
