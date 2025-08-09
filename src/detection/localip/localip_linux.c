@@ -87,7 +87,7 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     {},
 };
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, uint32_t flags, bool firstOnly)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, uint64_t flags, bool firstOnly)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -244,7 +244,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        uint32_t flags = options->showType & FF_LOCALIP_TYPE_FLAGS_BIT ? ifa->ifa_flags : 0;
+        uint64_t flags = options->showType & FF_LOCALIP_TYPE_FLAGS_BIT ? ifa->ifa_flags : 0;
 
         if (ifa->ifa_addr->sa_family == AF_INET)
         {

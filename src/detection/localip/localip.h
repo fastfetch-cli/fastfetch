@@ -21,7 +21,7 @@ typedef struct FFLocalIpNIFlag
     const char *name;
 } FFLocalIpNIFlag;
 
-static inline void ffLocalIpFillNIFlags(FFstrbuf *buf, uint32_t flag, const FFLocalIpNIFlag names[])
+static inline void ffLocalIpFillNIFlags(FFstrbuf *buf, uint64_t flag, const FFLocalIpNIFlag names[])
 {
     for (const FFLocalIpNIFlag *nf = names; flag && nf->name; ++nf)
     {
