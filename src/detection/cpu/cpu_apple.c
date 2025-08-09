@@ -72,14 +72,17 @@ static const char* detectFrequency(FFCPUResult* cpu)
 #else
 static const char* detectFrequency(FFCPUResult* cpu)
 {
-    cpu->frequencyBase = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency", 0) / 1000 / 1000);
-    cpu->frequencyMax = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000 / 1000);
-    if(cpu->frequencyBase == 0)
+    if (ffCPUDetectSpeedByCpuid(cpu) != NULL)
     {
-        unsigned current = 0;
-        size_t size = sizeof(current);
-        if (sysctl((int[]){ CTL_HW, HW_CPU_FREQ }, 2, &current, &size, NULL, 0) == 0)
-            cpu->frequencyBase = (uint32_t) (current / 1000 / 1000);
+        cpu->frequencyBase = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency", 0) / 1000 / 1000);
+        cpu->frequencyMax = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000 / 1000);
+        if(cpu->frequencyBase == 0)
+        {
+            unsigned current = 0;
+            size_t size = sizeof(current);
+            if (sysctl((int[]){ CTL_HW, HW_CPU_FREQ }, 2, &current, &size, NULL, 0) == 0)
+                cpu->frequencyBase = (uint32_t) (current / 1000 / 1000);
+        }
     }
     return NULL;
 }
