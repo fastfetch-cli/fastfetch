@@ -34,6 +34,16 @@
 #if defined(__sun) || defined(__HAIKU__)
 #include <sys/sockio.h>
 #endif
+#if defined(__sun)
+#include <kstat.h>
+
+static inline void kstatFreeWrap(kstat_ctl_t** pkc)
+{
+    assert(pkc);
+    if (*pkc)
+        kstat_close(*pkc);
+}
+#endif
 
 #define FF_LOCALIP_NIFLAG(name) { IFF_##name, #name }
 
@@ -768,6 +778,24 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     const uint8_t* ptr = (uint8_t*) ifr.ifr_addr.sa_data; // NOT ifr_enaddr
                     ffStrbufSetF(&iface->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
                                 ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
+                }
+                if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
+                {
+                    __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
+                    for (kstat_t* ks = kc->kc_chain; ks; ks = ks->ks_next)
+                    {
+                        if (!ffStrEquals(ks->ks_class, "net") || !ffStrEquals(ks->ks_module, "link")) continue;
+                        if (ffStrbufEqualS(&iface->name, ks->ks_name))
+                        {
+                            if (kstat_read(kc, ks, NULL) >= 0)
+                            {
+                                kstat_named_t* ifspeed = (kstat_named_t*) kstat_data_lookup(ks, "ifspeed");
+                                if (ifspeed)
+                                    iface->speed = (int32_t) (ifspeed->value.ui64 / 1000 / 1000);
+                            }
+                            break;
+                        }
+                    }
                 }
                 #endif
             }
