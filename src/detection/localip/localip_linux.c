@@ -202,7 +202,7 @@ static bool isIPv6AddressPreferred(struct ifaddrs* ifa, struct sockaddr_in6* add
         #endif
     ));
 #elif __linux__
-    FF_UNUSED(ifname);
+    FF_UNUSED(ifa);
 
     static FFlist addresses = {};
     if (addresses.elementSize == 0)
