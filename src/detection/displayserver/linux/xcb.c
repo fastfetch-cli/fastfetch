@@ -101,15 +101,7 @@ static void xcbFetchServerVendor(XcbPropertyData* data, xcb_connection_t* connec
     if(length <= 0)
         return;
 
-    //Why are xcb property strings not null terminated???
-    void* replyValue = malloc((size_t)length + 1);
-    memcpy(replyValue, data->ffxcb_setup_vendor(setup), (size_t) length);
-    ((char*) replyValue)[length] = '\0';
-
-    if (ffStrSet(replyValue))
-        ffStrbufSetS(&result->serverVendor, replyValue);
-
-    free(replyValue);
+    ffStrbufSetNS(&result->serverVendor, (uint32_t) length, data->ffxcb_setup_vendor(setup));
 }
 
 typedef struct XcbRandrData
