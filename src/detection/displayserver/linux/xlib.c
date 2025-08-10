@@ -70,8 +70,15 @@ static void x11FetchServerVendor(X11PropertyData* data, Display* display, FFDisp
         return;
 
     const char* serverVendor = data->ffXServerVendor(display);
-    if(ffStrSet(serverVendor))
+    if(ffStrSet(serverVendor)) {
         ffStrbufSetS(&result->serverVendor, serverVendor);
+
+        //Shorten Xorg vendor string
+        if (!ffStrbufCompS(&result->serverVendor, "The X.Org Foundation"))
+            ffStrbufSetS(&result->serverVendor, "Xorg");
+    }
+
+
 }
 
 typedef struct XrandrData

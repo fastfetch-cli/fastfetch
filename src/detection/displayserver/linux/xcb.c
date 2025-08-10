@@ -102,6 +102,10 @@ static void xcbFetchServerVendor(XcbPropertyData* data, xcb_connection_t* connec
         return;
 
     ffStrbufSetNS(&result->serverVendor, (uint32_t) length, data->ffxcb_setup_vendor(setup));
+
+    //Shorten Xorg vendor string
+    if (!ffStrbufCompS(&result->serverVendor, "The X.Org Foundation"))
+        ffStrbufSetS(&result->serverVendor, "Xorg");
 }
 
 typedef struct XcbRandrData
