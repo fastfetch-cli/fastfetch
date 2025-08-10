@@ -103,7 +103,9 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
     while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 1 && rtmsg.hdr.rtm_pid == pid))
         ;
 
+    #ifndef __sun // On Solaris, the RTF_GATEWAY flag is not set for default routes for some reason
     if ((rtmsg.hdr.rtm_flags & (RTF_UP | RTF_GATEWAY)) == (RTF_UP | RTF_GATEWAY))
+    #endif
     {
         struct sockaddr_dl* sdl = (struct sockaddr_dl *)get_rt_address(&rtmsg.hdr, RTA_IFP);
         if (sdl
@@ -174,7 +176,9 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
     while (recv(pfRoute, &rtmsg, sizeof(rtmsg), 0) > 0 && !(rtmsg.hdr.rtm_seq == 2 && rtmsg.hdr.rtm_pid == pid))
         ;
 
+    #ifndef __sun // On Solaris, the RTF_GATEWAY flag is not set for default routes for some reason
     if ((rtmsg.hdr.rtm_flags & (RTF_UP | RTF_GATEWAY)) == (RTF_UP | RTF_GATEWAY))
+    #endif
     {
         struct sockaddr_dl* sdl = (struct sockaddr_dl *)get_rt_address(&rtmsg.hdr, RTA_IFP);
         if (sdl
