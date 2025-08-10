@@ -61,6 +61,7 @@ const FFDisplayServerResult* ffConnectDisplayServer()
         ffStrbufInit(&result.wmProtocolName);
         ffStrbufInit(&result.deProcessName);
         ffStrbufInit(&result.dePrettyName);
+        ffStrbufInit(&result.serverVendor);
         ffListInit(&result.displays, sizeof(FFDisplayResult));
         ffConnectDisplayServerImpl(&result);
     }
