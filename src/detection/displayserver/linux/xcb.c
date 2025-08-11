@@ -6,6 +6,7 @@
 #include "common/time.h"
 #include "util/edidHelper.h"
 #include "util/mallocHelper.h"
+#include "util/stringUtils.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +25,9 @@ typedef struct XcbPropertyData
     FF_LIBRARY_SYMBOL(xcb_get_atom_name_name)
     FF_LIBRARY_SYMBOL(xcb_get_atom_name_name_length)
     FF_LIBRARY_SYMBOL(xcb_get_atom_name_reply)
+    FF_LIBRARY_SYMBOL(xcb_get_setup)
+    FF_LIBRARY_SYMBOL(xcb_setup_vendor)
+    FF_LIBRARY_SYMBOL(xcb_setup_vendor_length)
 } XcbPropertyData;
 
 static bool xcbInitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, XcbPropertyData* propertyData)
@@ -38,6 +42,9 @@ static bool xcbInitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, XcbProperty
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_name_length, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_atom_name_reply, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_get_setup, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_setup_vendor, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, xcb_setup_vendor_length, false)
 
     return true;
 }
@@ -84,6 +91,21 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
         return;
 
     ffStrbufSetS(&result->wmProcessName, wmName);
+}
+
+static void xcbFetchServerVendor(XcbPropertyData* data, xcb_connection_t* connection, FFDisplayServerResult* result)
+{
+    const xcb_setup_t* setup = data->ffxcb_get_setup(connection);
+
+    int length = data->ffxcb_setup_vendor_length(setup);
+    if(length <= 0)
+        return;
+
+    ffStrbufSetNS(&result->serverVendor, (uint32_t) length, data->ffxcb_setup_vendor(setup));
+
+    //Shorten Xorg vendor string
+    if (!ffStrbufCompS(&result->serverVendor, "The X.Org Foundation"))
+        ffStrbufSetS(&result->serverVendor, "Xorg");
 }
 
 typedef struct XcbRandrData
@@ -381,8 +403,10 @@ const char* ffdsConnectXcbRandr(FFDisplayServerResult* result)
     xcb_screen_iterator_t iterator = ffxcb_setup_roots_iterator(ffxcb_get_setup(data.connection));
 
 
-    if(iterator.rem > 0 && propertyDataInitialized)
+    if(iterator.rem > 0 && propertyDataInitialized) {
         xcbDetectWMfromEWMH(&data.propData, data.connection, iterator.data->root, result);
+        xcbFetchServerVendor(&data.propData, data.connection, result);
+    }
 
 
     while(iterator.rem > 0)
