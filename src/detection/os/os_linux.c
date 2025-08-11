@@ -89,6 +89,21 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->idLike, "ubuntu");
     }
 
+    if (ffPathExists("/usr/bin/lliurex-version", FF_PATHTYPE_FILE))
+	{
+        ffStrbufSetStatic(&result->name, "LliureX");
+        ffStrbufSetStatic(&result->id, "lliurex");
+        ffStrbufClear(&result->version);
+        if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+            "/usr/bin/lliurex-version",
+            NULL,
+        }) == NULL) // 8.2.2
+            ffStrbufTrimRightSpace(&result->version);
+        ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
+        ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return;
+	}
+
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Kubuntu");
@@ -166,15 +181,6 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->name, "Ubuntu Touch");
         ffStrbufSetF(&result->prettyName, "Ubuntu Touch %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-touch");
-        ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
-    }
-
-    if(ffStrContains(xdgConfigDirs, "lliurex"))
-    {
-        ffStrbufSetStatic(&result->name, "LliureX");
-        ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
-        ffStrbufSetStatic(&result->id, "lliurex");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
     }
