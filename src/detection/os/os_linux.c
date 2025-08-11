@@ -90,7 +90,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
     }
 
     if (ffPathExists("/usr/bin/lliurex-version", FF_PATHTYPE_FILE))
-	{
+    {
         ffStrbufSetStatic(&result->name, "LliureX");
         ffStrbufSetStatic(&result->id, "lliurex");
         ffStrbufClear(&result->version);
@@ -102,7 +102,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
-	}
+    }
 
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
