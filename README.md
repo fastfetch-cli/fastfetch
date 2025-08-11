@@ -57,7 +57,7 @@ If fastfetch is not packaged for your distribution or an outdated version is pac
 
 ### macOS
 
-* [HomeBrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
+* [Homebrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
 * [MacPorts](https://ports.macports.org/port/fastfetch/): `sudo port install fastfetch`
 
 ### Windows
