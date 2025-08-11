@@ -66,16 +66,9 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
 
 static void x11FetchServerVendor(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
 {
-    if(result->serverVendor.length > 0 || ffStrbufCompS(&result->wmProtocolName, FF_WM_PROTOCOL_WAYLAND) == 0)
-        return;
-
     const char* serverVendor = data->ffXServerVendor(display);
-    if(ffStrSet(serverVendor)) {
-        ffStrbufSetS(&result->serverVendor, serverVendor);
-
-        //Shorten Xorg vendor string
-        if (!ffStrbufCompS(&result->serverVendor, "The X.Org Foundation"))
-            ffStrbufSetS(&result->serverVendor, "Xorg");
+    if (serverVendor && !ffStrEquals(serverVendor, "The X.Org Foundation")) {
+        ffStrbufSetS(&result->wmProtocolName, serverVendor);
     }
 
 

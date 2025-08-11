@@ -91,7 +91,6 @@ typedef struct FFDisplayServerResult
     FFstrbuf wmProtocolName;
     FFstrbuf deProcessName;
     FFstrbuf dePrettyName;
-    FFstrbuf serverVendor;
     FFlist displays; //List of FFDisplayResult
 } FFDisplayServerResult;
 

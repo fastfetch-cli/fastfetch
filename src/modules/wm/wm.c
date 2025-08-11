@@ -42,13 +42,6 @@ void ffPrintWM(FFWMOptions* options)
             putchar(')');
         }
 
-        if(result->serverVendor.length > 0)
-        {
-            fputs(" [", stdout);
-            ffStrbufWriteTo(&result->serverVendor, stdout);
-            putchar(']');
-        }
-
         if(pluginName.length > 0)
         {
             fputs(" (with ", stdout);
