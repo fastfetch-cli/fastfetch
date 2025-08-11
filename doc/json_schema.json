@@ -1207,26 +1207,6 @@
                                 }
                             ]
                         },
-                        "charElapsed": {
-                            "type": "string",
-                            "description": "Set the character to use in elapsed part. Deprecated in v2.50.0",
-                            "default": "■"
-                        },
-                        "charTotal": {
-                            "type": "string",
-                            "description": "Set the character to use in total part. Deprecated in v2.50.0",
-                            "default": "-"
-                        },
-                        "borderLeft": {
-                            "type": "string",
-                            "description": "Set the string to use at left border. Deprecated in v2.50.0",
-                            "default": "[ "
-                        },
-                        "borderRight": {
-                            "type": "string",
-                            "description": "Set the string to use at right border. Deprecated in v2.50.0",
-                            "default": " ]"
-                        },
                         "width": {
                             "type": "integer",
                             "description": "Set the width of the bar, in number of characters",
