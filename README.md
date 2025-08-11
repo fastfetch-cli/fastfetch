@@ -94,7 +94,8 @@ See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 * Run with [all supported modules](https://github.com/fastfetch-cli/fastfetch/wiki/Support+Status#available-modules) to find what interests you: `fastfetch -c all.jsonc`
 * View all data that fastfetch detects: `fastfetch -s <module1>[:<module2>][:<module3>] --format json`
 * Display help messages: `fastfetch --help`
-* Generate a config file based on command line arguments: `fastfetch --arg1 --arg2 --gen-config`
+* Generate a minimal config file: `fastfetch [-s <module1>[:<module2>]] --gen-config [</path/to/config.jsonc>]`
+    * Use: `--gen-config-full` to generate a full config file with all optional options
 
 ## Customization
 

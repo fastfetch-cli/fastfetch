@@ -77,7 +77,16 @@
         },
         {
             "long": "gen-config",
-            "desc": "Generate a config file at the specified path with options from the command line (if any)",
+            "desc": "Generate a minimal config file at the specified path",
+            "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will print the generated config if <path> is \"-\"",
+            "arg": {
+                "type": "path",
+                "optional": true
+            }
+        },
+        {
+            "long": "gen-config-full",
+            "desc": "Generate a full config file with all optional options at the specified path",
             "remark": "Defaults to \"~/.config/fastfetch/config.jsonc\". Will print the generated config if <path> is \"-\"",
             "arg": {
                 "type": "path",

@@ -1,6 +1,9 @@
 # WIP
 
 Changes:
+* Keys in JSON configuration files are now case-sensitive, as stated in v2.49.0
+    * This is a breaking change, but it should not affect most users as long as your config file passes JSON schema validation.
+* All module config flags are removed, as stated in v2.49.0
 * Percent bar config `display.bar.*` options have been replaced with a more organized, nested object structure.
     * `display.bar.charElapsed` has been renamed to `display.bar.char.elapsed`.
     * `display.bar.charTotal` has been renamed to `display.bar.char.total`.
@@ -12,6 +15,19 @@ Features:
     * `display.bar.border: null` has been added as a shorthand to disable bar borders.
 * Add `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total and border sections of the percent bar.
     * `display.bar.color: null` has been added as a shorthand to disable bar colors.
+* Improve Bedrock linux detection (#1881, OS / Disk, Linux)
+* Add command flag `--gen-config-full` which generates a JSON config file that contains all optional module options.
+* Default IP address shown when `localip.showAllIPs` is not set is improved (LocalIP)
+    * For IPv4, preferred source address (if detected) is shown
+    * For IPv6, first GUA or ULA that is not deprecated nor temporary is shown
+* Support interface speed detection on SunOS (LocalIP, SunOS)
+* Detect Xlibre (#1888, WM, Linux)
+
+Bugfixes:
+* Fix possible segfault when parsing color strings in JSON config (#1878)
+* Fix gpu driver detection when DRM is used (GPU, FreeBSD)
+* Fix default route detection on DragonFly BSD (LocalIP, DFBSD)
+* Fix lliurex detection (#1882, OS, Linux)
 
 # 2.49.0
 
