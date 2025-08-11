@@ -89,7 +89,7 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->idLike, "ubuntu");
     }
 
-    if (ffPathExists("/etc/lliurex-cdd-version", FF_PATHTYPE_FILE))
+    if (ffPathExists("/usr/bin/lliurex-version", FF_PATHTYPE_FILE))
 	{
         ffStrbufSetStatic(&result->name, "LliureX");
         ffStrbufSetStatic(&result->id, "lliurex");
