@@ -421,7 +421,8 @@ static bool parseJsoncFile(const char* path, bool strictJson)
     return true;
 }
 
-static void generateConfigFile(bool force, const char* filePath)
+
+static void generateConfigFile(bool force, const char* filePath, bool fullConfig)
 {
     if (!filePath)
     {
@@ -435,9 +436,11 @@ static void generateConfigFile(bool force, const char* filePath)
 
     if (!force && ffPathExists(instance.state.genConfigPath.chars, FF_PATHTYPE_ANY))
     {
-        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config-force` to overwrite\n", instance.state.genConfigPath.chars);
+        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config%s-force` to overwrite\n", instance.state.genConfigPath.chars, fullConfig ? "-full" : "");
         exit(477);
     }
+
+    instance.state.fullConfig = fullConfig;
 }
 
 static void optionParseConfigFile(FFdata* data, const char* key, const char* value)
@@ -599,9 +602,13 @@ static void parseCommand(FFdata* data, char* key, char* value)
         exit(0);
     }
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
-        generateConfigFile(false, value);
+        generateConfigFile(false, value, false);
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
-        generateConfigFile(true, value);
+        generateConfigFile(true, value, false);
+    else if(ffStrEqualsIgnCase(key, "--gen-config-full"))
+        generateConfigFile(false, value, true);
+    else if(ffStrEqualsIgnCase(key, "--gen-config-full-force"))
+        generateConfigFile(true, value, true);
     else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--format"))
@@ -726,16 +733,21 @@ static void run(FFdata* data)
         ffFinish();
 }
 
-static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
+static void writeConfigFile(FFdata* data)
 {
+    const FFstrbuf* filename = &instance.state.genConfigPath;
+
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val* root = yyjson_mut_obj(doc);
     yyjson_mut_doc_set_root(doc, root);
-    yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json");
+    yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json");
 
-    ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
-    ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
-    ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
+    if (instance.state.fullConfig)
+    {
+        ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
+        ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
+        ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
+    }
     ffMigrateCommandOptionToJsonc(data, doc);
 
     if (ffStrbufEqualS(filename, "-"))
@@ -780,7 +792,7 @@ int main(int argc, char** argv)
     if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
         run(&data);
     else
-        writeConfigFile(&data, &instance.state.genConfigPath);
+        writeConfigFile(&data);
 
     ffStrbufDestroy(&data.structure);
 }

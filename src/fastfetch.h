@@ -54,6 +54,7 @@ typedef struct FFstate
     yyjson_doc* configDoc;
     yyjson_mut_doc* resultDoc;
     FFstrbuf genConfigPath;
+    bool fullConfig;
 } FFstate;
 
 typedef struct FFinstance
