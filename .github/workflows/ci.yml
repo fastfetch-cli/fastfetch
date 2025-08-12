@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install codespell
         shell: bash
@@ -29,7 +29,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: uname -a
         run: uname -a
@@ -68,7 +68,7 @@ jobs:
       ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: uname -a
         run: uname -a
@@ -137,7 +137,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: uname -a
         run: uname -a
@@ -198,7 +198,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -237,7 +237,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -273,7 +273,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -308,7 +308,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -343,7 +343,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: uraimo/run-on-arch-action@v3
@@ -374,7 +374,7 @@ jobs:
     name: Musl-amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: setup alpine linux
         uses: jirutka/setup-alpine@master
@@ -416,7 +416,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: uname -a
         run: uname -a
@@ -463,7 +463,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: uname -a
         run: uname -a
@@ -507,7 +507,7 @@ jobs:
     name: SunOS-amd64
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: vmactions/omnios-vm@v1
@@ -543,7 +543,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -580,7 +580,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -616,7 +616,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -653,7 +653,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: vmactions/dragonflybsd-vm@v1
@@ -688,7 +688,7 @@ jobs:
       contents: read
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: run VM
         uses: cross-platform-actions/action@master
@@ -726,7 +726,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
@@ -788,7 +788,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
