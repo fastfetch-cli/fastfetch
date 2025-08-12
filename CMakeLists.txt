@@ -547,6 +547,7 @@ if(LINUX)
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
+        src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_linux.c
         src/detection/processes/processes_linux.c
         src/detection/gtk_qt/qt.c
@@ -939,6 +940,7 @@ elseif(APPLE)
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
+        src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/processes/processes_bsd.c
         src/detection/sound/sound_apple.c
