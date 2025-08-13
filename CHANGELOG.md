@@ -30,6 +30,9 @@ Bugfixes:
 * Fix default route detection on DragonFly BSD (LocalIP, DFBSD)
 * Fix lliurex detection (#1882, OS, Linux)
 
+Logos:
+* Add ObsidianOS (#1890)
+
 # 2.49.0
 
 Deprecation Notice:
