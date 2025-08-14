@@ -15,9 +15,9 @@
         "bar": {
             "border": {
                 "left": "[",
-                "leftElapsed": "[─",
+                "leftElapsed": "[",
                 "right": "]",
-                "rightElapsed": "─]"
+                "rightElapsed": "]"
             },
             "char": {
                 "elapsed": "─",
@@ -27,7 +27,7 @@
                 "elapsed": "default",
                 "total": "light_black"
             },
-            "width": 14
+            "width": 16
         },
         "color": {
             "separator": "default",
