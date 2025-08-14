@@ -4,6 +4,7 @@ Changes:
 * Keys in JSON configuration files are now case-sensitive, as stated in v2.49.0
     * This is a breaking change, but it should not affect most users as long as your config file passes JSON schema validation.
 * All module config flags have been removed, as stated in v2.49.0
+    * To configure modules at command line, `echo '{"modules": [{"type":"custom","format":"Hello Fastfetch!"}]}' | fastfetch -c -` should be used instead.
 * Percent bar config `display.bar.*` options have been replaced with a more organized, nested object structure.
     * `display.bar.charElapsed` has been renamed to `display.bar.char.elapsed`.
     * `display.bar.charTotal` has been renamed to `display.bar.char.total`.
@@ -13,6 +14,7 @@ Changes:
     * `--config` or `-c` should be used instead.
 
 Features:
+* Added support for reading JSON config from stdin using `--config -` or `-c -`
 * Added `display.bar.border.{leftElapsed,rightElapsed}` for using border as parts of bar content. (#1875)
     * `display.bar.border: null` has been added as a shorthand to disable bar borders.
 * Added `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total and border sections of the percent bar.

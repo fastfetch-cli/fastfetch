@@ -382,16 +382,25 @@ static bool parseJsoncFile(const char* path, bool strictJson)
 
     {
         yyjson_read_err error;
-        instance.state.configDoc = yyjson_read_file(path, strictJson ? 0 : YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, &error);
+        yyjson_read_flag flg = strictJson ? 0 : YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS;
+        instance.state.configDoc = path
+            ? yyjson_read_file(path, flg, NULL, &error)
+            : yyjson_read_fp(stdin, flg, NULL, &error);
         if (!instance.state.configDoc)
         {
             if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
             {
-                size_t row = 0, col = error.pos;
-                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-                if (ffAppendFileBuffer(path, &content))
-                    yyjson_locate_pos(content.chars, content.length, error.pos, &row, &col, NULL);
-                fprintf(stderr, "Error: failed to parse JSON config file `%s` at (%zu, %zu): %s\n", path, row, col, error.msg);
+                if (path)
+                {
+                    size_t row = 0, col = error.pos;
+                    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+                    if (ffAppendFileBuffer(path, &content))
+                        yyjson_locate_pos(content.chars, content.length, error.pos, &row, &col, NULL);
+                    fprintf(stderr, "Error: failed to parse JSON config file `%s` at (%zu, %zu): %s\n", path, row, col, error.msg);
+                }
+                else
+                    fprintf(stderr, "Error: failed to parse JSON from stdin at %zu: %s\n", error.pos, error.msg);
+
                 exit(477);
             }
             return false;
@@ -460,6 +469,12 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     if (value[0] == '\0' || ffStrEqualsIgnCase(value, "none"))
         return;
+
+    if (value[0] == '-' && value[1] == '\0')
+    {
+        parseJsoncFile(NULL, false);
+        return;
+    }
 
     //Try to load as an absolute path
 
