@@ -29,6 +29,8 @@ Bugfixes:
 * Fix gpu driver detection when DRM is used (GPU, FreeBSD)
 * Fix default route detection on DragonFly BSD (LocalIP, DFBSD)
 * Fix lliurex detection (#1882, OS, Linux)
+* Fix compatibility with `-ffast-math` (#1894)
+* Fix physical GPU being ignored sometimes (#1896, GPU, Windows)
 
 Logos:
 * Add ObsidianOS (#1890)
