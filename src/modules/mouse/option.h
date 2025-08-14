@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFMouseOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFMouseOptions;
+
+static_assert(sizeof(FFMouseOptions) <= FF_OPTION_MAX_SIZE, "FFMouseOptions size exceeds maximum allowed size");

@@ -71,47 +71,27 @@ void ffPrintMemory(FFMemoryOptions* options)
     }
 }
 
-bool ffParseMemoryCommandOptions(FFMemoryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MEMORY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateMemoryJsonConfig(FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyMemoryOptions))) FFMemoryOptions defaultOptions;
-    ffInitMemoryOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -130,10 +110,22 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffMemoryModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
     .description = "Print system memory usage info",
-    .parseCommandOptions = (void*) ffParseMemoryCommandOptions,
+    .initOptions = (void*) ffInitMemoryOptions,
+    .destroyOptions = (void*) ffDestroyMemoryOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,
     .printModule = (void*) ffPrintMemory,
     .generateJsonResult = (void*) ffGenerateMemoryJsonResult,
@@ -145,15 +137,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Percentage used (bar)", "percentage-bar"},
     }))
 };
-
-void ffInitMemoryOptions(FFMemoryOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyMemoryOptions(FFMemoryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

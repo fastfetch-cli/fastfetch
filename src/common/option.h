@@ -29,7 +29,8 @@ typedef struct FFModuleBaseInfo
     // This is UB, because `void*` is not compatible with `FF*Options*`.
     // However we can't do it better unless we move to C++, so that `option` becomes a `this` pointer
     // https://stackoverflow.com/questions/559581/casting-a-function-pointer-to-another-type
-    bool (*parseCommandOptions)(void* options, const char* key, const char* value);
+    void (*initOptions)(void* options);
+    void (*destroyOptions)(void* options);
     void (*parseJsonObject)(void* options, struct yyjson_val *module);
     void (*printModule)(void* options);
     void (*generateJsonResult)(void* options, struct yyjson_mut_doc* doc, struct yyjson_mut_val* module);
@@ -63,7 +64,6 @@ typedef struct FFKeyValuePair
 } FFKeyValuePair;
 
 const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName);
-bool ffOptionParseModuleArgs(const char* argumentKey, const char* pkey, const char* value, FFModuleArgs* result);
 void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer);
 FF_C_NODISCARD uint32_t ffOptionParseUInt32(const char* argumentKey, const char* value);
 FF_C_NODISCARD int32_t ffOptionParseInt32(const char* argumentKey, const char* value);
@@ -94,3 +94,5 @@ static inline void ffOptionDestroyModuleArg(FFModuleArgs* args)
     ffStrbufDestroy(&args->outputFormat);
     ffStrbufDestroy(&args->outputColor);
 }
+
+enum { FF_OPTION_MAX_SIZE = 1 << 8 }; // Maximum size of a single option value, used for static allocation

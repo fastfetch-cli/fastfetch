@@ -57,41 +57,16 @@ void ffPrintDNS(FFDNSOptions* options)
     }
 }
 
-bool ffParseDNSCommandOptions(FFDNSOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DNS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "show-type"))
-    {
-        options->showType = (FFDNSShowType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "both", FF_DNS_TYPE_BOTH },
-            { "ipv4", FF_DNS_TYPE_IPV4_BIT },
-            { "ipv6", FF_DNS_TYPE_IPV6_BIT },
-            {},
-        });
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "showType"))
+        if (unsafe_yyjson_equals_str(key, "showType"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -101,44 +76,35 @@ void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_DNS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_DNS_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             else
                 options->showType = (FFDNSShowType) value;
             continue;
         }
 
-        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDNSOptions))) FFDNSOptions defaultOptions;
-    ffInitDNSOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (defaultOptions.showType != options->showType)
+    switch ((uint8_t) options->showType)
     {
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wswitch" // FF_DNS_TYPE_FORCE_UNSIGNED
-        switch (options->showType)
-        {
-            case FF_DNS_TYPE_IPV4_BIT:
-                yyjson_mut_obj_add_str(doc, module, "showType", "ipv4");
-                break;
-            case FF_DNS_TYPE_IPV6_BIT:
-                yyjson_mut_obj_add_str(doc, module, "showType", "ipv6");
-                break;
-            case FF_DNS_TYPE_BOTH:
-                yyjson_mut_obj_add_str(doc, module, "showType", "both");
-                break;
-        }
-        #pragma GCC diagnostic pop
+        case FF_DNS_TYPE_IPV4_BIT:
+            yyjson_mut_obj_add_str(doc, module, "showType", "ipv4");
+            break;
+        case FF_DNS_TYPE_IPV6_BIT:
+            yyjson_mut_obj_add_str(doc, module, "showType", "ipv6");
+            break;
+        case FF_DNS_TYPE_BOTH:
+            yyjson_mut_obj_add_str(doc, module, "showType", "both");
+            break;
     }
 }
 
-void ffGenerateDNSJsonResult(FF_MAYBE_UNUSED FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
 
@@ -164,22 +130,8 @@ exit:
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_DNS_MODULE_NAME,
-    .description = "Print configured DNS servers",
-    .parseCommandOptions = (void*) ffParseDNSCommandOptions,
-    .parseJsonObject = (void*) ffParseDNSJsonObject,
-    .printModule = (void*) ffPrintDNS,
-    .generateJsonResult = (void*) ffGenerateDNSJsonResult,
-    .generateJsonConfig = (void*) ffGenerateDNSJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"DNS result", "result"},
-    }))
-};
-
 void ffInitDNSOptions(FFDNSOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "󰇖");
 
     options->showType = FF_DNS_TYPE_BOTH;
@@ -189,3 +141,17 @@ void ffDestroyDNSOptions(FFDNSOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
+FFModuleBaseInfo ffDNSModuleInfo = {
+    .name = FF_DNS_MODULE_NAME,
+    .description = "Print configured DNS servers",
+    .initOptions = (void*) ffInitDNSOptions,
+    .destroyOptions = (void*) ffDestroyDNSOptions,
+    .parseJsonObject = (void*) ffParseDNSJsonObject,
+    .printModule = (void*) ffPrintDNS,
+    .generateJsonResult = (void*) ffGenerateDNSJsonResult,
+    .generateJsonConfig = (void*) ffGenerateDNSJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"DNS result", "result"},
+    }))
+};

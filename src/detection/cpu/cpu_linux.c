@@ -28,19 +28,19 @@ static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
         ffStrbufAppendS(dir, "temp1_input");
 
         if(!ffReadFileBuffer(dir->chars, buffer))
-            return 0.0/0.0;
+            return FF_CPU_TEMP_UNSET;
     }
 
     ffStrbufSubstrBefore(dir, dirLength);
 
-    double value = ffStrbufToDouble(buffer);// millidegree Celsius
+    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
 
-    if(value != value)
-        return 0.0/0.0;
+    if(value == FF_CPU_TEMP_UNSET)
+        return FF_CPU_TEMP_UNSET;
 
     ffStrbufAppendS(dir, "name");
     if (!ffReadFileBuffer(dir->chars, buffer))
-        return 0.0/0.0;
+        return FF_CPU_TEMP_UNSET;
 
     ffStrbufTrimRightSpace(buffer);
 
@@ -51,14 +51,17 @@ static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
         ffStrbufEqualS(buffer, "coretemp") // Intel
     ) return value / 1000.;
 
-    return 0.0/0.0;
+    return FF_CPU_TEMP_UNSET;
 }
 
 static double detectTZTemp(FFstrbuf* buffer)
 {
     if (ffReadFileBuffer("/sys/class/thermal/thermal_zone0/temp", buffer))
-        return ffStrbufToDouble(buffer) / 1000.;
-    return 0.0/0.0;
+    {
+        double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
+        return value != FF_CPU_TEMP_UNSET ? value / 1000. : FF_CPU_TEMP_UNSET;
+    }
+    return FF_CPU_TEMP_UNSET;
 }
 
 static double detectCPUTemp(void)
@@ -72,7 +75,7 @@ static double detectCPUTemp(void)
 
     FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
     if(dirp == NULL)
-        return 0.0/0.0;
+        return FF_CPU_TEMP_UNSET;
 
     struct dirent* entry;
     while((entry = readdir(dirp)) != NULL)
@@ -84,7 +87,7 @@ static double detectCPUTemp(void)
         ffStrbufAppendC(&baseDir, '/');
 
         double result = parseHwmonDir(&baseDir, &buffer);
-        if (result == result)
+        if (result != FF_CPU_TEMP_UNSET)
             return result;
 
         ffStrbufSubstrBefore(&baseDir, baseDirLength);

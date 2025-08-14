@@ -1,8 +1,9 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/font/option.h"
 
-#define FF_DETECT_FONT_NUM_FONTS 4
+enum { FF_DETECT_FONT_NUM_FONTS = 4 };
 
 typedef struct FFFontResult
 {

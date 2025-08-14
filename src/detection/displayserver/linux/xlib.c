@@ -14,6 +14,7 @@ typedef struct X11PropertyData
 {
     FF_LIBRARY_SYMBOL(XInternAtom)
     FF_LIBRARY_SYMBOL(XGetWindowProperty)
+    FF_LIBRARY_SYMBOL(XServerVendor)
     FF_LIBRARY_SYMBOL(XFree)
 } X11PropertyData;
 
@@ -21,6 +22,7 @@ static bool x11InitPropertyData(FF_MAYBE_UNUSED void* libraryHandle, X11Property
 {
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XInternAtom, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XGetWindowProperty, false)
+    FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XServerVendor, false)
     FF_LIBRARY_LOAD_SYMBOL_PTR(libraryHandle, propertyData, XFree, false)
 
     return true;
@@ -60,6 +62,16 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
 
     data->ffXFree(wmName);
     data->ffXFree(wmWindow);
+}
+
+static void x11FetchServerVendor(X11PropertyData* data, Display* display, FFDisplayServerResult* result)
+{
+    const char* serverVendor = data->ffXServerVendor(display);
+    if (serverVendor && !ffStrEquals(serverVendor, "The X.Org Foundation")) {
+        ffStrbufSetS(&result->wmProtocolName, serverVendor);
+    }
+
+
 }
 
 typedef struct XrandrData
@@ -305,8 +317,10 @@ const char* ffdsConnectXrandr(FFDisplayServerResult* result)
     if(data.display == NULL)
         return "XOpenDisplay() failed";
 
-    if(propertyDataInitialized && ScreenCount(data.display) > 0)
+    if(propertyDataInitialized && ScreenCount(data.display) > 0) {
         x11DetectWMFromEWMH(&propertyData, data.display, result);
+        x11FetchServerVendor(&propertyData, data.display, result);
+    }
 
     data.result = result;
 

@@ -1,7 +1,5 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 #include "common/percent.h"
 
@@ -14,9 +12,10 @@ typedef enum __attribute__((__packed__)) FFSoundType
 
 typedef struct FFSoundOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFSoundType soundType;
     FFPercentageModuleConfig percent;
 } FFSoundOptions;
+
+static_assert(sizeof(FFSoundOptions) <= FF_OPTION_MAX_SIZE, "FFSoundOptions size exceeds maximum allowed size");

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/disk/option.h"
 
 typedef struct FFDisk
 {

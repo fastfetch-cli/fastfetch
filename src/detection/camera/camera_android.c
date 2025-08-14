@@ -45,7 +45,7 @@ const char* ffDetectCamera(FF_MAYBE_UNUSED FFlist* result)
                 ffStrbufInitStatic(&camera->name, "Unknown");
         }
         ffStrbufInit(&camera->vendor);
-        ffStrbufInitS(&camera->id, yyjson_get_str(yyjson_obj_get(device, "id")));
+        ffStrbufInitJsonVal(&camera->id, yyjson_obj_get(device, "id"));
         yyjson_val* sizes = yyjson_arr_get_first(yyjson_obj_get(device, "jpeg_output_sizes"));
         if (yyjson_is_obj(sizes))
         {

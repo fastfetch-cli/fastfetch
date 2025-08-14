@@ -31,13 +31,13 @@ static void parsePowerAdapter(int dfd, FF_MAYBE_UNUSED const char* id, FFlist* r
         return;
 
     //input_power_limit must exist and be not empty
-    if (!ffReadFileBufferRelative(dfd, "input_power_limit", &tmpBuffer))
+    if (!ffReadFileBufferRelative(dfd, "input_power_limit", &tmpBuffer) || tmpBuffer.length == 0)
         return;
 
     FFPowerAdapterResult* result = ffListAdd(results);
     ffStrbufInit(&result->name);
     ffStrbufInit(&result->description);
-    result->watts = (int) (ffStrbufToDouble(&tmpBuffer) / 1e6 + 0.5);
+    result->watts = (int) (ffStrbufToDouble(&tmpBuffer, 0) / 1e6 + 0.5);
     ffStrbufInit(&result->manufacturer);
     ffStrbufInit(&result->modelName);
     ffStrbufInit(&result->serial);

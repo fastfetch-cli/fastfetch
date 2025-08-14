@@ -28,55 +28,6 @@ const char* ffOptionTestPrefix(const char* argumentKey, const char* moduleName)
     return subKey;
 }
 
-bool ffOptionParseModuleArgs(const char* argumentKey, const char* subKey, const char* value, FFModuleArgs* result)
-{
-    if(ffStrEqualsIgnCase(subKey, "key"))
-    {
-        ffOptionParseString(argumentKey, value, &result->key);
-        return true;
-    }
-    else if(ffStrEqualsIgnCase(subKey, "format"))
-    {
-        ffOptionParseString(argumentKey, value, &result->outputFormat);
-        return true;
-    }
-    else if(ffStrEqualsIgnCase(subKey, "output-color"))
-    {
-        if(value == NULL)
-        {
-            fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
-            exit(477);
-        }
-        ffOptionParseColor(value, &result->outputColor);
-        return true;
-    }
-    else if(ffStrStartsWithIgnCase(subKey, "key-"))
-    {
-        const char* subKey2 = subKey + strlen("key-");
-        if(ffStrEqualsIgnCase(subKey2, "color"))
-        {
-            if(value == NULL)
-            {
-                fprintf(stderr, "Error: usage: %s <str>\n", argumentKey);
-                exit(477);
-            }
-            ffOptionParseColor(value, &result->keyColor);
-            return true;
-        }
-        else if(ffStrEqualsIgnCase(subKey2, "width"))
-        {
-            result->keyWidth = ffOptionParseUInt32(argumentKey, value);
-            return true;
-        }
-        else if(ffStrEqualsIgnCase(subKey2, "icon"))
-        {
-            ffOptionParseString(argumentKey, value, &result->keyIcon);
-            return true;
-        }
-    }
-    return false;
-}
-
 void ffOptionParseString(const char* argumentKey, const char* value, FFstrbuf* buffer)
 {
     if(value == NULL)
@@ -157,6 +108,8 @@ bool ffOptionParseBoolean(const char* str)
 
 void ffOptionParseColorNoClear(const char* value, FFstrbuf* buffer)
 {
+    if (!value || value[0] == '\0') return;
+
     // If value is already an ANSI escape code, use it
     if (value[0] == '\e' && value[1] == '[')
     {

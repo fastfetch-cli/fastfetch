@@ -67,39 +67,22 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-bool ffParseHostCommandOptions(FFHostOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_HOST_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_HOST_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyHostOptions))) FFHostOptions defaultOptions;
-    ffInitHostOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -145,10 +128,21 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitHostOptions(FFHostOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
+}
+
+void ffDestroyHostOptions(FFHostOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffHostModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
-    .parseCommandOptions = (void*) ffParseHostCommandOptions,
+    .initOptions = (void*) ffInitHostOptions,
+    .destroyOptions = (void*) ffDestroyHostOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,
     .printModule = (void*) ffPrintHost,
     .generateJsonResult = (void*) ffGenerateHostJsonResult,
@@ -163,14 +157,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Product uuid", "uuid"},
     }))
 };
-
-void ffInitHostOptions(FFHostOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
-}
-
-void ffDestroyHostOptions(FFHostOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

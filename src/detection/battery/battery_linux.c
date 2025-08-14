@@ -45,7 +45,7 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
         return;
 
     FFBatteryResult* result = ffListAdd(results);
-    result->capacity = ffStrbufToDouble(&tmpBuffer);
+    result->capacity = ffStrbufToDouble(&tmpBuffer, 0);
 
     //At this point, we have a battery. Try to get as much values as possible.
 
@@ -154,7 +154,11 @@ static void parseBattery(int dfd, const char* id, FFBatteryOptions* options, FFl
     if (options->temp)
     {
         if (ffReadFileBufferRelative(dfd, "temp", &tmpBuffer))
-            result->temperature = ffStrbufToDouble(&tmpBuffer) / 10;
+        {
+            result->temperature = ffStrbufToDouble(&tmpBuffer, FF_BATTERY_TEMP_UNSET);
+            if (result->temperature != FF_BATTERY_TEMP_UNSET)
+                result->temperature /= 10;
+        }
     }
 }
 

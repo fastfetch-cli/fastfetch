@@ -89,6 +89,21 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->idLike, "ubuntu");
     }
 
+    if (ffPathExists("/usr/bin/lliurex-version", FF_PATHTYPE_FILE))
+    {
+        ffStrbufSetStatic(&result->name, "LliureX");
+        ffStrbufSetStatic(&result->id, "lliurex");
+        ffStrbufClear(&result->version);
+        if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+            "/usr/bin/lliurex-version",
+            NULL,
+        }) == NULL) // 8.2.2
+            ffStrbufTrimRightSpace(&result->version);
+        ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
+        ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return;
+    }
+
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Kubuntu");
@@ -166,15 +181,6 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->name, "Ubuntu Touch");
         ffStrbufSetF(&result->prettyName, "Ubuntu Touch %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-touch");
-        ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
-    }
-
-    if(ffStrContains(xdgConfigDirs, "lliurex"))
-    {
-        ffStrbufSetStatic(&result->name, "LliureX");
-        ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
-        ffStrbufSetStatic(&result->id, "lliurex");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
     }
@@ -306,16 +312,10 @@ FF_MAYBE_UNUSED static bool detectFedoraVariant(FFOSResult* result)
     return false;
 }
 
-static void detectOS(FFOSResult* os)
+static bool detectBedrock(FFOSResult* os)
 {
-    #ifdef FF_CUSTOM_OS_RELEASE_PATH
-    parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
-        #ifdef FF_CUSTOM_LSB_RELEASE_PATH
-        parseLsbRelease(FF_STR(FF_CUSTOM_LSB_RELEASE_PATH), os);
-        #endif
-    return;
-    #endif
-
+    const char* bedrockRestrict = getenv("BEDROCK_RESTRICT");
+    if(bedrockRestrict && bedrockRestrict[0] == '1') return false;
     if(parseOsRelease(FASTFETCH_TARGET_DIR_ROOT "/bedrock" FASTFETCH_TARGET_DIR_ETC "/bedrock-release", os))
     {
         if(os->id.length == 0)
@@ -328,8 +328,23 @@ static void detectOS(FFOSResult* os)
             ffStrbufAppendS(&os->prettyName, "Bedrock Linux");
 
         parseOsRelease("/bedrock" FASTFETCH_TARGET_DIR_ETC "/os-release", os);
-        return;
+        return true;
     }
+    return false;
+}
+
+static void detectOS(FFOSResult* os)
+{
+    #ifdef FF_CUSTOM_OS_RELEASE_PATH
+    parseOsRelease(FF_STR(FF_CUSTOM_OS_RELEASE_PATH), os);
+        #ifdef FF_CUSTOM_LSB_RELEASE_PATH
+        parseLsbRelease(FF_STR(FF_CUSTOM_LSB_RELEASE_PATH), os);
+        #endif
+    return;
+    #endif
+
+    if (detectBedrock(os))
+        return;
 
     // Refer: https://gist.github.com/natefoo/814c5bf936922dad97ff
 

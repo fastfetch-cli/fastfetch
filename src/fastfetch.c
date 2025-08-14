@@ -3,7 +3,6 @@
 #include "common/init.h"
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
-#include "common/printing.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
 #include "util/stringUtils.h"
@@ -183,10 +182,11 @@ static void printFullHelp()
     yyjson_doc_free(doc);
 
     puts("\n\
-Parsing is not case sensitive. E.g. `--print-logos` is equal to `--Print-Logos`\n\
+Command flags are not case sensitive. E.g. `--print-logos` is equal to `--Print-Logos`\n\
 If a value starts with a ?, it is optional. An optional boolean value defaults to true if not specified.\n\
 More detailed help messages for each options can be printed with `-h <option_without_dash_prefix>`\n\
-All options can be made permanent with command `fastfetch <options> --gen-config`");
+For detailed information on logo options, module configuration, and formatting, visit:\n\
+      https://github.com/fastfetch-cli/fastfetch/wiki/Configuration");
 }
 
 static bool printSpecificCommandHelp(const char* command)
@@ -382,16 +382,25 @@ static bool parseJsoncFile(const char* path, bool strictJson)
 
     {
         yyjson_read_err error;
-        instance.state.configDoc = yyjson_read_file(path, strictJson ? 0 : YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, &error);
+        yyjson_read_flag flg = strictJson ? 0 : YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS;
+        instance.state.configDoc = path
+            ? yyjson_read_file(path, flg, NULL, &error)
+            : yyjson_read_fp(stdin, flg, NULL, &error);
         if (!instance.state.configDoc)
         {
             if (error.code != YYJSON_READ_ERROR_FILE_OPEN)
             {
-                size_t row = 0, col = error.pos;
-                FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
-                if (ffAppendFileBuffer(path, &content))
-                    yyjson_locate_pos(content.chars, content.length, error.pos, &row, &col, NULL);
-                fprintf(stderr, "Error: failed to parse JSON config file `%s` at (%zu, %zu): %s\n", path, row, col, error.msg);
+                if (path)
+                {
+                    size_t row = 0, col = error.pos;
+                    FF_STRBUF_AUTO_DESTROY content = ffStrbufCreate();
+                    if (ffAppendFileBuffer(path, &content))
+                        yyjson_locate_pos(content.chars, content.length, error.pos, &row, &col, NULL);
+                    fprintf(stderr, "Error: failed to parse JSON config file `%s` at (%zu, %zu): %s\n", path, row, col, error.msg);
+                }
+                else
+                    fprintf(stderr, "Error: failed to parse JSON from stdin at %zu: %s\n", error.pos, error.msg);
+
                 exit(477);
             }
             return false;
@@ -420,7 +429,8 @@ static bool parseJsoncFile(const char* path, bool strictJson)
     return true;
 }
 
-static void generateConfigFile(bool force, const char* filePath)
+
+static void generateConfigFile(bool force, const char* filePath, bool fullConfig)
 {
     if (!filePath)
     {
@@ -434,9 +444,11 @@ static void generateConfigFile(bool force, const char* filePath)
 
     if (!force && ffPathExists(instance.state.genConfigPath.chars, FF_PATHTYPE_ANY))
     {
-        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config-force` to overwrite\n", instance.state.genConfigPath.chars);
+        fprintf(stderr, "Error: file `%s` exists. Use `--gen-config%s-force` to overwrite\n", instance.state.genConfigPath.chars, fullConfig ? "-full" : "");
         exit(477);
     }
+
+    instance.state.fullConfig = fullConfig;
 }
 
 static void optionParseConfigFile(FFdata* data, const char* key, const char* value)
@@ -457,6 +469,12 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     if (value[0] == '\0' || ffStrEqualsIgnCase(value, "none"))
         return;
+
+    if (value[0] == '-' && value[1] == '\0')
+    {
+        parseJsoncFile(NULL, false);
+        return;
+    }
 
     //Try to load as an absolute path
 
@@ -598,10 +616,14 @@ static void parseCommand(FFdata* data, char* key, char* value)
         exit(0);
     }
     else if(ffStrEqualsIgnCase(key, "--gen-config"))
-        generateConfigFile(false, value);
+        generateConfigFile(false, value, false);
     else if(ffStrEqualsIgnCase(key, "--gen-config-force"))
-        generateConfigFile(true, value);
-    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+        generateConfigFile(true, value, false);
+    else if(ffStrEqualsIgnCase(key, "--gen-config-full"))
+        generateConfigFile(false, value, true);
+    else if(ffStrEqualsIgnCase(key, "--gen-config-full-force"))
+        generateConfigFile(true, value, true);
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--format"))
     {
@@ -644,8 +666,7 @@ static void parseOption(FFdata* data, const char* key, const char* value)
     else if(
         ffOptionsParseGeneralCommandLine(&instance.config.general, key, value) ||
         ffOptionsParseLogoCommandLine(&instance.config.logo, key, value) ||
-        ffOptionsParseDisplayCommandLine(&instance.config.display, key, value) ||
-        ffParseModuleOptions(key, value)
+        ffOptionsParseDisplayCommandLine(&instance.config.display, key, value)
     ) {}
 
     else
@@ -726,16 +747,21 @@ static void run(FFdata* data)
         ffFinish();
 }
 
-static void writeConfigFile(FFdata* data, const FFstrbuf* filename)
+static void writeConfigFile(FFdata* data)
 {
+    const FFstrbuf* filename = &instance.state.genConfigPath;
+
     yyjson_mut_doc* doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val* root = yyjson_mut_obj(doc);
     yyjson_mut_doc_set_root(doc, root);
-    yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json");
+    yyjson_mut_obj_add_str(doc, root, "$schema", "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json");
 
-    ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
-    ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
-    ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
+    if (instance.state.fullConfig)
+    {
+        ffOptionsGenerateLogoJsonConfig(&instance.config.logo, doc);
+        ffOptionsGenerateDisplayJsonConfig(&instance.config.display, doc);
+        ffOptionsGenerateGeneralJsonConfig(&instance.config.general, doc);
+    }
     ffMigrateCommandOptionToJsonc(data, doc);
 
     if (ffStrbufEqualS(filename, "-"))
@@ -780,7 +806,7 @@ int main(int argc, char** argv)
     if (__builtin_expect(instance.state.genConfigPath.length == 0, true))
         run(&data);
     else
-        writeConfigFile(&data, &instance.state.genConfigPath);
+        writeConfigFile(&data);
 
     ffStrbufDestroy(&data.structure);
 }

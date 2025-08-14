@@ -12,7 +12,7 @@
 
 const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 {
-    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteIfIndex();
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteV4()->ifIndex;
 
     size_t bufSize = 0;
     if (sysctl((int[]) { CTL_NET, PF_ROUTE, 0, 0, NET_RT_IFLIST, (options->defaultRouteOnly ? (int) defaultRouteIfIndex : 0) }, 6, NULL, &bufSize, 0, 0) < 0)

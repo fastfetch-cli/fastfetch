@@ -1,9 +1,11 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_DISPLAY_MODULE_NAME "Display"
 
 void ffPrintDisplay(FFDisplayOptions* options);
 void ffInitDisplayOptions(FFDisplayOptions* options);
 void ffDestroyDisplayOptions(FFDisplayOptions* options);
+
+extern FFModuleBaseInfo ffDisplayModuleInfo;

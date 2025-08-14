@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFIconsOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFIconsOptions;
+
+static_assert(sizeof(FFIconsOptions) <= FF_OPTION_MAX_SIZE, "FFIconsOptions size exceeds maximum allowed size");

@@ -48,39 +48,22 @@ void ffPrintCursor(FFCursorOptions* options)
     ffStrbufDestroy(&result.size);
 }
 
-bool ffParseCursorCommandOptions(FFCursorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CURSOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCursorOptions))) FFCursorOptions defaultOptions;
-    ffInitCursorOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -108,10 +91,21 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
     ffStrbufDestroy(&result.size);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCursorOptions(FFCursorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
+}
+
+void ffDestroyCursorOptions(FFCursorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCursorModuleInfo = {
     .name = FF_CURSOR_MODULE_NAME,
     .description = "Print cursor style name",
-    .parseCommandOptions = (void*) ffParseCursorCommandOptions,
+    .initOptions = (void*) ffInitCursorOptions,
+    .destroyOptions = (void*) ffDestroyCursorOptions,
     .parseJsonObject = (void*) ffParseCursorJsonObject,
     .printModule = (void*) ffPrintCursor,
     .generateJsonResult = (void*) ffGenerateCursorJsonResult,
@@ -121,14 +115,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Cursor size", "size"},
     })),
 };
-
-void ffInitCursorOptions(FFCursorOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
-}
-
-void ffDestroyCursorOptions(FFCursorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

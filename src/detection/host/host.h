@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/host/option.h"
 
 typedef struct FFHostResult
 {

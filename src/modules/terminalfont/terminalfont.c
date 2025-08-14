@@ -46,42 +46,25 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
     ffFontDestroy(&terminalFont.fallback);
 }
 
-bool ffParseTerminalFontCommandOptions(FFTerminalFontOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_TERMINALFONT_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_TERMINALFONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTerminalFontOptions))) FFTerminalFontOptions defaultOptions;
-    ffInitTerminalFontOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalFontResult result;
     ffFontInit(&result.font);
@@ -120,10 +103,21 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     ffFontDestroy(&result.fallback);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffTerminalFontModuleInfo = {
     .name = FF_TERMINALFONT_MODULE_NAME,
     .description = "Print font name and size used by current terminal",
-    .parseCommandOptions = (void*) ffParseTerminalFontCommandOptions,
+    .initOptions = (void*) ffInitTerminalFontOptions,
+    .destroyOptions = (void*) ffDestroyTerminalFontOptions,
     .parseJsonObject = (void*) ffParseTerminalFontJsonObject,
     .printModule = (void*) ffPrintTerminalFont,
     .generateJsonResult = (void*) ffGenerateTerminalFontJsonResult,
@@ -135,14 +129,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Terminal font styles", "styles"},
     })),
 };
-
-void ffInitTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyTerminalFontOptions(FFTerminalFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

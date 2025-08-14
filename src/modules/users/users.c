@@ -107,69 +107,41 @@ void ffPrintUsers(FFUsersOptions* options)
     }
 }
 
-bool ffParseUsersCommandOptions(FFUsersOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_USERS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "myself-only"))
-    {
-        options->myselfOnly = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if (ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
+        if (unsafe_yyjson_equals_str(key, "type") || unsafe_yyjson_equals_str(key, "condition"))
             continue;
 
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "compact"))
+        if (unsafe_yyjson_equals_str(key, "compact"))
         {
             options->compact = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "myselfOnly"))
+        if (unsafe_yyjson_equals_str(key, "myselfOnly"))
         {
             options->myselfOnly = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyUsersOptions))) FFUsersOptions defaultOptions;
-    ffInitUsersOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 
-    if (options->compact != defaultOptions.compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
-
-    if (options->myselfOnly != defaultOptions.myselfOnly)
-        yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
+    yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
 }
 
 void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -208,10 +180,24 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitUsersOptions(FFUsersOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->compact = false;
+    options->myselfOnly = false;
+}
+
+void ffDestroyUsersOptions(FFUsersOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffUsersModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
     .description = "Print users currently logged in",
-    .parseCommandOptions = (void*) ffParseUsersCommandOptions,
+    .initOptions = (void*) ffInitUsersOptions,
+    .destroyOptions = (void*) ffDestroyUsersOptions,
     .parseJsonObject = (void*) ffParseUsersJsonObject,
     .printModule = (void*) ffPrintUsers,
     .generateJsonResult = (void*) ffGenerateUsersJsonResult,
@@ -232,17 +218,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Years fraction after login", "years-fraction"},
     }))
 };
-
-void ffInitUsersOptions(FFUsersOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->compact = false;
-    options->myselfOnly = false;
-}
-
-void ffDestroyUsersOptions(FFUsersOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

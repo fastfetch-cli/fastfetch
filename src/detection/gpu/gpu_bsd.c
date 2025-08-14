@@ -106,7 +106,10 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
             .name_len = ARRAY_SIZE(driverName),
         };
         if (ioctl(fd, DRM_IOCTL_VERSION, &ver) == 0)
-            ffStrbufSetF(&gpu->driver, "%*s %d.%d.%d", (int) ver.name_len, ver.name, ver.version_major, ver.version_minor, ver.version_patchlevel);
+        {
+            driverName[ver.name_len] = '\0';
+            ffStrbufSetF(&gpu->driver, "%s %d.%d.%d", ver.name, ver.version_major, ver.version_minor, ver.version_patchlevel);
+        }
 
         if (ffStrStartsWith(driverName, "i915"))
             ffDrmDetectI915(gpu, fd);

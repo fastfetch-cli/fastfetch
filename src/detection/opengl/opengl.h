@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/opengl/option.h"
 
 typedef struct FFOpenGLResult
 {

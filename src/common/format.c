@@ -113,8 +113,8 @@ static inline void appendInvalidPlaceholder(FFstrbuf* buffer, const char* start,
 static inline bool formatArgSet(const FFformatarg* arg)
 {
     return arg->value != NULL && (
-        (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0.0) || //Also is false for NaN
-        (arg->type == FF_FORMAT_ARG_TYPE_FLOAT && *(float*)arg->value > 0.0) || //Also is false for NaN
+        (arg->type == FF_FORMAT_ARG_TYPE_DOUBLE && *(double*)arg->value > 0.0) ||
+        (arg->type == FF_FORMAT_ARG_TYPE_FLOAT && *(float*)arg->value > 0.0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_INT && *(int*)arg->value > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRBUF && ((FFstrbuf*)arg->value)->length > 0) ||
         (arg->type == FF_FORMAT_ARG_TYPE_STRING && ffStrSet((char*)arg->value)) ||

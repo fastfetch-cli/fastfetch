@@ -105,39 +105,22 @@ void ffPrintBluetoothRadio(FFBluetoothRadioOptions* options)
     }
 }
 
-bool ffParseBluetoothRadioCommandOptions(FFBluetoothRadioOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BLUETOOTHRADIO_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_BLUETOOTHRADIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BLUETOOTHRADIO_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBluetoothRadioOptions))) FFBluetoothRadioOptions defaultOptions;
-    ffInitBluetoothRadioOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -180,10 +163,21 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
+}
+
+void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
     .description = "List bluetooth radios width supported version and vendor",
-    .parseCommandOptions = (void*) ffParseBluetoothRadioCommandOptions,
+    .initOptions = (void*) ffInitBluetoothRadioOptions,
+    .destroyOptions = (void*) ffDestroyBluetoothRadioOptions,
     .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,
     .printModule = (void*) ffPrintBluetoothRadio,
     .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,
@@ -199,14 +193,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Connectable / Pairable", "connectable"},
     }))
 };
-
-void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
-}
-
-void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

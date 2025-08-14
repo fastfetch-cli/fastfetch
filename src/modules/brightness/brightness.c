@@ -112,51 +112,22 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     }
 }
 
-bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BRIGHTNESS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "ddcci-sleep"))
-    {
-        options->ddcciSleep = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "ddcciSleep"))
+        if (unsafe_yyjson_equals_str(key, "ddcciSleep"))
         {
             options->ddcciSleep = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "compact"))
+        if (unsafe_yyjson_equals_str(key, "compact"))
         {
             options->compact = (uint32_t) yyjson_get_bool(val);
             continue;
@@ -165,24 +136,19 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBrightnessOptions))) FFBrightnessOptions defaultOptions;
-    ffInitBrightnessOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
 
-    if (defaultOptions.ddcciSleep != options->ddcciSleep)
-        yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
-
-    if (defaultOptions.compact != options->compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
 void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -216,10 +182,25 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
+
+    options->ddcciSleep = 10;
+    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
+    options->compact = false;
+}
+
+void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBrightnessModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
-    .parseCommandOptions = (void*) ffParseBrightnessCommandOptions,
+    .initOptions = (void*) ffInitBrightnessOptions,
+    .destroyOptions = (void*) ffDestroyBrightnessOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,
     .printModule = (void*) ffPrintBrightness,
     .generateJsonResult = (void*) ffGenerateBrightnessJsonResult,
@@ -234,18 +215,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Is built-in screen", "is-builtin"},
     }))
 };
-
-void ffInitBrightnessOptions(FFBrightnessOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
-
-    options->ddcciSleep = 10;
-    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
-    options->compact = false;
-}
-
-void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

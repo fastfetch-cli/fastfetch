@@ -1,9 +1,11 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_SWAP_MODULE_NAME "Swap"
 
 void ffPrintSwap(FFSwapOptions* options);
 void ffInitSwapOptions(FFSwapOptions* options);
 void ffDestroySwapOptions(FFSwapOptions* options);
+
+extern FFModuleBaseInfo ffSwapModuleInfo;

@@ -90,51 +90,22 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     }
 }
 
-bool ffParseLoadavgCommandOptions(FFLoadavgOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_LOADAVG_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "ndigits"))
-    {
-        options->ndigits = (uint8_t) ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
-}
-
 void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "ndigits"))
+        if (unsafe_yyjson_equals_str(key, "ndigits"))
         {
             options->ndigits = (uint8_t) yyjson_get_uint(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "compact"))
+        if (unsafe_yyjson_equals_str(key, "compact"))
         {
             options->compact = yyjson_get_bool(val);
             continue;
@@ -143,24 +114,19 @@ void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLoadavgOptions))) FFLoadavgOptions defaultOptions;
-    ffInitLoadavgOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_uint(doc, module, "ndigits", options->ndigits);
 
-    if (defaultOptions.ndigits != options->ndigits)
-        yyjson_mut_obj_add_uint(doc, module, "ndigits", options->ndigits);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 
-    if (defaultOptions.compact != options->compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -179,24 +145,8 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
         yyjson_mut_arr_add_real(doc, arr, result[i]);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_LOADAVG_MODULE_NAME,
-    .description = "Print system load averages",
-    .parseCommandOptions = (void*) ffParseLoadavgCommandOptions,
-    .parseJsonObject = (void*) ffParseLoadavgJsonObject,
-    .printModule = (void*) ffPrintLoadavg,
-    .generateJsonResult = (void*) ffGenerateLoadavgJsonResult,
-    .generateJsonConfig = (void*) ffGenerateLoadavgJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Load average over 1min", "loadavg1"},
-        {"Load average over 5min", "loadavg2"},
-        {"Load average over 15min", "loadavg3"},
-    }))
-};
-
 void ffInitLoadavgOptions(FFLoadavgOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
@@ -208,3 +158,19 @@ void ffDestroyLoadavgOptions(FFLoadavgOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
+FFModuleBaseInfo ffLoadavgModuleInfo = {
+    .name = FF_LOADAVG_MODULE_NAME,
+    .description = "Print system load averages",
+    .initOptions = (void*) ffInitLoadavgOptions,
+    .destroyOptions = (void*) ffDestroyLoadavgOptions,
+    .parseJsonObject = (void*) ffParseLoadavgJsonObject,
+    .printModule = (void*) ffPrintLoadavg,
+    .generateJsonResult = (void*) ffGenerateLoadavgJsonResult,
+    .generateJsonConfig = (void*) ffGenerateLoadavgJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Load average over 1min", "loadavg1"},
+        {"Load average over 5min", "loadavg2"},
+        {"Load average over 15min", "loadavg3"},
+    }))
+};

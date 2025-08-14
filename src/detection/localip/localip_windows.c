@@ -6,17 +6,19 @@
 #include "util/windows/unicode.h"
 #include "localip.h"
 
+#define FF_LOCALIP_NIFLAG(name) { IP_ADAPTER_##name, #name }
+
 static const FFLocalIpNIFlag niFlagOptions[] = {
-    { IP_ADAPTER_DDNS_ENABLED, "DDNS_ENABLED" },
-    { IP_ADAPTER_REGISTER_ADAPTER_SUFFIX, "REGISTER_ADAPTER_SUFFIX" },
-    { IP_ADAPTER_DHCP_ENABLED, "DHCP_ENABLED" },
-    { IP_ADAPTER_RECEIVE_ONLY, "RECEIVE_ONLY" },
-    { IP_ADAPTER_NO_MULTICAST, "NO_MULTICAST" },
-    { IP_ADAPTER_IPV6_OTHER_STATEFUL_CONFIG, "IPV6_OTHER_STATEFUL_CONFIG" },
-    { IP_ADAPTER_NETBIOS_OVER_TCPIP_ENABLED, "NETBIOS_OVER_TCPIP_ENABLED" },
-    { IP_ADAPTER_IPV4_ENABLED, "IPV4_ENABLED" },
-    { IP_ADAPTER_IPV6_ENABLED, "IPV6_ENABLED" },
-    { IP_ADAPTER_IPV6_MANAGE_ADDRESS_CONFIG, "IPV6_MANAGE_ADDRESS_CONFIG" },
+    FF_LOCALIP_NIFLAG(DDNS_ENABLED),
+    FF_LOCALIP_NIFLAG(REGISTER_ADAPTER_SUFFIX),
+    FF_LOCALIP_NIFLAG(DHCP_ENABLED),
+    FF_LOCALIP_NIFLAG(RECEIVE_ONLY),
+    FF_LOCALIP_NIFLAG(NO_MULTICAST),
+    FF_LOCALIP_NIFLAG(IPV6_OTHER_STATEFUL_CONFIG),
+    FF_LOCALIP_NIFLAG(NETBIOS_OVER_TCPIP_ENABLED),
+    FF_LOCALIP_NIFLAG(IPV4_ENABLED),
+    FF_LOCALIP_NIFLAG(IPV6_ENABLED),
+    FF_LOCALIP_NIFLAG(IPV6_MANAGE_ADDRESS_CONFIG),
     // sentinel
     {},
 };
@@ -90,7 +92,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             return "GetAdaptersAddresses() failed";
     }
 
-    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteIfIndex();
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteV4()->ifIndex;
 
     // Iterate through all of the adapters
     for (IP_ADAPTER_ADDRESSES* adapter = adapter_addresses; adapter; adapter = adapter->Next)
@@ -127,6 +129,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
         {
+            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) && ifa->DadState != IpDadStatePreferred)
+                continue;
+
             if (ifa->Address.lpSockaddr->sa_family == AF_INET)
             {
                 if (!(typesToAdd & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_ALL_IPS_BIT))) continue;

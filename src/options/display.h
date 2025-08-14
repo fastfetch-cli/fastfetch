@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/percent.h"
 #include "util/FFstrbuf.h"
 
 typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
@@ -60,6 +61,11 @@ typedef struct FFOptionsDisplay
     FFstrbuf barCharTotal;
     FFstrbuf barBorderLeft;
     FFstrbuf barBorderRight;
+    FFstrbuf barBorderLeftElapsed;
+    FFstrbuf barBorderRightElapsed;
+    FFstrbuf barColorElapsed; // "auto" for auto selection from percent config; empty for no custom color (inherits)
+    FFstrbuf barColorTotal; // empty for no custom color (inherits)
+    FFstrbuf barColorBorder; // empty for no custom color (inherits)
     uint8_t barWidth;
     FFPercentageTypeFlags percentType;
     uint8_t percentNdigits;

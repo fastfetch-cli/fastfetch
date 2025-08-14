@@ -50,39 +50,22 @@ void ffPrintVulkan(FFVulkanOptions* options)
     }
 }
 
-bool ffParseVulkanCommandOptions(FFVulkanOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_VULKAN_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseVulkanJsonObject(FFVulkanOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_VULKAN_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateVulkanJsonConfig(FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyVulkanOptions))) FFVulkanOptions defaultOptions;
-    ffInitVulkanOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -142,10 +125,21 @@ void ffGenerateVulkanJsonResult(FF_MAYBE_UNUSED FFVulkanOptions* options, yyjson
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyVulkanOptions(FFVulkanOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffVulkanModuleInfo = {
     .name = FF_VULKAN_MODULE_NAME,
     .description = "Print highest Vulkan version supported by the GPU",
-    .parseCommandOptions = (void*) ffParseVulkanCommandOptions,
+    .initOptions = (void*) ffInitVulkanOptions,
+    .destroyOptions = (void*) ffDestroyVulkanOptions,
     .parseJsonObject = (void*) ffParseVulkanJsonObject,
     .printModule = (void*) ffPrintVulkan,
     .generateJsonResult = (void*) ffGenerateVulkanJsonResult,
@@ -157,14 +151,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Instance version", "instance-version"},
     }))
 };
-
-void ffInitVulkanOptions(FFVulkanOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyVulkanOptions(FFVulkanOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -205,135 +205,20 @@ void ffPrintPackages(FFPackagesOptions* options)
     ffStrbufDestroy(&counts.pacmanBranch);
 }
 
-bool ffParsePackagesCommandOptions(FFPackagesOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PACKAGES_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "disabled"))
-    {
-        options->disabled = FF_PACKAGES_FLAG_NONE;
-        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-        ffOptionParseString(key, value, &buffer);
-
-        char *start = buffer.chars, *end = strchr(start, ':');
-        while (true)
-        {
-            if (end)
-                *end = '\0';
-
-            #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(start, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
-            switch (toupper(start[0]))
-            {
-                case 'A': if (false);
-                    FF_TEST_PACKAGE_NAME(APK)
-                    FF_TEST_PACKAGE_NAME(AM)
-                    break;
-                case 'B': if (false);
-                    FF_TEST_PACKAGE_NAME(BREW)
-                    break;
-                case 'C': if (false);
-                    FF_TEST_PACKAGE_NAME(CHOCO)
-                    break;
-                case 'D': if (false);
-                    FF_TEST_PACKAGE_NAME(DPKG)
-                    break;
-                case 'E': if (false);
-                    FF_TEST_PACKAGE_NAME(EMERGE)
-                    FF_TEST_PACKAGE_NAME(EOPKG)
-                    break;
-                case 'F': if (false);
-                    FF_TEST_PACKAGE_NAME(FLATPAK)
-                    break;
-                case 'G': if (false);
-                    FF_TEST_PACKAGE_NAME(GUIX)
-                    break;
-                case 'H': if (false);
-                    FF_TEST_PACKAGE_NAME(HPKG)
-                    break;
-                case 'L': if (false);
-                    FF_TEST_PACKAGE_NAME(LPKG)
-                    FF_TEST_PACKAGE_NAME(LPKGBUILD)
-                    FF_TEST_PACKAGE_NAME(LINGLONG)
-                    break;
-                case 'M': if (false);
-                    FF_TEST_PACKAGE_NAME(MACPORTS)
-                    FF_TEST_PACKAGE_NAME(MPORT)
-                    break;
-                case 'N': if (false);
-                    FF_TEST_PACKAGE_NAME(NIX)
-                    break;
-                case 'O': if (false);
-                    FF_TEST_PACKAGE_NAME(OPKG)
-                    break;
-                case 'P': if (false);
-                    FF_TEST_PACKAGE_NAME(PACMAN)
-                    FF_TEST_PACKAGE_NAME(PACSTALL)
-                    FF_TEST_PACKAGE_NAME(PALUDIS)
-                    FF_TEST_PACKAGE_NAME(PISI)
-                    FF_TEST_PACKAGE_NAME(PKG)
-                    FF_TEST_PACKAGE_NAME(PKGTOOL)
-                    FF_TEST_PACKAGE_NAME(PKGSRC)
-                    break;
-                case 'R': if (false);
-                    FF_TEST_PACKAGE_NAME(RPM)
-                    break;
-                case 'S': if (false);
-                    FF_TEST_PACKAGE_NAME(SCOOP)
-                    FF_TEST_PACKAGE_NAME(SNAP)
-                    FF_TEST_PACKAGE_NAME(SOAR)
-                    FF_TEST_PACKAGE_NAME(SORCERY)
-                    break;
-                case 'W': if (false);
-                    FF_TEST_PACKAGE_NAME(WINGET)
-                    break;
-                case 'X': if (false);
-                    FF_TEST_PACKAGE_NAME(XBPS)
-                    break;
-            }
-            #undef FF_TEST_PACKAGE_NAME
-
-            if (end)
-            {
-                start = end + 1;
-                end = strchr(start, ':');
-            }
-            else
-                break;
-        }
-
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "combined"))
-    {
-        options->combined = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    return false;
-}
-
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if (ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "disabled"))
+        if (unsafe_yyjson_equals_str(key, "disabled"))
         {
             if (!yyjson_is_null(val) && !yyjson_is_arr(val))
             {
-                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", key);
+                ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
                 continue;
             }
 
@@ -345,7 +230,12 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                 size_t flagIdx, flagMax;
                 yyjson_arr_foreach(val, flagIdx, flagMax, flagObj)
                 {
-                    const char* flag = yyjson_get_str(flagObj);
+                    if (!yyjson_is_str(flagObj))
+                    {
+                        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid JSON value for %s", unsafe_yyjson_get_str(key));
+                        continue;
+                    }
+                    const char* flag = unsafe_yyjson_get_str(flagObj);
 
                     #define FF_TEST_PACKAGE_NAME(name) else if (ffStrEqualsIgnCase(flag, #name)) { options->disabled |= FF_PACKAGES_FLAG_ ## name ## _BIT; }
                     switch (toupper(flag[0]))
@@ -422,64 +312,62 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
             }
         }
 
-        if (ffStrEqualsIgnCase(key, "combined"))
+        if (unsafe_yyjson_equals_str(key, "combined"))
         {
             options->combined = yyjson_get_bool(val);
             continue;
         }
 
-        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPackagesOptions))) FFPackagesOptions defaultOptions;
-    ffInitPackagesOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (options->disabled != defaultOptions.disabled)
-    {
-        yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "disabled");
-        #define FF_TEST_PACKAGE_NAME(name) else if ((options->disabled & FF_PACKAGES_FLAG_ ## name ## _BIT) != (defaultOptions.disabled & FF_PACKAGES_FLAG_ ## name ## _BIT)) { yyjson_mut_arr_add_str(doc, arr, #name); }
-        if (false);
-        FF_TEST_PACKAGE_NAME(AM)
-        FF_TEST_PACKAGE_NAME(APK)
-        FF_TEST_PACKAGE_NAME(BREW)
-        FF_TEST_PACKAGE_NAME(CHOCO)
-        FF_TEST_PACKAGE_NAME(DPKG)
-        FF_TEST_PACKAGE_NAME(EMERGE)
-        FF_TEST_PACKAGE_NAME(EOPKG)
-        FF_TEST_PACKAGE_NAME(FLATPAK)
-        FF_TEST_PACKAGE_NAME(GUIX)
-        FF_TEST_PACKAGE_NAME(HPKG)
-        FF_TEST_PACKAGE_NAME(LINGLONG)
-        FF_TEST_PACKAGE_NAME(LPKG)
-        FF_TEST_PACKAGE_NAME(LPKGBUILD)
-        FF_TEST_PACKAGE_NAME(MACPORTS)
-        FF_TEST_PACKAGE_NAME(MPORT)
-        FF_TEST_PACKAGE_NAME(NIX)
-        FF_TEST_PACKAGE_NAME(OPKG)
-        FF_TEST_PACKAGE_NAME(PACMAN)
-        FF_TEST_PACKAGE_NAME(PACSTALL)
-        FF_TEST_PACKAGE_NAME(PALUDIS)
-        FF_TEST_PACKAGE_NAME(PISI)
-        FF_TEST_PACKAGE_NAME(PKG)
-        FF_TEST_PACKAGE_NAME(PKGTOOL)
-        FF_TEST_PACKAGE_NAME(PKGSRC)
-        FF_TEST_PACKAGE_NAME(RPM)
-        FF_TEST_PACKAGE_NAME(SCOOP)
-        FF_TEST_PACKAGE_NAME(SNAP)
-        FF_TEST_PACKAGE_NAME(SOAR)
-        FF_TEST_PACKAGE_NAME(SORCERY)
-        FF_TEST_PACKAGE_NAME(WINGET)
-        FF_TEST_PACKAGE_NAME(XBPS)
-        #undef FF_TEST_PACKAGE_NAME
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "disabled");
+    #define FF_TEST_PACKAGE_NAME(name) else if ((options->disabled & FF_PACKAGES_FLAG_ ## name ## _BIT)) { \
+        ffStrbufSetS(&buf, #name); \
+        ffStrbufLowerCase(&buf); \
+        yyjson_mut_arr_add_strbuf(doc, arr, &buf); \
     }
+    if (false);
+    FF_TEST_PACKAGE_NAME(AM)
+    FF_TEST_PACKAGE_NAME(APK)
+    FF_TEST_PACKAGE_NAME(BREW)
+    FF_TEST_PACKAGE_NAME(CHOCO)
+    FF_TEST_PACKAGE_NAME(DPKG)
+    FF_TEST_PACKAGE_NAME(EMERGE)
+    FF_TEST_PACKAGE_NAME(EOPKG)
+    FF_TEST_PACKAGE_NAME(FLATPAK)
+    FF_TEST_PACKAGE_NAME(GUIX)
+    FF_TEST_PACKAGE_NAME(HPKG)
+    FF_TEST_PACKAGE_NAME(LINGLONG)
+    FF_TEST_PACKAGE_NAME(LPKG)
+    FF_TEST_PACKAGE_NAME(LPKGBUILD)
+    FF_TEST_PACKAGE_NAME(MACPORTS)
+    FF_TEST_PACKAGE_NAME(MPORT)
+    FF_TEST_PACKAGE_NAME(NIX)
+    FF_TEST_PACKAGE_NAME(OPKG)
+    FF_TEST_PACKAGE_NAME(PACMAN)
+    FF_TEST_PACKAGE_NAME(PACSTALL)
+    FF_TEST_PACKAGE_NAME(PALUDIS)
+    FF_TEST_PACKAGE_NAME(PISI)
+    FF_TEST_PACKAGE_NAME(PKG)
+    FF_TEST_PACKAGE_NAME(PKGTOOL)
+    FF_TEST_PACKAGE_NAME(PKGSRC)
+    FF_TEST_PACKAGE_NAME(RPM)
+    FF_TEST_PACKAGE_NAME(SCOOP)
+    FF_TEST_PACKAGE_NAME(SNAP)
+    FF_TEST_PACKAGE_NAME(SOAR)
+    FF_TEST_PACKAGE_NAME(SORCERY)
+    FF_TEST_PACKAGE_NAME(WINGET)
+    FF_TEST_PACKAGE_NAME(XBPS)
+    #undef FF_TEST_PACKAGE_NAME
 
-    if (options->combined != defaultOptions.combined)
-        yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
+    yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
 }
 
 void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -541,10 +429,24 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
+
+    options->disabled = FF_PACKAGES_DISABLE_LIST;
+    options->combined = false;
+}
+
+void ffDestroyPackagesOptions(FFPackagesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffPackagesModuleInfo = {
     .name = FF_PACKAGES_MODULE_NAME,
     .description = "List installed package managers and count of installed packages",
-    .parseCommandOptions = (void*) ffParsePackagesCommandOptions,
+    .initOptions = (void*) ffInitPackagesOptions,
+    .destroyOptions = (void*) ffDestroyPackagesOptions,
     .parseJsonObject = (void*) ffParsePackagesJsonObject,
     .printModule = (void*) ffPrintPackages,
     .generateJsonResult = (void*) ffGeneratePackagesJsonResult,
@@ -599,17 +501,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Total number of all hpkg packages", "hpkg-all"},
     }))
 };
-
-void ffInitPackagesOptions(FFPackagesOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰏖");
-
-    options->disabled = FF_PACKAGES_DISABLE_LIST;
-    options->combined = false;
-}
-
-void ffDestroyPackagesOptions(FFPackagesOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

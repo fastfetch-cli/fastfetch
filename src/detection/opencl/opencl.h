@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/opencl/option.h"
 
 typedef struct FFOpenCLResult
 {

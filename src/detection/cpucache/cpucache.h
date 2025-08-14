@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/cpucache/option.h"
 
 typedef enum __attribute__((__packed__)) FFCPUCacheType
 {

@@ -23,16 +23,14 @@ static const char* detectWTProfile(yyjson_val* profile, FFstrbuf* name, double* 
 
     if (name->length == 0)
     {
-        yyjson_val* pface = yyjson_obj_get(font, "face");
-        if(yyjson_is_str(pface))
-            ffStrbufAppendS(name, unsafe_yyjson_get_str(pface));
+        ffStrbufAppendJsonVal(name, yyjson_obj_get(font, "face"));
     }
 
     if (*size < 0)
     {
         yyjson_val* psize = yyjson_obj_get(font, "size");
         if (yyjson_is_num(psize))
-            *size = yyjson_get_num(psize);
+            *size = unsafe_yyjson_get_num(psize);
     }
     return NULL;
 }
@@ -46,7 +44,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 
 static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* size)
 {
-    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, NULL);
     if (!doc)
         return "Failed to parse WT JSON config file";
 

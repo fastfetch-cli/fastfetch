@@ -8,28 +8,32 @@ void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
     putchar('\n');
 }
 
-bool ffParseBreakCommandOptions(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED const char* key, FF_MAYBE_UNUSED const char* value)
-{
-    return false;
-}
-
 void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)
 {
-}
+    yyjson_val *key, *val;
+    size_t idx, max;
+    yyjson_obj_foreach(module, idx, max, key, val)
+    {
+        if (unsafe_yyjson_equals_str(key, "type") || unsafe_yyjson_equals_str(key, "condition"))
+            continue;
 
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_BREAK_MODULE_NAME,
-    .description = "Print a empty line",
-    .parseCommandOptions = (void*) ffParseBreakCommandOptions,
-    .parseJsonObject = (void*) ffParseBreakJsonObject,
-    .printModule = (void*) ffPrintBreak,
-};
+        ffPrintError(FF_BREAK_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
+    }
+}
 
 void ffInitBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
 }
 
 void ffDestroyBreakOptions(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
 }
+
+FFModuleBaseInfo ffBreakModuleInfo = {
+    .name = FF_BREAK_MODULE_NAME,
+    .description = "Print a empty line",
+    .initOptions = (void*) ffInitBreakOptions,
+    .destroyOptions = (void*) ffDestroyBreakOptions,
+    .parseJsonObject = (void*) ffParseBreakJsonObject,
+    .printModule = (void*) ffPrintBreak,
+};

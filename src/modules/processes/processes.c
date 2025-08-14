@@ -29,39 +29,22 @@ void ffPrintProcesses(FFProcessesOptions* options)
     }
 }
 
-bool ffParseProcessesCommandOptions(FFProcessesOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PROCESSES_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateProcessesJsonConfig(FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyProcessesOptions))) FFProcessesOptions defaultOptions;
-    ffInitProcessesOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -78,10 +61,21 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
     yyjson_mut_obj_add_uint(doc, module, "result", result);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitProcessesOptions(FFProcessesOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyProcessesOptions(FFProcessesOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffProcessesModuleInfo = {
     .name = FF_PROCESSES_MODULE_NAME,
     .description = "Print number of running processes",
-    .parseCommandOptions = (void*) ffParseProcessesCommandOptions,
+    .initOptions = (void*) ffInitProcessesOptions,
+    .destroyOptions = (void*) ffDestroyProcessesOptions,
     .parseJsonObject = (void*) ffParseProcessesJsonObject,
     .printModule = (void*) ffPrintProcesses,
     .generateJsonResult = (void*) ffGenerateProcessesJsonResult,
@@ -90,14 +84,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Process count", "result"}
     }))
 };
-
-void ffInitProcessesOptions(FFProcessesOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyProcessesOptions(FFProcessesOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

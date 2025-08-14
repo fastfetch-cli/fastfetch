@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/zpool/option.h"
 
 typedef struct FFZpoolResult
 {

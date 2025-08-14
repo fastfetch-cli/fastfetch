@@ -48,39 +48,22 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-bool ffParseInitSystemCommandOptions(FFInitSystemOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_INITSYSTEM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseInitSystemJsonObject(FFInitSystemOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_INITSYSTEM_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateInitSystemJsonConfig(FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyInitSystemOptions))) FFInitSystemOptions defaultOptions;
-    ffInitInitSystemOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateInitSystemJsonResult(FF_MAYBE_UNUSED FFInitSystemOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -112,10 +95,21 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitInitSystemOptions(FFInitSystemOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
+}
+
+void ffDestroyInitSystemOptions(FFInitSystemOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffInitSystemModuleInfo = {
     .name = FF_INITSYSTEM_MODULE_NAME,
     .description = "Print init system (pid 1) name and version",
-    .parseCommandOptions = (void*) ffParseInitSystemCommandOptions,
+    .initOptions = (void*) ffInitInitSystemOptions,
+    .destroyOptions = (void*) ffDestroyInitSystemOptions,
     .parseJsonObject = (void*) ffParseInitSystemJsonObject,
     .printModule = (void*) ffPrintInitSystem,
     .generateJsonResult = (void*) ffGenerateInitSystemJsonResult,
@@ -127,14 +121,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Init system pid", "pid"},
     }))
 };
-
-void ffInitInitSystemOptions(FFInitSystemOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰿄");
-}
-
-void ffDestroyInitSystemOptions(FFInitSystemOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -80,39 +80,22 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
     }
 }
 
-bool ffParsePhysicalMemoryCommandOptions(FFPhysicalMemoryOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_PHYSICALMEMORY_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParsePhysicalMemoryJsonObject(FFPhysicalMemoryOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_PHYSICALMEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_PHYSICALMEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGeneratePhysicalMemoryJsonConfig(FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPhysicalMemoryOptions))) FFPhysicalMemoryOptions defaultOptions;
-    ffInitPhysicalMemoryOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -153,10 +136,21 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰑭");
+}
+
+void ffDestroyPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffPhysicalMemoryModuleInfo = {
     .name = FF_PHYSICALMEMORY_MODULE_NAME,
     .description = "Print system physical memory devices",
-    .parseCommandOptions = (void*) ffParsePhysicalMemoryCommandOptions,
+    .initOptions = (void*) ffInitPhysicalMemoryOptions,
+    .destroyOptions = (void*) ffDestroyPhysicalMemoryOptions,
     .parseJsonObject = (void*) ffParsePhysicalMemoryJsonObject,
     .printModule = (void*) ffPrintPhysicalMemory,
     .generateJsonConfig = (void*) ffGeneratePhysicalMemoryJsonConfig,
@@ -175,14 +169,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"True if ECC enabled", "is-ecc-enabled"},
     }))
 };
-
-void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰑭");
-}
-
-void ffDestroyPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

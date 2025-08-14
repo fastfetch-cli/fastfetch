@@ -11,11 +11,18 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
+#include <inttypes.h>
+#include <fcntl.h>
 
 #ifdef __linux__
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
 #include <linux/if.h>
+#include <linux/if_addr.h>
+#endif
+
+#if __has_include(<netinet6/in6_var.h>)
+    #include <netinet6/in6_var.h>
 #endif
 
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__) || defined(__HAIKU__)
@@ -27,60 +34,81 @@
 #if defined(__sun) || defined(__HAIKU__)
 #include <sys/sockio.h>
 #endif
+#if defined(__sun)
+#include <kstat.h>
+
+static inline void kstatFreeWrap(kstat_ctl_t** pkc)
+{
+    assert(pkc);
+    if (*pkc)
+        kstat_close(*pkc);
+}
+#endif
+
+#define FF_LOCALIP_NIFLAG(name) { IFF_##name, #name }
 
 static const FFLocalIpNIFlag niFlagOptions[] = {
-    { IFF_UP, "UP" },
-    { IFF_BROADCAST, "BROADCAST" },
+    FF_LOCALIP_NIFLAG(UP),
+    FF_LOCALIP_NIFLAG(BROADCAST),
 #ifdef IFF_DEBUG
-    { IFF_DEBUG, "DEBUG" },
+    FF_LOCALIP_NIFLAG(DEBUG),
 #endif
-    { IFF_LOOPBACK, "LOOPBACK" },
-    { IFF_POINTOPOINT, "POINTOPOINT" },
+    FF_LOCALIP_NIFLAG(LOOPBACK),
+    FF_LOCALIP_NIFLAG(POINTOPOINT),
 #ifdef IFF_RUNNING
-    { IFF_RUNNING, "RUNNING" },
+    FF_LOCALIP_NIFLAG(RUNNING),
 #endif
-    { IFF_NOARP, "NOARP" },
-    { IFF_PROMISC, "PROMISC" },
-    { IFF_ALLMULTI, "ALLMULTI" },
-    { IFF_MULTICAST, "MULTICAST" },
+    FF_LOCALIP_NIFLAG(NOARP),
+    FF_LOCALIP_NIFLAG(PROMISC),
+    FF_LOCALIP_NIFLAG(ALLMULTI),
+#ifdef IFF_INTELLIGENT
+    FF_LOCALIP_NIFLAG(INTELLIGENT),
+#endif
+    FF_LOCALIP_NIFLAG(MULTICAST),
 #ifdef IFF_NOTRAILERS
-    { IFF_NOTRAILERS, "NOTRAILERS" },
+    FF_LOCALIP_NIFLAG(NOTRAILERS),
 #endif
 #ifdef __linux__
-    { IFF_MASTER, "MASTER" },
-    { IFF_SLAVE, "SLAVE" },
-    { IFF_PORTSEL, "PORTSEL" },
-    { IFF_AUTOMEDIA, "AUTOMEDIA" },
-    { IFF_DYNAMIC, "DYNAMIC" },
-    { IFF_LOWER_UP, "LOWER_UP" },
-    { IFF_DORMANT, "DORMANT" },
-    { IFF_ECHO, "ECHO" },
+    FF_LOCALIP_NIFLAG(MASTER),
+    FF_LOCALIP_NIFLAG(SLAVE),
+    FF_LOCALIP_NIFLAG(PORTSEL),
+    FF_LOCALIP_NIFLAG(AUTOMEDIA),
+    FF_LOCALIP_NIFLAG(DYNAMIC),
+    FF_LOCALIP_NIFLAG(LOWER_UP),
+    FF_LOCALIP_NIFLAG(DORMANT),
+    FF_LOCALIP_NIFLAG(ECHO),
 #endif
 #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
-    { IFF_OACTIVE, "OACTIVE" },
-    { IFF_SIMPLEX, "SIMPLEX" },
-    { IFF_LINK0, "LINK0" },
-    { IFF_LINK1, "LINK1" },
-    { IFF_LINK2, "LINK2" },
+    FF_LOCALIP_NIFLAG(OACTIVE),
+    FF_LOCALIP_NIFLAG(SIMPLEX),
+    FF_LOCALIP_NIFLAG(LINK0),
+    FF_LOCALIP_NIFLAG(LINK1),
+    FF_LOCALIP_NIFLAG(LINK2),
 #endif
 #ifdef IFF_ALTPHYS
-    { IFF_ALTPHYS, "ALTPHYS" },
+    FF_LOCALIP_NIFLAG(ALTPHYS),
 #endif
 #ifdef IFF_CANTCONFIG
-    { IFF_CANTCONFIG, "CANTCONFIG" },
+    FF_LOCALIP_NIFLAG(CANTCONFIG),
 #endif
 #ifdef __HAIKU__
-    { IFF_AUTOUP, "IAUTOUP" },
-    { IFF_SIMPLEX, "SIMPLEX" },
-    { IFF_LINK, "LINK" },
-    { IFF_AUTO_CONFIGURED, "AUTO_CONFIGURED" },
-    { IFF_CONFIGURING, "CONFIGURING" },
+    FF_LOCALIP_NIFLAG(AUTOUP),
+    FF_LOCALIP_NIFLAG(SIMPLEX),
+    FF_LOCALIP_NIFLAG(LINK),
+    FF_LOCALIP_NIFLAG(AUTO_CONFIGURED),
+    FF_LOCALIP_NIFLAG(CONFIGURING),
+#endif
+#ifdef __sun
+    FF_LOCALIP_NIFLAG(MULTI_BCAST),
+    FF_LOCALIP_NIFLAG(UNNUMBERED),
+    FF_LOCALIP_NIFLAG(DHCPRUNNING),
+    FF_LOCALIP_NIFLAG(PRIVATE),
 #endif
     // sentinel
     {},
 };
 
-static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, uint32_t flags, bool firstOnly)
+static void addNewIp(FFlist* list, const char* name, const char* addr, int type, bool defaultRoute, uint64_t flags, bool firstOnly)
 {
     FFLocalIpResult* ip = NULL;
 
@@ -88,6 +116,7 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
     {
         if (!ffStrbufEqualS(&temp->name, name)) continue;
         ip = temp;
+        if (defaultRoute) ip->defaultRoute = true;
         break;
     }
     if (!ip)
@@ -129,26 +158,110 @@ static void addNewIp(FFlist* list, const char* name, const char* addr, int type,
     }
 }
 
+static bool isIPv6AddressPreferred(struct ifaddrs* ifa, struct sockaddr_in6* addr)
+{
+#ifndef IN6_IS_ADDR_GLOBAL
+#define IN6_IS_ADDR_GLOBAL(a) \
+        ((((const uint32_t *) (a))[0] & htonl(0x70000000)) == htonl(0x20000000))
+#endif
+#ifndef IN6_IS_ADDR_UNIQUE_LOCAL
+#define IN6_IS_ADDR_UNIQUE_LOCAL(a) \
+        ((((const uint32_t *) (a))[0] & htonl(0xfe000000)) == htonl(0xfc000000))
+#endif
+    if (!IN6_IS_ADDR_GLOBAL(&addr->sin6_addr) && !IN6_IS_ADDR_UNIQUE_LOCAL(&addr->sin6_addr))
+        return false;
+
+#ifdef SIOCGIFAFLAG_IN6
+    static int sockfd = 0;
+    if (sockfd == 0)
+    {
+        sockfd = socket(AF_INET6, SOCK_DGRAM
+            #ifdef SOCK_CLOEXEC
+            | SOCK_CLOEXEC
+            #endif
+        , 0);
+        #ifndef SOCK_CLOEXEC
+        if (sockfd > 0) fcntl(sockfd, F_SETFD, FD_CLOEXEC);
+        #endif
+    }
+    if (sockfd < 0) return true; // Give up
+
+    struct in6_ifreq ifr6 = {};
+    ffStrCopy(ifr6.ifr_name, ifa->ifa_name, IFNAMSIZ);
+    ifr6.ifr_addr = *addr;
+
+    if (ioctl(sockfd, SIOCGIFAFLAG_IN6, &ifr6) != 0)
+        return true;
+    #ifdef IN6_IFF_PREFER_SOURCE
+        if (ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_PREFER_SOURCE)
+            return true;
+    #endif
+    return !(ifr6.ifr_ifru.ifru_flags6 & (IN6_IFF_DEPRECATED | IN6_IFF_TEMPORARY | IN6_IFF_TENTATIVE | IN6_IFF_DUPLICATED
+        #ifdef IN6_IFF_OPTIMISTIC
+             | IN6_IFF_OPTIMISTIC
+        #endif
+    ));
+#elif __linux__
+    FF_UNUSED(ifa);
+
+    static FFlist addresses = {};
+    if (addresses.elementSize == 0)
+    {
+        ffListInit(&addresses, sizeof(struct in6_addr));
+        FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+        if (!ffReadFileBuffer("/proc/net/if_inet6", &buffer))
+            return true;
+
+        char* line = NULL;
+        size_t len = 0;
+        while (ffStrbufGetline(&line, &len, &buffer))
+        {
+            struct in6_addr* entry = (struct in6_addr*) ffListAdd(&addresses);
+            uint8_t flags;
+            if (sscanf(line, "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 "%2" SCNx8 " %*s %*s %*s %" SCNx8 " %*s",
+                    &entry->s6_addr[0], &entry->s6_addr[1], &entry->s6_addr[2], &entry->s6_addr[3],
+                    &entry->s6_addr[4], &entry->s6_addr[5], &entry->s6_addr[6], &entry->s6_addr[7],
+                    &entry->s6_addr[8], &entry->s6_addr[9], &entry->s6_addr[10], &entry->s6_addr[11],
+                    &entry->s6_addr[12], &entry->s6_addr[13], &entry->s6_addr[14], &entry->s6_addr[15],
+                    &flags) != 17 ||
+                (!IN6_IS_ADDR_GLOBAL(entry) && !IN6_IS_ADDR_UNIQUE_LOCAL(entry)) ||
+                (flags & (IFA_F_DEPRECATED | IFA_F_TEMPORARY | IFA_F_TENTATIVE | IFA_F_DADFAILED | IFA_F_OPTIMISTIC))
+            )
+                --addresses.length;
+        }
+    }
+    if (addresses.capacity == 0) return true; // Give up
+
+    FF_LIST_FOR_EACH(struct in6_addr, entry, addresses)
+    {
+        if (memcmp(&addr->sin6_addr, entry, sizeof(struct in6_addr)) == 0)
+            return true;
+    }
+    return false;
+#elif __sun
+    if (ifa->ifa_flags & IFF_PREFERRED)
+        return true;
+    return !(ifa->ifa_flags & (IFF_DEPRECATED | IFF_TEMPORARY | IFF_DUPLICATE));
+#else
+    return true;
+#endif
+}
+
 const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 {
     struct ifaddrs* ifAddrStruct = NULL;
     if(getifaddrs(&ifAddrStruct) < 0)
         return "getifaddrs(&ifAddrStruct) failed";
 
-    const char* defaultRouteIfName = ffNetifGetDefaultRouteIfName();
-
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next)
     {
         if (!ifa->ifa_addr)
             continue;
+
 #ifdef IFF_RUNNING
         if (!(ifa->ifa_flags & IFF_RUNNING))
             continue;
 #endif
-
-        bool isDefaultRoute = ffStrEquals(defaultRouteIfName, ifa->ifa_name);
-        if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
-            continue;
 
         if ((ifa->ifa_flags & IFF_LOOPBACK) && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
             continue;
@@ -156,7 +269,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
             continue;
 
-        uint32_t flags = options->showType & FF_LOCALIP_TYPE_FLAGS_BIT ? ifa->ifa_flags : 0;
+        uint64_t flags = options->showType & FF_LOCALIP_TYPE_FLAGS_BIT ? ifa->ifa_flags : 0;
 
         if (ifa->ifa_addr->sa_family == AF_INET)
         {
@@ -164,6 +277,22 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 continue;
 
             struct sockaddr_in* ipv4 = (struct sockaddr_in*) ifa->ifa_addr;
+
+            const FFNetifDefaultRouteResult* defaultRoute = ffNetifGetDefaultRouteV4();
+            bool isDefaultRouteIf = ffStrEquals(defaultRoute->ifName, ifa->ifa_name);
+            if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
+            {
+                if (!isDefaultRouteIf)
+                    continue;
+
+                if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
+                {
+                    bool isPreferredSourceAddr = defaultRoute->preferredSourceAddrV4 == 0 || ipv4->sin_addr.s_addr == defaultRoute->preferredSourceAddrV4;
+                    if (!isPreferredSourceAddr)
+                        continue;
+                }
+            }
+
             char addressBuffer[INET_ADDRSTRLEN + 16];
             inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
@@ -178,14 +307,22 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET, isDefaultRouteIf, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         else if (ifa->ifa_addr->sa_family == AF_INET6)
         {
             if (!(options->showType & FF_LOCALIP_TYPE_IPV6_BIT))
                 continue;
 
+            const FFNetifDefaultRouteResult* defaultRoute = ffNetifGetDefaultRouteV6();
+            bool isDefaultRouteIf = ffStrEquals(defaultRoute->ifName, ifa->ifa_name);
+            if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRouteIf)
+                continue;
+
             struct sockaddr_in6* ipv6 = (struct sockaddr_in6 *)ifa->ifa_addr;
+            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) && !isIPv6AddressPreferred(ifa, ipv6))
+                continue;
+
             char addressBuffer[INET6_ADDRSTRLEN + 16];
             inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 
@@ -203,7 +340,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRoute, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
+            addNewIp(results, ifa->ifa_name, addressBuffer, AF_INET6, isDefaultRouteIf, flags, !(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT));
         }
         #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__
         else if (ifa->ifa_addr->sa_family == AF_LINK)
@@ -215,7 +352,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = (uint8_t*) LLADDR((struct sockaddr_dl *)ifa->ifa_addr);
             snprintf(addressBuffer, ARRAY_SIZE(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, false, flags, false);
         }
         #else
         else if (ifa->ifa_addr->sa_family == AF_PACKET)
@@ -227,7 +364,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             uint8_t* ptr = ((struct sockaddr_ll *)ifa->ifa_addr)->sll_addr;
             snprintf(addressBuffer, ARRAY_SIZE(addressBuffer), "%02x:%02x:%02x:%02x:%02x:%02x",
                         ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-            addNewIp(results, ifa->ifa_name, addressBuffer, -1, isDefaultRoute, flags, false);
+            addNewIp(results, ifa->ifa_name, addressBuffer, -1, false, flags, false);
         }
         #endif
     }
@@ -641,6 +778,24 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     const uint8_t* ptr = (uint8_t*) ifr.ifr_addr.sa_data; // NOT ifr_enaddr
                     ffStrbufSetF(&iface->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
                                 ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
+                }
+                if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
+                {
+                    __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
+                    for (kstat_t* ks = kc->kc_chain; ks; ks = ks->ks_next)
+                    {
+                        if (!ffStrEquals(ks->ks_class, "net") || !ffStrEquals(ks->ks_module, "link")) continue;
+                        if (ffStrbufEqualS(&iface->name, ks->ks_name))
+                        {
+                            if (kstat_read(kc, ks, NULL) >= 0)
+                            {
+                                kstat_named_t* ifspeed = (kstat_named_t*) kstat_data_lookup(ks, "ifspeed");
+                                if (ifspeed)
+                                    iface->speed = (int32_t) (ifspeed->value.ui64 / 1000 / 1000);
+                            }
+                            break;
+                        }
+                    }
                 }
                 #endif
             }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/netio/option.h"
 
 typedef struct FFNetIOResult
 {

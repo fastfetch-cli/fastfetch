@@ -2,30 +2,23 @@
 
 #ifndef _WIN32
     #include <net/if.h>
-#else
-    #include <ws2tcpip.h>
-    #include <iphlpapi.h>
+    #include <netinet/in.h>
 #endif
 
-bool ffNetifGetDefaultRouteImpl(char iface[IF_NAMESIZE + 1], uint32_t* ifIndex);
-enum { IF_INDEX_UNINITIALIZED = (uint32_t) -1, IF_INDEX_INVALID = (uint32_t) -2 };
-static uint32_t ifIndex = IF_INDEX_UNINITIALIZED;
-static char ifName[IF_NAMESIZE + 1];
-
-static inline void init()
+const FFNetifDefaultRouteResult* ffNetifGetDefaultRouteV4(void)
 {
-    if (ifIndex == (uint32_t) IF_INDEX_UNINITIALIZED && !ffNetifGetDefaultRouteImpl(ifName, &ifIndex))
-        ifIndex = (uint32_t) IF_INDEX_INVALID;
+    static FFNetifDefaultRouteResult result;
+    if (result.status == FF_NETIF_UNINITIALIZED) {
+        result.status = ffNetifGetDefaultRouteImplV4(&result) ? FF_NETIF_OK : FF_NETIF_INVALID;
+    }
+    return &result;
 }
 
-const char* ffNetifGetDefaultRouteIfName()
+const FFNetifDefaultRouteResult* ffNetifGetDefaultRouteV6(void)
 {
-    init();
-    return ifName;
-}
-
-uint32_t ffNetifGetDefaultRouteIfIndex()
-{
-    init();
-    return ifIndex;
+    static FFNetifDefaultRouteResult result;
+    if (result.status == FF_NETIF_UNINITIALIZED) {
+        result.status = ffNetifGetDefaultRouteImplV6(&result) ? FF_NETIF_OK : FF_NETIF_INVALID;
+    }
+    return &result;
 }

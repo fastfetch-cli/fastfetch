@@ -56,38 +56,21 @@ void ffPrintPowerAdapter(FFPowerAdapterOptions* options)
     }
 }
 
-bool ffParsePowerAdapterCommandOptions(FFPowerAdapterOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_POWERADAPTER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffGeneratePowerAdapterJsonConfig(FFPowerAdapterOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPowerAdapterOptions))) FFPowerAdapterOptions defaultOptions;
-    ffInitPowerAdapterOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffParsePowerAdapterJsonObject(FFPowerAdapterOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_POWERADAPTER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
@@ -125,10 +108,21 @@ void ffGeneratePowerAdapterJsonResult(FF_MAYBE_UNUSED FFPowerAdapterOptions* opt
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
+}
+
+void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffPowerAdapterModuleInfo = {
     .name = FF_POWERADAPTER_MODULE_NAME,
     .description = "Print power adapter name and charging watts",
-    .parseCommandOptions = (void*) ffParsePowerAdapterCommandOptions,
+    .initOptions = (void*) ffInitPowerAdapterOptions,
+    .destroyOptions = (void*) ffDestroyPowerAdapterOptions,
     .parseJsonObject = (void*) ffParsePowerAdapterJsonObject,
     .printModule = (void*) ffPrintPowerAdapter,
     .generateJsonResult = (void*) ffGeneratePowerAdapterJsonResult,
@@ -142,14 +136,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Power adapter serial number", "serial"},
     }))
 };
-
-void ffInitPowerAdapterOptions(FFPowerAdapterOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰚥");
-}
-
-void ffDestroyPowerAdapterOptions(FFPowerAdapterOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

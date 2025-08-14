@@ -11,7 +11,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 {
     int mib[] = {CTL_NET, PF_LINK, NETLINK_GENERIC,
         options->defaultRouteOnly ? IFMIB_IFDATA : IFMIB_IFALLDATA,
-        options->defaultRouteOnly ? (int) ffNetifGetDefaultRouteIfIndex() : 0,
+        options->defaultRouteOnly ? (int) ffNetifGetDefaultRouteV4()->ifIndex : 0,
         IFDATA_GENERAL};
 
     size_t bufSize = 0;
@@ -26,7 +26,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 
     size_t ifCount = bufSize / sizeof(struct ifmibdata);
 
-    const char* defaultRouteIfName = ffNetifGetDefaultRouteIfName();
+    const char* defaultRouteIfName = ffNetifGetDefaultRouteV4()->ifName;
 
     for (size_t i = 0; i < ifCount; i++)
     {

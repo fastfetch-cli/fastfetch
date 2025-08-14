@@ -54,39 +54,22 @@ void ffPrintEditor(FFEditorOptions* options)
     ffStrbufDestroy(&result.version);
 }
 
-bool ffParseEditorCommandOptions(FFEditorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_EDITOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
-}
-
 void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type") || ffStrEqualsIgnCase(key, "condition"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyEditorOptions))) FFEditorOptions defaultOptions;
-    ffInitEditorOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -118,10 +101,21 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitEditorOptions(FFEditorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
+}
+
+void ffDestroyEditorOptions(FFEditorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffEditorModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
-    .parseCommandOptions = (void*) ffParseEditorCommandOptions,
+    .initOptions = (void*) ffInitEditorOptions,
+    .destroyOptions = (void*) ffDestroyEditorOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
     .printModule = (void*) ffPrintEditor,
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,
@@ -134,14 +128,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Version", "version"},
     }))
 };
-
-void ffInitEditorOptions(FFEditorOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
-}
-
-void ffDestroyEditorOptions(FFEditorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/vulkan/option.h"
 
 typedef struct FFVulkanResult
 {

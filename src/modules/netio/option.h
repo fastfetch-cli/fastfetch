@@ -1,12 +1,9 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFNetIOOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFstrbuf namePrefix;
@@ -14,3 +11,5 @@ typedef struct FFNetIOOptions
     bool defaultRouteOnly;
     bool detectTotal;
 } FFNetIOOptions;
+
+static_assert(sizeof(FFNetIOOptions) <= FF_OPTION_MAX_SIZE, "FFNetIOOptions size exceeds maximum allowed size");
