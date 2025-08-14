@@ -146,9 +146,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             for (uint8_t i = blocksPercent; i < options->barWidth; ++i)
             {
                 ffStrbufAppend(buffer, borderAsValue && i == 0
-                    ? &options->barBorderLeftElapsed
+                    ? &options->barBorderLeft
                     : borderAsValue && i == options->barWidth - 1
-                        ? &options->barBorderRightElapsed
+                        ? &options->barBorderRight
                         : &options->barCharTotal);
             }
         }
