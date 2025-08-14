@@ -139,9 +139,9 @@ static const char* detectByWdutil(FFlist* result)
     ffStrbufInit(&item->conn.bssid);
     ffStrbufInit(&item->conn.protocol);
     ffStrbufInit(&item->conn.security);
-    item->conn.signalQuality = 0.0/0.0;
-    item->conn.rxRate = 0.0/0.0;
-    item->conn.txRate = 0.0/0.0;
+    item->conn.signalQuality = -DBL_MAX;
+    item->conn.rxRate = -DBL_MAX;
+    item->conn.txRate = -DBL_MAX;
     item->conn.channel = 0;
     item->conn.frequency = 0;
 
@@ -245,9 +245,9 @@ static const char* detectByCoreWlan(FFlist* result)
         ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
-        item->conn.signalQuality = 0.0/0.0;
-        item->conn.rxRate = 0.0/0.0;
-        item->conn.txRate = 0.0/0.0;
+        item->conn.signalQuality = -DBL_MAX;
+        item->conn.rxRate = -DBL_MAX;
+        item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
         item->conn.frequency = 0;
 

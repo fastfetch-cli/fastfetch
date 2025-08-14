@@ -81,7 +81,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 ffFreqAppendNum(freq, &str);
             }
 
-            if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
+            if(cpu.temperature != FF_CPU_TEMP_UNSET)
             {
                 ffStrbufAppendS(&str, " - ");
                 ffTempsAppendNum(cpu.temperature, &str, options->tempConfig, &options->moduleArgs);
@@ -201,7 +201,10 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
             yyjson_mut_obj_add_uint(doc, core, "freq", cpu.coreTypes[i].freq);
         }
 
-        yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
+        if (cpu.temperature != FF_CPU_TEMP_UNSET)
+            yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "temperature");
     }
 
     ffStrbufDestroy(&cpu.name);

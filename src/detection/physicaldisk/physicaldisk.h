@@ -1,7 +1,7 @@
 #include "fastfetch.h"
 #include "modules/physicaldisk/option.h"
 
-#define FF_PHYSICALDISK_TEMP_UNSET (0/0.0)
+#define FF_PHYSICALDISK_TEMP_UNSET (-DBL_MAX)
 
 typedef enum __attribute__((__packed__)) FFPhysicalDiskType
 {

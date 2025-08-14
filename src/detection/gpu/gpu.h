@@ -3,11 +3,11 @@
 #include "fastfetch.h"
 #include "modules/gpu/option.h"
 
-#define FF_GPU_TEMP_UNSET (0/0.0)
+#define FF_GPU_TEMP_UNSET (-DBL_MAX)
 #define FF_GPU_CORE_COUNT_UNSET -1
 #define FF_GPU_VMEM_SIZE_UNSET ((uint64_t)-1)
 #define FF_GPU_FREQUENCY_UNSET 0
-#define FF_GPU_CORE_USAGE_UNSET (0/0.0)
+#define FF_GPU_CORE_USAGE_UNSET (-DBL_MAX)
 #define FF_GPU_INDEX_UNSET ((uint32_t)-1)
 
 extern const char* FF_GPU_VENDOR_NAME_APPLE;

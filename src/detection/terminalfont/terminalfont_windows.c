@@ -44,7 +44,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
 
 static const char* detectFromWTImpl(FFstrbuf* content, FFstrbuf* name, double* size)
 {
-    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS | YYJSON_READ_ALLOW_INF_AND_NAN, NULL, NULL);
+    yyjson_doc* __attribute__((__cleanup__(wrapYyjsonFree))) doc = yyjson_read_opts(content->chars, content->length, YYJSON_READ_ALLOW_COMMENTS | YYJSON_READ_ALLOW_TRAILING_COMMAS, NULL, NULL);
     if (!doc)
         return "Failed to parse WT JSON config file";
 

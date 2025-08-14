@@ -84,7 +84,7 @@ bool ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
-FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
+FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue);
 FF_C_NODISCARD int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue);
 FF_C_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue);
 

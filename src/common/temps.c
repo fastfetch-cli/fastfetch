@@ -5,7 +5,7 @@
 
 void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig config, const FFModuleArgs* module)
 {
-    if (celsius != celsius) // ignores NaN
+    if (celsius == -DBL_MAX) // ignores invalid value
         return;
 
     const FFOptionsDisplay* options = &instance.config.display;

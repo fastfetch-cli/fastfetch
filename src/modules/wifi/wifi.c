@@ -55,7 +55,7 @@ void ffPrintWifi(FFWifiOptions* options)
             FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
             if(item->conn.ssid.length)
             {
-                if(item->conn.signalQuality == item->conn.signalQuality)
+                if(item->conn.signalQuality != -DBL_MAX)
                 {
                     if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                     {
@@ -86,7 +86,7 @@ void ffPrintWifi(FFWifiOptions* options)
                     ffStrbufAppendC(&buffer, ' ');
                 }
 
-                if(item->conn.signalQuality == item->conn.signalQuality)
+                if(item->conn.signalQuality != -DBL_MAX)
                 {
                     if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                         ffPercentAppendNum(&buffer, item->conn.signalQuality, options->percent, buffer.length > 0, &options->moduleArgs);
@@ -184,9 +184,18 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
         yyjson_mut_obj_add_strbuf(doc, conn, "bssid", &wifi->conn.bssid);
         yyjson_mut_obj_add_strbuf(doc, conn, "protocol", &wifi->conn.protocol);
         yyjson_mut_obj_add_strbuf(doc, conn, "security", &wifi->conn.security);
-        yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
-        yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
-        yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
+        if (wifi->conn.signalQuality != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
+        else
+            yyjson_mut_obj_add_null(doc, conn, "signalQuality");
+        if (wifi->conn.rxRate != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
+        else
+            yyjson_mut_obj_add_null(doc, conn, "rxRate");
+        if (wifi->conn.txRate != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
+        else
+            yyjson_mut_obj_add_null(doc, conn, "txRate");
         yyjson_mut_obj_add_uint(doc, conn, "channel", wifi->conn.channel);
         yyjson_mut_obj_add_uint(doc, conn, "frequency", wifi->conn.frequency);
     }

@@ -72,9 +72,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         ffStrbufAppend(buffer, &options->barBorderLeft);
     }
 
-    if (percent != percent)
+    if (percent == -DBL_MAX)
     {
-        // No color config for NaN, use total color for simplification
+        // Use total color for simplification
         if(!options->pipe && options->barColorTotal.length > 0)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
 
@@ -187,7 +187,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         const char* colorYellow = options->percentColorYellow.chars;
         const char* colorRed = options->percentColorRed.chars;
 
-        if(percent != percent)
+        if(percent == -DBL_MAX)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
         else if(green <= yellow)
         {

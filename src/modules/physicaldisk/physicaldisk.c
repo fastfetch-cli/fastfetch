@@ -92,7 +92,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
                 ffStrbufAppendC(&buffer, ']');
             }
 
-            if (dev->temperature == dev->temperature) //FF_PHYSICALDISK_TEMP_UNSET
+            if (dev->temperature != FF_PHYSICALDISK_TEMP_UNSET)
             {
                 if(buffer.length > 0)
                     ffStrbufAppendS(&buffer, " - ");
@@ -209,7 +209,10 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
 
         yyjson_mut_obj_add_strbuf(doc, obj, "revision", &dev->revision);
 
-        yyjson_mut_obj_add_real(doc, obj, "temperature", dev->temperature);
+        if (dev->temperature != FF_PHYSICALDISK_TEMP_UNSET)
+            yyjson_mut_obj_add_real(doc, obj, "temperature", dev->temperature);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "temperature");
     }
 
     FF_LIST_FOR_EACH(FFPhysicalDiskResult, dev, result)

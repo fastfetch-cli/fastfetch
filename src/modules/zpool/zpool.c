@@ -151,7 +151,10 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
         yyjson_mut_obj_add_uint(doc, obj, "used", zpool->used);
         yyjson_mut_obj_add_uint(doc, obj, "total", zpool->total);
         yyjson_mut_obj_add_uint(doc, obj, "version", zpool->version);
-        yyjson_mut_obj_add_real(doc, obj, "fragmentation", zpool->fragmentation);
+        if (zpool->fragmentation != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, obj, "fragmentation", zpool->fragmentation);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "fragmentation");
     }
 
     FF_LIST_FOR_EACH(FFZpoolResult, zpool, results)

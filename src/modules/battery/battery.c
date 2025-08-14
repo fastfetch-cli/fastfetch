@@ -72,7 +72,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
                 ffStrbufAppend(&str, &result->status);
         }
 
-        if(result->temperature == result->temperature) //FF_BATTERY_TEMP_UNSET
+        if(result->temperature != FF_BATTERY_TEMP_UNSET)
         {
             if(str.length > 0)
                 ffStrbufAppendS(&str, " - ");
@@ -221,7 +221,10 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         yyjson_mut_obj_add_strbuf(doc, obj, "status", &battery->status);
         yyjson_mut_obj_add_strbuf(doc, obj, "technology", &battery->technology);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &battery->serial);
-        yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
+        if (battery->temperature != FF_BATTERY_TEMP_UNSET)
+            yyjson_mut_obj_add_real(doc, obj, "temperature", battery->temperature);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "temperature");
         yyjson_mut_obj_add_uint(doc, obj, "cycleCount", battery->cycleCount);
         if (battery->timeRemaining > 0)
             yyjson_mut_obj_add_int(doc, obj, "timeRemaining", battery->timeRemaining);

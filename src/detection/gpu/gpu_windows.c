@@ -411,7 +411,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         FF_DEBUG("Failed to open adapter from LUID");
                     }
 
-                    if (options->temp && gpu->temperature != gpu->temperature)
+                    if (options->temp && gpu->temperature == FF_GPU_TEMP_UNSET)
                     {
                         FF_DEBUG("Trying to get GPU temperature");
                         D3DKMT_QUERYSTATISTICS queryStatistics = {
