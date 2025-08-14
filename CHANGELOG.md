@@ -3,7 +3,7 @@
 Changes:
 * Keys in JSON configuration files are now case-sensitive, as stated in v2.49.0
     * This is a breaking change, but it should not affect most users as long as your config file passes JSON schema validation.
-* All module config flags are removed, as stated in v2.49.0
+* All module config flags have been removed, as stated in v2.49.0
 * Percent bar config `display.bar.*` options have been replaced with a more organized, nested object structure.
     * `display.bar.charElapsed` has been renamed to `display.bar.char.elapsed`.
     * `display.bar.charTotal` has been renamed to `display.bar.char.total`.
@@ -11,29 +11,29 @@ Changes:
     * `display.bar.borderRight` has been renamed to `display.bar.border.right`.
 
 Features:
-* Add `display.bar.border.{leftElapsed,rightElapsed}` for using border as parts of bar content. (#1875)
+* Added `display.bar.border.{leftElapsed,rightElapsed}` for using border as parts of bar content. (#1875)
     * `display.bar.border: null` has been added as a shorthand to disable bar borders.
-* Add `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total and border sections of the percent bar.
+* Added `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total and border sections of the percent bar.
     * `display.bar.color: null` has been added as a shorthand to disable bar colors.
-* Improve Bedrock linux detection (#1881, OS / Disk, Linux)
-* Add command flag `--gen-config-full` which generates a JSON config file that contains all optional module options.
-* Default IP address shown when `localip.showAllIPs` is not set is improved (LocalIP)
+* Improved Bedrock linux detection (#1881, OS / Disk, Linux)
+* Added command flag `--gen-config-full` which generates a JSON config file that contains all optional module options.
+* Improved default IP address display when `localip.showAllIPs` is not set (LocalIP)
     * For IPv4, preferred source address (if detected) is shown
-    * For IPv6, first GUA or ULA that is not deprecated nor temporary is shown
-* Support interface speed detection on SunOS (LocalIP, SunOS)
-* Detect Xlibre (#1888, WM, Linux)
-* Improve accuracy of color detection (Cursor, macOS)
+    * For IPv6, first GUA or ULA that is not deprecated or temporary is shown
+* Added support for interface speed detection on SunOS (LocalIP, SunOS)
+* Added detection for Xlibre (#1888, WM, Linux)
+* Improved accuracy of color detection (Cursor, macOS)
 
 Bugfixes:
-* Fix possible segfault when parsing color strings in JSON config (#1878)
-* Fix gpu driver detection when DRM is used (GPU, FreeBSD)
-* Fix default route detection on DragonFly BSD (LocalIP, DFBSD)
-* Fix lliurex detection (#1882, OS, Linux)
-* Fix compatibility with `-ffast-math` (#1894)
-* Fix physical GPU being ignored sometimes (#1896, GPU, Windows)
+* Fixed possible segfault when parsing color strings in JSON config (#1878)
+* Fixed GPU driver detection when DRM is used (GPU, FreeBSD)
+* Fixed default route detection on DragonFly BSD (LocalIP, DFBSD)
+* Fixed lliurex detection (#1882, OS, Linux)
+* Fixed compatibility with `-ffast-math` (#1894)
+* Fixed physical GPU being ignored sometimes (#1896, GPU, Windows)
 
 Logos:
-* Add ObsidianOS (#1890)
+* Added ObsidianOS (#1890)
 
 # 2.49.0
 
