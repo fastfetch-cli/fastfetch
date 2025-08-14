@@ -614,6 +614,7 @@ elseif(ANDROID)
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
+        src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
         src/detection/sound/sound_nosupport.c
