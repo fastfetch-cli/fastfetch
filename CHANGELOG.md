@@ -29,6 +29,7 @@ Features:
 * Improved accuracy of color detection (Cursor, macOS)
 
 Bugfixes:
+* Fixed custom object inherits key from previous custom object if key is blank (#1477)
 * Fixed possible segfault when parsing color strings in JSON config (#1878)
 * Fixed GPU driver detection when DRM is used (GPU, FreeBSD)
 * Fixed default route detection on DragonFly BSD (LocalIP, DFBSD)
