@@ -451,6 +451,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
         packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/heads/main", true);
         if (packageCounts->linglong == 0)
             packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/remotes/stable/main", true);
+            packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/remotes/ci/main", true);
     }
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
