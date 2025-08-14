@@ -29,6 +29,7 @@ Features:
 * Added support for interface speed detection on SunOS (LocalIP, SunOS)
 * Added detection support for Xlibre (#1888, WM, Linux)
 * Improved the accuracy of color detection (Cursor, macOS)
+* Improved the proformance of `Nix` package manager detection on macOS by porting optimizations form Linux port (#1893, Packages, macOS)
 
 Bugfixes:
 * Fixed custom object inheriting a key from the previous custom object if the key is blank (#1477)
