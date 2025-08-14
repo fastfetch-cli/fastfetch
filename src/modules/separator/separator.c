@@ -56,7 +56,6 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     {
         setlocale(LC_CTYPE, "");
         mbstate_t state = {};
-        bool fqdn = true; // TODO: Make this configurable
         const FFPlatform* platform = &instance.state.platform;
 
         FF_AUTO_FREE wchar_t* wstr = malloc((max(
@@ -64,7 +63,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
         uint32_t titleLength = 1 // @
             + getWcsWidth(&platform->userName, wstr, &state) // user name
-            + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
+            + (instance.state.titleFqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
 
         if(__builtin_expect(options->string.length == 1, 1))
         {

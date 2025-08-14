@@ -2,7 +2,6 @@
 #include "common/jsonconfig.h"
 #include "modules/title/title.h"
 #include "util/textModifier.h"
-#include "util/stringUtils.h"
 
 static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
 {
@@ -30,6 +29,7 @@ void ffPrintTitle(FFTitleOptions* options)
     FF_STRBUF_AUTO_DESTROY hostName = ffStrbufCreateCopy(&instance.state.platform.hostName);
     if (!options->fqdn)
         ffStrbufSubstrBeforeFirstC(&hostName, '.');
+    instance.state.titleFqdn = options->fqdn;
 
     FF_STRBUF_AUTO_DESTROY hostNameColored = ffStrbufCreate();
     appendText(&hostNameColored, &hostName, &options->colorHost);

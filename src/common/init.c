@@ -25,6 +25,7 @@ static void initState(FFstate* state)
     state->logoHeight = 0;
     state->keysHeight = 0;
     state->terminalLightTheme = false;
+    state->titleFqdn = false;
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;

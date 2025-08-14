@@ -49,6 +49,7 @@ typedef struct FFstate
     uint32_t logoHeight;
     uint32_t keysHeight;
     bool terminalLightTheme;
+    bool titleFqdn;
 
     FFPlatform platform;
     yyjson_doc* configDoc;
