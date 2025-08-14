@@ -3,7 +3,6 @@
 #include "common/init.h"
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
-#include "common/printing.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
 #include "util/stringUtils.h"
@@ -609,7 +608,7 @@ static void parseCommand(FFdata* data, char* key, char* value)
         generateConfigFile(false, value, true);
     else if(ffStrEqualsIgnCase(key, "--gen-config-full-force"))
         generateConfigFile(true, value, true);
-    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--load-config") || ffStrEqualsIgnCase(key, "--config"))
+    else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
     else if(ffStrEqualsIgnCase(key, "--format"))
     {

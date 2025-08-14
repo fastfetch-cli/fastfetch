@@ -9,6 +9,8 @@ Changes:
     * `display.bar.charTotal` has been renamed to `display.bar.char.total`.
     * `display.bar.borderLeft` has been renamed to `display.bar.border.left`.
     * `display.bar.borderRight` has been renamed to `display.bar.border.right`.
+* Undocumented flag `--load-config` has been removed
+    * `--config` or `-c` should be used instead.
 
 Features:
 * Added `display.bar.border.{leftElapsed,rightElapsed}` for using border as parts of bar content. (#1875)
