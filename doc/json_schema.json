@@ -2,11 +2,19 @@
     "$schema": "https://json-schema.org/draft-07/schema",
     "$defs": {
         "colors": {
-            "type": "string",
-            "description": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
-            "examples": [
-                "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
-                "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
+            "oneOf": [
+                {
+                    "type": "string",
+                    "$comment": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
+                    "examples": [
+                        "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
+                        "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
+                    ]
+                },
+                {
+                    "type": "null",
+                    "$comment": "Disable default color"
+                }
             ]
         },
         "key": {

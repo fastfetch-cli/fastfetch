@@ -97,40 +97,38 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
 
         bool autoColorElapsed = ffStrbufIgnCaseEqualS(&options->barColorElapsed, "auto");
 
+        bool monochrome = (percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT) || !autoColorElapsed;
+        if (!options->pipe && options->barColorElapsed.length > 0 && monochrome)
+        {
+            const char* color = NULL;
+            if (!autoColorElapsed)
+                color = options->barColorElapsed.chars;
+            else if (green <= yellow)
+            {
+                if (percent < green) color = colorGreen;
+                else if (percent < yellow) color = colorYellow;
+                else color = colorRed;
+            }
+            else
+            {
+                if (percent < yellow) color = colorRed;
+                else if (percent < green) color = colorYellow;
+                else color = colorGreen;
+            }
+            ffStrbufAppendF(buffer, "\e[%sm", color);
+        }
         for (uint8_t i = 0; i < blocksPercent; ++i)
         {
-            if(!options->pipe && options->barColorElapsed.length > 0)
+            if (!options->pipe && options->barColorElapsed.length > 0 && !monochrome)
             {
-                if ((percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT) || !autoColorElapsed)
-                {
-                    const char* color = NULL;
-                    if (!autoColorElapsed)
-                        color = options->barColorElapsed.chars;
-                    else if (green <= yellow)
-                    {
-                        if (percent < green) color = colorGreen;
-                        else if (percent < yellow) color = colorYellow;
-                        else color = colorRed;
-                    }
-                    else
-                    {
-                        if (percent < yellow) color = colorRed;
-                        else if (percent < green) color = colorYellow;
-                        else color = colorGreen;
-                    }
-                    ffStrbufAppendF(buffer, "\e[%sm", color);
-                }
-                else
-                {
-                    uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
-                    uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
-                    if (i == section2Begin)
-                        ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? colorGreen : colorRed));
-                    else if (i == section1Begin)
-                        ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
-                    else if (i == 0)
-                        ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
-                }
+                uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+                uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+                if (i == section2Begin)
+                    ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? colorGreen : colorRed));
+                else if (i == section1Begin)
+                    ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
+                else if (i == 0)
+                    ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
             }
             ffStrbufAppend(buffer, borderAsValue && i == 0
                 ? &options->barBorderLeftElapsed
@@ -146,9 +144,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
             for (uint8_t i = blocksPercent; i < options->barWidth; ++i)
             {
                 ffStrbufAppend(buffer, borderAsValue && i == 0
-                    ? &options->barBorderLeftElapsed
+                    ? &options->barBorderLeft
                     : borderAsValue && i == options->barWidth - 1
-                        ? &options->barBorderRightElapsed
+                        ? &options->barBorderRight
                         : &options->barCharTotal);
             }
         }
