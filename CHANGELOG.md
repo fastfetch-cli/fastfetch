@@ -1,3 +1,9 @@
+# 2.50.1
+
+Bugfixes:
+* Fixes percentage bar not displaying correctly in certain cases
+* Fixes linglong package detection on Debian 13 (#1899, Packages, Linux)
+
 # 2.50.0
 
 Changes:
