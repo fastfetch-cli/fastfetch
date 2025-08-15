@@ -446,12 +446,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     {
       packageCounts->guixSystem += getGuixPackages(baseDir, "/run/current-system/profile");
     }
-    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT))
-    {
-        packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/heads/main", true);
-        if (packageCounts->linglong == 0)
-            packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/repo/refs/remotes/stable/main", true);
-    }
+    if (!(options->disabled & FF_PACKAGES_FLAG_LINGLONG_BIT)) packageCounts->linglong += getNumElements(baseDir, "/var/lib/linglong/layers", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
