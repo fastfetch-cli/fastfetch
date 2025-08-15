@@ -120,3 +120,9 @@ static inline void ffListClear(FFlist* list)
         assert((listVar).capacity > (index)); \
         (itemType*)(listVar).data + (index); \
     })
+
+#define FF_LIST_ADD(itemType, listVar) \
+    ({ \
+        assert(sizeof(itemType) == (listVar).elementSize); \
+        (itemType*) ffListAdd(&(listVar)); \
+    })

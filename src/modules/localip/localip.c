@@ -91,9 +91,11 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute, FFstrbuf* buffer
     }
     if (ip->flags.length)
     {
-        if (buffer->length) ffStrbufAppendS(buffer, " <");
+        bool flag = buffer->length > 0;
+        if (flag) ffStrbufAppendS(buffer, " <");
         ffStrbufAppend(buffer, &ip->flags);
-        ffStrbufAppendC(buffer, '>');
+        if (flag)
+            ffStrbufAppendC(buffer, '>');
     }
     if (markDefaultRoute && ip->defaultRoute)
         ffStrbufAppendS(buffer, " *");
