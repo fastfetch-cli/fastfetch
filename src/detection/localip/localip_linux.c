@@ -302,12 +302,6 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
     FF_DEBUG("Successfully retrieved interface addresses");
 
-    const FFNetifDefaultRouteResult* defaultRouteV4 = ffNetifGetDefaultRouteV4();
-    const FFNetifDefaultRouteResult* defaultRouteV6 = ffNetifGetDefaultRouteV6();
-
-    FF_DEBUG("Default routes - IPv4: %s, IPv6: %s",
-             defaultRouteV4->ifName, defaultRouteV6->ifName);
-
     FF_LIST_AUTO_DESTROY adapters = ffListCreate(sizeof(FFAdapter));
 
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next)
@@ -349,8 +343,9 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
         if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
         {
-            if (!ffStrEquals(defaultRouteV4->ifName, ifa->ifa_name) &&
-                !ffStrEquals(defaultRouteV6->ifName, ifa->ifa_name))
+            // If the interface is not the default route for either IPv4 or IPv6, skip it
+            if (!((options->showType & FF_LOCALIP_TYPE_IPV4_BIT) && ffStrEquals(ffNetifGetDefaultRouteV4()->ifName, ifa->ifa_name)) &&
+                !((options->showType & FF_LOCALIP_TYPE_IPV6_BIT) && ffStrEquals(ffNetifGetDefaultRouteV6()->ifName, ifa->ifa_name)))
             {
                 FF_DEBUG("Skipping interface %s (not default route interface)", ifa->ifa_name);
                     continue;
@@ -435,6 +430,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
         if ((options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
         {
+            const FFNetifDefaultRouteResult* defaultRouteV4 = ffNetifGetDefaultRouteV4();
             bool isDefaultRouteIf = ffStrEquals(defaultRouteV4->ifName, adapter->mac->ifa_name);
 
             if (isDefaultRouteIf)
@@ -486,6 +482,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     v6:
         if ((options->showType & FF_LOCALIP_TYPE_IPV6_BIT))
         {
+            const FFNetifDefaultRouteResult* defaultRouteV6 = ffNetifGetDefaultRouteV6();
             bool isDefaultRouteIf = ffStrEquals(defaultRouteV6->ifName, adapter->mac->ifa_name);
 
             if (isDefaultRouteIf)
