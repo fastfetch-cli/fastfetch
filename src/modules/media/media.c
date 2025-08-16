@@ -121,10 +121,7 @@ void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
 
 void ffGenerateMediaJsonConfig(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyMediaOptions))) FFMediaOptions defaultOptions;
-    ffInitMediaOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -151,9 +148,21 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, player, "url", &media->url);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitMediaOptions(FFMediaOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyMediaOptions(FFMediaOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffMediaModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
     .description = "Print playing song name",
+    .initOptions = (void*) ffInitMediaOptions,
+    .destroyOptions = (void*) ffDestroyMediaOptions,
     .parseJsonObject = (void*) ffParseMediaJsonObject,
     .printModule = (void*) ffPrintMedia,
     .generateJsonResult = (void*) ffGenerateMediaJsonResult,
@@ -166,14 +175,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Status", "status"},
     }))
 };
-
-void ffInitMediaOptions(FFMediaOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyMediaOptions(FFMediaOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

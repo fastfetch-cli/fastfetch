@@ -282,35 +282,41 @@ void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
 
 void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDisplayOptions))) FFDisplayOptions defaultOptions;
-    ffInitDisplayOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (options->compactType != defaultOptions.compactType)
+    switch ((int) options->compactType)
     {
-        switch ((int) options->compactType)
-        {
-            case FF_DISPLAY_COMPACT_TYPE_NONE:
-                yyjson_mut_obj_add_str(doc, module, "compactType", "none");
-                break;
-            case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT:
-                yyjson_mut_obj_add_str(doc, module, "compactType", "original");
-                break;
-            case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT:
-                yyjson_mut_obj_add_str(doc, module, "compactType", "scaled");
-                break;
-            case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
-                yyjson_mut_obj_add_str(doc, module, "compactType", "original-with-refresh-rate");
-                break;
-            case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
-                yyjson_mut_obj_add_str(doc, module, "compactType", "scaled-with-refresh-rate");
-                break;
-        }
+        case FF_DISPLAY_COMPACT_TYPE_NONE:
+            yyjson_mut_obj_add_str(doc, module, "compactType", "none");
+            break;
+        case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT:
+            yyjson_mut_obj_add_str(doc, module, "compactType", "original");
+            break;
+        case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT:
+            yyjson_mut_obj_add_str(doc, module, "compactType", "scaled");
+            break;
+        case FF_DISPLAY_COMPACT_TYPE_ORIGINAL_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
+            yyjson_mut_obj_add_str(doc, module, "compactType", "original-with-refresh-rate");
+            break;
+        case FF_DISPLAY_COMPACT_TYPE_SCALED_BIT | FF_DISPLAY_COMPACT_TYPE_REFRESH_RATE_BIT:
+            yyjson_mut_obj_add_str(doc, module, "compactType", "scaled-with-refresh-rate");
+            break;
     }
 
-    if (options->preciseRefreshRate != defaultOptions.preciseRefreshRate)
-        yyjson_mut_obj_add_bool(doc, module, "preciseRefreshRate", options->preciseRefreshRate);
+    yyjson_mut_obj_add_bool(doc, module, "preciseRefreshRate", options->preciseRefreshRate);
+
+    switch (options->order)
+    {
+        case FF_DISPLAY_ORDER_NONE:
+            yyjson_mut_obj_add_null(doc, module, "order");
+            break;
+        case FF_DISPLAY_ORDER_ASC:
+            yyjson_mut_obj_add_str(doc, module, "order", "asc");
+            break;
+        case FF_DISPLAY_ORDER_DESC:
+            yyjson_mut_obj_add_str(doc, module, "order", "desc");
+            break;
+    }
 }
 
 void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -402,9 +408,23 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
+    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
+    options->preciseRefreshRate = false;
+}
+
+void ffDestroyDisplayOptions(FFDisplayOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffDisplayModuleInfo = {
     .name = FF_DISPLAY_MODULE_NAME,
     .description = "Print resolutions, refresh rates, etc",
+    .initOptions = (void*) ffInitDisplayOptions,
+    .destroyOptions = (void*) ffDestroyDisplayOptions,
     .parseJsonObject = (void*) ffParseDisplayJsonObject,
     .printModule = (void*) ffPrintDisplay,
     .generateJsonResult = (void*) ffGenerateDisplayJsonResult,
@@ -436,16 +456,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Screen preferred refresh rate (in Hz)", "preferred-refresh-rate"},
     }))
 };
-
-void ffInitDisplayOptions(FFDisplayOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
-    options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
-    options->preciseRefreshRate = false;
-}
-
-void ffDestroyDisplayOptions(FFDisplayOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

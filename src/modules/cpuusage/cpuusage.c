@@ -146,15 +146,13 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
 
 void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCPUUsageOptions))) FFCPUUsageOptions defaultOptions;
-    ffInitCPUUsageOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
 
-    if (options->separate != defaultOptions.separate)
-        yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
 void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -174,9 +172,24 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
+    options->separate = false;
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+    options->waitTime = 200;
+}
+
+void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCPUUsageModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
     .description = "Print CPU usage. Costs some time to collect data",
+    .initOptions = (void*) ffInitCPUUsageOptions,
+    .destroyOptions = (void*) ffDestroyCPUUsageOptions,
     .parseJsonObject = (void*) ffParseCPUUsageJsonObject,
     .printModule = (void*) ffPrintCPUUsage,
     .generateJsonResult = (void*) ffGenerateCPUUsageJsonResult,
@@ -192,17 +205,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"CPU usage (percentage bar, minimum)", "min-bar"},
     }))
 };
-
-void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
-    options->separate = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-    options->waitTime = 200;
-}
-
-void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

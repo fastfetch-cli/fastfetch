@@ -71,10 +71,7 @@ void ffParseUptimeJsonObject(FFUptimeOptions* options, yyjson_val* module)
 
 void ffGenerateUptimeJsonConfig(FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyUptimeOptions))) FFUptimeOptions defaultOptions;
-    ffInitUptimeOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -93,9 +90,21 @@ void ffGenerateUptimeJsonResult(FF_MAYBE_UNUSED FFUptimeOptions* options, yyjson
     yyjson_mut_obj_add_strcpy(doc, obj, "bootTime", ffTimeToFullStr(result.bootTime));
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitUptimeOptions(FFUptimeOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyUptimeOptions(FFUptimeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffUptimeModuleInfo = {
     .name = FF_UPTIME_MODULE_NAME,
     .description = "Print how long system has been running",
+    .initOptions = (void*) ffInitUptimeOptions,
+    .destroyOptions = (void*) ffDestroyUptimeOptions,
     .parseJsonObject = (void*) ffParseUptimeJsonObject,
     .printModule = (void*) ffPrintUptime,
     .generateJsonResult = (void*) ffGenerateUptimeJsonResult,
@@ -113,14 +122,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Formatted uptime", "formatted"},
     }))
 };
-
-void ffInitUptimeOptions(FFUptimeOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyUptimeOptions(FFUptimeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

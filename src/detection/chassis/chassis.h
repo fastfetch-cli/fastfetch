@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/chassis/option.h"
 
 typedef struct FFChassisResult
 {

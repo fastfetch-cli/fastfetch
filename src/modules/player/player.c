@@ -96,10 +96,7 @@ void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
 
 void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPlayerOptions))) FFPlayerOptions defaultOptions;
-    ffInitPlayerOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -107,9 +104,21 @@ void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_
     yyjson_mut_obj_add_str(doc, module, "error", "Player module is an alias of Media module");
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰥠");
+}
+
+void ffDestroyPlayerOptions(FFPlayerOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffPlayerModuleInfo = {
     .name = FF_PLAYER_MODULE_NAME,
     .description = "Print music player name",
+    .initOptions = (void*) ffInitPlayerOptions,
+    .destroyOptions = (void*) ffDestroyPlayerOptions,
     .parseJsonObject = (void*) ffParsePlayerJsonObject,
     .printModule = (void*) ffPrintPlayer,
     .generateJsonResult = (void*) ffGeneratePlayerJsonResult,
@@ -121,14 +130,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"URL name", "url"},
     }))
 };
-
-void ffInitPlayerOptions(FFPlayerOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰥠");
-}
-
-void ffDestroyPlayerOptions(FFPlayerOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

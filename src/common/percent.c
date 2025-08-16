@@ -72,9 +72,9 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         ffStrbufAppend(buffer, &options->barBorderLeft);
     }
 
-    if (percent != percent)
+    if (percent == -DBL_MAX)
     {
-        // No color config for NaN, use total color for simplification
+        // Use total color for simplification
         if(!options->pipe && options->barColorTotal.length > 0)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
 
@@ -97,40 +97,38 @@ void ffPercentAppendBar(FFstrbuf* buffer, double percent, FFPercentageModuleConf
 
         bool autoColorElapsed = ffStrbufIgnCaseEqualS(&options->barColorElapsed, "auto");
 
+        bool monochrome = (percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT) || !autoColorElapsed;
+        if (!options->pipe && options->barColorElapsed.length > 0 && monochrome)
+        {
+            const char* color = NULL;
+            if (!autoColorElapsed)
+                color = options->barColorElapsed.chars;
+            else if (green <= yellow)
+            {
+                if (percent < green) color = colorGreen;
+                else if (percent < yellow) color = colorYellow;
+                else color = colorRed;
+            }
+            else
+            {
+                if (percent < yellow) color = colorRed;
+                else if (percent < green) color = colorYellow;
+                else color = colorGreen;
+            }
+            ffStrbufAppendF(buffer, "\e[%sm", color);
+        }
         for (uint8_t i = 0; i < blocksPercent; ++i)
         {
-            if(!options->pipe && options->barColorElapsed.length > 0)
+            if (!options->pipe && options->barColorElapsed.length > 0 && !monochrome)
             {
-                if ((percentType & FF_PERCENTAGE_TYPE_BAR_MONOCHROME_BIT) || !autoColorElapsed)
-                {
-                    const char* color = NULL;
-                    if (!autoColorElapsed)
-                        color = options->barColorElapsed.chars;
-                    else if (green <= yellow)
-                    {
-                        if (percent < green) color = colorGreen;
-                        else if (percent < yellow) color = colorYellow;
-                        else color = colorRed;
-                    }
-                    else
-                    {
-                        if (percent < yellow) color = colorRed;
-                        else if (percent < green) color = colorYellow;
-                        else color = colorGreen;
-                    }
-                    ffStrbufAppendF(buffer, "\e[%sm", color);
-                }
-                else
-                {
-                    uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
-                    uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
-                    if (i == section2Begin)
-                        ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? colorGreen : colorRed));
-                    else if (i == section1Begin)
-                        ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
-                    else if (i == 0)
-                        ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
-                }
+                uint32_t section1Begin = (uint32_t) ((green <= yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+                uint32_t section2Begin = (uint32_t) ((green > yellow ? green : yellow) / 100.0 * options->barWidth + 0.5);
+                if (i == section2Begin)
+                    ffStrbufAppendF(buffer, "\e[%sm", (green > yellow ? colorGreen : colorRed));
+                else if (i == section1Begin)
+                    ffStrbufAppendF(buffer, "\e[%sm", colorYellow);
+                else if (i == 0)
+                    ffStrbufAppendF(buffer, "\e[%sm", (green <= yellow ? colorGreen : colorRed));
             }
             ffStrbufAppend(buffer, borderAsValue && i == 0
                 ? &options->barBorderLeftElapsed
@@ -187,7 +185,7 @@ void ffPercentAppendNum(FFstrbuf* buffer, double percent, FFPercentageModuleConf
         const char* colorYellow = options->percentColorYellow.chars;
         const char* colorRed = options->percentColorRed.chars;
 
-        if(percent != percent)
+        if(percent == -DBL_MAX)
             ffStrbufAppendS(buffer, "\e[" FF_COLOR_FG_LIGHT_BLACK "m");
         else if(green <= yellow)
         {
@@ -310,16 +308,10 @@ bool ffPercentParseJsonObject(yyjson_val* key, yyjson_val* value, FFPercentageMo
     return true;
 }
 
-void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig defaultConfig, FFPercentageModuleConfig config)
+void ffPercentGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FFPercentageModuleConfig config)
 {
-    if (config.green == defaultConfig.green && config.yellow == defaultConfig.yellow)
-        return;
-
     yyjson_mut_val* percent = yyjson_mut_obj_add_obj(doc, module, "percent");
-    if (config.green != defaultConfig.green)
-        yyjson_mut_obj_add_uint(doc, percent, "green", config.green);
-    if (config.yellow != defaultConfig.yellow)
-        yyjson_mut_obj_add_uint(doc, percent, "yellow", config.yellow);
-    if (config.type != defaultConfig.type)
-        yyjson_mut_obj_add_uint(doc, percent, "type", config.type);
+    yyjson_mut_obj_add_uint(doc, percent, "green", config.green);
+    yyjson_mut_obj_add_uint(doc, percent, "yellow", config.yellow);
+    yyjson_mut_obj_add_uint(doc, percent, "type", config.type);
 }

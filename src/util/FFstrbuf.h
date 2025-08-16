@@ -9,7 +9,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "3rdparty/yyjson/yyjson.h"
+
+#ifdef FF_USE_SYSTEM_YYJSON
+    #include <yyjson.h>
+#else
+    #include "3rdparty/yyjson/yyjson.h"
+#endif
 
 #ifdef _WIN32
     // #include <shlwapi.h>
@@ -84,7 +89,7 @@ bool ffStrbufEnsureEndsWithC(FFstrbuf* strbuf, char c);
 void ffStrbufWriteTo(const FFstrbuf* strbuf, FILE* file);
 void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file);
 
-FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf);
+FF_C_NODISCARD double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue);
 FF_C_NODISCARD int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue);
 FF_C_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue);
 

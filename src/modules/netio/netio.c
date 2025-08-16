@@ -142,19 +142,15 @@ void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
 
 void ffGenerateNetIOJsonConfig(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions defaultOptions;
-    ffInitNetIOOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 
-    if (!ffStrbufEqual(&options->namePrefix, &defaultOptions.namePrefix))
-        yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
+    yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", options->defaultRouteOnly);
 
-    if (options->defaultRouteOnly != defaultOptions.defaultRouteOnly)
-        yyjson_mut_obj_add_bool(doc, module, "defaultRouteOnly", options->defaultRouteOnly);
+    yyjson_mut_obj_add_bool(doc, module, "detectTotal", options->detectTotal);
 
-    if (options->detectTotal != defaultOptions.detectTotal)
-        yyjson_mut_obj_add_bool(doc, module, "detectTotal", options->detectTotal);
+    yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
 void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -190,9 +186,33 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰾆");
+
+    ffStrbufInit(&options->namePrefix);
+    options->defaultRouteOnly =
+        #if __ANDROID__
+            false
+        #else
+            true
+        #endif
+    ;
+    options->detectTotal = false;
+    options->waitTime = 1000;
+}
+
+void ffDestroyNetIOOptions(FFNetIOOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->namePrefix);
+}
+
+FFModuleBaseInfo ffNetIOModuleInfo = {
     .name = FF_NETIO_MODULE_NAME,
     .description = "Print network I/O throughput",
+    .initOptions = (void*) ffInitNetIOOptions,
+    .destroyOptions = (void*) ffDestroyNetIOOptions,
     .parseJsonObject = (void*) ffParseNetIOJsonObject,
     .printModule = (void*) ffPrintNetIO,
     .generateJsonResult = (void*) ffGenerateNetIOJsonResult,
@@ -212,26 +232,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Number of packets dropped when sending [per second]", "tx-drops"},
     }))
 };
-
-void ffInitNetIOOptions(FFNetIOOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰾆");
-
-    ffStrbufInit(&options->namePrefix);
-    options->defaultRouteOnly =
-        #if __ANDROID__ || __OpenBSD__
-            false
-        #else
-            true
-        #endif
-    ;
-    options->detectTotal = false;
-    options->waitTime = 1000;
-}
-
-void ffDestroyNetIOOptions(FFNetIOOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->namePrefix);
-}

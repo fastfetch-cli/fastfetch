@@ -230,7 +230,7 @@ bool FFWmiRecord::getReal(const wchar_t* key, double* real)
             case VT_R4: *real = vtProp.fltVal; break;
             case VT_R8: *real = vtProp.dblVal; break;
             case VT_BOOL: *real = vtProp.boolVal != VARIANT_FALSE; break;
-            default: *real = NAN; result = false;
+            default: *real = -DBL_MAX; result = false;
         }
     }
     return result;

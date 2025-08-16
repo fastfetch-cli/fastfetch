@@ -1,7 +1,5 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef enum __attribute__((__packed__)) FFDNSShowType {
@@ -13,8 +11,9 @@ typedef enum __attribute__((__packed__)) FFDNSShowType {
 
 typedef struct FFDNSOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFDNSShowType showType;
 } FFDNSOptions;
+
+static_assert(sizeof(FFDNSOptions) <= FF_OPTION_MAX_SIZE, "FFDNSOptions size exceeds maximum allowed size");

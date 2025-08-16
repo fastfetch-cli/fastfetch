@@ -56,7 +56,6 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     {
         setlocale(LC_CTYPE, "");
         mbstate_t state = {};
-        bool fqdn = instance.config.modules.title.fqdn;
         const FFPlatform* platform = &instance.state.platform;
 
         FF_AUTO_FREE wchar_t* wstr = malloc((max(
@@ -64,7 +63,7 @@ void ffPrintSeparator(FFSeparatorOptions* options)
 
         uint32_t titleLength = 1 // @
             + getWcsWidth(&platform->userName, wstr, &state) // user name
-            + (fqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
+            + (instance.state.titleFqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
 
         if(__builtin_expect(options->string.length == 1, 1))
         {
@@ -147,24 +146,13 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
 
 void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroySeparatorOptions))) FFSeparatorOptions defaultOptions;
-    ffInitSeparatorOptions(&defaultOptions);
-
-    if (!ffStrbufEqual(&options->string, &defaultOptions.string))
-        yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
+    yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
+    yyjson_mut_obj_add_strbuf(doc, module, "outputColor", &options->outputColor);
+    yyjson_mut_obj_add_uint(doc, module, "length", options->length);
 }
-
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_SEPARATOR_MODULE_NAME,
-    .description = "Print a separator line",
-    .parseJsonObject = (void*) ffParseSeparatorJsonObject,
-    .printModule = (void*) ffPrintSeparator,
-    .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
-};
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
     ffStrbufInitStatic(&options->string, "-");
     ffStrbufInit(&options->outputColor);
     options->length = 0;
@@ -174,3 +162,13 @@ void ffDestroySeparatorOptions(FFSeparatorOptions* options)
 {
     ffStrbufDestroy(&options->string);
 }
+
+FFModuleBaseInfo ffSeparatorModuleInfo = {
+    .name = FF_SEPARATOR_MODULE_NAME,
+    .description = "Print a separator line",
+    .initOptions = (void*) ffInitSeparatorOptions,
+    .destroyOptions = (void*) ffDestroySeparatorOptions,
+    .parseJsonObject = (void*) ffParseSeparatorJsonObject,
+    .printModule = (void*) ffPrintSeparator,
+    .generateJsonConfig = (void*) ffGenerateSeparatorJsonConfig,
+};

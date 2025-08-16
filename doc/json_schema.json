@@ -2,33 +2,41 @@
     "$schema": "https://json-schema.org/draft-07/schema",
     "$defs": {
         "colors": {
-            "type": "string",
-            "description": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
-            "examples": [
-                "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
-                "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
+            "oneOf": [
+                {
+                    "type": "string",
+                    "$comment": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
+                    "examples": [
+                        "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
+                        "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
+                    ]
+                },
+                {
+                    "type": "null",
+                    "$comment": "Disable default color"
+                }
             ]
         },
         "key": {
-            "description": "Key of the module",
-            "type": "string"
+            "description": "Key of the module\nOne whitespace character (` `) can be used to hide the key",
+            "type": "string",
+            "minLength": 1
         },
         "keyColor": {
-            "description": "Color of the module key. Left empty to use `display.color.keys`",
+            "description": "Color of the module key to override the global setting `display.color.key`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "description": "Width of the module key. Use 0 to use `display.keyWidth`",
+            "description": "Width of the module key to override the global setting `display.keyWidth`",
             "type": "integer",
-            "minimum": 0,
-            "default": 0
+            "minimum": 1
         },
         "keyIcon": {
             "description": "Set the icon to be displayed by `display.keyType: \"icon\"`",
             "type": "string"
         },
         "outputColor": {
-            "description": "Output color of the module. Left empty to use `display.color.output`",
+            "description": "Output color of the module to override the global setting `display.color.output`",
             "$ref": "#/$defs/colors"
         },
         "percentType": {
@@ -549,7 +557,7 @@
                     "const": null
                 },
                 {
-                    "description": "Set the source file of the logo",
+                    "description": "Set the source file of the logo or built-in ASCII art name",
                     "type": "string"
                 },
                 {
@@ -671,14 +679,30 @@
                             }
                         },
                         "width": {
-                            "type": "integer",
-                            "description": "Set the width of the logo (in characters). Required for iTerm image protocol",
-                            "minimum": 1
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detect width (default)"
+                                },
+                                {
+                                    "type": "integer",
+                                    "description": "Set the width of the logo (in characters). Required for some image protocols",
+                                    "minimum": 1
+                                }
+                            ]
                         },
                         "height": {
-                            "type": "integer",
-                            "description": "Set the height of the logo (in characters). Required for iTerm image protocol",
-                            "minimum": 1
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detect width (default)"
+                                },
+                                {
+                                    "type": "integer",
+                                    "description": "Set the height of the logo (in characters). Required for some image protocols",
+                                    "minimum": 1
+                                }
+                            ]
                         },
                         "padding": {
                             "type": "object",
@@ -1190,26 +1214,6 @@
                                     }
                                 }
                             ]
-                        },
-                        "charElapsed": {
-                            "type": "string",
-                            "description": "Set the character to use in elapsed part. Deprecated in v2.50.0",
-                            "default": "■"
-                        },
-                        "charTotal": {
-                            "type": "string",
-                            "description": "Set the character to use in total part. Deprecated in v2.50.0",
-                            "default": "-"
-                        },
-                        "borderLeft": {
-                            "type": "string",
-                            "description": "Set the string to use at left border. Deprecated in v2.50.0",
-                            "default": "[ "
-                        },
-                        "borderRight": {
-                            "type": "string",
-                            "description": "Set the string to use at right border. Deprecated in v2.50.0",
-                            "default": " ]"
                         },
                         "width": {
                             "type": "integer",
@@ -1998,8 +2002,14 @@
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
                                     "keyIcon": {
                                         "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -2634,6 +2644,9 @@
                                             }
                                         ],
                                         "default": null
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

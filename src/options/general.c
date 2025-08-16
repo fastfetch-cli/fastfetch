@@ -12,30 +12,28 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
     if (!object) return NULL;
     if (!yyjson_is_obj(object)) return "Property 'general' must be an object";
 
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(object, idx, max, key_, val)
+    yyjson_obj_foreach(object, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-
-        if (ffStrEqualsIgnCase(key, "thread"))
+        if (unsafe_yyjson_equals_str(key, "thread"))
             options->multithreading = yyjson_get_bool(val);
-        else if (ffStrEqualsIgnCase(key, "processingTimeout"))
+        else if (unsafe_yyjson_equals_str(key, "processingTimeout"))
             options->processingTimeout = (int32_t) yyjson_get_int(val);
-        else if (ffStrEqualsIgnCase(key, "preRun"))
+        else if (unsafe_yyjson_equals_str(key, "preRun"))
         {
             if (!yyjson_is_str(val))
                 return "general.preRun must be a string";
             if (system(unsafe_yyjson_get_str(val)) < 0)
                 return "Failed to execute preRun command";
         }
-        else if (ffStrEqualsIgnCase(key, "detectVersion"))
+        else if (unsafe_yyjson_equals_str(key, "detectVersion"))
             options->detectVersion = yyjson_get_bool(val);
 
         #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
-        else if (ffStrEqualsIgnCase(key, "playerName"))
+        else if (unsafe_yyjson_equals_str(key, "playerName"))
             ffStrbufSetJsonVal(&options->playerName, val);
-        else if (ffStrEqualsIgnCase(key, "dsForceDrm"))
+        else if (unsafe_yyjson_equals_str(key, "dsForceDrm"))
         {
             if (yyjson_is_str(val))
             {
@@ -55,7 +53,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
                 options->dsForceDrm = yyjson_get_bool(val) ? FF_DS_FORCE_DRM_TYPE_TRUE : FF_DS_FORCE_DRM_TYPE_FALSE;
         }
         #elif defined(_WIN32)
-        else if (ffStrEqualsIgnCase(key, "wmiTimeout"))
+        else if (unsafe_yyjson_equals_str(key, "wmiTimeout"))
             options->wmiTimeout = (int32_t) yyjson_get_int(val);
         #endif
 
@@ -121,45 +119,34 @@ void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 
 void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_doc* doc)
 {
-    __attribute__((__cleanup__(ffOptionsDestroyGeneral))) FFOptionsGeneral defaultOptions;
-    ffOptionsInitGeneral(&defaultOptions);
+    yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, doc->root, "general");
 
-    yyjson_mut_val* obj = yyjson_mut_obj(doc);
+    yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);
 
-    if (options->multithreading != defaultOptions.multithreading)
-        yyjson_mut_obj_add_bool(doc, obj, "thread", options->multithreading);
+    yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
 
-    if (options->processingTimeout != defaultOptions.processingTimeout)
-        yyjson_mut_obj_add_int(doc, obj, "processingTimeout", options->processingTimeout);
+    yyjson_mut_obj_add_bool(doc, obj, "detectVersion", options->detectVersion);
 
     #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 
-    if (!ffStrbufEqual(&options->playerName, &defaultOptions.playerName))
-        yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
+    yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
 
-    if (options->dsForceDrm != defaultOptions.dsForceDrm)
+    switch (options->dsForceDrm)
     {
-        switch (options->dsForceDrm)
-        {
-            case FF_DS_FORCE_DRM_TYPE_FALSE:
-                yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", false);
-                break;
-            case FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY:
-                yyjson_mut_obj_add_str(doc, obj, "dsForceDrm", "sysfs-only");
-                break;
-            case FF_DS_FORCE_DRM_TYPE_TRUE:
-                yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
-                break;
-        }
+        case FF_DS_FORCE_DRM_TYPE_FALSE:
+            yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", false);
+            break;
+        case FF_DS_FORCE_DRM_TYPE_SYSFS_ONLY:
+            yyjson_mut_obj_add_str(doc, obj, "dsForceDrm", "sysfs-only");
+            break;
+        case FF_DS_FORCE_DRM_TYPE_TRUE:
+            yyjson_mut_obj_add_bool(doc, obj, "dsForceDrm", true);
+            break;
     }
 
     #elif defined(_WIN32)
 
-    if (options->wmiTimeout != defaultOptions.wmiTimeout)
-        yyjson_mut_obj_add_int(doc, obj, "wmiTimeout", options->wmiTimeout);
+    yyjson_mut_obj_add_int(doc, obj, "wmiTimeout", options->wmiTimeout);
 
     #endif
-
-    if (yyjson_mut_obj_size(obj) > 0)
-        yyjson_mut_obj_add_val(doc, doc->root, "general", obj);
 }

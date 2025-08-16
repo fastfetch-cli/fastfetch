@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/icons/option.h"
 
 typedef struct FFIconsResult
 {

@@ -25,6 +25,7 @@ static void initState(FFstate* state)
     state->logoHeight = 0;
     state->keysHeight = 0;
     state->terminalLightTheme = false;
+    state->titleFqdn = false;
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
@@ -42,14 +43,13 @@ static void defaultConfig(void)
 {
     ffOptionsInitLogo(&instance.config.logo);
     ffOptionsInitGeneral(&instance.config.general);
-    ffOptionsInitModules(&instance.config.modules);
     ffOptionsInitDisplay(&instance.config.display);
 }
 
 void ffInitInstance(void)
 {
     #ifdef WIN32
-        //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
+        // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
         setlocale(LC_ALL, ".UTF8");
     #else
         // Never use `setlocale(LC_ALL, "")`
@@ -96,11 +96,6 @@ static void chldSignalHandler(FF_MAYBE_UNUSED int signal)
 
 void ffStart(void)
 {
-    #ifdef FF_START_DETECTION_THREADS
-        if(instance.config.general.multithreading)
-            startDetectionThreads();
-    #endif
-
     ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe && !instance.state.resultDoc;
     ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe && !instance.state.resultDoc;
 
@@ -150,7 +145,6 @@ static void destroyConfig(void)
 {
     ffOptionsDestroyLogo(&instance.config.logo);
     ffOptionsDestroyGeneral(&instance.config.general);
-    ffOptionsDestroyModules(&instance.config.modules);
     ffOptionsDestroyDisplay(&instance.config.display);
 }
 

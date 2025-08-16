@@ -1,6 +1,4 @@
 #include "gpu.h"
-#include "common/library.h"
-#include "detection/cpu/cpu.h"
 #include "util/apple/cf_helpers.h"
 #include "util/apple/smc_temps.h"
 
@@ -109,7 +107,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         IORegistryEntryGetRegistryEntryID(registryEntry, &gpu->deviceId);
-        ffStrbufInitStatic(&gpu->platformApi, "Metal");
+        ffStrbufInitStatic(&gpu->platformApi, "IOKit");
 
         ffStrbufInit(&gpu->driver); // Ok for both Apple and Intel
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);

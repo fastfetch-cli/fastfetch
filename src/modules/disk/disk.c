@@ -302,45 +302,29 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 
 void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDiskOptions))) FFDiskOptions defaultOptions;
-    ffInitDiskOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "showRegular", !!(options->showTypes & FF_DISK_VOLUME_TYPE_REGULAR_BIT));
 
-    if (defaultOptions.showTypes != options->showTypes)
-    {
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_REGULAR_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showRegular", true);
+    yyjson_mut_obj_add_bool(doc, module, "showExternal", !!(options->showTypes & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showExternal", true);
+    yyjson_mut_obj_add_bool(doc, module, "showHidden", !!(options->showTypes & FF_DISK_VOLUME_TYPE_HIDDEN_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_HIDDEN_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showHidden", true);
+    yyjson_mut_obj_add_bool(doc, module, "showSubvolumes", !!(options->showTypes & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showSubvolumes", true);
+    yyjson_mut_obj_add_bool(doc, module, "showReadOnly", !!(options->showTypes & FF_DISK_VOLUME_TYPE_READONLY_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_READONLY_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showReadOnly", true);
+    yyjson_mut_obj_add_bool(doc, module, "showUnknown", !!(options->showTypes & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showUnknown", true);
-    }
+    yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
 
-    if (!ffStrbufEqual(&options->folders, &defaultOptions.folders))
-        yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
+    yyjson_mut_obj_add_strbuf(doc, module, "hideFolders", &options->hideFolders);
 
-    if (!ffStrbufEqual(&options->hideFolders, &defaultOptions.hideFolders))
-        yyjson_mut_obj_add_strbuf(doc, module, "hideFolders", &options->hideFolders);
+    yyjson_mut_obj_add_strbuf(doc, module, "hideFS", &options->hideFS);
 
-    if (!ffStrbufEqual(&options->hideFS, &defaultOptions.hideFS))
-        yyjson_mut_obj_add_strbuf(doc, module, "hideFS", &options->hideFS);
+    yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
 
-    if (defaultOptions.calcType != options->calcType)
-        yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -412,9 +396,35 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitDiskOptions(FFDiskOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    ffStrbufInit(&options->folders);
+    #if _WIN32 || __APPLE__ || __ANDROID__
+    ffStrbufInit(&options->hideFolders);
+    #else
+    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
+    #endif
+    ffStrbufInit(&options->hideFS);
+    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
+    options->calcType = FF_DISK_CALC_TYPE_FREE;
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyDiskOptions(FFDiskOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->folders);
+    ffStrbufDestroy(&options->hideFolders);
+    ffStrbufDestroy(&options->hideFS);
+}
+
+FFModuleBaseInfo ffDiskModuleInfo = {
     .name = FF_DISK_MODULE_NAME,
     .description = "Print partitions, space usage, file system, etc",
+    .initOptions = (void*) ffInitDiskOptions,
+    .destroyOptions = (void*) ffDestroyDiskOptions,
     .parseJsonObject = (void*) ffParseDiskJsonObject,
     .printModule = (void*) ffPrintDisk,
     .generateJsonResult = (void*) ffGenerateDiskJsonResult,
@@ -446,28 +456,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Years fraction after creation", "years-fraction"},
     }))
 };
-
-void ffInitDiskOptions(FFDiskOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    ffStrbufInit(&options->folders);
-    #if _WIN32 || __APPLE__ || __ANDROID__
-    ffStrbufInit(&options->hideFolders);
-    #else
-    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
-    #endif
-    ffStrbufInit(&options->hideFS);
-    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
-    options->calcType = FF_DISK_CALC_TYPE_FREE;
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyDiskOptions(FFDiskOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->folders);
-    ffStrbufDestroy(&options->hideFolders);
-    ffStrbufDestroy(&options->hideFS);
-}

@@ -136,7 +136,7 @@ int main(void)
 
     //toNumber
 
-    VERIFY(ffStrbufToDouble(&strbuf) == 123456789.0);
+    VERIFY(ffStrbufToDouble(&strbuf, -DBL_MAX) == 123456789.0);
     VERIFY(ffStrbufToUInt(&strbuf, 999) == 123456789);
 
     //countC

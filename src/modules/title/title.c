@@ -2,7 +2,6 @@
 #include "common/jsonconfig.h"
 #include "modules/title/title.h"
 #include "util/textModifier.h"
-#include "util/stringUtils.h"
 
 static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* color)
 {
@@ -30,6 +29,7 @@ void ffPrintTitle(FFTitleOptions* options)
     FF_STRBUF_AUTO_DESTROY hostName = ffStrbufCreateCopy(&instance.state.platform.hostName);
     if (!options->fqdn)
         ffStrbufSubstrBeforeFirstC(&hostName, '.');
+    instance.state.titleFqdn = options->fqdn;
 
     FF_STRBUF_AUTO_DESTROY hostNameColored = ffStrbufCreate();
     appendText(&hostNameColored, &hostName, &options->colorHost);
@@ -106,27 +106,14 @@ void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
 
 void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTitleOptions))) FFTitleOptions defaultOptions;
-    ffInitTitleOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "fqdn", options->fqdn);
 
-    if (defaultOptions.fqdn != options->fqdn)
-        yyjson_mut_obj_add_bool(doc, module, "fqdn", options->fqdn);
-
-    yyjson_mut_val* color = yyjson_mut_obj(doc);
-
-    if (!ffStrbufEqual(&options->colorUser, &defaultOptions.colorUser))
-        yyjson_mut_obj_add_strbuf(doc, color, "user", &options->colorUser);
-
-    if (!ffStrbufEqual(&options->colorAt, &defaultOptions.colorAt))
-        yyjson_mut_obj_add_strbuf(doc, color, "at", &options->colorAt);
-
-    if (!ffStrbufEqual(&options->colorHost, &defaultOptions.colorHost))
-        yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
-
-    if (yyjson_mut_obj_size(color))
-        yyjson_mut_obj_add_val(doc, module, "color", color);
+    yyjson_mut_val* color = yyjson_mut_obj_add_obj(doc, module, "color");
+    yyjson_mut_obj_add_strbuf(doc, color, "user", &options->colorUser);
+    yyjson_mut_obj_add_strbuf(doc, color, "at", &options->colorAt);
+    yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
 }
 
 void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -140,29 +127,8 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_TITLE_MODULE_NAME,
-    .description = "Print title, which contains your user name, hostname",
-    .parseJsonObject = (void*) ffParseTitleJsonObject,
-    .printModule = (void*) ffPrintTitle,
-    .generateJsonResult = (void*) ffGenerateTitleJsonResult,
-    .generateJsonConfig = (void*) ffGenerateTitleJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"User name", "user-name"},
-        {"Host name", "host-name"},
-        {"Home directory", "home-dir"},
-        {"Executable path of current process", "exe-path"},
-        {"User's default shell", "user-shell"},
-        {"User name (colored)", "user-name-colored"},
-        {"@ symbol (colored)", "at-symbol-colored"},
-        {"Host name (colored)", "host-name-colored"},
-        {"Full user name", "full-user-name"},
-    }))
-};
-
 void ffInitTitleOptions(FFTitleOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
     ffStrbufSetStatic(&options->moduleArgs.key, " ");
 
@@ -179,3 +145,25 @@ void ffDestroyTitleOptions(FFTitleOptions* options)
     ffStrbufDestroy(&options->colorAt);
     ffStrbufDestroy(&options->colorHost);
 }
+
+FFModuleBaseInfo ffTitleModuleInfo = {
+    .name = FF_TITLE_MODULE_NAME,
+    .description = "Print title, which contains your user name, hostname",
+    .initOptions = (void*) ffInitTitleOptions,
+    .destroyOptions = (void*) ffDestroyTitleOptions,
+    .parseJsonObject = (void*) ffParseTitleJsonObject,
+    .printModule = (void*) ffPrintTitle,
+    .generateJsonResult = (void*) ffGenerateTitleJsonResult,
+    .generateJsonConfig = (void*) ffGenerateTitleJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"User name", "user-name"},
+        {"Host name", "host-name"},
+        {"Home directory", "home-dir"},
+        {"Executable path of current process", "exe-path"},
+        {"User's default shell", "user-shell"},
+        {"User name (colored)", "user-name-colored"},
+        {"@ symbol (colored)", "at-symbol-colored"},
+        {"Host name (colored)", "host-name-colored"},
+        {"Full user name", "full-user-name"},
+    }))
+};

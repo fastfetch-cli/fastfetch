@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFWMThemeOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFWMThemeOptions;
+
+static_assert(sizeof(FFWMThemeOptions) <= FF_OPTION_MAX_SIZE, "FFWMThemeOptions size exceeds maximum allowed size");

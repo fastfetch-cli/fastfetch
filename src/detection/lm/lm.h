@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/lm/option.h"
 
 typedef struct FFLMResult
 {

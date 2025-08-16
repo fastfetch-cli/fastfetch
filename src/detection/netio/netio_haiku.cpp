@@ -13,7 +13,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
     BNetworkInterface interface;
     uint32 cookie = 0;
 
-    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteIfIndex();
+    uint32_t defaultRouteIfIndex = ffNetifGetDefaultRouteV4()->ifIndex;
 
     while (roster.GetNextInterface(&cookie, interface) == B_OK)
     {

@@ -1,17 +1,53 @@
-# WIP
+# 2.50.1
+
+Bugfixes:
+* Fixes percentage bar not displaying correctly in certain cases
+* Fixes linglong package detection on Debian 13 (#1899, Packages, Linux)
+
+# 2.50.0
 
 Changes:
-* Percent bar config `display.bar.*` options have been replaced with a more organized, nested object structure.
+* Keys in JSON configuration files are now case-sensitive, as stated in v2.49.0.
+    * This is a breaking change, but it should not affect most users as long as your config file passes JSON schema validation.
+* All module config flags have been removed, as stated in v2.49.0.
+    * To configure modules via the command line, use: `echo '{"modules": [{"type":"custom","format":"Hello Fastfetch!"}]}' | fastfetch -c -`.
+* The percent bar config `display.bar.*` options have been replaced with a more organized, nested object structure.
     * `display.bar.charElapsed` has been renamed to `display.bar.char.elapsed`.
     * `display.bar.charTotal` has been renamed to `display.bar.char.total`.
     * `display.bar.borderLeft` has been renamed to `display.bar.border.left`.
     * `display.bar.borderRight` has been renamed to `display.bar.border.right`.
+* The undocumented flag `--load-config` has been removed.
+    * Use `--config` or `-c` instead.
+* Flashfetch, a simplified fastfetch variant that used a hardcoded module list with direct function calls to reduce startup overhead, has been changed to a version that aims to match neofetch's behavior as closely as possible, for demonstration purposes.
+    * Flashfetch is intended to be built from source (like [st](https://st.suckless.org/)). We do not provide prebuilt binaries in distributions.
 
 Features:
-* Add `display.bar.border.{leftElapsed,rightElapsed}` for using border as parts of bar content. (#1875)
+* Added support for reading JSON config from stdin using `--config -` or `-c -`.
+* Added `display.bar.border.{leftElapsed,rightElapsed}` for using the border as part of the bar content. (#1875)
     * `display.bar.border: null` has been added as a shorthand to disable bar borders.
-* Add `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total and border sections of the percent bar.
+* Added `display.bar.color.{elapsed,total,border}` to customize the color of the elapsed, total, and border sections of the percent bar.
     * `display.bar.color: null` has been added as a shorthand to disable bar colors.
+* Improved Bedrock Linux detection (#1881, OS / Disk, Linux)
+* Added the command flag `--gen-config-full`, which generates a JSON config file containing all optional module options.
+* Improved the default IP address display when `localip.showAllIPs` is not set (LocalIP)
+    * For IPv4, the preferred source address (if detected) is shown.
+    * For IPv6, the first GUA or ULA that is not deprecated or temporary is shown.
+* Added support for interface speed detection on SunOS (LocalIP, SunOS)
+* Added detection support for Xlibre (#1888, WM, Linux)
+* Improved the accuracy of color detection (Cursor, macOS)
+* Improved the proformance of `Nix` package manager detection on macOS by porting optimizations form Linux port (#1893, Packages, macOS)
+
+Bugfixes:
+* Fixed custom object inheriting a key from the previous custom object if the key is blank (#1477)
+* Fixed a possible segfault when parsing color strings in the JSON config (#1878)
+* Fixed GPU driver detection when DRM is used (GPU, FreeBSD)
+* Fixed default route detection on DragonFly BSD (LocalIP, DFBSD)
+* Fixed lliurex detection (#1882, OS, Linux)
+* Fixed compatibility with `-ffast-math` (#1894)
+* Fixed physical GPU sometimes being ignored (#1896, GPU, Windows)
+
+Logos:
+* Added ObsidianOS (#1890)
 
 # 2.49.0
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/localip/option.h"
 
 typedef struct FFLocalIpResult
 {
@@ -11,7 +12,7 @@ typedef struct FFLocalIpResult
     FFstrbuf flags;
     int32_t mtu;
     int32_t speed; // in Mbps
-    bool defaultRoute;
+    FFLocalIpType defaultRoute;
 } FFLocalIpResult;
 
 typedef struct FFLocalIpNIFlag
@@ -20,7 +21,7 @@ typedef struct FFLocalIpNIFlag
     const char *name;
 } FFLocalIpNIFlag;
 
-static inline void ffLocalIpFillNIFlags(FFstrbuf *buf, uint32_t flag, const FFLocalIpNIFlag names[])
+static inline void ffLocalIpFillNIFlags(FFstrbuf *buf, uint64_t flag, const FFLocalIpNIFlag names[])
 {
     for (const FFLocalIpNIFlag *nf = names; flag && nf->name; ++nf)
     {

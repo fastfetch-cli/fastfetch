@@ -142,18 +142,13 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
 
 void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBrightnessOptions))) FFBrightnessOptions defaultOptions;
-    ffInitBrightnessOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
 
-    if (defaultOptions.ddcciSleep != options->ddcciSleep)
-        yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
-
-    if (defaultOptions.compact != options->compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
 void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -187,9 +182,25 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
+
+    options->ddcciSleep = 10;
+    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
+    options->compact = false;
+}
+
+void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBrightnessModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
+    .initOptions = (void*) ffInitBrightnessOptions,
+    .destroyOptions = (void*) ffDestroyBrightnessOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,
     .printModule = (void*) ffPrintBrightness,
     .generateJsonResult = (void*) ffGenerateBrightnessJsonResult,
@@ -204,18 +215,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Is built-in screen", "is-builtin"},
     }))
 };
-
-void ffInitBrightnessOptions(FFBrightnessOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
-
-    options->ddcciSleep = 10;
-    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
-    options->compact = false;
-}
-
-void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

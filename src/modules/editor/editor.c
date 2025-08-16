@@ -69,10 +69,7 @@ void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
 
 void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyEditorOptions))) FFEditorOptions defaultOptions;
-    ffInitEditorOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -104,9 +101,21 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitEditorOptions(FFEditorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
+}
+
+void ffDestroyEditorOptions(FFEditorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffEditorModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
+    .initOptions = (void*) ffInitEditorOptions,
+    .destroyOptions = (void*) ffDestroyEditorOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
     .printModule = (void*) ffPrintEditor,
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,
@@ -119,14 +128,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Version", "version"},
     }))
 };
-
-void ffInitEditorOptions(FFEditorOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
-}
-
-void ffDestroyEditorOptions(FFEditorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

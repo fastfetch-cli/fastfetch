@@ -65,10 +65,7 @@ void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module)
 
 void ffGenerateBootmgrJsonConfig(FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBootmgrOptions))) FFBootmgrOptions defaultOptions;
-    ffInitBootmgrOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -97,9 +94,21 @@ exit:
     ffStrbufDestroy(&bootmgr.firmware);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBootmgrOptions(FFBootmgrOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBootmgrModuleInfo = {
     .name = FF_BOOTMGR_MODULE_NAME,
     .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
+    .initOptions = (void*) ffInitBootmgrOptions,
+    .destroyOptions = (void*) ffDestroyBootmgrOptions,
     .parseJsonObject = (void*) ffParseBootmgrJsonObject,
     .printModule = (void*) ffPrintBootmgr,
     .generateJsonResult = (void*) ffGenerateBootmgrJsonResult,
@@ -112,14 +121,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Boot order", "order"},
     }))
 };
-
-void ffInitBootmgrOptions(FFBootmgrOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

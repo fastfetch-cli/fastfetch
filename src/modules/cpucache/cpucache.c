@@ -153,10 +153,9 @@ void ffParseCPUCacheJsonObject(FFCPUCacheOptions* options, yyjson_val* module)
 
 void ffGenerateCPUCacheJsonConfig(FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCPUCacheOptions))) FFCPUCacheOptions defaultOptions;
-    ffInitCPUCacheOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
 void ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -208,22 +207,8 @@ exit:
     ffListDestroy(&result.caches[3]);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_CPUCACHE_MODULE_NAME,
-    .description = "Print CPU cache sizes",
-    .parseJsonObject = (void*) ffParseCPUCacheJsonObject,
-    .printModule = (void*) ffPrintCPUCache,
-    .generateJsonResult = (void*) ffGenerateCPUCacheJsonResult,
-    .generateJsonConfig = (void*) ffGenerateCPUCacheJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Separate result", "result"},
-        {"Sum result", "sum"},
-    }))
-};
-
 void ffInitCPUCacheOptions(FFCPUCacheOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     options->compact = false;
@@ -233,3 +218,18 @@ void ffDestroyCPUCacheOptions(FFCPUCacheOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
 }
+
+FFModuleBaseInfo ffCPUCacheModuleInfo = {
+    .name = FF_CPUCACHE_MODULE_NAME,
+    .description = "Print CPU cache sizes",
+    .initOptions = (void*) ffInitCPUCacheOptions,
+    .destroyOptions = (void*) ffDestroyCPUCacheOptions,
+    .parseJsonObject = (void*) ffParseCPUCacheJsonObject,
+    .printModule = (void*) ffPrintCPUCache,
+    .generateJsonResult = (void*) ffGenerateCPUCacheJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCPUCacheJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Separate result", "result"},
+        {"Sum result", "sum"},
+    }))
+};

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/media/option.h"
 
 typedef struct FFMediaResult
 {

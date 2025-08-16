@@ -63,10 +63,7 @@ void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
 
 void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyKeyboardOptions))) FFKeyboardOptions defaultOptions;
-    ffInitKeyboardOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -96,9 +93,21 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitKeyboardOptions(FFKeyboardOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyKeyboardOptions(FFKeyboardOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffKeyboardModuleInfo = {
     .name = FF_KEYBOARD_MODULE_NAME,
     .description = "List (connected) keyboards",
+    .initOptions = (void*) ffInitKeyboardOptions,
+    .destroyOptions = (void*) ffDestroyKeyboardOptions,
     .parseJsonObject = (void*) ffParseKeyboardJsonObject,
     .printModule = (void*) ffPrintKeyboard,
     .generateJsonResult = (void*) ffGenerateKeyboardJsonResult,
@@ -108,14 +117,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Serial number", "serial"},
     }))
 };
-
-void ffInitKeyboardOptions(FFKeyboardOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyKeyboardOptions(FFKeyboardOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

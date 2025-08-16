@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/initsystem/option.h"
 
 typedef struct FFInitSystemResult
 {

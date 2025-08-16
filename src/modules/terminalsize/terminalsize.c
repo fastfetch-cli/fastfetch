@@ -53,13 +53,10 @@ void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* m
 
 void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTerminalSizeOptions))) FFTerminalSizeOptions defaultOptions;
-    ffInitTerminalSizeOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalSizeResult result;
 
@@ -76,9 +73,21 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options
     yyjson_mut_obj_add_uint(doc, obj, "height", result.height);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰲎");
+}
+
+void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffTerminalSizeModuleInfo = {
     .name = FF_TERMINALSIZE_MODULE_NAME,
     .description = "Print current terminal size",
+    .initOptions = (void*) ffInitTerminalSizeOptions,
+    .destroyOptions = (void*) ffDestroyTerminalSizeOptions,
     .parseJsonObject = (void*) ffParseTerminalSizeJsonObject,
     .printModule = (void*) ffPrintTerminalSize,
     .generateJsonResult = (void*) ffGenerateTerminalSizeJsonResult,
@@ -90,14 +99,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Terminal height (in pixels)", "height"},
     })),
 };
-
-void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰲎");
-}
-
-void ffDestroyTerminalSizeOptions(FFTerminalSizeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

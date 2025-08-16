@@ -66,10 +66,7 @@ void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
 
 void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyChassisOptions))) FFChassisOptions defaultOptions;
-    ffInitChassisOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -107,9 +104,21 @@ exit:
     ffStrbufDestroy(&result.serial);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitChassisOptions(FFChassisOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyChassisOptions(FFChassisOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffChassisModuleInfo = {
     .name = FF_CHASSIS_MODULE_NAME,
     .description = "Print chassis type (desktop, laptop, etc)",
+    .initOptions = (void*) ffInitChassisOptions,
+    .destroyOptions = (void*) ffDestroyChassisOptions,
     .parseJsonObject = (void*) ffParseChassisJsonObject,
     .printModule = (void*) ffPrintChassis,
     .generateJsonResult = (void*) ffGenerateChassisJsonResult,
@@ -121,14 +130,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Chassis serial number", "serial"},
     })),
 };
-
-void ffInitChassisOptions(FFChassisOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyChassisOptions(FFChassisOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

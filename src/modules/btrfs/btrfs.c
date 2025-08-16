@@ -148,12 +148,9 @@ void ffParseBtrfsJsonObject(FFBtrfsOptions* options, yyjson_val* module)
 
 void ffGenerateBtrfsJsonConfig(FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBtrfsOptions))) FFBtrfsOptions defaultOptions;
-    ffInitBtrfsOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -200,9 +197,22 @@ void ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBtrfsOptions(FFBtrfsOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyBtrfsOptions(FFBtrfsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBtrfsModuleInfo = {
     .name = FF_BTRFS_MODULE_NAME,
     .description = "Print Linux BTRFS volumes",
+    .initOptions = (void*) ffInitBtrfsOptions,
+    .destroyOptions = (void*) ffDestroyBtrfsOptions,
     .parseJsonObject = (void*) ffParseBtrfsJsonObject,
     .printModule = (void*) ffPrintBtrfs,
     .generateJsonResult = (void*) ffGenerateBtrfsJsonResult,
@@ -223,15 +233,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Sector size", "sector-size"},
     }))
 };
-
-void ffInitBtrfsOptions(FFBtrfsOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyBtrfsOptions(FFBtrfsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/diskio/option.h"
 
 typedef struct FFDiskIOResult
 {

@@ -82,10 +82,7 @@ void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
 
 void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyHostOptions))) FFHostOptions defaultOptions;
-    ffInitHostOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -131,9 +128,21 @@ exit:
     ffStrbufDestroy(&host.vendor);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitHostOptions(FFHostOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
+}
+
+void ffDestroyHostOptions(FFHostOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffHostModuleInfo = {
     .name = FF_HOST_MODULE_NAME,
     .description = "Print product name of your computer",
+    .initOptions = (void*) ffInitHostOptions,
+    .destroyOptions = (void*) ffDestroyHostOptions,
     .parseJsonObject = (void*) ffParseHostJsonObject,
     .printModule = (void*) ffPrintHost,
     .generateJsonResult = (void*) ffGenerateHostJsonResult,
@@ -148,14 +157,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Product uuid", "uuid"},
     }))
 };
-
-void ffInitHostOptions(FFHostOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰌢");
-}
-
-void ffDestroyHostOptions(FFHostOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

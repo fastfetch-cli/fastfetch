@@ -3392,6 +3392,15 @@ static const FFlogo O[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // ObsidianOS
+    {
+        .names = {"ObsidianOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OBSIDIANOS,
+        .colors = {
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // OmniOS
     {
         .names = {"OmniOS"},

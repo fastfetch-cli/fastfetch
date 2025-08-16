@@ -55,10 +55,7 @@ void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
 
 void ffGenerateWallpaperJsonConfig(FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyWallpaperOptions))) FFWallpaperOptions defaultOptions;
-    ffInitWallpaperOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -73,9 +70,21 @@ void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
+}
+
+void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffWallpaperModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
     .description = "Print image file path of current wallpaper",
+    .initOptions = (void*) ffInitWallpaperOptions,
+    .destroyOptions = (void*) ffDestroyWallpaperOptions,
     .parseJsonObject = (void*) ffParseWallpaperJsonObject,
     .printModule = (void*) ffPrintWallpaper,
     .generateJsonResult = (void*) ffGenerateWallpaperJsonResult,
@@ -85,14 +94,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Full path", "full-path"},
     }))
 };
-
-void ffInitWallpaperOptions(FFWallpaperOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
-}
-
-void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

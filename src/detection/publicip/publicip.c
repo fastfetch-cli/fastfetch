@@ -5,7 +5,7 @@
 static FFNetworkingState states[2];
 static const char* statuses[2] = { FF_UNITIALIZED, FF_UNITIALIZED };
 
-void ffPreparePublicIp(FFPublicIpOptions* options)
+void ffPreparePublicIp(FFPublicIPOptions* options)
 {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];
@@ -58,7 +58,7 @@ static inline void wrapYyjsonFree(yyjson_doc** doc)
         yyjson_doc_free(*doc);
 }
 
-const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* result)
+const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* result)
 {
     FFNetworkingState* state = &states[options->ipv6];
     const char** status = &statuses[options->ipv6];

@@ -53,13 +53,10 @@ void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module)
 
 void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTPMOptions))) FFTPMOptions defaultOptions;
-    ffInitTPMOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
@@ -81,9 +78,21 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_
     ffStrbufDestroy(&result.description);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitTPMOptions(FFTPMOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyTPMOptions(FFTPMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffTPMModuleInfo = {
     .name = FF_TPM_MODULE_NAME,
     .description = "Print info of Trusted Platform Module (TPM) Security Device",
+    .initOptions = (void*) ffInitTPMOptions,
+    .destroyOptions = (void*) ffDestroyTPMOptions,
     .parseJsonObject = (void*) ffParseTPMJsonObject,
     .printModule = (void*) ffPrintTPM,
     .generateJsonResult = (void*) ffGenerateTPMJsonResult,
@@ -93,14 +102,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"TPM general description", "description"},
     }))
 };
-
-void ffInitTPMOptions(FFTPMOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyTPMOptions(FFTPMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

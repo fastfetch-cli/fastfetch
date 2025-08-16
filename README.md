@@ -36,7 +36,6 @@ Some distributions package outdated versions of fastfetch. Older versions receiv
     <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
 </a>
 
-* Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (for Ubuntu 22.04 or newer)
 * Debian: `apt install fastfetch` (for Debian 13 or newer)
 * Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
 * Arch Linux: `pacman -S fastfetch`
@@ -58,7 +57,7 @@ If fastfetch is not packaged for your distribution or an outdated version is pac
 
 ### macOS
 
-* [HomeBrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
+* [Homebrew](https://formulae.brew.sh/formula/fastfetch#default): `brew install fastfetch`
 * [MacPorts](https://ports.macports.org/port/fastfetch/): `sudo port install fastfetch`
 
 ### Windows
@@ -95,7 +94,8 @@ See the Wiki: https://github.com/fastfetch-cli/fastfetch/wiki/Building
 * Run with [all supported modules](https://github.com/fastfetch-cli/fastfetch/wiki/Support+Status#available-modules) to find what interests you: `fastfetch -c all.jsonc`
 * View all data that fastfetch detects: `fastfetch -s <module1>[:<module2>][:<module3>] --format json`
 * Display help messages: `fastfetch --help`
-* Generate a config file based on command line arguments: `fastfetch --arg1 --arg2 --gen-config`
+* Generate a minimal config file: `fastfetch [-s <module1>[:<module2>]] --gen-config [</path/to/config.jsonc>]`
+    * Use: `--gen-config-full` to generate a full config file with all optional options
 
 ## Customization
 

@@ -53,10 +53,7 @@ void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
 
 void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyTerminalOptions))) FFTerminalOptions defaultOptions;
-    ffInitTerminalOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -81,9 +78,21 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "tty", &result->tty);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyTerminalOptions(FFTerminalOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffTerminalModuleInfo = {
     .name = FF_TERMINAL_MODULE_NAME,
     .description = "Print current terminal name and version",
+    .initOptions = (void*) ffInitTerminalOptions,
+    .destroyOptions = (void*) ffDestroyTerminalOptions,
     .parseJsonObject = (void*) ffParseTerminalJsonObject,
     .printModule = (void*) ffPrintTerminal,
     .generateJsonResult = (void*) ffGenerateTerminalJsonResult,
@@ -99,14 +108,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Terminal tty / pts used", "tty"},
     }))
 };
-
-void ffInitTerminalOptions(FFTerminalOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyTerminalOptions(FFTerminalOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

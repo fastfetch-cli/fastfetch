@@ -120,10 +120,7 @@ void ffParseBluetoothRadioJsonObject(FFBluetoothRadioOptions* options, yyjson_va
 
 void ffGenerateBluetoothRadioJsonConfig(FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBluetoothRadioOptions))) FFBluetoothRadioOptions defaultOptions;
-    ffInitBluetoothRadioOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -166,9 +163,21 @@ void ffGenerateBluetoothRadioJsonResult(FF_MAYBE_UNUSED FFBluetoothRadioOptions*
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
+}
+
+void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBluetoothRadioModuleInfo = {
     .name = FF_BLUETOOTHRADIO_MODULE_NAME,
     .description = "List bluetooth radios width supported version and vendor",
+    .initOptions = (void*) ffInitBluetoothRadioOptions,
+    .destroyOptions = (void*) ffDestroyBluetoothRadioOptions,
     .parseJsonObject = (void*) ffParseBluetoothRadioJsonObject,
     .printModule = (void*) ffPrintBluetoothRadio,
     .generateJsonResult = (void*) ffGenerateBluetoothRadioJsonResult,
@@ -184,14 +193,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Connectable / Pairable", "connectable"},
     }))
 };
-
-void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰐻");
-}
-
-void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

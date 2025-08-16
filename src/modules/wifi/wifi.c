@@ -55,7 +55,7 @@ void ffPrintWifi(FFWifiOptions* options)
             FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
             if(item->conn.ssid.length)
             {
-                if(item->conn.signalQuality == item->conn.signalQuality)
+                if(item->conn.signalQuality != -DBL_MAX)
                 {
                     if(percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
                     {
@@ -86,7 +86,7 @@ void ffPrintWifi(FFWifiOptions* options)
                     ffStrbufAppendC(&buffer, ' ');
                 }
 
-                if(item->conn.signalQuality == item->conn.signalQuality)
+                if(item->conn.signalQuality != -DBL_MAX)
                 {
                     if(percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                         ffPercentAppendNum(&buffer, item->conn.signalQuality, options->percent, buffer.length > 0, &options->moduleArgs);
@@ -154,12 +154,9 @@ void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
 
 void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyWifiOptions))) FFWifiOptions defaultOptions;
-    ffInitWifiOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -187,9 +184,18 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
         yyjson_mut_obj_add_strbuf(doc, conn, "bssid", &wifi->conn.bssid);
         yyjson_mut_obj_add_strbuf(doc, conn, "protocol", &wifi->conn.protocol);
         yyjson_mut_obj_add_strbuf(doc, conn, "security", &wifi->conn.security);
-        yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
-        yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
-        yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
+        if (wifi->conn.signalQuality != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, conn, "signalQuality", wifi->conn.signalQuality);
+        else
+            yyjson_mut_obj_add_null(doc, conn, "signalQuality");
+        if (wifi->conn.rxRate != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, conn, "rxRate", wifi->conn.rxRate);
+        else
+            yyjson_mut_obj_add_null(doc, conn, "rxRate");
+        if (wifi->conn.txRate != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, conn, "txRate", wifi->conn.txRate);
+        else
+            yyjson_mut_obj_add_null(doc, conn, "txRate");
         yyjson_mut_obj_add_uint(doc, conn, "channel", wifi->conn.channel);
         yyjson_mut_obj_add_uint(doc, conn, "frequency", wifi->conn.frequency);
     }
@@ -206,9 +212,23 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitWifiOptions(FFWifiOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->percent = (FFPercentageModuleConfig) { 75, 50, 0 };
+}
+
+void ffDestroyWifiOptions(FFWifiOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffWifiModuleInfo = {
     .name = FF_WIFI_MODULE_NAME,
     .description = "Print connected Wi-Fi info (SSID, connection and security protocol)",
+    .initOptions = (void*) ffInitWifiOptions,
+    .destroyOptions = (void*) ffDestroyWifiOptions,
     .parseJsonObject = (void*) ffParseWifiJsonObject,
     .printModule = (void*) ffPrintWifi,
     .generateJsonResult = (void*) ffGenerateWifiJsonResult,
@@ -229,16 +249,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Connection channel band in GHz", "band"},
     }))
 };
-
-void ffInitWifiOptions(FFWifiOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-}
-
-void ffDestroyWifiOptions(FFWifiOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

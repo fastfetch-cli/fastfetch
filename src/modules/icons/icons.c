@@ -58,10 +58,7 @@ void ffParseIconsJsonObject(FFIconsOptions* options, yyjson_val* module)
 
 void ffGenerateIconsJsonConfig(FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyIconsOptions))) FFIconsOptions defaultOptions;
-    ffInitIconsOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -86,9 +83,21 @@ void ffGenerateIconsJsonResult(FF_MAYBE_UNUSED FFIconsOptions* options, yyjson_m
     ffStrbufDestroy(&result.icons2);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitIconsOptions(FFIconsOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyIconsOptions(FFIconsOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffIconsModuleInfo = {
     .name = FF_ICONS_MODULE_NAME,
     .description = "Print icon style name",
+    .initOptions = (void*) ffInitIconsOptions,
+    .destroyOptions = (void*) ffDestroyIconsOptions,
     .parseJsonObject = (void*) ffParseIconsJsonObject,
     .printModule = (void*) ffPrintIcons,
     .generateJsonResult = (void*) ffGenerateIconsJsonResult,
@@ -98,14 +107,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Icons part 2", "icons2"},
     }))
 };
-
-void ffInitIconsOptions(FFIconsOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyIconsOptions(FFIconsOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

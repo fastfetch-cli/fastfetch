@@ -74,7 +74,7 @@ static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
     item->total = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_SIZE, &source);
     item->used = item->total - data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FREE, &source);
     uint64_t fragmentation = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FRAGMENTATION, &source);
-    item->fragmentation = fragmentation == UINT64_MAX ? 0.0/0.0 : (double) fragmentation;
+    item->fragmentation = fragmentation == UINT64_MAX ? -DBL_MAX : (double) fragmentation;
     return 0;
 }
 

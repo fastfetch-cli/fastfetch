@@ -146,28 +146,22 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
 
 void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroySoundOptions))) FFSoundOptions defaultOptions;
-    ffInitSoundOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (defaultOptions.soundType != options->soundType)
+    switch (options->soundType)
     {
-        switch (options->soundType)
-        {
-            case FF_SOUND_TYPE_MAIN:
-                yyjson_mut_obj_add_str(doc, module, "soundType", "main");
-                break;
-            case FF_SOUND_TYPE_ACTIVE:
-                yyjson_mut_obj_add_str(doc, module, "soundType", "active");
-                break;
-            case FF_SOUND_TYPE_ALL:
-                yyjson_mut_obj_add_str(doc, module, "soundType", "all");
-                break;
-        }
+        case FF_SOUND_TYPE_MAIN:
+            yyjson_mut_obj_add_str(doc, module, "soundType", "main");
+            break;
+        case FF_SOUND_TYPE_ACTIVE:
+            yyjson_mut_obj_add_str(doc, module, "soundType", "active");
+            break;
+        case FF_SOUND_TYPE_ALL:
+            yyjson_mut_obj_add_str(doc, module, "soundType", "all");
+            break;
     }
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -206,9 +200,24 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitSoundOptions(FFSoundOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->soundType = FF_SOUND_TYPE_MAIN;
+    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
+}
+
+void ffDestroySoundOptions(FFSoundOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffSoundModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
     .description = "Print sound devices, volume, etc",
+    .initOptions = (void*) ffInitSoundOptions,
+    .destroyOptions = (void*) ffDestroySoundOptions,
     .parseJsonObject = (void*) ffParseSoundJsonObject,
     .printModule = (void*) ffPrintSound,
     .generateJsonResult = (void*) ffGenerateSoundJsonResult,
@@ -222,17 +231,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Platform API used", "platform-api"},
     }))
 };
-
-void ffInitSoundOptions(FFSoundOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->soundType = FF_SOUND_TYPE_MAIN;
-    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
-}
-
-void ffDestroySoundOptions(FFSoundOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

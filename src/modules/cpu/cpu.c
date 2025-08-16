@@ -81,7 +81,7 @@ void ffPrintCPU(FFCPUOptions* options)
                 ffFreqAppendNum(freq, &str);
             }
 
-            if(cpu.temperature == cpu.temperature) //FF_CPU_TEMP_UNSET
+            if(cpu.temperature != FF_CPU_TEMP_UNSET)
             {
                 ffStrbufAppendS(&str, " - ");
                 ffTempsAppendNum(cpu.temperature, &str, options->tempConfig, &options->moduleArgs);
@@ -147,15 +147,11 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
 
 void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCPUOptions))) FFCPUOptions defaultOptions;
-    ffInitCPUOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
 
-    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
-
-    if (defaultOptions.showPeCoreCount != options->showPeCoreCount)
-        yyjson_mut_obj_add_bool(doc, module, "showPeCoreCount", options->showPeCoreCount);
+    yyjson_mut_obj_add_bool(doc, module, "showPeCoreCount", options->showPeCoreCount);
 }
 
 void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -205,16 +201,34 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
             yyjson_mut_obj_add_uint(doc, core, "freq", cpu.coreTypes[i].freq);
         }
 
-        yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
+        if (cpu.temperature != FF_CPU_TEMP_UNSET)
+            yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "temperature");
     }
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCPUOptions(FFCPUOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->temp = false;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->showPeCoreCount = false;
+}
+
+void ffDestroyCPUOptions(FFCPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCPUModuleInfo = {
     .name = FF_CPU_MODULE_NAME,
     .description = "Print CPU name, frequency, etc",
+    .initOptions = (void*) ffInitCPUOptions,
+    .destroyOptions = (void*) ffDestroyCPUOptions,
     .parseJsonObject = (void*) ffParseCPUJsonObject,
     .printModule = (void*) ffPrintCPU,
     .generateJsonResult = (void*) ffGenerateCPUJsonResult,
@@ -232,17 +246,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Processor package count", "packages"},
     }))
 };
-
-void ffInitCPUOptions(FFCPUOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->temp = false;
-    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->showPeCoreCount = false;
-}
-
-void ffDestroyCPUOptions(FFCPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

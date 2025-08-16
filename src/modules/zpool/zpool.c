@@ -125,12 +125,9 @@ void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module)
 
 void ffGenerateZpoolJsonConfig(FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyZpoolOptions))) FFZpoolOptions defaultOptions;
-    ffInitZpoolOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -154,7 +151,10 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
         yyjson_mut_obj_add_uint(doc, obj, "used", zpool->used);
         yyjson_mut_obj_add_uint(doc, obj, "total", zpool->total);
         yyjson_mut_obj_add_uint(doc, obj, "version", zpool->version);
-        yyjson_mut_obj_add_real(doc, obj, "fragmentation", zpool->fragmentation);
+        if (zpool->fragmentation != -DBL_MAX)
+            yyjson_mut_obj_add_real(doc, obj, "fragmentation", zpool->fragmentation);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "fragmentation");
     }
 
     FF_LIST_FOR_EACH(FFZpoolResult, zpool, results)
@@ -164,9 +164,22 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitZpoolOptions(FFZpoolOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyZpoolOptions(FFZpoolOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffZpoolModuleInfo = {
     .name = FF_ZPOOL_MODULE_NAME,
     .description = "Print ZFS storage pools",
+    .initOptions = (void*) ffInitZpoolOptions,
+    .destroyOptions = (void*) ffDestroyZpoolOptions,
     .parseJsonObject = (void*) ffParseZpoolJsonObject,
     .printModule = (void*) ffPrintZpool,
     .generateJsonResult = (void*) ffGenerateZpoolJsonResult,
@@ -182,15 +195,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
     }))
 };
-
-void ffInitZpoolOptions(FFZpoolOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱑛");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyZpoolOptions(FFZpoolOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

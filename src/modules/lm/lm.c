@@ -62,10 +62,7 @@ void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
 
 void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLMOptions))) FFLMOptions defaultOptions;
-    ffInitLMOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -99,9 +96,21 @@ exit:
     ffStrbufDestroy(&result.version);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitLMOptions(FFLMOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
+}
+
+void ffDestroyLMOptions(FFLMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffLMModuleInfo = {
     .name = FF_LM_MODULE_NAME,
     .description = "Print login manager (desktop manager) name and version",
+    .initOptions = (void*) ffInitLMOptions,
+    .destroyOptions = (void*) ffDestroyLMOptions,
     .parseJsonObject = (void*) ffParseLMJsonObject,
     .printModule = (void*) ffPrintLM,
     .generateJsonResult = (void*) ffGenerateLMJsonResult,
@@ -112,14 +121,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"LM version", "version"},
     }))
 };
-
-void ffInitLMOptions(FFLMOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
-}
-
-void ffDestroyLMOptions(FFLMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

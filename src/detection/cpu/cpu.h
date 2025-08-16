@@ -1,8 +1,9 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/cpu/option.h"
 
-#define FF_CPU_TEMP_UNSET (0/0.0)
+#define FF_CPU_TEMP_UNSET (-DBL_MAX)
 
 typedef struct FFCPUCore
 {

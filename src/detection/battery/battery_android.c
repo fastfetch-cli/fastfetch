@@ -96,6 +96,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     battery->temperature = FF_BATTERY_TEMP_UNSET;
     battery->cycleCount = 0;
     battery->timeRemaining = -1;
+    battery->capacity = 0;
     ffStrbufInit(&battery->manufacturer);
     ffStrbufInit(&battery->modelName);
     ffStrbufInit(&battery->status);
@@ -124,11 +125,11 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     {
         double level = 0, scale = 0;
         if (ffParsePropLines(start, "level: ", &temp))
-            level = ffStrbufToDouble(&temp);
+            level = ffStrbufToDouble(&temp, -DBL_MAX);
         ffStrbufClear(&temp);
 
         if (ffParsePropLines(start, "scale: ", &temp))
-            scale = ffStrbufToDouble(&temp);
+            scale = ffStrbufToDouble(&temp, -DBL_MAX);
         ffStrbufClear(&temp);
 
         if (level > 0 && scale > 0)
@@ -138,7 +139,7 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     if(options->temp)
     {
         if (ffParsePropLines(start, "temperature: ", &temp))
-            battery->temperature = ffStrbufToDouble(&temp);
+            battery->temperature = ffStrbufToDouble(&temp, FF_BATTERY_TEMP_UNSET);
         ffStrbufClear(&temp);
     }
 

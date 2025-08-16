@@ -1,13 +1,12 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFCPUCacheOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     bool compact;
 } FFCPUCacheOptions;
+
+static_assert(sizeof(FFCPUCacheOptions) <= FF_OPTION_MAX_SIZE, "FFCPUCacheOptions size exceeds maximum allowed size");

@@ -82,10 +82,7 @@ void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module)
 
 void ffGenerateCameraJsonConfig(FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCameraOptions))) FFCameraOptions defaultOptions;
-    ffInitCameraOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -120,9 +117,21 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCameraOptions(FFCameraOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
+}
+
+void ffDestroyCameraOptions(FFCameraOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCameraModuleInfo = {
     .name = FF_CAMERA_MODULE_NAME,
     .description = "Print available cameras",
+    .initOptions = (void*) ffInitCameraOptions,
+    .destroyOptions = (void*) ffDestroyCameraOptions,
     .parseJsonObject = (void*) ffParseCameraJsonObject,
     .printModule = (void*) ffPrintCamera,
     .generateJsonResult = (void*) ffGenerateCameraJsonResult,
@@ -136,14 +145,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Height (in px)", "height"},
     }))
 };
-
-void ffInitCameraOptions(FFCameraOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
-}
-
-void ffDestroyCameraOptions(FFCameraOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -56,10 +56,7 @@ void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
 
 void ffGenerateFontJsonConfig(FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyFontOptions))) FFFontOptions defaultOptions;
-    ffInitFontOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -88,9 +85,21 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
         ffStrbufDestroy(&font.fonts[i]);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitFontOptions(FFFontOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyFontOptions(FFFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffFontModuleInfo = {
     .name = FF_FONT_MODULE_NAME,
     .description = "Print system font names",
+    .initOptions = (void*) ffInitFontOptions,
+    .destroyOptions = (void*) ffDestroyFontOptions,
     .parseJsonObject = (void*) ffParseFontJsonObject,
     .printModule = (void*) ffPrintFont,
     .generateJsonResult = (void*) ffGenerateFontJsonResult,
@@ -103,14 +112,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Combined fonts for display", "combined"},
     }))
 };
-
-void ffInitFontOptions(FFFontOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyFontOptions(FFFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

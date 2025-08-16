@@ -57,10 +57,7 @@ void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
 
 void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyShellOptions))) FFShellOptions defaultOptions;
-    ffInitShellOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -88,9 +85,21 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
         yyjson_mut_obj_add_null(doc, obj, "tty");
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitShellOptions(FFShellOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyShellOptions(FFShellOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffShellModuleInfo = {
     .name = FF_SHELL_MODULE_NAME,
     .description = "Print current shell name and version",
+    .initOptions = (void*) ffInitShellOptions,
+    .destroyOptions = (void*) ffDestroyShellOptions,
     .parseJsonObject = (void*) ffParseShellJsonObject,
     .printModule = (void*) ffPrintShell,
     .generateJsonResult = (void*) ffGenerateShellJsonResult,
@@ -106,14 +115,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Shell tty used", "tty"},
     }))
 };
-
-void ffInitShellOptions(FFShellOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyShellOptions(FFShellOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

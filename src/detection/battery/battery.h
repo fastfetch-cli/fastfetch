@@ -1,8 +1,9 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/battery/option.h"
 
-#define FF_BATTERY_TEMP_UNSET (0/0.0)
+#define FF_BATTERY_TEMP_UNSET (-DBL_MAX)
 
 typedef struct FFBatteryResult
 {

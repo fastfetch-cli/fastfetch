@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/publicip/option.h"
 
 typedef struct FFPublicIpResult
 {
@@ -8,5 +9,5 @@ typedef struct FFPublicIpResult
     FFstrbuf location;
 } FFPublicIpResult;
 
-void ffPreparePublicIp(FFPublicIpOptions* options);
-const char* ffDetectPublicIp(FFPublicIpOptions* options, FFPublicIpResult* result);
+void ffPreparePublicIp(FFPublicIPOptions* options);
+const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* result);

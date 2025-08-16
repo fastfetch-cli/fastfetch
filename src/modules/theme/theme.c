@@ -58,10 +58,7 @@ void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
 
 void ffGenerateThemeJsonConfig(FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyThemeOptions))) FFThemeOptions defaultOptions;
-    ffInitThemeOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -86,9 +83,21 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
     ffStrbufDestroy(&result.theme2);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitThemeOptions(FFThemeOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰉼");
+}
+
+void ffDestroyThemeOptions(FFThemeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffThemeModuleInfo = {
     .name = FF_THEME_MODULE_NAME,
     .description = "Print current theme of desktop environment",
+    .initOptions = (void*) ffInitThemeOptions,
+    .destroyOptions = (void*) ffDestroyThemeOptions,
     .parseJsonObject = (void*) ffParseThemeJsonObject,
     .printModule = (void*) ffPrintTheme,
     .generateJsonResult = (void*) ffGenerateThemeJsonResult,
@@ -98,14 +107,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Theme part 2", "theme2"},
     }))
 };
-
-void ffInitThemeOptions(FFThemeOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰉼");
-}
-
-void ffDestroyThemeOptions(FFThemeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

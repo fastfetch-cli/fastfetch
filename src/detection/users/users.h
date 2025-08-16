@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/users/option.h"
 
 typedef struct FFUserResult
 {

@@ -137,16 +137,11 @@ void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
 
 void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyUsersOptions))) FFUsersOptions defaultOptions;
-    ffInitUsersOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 
-    if (options->compact != defaultOptions.compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
-
-    if (options->myselfOnly != defaultOptions.myselfOnly)
-        yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
+    yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
 }
 
 void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -185,9 +180,24 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitUsersOptions(FFUsersOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->compact = false;
+    options->myselfOnly = false;
+}
+
+void ffDestroyUsersOptions(FFUsersOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffUsersModuleInfo = {
     .name = FF_USERS_MODULE_NAME,
     .description = "Print users currently logged in",
+    .initOptions = (void*) ffInitUsersOptions,
+    .destroyOptions = (void*) ffDestroyUsersOptions,
     .parseJsonObject = (void*) ffParseUsersJsonObject,
     .printModule = (void*) ffPrintUsers,
     .generateJsonResult = (void*) ffGenerateUsersJsonResult,
@@ -208,17 +218,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Years fraction after login", "years-fraction"},
     }))
 };
-
-void ffInitUsersOptions(FFUsersOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->compact = false;
-    options->myselfOnly = false;
-}
-
-void ffDestroyUsersOptions(FFUsersOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

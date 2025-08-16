@@ -346,7 +346,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         FF_DEBUG("Multithreading mode enabled, creating connection thread");
         state->thread = ffThreadCreate(connectAndSendThreadMain, state);
         if (state->thread) {
-            FF_DEBUG("Thread creation successful: thread=%p", (void*)state->thread);
+            FF_DEBUG("Thread creation successful: thread=%p", (void*)(uintptr_t)state->thread);
             return NULL;
         }
         FF_DEBUG("Thread creation failed");

@@ -63,10 +63,7 @@ void ffParseMouseJsonObject(FFMouseOptions* options, yyjson_val* module)
 
 void ffGenerateMouseJsonConfig(FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyMouseOptions))) FFMouseOptions defaultOptions;
-    ffInitMouseOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -96,9 +93,21 @@ void ffGenerateMouseJsonResult(FF_MAYBE_UNUSED FFMouseOptions* options, yyjson_m
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitMouseOptions(FFMouseOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
+}
+
+void ffDestroyMouseOptions(FFMouseOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffMouseModuleInfo = {
     .name = FF_MOUSE_MODULE_NAME,
     .description = "List connected mouses",
+    .initOptions = (void*) ffInitMouseOptions,
+    .destroyOptions = (void*) ffDestroyMouseOptions,
     .parseJsonObject = (void*) ffParseMouseJsonObject,
     .printModule = (void*) ffPrintMouse,
     .generateJsonResult = (void*) ffGenerateMouseJsonResult,
@@ -108,14 +117,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Mouse serial number", "serial"},
     }))
 };
-
-void ffInitMouseOptions(FFMouseOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰍽");
-}
-
-void ffDestroyMouseOptions(FFMouseOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

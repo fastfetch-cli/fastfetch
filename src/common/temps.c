@@ -5,7 +5,7 @@
 
 void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig config, const FFModuleArgs* module)
 {
-    if (celsius != celsius) // ignores NaN
+    if (celsius == -DBL_MAX) // ignores invalid value
         return;
 
     const FFOptionsDisplay* options = &instance.config.display;
@@ -159,23 +159,14 @@ bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, F
     return true;
 }
 
-void ffTempsGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FF_MAYBE_UNUSED bool defaultTemp, FFColorRangeConfig defaultConfig, bool temp, FFColorRangeConfig config)
+void ffTempsGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, bool temp, FFColorRangeConfig config)
 {
-    assert(defaultTemp == false); // assume defaultTemp is always false
-
     if (!temp)
-        return;
-
-    if (config.green != defaultConfig.green || config.yellow != defaultConfig.yellow)
-    {
-        yyjson_mut_val* temp = yyjson_mut_obj_add_obj(doc, module, "temp");
-        if (config.green != defaultConfig.green)
-            yyjson_mut_obj_add_uint(doc, temp, "green", config.green);
-        if (config.yellow != defaultConfig.yellow)
-            yyjson_mut_obj_add_uint(doc, temp, "yellow", config.yellow);
-    }
+        yyjson_mut_obj_add_bool(doc, module, "temp", false);
     else
     {
-        yyjson_mut_obj_add_bool(doc, module, "temp", true);
+        yyjson_mut_val* temp = yyjson_mut_obj_add_obj(doc, module, "temp");
+        yyjson_mut_obj_add_uint(doc, temp, "green", config.green);
+        yyjson_mut_obj_add_uint(doc, temp, "yellow", config.yellow);
     }
 }

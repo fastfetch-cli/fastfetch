@@ -95,12 +95,9 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
 
 void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyGamepadOptions))) FFGamepadOptions defaultOptions;
-    ffInitGamepadOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -130,9 +127,22 @@ void ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
     }
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitGamepadOptions(FFGamepadOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+}
+
+void ffDestroyGamepadOptions(FFGamepadOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffGamepadModuleInfo = {
     .name = FF_GAMEPAD_MODULE_NAME,
     .description = "List (connected) gamepads",
+    .initOptions = (void*) ffInitGamepadOptions,
+    .destroyOptions = (void*) ffDestroyGamepadOptions,
     .parseJsonObject = (void*) ffParseGamepadJsonObject,
     .printModule = (void*) ffPrintGamepad,
     .generateJsonResult = (void*) ffGenerateGamepadJsonResult,
@@ -144,15 +154,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Battery percentage bar", "battery-percentage-bar"},
     }))
 };
-
-void ffInitGamepadOptions(FFGamepadOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-}
-
-void ffDestroyGamepadOptions(FFGamepadOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -6,7 +6,7 @@
 
 #define FF_PUBLICIP_DISPLAY_NAME "Public IP"
 
-void ffPrintPublicIp(FFPublicIpOptions* options)
+void ffPrintPublicIp(FFPublicIPOptions* options)
 {
     FFPublicIpResult result;
     ffStrbufInit(&result.ip);
@@ -39,7 +39,7 @@ void ffPrintPublicIp(FFPublicIpOptions* options)
     ffStrbufDestroy(&result.location);
 }
 
-void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
+void ffParsePublicIpJsonObject(FFPublicIPOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
     size_t idx, max;
@@ -70,24 +70,18 @@ void ffParsePublicIpJsonObject(FFPublicIpOptions* options, yyjson_val* module)
     }
 }
 
-void ffGeneratePublicIpJsonConfig(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGeneratePublicIpJsonConfig(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIpOptions defaultOptions;
-    ffInitPublicIpOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_strbuf(doc, module, "url", &options->url);
 
-    if (!ffStrbufEqual(&options->url, &defaultOptions.url))
-        yyjson_mut_obj_add_strbuf(doc, module, "url", &options->url);
+    yyjson_mut_obj_add_uint(doc, module, "timeout", options->timeout);
 
-    if (defaultOptions.timeout != options->timeout)
-        yyjson_mut_obj_add_uint(doc, module, "timeout", options->timeout);
-
-    if (defaultOptions.ipv6 != options->ipv6)
-        yyjson_mut_obj_add_bool(doc, module, "ipv6", options->ipv6);
+    yyjson_mut_obj_add_bool(doc, module, "ipv6", options->ipv6);
 }
 
-void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+void ffGeneratePublicIpJsonResult(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPublicIpResult result;
     ffStrbufInit(&result.ip);
@@ -108,9 +102,27 @@ void ffGeneratePublicIpJsonResult(FFPublicIpOptions* options, yyjson_mut_doc* do
     ffStrbufDestroy(&result.location);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitPublicIpOptions(FFPublicIPOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰩠");
+
+    ffStrbufInit(&options->url);
+    options->timeout = 0;
+    options->ipv6 = false;
+}
+
+void ffDestroyPublicIpOptions(FFPublicIPOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    ffStrbufDestroy(&options->url);
+}
+
+FFModuleBaseInfo ffPublicIPModuleInfo = {
     .name = FF_PUBLICIP_MODULE_NAME,
     .description = "Print your public IP address, etc",
+    .initOptions = (void*) ffInitPublicIpOptions,
+    .destroyOptions = (void*) ffDestroyPublicIpOptions,
     .parseJsonObject = (void*) ffParsePublicIpJsonObject,
     .printModule = (void*) ffPrintPublicIp,
     .generateJsonResult = (void*) ffGeneratePublicIpJsonResult,
@@ -120,20 +132,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Location", "location"},
     }))
 };
-
-void ffInitPublicIpOptions(FFPublicIpOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰩠");
-
-    ffStrbufInit(&options->url);
-    options->timeout = 0;
-    options->ipv6 = false;
-}
-
-void ffDestroyPublicIpOptions(FFPublicIpOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-
-    ffStrbufDestroy(&options->url);
-}

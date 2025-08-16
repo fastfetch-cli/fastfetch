@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/cursor/option.h"
 
 typedef struct FFCursorResult
 {

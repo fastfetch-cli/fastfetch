@@ -1,16 +1,15 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFTitleOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
-    bool fqdn;
     FFstrbuf colorUser;
     FFstrbuf colorAt;
     FFstrbuf colorHost;
+    bool fqdn;
 } FFTitleOptions;
+
+static_assert(sizeof(FFTitleOptions) <= FF_OPTION_MAX_SIZE, "FFTitleOptions size exceeds maximum allowed size");

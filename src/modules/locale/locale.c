@@ -43,10 +43,7 @@ void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
 
 void ffGenerateLocaleJsonConfig(FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLocaleOptions))) FFLocaleOptions defaultOptions;
-    ffInitLocaleOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -63,9 +60,21 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
     yyjson_mut_obj_add_strbuf(doc, module, "result", &locale);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyLocaleOptions(FFLocaleOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffLocaleModuleInfo = {
     .name = FF_LOCALE_MODULE_NAME,
     .description = "Print system locale name",
+    .initOptions = (void*) ffInitLocaleOptions,
+    .destroyOptions = (void*) ffDestroyLocaleOptions,
     .parseJsonObject = (void*) ffParseLocaleJsonObject,
     .printModule = (void*) ffPrintLocale,
     .generateJsonResult = (void*) ffGenerateLocaleJsonResult,
@@ -74,14 +83,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Locale code", "result"},
     }))
 };
-
-void ffInitLocaleOptions(FFLocaleOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyLocaleOptions(FFLocaleOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

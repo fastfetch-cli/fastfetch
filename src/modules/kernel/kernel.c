@@ -47,10 +47,7 @@ void ffParseKernelJsonObject(FFKernelOptions* options, yyjson_val* module)
 
 void ffGenerateKernelJsonConfig(FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyKernelOptions))) FFKernelOptions defaultOptions;
-    ffInitKernelOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
 void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -66,9 +63,21 @@ void ffGenerateKernelJsonResult(FF_MAYBE_UNUSED FFKernelOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "pageSize", info->pageSize);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitKernelOptions(FFKernelOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyKernelOptions(FFKernelOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffKernelModuleInfo = {
     .name = FF_KERNEL_MODULE_NAME,
     .description = "Print system kernel version",
+    .initOptions = (void*) ffInitKernelOptions,
+    .destroyOptions = (void*) ffDestroyKernelOptions,
     .parseJsonObject = (void*) ffParseKernelJsonObject,
     .printModule = (void*) ffPrintKernel,
     .generateJsonResult = (void*) ffGenerateKernelJsonResult,
@@ -82,14 +91,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Page size", "page-size"},
     }))
 };
-
-void ffInitKernelOptions(FFKernelOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyKernelOptions(FFKernelOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

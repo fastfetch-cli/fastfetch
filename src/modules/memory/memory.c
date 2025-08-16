@@ -89,12 +89,9 @@ void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
 
 void ffGenerateMemoryJsonConfig(FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyMemoryOptions))) FFMemoryOptions defaultOptions;
-    ffInitMemoryOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
 void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -113,9 +110,22 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyMemoryOptions(FFMemoryOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffMemoryModuleInfo = {
     .name = FF_MEMORY_MODULE_NAME,
     .description = "Print system memory usage info",
+    .initOptions = (void*) ffInitMemoryOptions,
+    .destroyOptions = (void*) ffDestroyMemoryOptions,
     .parseJsonObject = (void*) ffParseMemoryJsonObject,
     .printModule = (void*) ffPrintMemory,
     .generateJsonResult = (void*) ffGenerateMemoryJsonResult,
@@ -127,15 +137,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Percentage used (bar)", "percentage-bar"},
     }))
 };
-
-void ffInitMemoryOptions(FFMemoryOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyMemoryOptions(FFMemoryOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

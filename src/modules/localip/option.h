@@ -1,7 +1,5 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef enum __attribute__((__packed__)) FFLocalIpType
@@ -25,9 +23,10 @@ static_assert(sizeof(FFLocalIpType) == sizeof(uint16_t), "");
 
 typedef struct FFLocalIpOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFLocalIpType showType;
     FFstrbuf namePrefix;
 } FFLocalIpOptions;
+
+static_assert(sizeof(FFLocalIpOptions) <= FF_OPTION_MAX_SIZE, "FFLocalIpOptions size exceeds maximum allowed size");

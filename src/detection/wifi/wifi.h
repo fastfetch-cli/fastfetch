@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/wifi/option.h"
 
 struct FFWifiInterface
 {

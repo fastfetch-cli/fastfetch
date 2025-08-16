@@ -521,11 +521,11 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
     fputc('\n', file);
 }
 
-double ffStrbufToDouble(const FFstrbuf* strbuf)
+double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue)
 {
     char* str_end;
     double result = strtod(strbuf->chars, &str_end);
-    return str_end == strbuf->chars ? 0.0/0.0 : result;
+    return str_end == strbuf->chars ? defaultValue : result;
 }
 
 uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue)
