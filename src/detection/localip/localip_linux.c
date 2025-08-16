@@ -179,7 +179,7 @@ static FFIPv6Type getIpType(struct ifaddrs* ifa)
         ffListInit(&addresses, sizeof(struct in6_addr));
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         if (!ffReadFileBuffer("/proc/net/if_inet6", &buffer))
-            return true;
+            return result;
 
         char* line = NULL;
         size_t len = 0;
@@ -487,7 +487,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         {
             FF_LIST_FOR_EACH(FFLocalIpResult, iface, *results)
             {
-                struct ifreq ifr;
+                struct ifreq ifr = {};
                 ffStrCopy(ifr.ifr_name, iface->name.chars, IFNAMSIZ);
 
                 if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
