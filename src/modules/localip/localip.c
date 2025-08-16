@@ -91,9 +91,11 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute, FFstrbuf* buffer
     }
     if (ip->flags.length)
     {
-        if (buffer->length) ffStrbufAppendS(buffer, " <");
+        bool flag = buffer->length > 0;
+        if (flag) ffStrbufAppendS(buffer, " <");
         ffStrbufAppend(buffer, &ip->flags);
-        ffStrbufAppendC(buffer, '>');
+        if (flag)
+            ffStrbufAppendC(buffer, '>');
     }
     if (markDefaultRoute && ip->defaultRoute)
         ffStrbufAppendS(buffer, " *");
@@ -342,7 +344,14 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     {
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &ip->name);
-        yyjson_mut_obj_add_bool(doc, obj, "defaultRoute", ip->defaultRoute);
+        if (options->showType & (FF_LOCALIP_TYPE_IPV4_BIT | FF_LOCALIP_TYPE_IPV6_BIT))
+        {
+            yyjson_mut_val* defaultRoute = yyjson_mut_obj_add_obj(doc, obj, "defaultRoute");
+            if (options->showType & FF_LOCALIP_TYPE_IPV4_BIT)
+                yyjson_mut_obj_add_bool(doc, defaultRoute, "ipv4", !!(ip->defaultRoute & FF_LOCALIP_TYPE_IPV4_BIT));
+            if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)
+                yyjson_mut_obj_add_bool(doc, defaultRoute, "ipv6", !!(ip->defaultRoute & FF_LOCALIP_TYPE_IPV6_BIT));
+        }
         if (options->showType & FF_LOCALIP_TYPE_IPV4_BIT)
             yyjson_mut_obj_add_strbuf(doc, obj, "ipv4", &ip->ipv4);
         if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)

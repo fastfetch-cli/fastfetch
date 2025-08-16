@@ -12,7 +12,7 @@ typedef struct FFLocalIpResult
     FFstrbuf flags;
     int32_t mtu;
     int32_t speed; // in Mbps
-    bool defaultRoute;
+    FFLocalIpType defaultRoute;
 } FFLocalIpResult;
 
 typedef struct FFLocalIpNIFlag

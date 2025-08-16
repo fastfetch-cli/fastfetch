@@ -4,6 +4,9 @@ on:
   - push
   - pull_request
 
+env:
+  CMAKE_BUILD_TYPE: ${{ vars.CMAKE_BUILD_TYPE || 'RelWithDebInfo' }}
+
 jobs:
   spellcheck:
     runs-on: ubuntu-latest

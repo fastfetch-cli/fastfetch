@@ -1,3 +1,11 @@
+# 2.50.2
+
+Bugfixes:
+* Fixes linglong package detection V2 (#1903, Packages, Linux)
+* Fixes building with `-DENABLE_SYSTEM_YYJSON=ON` (#1904)
+* Fixes `showMac` does not honor `defaultRouteOnly` (#1902, LocalIP, Linux)
+* Fixes failing to acquire default route on Linux in certain cases (#1902, LocalIP, Linux)
+
 # 2.50.1
 
 Bugfixes:
