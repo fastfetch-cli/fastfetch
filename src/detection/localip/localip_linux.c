@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/netif/netif.h"
 #include "util/stringUtils.h"
+#include "util/debug.h"
 
 #include <string.h>
 #include <ctype.h>
@@ -124,6 +125,8 @@ static FFIPv6Type getIpType(struct ifaddrs* ifa)
 {
     struct sockaddr_in6* addr = (struct sockaddr_in6*) ifa->ifa_addr;
 
+    FF_DEBUG("Checking IPv6 type for interface %s", ifa->ifa_name);
+
 #ifndef IN6_IS_ADDR_GLOBAL
 #define IN6_IS_ADDR_GLOBAL(a) \
         ((((const uint32_t *) (a))[0] & htonl(0x70000000)) == htonl(0x20000000))
@@ -134,11 +137,20 @@ static FFIPv6Type getIpType(struct ifaddrs* ifa)
 #endif
     FFIPv6Type result = FF_IPV6_Other;
     if (IN6_IS_ADDR_GLOBAL(&addr->sin6_addr))
+    {
         result = FF_IPV6_GUA;
+        FF_DEBUG("Interface %s has Global Unicast Address", ifa->ifa_name);
+    }
     else if (IN6_IS_ADDR_UNIQUE_LOCAL(&addr->sin6_addr))
+    {
         result = FF_IPV6_ULA;
+        FF_DEBUG("Interface %s has Unique Local Address", ifa->ifa_name);
+    }
     else
+    {
+        FF_DEBUG("Interface %s has other IPv6 address type", ifa->ifa_name);
         return FF_IPV6_Other;
+    }
 
 #ifdef SIOCGIFAFLAG_IN6
     static int sockfd = 0;
@@ -232,6 +244,8 @@ static void appendIpv4(const FFLocalIpOptions* options, FFstrbuf* buffer, const 
     char addressBuffer[INET_ADDRSTRLEN + 16];
     inet_ntop(AF_INET, &ipv4->sin_addr, addressBuffer, INET_ADDRSTRLEN);
 
+    FF_DEBUG("Adding IPv4 address %s for interface %s", addressBuffer, ifa->ifa_name);
+
     if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
     {
         struct sockaddr_in* netmask = (struct sockaddr_in*) ifa->ifa_netmask;
@@ -254,6 +268,8 @@ static void appendIpv6(const FFLocalIpOptions* options, FFstrbuf* buffer, const 
     char addressBuffer[INET6_ADDRSTRLEN + 16];
     inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 
+    FF_DEBUG("Adding IPv6 address %s for interface %s", addressBuffer, ifa->ifa_name);
+
     if (options->showType & FF_LOCALIP_TYPE_PREFIX_LEN_BIT)
     {
         struct sockaddr_in6* netmask = (struct sockaddr_in6*) ifa->ifa_netmask;
@@ -274,41 +290,75 @@ static void appendIpv6(const FFLocalIpOptions* options, FFstrbuf* buffer, const 
 
 const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 {
+    FF_DEBUG("Starting local IP detection with showType=0x%x, namePrefix='%s'",
+             options->showType, options->namePrefix.chars);
+
     struct ifaddrs* ifAddrStruct = NULL;
     if(getifaddrs(&ifAddrStruct) < 0)
+    {
+        FF_DEBUG("getifaddrs() failed");
         return "getifaddrs(&ifAddrStruct) failed";
+    }
+
+    FF_DEBUG("Successfully retrieved interface addresses");
 
     const FFNetifDefaultRouteResult* defaultRouteV4 = ffNetifGetDefaultRouteV4();
     const FFNetifDefaultRouteResult* defaultRouteV6 = ffNetifGetDefaultRouteV6();
+
+    FF_DEBUG("Default routes - IPv4: %s, IPv6: %s",
+             defaultRouteV4->ifName, defaultRouteV6->ifName);
 
     FF_LIST_AUTO_DESTROY adapters = ffListCreate(sizeof(FFAdapter));
 
     for (struct ifaddrs* ifa = ifAddrStruct; ifa; ifa = ifa->ifa_next)
     {
         if (!ifa->ifa_addr)
+        {
+            FF_DEBUG("Skipping interface %s (no address)", ifa->ifa_name);
             continue;
+        }
 
         #ifdef IFF_RUNNING
         if (!(ifa->ifa_flags & IFF_RUNNING))
+        {
+            FF_DEBUG("Skipping interface %s (not running)", ifa->ifa_name);
             continue;
+        }
         #endif
 
         if ((ifa->ifa_flags & IFF_LOOPBACK) && !(options->showType & FF_LOCALIP_TYPE_LOOP_BIT))
+        {
+            FF_DEBUG("Skipping loopback interface %s", ifa->ifa_name);
             continue;
+        }
 
         if (options->namePrefix.length && strncmp(ifa->ifa_name, options->namePrefix.chars, options->namePrefix.length) != 0)
+        {
+            FF_DEBUG("Skipping interface %s (doesn't match prefix '%s')",
+                     ifa->ifa_name, options->namePrefix.chars);
             continue;
+        }
 
         if (!(options->showType & FF_LOCALIP_TYPE_MAC_BIT) &&
             ifa->ifa_addr->sa_family != AF_INET && ifa->ifa_addr->sa_family != AF_INET6)
+        {
+            FF_DEBUG("Skipping interface %s (unsupported address family %d)",
+                     ifa->ifa_name, ifa->ifa_addr->sa_family);
             continue;
+        }
 
         if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
         {
             if (!ffStrEquals(defaultRouteV4->ifName, ifa->ifa_name) &&
                 !ffStrEquals(defaultRouteV6->ifName, ifa->ifa_name))
+            {
+                FF_DEBUG("Skipping interface %s (not default route interface)", ifa->ifa_name);
                     continue;
+            }
         }
+
+        FF_DEBUG("Processing interface %s (family=%d, flags=0x%x)",
+                 ifa->ifa_name, ifa->ifa_addr->sa_family, ifa->ifa_flags);
 
         FFAdapter* adapter = NULL;
         FF_LIST_FOR_EACH(FFAdapter, x, adapters)
@@ -327,28 +377,46 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 .ipv4 = ffListCreate(sizeof(struct ifaddrs*)),
                 .ipv6 = ffListCreate(sizeof(struct ifaddrs*)),
             };
+            FF_DEBUG("Created new adapter entry for interface %s", ifa->ifa_name);
         }
 
         switch (ifa->ifa_addr->sa_family)
         {
             case AF_INET:
                 if (options->showType & FF_LOCALIP_TYPE_IPV4_BIT)
+                {
                     *FF_LIST_ADD(struct ifaddrs*, adapter->ipv4) = ifa;
+                    FF_DEBUG("Added IPv4 entry for interface %s", ifa->ifa_name);
+                }
                 break;
             case AF_INET6:
                 if (options->showType & FF_LOCALIP_TYPE_IPV6_BIT)
+                {
                     *FF_LIST_ADD(struct ifaddrs*, adapter->ipv6) = ifa;
+                    FF_DEBUG("Added IPv6 entry for interface %s", ifa->ifa_name);
+                }
                 break;
             #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__
-            case AF_LINK: adapter->mac = ifa; break;
+            case AF_LINK:
+                adapter->mac = ifa;
+                FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
+                break;
             #elif !__sun
-            case AF_PACKET: adapter->mac = ifa; break;
+            case AF_PACKET:
+                adapter->mac = ifa;
+                FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
+                break;
             #endif
         }
     }
 
+    FF_DEBUG("Found %u network adapters", adapters.length);
+
     FF_LIST_FOR_EACH(FFAdapter, adapter, adapters)
     {
+        FF_DEBUG("Processing adapter %s (IPv4 entries: %u, IPv6 entries: %u)",
+                 adapter->mac->ifa_name, adapter->ipv4.length, adapter->ipv6.length);
+
         FFLocalIpResult* item = FF_LIST_ADD(FFLocalIpResult, *results);
         ffStrbufInitS(&item->name, adapter->mac->ifa_name);
         ffStrbufInit(&item->ipv4);
@@ -360,24 +428,34 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         item->speed = -1;
 
         if (options->showType & FF_LOCALIP_TYPE_FLAGS_BIT)
+        {
             ffLocalIpFillNIFlags(&item->flags, adapter->mac->ifa_flags, niFlagOptions);
+            FF_DEBUG("Added flags for interface %s: %s", adapter->mac->ifa_name, item->flags.chars);
+        }
 
         if ((options->showType & FF_LOCALIP_TYPE_IPV4_BIT))
         {
             bool isDefaultRouteIf = ffStrEquals(defaultRouteV4->ifName, adapter->mac->ifa_name);
 
-            if (isDefaultRouteIf) item->defaultRoute |= FF_LOCALIP_TYPE_IPV4_BIT;
+            if (isDefaultRouteIf)
+            {
+                item->defaultRoute |= FF_LOCALIP_TYPE_IPV4_BIT;
+                FF_DEBUG("Interface %s is IPv4 default route", adapter->mac->ifa_name);
+            }
 
             if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
             {
                 if (!isDefaultRouteIf)
+                {
+                    FF_DEBUG("Skipping IPv4 for interface %s (not default route)", adapter->mac->ifa_name);
                     goto v6;
+                }
             }
 
             if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
             {
                 struct ifaddrs* ifa = NULL;
-                if (isDefaultRouteIf && defaultRouteV4->preferredSourceAddrV4 != 0) // preferredSourceAddrV4 is only set for the default route
+                if (isDefaultRouteIf && defaultRouteV4->preferredSourceAddrV4 != 0)
                 {
                     FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv4)
                     {
@@ -385,6 +463,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                         if (ipv4->sin_addr.s_addr == defaultRouteV4->preferredSourceAddrV4)
                         {
                             ifa = *pifa;
+                            FF_DEBUG("Found preferred IPv4 source address for interface %s", adapter->mac->ifa_name);
                             break;
                         }
                     }
@@ -392,10 +471,14 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (ifa)
                     appendIpv4(options, &item->ipv4, ifa);
                 else if (adapter->ipv4.length > 0)
+                {
                     appendIpv4(options, &item->ipv4, *FF_LIST_GET(struct ifaddrs*, adapter->ipv4, 0));
+                    FF_DEBUG("Using first IPv4 address for interface %s", adapter->mac->ifa_name);
+                }
             }
             else
             {
+                FF_DEBUG("Adding all IPv4 addresses for interface %s", adapter->mac->ifa_name);
                 FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv4)
                     appendIpv4(options, &item->ipv4, *pifa);
             }
@@ -405,12 +488,19 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         {
             bool isDefaultRouteIf = ffStrEquals(defaultRouteV6->ifName, adapter->mac->ifa_name);
 
-            if (isDefaultRouteIf) item->defaultRoute |= FF_LOCALIP_TYPE_IPV6_BIT;
+            if (isDefaultRouteIf)
+            {
+                item->defaultRoute |= FF_LOCALIP_TYPE_IPV6_BIT;
+                FF_DEBUG("Interface %s is IPv6 default route", adapter->mac->ifa_name);
+            }
 
             if (options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT)
             {
                 if (!isDefaultRouteIf)
+                {
+                    FF_DEBUG("Skipping IPv6 for interface %s (not default route)", adapter->mac->ifa_name);
                     goto mac;
+                }
             }
 
             if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
@@ -424,22 +514,33 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     if (type == FF_IPV6_PREFERRED)
                     {
                         selected = *pifa;
+                        FF_DEBUG("Found preferred IPv6 address for interface %s", adapter->mac->ifa_name);
                         break;
                     }
                     else if (type == FF_IPV6_GUA && !selected)
+                    {
                         selected = *pifa;
+                        FF_DEBUG("Found GUA IPv6 address for interface %s", adapter->mac->ifa_name);
+                    }
                     else if (type == FF_IPV6_ULA && !secondary)
+                    {
                         secondary = *pifa;
+                        FF_DEBUG("Found ULA IPv6 address for interface %s", adapter->mac->ifa_name);
+                    }
                 }
                 if (!selected) selected = secondary;
 
                 if (selected)
                     appendIpv6(options, &item->ipv6, selected);
                 else if (adapter->ipv6.length > 0)
+                {
                     appendIpv6(options, &item->ipv6, *FF_LIST_GET(struct ifaddrs*, adapter->ipv6, 0));
+                    FF_DEBUG("Using first IPv6 address for interface %s", adapter->mac->ifa_name);
+                }
             }
             else
             {
+                FF_DEBUG("Adding all IPv6 addresses for interface %s", adapter->mac->ifa_name);
                 FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv6)
                     appendIpv6(options, &item->ipv6, *pifa);
             }
@@ -457,6 +558,11 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 #endif
                 ffStrbufSetF(&item->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
                     ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
+                FF_DEBUG("Added MAC address %s for interface %s", item->mac.chars, adapter->mac->ifa_name);
+            }
+            else
+            {
+                FF_DEBUG("No MAC address available for interface %s", adapter->mac->ifa_name);
             }
         }
         #else
@@ -474,6 +580,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
     {
         freeifaddrs(ifAddrStruct);
         ifAddrStruct = NULL;
+        FF_DEBUG("Cleaned up interface address structures");
     }
 
     if ((options->showType & FF_LOCALIP_TYPE_MTU_BIT) || (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
@@ -482,6 +589,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         #endif
     )
     {
+        FF_DEBUG("Retrieving additional interface properties (MTU/Speed/MAC)");
         FF_AUTO_CLOSE_FD int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
         if (sockfd > 0)
         {
@@ -493,7 +601,14 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 if (options->showType & FF_LOCALIP_TYPE_MTU_BIT)
                 {
                     if (ioctl(sockfd, SIOCGIFMTU, &ifr) == 0)
+                    {
                         iface->mtu = (int32_t) ifr.ifr_mtu;
+                        FF_DEBUG("Interface %s MTU: %d", iface->name.chars, iface->mtu);
+                    }
+                    else
+                    {
+                        FF_DEBUG("Failed to get MTU for interface %s", iface->name.chars);
+                    }
                 }
 
                 if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
@@ -502,12 +617,21 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     struct ethtool_cmd edata = { .cmd = ETHTOOL_GSET };
                     ifr.ifr_data = (void*) &edata;
                     if (ioctl(sockfd, SIOCETHTOOL, &ifr) == 0)
-                        iface->speed = (edata.speed_hi << 16) | edata.speed; // ethtool_cmd_speed is not available on Android
+                    {
+                        iface->speed = (edata.speed_hi << 16) | edata.speed;
+                        FF_DEBUG("Interface %s speed: %d Mbps", iface->name.chars, iface->speed);
+                    }
+                    else
+                    {
+                        // ethtool_cmd_speed is not available on Android
+                        FF_DEBUG("Failed to get speed for interface %s via ethtool", iface->name.chars);
+                    }
                     #elif __FreeBSD__ || __APPLE__ || __OpenBSD__ || __NetBSD__
                     struct ifmediareq ifmr = {};
                     ffStrCopy(ifmr.ifm_name, iface->name.chars, IFNAMSIZ);
                     if (ioctl(sockfd, SIOCGIFMEDIA, &ifmr) == 0 && (IFM_TYPE(ifmr.ifm_active) & IFM_ETHER))
                     {
+                        FF_DEBUG("Interface %s media type: 0x%x", iface->name.chars, IFM_SUBTYPE(ifmr.ifm_active));
                         switch (IFM_SUBTYPE(ifmr.ifm_active))
                         {
                         #ifdef IFM_HPNA_1
@@ -872,7 +996,15 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                             iface->speed = 56000; break;
                         default:
                             iface->speed = -1;
+                            FF_DEBUG("Unknown media subtype for interface %s", iface->name.chars);
+                            break;
                         }
+                        if (iface->speed > 0)
+                            FF_DEBUG("Interface %s speed: %d Mbps", iface->name.chars, iface->speed);
+                    }
+                    else
+                    {
+                        FF_DEBUG("Failed to get media info for interface %s", iface->name.chars);
                     }
                     #endif
                 }
@@ -883,6 +1015,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     const uint8_t* ptr = (uint8_t*) ifr.ifr_addr.sa_data; // NOT ifr_enaddr
                     ffStrbufSetF(&iface->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
                                 ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
+                    FF_DEBUG("Added MAC address %s for interface %s (Solaris)", iface->mac.chars, iface->name.chars);
                 }
                 if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
                 {
@@ -896,7 +1029,10 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                             {
                                 kstat_named_t* ifspeed = (kstat_named_t*) kstat_data_lookup(ks, "ifspeed");
                                 if (ifspeed)
+                                {
                                     iface->speed = (int32_t) (ifspeed->value.ui64 / 1000 / 1000);
+                                    FF_DEBUG("Interface %s speed: %d Mbps (kstat)", iface->name.chars, iface->speed);
+                                }
                             }
                             break;
                         }
@@ -905,7 +1041,12 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 #endif
             }
         }
+        else
+        {
+            FF_DEBUG("Failed to create socket for interface property retrieval");
+        }
     }
 
+    FF_DEBUG("Local IP detection completed, found %u interfaces", results->length);
     return NULL;
 }
