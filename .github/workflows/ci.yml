@@ -651,7 +651,6 @@ jobs:
   dragonfly-amd64:
     name: DragonFly-amd64
     runs-on: ubuntu-latest
-    if: false
     permissions:
       security-events: write
       contents: read
