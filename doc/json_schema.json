@@ -237,6 +237,19 @@
                             "description": "Null to disable this condition"
                         }
                     ]
+                },
+                "succeeded": {
+                    "description": "Whether the module succeeded in the last run",
+                    "oneOf": [
+                        {
+                            "type": "boolean",
+                            "description": "True to only show the module if it succeeded, false to only show it if it failed"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
                 }
             }
         },

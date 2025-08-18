@@ -101,16 +101,6 @@ const char* ffJsonConfigParseEnum(yyjson_val* val, int* result, FFKeyValuePair p
         return "Invalid enum value type; must be a string or integer";
 }
 
-static inline void genJsonResult(FFModuleBaseInfo* baseInfo, void* options, yyjson_mut_doc* doc)
-{
-    yyjson_mut_val* module = yyjson_mut_arr_add_obj(doc, doc->root);
-    yyjson_mut_obj_add_str(doc, module, "type", baseInfo->name);
-    if (baseInfo->generateJsonResult)
-        baseInfo->generateJsonResult(options, doc, module);
-    else
-        yyjson_mut_obj_add_str(doc, module, "error", "Unsupported for JSON format");
-}
-
 static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_mut_doc* jsonDoc)
 {
     if(!ffCharIsEnglishAlphabet(type[0])) return false;
@@ -123,13 +113,38 @@ static bool parseModuleJsonObject(const char* type, yyjson_val* jsonVal, yyjson_
             uint8_t optionBuf[FF_OPTION_MAX_SIZE];
             baseInfo->initOptions(optionBuf);
             if (jsonVal) baseInfo->parseJsonObject(optionBuf, jsonVal);
-            if (__builtin_expect(jsonDoc != NULL, false))
-                genJsonResult(baseInfo, optionBuf, jsonDoc);
+            bool succeeded;
+            if (jsonDoc)
+            {
+                yyjson_mut_val* module = yyjson_mut_arr_add_obj(jsonDoc, jsonDoc->root);
+                yyjson_mut_obj_add_str(jsonDoc, module, "type", baseInfo->name);
+                if (baseInfo->generateJsonResult)
+                    succeeded = baseInfo->generateJsonResult(optionBuf, jsonDoc, module);
+                else
+                {
+                    yyjson_mut_obj_add_str(jsonDoc, module, "error", "Unsupported for JSON format");
+                    succeeded = false;
+                }
+            }
             else
-                baseInfo->printModule(optionBuf);
+                succeeded = baseInfo->printModule(optionBuf);
             baseInfo->destroyOptions(optionBuf);
-            return true;
+            return succeeded;
         }
+    }
+
+    if (jsonDoc)
+    {
+        yyjson_mut_val* module = yyjson_mut_arr_add_obj(jsonDoc, jsonDoc->root);
+        yyjson_mut_obj_add_strcpy(jsonDoc, module, "type", type);
+        yyjson_mut_obj_add_str(jsonDoc, module, "error", "Unknown module type");
+    }
+    else
+    {
+        FFModuleArgs moduleArgs;
+        ffOptionInitModuleArg(&moduleArgs, "");
+        ffPrintError(type, 0, &moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown module type");
+        ffOptionDestroyModuleArg(&moduleArgs);
     }
     return false;
 }
@@ -217,6 +232,7 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
     if (!modules) return NULL;
     if (!yyjson_is_arr(modules)) return "Property 'modules' must be an array of strings or objects";
 
+    bool succeeded = true;
     int32_t thres = instance.config.display.stat;
     yyjson_val* item;
     size_t idx, max;
@@ -253,6 +269,15 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
                 arch = yyjson_obj_get(conditions, "!arch");
                 if (arch && matchesJsonArray(ffVersionResult.architecture, arch))
                     continue;
+
+                yyjson_val* previousSucceeded = yyjson_obj_get(conditions, "succeeded");
+                if (previousSucceeded && !unsafe_yyjson_is_null(previousSucceeded))
+                {
+                    if (!unsafe_yyjson_is_bool(previousSucceeded))
+                        return "Property 'succeeded' in 'condition' must be a boolean";
+                    if (succeeded != unsafe_yyjson_get_bool(previousSucceeded))
+                        continue;
+                }
             }
 
             type = yyjson_get_str(yyjson_obj_get(module, "type"));
@@ -265,8 +290,8 @@ static const char* printJsonConfig(bool prepare, yyjson_mut_doc* jsonDoc)
 
         if(prepare)
             prepareModuleJsonObject(type, module);
-        else if(!parseModuleJsonObject(type, module, jsonDoc))
-            return "Unknown module type";
+        else
+            succeeded = parseModuleJsonObject(type, module, jsonDoc);
 
         if(!prepare && thres >= 0)
         {
