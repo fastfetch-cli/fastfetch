@@ -180,7 +180,7 @@ void ffInitOSOptions(FFOSOptions* options)
         #elif __Haiku__
             ""
         #else
-            "?"
+            "󰢻"
         #endif
     );
 }
