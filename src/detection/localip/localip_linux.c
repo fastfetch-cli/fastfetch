@@ -394,7 +394,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     FF_DEBUG("Added IPv6 entry for interface %s", ifa->ifa_name);
                 }
                 break;
-            #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__
+            #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__ || __GNU__
             case AF_LINK:
                 adapter->mac = ifa;
                 FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
@@ -546,7 +546,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             }
         }
     mac:
-        #ifndef __sun
+        #if !defined( __sun)  && !defined(__GNU__)
         if (options->showType & FF_LOCALIP_TYPE_MAC_BIT)
         {
             if (adapter->mac->ifa_addr)
@@ -565,7 +565,6 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 FF_DEBUG("No MAC address available for interface %s", adapter->mac->ifa_name);
             }
         }
-        #elif defined(__GNU__)
         #else
         (void) adapter;
         #endif
