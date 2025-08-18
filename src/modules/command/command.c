@@ -4,7 +4,7 @@
 #include "modules/command/command.h"
 #include "util/stringUtils.h"
 
-void ffPrintCommand(FFCommandOptions* options)
+bool ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
@@ -21,13 +21,13 @@ void ffPrintCommand(FFCommandOptions* options)
     if(error)
     {
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(!result.length)
     {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result printed");
-        return;
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
+        return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0)
@@ -41,6 +41,8 @@ void ffPrintCommand(FFCommandOptions* options)
             FF_FORMAT_ARG(result, "result")
         }));
     }
+
+    return true;
 }
 
 void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
@@ -85,7 +87,7 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
 }
 
-void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
@@ -102,16 +104,18 @@ void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     if(!result.length)
     {
-        yyjson_mut_obj_add_str(doc, module, "error", "No result printed");
-        return;
+        yyjson_mut_obj_add_str(doc, module, "error", "No result generated");
+        return false;
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
+
+    return true;
 }
 
 void ffInitCommandOptions(FFCommandOptions* options)

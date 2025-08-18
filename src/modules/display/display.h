@@ -4,7 +4,7 @@
 
 #define FF_DISPLAY_MODULE_NAME "Display"
 
-void ffPrintDisplay(FFDisplayOptions* options);
+bool ffPrintDisplay(FFDisplayOptions* options);
 void ffInitDisplayOptions(FFDisplayOptions* options);
 void ffDestroyDisplayOptions(FFDisplayOptions* options);
 

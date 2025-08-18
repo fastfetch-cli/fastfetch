@@ -4,7 +4,7 @@
 
 #define FF_UPTIME_MODULE_NAME "Uptime"
 
-void ffPrintUptime(FFUptimeOptions* options);
+bool ffPrintUptime(FFUptimeOptions* options);
 void ffInitUptimeOptions(FFUptimeOptions* options);
 void ffDestroyUptimeOptions(FFUptimeOptions* options);
 

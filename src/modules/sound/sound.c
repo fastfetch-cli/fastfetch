@@ -66,8 +66,9 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     }
 }
 
-void ffPrintSound(FFSoundOptions* options)
+bool ffPrintSound(FFSoundOptions* options)
 {
+    bool success = false;
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
 
     const char* error = ffDetectSound(&result);
@@ -75,41 +76,47 @@ void ffPrintSound(FFSoundOptions* options)
     if(error)
     {
         ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        goto exit;
     }
 
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFSoundDevice*));
-
-    FF_LIST_FOR_EACH(FFSoundDevice, device, result)
     {
-        switch (options->soundType)
+        FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFSoundDevice*));
+
+        FF_LIST_FOR_EACH(FFSoundDevice, device, result)
         {
-            case FF_SOUND_TYPE_MAIN: if (!device->main) continue; break;
-            case FF_SOUND_TYPE_ACTIVE: if (!device->active) continue; break;
-            case FF_SOUND_TYPE_ALL: break;
+            switch (options->soundType)
+            {
+                case FF_SOUND_TYPE_MAIN: if (!device->main) continue; break;
+                case FF_SOUND_TYPE_ACTIVE: if (!device->active) continue; break;
+                case FF_SOUND_TYPE_ALL: break;
+            }
+
+            *(FFSoundDevice**)ffListAdd(&filtered) = device;
         }
 
-        *(FFSoundDevice**)ffListAdd(&filtered) = device;
-    }
+        if(filtered.length == 0)
+        {
+            ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No active sound devices found");
+            goto exit;
+        }
 
-    if(filtered.length == 0)
-    {
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No active sound devices found");
-        return;
+        uint8_t index = 1;
+        FF_LIST_FOR_EACH(FFSoundDevice*, device, filtered)
+        {
+            printDevice(options, *device, filtered.length == 1 ? 0 : index++);
+        }
     }
+    success = true;
 
-    uint8_t index = 1;
-    FF_LIST_FOR_EACH(FFSoundDevice*, device, filtered)
-    {
-        printDevice(options, *device, filtered.length == 1 ? 0 : index++);
-    }
-
+exit:
     FF_LIST_FOR_EACH(FFSoundDevice, device, result)
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
         ffStrbufDestroy(&device->platformApi);
     }
+
+    return success;
 }
 
 void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
@@ -164,7 +171,7 @@ void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyj
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
     const char* error = ffDetectSound(&result);
@@ -172,7 +179,7 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -198,6 +205,8 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
         ffStrbufDestroy(&device->name);
         ffStrbufDestroy(&device->platformApi);
     }
+
+    return true;
 }
 
 void ffInitSoundOptions(FFSoundOptions* options)

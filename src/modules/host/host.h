@@ -4,7 +4,7 @@
 
 #define FF_HOST_MODULE_NAME "Host"
 
-void ffPrintHost(FFHostOptions* options);
+bool ffPrintHost(FFHostOptions* options);
 void ffInitHostOptions(FFHostOptions* options);
 void ffDestroyHostOptions(FFHostOptions* options);
 

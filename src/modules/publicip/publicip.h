@@ -6,7 +6,7 @@
 
 void ffPreparePublicIp(FFPublicIPOptions* options);
 
-void ffPrintPublicIp(FFPublicIPOptions* options);
+bool ffPrintPublicIp(FFPublicIPOptions* options);
 void ffInitPublicIpOptions(FFPublicIPOptions* options);
 void ffDestroyPublicIpOptions(FFPublicIPOptions* options);
 

@@ -36,7 +36,7 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
     }
 }
 
-void ffPrintCamera(FFCameraOptions* options)
+bool ffPrintCamera(FFCameraOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
     const char* error = ffDetectCamera(&result);
@@ -44,13 +44,13 @@ void ffPrintCamera(FFCameraOptions* options)
     if (error)
     {
         ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (result.length == 0)
     {
         ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No camera found");
-        return;
+        return false;
     }
 
     for(uint32_t i = 0; i < result.length; i++)
@@ -65,6 +65,8 @@ void ffPrintCamera(FFCameraOptions* options)
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
+
+    return true;
 }
 
 void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module)
@@ -85,7 +87,7 @@ void ffGenerateCameraJsonConfig(FFCameraOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
     const char* error = ffDetectCamera(&result);
@@ -93,7 +95,7 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -115,6 +117,8 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
+
+    return true;
 }
 
 void ffInitCameraOptions(FFCameraOptions* options)

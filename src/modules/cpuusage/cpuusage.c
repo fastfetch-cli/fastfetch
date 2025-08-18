@@ -7,7 +7,7 @@
 
 #define FF_CPUUSAGE_DISPLAY_NAME "CPU Usage"
 
-void ffPrintCPUUsage(FFCPUUsageOptions* options)
+bool ffPrintCPUUsage(FFCPUUsageOptions* options)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
     const char* error = ffGetCpuUsageResult(options, &percentages);
@@ -15,7 +15,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     if(error)
     {
         ffPrintError(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     double maxValue = -999, minValue = 999, sumValue = 0;
@@ -114,6 +114,8 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
             FF_FORMAT_ARG(minBar, "min-bar"),
         }));
     }
+
+    return true;
 }
 
 void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
@@ -155,7 +157,7 @@ void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* do
     yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
-void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
     const char* error = ffGetCpuUsageResult(options, &percentages);
@@ -163,13 +165,15 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
     yyjson_mut_val* result = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH(double, percent, percentages)
     {
         yyjson_mut_arr_add_real(doc, result, *percent);
     }
+
+    return true;
 }
 
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options)

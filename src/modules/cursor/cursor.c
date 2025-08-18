@@ -4,8 +4,9 @@
 #include "modules/cursor/cursor.h"
 #include "util/stringUtils.h"
 
-void ffPrintCursor(FFCursorOptions* options)
+bool ffPrintCursor(FFCursorOptions* options)
 {
+    bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
     ffStrbufInit(&result.theme);
@@ -41,11 +42,15 @@ void ffPrintCursor(FFCursorOptions* options)
                 FF_FORMAT_ARG(result.size, "size"),
             }));
         }
+
+        success = true;
     }
 
     ffStrbufDestroy(&result.error);
     ffStrbufDestroy(&result.theme);
     ffStrbufDestroy(&result.size);
+
+    return success;
 }
 
 void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
@@ -66,8 +71,9 @@ void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
     ffStrbufInit(&result.theme);
@@ -84,11 +90,14 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
         yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
         yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
         yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
+        success = true;
     }
 
     ffStrbufDestroy(&result.error);
     ffStrbufDestroy(&result.theme);
     ffStrbufDestroy(&result.size);
+
+    return success;
 }
 
 void ffInitCursorOptions(FFCursorOptions* options)

@@ -4,7 +4,7 @@
 
 #define FF_BOARD_MODULE_NAME "Board"
 
-void ffPrintBoard(FFBoardOptions* options);
+bool ffPrintBoard(FFBoardOptions* options);
 void ffInitBoardOptions(FFBoardOptions* options);
 void ffDestroyBoardOptions(FFBoardOptions* options);
 

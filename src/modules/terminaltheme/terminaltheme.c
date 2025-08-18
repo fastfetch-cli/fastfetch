@@ -8,39 +8,40 @@
 
 #define FF_TERMINALTHEME_DISPLAY_NAME "Terminal Theme"
 
-void ffPrintTerminalTheme(FFTerminalThemeOptions* options)
+bool ffPrintTerminalTheme(FFTerminalThemeOptions* options)
 {
     FFTerminalThemeResult result = {};
 
     if(!ffDetectTerminalTheme(&result, false))
     {
         ffPrintError(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal theme");
+        return false;
+    }
+
+    if(options->moduleArgs.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        printf("#%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (FG) - #%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (BG) [%s]\n",
+            result.fg.r, result.fg.g, result.fg.b,
+            result.bg.r, result.bg.g, result.bg.b,
+            result.bg.dark ? "Dark" : "Light");
     }
     else
     {
-        if(options->moduleArgs.outputFormat.length == 0)
-        {
-            ffPrintLogoAndKey(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            printf("#%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (FG) - #%02" PRIX16 "%02" PRIX16 "%02" PRIX16 " (BG) [%s]\n",
-                result.fg.r, result.fg.g, result.fg.b,
-                result.bg.r, result.bg.g, result.bg.b,
-                result.bg.dark ? "Dark" : "Light");
-        }
-        else
-        {
-            char fg[32], bg[32];
-            const char* fgType = result.fg.dark ? "Dark" : "Light";
-            const char* bgType = result.bg.dark ? "Dark" : "Light";
-            snprintf(fg, ARRAY_SIZE(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
-            snprintf(bg, ARRAY_SIZE(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
-            FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(fg, "fg-color"),
-                FF_FORMAT_ARG(fgType, "fg-type"),
-                FF_FORMAT_ARG(bg, "bg-color"),
-                FF_FORMAT_ARG(bgType, "bg-type"),
-            }));
-        }
+        char fg[32], bg[32];
+        const char* fgType = result.fg.dark ? "Dark" : "Light";
+        const char* bgType = result.bg.dark ? "Dark" : "Light";
+        snprintf(fg, ARRAY_SIZE(fg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.fg.r, result.fg.g, result.fg.b);
+        snprintf(bg, ARRAY_SIZE(bg), "#%02" PRIX16 "%02" PRIX16 "%02" PRIX16, result.bg.r, result.bg.g, result.bg.b);
+        FF_PRINT_FORMAT_CHECKED(FF_TERMINALTHEME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+            FF_FORMAT_ARG(fg, "fg-color"),
+            FF_FORMAT_ARG(fgType, "fg-type"),
+            FF_FORMAT_ARG(bg, "bg-color"),
+            FF_FORMAT_ARG(bgType, "bg-type"),
+        }));
     }
+
+    return true;
 }
 
 void ffParseTerminalThemeJsonObject(FFTerminalThemeOptions* options, yyjson_val* module)
@@ -61,14 +62,14 @@ void ffGenerateTerminalThemeJsonConfig(FFTerminalThemeOptions* options, yyjson_m
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalThemeResult result = {};
 
     if(!ffDetectTerminalTheme(&result, false))
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect terminal theme");
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -84,6 +85,8 @@ void ffGenerateTerminalThemeJsonResult(FF_MAYBE_UNUSED FFTerminalThemeOptions* o
     yyjson_mut_obj_add_uint(doc, bg, "g", result.bg.g);
     yyjson_mut_obj_add_uint(doc, bg, "b", result.bg.b);
     yyjson_mut_obj_add_bool(doc, bg, "dark", result.bg.dark);
+
+    return true;
 }
 
 void ffInitTerminalThemeOptions(FFTerminalThemeOptions* options)

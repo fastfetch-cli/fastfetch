@@ -15,7 +15,7 @@ static inline uint8_t max(uint8_t a, uint8_t b)
     return a > b ? a : b;
 }
 
-void ffPrintColors(FFColorsOptions* options)
+bool ffPrintColors(FFColorsOptions* options)
 {
     bool flag = false;
 
@@ -122,7 +122,10 @@ void ffPrintColors(FFColorsOptions* options)
     if (!flag)
     {
         ffPrintError(FF_COLORS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Nothing to print");
+        return false;
     }
+
+    return true;
 }
 
 void ffParseColorsJsonObject(FFColorsOptions* options, yyjson_val* module)

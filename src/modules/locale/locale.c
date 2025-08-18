@@ -4,7 +4,7 @@
 #include "modules/locale/locale.h"
 #include "util/stringUtils.h"
 
-void ffPrintLocale(FFLocaleOptions* options)
+bool ffPrintLocale(FFLocaleOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
 
@@ -12,7 +12,7 @@ void ffPrintLocale(FFLocaleOptions* options)
     if(locale.length == 0)
     {
         ffPrintError(FF_LOCALE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No locale found");
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -26,6 +26,8 @@ void ffPrintLocale(FFLocaleOptions* options)
             FF_FORMAT_ARG(locale, "result")
         }));
     }
+
+    return true;
 }
 
 void ffParseLocaleJsonObject(FFLocaleOptions* options, yyjson_val* module)
@@ -46,7 +48,7 @@ void ffGenerateLocaleJsonConfig(FFLocaleOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY locale = ffStrbufCreate();
 
@@ -54,10 +56,12 @@ void ffGenerateLocaleJsonResult(FF_MAYBE_UNUSED FFLocaleOptions* options, yyjson
     if(locale.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "No locale found");
-        return;
+        return false;
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &locale);
+
+    return true;
 }
 
 void ffInitLocaleOptions(FFLocaleOptions* options)

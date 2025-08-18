@@ -4,7 +4,7 @@
 
 #define FF_CPU_MODULE_NAME "CPU"
 
-void ffPrintCPU(FFCPUOptions* options);
+bool ffPrintCPU(FFCPUOptions* options);
 void ffInitCPUOptions(FFCPUOptions* options);
 void ffDestroyCPUOptions(FFCPUOptions* options);
 

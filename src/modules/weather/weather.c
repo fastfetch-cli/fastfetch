@@ -4,7 +4,7 @@
 #include "modules/weather/weather.h"
 #include "util/stringUtils.h"
 
-void ffPrintWeather(FFWeatherOptions* options)
+bool ffPrintWeather(FFWeatherOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffDetectWeather(options, &result);
@@ -12,9 +12,8 @@ void ffPrintWeather(FFWeatherOptions* options)
     if(error)
     {
         ffPrintError(FF_WEATHER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
-
 
     if(options->moduleArgs.outputFormat.length == 0)
     {
@@ -27,6 +26,8 @@ void ffPrintWeather(FFWeatherOptions* options)
             FF_FORMAT_ARG(result, "result"),
         }));
     }
+
+    return true;
 }
 
 void ffParseWeatherJsonObject(FFWeatherOptions* options, yyjson_val* module)
@@ -71,7 +72,7 @@ void ffGenerateWeatherJsonConfig(FFWeatherOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_uint(doc, module, "timeout", options->timeout);
 }
 
-void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
     const char* error = ffDetectWeather(options, &result);
@@ -79,10 +80,12 @@ void ffGenerateWeatherJsonResult(FFWeatherOptions* options, yyjson_mut_doc* doc,
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
+
+    return true;
 }
 
 void ffInitWeatherOptions(FFWeatherOptions* options)

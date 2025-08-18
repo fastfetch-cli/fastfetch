@@ -4,8 +4,9 @@
 #include "modules/lm/lm.h"
 #include "util/stringUtils.h"
 
-void ffPrintLM(FFLMOptions* options)
+bool ffPrintLM(FFLMOptions* options)
 {
+    bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
     ffStrbufInit(&result.type);
@@ -15,13 +16,13 @@ void ffPrintLM(FFLMOptions* options)
     if(error)
     {
         ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        goto exit;
     }
 
     if(result.service.length == 0)
     {
         ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
-        return;
+        goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -42,9 +43,14 @@ void ffPrintLM(FFLMOptions* options)
             FF_FORMAT_ARG(result.version, "version"),
         }));
     }
+    success = true;
+
+exit:
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.version);
+
+    return success;
 }
 
 void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
@@ -65,8 +71,9 @@ void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
     ffStrbufInit(&result.type);
@@ -89,11 +96,14 @@ void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "service", &result.service);
     yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
+    success = true;
 
 exit:
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.version);
+
+    return success;
 }
 
 void ffInitLMOptions(FFLMOptions* options)

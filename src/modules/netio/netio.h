@@ -6,7 +6,7 @@
 
 void ffPrepareNetIO(FFNetIOOptions* options);
 
-void ffPrintNetIO(FFNetIOOptions* options);
+bool ffPrintNetIO(FFNetIOOptions* options);
 void ffInitNetIOOptions(FFNetIOOptions* options);
 void ffDestroyNetIOOptions(FFNetIOOptions* options);
 

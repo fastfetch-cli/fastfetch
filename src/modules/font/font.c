@@ -4,8 +4,9 @@
 #include "modules/font/font.h"
 #include "util/stringUtils.h"
 
-void ffPrintFont(FFFontOptions* options)
+bool ffPrintFont(FFFontOptions* options)
 {
+    bool success = false;
     FFFontResult font;
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufInit(&font.fonts[i]);
@@ -34,11 +35,15 @@ void ffPrintFont(FFFontOptions* options)
                 FF_FORMAT_ARG(font.display, "combined"),
             }));
         }
+
+        success = true;
     }
 
     ffStrbufDestroy(&font.display);
     for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufDestroy(&font.fonts[i]);
+
+    return success;
 }
 
 void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
@@ -59,8 +64,9 @@ void ffGenerateFontJsonConfig(FFFontOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFFontResult font;
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufInit(&font.fonts[i]);
@@ -78,11 +84,14 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
         yyjson_mut_val* fontsArr = yyjson_mut_obj_add_arr(doc, obj, "fonts");
         for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
             yyjson_mut_arr_add_strbuf(doc, fontsArr, &font.fonts[i]);
+        success = true;
     }
 
     ffStrbufDestroy(&font.display);
     for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufDestroy(&font.fonts[i]);
+
+    return success;
 }
 
 void ffInitFontOptions(FFFontOptions* options)

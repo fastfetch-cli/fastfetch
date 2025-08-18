@@ -4,7 +4,7 @@
 
 #define FF_COLORS_MODULE_NAME "Colors"
 
-void ffPrintColors(FFColorsOptions* options);
+bool ffPrintColors(FFColorsOptions* options);
 void ffInitColorsOptions(FFColorsOptions* options);
 void ffDestroyColorsOptions(FFColorsOptions* options);
 

@@ -4,7 +4,7 @@
 
 #define FF_PACKAGES_MODULE_NAME "Packages"
 
-void ffPrintPackages(FFPackagesOptions* options);
+bool ffPrintPackages(FFPackagesOptions* options);
 void ffInitPackagesOptions(FFPackagesOptions* options);
 void ffDestroyPackagesOptions(FFPackagesOptions* options);
 

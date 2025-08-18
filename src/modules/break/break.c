@@ -2,10 +2,11 @@
 #include "logo/logo.h"
 #include "modules/break/break.h"
 
-void ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
+bool ffPrintBreak(FF_MAYBE_UNUSED FFBreakOptions* options)
 {
     ffLogoPrintLine();
     putchar('\n');
+    return true;
 }
 
 void ffParseBreakJsonObject(FF_MAYBE_UNUSED FFBreakOptions* options, FF_MAYBE_UNUSED yyjson_val* module)

@@ -4,8 +4,9 @@
 #include "modules/board/board.h"
 #include "util/stringUtils.h"
 
-void ffPrintBoard(FFBoardOptions* options)
+bool ffPrintBoard(FFBoardOptions* options)
 {
+    bool success = false;
     FFBoardResult result;
     ffStrbufInit(&result.name);
     ffStrbufInit(&result.vendor);
@@ -42,12 +43,14 @@ void ffPrintBoard(FFBoardOptions* options)
             FF_FORMAT_ARG(result.serial, "serial"),
         }));
     }
+    success = true;
 
 exit:
     ffStrbufDestroy(&result.name);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
     ffStrbufDestroy(&result.serial);
+    return success;
 }
 
 void ffParseBoardJsonObject(FFBoardOptions* options, yyjson_val* module)
@@ -68,8 +71,9 @@ void ffGenerateBoardJsonConfig(FFBoardOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFBoardResult board;
     ffStrbufInit(&board.name);
     ffStrbufInit(&board.vendor);
@@ -95,12 +99,14 @@ void ffGenerateBoardJsonResult(FF_MAYBE_UNUSED FFBoardOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &board.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &board.version);
     yyjson_mut_obj_add_strbuf(doc, obj, "serial", &board.serial);
+    success = true;
 
 exit:
     ffStrbufDestroy(&board.name);
     ffStrbufDestroy(&board.vendor);
     ffStrbufDestroy(&board.version);
     ffStrbufDestroy(&board.serial);
+    return success;
 }
 
 void ffInitBoardOptions(FFBoardOptions* options)

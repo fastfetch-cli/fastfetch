@@ -167,7 +167,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
     }
 }
 
-void ffPrintDisk(FFDiskOptions* options)
+bool ffPrintDisk(FFDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(options, &disks);
@@ -175,23 +175,22 @@ void ffPrintDisk(FFDiskOptions* options)
     if(error)
     {
         ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        return false;
     }
-    else
+
+    uint32_t index = 0;
+    FF_LIST_FOR_EACH(FFDisk, disk, disks)
     {
-        uint32_t index = 0;
-        FF_LIST_FOR_EACH(FFDisk, disk, disks)
-        {
-            if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
-                continue;
+        if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
+            continue;
 
-            if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
-                continue;
+        if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
+            continue;
 
-            if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
-                continue;
+        if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
+            continue;
 
-            printDisk(options, disk, ++index);
-        }
+        printDisk(options, disk, ++index);
     }
 
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
@@ -201,6 +200,8 @@ void ffPrintDisk(FFDiskOptions* options)
         ffStrbufDestroy(&disk->filesystem);
         ffStrbufDestroy(&disk->name);
     }
+
+    return true;
 }
 
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
@@ -327,7 +328,7 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(options, &disks);
@@ -335,7 +336,7 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "result", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -394,6 +395,8 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
         ffStrbufDestroy(&item->filesystem);
         ffStrbufDestroy(&item->name);
     }
+
+    return true;
 }
 
 void ffInitDiskOptions(FFDiskOptions* options)

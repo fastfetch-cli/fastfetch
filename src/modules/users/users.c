@@ -7,7 +7,7 @@
 
 #pragma GCC diagnostic ignored "-Wformat" // warning: unknown conversion type character 'F' in format
 
-void ffPrintUsers(FFUsersOptions* options)
+bool ffPrintUsers(FFUsersOptions* options)
 {
     FF_LIST_AUTO_DESTROY users = ffListCreate(sizeof(FFUserResult));
 
@@ -16,13 +16,13 @@ void ffPrintUsers(FFUsersOptions* options)
     if(error)
     {
         ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(users.length == 0)
     {
         ffPrintError(FF_USERS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "Unable to detect any users");
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -105,6 +105,8 @@ void ffPrintUsers(FFUsersOptions* options)
         ffStrbufDestroy(&user->sessionName);
         ffStrbufDestroy(&user->name);
     }
+
+    return true;
 }
 
 void ffParseUsersJsonObject(FFUsersOptions* options, yyjson_val* module)
@@ -144,7 +146,7 @@ void ffGenerateUsersJsonConfig(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_obj_add_bool(doc, module, "myselfOnly", options->myselfOnly);
 }
 
-void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFUserResult));
 
@@ -153,7 +155,7 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -178,6 +180,8 @@ void ffGenerateUsersJsonResult(FFUsersOptions* options, yyjson_mut_doc* doc, yyj
         ffStrbufDestroy(&user->sessionName);
         ffStrbufDestroy(&user->name);
     }
+
+    return true;
 }
 
 void ffInitUsersOptions(FFUsersOptions* options)

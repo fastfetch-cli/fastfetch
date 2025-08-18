@@ -6,7 +6,7 @@
 
 void ffPrepareWeather(FFWeatherOptions* options);
 
-void ffPrintWeather(FFWeatherOptions* options);
+bool ffPrintWeather(FFWeatherOptions* options);
 void ffInitWeatherOptions(FFWeatherOptions* options);
 void ffDestroyWeatherOptions(FFWeatherOptions* options);
 

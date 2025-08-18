@@ -6,7 +6,7 @@
 #include "modules/loadavg/loadavg.h"
 #include "util/stringUtils.h"
 
-void ffPrintLoadavg(FFLoadavgOptions* options)
+bool ffPrintLoadavg(FFLoadavgOptions* options)
 {
     double result[3] = { 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0 };
 
@@ -14,7 +14,7 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
     if(error)
     {
         ffPrintError(FF_LOADAVG_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -88,6 +88,8 @@ void ffPrintLoadavg(FFLoadavgOptions* options)
             FF_FORMAT_ARG(result[2], "loadavg3"),
         }));
     }
+
+    return true;
 }
 
 void ffParseLoadavgJsonObject(FFLoadavgOptions* options, yyjson_val* module)
@@ -129,7 +131,7 @@ void ffGenerateLoadavgJsonConfig(FFLoadavgOptions* options, yyjson_mut_doc* doc,
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     double result[3] = { 0.0 / 0.0, 0.0 / 0.0, 0.0 / 0.0 };
 
@@ -137,12 +139,14 @@ void ffGenerateLoadavgJsonResult(FF_MAYBE_UNUSED FFLoadavgOptions* options, yyjs
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
     for (size_t i = 0; i < 3; i++)
         yyjson_mut_arr_add_real(doc, arr, result[i]);
+
+    return true;
 }
 
 void ffInitLoadavgOptions(FFLoadavgOptions* options)

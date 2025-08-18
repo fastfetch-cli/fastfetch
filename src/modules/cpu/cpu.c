@@ -12,8 +12,9 @@ static int sortCores(const FFCPUCore* a, const FFCPUCore* b)
     return (int)b->freq - (int)a->freq;
 }
 
-void ffPrintCPU(FFCPUOptions* options)
+bool ffPrintCPU(FFCPUOptions* options)
 {
+    bool success = false;
     FFCPUResult cpu = {
         .temperature = FF_CPU_TEMP_UNSET,
         .frequencyMax = 0,
@@ -111,10 +112,13 @@ void ffPrintCPU(FFCPUOptions* options)
                 FF_FORMAT_ARG(cpu.packages, "packages"),
             }));
         }
+        success = true;
     }
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
+
+    return success;
 }
 
 void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
@@ -154,8 +158,9 @@ void ffGenerateCPUJsonConfig(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
     yyjson_mut_obj_add_bool(doc, module, "showPeCoreCount", options->showPeCoreCount);
 }
 
-void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFCPUResult cpu = {
         .temperature = FF_CPU_TEMP_UNSET,
         .frequencyMax = 0,
@@ -205,10 +210,14 @@ void ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
             yyjson_mut_obj_add_real(doc, obj, "temperature", cpu.temperature);
         else
             yyjson_mut_obj_add_null(doc, obj, "temperature");
+
+        success = true;
     }
 
     ffStrbufDestroy(&cpu.name);
     ffStrbufDestroy(&cpu.vendor);
+
+    return success;
 }
 
 void ffInitCPUOptions(FFCPUOptions* options)

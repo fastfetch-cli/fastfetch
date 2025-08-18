@@ -4,7 +4,7 @@
 
 #define FF_BTRFS_MODULE_NAME "Btrfs"
 
-void ffPrintBtrfs(FFBtrfsOptions* options);
+bool ffPrintBtrfs(FFBtrfsOptions* options);
 void ffInitBtrfsOptions(FFBtrfsOptions* options);
 void ffDestroyBtrfsOptions(FFBtrfsOptions* options);
 

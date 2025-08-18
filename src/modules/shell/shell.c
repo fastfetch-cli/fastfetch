@@ -4,14 +4,14 @@
 #include "modules/shell/shell.h"
 #include "util/stringUtils.h"
 
-void ffPrintShell(FFShellOptions* options)
+bool ffPrintShell(FFShellOptions* options)
 {
     const FFShellResult* result = ffDetectShell();
 
     if(result->processName.length == 0)
     {
         ffPrintError(FF_SHELL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect shell");
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -40,6 +40,8 @@ void ffPrintShell(FFShellOptions* options)
             FF_FORMAT_ARG(result->tty, "tty"),
         }));
     }
+
+    return true;
 }
 
 void ffParseShellJsonObject(FFShellOptions* options, yyjson_val* module)
@@ -60,14 +62,14 @@ void ffGenerateShellJsonConfig(FFShellOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFShellResult* result = ffDetectShell();
 
     if(result->processName.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect shell");
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -83,6 +85,8 @@ void ffGenerateShellJsonResult(FF_MAYBE_UNUSED FFShellOptions* options, yyjson_m
         yyjson_mut_obj_add_int(doc, obj, "tty", result->tty);
     else
         yyjson_mut_obj_add_null(doc, obj, "tty");
+
+    return true;
 }
 
 void ffInitShellOptions(FFShellOptions* options)

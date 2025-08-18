@@ -4,7 +4,7 @@
 
 #define FF_MOUSE_MODULE_NAME "Mouse"
 
-void ffPrintMouse(FFMouseOptions* options);
+bool ffPrintMouse(FFMouseOptions* options);
 void ffInitMouseOptions(FFMouseOptions* options);
 void ffDestroyMouseOptions(FFMouseOptions* options);
 

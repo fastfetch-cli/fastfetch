@@ -4,7 +4,7 @@
 
 #define FF_GPU_MODULE_NAME "GPU"
 
-void ffPrintGPU(FFGPUOptions* options);
+bool ffPrintGPU(FFGPUOptions* options);
 void ffInitGPUOptions(FFGPUOptions* options);
 void ffDestroyGPUOptions(FFGPUOptions* options);
 
