@@ -542,6 +542,74 @@ int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue)
     return str_end == strbuf->chars ? defaultValue : (int64_t)result;
 }
 
+void ffStrbufAppendSInt(FFstrbuf* strbuf, int64_t value)
+{
+    ffStrbufEnsureFree(strbuf, 21); // Required by yyjson_write_number
+    char* start = strbuf->chars + strbuf->length;
+
+    yyjson_val val = {};
+    unsafe_yyjson_set_sint(&val, value);
+    char* end = yyjson_write_number(&val, start);
+
+    assert(end != NULL);
+
+    strbuf->length += (uint32_t)(end - start);
+}
+
+void ffStrbufAppendUInt(FFstrbuf* strbuf, uint64_t value)
+{
+    ffStrbufEnsureFree(strbuf, 21); // Required by yyjson_write_number
+    char* start = strbuf->chars + strbuf->length;
+
+    yyjson_val val = {};
+    unsafe_yyjson_set_uint(&val, value);
+    char* end = yyjson_write_number(&val, start);
+
+    assert(end != NULL);
+
+    strbuf->length += (uint32_t)(end - start);
+}
+
+void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, uint8_t precision)
+{
+    assert(precision <= 15); // yyjson_write_number supports up to 15 digits after the decimal point
+
+    ffStrbufEnsureFree(strbuf, 40); // Required by yyjson_write_number
+    char* start = strbuf->chars + strbuf->length;
+
+    yyjson_val val = {};
+    unsafe_yyjson_set_double(&val, value);
+    if (precision > 0) unsafe_yyjson_set_fp_to_fixed(&val, (int) precision);
+
+    // Write at most <precision> digits after the decimal point; doesn't append trailing zeros
+    char* end = yyjson_write_number(&val, start);
+
+    assert(end != NULL);
+
+    strbuf->length += (uint32_t)(end - start);
+
+    if (__builtin_expect(value > 1e21 || value < -1e21, false))
+    {
+        // If the value is too large, yyjson_write_number will write it in scientific notation
+        return;
+    }
+
+    if (precision > 1)
+    {
+        for (char* p = end - 1; *p != '.' && p > start; --p)
+            --precision;
+        if (precision > 0)
+            ffStrbufAppendNC(strbuf, precision, '0');
+    }
+    else if (precision == 0 && end[-1] == '0' && end[-2] == '.')
+    {
+        // yyjson always appends a decimal point if value is an integer
+        // Remove trailing zeros and the decimal point if precision is 0
+        strbuf->length -= 2;
+        strbuf->chars[strbuf->length] = '\0';
+    }
+}
+
 void ffStrbufUpperCase(FFstrbuf* strbuf)
 {
     for (uint32_t i = 0; i < strbuf->length; ++i)
