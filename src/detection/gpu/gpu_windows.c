@@ -45,12 +45,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
     {
         FF_DEBUG("Processing device ID: %ls", devId);
 
-        if (wcsncmp(devId, L"SWD\\", 4) == 0)
-        {
-            FF_DEBUG("Skipping SWD device interface to avoid duplicates");
-            continue;
-        }
-
         DEVINST devInst = 0;
 
         {
@@ -121,6 +115,25 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
 
         wchar_t buffer[256];
         ULONG bufferLen = 0;
+
+        FF_DEBUG("Get device description as device name");
+        bufferLen = sizeof(buffer);
+        if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_DEVICEDESC, NULL, buffer, &bufferLen, 0) == CR_SUCCESS)
+        {
+            ffStrbufSetWS(&gpu->name, buffer);
+            FF_DEBUG("Found device description: %s", gpu->name.chars);
+        }
+        else
+        {
+            FF_DEBUG("Failed to get device description");
+        }
+
+        if (wcsncmp(devId, L"SWD\\", 4) == 0 || wcsncmp(devId, L"ROOT\\DISPLAY\\", 13) == 0)
+        {
+            FF_DEBUG("Skipping virtual devices to avoid duplicates");
+            continue;
+        }
+
         if (CM_Open_DevNode_Key(devInst, KEY_QUERY_VALUE, 0, RegDisposition_OpenExisting, &hVideoIdKey, CM_REGISTRY_HARDWARE) == CR_SUCCESS)
         {
             FF_DEBUG("Opened device node registry key");
@@ -145,8 +158,12 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                         }
                     }
 
-                    if (ffRegReadStrbuf(hDirectxKey, L"Description", &gpu->name, NULL))
-                        FF_DEBUG("Found GPU description: %s", gpu->name.chars);
+                    if (gpu->name.length == 0)
+                    {
+                        FF_DEBUG("Trying to get GPU name from DirectX registry");
+                        if (ffRegReadStrbuf(hDirectxKey, L"Description", &gpu->name, NULL))
+                            FF_DEBUG("Found GPU description: %s", gpu->name.chars);
+                    }
 
                     if (ffRegReadUint64(hDirectxKey, L"DedicatedVideoMemory", &gpu->dedicated.total, NULL))
                         FF_DEBUG("Found dedicated video memory: %llu bytes", gpu->dedicated.total);
@@ -307,21 +324,6 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         else if (options->driverSpecific)
         {
             FF_DEBUG("No driver-specific detection function found for vendor: %s", gpu->vendor.chars);
-        }
-
-        if (!gpu->name.length)
-        {
-            FF_DEBUG("Trying to get device description as fallback");
-            bufferLen = sizeof(buffer);
-            if (CM_Get_DevNode_Registry_PropertyW(devInst, CM_DRP_DEVICEDESC, NULL, buffer, &bufferLen, 0) == CR_SUCCESS)
-            {
-                ffStrbufSetWS(&gpu->name, buffer);
-                FF_DEBUG("Found device description: %s", gpu->name.chars);
-            }
-            else
-            {
-                FF_DEBUG("Failed to get device description");
-            }
         }
 
         if (gpu->type == FF_GPU_TYPE_UNKNOWN && adapterLuid > 0)
