@@ -85,8 +85,9 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
     if(!getExeVersionRaw(exe, version))
         return false;
 
-    //fish, version 3.6.0
-    ffStrbufSubstrAfterLastC(version, ' ');
+    //fish, version 4.0.2-1 (Built by MSYS2 project)
+    ffStrbufSubstrAfterFirstS(version, "version ");
+    ffStrbufSubstrBeforeFirstC(version, ' ');
     return true;
 }
 
