@@ -50,13 +50,21 @@ int8_t ffVersionCompare(const FFVersion* version1, const FFVersion* version2)
 void ffVersionToPretty(const FFVersion* version, FFstrbuf* pretty)
 {
     if(version->major > 0 || version->minor > 0 || version->patch > 0)
-        ffStrbufAppendF(pretty, "%u", version->major);
+    {
+        ffStrbufAppendUInt(pretty, version->major);
+    }
 
     if(version->minor > 0 || version->patch > 0)
-        ffStrbufAppendF(pretty, ".%u", version->minor);
+    {
+        ffStrbufAppendC(pretty, '.');
+        ffStrbufAppendUInt(pretty, version->minor);
+    }
 
     if(version->patch > 0)
-        ffStrbufAppendF(pretty, ".%u", version->patch);
+    {
+        ffStrbufAppendC(pretty, '.');
+        ffStrbufAppendUInt(pretty, version->patch);
+    }
 }
 
 void ffParseGTK(FFstrbuf* buffer, const FFstrbuf* gtk2, const FFstrbuf* gtk3, const FFstrbuf* gtk4)

@@ -6,12 +6,20 @@ bool ffFreqAppendNum(uint32_t mhz, FFstrbuf* result)
         return false;
 
     const FFOptionsDisplay* options = &instance.config.display;
-    const char* space = options->freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ";
+    bool spaceBeforeUnit = options->freqSpaceBeforeUnit != FF_SPACE_BEFORE_UNIT_NEVER;
     int8_t ndigits = options->freqNdigits;
 
     if (ndigits >= 0)
-        ffStrbufAppendF(result, "%.*f%sGHz", ndigits, mhz / 1000., space);
+    {
+        ffStrbufAppendDouble(result, mhz / 1000., ndigits);
+        if (spaceBeforeUnit) ffStrbufAppendC(result, ' ');
+        ffStrbufAppendS(result, "GHz");
+    }
     else
-        ffStrbufAppendF(result, "%u%sMHz", (unsigned) mhz, space);
+    {
+        ffStrbufAppendUInt(result, mhz);
+        if (spaceBeforeUnit) ffStrbufAppendC(result, ' ');
+        ffStrbufAppendS(result, "MHz");
+    }
     return true;
 }
