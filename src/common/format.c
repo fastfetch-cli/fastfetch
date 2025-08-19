@@ -11,37 +11,31 @@ void ffFormatAppendFormatArg(FFstrbuf* buffer, const FFformatarg* formatarg)
     switch(formatarg->type)
     {
         case FF_FORMAT_ARG_TYPE_INT:
-            ffStrbufAppendF(buffer, "%" PRIi32, *(int32_t*)formatarg->value);
+            ffStrbufAppendSInt(buffer, *(int32_t*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_UINT:
-            ffStrbufAppendF(buffer, "%" PRIu32, *(uint32_t*)formatarg->value);
+            ffStrbufAppendUInt(buffer, *(uint32_t*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_UINT64:
-            ffStrbufAppendF(buffer, "%" PRIu64, *(uint64_t*)formatarg->value);
+            ffStrbufAppendUInt(buffer, *(uint64_t*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_UINT16:
-            ffStrbufAppendF(buffer, "%" PRIu16, *(uint16_t*)formatarg->value);
+            ffStrbufAppendUInt(buffer, *(uint16_t*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_UINT8:
-            ffStrbufAppendF(buffer, "%" PRIu8, *(uint8_t*)formatarg->value);
+            ffStrbufAppendUInt(buffer, *(uint8_t*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_STRING:
             ffStrbufAppendS(buffer, (const char*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_STRBUF:
-            ffStrbufAppend(buffer, (FFstrbuf*)formatarg->value);
+            ffStrbufAppend(buffer, (const FFstrbuf*)formatarg->value);
             break;
         case FF_FORMAT_ARG_TYPE_FLOAT:
-            if (instance.config.display.fractionNdigits >= 0)
-                ffStrbufAppendF(buffer, "%.*f", instance.config.display.fractionNdigits, *(float*)formatarg->value);
-            else
-                ffStrbufAppendF(buffer, "%g", *(float*)formatarg->value);
+            ffStrbufAppendDouble(buffer, *(float*)formatarg->value, instance.config.display.fractionNdigits);
             break;
         case FF_FORMAT_ARG_TYPE_DOUBLE:
-            if (instance.config.display.fractionNdigits >= 0)
-                ffStrbufAppendF(buffer, "%.*f", instance.config.display.fractionNdigits, *(double*)formatarg->value);
-            else
-                ffStrbufAppendF(buffer, "%g", *(double*)formatarg->value);
+            ffStrbufAppendDouble(buffer, *(double*)formatarg->value, instance.config.display.fractionNdigits);
             break;
         case FF_FORMAT_ARG_TYPE_BOOL:
             ffStrbufAppendS(buffer, *(bool*)formatarg->value ? "true" : "false");
