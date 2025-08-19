@@ -11,6 +11,8 @@
     #include <OS.h>
 #endif
 
+#include "util/arrayUtils.h"
+
 static inline double ffTimeGetTick(void) //In msec
 {
     #ifdef _WIN32
@@ -64,11 +66,12 @@ static inline const char* ffTimeToFullStr(uint64_t msec)
     time_t tsec = (time_t) (msec / 1000);
     const struct tm* tm = localtime(&tsec);
 
-    static char buf[32];
-    strftime(buf, __builtin_strlen("0000-00-00T00:00:00") + 1, "%FT%T", tm);
-    snprintf(buf + __builtin_strlen("0000-00-00T00:00:00"), __builtin_strlen(".000") + 1, ".%03u", (unsigned) (msec % 1000));
-    strftime(buf + __builtin_strlen("0000-00-00T00:00:00.000"), __builtin_strlen("+0000") + 1, "%z", tm);
-    return buf;
+    extern char ffTimeInternalBuffer[64];
+    uint32_t len = 0;
+    len += (uint32_t) strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer) - len, "%FT%T", tm);
+    len += (uint32_t) snprintf(ffTimeInternalBuffer + len, ARRAY_SIZE(ffTimeInternalBuffer) - len, ".%03u", (unsigned) (msec % 1000));
+    len += (uint32_t) strftime(ffTimeInternalBuffer + len, ARRAY_SIZE(ffTimeInternalBuffer) - len, "%z", tm);
+    return ffTimeInternalBuffer;
 }
 
 // Not thread-safe
@@ -77,9 +80,9 @@ static inline const char* ffTimeToShortStr(uint64_t msec)
     if (msec == 0) return "";
     time_t tsec = (time_t) (msec / 1000);
 
-    static char buf[32];
-    strftime(buf, sizeof(buf), "%F %T", localtime(&tsec));
-    return buf;
+    extern char ffTimeInternalBuffer[64];
+    strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer), "%F %T", localtime(&tsec));
+    return ffTimeInternalBuffer;
 }
 
 // Not thread-safe
@@ -88,10 +91,10 @@ static inline const char* ffTimeToTimeStr(uint64_t msec)
     if (msec == 0) return "";
     time_t tsec = (time_t) (msec / 1000);
 
-    static char buf[32];
-    strftime(buf, sizeof(buf), "%T", localtime(&tsec));
-    sprintf(buf + __builtin_strlen("00:00:00"), ".%03u", (unsigned) (msec % 1000));
-    return buf;
+    extern char ffTimeInternalBuffer[64];
+    strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer), "%T", localtime(&tsec));
+    sprintf(ffTimeInternalBuffer + __builtin_strlen("00:00:00"), ".%03u", (unsigned) (msec % 1000));
+    return ffTimeInternalBuffer;
 }
 
 #ifdef _WIN32

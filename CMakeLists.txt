@@ -370,6 +370,7 @@ set(LIBFASTFETCH_SRC
     src/common/settings.c
     src/common/size.c
     src/common/temps.c
+    src/common/time.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
