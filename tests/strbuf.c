@@ -748,6 +748,10 @@ int main(void)
         VERIFY(ffStrbufEqualS(&strbuf, "120"));
 
         ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.0, 1);
+        VERIFY(ffStrbufEqualS(&strbuf, "120.0"));
+
+        ffStrbufClear(&strbuf);
         ffStrbufAppendDouble(&strbuf, 120.0, 5);
         VERIFY(ffStrbufEqualS(&strbuf, "120.00000"));
 
@@ -757,6 +761,10 @@ int main(void)
 
         ffStrbufClear(&strbuf);
         ffStrbufAppendDouble(&strbuf, 120.123456789, 0);
+        VERIFY(ffStrbufEqualS(&strbuf, "120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, -1);
         VERIFY(ffStrbufEqualS(&strbuf, "120.123456789"));
 
         ffStrbufClear(&strbuf);
@@ -768,6 +776,10 @@ int main(void)
         VERIFY(ffStrbufEqualS(&strbuf, "-120"));
 
         ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.0, 1);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120.0"));
+
+        ffStrbufClear(&strbuf);
         ffStrbufAppendDouble(&strbuf, -120.0, 5);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.00000"));
 
@@ -777,6 +789,10 @@ int main(void)
 
         ffStrbufClear(&strbuf);
         ffStrbufAppendDouble(&strbuf, -120.123456789, 0);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, -1);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.123456789"));
 
         ffStrbufClear(&strbuf);
@@ -789,6 +805,22 @@ int main(void)
 
         ffStrbufClear(&strbuf);
         ffStrbufAppendDouble(&strbuf, -1.2345e50, 1);
+        VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, 0);
+        VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, 0);
+        VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, -1);
+        VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, -1);
         VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
 
         ffStrbufClear(&strbuf);

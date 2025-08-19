@@ -570,7 +570,7 @@ void ffStrbufAppendUInt(FFstrbuf* strbuf, uint64_t value)
     strbuf->length += (uint32_t)(end - start);
 }
 
-void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, uint8_t precision)
+void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision)
 {
     assert(precision <= 15); // yyjson_write_number supports up to 15 digits after the decimal point
 
@@ -579,12 +579,12 @@ void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, uint8_t precision)
 
     yyjson_val val = {};
     unsafe_yyjson_set_double(&val, value);
-    if (precision > 0) unsafe_yyjson_set_fp_to_fixed(&val, (int) precision);
+    if (precision >= 0) unsafe_yyjson_set_fp_to_fixed(&val, precision == 0 ? 1 : precision); // yyjson ignores precision == 0
 
     // Write at most <precision> digits after the decimal point; doesn't append trailing zeros
     char* end = yyjson_write_number(&val, start);
 
-    assert(end != NULL);
+    assert(end > start);
 
     strbuf->length += (uint32_t)(end - start);
 
@@ -599,12 +599,11 @@ void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, uint8_t precision)
         for (char* p = end - 1; *p != '.' && p > start; --p)
             --precision;
         if (precision > 0)
-            ffStrbufAppendNC(strbuf, precision, '0');
+            ffStrbufAppendNC(strbuf, (uint32_t) precision, '0');
     }
-    else if (precision == 0 && end[-1] == '0' && end[-2] == '.')
+    else if (precision == 0 || (precision < 0 && end[-1] == '0'))
     {
-        // yyjson always appends a decimal point if value is an integer
-        // Remove trailing zeros and the decimal point if precision is 0
+        // yyjson always appends ".0", so we need to remove it
         strbuf->length -= 2;
         strbuf->chars[strbuf->length] = '\0';
     }
