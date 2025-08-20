@@ -38,6 +38,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
             //Common programs that are between terminal and own process, but are not the shell
             if(
                 // tty < 0                                  || //A shell should connect to a tty
+                pid == 1 || // init/systemd
                 ffStrbufEqualS(&result->processName, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
                 ffStrbufEqualS(&result->processName, "sudo")                ||
                 ffStrbufEqualS(&result->processName, "su")                  ||
@@ -85,6 +86,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
     {
         //Known shells
         if (
+            pid == 1 || // init/systemd
             ffStrbufEqualS(&result->processName, "sudo")       ||
             ffStrbufEqualS(&result->processName, "su")         ||
             ffStrbufEqualS(&result->processName, "sh")         ||
@@ -109,8 +111,6 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             ffStrbufEqualS(&result->processName, "proot")      ||
             ffStrbufEqualS(&result->processName, "script")     ||
-            ffStrbufEqualS(&result->processName, "init")       ||
-            ffStrbufEqualS(&result->processName, "systemd")    ||
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif
