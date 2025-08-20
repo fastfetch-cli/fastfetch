@@ -92,8 +92,8 @@ static inline const char* ffTimeToTimeStr(uint64_t msec)
     time_t tsec = (time_t) (msec / 1000);
 
     extern char ffTimeInternalBuffer[64];
-    strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer), "%T", localtime(&tsec));
-    sprintf(ffTimeInternalBuffer + __builtin_strlen("00:00:00"), ".%03u", (unsigned) (msec % 1000));
+    uint32_t len = (uint32_t) strftime(ffTimeInternalBuffer, ARRAY_SIZE(ffTimeInternalBuffer), "%T", localtime(&tsec));
+    sprintf(ffTimeInternalBuffer + len, ".%03u", (unsigned) (msec % 1000));
     return ffTimeInternalBuffer;
 }
 
