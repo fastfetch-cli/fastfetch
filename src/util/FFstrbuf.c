@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <inttypes.h>
+#include <math.h>
 
 char* CHAR_NULL_PTR = "";
 
@@ -577,9 +578,12 @@ void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision)
     ffStrbufEnsureFree(strbuf, 40); // Required by yyjson_write_number
     char* start = strbuf->chars + strbuf->length;
 
+    if (precision == 0)
+        value = round(value);
     yyjson_val val = {};
     unsafe_yyjson_set_double(&val, value);
-    if (precision >= 0) unsafe_yyjson_set_fp_to_fixed(&val, precision == 0 ? 1 : precision); // yyjson ignores precision == 0
+    if (precision > 0)
+        unsafe_yyjson_set_fp_to_fixed(&val, precision);
 
     // Write at most <precision> digits after the decimal point; doesn't append trailing zeros
     char* end = yyjson_write_number(&val, start);
