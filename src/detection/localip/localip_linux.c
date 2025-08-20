@@ -394,12 +394,12 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     FF_DEBUG("Added IPv6 entry for interface %s", ifa->ifa_name);
                 }
                 break;
-            #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__ || __GNU__
+            #if __FreeBSD__ || __OpenBSD__ || __APPLE__ || __NetBSD__ || __HAIKU__
             case AF_LINK:
                 adapter->mac = ifa;
                 FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
                 break;
-            #elif !__sun
+            #elif !__sun && !__GNU__
             case AF_PACKET:
                 adapter->mac = ifa;
                 FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
