@@ -31,7 +31,7 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
             userShellName = instance.state.platform.userShell.chars + index + 1;
     }
 
-    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
     {
         if (!ffStrbufEqualS(&result->processName, userShellName))
         {
@@ -75,14 +75,14 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
-    return ppid;
+    return pid > 1 ? ppid : 0;
 }
 
 static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 {
     pid_t ppid = 0;
 
-    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
     {
         //Known shells
         if (
@@ -145,7 +145,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
-    return ppid;
+    return pid > 1 ? ppid : 0;
 }
 
 static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv)
