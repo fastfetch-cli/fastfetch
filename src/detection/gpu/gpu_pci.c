@@ -47,6 +47,8 @@ static const FFstrbuf* loadPciIds()
         }
         #elif __OpenBSD__ || __FreeBSD__ || __NetBSD__
         ffReadFileBuffer(_PATH_LOCALBASE "/share/hwdata/pci.ids", &pciids);
+        if (pciids.length == 0)
+            ffReadFileBuffer(_PATH_LOCALBASE "/share/pciids/pci.ids", &pciids);
         #elif __sun
         ffReadFileBuffer(FASTFETCH_TARGET_DIR_ROOT "/usr/share/hwdata/pci.ids", &pciids);
         #elif __HAIKU__
