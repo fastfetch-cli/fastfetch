@@ -15,31 +15,42 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
 
     if(options->moduleArgs.key.length == 0)
     {
-        if(instance.config.display.pipe)
-            ffStrbufAppendF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
-        else
-        {
-            #ifdef __linux__
-            if (getenv("WSL_DISTRO_NAME") != NULL && getenv("WT_SESSION") != NULL)
-            {
-                if (ffStrbufEqualS(&disk->filesystem, "9p") && ffStrbufStartsWithS(&disk->mountpoint, "/mnt/"))
-                    ffStrbufAppendF(&key, "%s (\e]8;;file:///%c:/\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars[5], disk->mountpoint.chars);
-                else
-                    ffStrbufAppendF(&key, "%s (\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->mountpoint.chars);
-            }
-            else
-            #endif
-            ffStrbufAppendF(&key, "%s (\e]8;;file://%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars, disk->mountpoint.chars);
-        }
+        ffStrbufSetF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY mountpointLink = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY nameLink = ffStrbufCreate();
+        #ifdef __linux__
+        if (getenv("WSL_DISTRO_NAME") != NULL && getenv("WT_SESSION") != NULL)
+        {
+            if (ffStrbufEqualS(&disk->filesystem, "9p") && ffStrbufStartsWithS(&disk->mountpoint, "/mnt/"))
+            {
+                ffStrbufSetF(&mountpointLink, "\e]8;;file:///%c:/\e\\%s\e]8;;\e\\", disk->mountpoint.chars[5], disk->mountpoint.chars);
+                ffStrbufSetF(&nameLink, "\e]8;;file:///%c:/\e\\%s\e]8;;\e\\", disk->mountpoint.chars[5], disk->name.chars);
+            }
+            else
+            {
+                ffStrbufSetF(&mountpointLink, "\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\", getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->mountpoint.chars);
+                ffStrbufSetF(&nameLink, "\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\", getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->name.chars);
+            }
+        }
+        else
+        #endif
+        {
+            ffStrbufSetF(&mountpointLink, "\e]8;;file://%s\e\\%s\e]8;;\e\\", disk->mountpoint.chars, disk->mountpoint.chars);
+            ffStrbufSetF(&nameLink, "\e]8;;file://%s\e\\%s\e]8;;\e\\", disk->mountpoint.chars, disk->name.chars);
+        }
+
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->name, "name"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
             FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(disk->filesystem, "filesystem"),
+            FF_FORMAT_ARG(mountpointLink, "mountpoint-link"),
+            FF_FORMAT_ARG(nameLink, "name-link"),
         }));
     }
 
