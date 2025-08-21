@@ -53,9 +53,9 @@ static void x11DetectWMFromEWMH(X11PropertyData* data, Display* display, FFDispl
     if(wmWindow == NULL)
         return;
 
-    char* wmName = (char*) x11GetProperty(data, display, *wmWindow, "_NET_WM_NAME");
-    if(wmName == NULL)
-        wmName = (char*) x11GetProperty(data, display, *wmWindow, "WM_NAME");
+    char* wmName = (char*) x11GetProperty(data, display, *wmWindow, "WM_NAME");
+    if(!ffStrSet(wmName))
+        wmName = (char*) x11GetProperty(data, display, *wmWindow, "_NET_WM_NAME");
 
     if(ffStrSet(wmName))
         ffStrbufSetS(&result->wmProcessName, wmName);
