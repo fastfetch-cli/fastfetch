@@ -65,15 +65,17 @@ static void printCommandFormatHelp(const char* command)
         {
             if (baseInfo->formatArgs.count > 0)
             {
-                printf("--%s-format:\n", type.chars);
+                FF_STRBUF_AUTO_DESTROY variable = ffStrbufCreate();
+                printf("-- In config file: { \"type\": \"%s\", \"format\": \"{<format-variable>}\" }\n", type.chars);
                 printf("Sets the format string for %s output.\n", baseInfo->name);
-                puts("To see how a format string is constructed, take a look at \"fastfetch --help format\".");
-                puts("The following values are passed:");
+                puts("To see how a format string is constructed, take a look at https://github.com/fastfetch-cli/fastfetch/wiki/Format-String-Guide.");
+                puts("The following variables are passed:");
 
                 for (unsigned i = 0; i < baseInfo->formatArgs.count; i++)
                 {
                     const FFModuleFormatArg* arg = &baseInfo->formatArgs.args[i];
-                    printf("%16s {%u}: %s\n", arg->name, i + 1, arg->desc);
+                    ffStrbufSetF(&variable, "{%s}", arg->name);
+                    printf("%20s: %s\n", variable.chars, arg->desc);
                 }
             }
             else
