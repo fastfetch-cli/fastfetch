@@ -40,7 +40,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         return "CM_Get_Device_ID_ListW failed";
     }
 
-    int deviceCount = 0;
+    FF_MAYBE_UNUSED int deviceCount = 0;
     for (wchar_t* devId = devIdList; *devId; devId += wcslen(devId) + 1)
     {
         FF_DEBUG("Processing device ID: %ls", devId);

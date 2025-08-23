@@ -130,8 +130,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
             }
 
             if (nlh->nlmsg_type == NLMSG_ERROR) {
-                struct nlmsgerr* err = (struct nlmsgerr*)NLMSG_DATA(nlh);
-                FF_DEBUG("Netlink reports error: %s", strerror(-err->error));
+                FF_DEBUG("Netlink reports error: %s", strerror(-((struct nlmsgerr*)NLMSG_DATA(nlh))->error));
                 continue;
             }
 
@@ -340,8 +339,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
             }
 
             if (nlh->nlmsg_type == NLMSG_ERROR) {
-                struct nlmsgerr* err = (struct nlmsgerr*)NLMSG_DATA(nlh);
-                FF_DEBUG("Netlink reports error: %s", strerror(-err->error));
+                FF_DEBUG("Netlink reports error: %s", strerror(-((struct nlmsgerr*)NLMSG_DATA(nlh))->error));
                 continue;
             }
 
