@@ -99,7 +99,7 @@ inline static void ffCPUDetectByCpuid(FFCPUResult* cpu)
 
 inline static void ffCPUDetectByCpuid(FFCPUResult* cpu)
 {
-    return "Unsupported platform";
+    // Unsupported platform
 }
 
 #endif
