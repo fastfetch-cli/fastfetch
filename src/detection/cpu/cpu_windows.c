@@ -287,7 +287,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (error)
         return error;
 
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
     if (options->showPeCoreCount) detectCoreTypes(cpu);
 
     if (cpu->frequencyMax == 0)

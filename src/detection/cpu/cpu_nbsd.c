@@ -64,7 +64,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresLogical = cpu->coresPhysical;
     cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.ncpuonline", cpu->coresLogical);
 
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
 
     uint32_t freq = (uint32_t) ffSysctlGetInt("machdep.cpu.frequency.target", 0);
     if (freq == 0) freq = (uint32_t) (ffSysctlGetInt64("hw.cpu0.clock_frequency", 0) / 1000000);

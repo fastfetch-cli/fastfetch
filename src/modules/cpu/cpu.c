@@ -110,6 +110,7 @@ bool ffPrintCPU(FFCPUOptions* options)
                 FF_FORMAT_ARG(tempStr, "temperature"),
                 FF_FORMAT_ARG(coreTypes, "core-types"),
                 FF_FORMAT_ARG(cpu.packages, "packages"),
+                FF_FORMAT_ARG(cpu.march, "march"),
             }));
         }
         success = true;
@@ -211,6 +212,11 @@ bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, obj, "temperature");
 
+        if (cpu.march)
+            yyjson_mut_obj_add_str(doc, obj, "march", cpu.march);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "march");
+
         success = true;
     }
 
@@ -253,5 +259,6 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         {"Temperature (formatted)", "temperature"},
         {"Logical core count grouped by frequency", "core-types"},
         {"Processor package count", "packages"},
+        {"X86-64 CPU microarchitecture", "march"},
     }))
 };
