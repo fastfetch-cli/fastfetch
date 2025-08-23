@@ -51,7 +51,6 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "perf")                ||
                 ffStrbufEqualS(&result->processName, "guake-wrapped")       ||
                 ffStrbufEqualS(&result->processName, "time")                ||
-                ffStrbufContainS(&result->processName, "hyfetch")           || //when hyfetch uses fastfetch as backend
                 ffStrbufEqualS(&result->processName, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
                 ffStrbufEqualS(&result->processName, "valgrind")            ||
                 ffStrbufEqualS(&result->processName, "fastfetch")           || //#994
