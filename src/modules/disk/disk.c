@@ -136,6 +136,12 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
+        FF_STRBUF_AUTO_DESTROY freePretty = ffStrbufCreate();
+        ffSizeAppendNum(disk->bytesFree, &freePretty);
+
+        FF_STRBUF_AUTO_DESTROY availPretty = ffStrbufCreate();
+        ffSizeAppendNum(disk->bytesAvailable, &availPretty);
+
         uint64_t now = ffTimeGetNow();
         uint64_t duration = now - disk->createTime;
         uint32_t milliseconds = (uint32_t) (duration % 1000);
@@ -174,6 +180,8 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             FF_FORMAT_ARG(age.years, "years"),
             FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
             FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
+            FF_FORMAT_ARG(freePretty, "size-free"),
+            FF_FORMAT_ARG(availPretty, "size-available"),
         }));
     }
 }
@@ -468,5 +476,7 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         {"Years integer after creation", "years"},
         {"Days of year after creation", "days-of-year"},
         {"Years fraction after creation", "years-fraction"},
+        {"Size free", "size-free"},
+        {"Size available", "size-available"},
     }))
 };
