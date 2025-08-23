@@ -790,7 +790,11 @@ static void writeConfigFile(FFdata* data)
             exit(1);
         }
         if (ffWriteFileData(filename->chars, len, str))
-            printf("The generated config file has been written in `%s`\n", filename->chars);
+        {
+            printf("✓ Configuration file generated: `%s`\n"
+                   "* Tip: Use a JSON schema-aware editor for better editing experience\n"
+                   "* Documentation: https://github.com/fastfetch-cli/fastfetch/wiki/Configuration\n", filename->chars);
+        }
         else
         {
             printf("Error: failed to write file in `%s`\n", filename->chars);
