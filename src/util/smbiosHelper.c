@@ -52,7 +52,7 @@ const FFSmbiosHeader* ffSmbiosNextEntry(const FFSmbiosHeader* header)
     return (const FFSmbiosHeader*) (p + 1);
 }
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__) || defined(__OpenBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__sun) || defined(__HAIKU__) || defined(__OpenBSD__) || defined(__GNU__)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -143,7 +143,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
     {
         FF_DEBUG("Initializing SMBIOS buffer");
         ffStrbufInit(&buffer);
-        #if !__HAIKU__ && !__OpenBSD__ && !__DragonFly__
+        #if !__HAIKU__ && !__OpenBSD__ && !__DragonFly__ && !__GNU__
         #ifdef __linux__
         FF_DEBUG("Using Linux implementation - trying /sys/firmware/dmi/tables/DMI");
         if (!ffAppendFileBuffer("/sys/firmware/dmi/tables/DMI", &buffer))
