@@ -54,6 +54,7 @@ retry:
                 ffTimeSleep(options->waitTime);
                 goto retry;
             }
+            return "CPU time did not increase. Try increasing wait time.";
         }
     }
 
