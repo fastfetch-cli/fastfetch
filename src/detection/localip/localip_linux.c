@@ -1008,14 +1008,16 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     #endif
                 }
 
-                #ifdef __sun
+                #if __sun || __GNU__
                 if ((options->showType & FF_LOCALIP_TYPE_MAC_BIT) && ioctl(sockfd, SIOCGIFHWADDR, &ifr) == 0)
                 {
                     const uint8_t* ptr = (uint8_t*) ifr.ifr_addr.sa_data; // NOT ifr_enaddr
                     ffStrbufSetF(&iface->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
                                 ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-                    FF_DEBUG("Added MAC address %s for interface %s (Solaris)", iface->mac.chars, iface->name.chars);
+                    FF_DEBUG("Added MAC address %s for interface %s (Solaris/GNU)", iface->mac.chars, iface->name.chars);
                 }
+                #endif
+                #if __sun
                 if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
                 {
                     __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();
