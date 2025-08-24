@@ -471,9 +471,9 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         if(nRead <= 0)
             return "ffReadFileBuffer(/proc/pid/comm, name) failed";
         ffStrbufTrimRightSpace(name);
-	#else
-	// No /proc/1/comm on Hurd so read /proc/1/stat again
-	snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
+        #else
+        // No /proc/1/comm on Hurd so read /proc/1/stat again
+        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
         char buf[PROC_FILE_BUFFSIZ];
         ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
         if(nRead <= 8)
@@ -488,7 +488,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
             return "sscanf(stat) failed";
 
         ffStrbufRecalculateLength(name);
-	#endif
+        #endif
     }
 
     #elif defined(__APPLE__)

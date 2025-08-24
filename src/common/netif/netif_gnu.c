@@ -21,7 +21,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
     {
         if (destination != 0) continue;
         result->ifIndex = if_nametoindex(result->ifName);
-	// TODO: Get the preferred source address
+        // TODO: Get the preferred source address
         return true;
     }
     result->ifName[0] = '0';
