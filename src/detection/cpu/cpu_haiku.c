@@ -55,7 +55,7 @@ const char* ffDetectCPUImpl(FF_MAYBE_UNUSED const FFCPUOptions* options, FFCPURe
         ffStrbufSetF(&cpu->name, "(Unknown %" B_PRIx32 ")", cpuModel);
     ffStrbufSetS(&cpu->vendor, get_cpu_vendor_string(cpuVendor));
 
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
     if (cpu->frequencyBase < frequency) cpu->frequencyBase = frequency;
     cpu->packages = packages;
     cpu->coresPhysical = cores;

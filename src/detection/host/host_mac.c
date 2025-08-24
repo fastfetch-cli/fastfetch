@@ -140,7 +140,7 @@ const char* ffHostGetMacProductNameWithHwModel(const FFstrbuf* hwModel)
         if(ffStrEquals(version, "14,5") ||
            ffStrEquals(version, "14,9"))        return "MacBook Pro (14-inch, 2023)";
         if(ffStrEquals(version, "14,3"))        return "Mac mini (M2, 2023, Two Thunderbolt 4 ports)";
-        if(ffStrEquals(version, "14,12"))       return "Mac mini (M2, 2023, Four Thunderbolt 4 ports)";
+        if(ffStrEquals(version, "14,12"))       return "Mac mini (M2 Pro, 2023, Four Thunderbolt 4 ports)";
         if(ffStrEquals(version, "14,7"))        return "MacBook Pro (13-inch, M2, 2022)";
         if(ffStrEquals(version, "14,2"))        return "MacBook Air (M2, 2022)";
         if(ffStrEquals(version, "13,1"))        return "Mac Studio (M1 Max, 2022, Two USB-C front ports)";

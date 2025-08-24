@@ -5,7 +5,7 @@
 #include "modules/version/version.h"
 #include "util/stringUtils.h"
 
-void ffPrintVersion(FFVersionOptions* options)
+bool ffPrintVersion(FFVersionOptions* options)
 {
     FFVersionResult* result = &ffVersionResult;
 
@@ -42,6 +42,8 @@ void ffPrintVersion(FFVersionOptions* options)
             FF_FORMAT_ARG(buf, "libc"),
         }));
     }
+
+    return true;
 }
 
 void ffParseVersionJsonObject(FFVersionOptions* options, yyjson_val* module)
@@ -62,7 +64,7 @@ void ffGenerateVersionJsonConfig(FFVersionOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFVersionResult* result = &ffVersionResult;
 
@@ -92,6 +94,8 @@ void ffGenerateVersionJsonResult(FF_MAYBE_UNUSED FFVersionOptions* options, yyjs
         }
         yyjson_mut_obj_add_strbuf(doc, obj, "libc", &buf);
     }
+
+    return true;
 }
 
 void ffInitVersionOptions(FFVersionOptions* options)

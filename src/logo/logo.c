@@ -114,7 +114,7 @@ static bool ffLogoPrintCharsRaw(const char* data, size_t length, bool printError
 static uint32_t logoAppendChars(const char* data, bool doColorReplacement, FFstrbuf* result)
 {
     FFOptionsLogo* options = &instance.config.logo;
-    uint32_t currentlineLength = 0;
+    uint32_t currentlineLength = options->width;
     uint32_t logoHeight = 0;
 
     if (result)
@@ -260,7 +260,7 @@ static uint32_t logoAppendChars(const char* data, bool doColorReplacement, FFstr
     if(currentlineLength > instance.state.logoWidth)
         instance.state.logoWidth = currentlineLength;
 
-    return logoHeight;
+    return options->height > logoHeight ? options->height : logoHeight;
 }
 
 void ffLogoPrintChars(const char* data, bool doColorReplacement)

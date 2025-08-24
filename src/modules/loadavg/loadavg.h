@@ -4,7 +4,7 @@
 
 #define FF_LOADAVG_MODULE_NAME "Loadavg"
 
-void ffPrintLoadavg(FFLoadavgOptions* options);
+bool ffPrintLoadavg(FFLoadavgOptions* options);
 void ffInitLoadavgOptions(FFLoadavgOptions* options);
 void ffDestroyLoadavgOptions(FFLoadavgOptions* options);
 

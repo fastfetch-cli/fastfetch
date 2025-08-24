@@ -8,7 +8,7 @@
 
 #define FF_PHYSICALMEMORY_DISPLAY_NAME "Physical Memory"
 
-void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
+bool ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalMemoryResult));
     const char* error = ffDetectPhysicalMemory(&result);
@@ -16,13 +16,13 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
     if(error)
     {
         ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (result.length == 0)
     {
         ffPrintError(FF_PHYSICALMEMORY_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No physical memory detected");
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY prettySize = ffStrbufCreate();
@@ -78,6 +78,8 @@ void ffPrintPhysicalMemory(FFPhysicalMemoryOptions* options)
         ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->partNumber);
     }
+
+    return true;
 }
 
 void ffParsePhysicalMemoryJsonObject(FFPhysicalMemoryOptions* options, yyjson_val* module)
@@ -98,7 +100,7 @@ void ffGeneratePhysicalMemoryJsonConfig(FFPhysicalMemoryOptions* options, yyjson
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalMemoryResult));
     const char* error = ffDetectPhysicalMemory(&result);
@@ -106,7 +108,7 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -134,6 +136,8 @@ void ffGeneratePhysicalMemoryJsonResult(FF_MAYBE_UNUSED FFPhysicalMemoryOptions*
         ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->partNumber);
     }
+
+    return true;
 }
 
 void ffInitPhysicalMemoryOptions(FFPhysicalMemoryOptions* options)

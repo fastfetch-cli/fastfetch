@@ -32,7 +32,7 @@ static void formatKey(const FFNetIOOptions* options, FFNetIOResult* inf, uint32_
     }
 }
 
-void ffPrintNetIO(FFNetIOOptions* options)
+bool ffPrintNetIO(FFNetIOOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
     const char* error = ffDetectNetIO(&result, options);
@@ -40,7 +40,7 @@ void ffPrintNetIO(FFNetIOOptions* options)
     if(error)
     {
         ffPrintError(FF_NETIO_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     ffListSort(&result, (const void*) sortInfs);
@@ -101,6 +101,8 @@ void ffPrintNetIO(FFNetIOOptions* options)
     {
         ffStrbufDestroy(&inf->name);
     }
+
+    return true;
 }
 
 void ffParseNetIOJsonObject(FFNetIOOptions* options, yyjson_val* module)
@@ -153,7 +155,7 @@ void ffGenerateNetIOJsonConfig(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
-void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFNetIOResult));
     const char* error = ffDetectNetIO(&result, options);
@@ -161,7 +163,7 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -184,6 +186,8 @@ void ffGenerateNetIOJsonResult(FFNetIOOptions* options, yyjson_mut_doc* doc, yyj
     {
         ffStrbufDestroy(&inf->name);
     }
+
+    return true;
 }
 
 void ffInitNetIOOptions(FFNetIOOptions* options)

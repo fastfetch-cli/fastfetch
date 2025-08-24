@@ -122,7 +122,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
         kstat_named_t* kn = kstat_data_lookup(ks, "vendor_id");
         if (kn) ffStrbufSetNS(&cpu->vendor, KSTAT_NAMED_STR_BUFLEN(kn) - 1, KSTAT_NAMED_STR_PTR(kn));
     }
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
     {
         kstat_named_t* kn = kstat_data_lookup(ks, "clock_MHz");
         if (kn && kn->value.ui32 > cpu->frequencyBase)

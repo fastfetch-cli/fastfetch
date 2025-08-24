@@ -148,7 +148,7 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     ffStrbufSetStatic(&ds->wmProcessName, "WindowManager");
-    ffStrbufSetStatic(&ds->wmPrettyName, "Window Manager");
+    ffStrbufSetStatic(&ds->wmPrettyName, "SurfaceFlinger");
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);

@@ -14,11 +14,13 @@ static void appendNum(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
         counter++;
     }
 
-    const char* space = options->sizeSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ";
-    if(counter == 0)
-        ffStrbufAppendF(result, "%" PRIu64 "%s%s", bytes, space, prefixes[0]);
+    if (counter == 0)
+        ffStrbufAppendUInt(result, bytes);
     else
-        ffStrbufAppendF(result, "%.*f%s%s", options->sizeNdigits, size, space, prefixes[counter]);
+        ffStrbufAppendDouble(result, size, (int8_t) options->sizeNdigits);
+    if (options->sizeSpaceBeforeUnit != FF_SPACE_BEFORE_UNIT_NEVER)
+        ffStrbufAppendC(result, ' ');
+    ffStrbufAppendS(result, prefixes[counter]);
 }
 
 void ffSizeAppendNum(uint64_t bytes, FFstrbuf* result)

@@ -4,7 +4,7 @@
 #include "modules/theme/theme.h"
 #include "util/stringUtils.h"
 
-void ffPrintTheme(FFThemeOptions* options)
+bool ffPrintTheme(FFThemeOptions* options)
 {
     FFThemeResult result = {
         .theme1 = ffStrbufCreate(),
@@ -15,7 +15,7 @@ void ffPrintTheme(FFThemeOptions* options)
     if(error)
     {
         ffPrintError(FF_THEME_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -41,6 +41,7 @@ void ffPrintTheme(FFThemeOptions* options)
 
     ffStrbufDestroy(&result.theme1);
     ffStrbufDestroy(&result.theme2);
+    return true;
 }
 
 void ffParseThemeJsonObject(FFThemeOptions* options, yyjson_val* module)
@@ -61,7 +62,7 @@ void ffGenerateThemeJsonConfig(FFThemeOptions* options, yyjson_mut_doc* doc, yyj
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFThemeResult result = {
         .theme1 = ffStrbufCreate(),
@@ -72,7 +73,7 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* theme = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -81,6 +82,8 @@ void ffGenerateThemeJsonResult(FF_MAYBE_UNUSED FFThemeOptions* options, yyjson_m
 
     ffStrbufDestroy(&result.theme1);
     ffStrbufDestroy(&result.theme2);
+
+    return true;
 }
 
 void ffInitThemeOptions(FFThemeOptions* options)

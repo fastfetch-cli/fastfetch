@@ -5,14 +5,14 @@
 #include "modules/opencl/opencl.h"
 #include "util/stringUtils.h"
 
-void ffPrintOpenCL(FFOpenCLOptions* options)
+bool ffPrintOpenCL(FFOpenCLOptions* options)
 {
     FFOpenCLResult* result = ffDetectOpenCL();
 
     if(result->error != NULL)
     {
         ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result->error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -28,6 +28,8 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
             FF_FORMAT_ARG(result->vendor, "vendor"),
         }));
     }
+
+    return true;
 }
 
 void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
@@ -48,14 +50,14 @@ void ffGenerateOpenCLJsonConfig(FFOpenCLOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFOpenCLResult* result = ffDetectOpenCL();
 
     if(result->error != NULL)
     {
         yyjson_mut_obj_add_str(doc, module, "error", result->error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -109,6 +111,8 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
 
         yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", gpu->deviceId);
     }
+
+    return true;
 }
 
 void ffInitOpenCLOptions(FFOpenCLOptions* options)

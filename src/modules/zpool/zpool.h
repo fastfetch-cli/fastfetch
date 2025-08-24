@@ -4,7 +4,7 @@
 
 #define FF_ZPOOL_MODULE_NAME "Zpool"
 
-void ffPrintZpool(FFZpoolOptions* options);
+bool ffPrintZpool(FFZpoolOptions* options);
 void ffInitZpoolOptions(FFZpoolOptions* options);
 void ffDestroyZpoolOptions(FFZpoolOptions* options);
 

@@ -6,7 +6,7 @@
 #include "modules/memory/memory.h"
 #include "util/stringUtils.h"
 
-void ffPrintMemory(FFMemoryOptions* options)
+bool ffPrintMemory(FFMemoryOptions* options)
 {
     FFMemoryResult storage = {};
     const char* error = ffDetectMemory(&storage);
@@ -14,7 +14,7 @@ void ffPrintMemory(FFMemoryOptions* options)
     if(error)
     {
         ffPrintError(FF_MEMORY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
@@ -69,6 +69,8 @@ void ffPrintMemory(FFMemoryOptions* options)
             FF_FORMAT_ARG(percentageBar, "percentage-bar"),
         }));
     }
+
+    return true;
 }
 
 void ffParseMemoryJsonObject(FFMemoryOptions* options, yyjson_val* module)
@@ -94,7 +96,7 @@ void ffGenerateMemoryJsonConfig(FFMemoryOptions* options, yyjson_mut_doc* doc, y
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFMemoryResult storage = {};
     const char* error = ffDetectMemory(&storage);
@@ -102,12 +104,14 @@ void ffGenerateMemoryJsonResult(FF_MAYBE_UNUSED FFMemoryOptions* options, yyjson
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_uint(doc, obj, "total", storage.bytesTotal);
     yyjson_mut_obj_add_uint(doc, obj, "used", storage.bytesUsed);
+
+    return true;
 }
 
 void ffInitMemoryOptions(FFMemoryOptions* options)

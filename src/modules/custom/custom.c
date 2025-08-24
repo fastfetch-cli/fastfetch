@@ -4,9 +4,10 @@
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
-void ffPrintCustom(FFCustomOptions* options)
+bool ffPrintCustom(FFCustomOptions* options)
 {
     ffPrintFormat(FF_CUSTOM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, 0, ((FFformatarg[]) {}));
+    return true;
 }
 
 void ffGenerateCustomJsonConfig(FFCustomOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)

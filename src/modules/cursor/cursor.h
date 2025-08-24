@@ -4,7 +4,7 @@
 
 #define FF_CURSOR_MODULE_NAME "Cursor"
 
-void ffPrintCursor(FFCursorOptions* options);
+bool ffPrintCursor(FFCursorOptions* options);
 void ffInitCursorOptions(FFCursorOptions* options);
 void ffDestroyCursorOptions(FFCursorOptions* options);
 

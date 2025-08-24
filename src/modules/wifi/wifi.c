@@ -4,7 +4,7 @@
 #include "modules/wifi/wifi.h"
 #include "util/stringUtils.h"
 
-void ffPrintWifi(FFWifiOptions* options)
+bool ffPrintWifi(FFWifiOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
 
@@ -12,12 +12,12 @@ void ffPrintWifi(FFWifiOptions* options)
     if(error)
     {
         ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
     if(!result.length)
     {
         ffPrintError(FF_WIFI_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No Wifi interfaces found");
-        return;
+        return false;
     }
 
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -125,7 +125,10 @@ void ffPrintWifi(FFWifiOptions* options)
                 FF_FORMAT_ARG(bandStr, "band"),
             }));
         }
+    }
 
+    FF_LIST_FOR_EACH(FFWifiResult, item, result)
+    {
         ffStrbufDestroy(&item->inf.description);
         ffStrbufDestroy(&item->inf.status);
         ffStrbufDestroy(&item->conn.status);
@@ -134,6 +137,8 @@ void ffPrintWifi(FFWifiOptions* options)
         ffStrbufDestroy(&item->conn.protocol);
         ffStrbufDestroy(&item->conn.security);
     }
+
+    return true;
 }
 
 void ffParseWifiJsonObject(FFWifiOptions* options, yyjson_val* module)
@@ -159,14 +164,14 @@ void ffGenerateWifiJsonConfig(FFWifiOptions* options, yyjson_mut_doc* doc, yyjso
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFWifiResult));
     const char* error = ffDetectWifi(&result);
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -210,6 +215,8 @@ void ffGenerateWifiJsonResult(FF_MAYBE_UNUSED FFWifiOptions* options, yyjson_mut
         ffStrbufDestroy(&item->conn.protocol);
         ffStrbufDestroy(&item->conn.security);
     }
+
+    return true;
 }
 
 void ffInitWifiOptions(FFWifiOptions* options)

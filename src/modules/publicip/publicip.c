@@ -6,7 +6,7 @@
 
 #define FF_PUBLICIP_DISPLAY_NAME "Public IP"
 
-void ffPrintPublicIp(FFPublicIPOptions* options)
+bool ffPrintPublicIp(FFPublicIPOptions* options)
 {
     FFPublicIpResult result;
     ffStrbufInit(&result.ip);
@@ -16,7 +16,7 @@ void ffPrintPublicIp(FFPublicIPOptions* options)
     if (error)
     {
         ffPrintError(FF_PUBLICIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0)
@@ -37,6 +37,8 @@ void ffPrintPublicIp(FFPublicIPOptions* options)
 
     ffStrbufDestroy(&result.ip);
     ffStrbufDestroy(&result.location);
+
+    return true;
 }
 
 void ffParsePublicIpJsonObject(FFPublicIPOptions* options, yyjson_val* module)
@@ -81,7 +83,7 @@ void ffGeneratePublicIpJsonConfig(FFPublicIPOptions* options, yyjson_mut_doc* do
     yyjson_mut_obj_add_bool(doc, module, "ipv6", options->ipv6);
 }
 
-void ffGeneratePublicIpJsonResult(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGeneratePublicIpJsonResult(FFPublicIPOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPublicIpResult result;
     ffStrbufInit(&result.ip);
@@ -91,7 +93,7 @@ void ffGeneratePublicIpJsonResult(FFPublicIPOptions* options, yyjson_mut_doc* do
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -100,6 +102,8 @@ void ffGeneratePublicIpJsonResult(FFPublicIPOptions* options, yyjson_mut_doc* do
 
     ffStrbufDestroy(&result.ip);
     ffStrbufDestroy(&result.location);
+
+    return true;
 }
 
 void ffInitPublicIpOptions(FFPublicIPOptions* options)

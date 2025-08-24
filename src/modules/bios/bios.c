@@ -4,8 +4,9 @@
 #include "modules/bios/bios.h"
 #include "util/stringUtils.h"
 
-void ffPrintBios(FFBiosOptions* options)
+bool ffPrintBios(FFBiosOptions* options)
 {
+    bool success = false;
     FFBiosResult bios;
     ffStrbufInit(&bios.date);
     ffStrbufInit(&bios.release);
@@ -66,6 +67,7 @@ void ffPrintBios(FFBiosOptions* options)
             FF_FORMAT_ARG(bios.type, "type"),
         }));
     }
+    success = true;
 
 exit:
     ffStrbufDestroy(&bios.date);
@@ -73,6 +75,8 @@ exit:
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
     ffStrbufDestroy(&bios.type);
+
+    return success;
 }
 
 void ffParseBiosJsonObject(FFBiosOptions* options, yyjson_val* module)
@@ -93,8 +97,9 @@ void ffGenerateBiosJsonConfig(FFBiosOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFBiosResult bios;
     ffStrbufInit(&bios.date);
     ffStrbufInit(&bios.release);
@@ -116,6 +121,7 @@ void ffGenerateBiosJsonResult(FF_MAYBE_UNUSED FFBiosOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &bios.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &bios.version);
     yyjson_mut_obj_add_strbuf(doc, obj, "type", &bios.type);
+    success = true;
 
 exit:
     ffStrbufDestroy(&bios.date);
@@ -123,6 +129,7 @@ exit:
     ffStrbufDestroy(&bios.vendor);
     ffStrbufDestroy(&bios.version);
     ffStrbufDestroy(&bios.type);
+    return success;
 }
 
 void ffInitBiosOptions(FFBiosOptions* options)

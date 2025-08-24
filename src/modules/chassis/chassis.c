@@ -4,8 +4,10 @@
 #include "modules/chassis/chassis.h"
 #include "util/stringUtils.h"
 
-void ffPrintChassis(FFChassisOptions* options)
+bool ffPrintChassis(FFChassisOptions* options)
 {
+    bool success = false;
+
     FFChassisResult result;
     ffStrbufInit(&result.type);
     ffStrbufInit(&result.vendor);
@@ -43,12 +45,14 @@ void ffPrintChassis(FFChassisOptions* options)
             FF_FORMAT_ARG(result.serial, "serial"),
         }));
     }
+    success = true;
 
 exit:
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
     ffStrbufDestroy(&result.serial);
+    return success;
 }
 
 void ffParseChassisJsonObject(FFChassisOptions* options, yyjson_val* module)
@@ -69,8 +73,9 @@ void ffGenerateChassisJsonConfig(FFChassisOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFChassisResult result;
     ffStrbufInit(&result.type);
     ffStrbufInit(&result.vendor);
@@ -96,12 +101,14 @@ void ffGenerateChassisJsonResult(FF_MAYBE_UNUSED FFChassisOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &result.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
     yyjson_mut_obj_add_strbuf(doc, obj, "serial", &result.serial);
+    success = true;
 
 exit:
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.vendor);
     ffStrbufDestroy(&result.version);
     ffStrbufDestroy(&result.serial);
+    return success;
 }
 
 void ffInitChassisOptions(FFChassisOptions* options)

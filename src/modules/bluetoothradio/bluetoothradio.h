@@ -4,7 +4,7 @@
 
 #define FF_BLUETOOTHRADIO_MODULE_NAME "BluetoothRadio"
 
-void ffPrintBluetoothRadio(FFBluetoothRadioOptions* options);
+bool ffPrintBluetoothRadio(FFBluetoothRadioOptions* options);
 void ffInitBluetoothRadioOptions(FFBluetoothRadioOptions* options);
 void ffDestroyBluetoothRadioOptions(FFBluetoothRadioOptions* options);
 

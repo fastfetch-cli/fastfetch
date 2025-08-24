@@ -6,36 +6,36 @@
 
 #define FF_TERMINALSIZE_DISPLAY_NAME "Terminal Size"
 
-void ffPrintTerminalSize(FFTerminalSizeOptions* options)
+bool ffPrintTerminalSize(FFTerminalSizeOptions* options)
 {
     FFTerminalSizeResult result = {};
 
     if(!ffDetectTerminalSize(&result))
     {
         ffPrintError(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect terminal size");
+        return false;
+    }
+
+    if(options->moduleArgs.outputFormat.length == 0)
+    {
+        ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+        printf("%u columns x %u rows", result.columns, result.rows);
+
+        if (result.width != 0 && result.height != 0)
+            printf(" (%upx x %upx)", result.width, result.height);
+
+        putchar('\n');
     }
     else
     {
-        if(options->moduleArgs.outputFormat.length == 0)
-        {
-            ffPrintLogoAndKey(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-            printf("%u columns x %u rows", result.columns, result.rows);
-
-            if (result.width != 0 && result.height != 0)
-                printf(" (%upx x %upx)", result.width, result.height);
-
-            putchar('\n');
-        }
-        else
-        {
-            FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-                FF_FORMAT_ARG(result.rows, "rows"),
-                FF_FORMAT_ARG(result.columns, "columns"),
-                FF_FORMAT_ARG(result.width, "width"),
-                FF_FORMAT_ARG(result.height, "height"),
-            }));
-        }
+        FF_PRINT_FORMAT_CHECKED(FF_TERMINALSIZE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+            FF_FORMAT_ARG(result.rows, "rows"),
+            FF_FORMAT_ARG(result.columns, "columns"),
+            FF_FORMAT_ARG(result.width, "width"),
+            FF_FORMAT_ARG(result.height, "height"),
+        }));
     }
+    return true;
 }
 
 void ffParseTerminalSizeJsonObject(FFTerminalSizeOptions* options, yyjson_val* module)
@@ -56,14 +56,14 @@ void ffGenerateTerminalSizeJsonConfig(FFTerminalSizeOptions* options, yyjson_mut
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalSizeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTerminalSizeResult result;
 
     if(!ffDetectTerminalSize(&result))
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Failed to detect terminal size");
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -71,6 +71,8 @@ void ffGenerateTerminalSizeJsonResult(FF_MAYBE_UNUSED FFTerminalSizeOptions* opt
     yyjson_mut_obj_add_uint(doc, obj, "rows", result.rows);
     yyjson_mut_obj_add_uint(doc, obj, "width", result.width);
     yyjson_mut_obj_add_uint(doc, obj, "height", result.height);
+
+    return true;
 }
 
 void ffInitTerminalSizeOptions(FFTerminalSizeOptions* options)

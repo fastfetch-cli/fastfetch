@@ -9,7 +9,6 @@
 #include <mntent.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <sys/mount.h>
 
 #ifdef __USE_LARGEFILE64
     #define stat stat64

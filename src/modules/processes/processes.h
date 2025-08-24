@@ -4,7 +4,7 @@
 
 #define FF_PROCESSES_MODULE_NAME "Processes"
 
-void ffPrintProcesses(FFProcessesOptions* options);
+bool ffPrintProcesses(FFProcessesOptions* options);
 void ffInitProcessesOptions(FFProcessesOptions* options);
 void ffDestroyProcessesOptions(FFProcessesOptions* options);
 

@@ -8,20 +8,20 @@
 
 #define FF_PLAYER_DISPLAY_NAME "Media Player"
 
-void ffPrintPlayer(FFPlayerOptions* options)
+bool ffPrintPlayer(FFPlayerOptions* options)
 {
     const FFMediaResult* media = ffDetectMedia();
 
     if(media->error.length > 0)
     {
         ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
-        return;
+        return false;
     }
 
     if (media->player.length == 0)
     {
         ffPrintError(FF_PLAYER_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No media player detected");
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY playerPretty = ffStrbufCreate();
@@ -79,6 +79,8 @@ void ffPrintPlayer(FFPlayerOptions* options)
             FF_FORMAT_ARG(media->url, "url"),
         }));
     }
+
+    return true;
 }
 
 void ffParsePlayerJsonObject(FFPlayerOptions* options, yyjson_val* module)
@@ -99,9 +101,10 @@ void ffGeneratePlayerJsonConfig(FFPlayerOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGeneratePlayerJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_obj_add_str(doc, module, "error", "Player module is an alias of Media module");
+    return false;
 }
 
 void ffInitPlayerOptions(FFPlayerOptions* options)

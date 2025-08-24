@@ -6,8 +6,9 @@
 
 #define FF_TERMINALFONT_DISPLAY_NAME "Terminal Font"
 
-void ffPrintTerminalFont(FFTerminalFontOptions* options)
+bool ffPrintTerminalFont(FFTerminalFontOptions* options)
 {
+    bool success = false;
     FFTerminalFontResult terminalFont;
     ffFontInit(&terminalFont.font);
     ffFontInit(&terminalFont.fallback);
@@ -39,11 +40,14 @@ void ffPrintTerminalFont(FFTerminalFontOptions* options)
                 FF_FORMAT_ARG(terminalFont.font.styles, "styles"),
             }));
         }
+        success = true;
     }
 
     ffStrbufDestroy(&terminalFont.error);
     ffFontDestroy(&terminalFont.font);
     ffFontDestroy(&terminalFont.fallback);
+
+    return success;
 }
 
 void ffParseTerminalFontJsonObject(FFTerminalFontOptions* options, yyjson_val* module)
@@ -64,8 +68,9 @@ void ffGenerateTerminalFontJsonConfig(FFTerminalFontOptions* options, yyjson_mut
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFTerminalFontResult result;
     ffFontInit(&result.font);
     ffFontInit(&result.fallback);
@@ -96,11 +101,13 @@ void ffGenerateTerminalFontJsonResult(FF_MAYBE_UNUSED FFTerminalFontOptions* opt
             yyjson_mut_arr_add_strbuf(doc, fallbackStyles, style);
         }
         yyjson_mut_obj_add_strbuf(doc, fallback, "pretty", &result.fallback.pretty);
+        success = true;
     }
 
     ffStrbufDestroy(&result.error);
     ffFontDestroy(&result.font);
     ffFontDestroy(&result.fallback);
+    return success;
 }
 
 void ffInitTerminalFontOptions(FFTerminalFontOptions* options)

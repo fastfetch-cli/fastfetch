@@ -72,6 +72,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
 #else
 static const char* detectFrequency(FFCPUResult* cpu)
 {
+    ffCPUDetectByCpuid(cpu);
     cpu->frequencyBase = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency", 0) / 1000 / 1000);
     cpu->frequencyMax = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000 / 1000);
     if(cpu->frequencyBase == 0)

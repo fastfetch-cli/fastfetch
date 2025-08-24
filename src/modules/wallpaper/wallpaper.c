@@ -4,7 +4,7 @@
 #include "modules/wallpaper/wallpaper.h"
 #include "util/stringUtils.h"
 
-void ffPrintWallpaper(FFWallpaperOptions* options)
+bool ffPrintWallpaper(FFWallpaperOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
     const char* error = ffDetectWallpaper(&fullpath);
@@ -23,7 +23,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
     if(error)
     {
         ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -38,6 +38,8 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
             FF_FORMAT_ARG(fullpath, "full-path"),
         }));
     }
+
+    return true;
 }
 
 void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
@@ -58,16 +60,18 @@ void ffGenerateWallpaperJsonConfig(FFWallpaperOptions* options, yyjson_mut_doc* 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
     const char* error = ffDetectWallpaper(&fullpath);
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
+
+    return true;
 }
 
 void ffInitWallpaperOptions(FFWallpaperOptions* options)

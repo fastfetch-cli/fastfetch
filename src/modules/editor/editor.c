@@ -5,7 +5,7 @@
 #include "modules/editor/editor.h"
 #include "util/stringUtils.h"
 
-void ffPrintEditor(FFEditorOptions* options)
+bool ffPrintEditor(FFEditorOptions* options)
 {
     FFEditorResult result = {
         .type = "Unknown",
@@ -19,7 +19,7 @@ void ffPrintEditor(FFEditorOptions* options)
     if (error)
     {
         ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0)
@@ -52,6 +52,8 @@ void ffPrintEditor(FFEditorOptions* options)
     ffStrbufDestroy(&result.path);
     ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
+
+    return true;
 }
 
 void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
@@ -72,7 +74,7 @@ void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, y
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFEditorResult result = {
         .name = ffStrbufCreate(),
@@ -85,7 +87,7 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -99,6 +101,8 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     ffStrbufDestroy(&result.path);
     ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
+
+    return true;
 }
 
 void ffInitEditorOptions(FFEditorOptions* options)

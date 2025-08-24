@@ -91,7 +91,7 @@ void printSwap(FFSwapOptions* options, uint8_t index, FFSwapResult* storage)
     }
 }
 
-void ffPrintSwap(FFSwapOptions* options)
+bool ffPrintSwap(FFSwapOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSwapResult));
     const char* error = ffDetectSwap(&result);
@@ -99,7 +99,7 @@ void ffPrintSwap(FFSwapOptions* options)
     if(error)
     {
         ffPrintError(FF_SWAP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (options->separate)
@@ -129,6 +129,8 @@ void ffPrintSwap(FFSwapOptions* options)
     {
         ffStrbufDestroy(&storage->name);
     }
+
+    return true;
 }
 
 void ffParseSwapJsonObject(FFSwapOptions* options, yyjson_val* module)
@@ -161,7 +163,7 @@ void ffGenerateSwapJsonConfig(FFSwapOptions* options, yyjson_mut_doc* doc, yyjso
     yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
 }
 
-void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSwapResult));
     const char* error = ffDetectSwap(&result);
@@ -169,7 +171,7 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -185,6 +187,8 @@ void ffGenerateSwapJsonResult(FF_MAYBE_UNUSED FFSwapOptions* options, yyjson_mut
     {
         ffStrbufDestroy(&storage->name);
     }
+
+    return true;
 }
 
 void ffInitSwapOptions(FFSwapOptions* options)

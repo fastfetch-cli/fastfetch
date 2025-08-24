@@ -31,13 +31,14 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
             userShellName = instance.state.platform.userShell.chars + index + 1;
     }
 
-    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
     {
         if (!ffStrbufEqualS(&result->processName, userShellName))
         {
             //Common programs that are between terminal and own process, but are not the shell
             if(
                 // tty < 0                                  || //A shell should connect to a tty
+                pid == 1 || // init/systemd
                 ffStrbufEqualS(&result->processName, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
                 ffStrbufEqualS(&result->processName, "sudo")                ||
                 ffStrbufEqualS(&result->processName, "su")                  ||
@@ -50,7 +51,6 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "perf")                ||
                 ffStrbufEqualS(&result->processName, "guake-wrapped")       ||
                 ffStrbufEqualS(&result->processName, "time")                ||
-                ffStrbufContainS(&result->processName, "hyfetch")           || //when hyfetch uses fastfetch as backend
                 ffStrbufEqualS(&result->processName, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
                 ffStrbufEqualS(&result->processName, "valgrind")            ||
                 ffStrbufEqualS(&result->processName, "fastfetch")           || //#994
@@ -74,17 +74,18 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
-    return ppid;
+    return pid > 1 ? ppid : 0;
 }
 
 static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 {
     pid_t ppid = 0;
 
-    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
     {
         //Known shells
         if (
+            pid == 1 || // init/systemd
             ffStrbufEqualS(&result->processName, "sudo")       ||
             ffStrbufEqualS(&result->processName, "su")         ||
             ffStrbufEqualS(&result->processName, "sh")         ||
@@ -109,8 +110,6 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             ffStrbufEqualS(&result->processName, "proot")      ||
             ffStrbufEqualS(&result->processName, "script")     ||
-            ffStrbufEqualS(&result->processName, "init")       ||
-            ffStrbufEqualS(&result->processName, "systemd")    ||
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif
@@ -145,7 +144,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
-    return ppid;
+    return pid > 1 ? ppid : 0;
 }
 
 static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv)

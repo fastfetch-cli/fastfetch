@@ -83,11 +83,11 @@ static void xcbDetectWMfromEWMH(XcbPropertyData* data, xcb_connection_t* connect
     if(wmWindow == NULL)
         return;
 
-    FF_AUTO_FREE char* wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "_NET_WM_NAME");
-    if(wmName == NULL)
-        wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "WM_NAME");
+    FF_AUTO_FREE char* wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "WM_NAME");
+    if(!ffStrSet(wmName))
+        wmName = (char*) xcbGetProperty(data, connection, *wmWindow, "_NET_WM_NAME");
 
-    if(wmName == NULL || *wmName == '\0')
+    if(!ffStrSet(wmName))
         return;
 
     ffStrbufSetS(&result->wmProcessName, wmName);

@@ -4,7 +4,7 @@
 
 #define FF_BATTERY_MODULE_NAME "Battery"
 
-void ffPrintBattery(FFBatteryOptions* options);
+bool ffPrintBattery(FFBatteryOptions* options);
 void ffInitBatteryOptions(FFBatteryOptions* options);
 void ffDestroyBatteryOptions(FFBatteryOptions* options);
 
