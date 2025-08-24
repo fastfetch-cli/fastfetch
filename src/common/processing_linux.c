@@ -465,30 +465,23 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     }
     else
     {
-        #ifndef __GNU__
-        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int)pid);
+        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/"
+        #if __GNU__
+            "cmdline"
+        #else
+            "comm"
+        #endif
+        , (int)pid);
         ssize_t nRead = ffReadFileBuffer(procFilePath, name);
         if(nRead <= 0)
-            return "ffReadFileBuffer(/proc/pid/comm, name) failed";
+            return "ffReadFileBuffer(/proc/pid/"
+            #if __GNU__
+                "cmdline"
+            #else
+                "comm"
+            #endif
+            ", name) failed";
         ffStrbufTrimRightSpace(name);
-        #else
-        // No /proc/1/comm on Hurd so read /proc/1/stat again
-        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
-        char buf[PROC_FILE_BUFFSIZ];
-        ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
-        if(nRead <= 8)
-            return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
-        buf[nRead] = '\0';
-
-        ffStrbufEnsureFixedLengthFree(name, 255);
-        if(
-            sscanf(buf, "%*s (%255[^)]) %*c %*d %*d %*d %*d", name->chars) == 0 || //stat (comm) state ppid pgrp session tty
-            name->chars[0] == '\0'
-        )
-            return "sscanf(stat) failed";
-
-        ffStrbufRecalculateLength(name);
-        #endif
     }
 
     #elif defined(__APPLE__)
