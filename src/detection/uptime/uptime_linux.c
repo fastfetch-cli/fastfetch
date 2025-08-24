@@ -33,6 +33,8 @@ const char* ffDetectUptime(FFUptimeResult* result)
 
     result->uptime = (uint64_t) uptime.tv_sec * 1000 + (uint64_t) uptime.tv_nsec / 1000000;
     result->bootTime = ffTimeGetNow() - result->uptime;
-    #endif
     return NULL;
+    #else
+    return "read(/proc/uptime) failed";
+    #endif
 }

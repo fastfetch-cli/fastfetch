@@ -29,8 +29,7 @@
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__) || defined(__HAIKU__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
-#elif defined(__GNU__)
-#else
+#elif !defined(__GNU__)
 #include <netpacket/packet.h>
 #endif
 #if defined(__sun) || defined(__HAIKU__)
