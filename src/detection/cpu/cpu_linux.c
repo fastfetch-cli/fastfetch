@@ -46,9 +46,13 @@ static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
 
     if(
         ffStrbufContainS(buffer, "cpu") ||
+        #if __x86_64__ || __i386__
         ffStrbufEqualS(buffer, "k10temp") || // AMD
         ffStrbufEqualS(buffer, "fam15h_power") || // AMD
         ffStrbufEqualS(buffer, "coretemp") // Intel
+        #else
+        ffStrbufEqualS(buffer, "temp") // Asahi
+        #endif
     ) return value / 1000.;
 
     return FF_CPU_TEMP_UNSET;
@@ -733,6 +737,8 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
 
     if (cpu->coresPhysical == 0)
         detectPhysicalCores(cpu);
+
+    ffCPUDetectByCpuid(cpu);
 
     return NULL;
 }
