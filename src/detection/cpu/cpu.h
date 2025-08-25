@@ -97,7 +97,7 @@ inline static void ffCPUDetectByCpuid(FFCPUResult* cpu)
 
 #else
 
-inline static void ffCPUDetectByCpuid(FFCPUResult* cpu)
+inline static void ffCPUDetectByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
 {
     // Unsupported platform
 }

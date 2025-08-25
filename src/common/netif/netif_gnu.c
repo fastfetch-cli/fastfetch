@@ -9,7 +9,6 @@
 
 bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 {
-    // Based on netif_linux.c before 5e770dc8b019702ca458cc0cad46161ebec608a4
     FILE* FF_AUTO_CLOSE_FILE netRoute = fopen("/proc/route", "r");
 
     if (!netRoute) return false;
@@ -31,5 +30,6 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
 {
     // TODO: AF_INET6
+    FF_UNUSED(result);
     return false;
 }
