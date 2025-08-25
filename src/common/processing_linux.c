@@ -439,57 +439,60 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     #if defined(__linux__) || defined(__GNU__)
 
     char procFilePath[64];
-    if (ppid)
+    #if __linux__
+    if (ppid || tty)
+    #endif
     {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
         char buf[PROC_FILE_BUFFSIZ];
         ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
         if(nRead <= 8)
             return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
-        buf[nRead] = '\0';
+        buf[nRead] = '\0'; // pid (comm) state ppid pgrp session tty
 
-        *ppid = 0;
-        static_assert(sizeof(*ppid) == sizeof(int), "");
+        const char* pState = NULL;
 
-        ffStrbufEnsureFixedLengthFree(name, 255);
-        int tty_;
-        if(
-            sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name->chars, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
-            name->chars[0] == '\0'
-        )
-            return "sscanf(stat) failed";
+        {
+            // comm in `/proc/pid/stat` is not encoded, and may contain ' ', ')' or even `\n`
+            const char* start = memchr(buf, '(', (size_t) nRead);
+            if (!start)
+                return "memchr(stat, '(') failed";
+            start++;
+            const char* end = memrchr(start, ')', (size_t) nRead - (size_t) (start - buf));
+            if (!end)
+                return "memrchr(stat, ')') failed";
+            ffStrbufSetNS(name, (uint32_t) (end - start), start);
+            ffStrbufTrimRightSpace(name);
+            pState = end + 2; // skip ") "
+        }
 
-        ffStrbufRecalculateLength(name);
-        if (tty)
-            *tty = tty_ & 0xFF;
+        #if !__linux__
+        if (ppid || tty)
+        #endif
+        {
+            int ppid_, tty_;
+            if(
+                sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2 ||
+                name->chars[0] == '\0'
+            )
+                return "sscanf(stat) failed";
+
+            if (ppid)
+                *ppid = (pid_t) ppid_;
+            if (tty)
+                *tty = tty_ & 0xFF;
+        }
     }
+    #if __linux__
     else
     {
-        #ifndef __GNU__
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int)pid);
         ssize_t nRead = ffReadFileBuffer(procFilePath, name);
         if(nRead <= 0)
             return "ffReadFileBuffer(/proc/pid/comm, name) failed";
         ffStrbufTrimRightSpace(name);
-        #else
-        // No /proc/1/comm on Hurd so read /proc/1/stat again
-        snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
-        char buf[PROC_FILE_BUFFSIZ];
-        ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
-        if(nRead <= 8)
-            return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
-        buf[nRead] = '\0';
-
-        const char* start = memchr(buf, '(', (size_t) nRead);
-        if (!start)
-            return "memchr(stat, '(') failed";
-        start++;
-        const char* end = memchr(start, ')', (size_t) nRead - (size_t) (start - buf));
-        if (!end)
-            return "memchr(stat, ')') failed";
-        ffStrbufSetNS(name, (uint32_t) (end - start), start);
-        #endif
     }
+    #endif
 
     #elif defined(__APPLE__)
 
