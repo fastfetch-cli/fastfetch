@@ -10,7 +10,7 @@
     #define setutxent setutent
     #define getutxent getutent
 #endif
-#ifdef __linux__
+#if __linux__ || __GNU__
     #include <netinet/in.h>
     #include <arpa/inet.h>
 #endif
@@ -40,7 +40,7 @@ next:
         ffStrbufInitS(&user->hostName, n->ut_host);
         ffStrbufInitS(&user->sessionName, n->ut_line);
         ffStrbufInit(&user->clientIp);
-        #ifdef __linux__
+        #if __linux__ || __GNU__
         bool isIpv6 = false;
         for (int i = 1; i < 4; ++i) {
             if (n->ut_addr_v6[i] != 0) {

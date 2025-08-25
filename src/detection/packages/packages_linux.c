@@ -517,7 +517,6 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
     #endif
 
     ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
-
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
         // Count packages from $HOME/.nix-profile

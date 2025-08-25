@@ -29,7 +29,7 @@
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE__) || defined(__NetBSD__) || defined(__HAIKU__)
 #include <net/if_media.h>
 #include <net/if_dl.h>
-#else
+#elif !defined(__GNU__)
 #include <netpacket/packet.h>
 #endif
 #if defined(__sun) || defined(__HAIKU__)
@@ -69,12 +69,14 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
 #ifdef IFF_NOTRAILERS
     FF_LOCALIP_NIFLAG(NOTRAILERS),
 #endif
-#ifdef __linux__
+#if defined( __linux__) || defined (__GNU__)
     FF_LOCALIP_NIFLAG(MASTER),
     FF_LOCALIP_NIFLAG(SLAVE),
     FF_LOCALIP_NIFLAG(PORTSEL),
     FF_LOCALIP_NIFLAG(AUTOMEDIA),
     FF_LOCALIP_NIFLAG(DYNAMIC),
+#endif
+#ifdef __linux__
     FF_LOCALIP_NIFLAG(LOWER_UP),
     FF_LOCALIP_NIFLAG(DORMANT),
     FF_LOCALIP_NIFLAG(ECHO),
@@ -396,7 +398,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 adapter->mac = ifa;
                 FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
                 break;
-            #elif !__sun
+            #elif !__sun && !__GNU__
             case AF_PACKET:
                 adapter->mac = ifa;
                 FF_DEBUG("Updated MAC entry for interface %s", ifa->ifa_name);
@@ -543,7 +545,7 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
             }
         }
     mac:
-        #ifndef __sun
+        #if !defined( __sun)  && !defined(__GNU__)
         if (options->showType & FF_LOCALIP_TYPE_MAC_BIT)
         {
             if (adapter->mac->ifa_addr)
@@ -1006,14 +1008,16 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     #endif
                 }
 
-                #ifdef __sun
+                #if __sun || __GNU__
                 if ((options->showType & FF_LOCALIP_TYPE_MAC_BIT) && ioctl(sockfd, SIOCGIFHWADDR, &ifr) == 0)
                 {
                     const uint8_t* ptr = (uint8_t*) ifr.ifr_addr.sa_data; // NOT ifr_enaddr
                     ffStrbufSetF(&iface->mac, "%02x:%02x:%02x:%02x:%02x:%02x",
                                 ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5]);
-                    FF_DEBUG("Added MAC address %s for interface %s (Solaris)", iface->mac.chars, iface->name.chars);
+                    FF_DEBUG("Added MAC address %s for interface %s (Solaris/GNU)", iface->mac.chars, iface->name.chars);
                 }
+                #endif
+                #if __sun
                 if (options->showType & FF_LOCALIP_TYPE_SPEED_BIT)
                 {
                     __attribute__((__cleanup__(kstatFreeWrap))) kstat_ctl_t* kc = kstat_open();

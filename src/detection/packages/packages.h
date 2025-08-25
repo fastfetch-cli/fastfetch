@@ -55,7 +55,7 @@ const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* option
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result);
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements);
 
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(__linux__) || defined(__APPLE__) || defined(__GNU__)
 uint32_t ffPackagesGetNix(FFstrbuf* baseDir, const char* dirname);
 #endif
 #ifndef _WIN32

@@ -48,7 +48,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
 
     if (instance.config.general.detectVersion)
     {
-        #if __linux__ && !__ANDROID__
+        #if (defined(__linux__) && !defined(__ANDROID__)) || defined(__GNU__)
         if (ffStrbufEqualS(&result->name, "systemd"))
         {
             ffBinaryExtractStrings(result->exe.chars, extractSystemdVersion, &result->version, (uint32_t) strlen("systemd 0.0 running in x"));
@@ -81,6 +81,20 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                 // Dinit version 0.18.0.
                 ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufTrimRight(&result->version, '.');
+                ffStrbufSubstrAfterLastC(&result->version, ' ');
+            }
+        }
+        else if (ffStrbufEqualS(&result->name, "guile"))
+        {
+            // TODO: guile is actually shepherd
+            if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+                ffStrbufEndsWithS(&result->exe, "/guile") ? result->exe.chars : "guile",
+                "--version",
+                NULL,
+            }) == NULL && result->version.length)
+            {
+                // guile (GNU Guile) 3.0.9
+                ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
         }

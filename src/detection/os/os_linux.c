@@ -370,7 +370,7 @@ void ffDetectOSImpl(FFOSResult* os)
 {
     detectOS(os);
 
-    #ifdef __linux__
+    #if __linux__ || __GNU__
     if(ffStrbufEqualS(&os->id, "ubuntu"))
         getUbuntuFlavour(os);
     else if(ffStrbufEqualS(&os->id, "debian"))

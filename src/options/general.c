@@ -30,7 +30,7 @@ const char* ffOptionsParseGeneralJsonConfig(FFOptionsGeneral* options, yyjson_va
         else if (unsafe_yyjson_equals_str(key, "detectVersion"))
             options->detectVersion = yyjson_get_bool(val);
 
-        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+        #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
         else if (unsafe_yyjson_equals_str(key, "playerName"))
             ffStrbufSetJsonVal(&options->playerName, val);
         else if (unsafe_yyjson_equals_str(key, "dsForceDrm"))
@@ -73,7 +73,7 @@ bool ffOptionsParseGeneralCommandLine(FFOptionsGeneral* options, const char* key
     else if(ffStrEqualsIgnCase(key, "--detect-version"))
         options->detectVersion = ffOptionParseBoolean(value);
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
     else if(ffStrEqualsIgnCase(key, "--player-name"))
         ffOptionParseString(key, value, &options->playerName);
     else if(ffStrEqualsIgnCase(key, "--ds-force-drm"))
@@ -102,7 +102,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
     options->multithreading = true;
     options->detectVersion = true;
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
     ffStrbufInit(&options->playerName);
     options->dsForceDrm = FF_DS_FORCE_DRM_TYPE_FALSE;
     #elif defined(_WIN32)
@@ -112,7 +112,7 @@ void ffOptionsInitGeneral(FFOptionsGeneral* options)
 
 void ffOptionsDestroyGeneral(FF_MAYBE_UNUSED FFOptionsGeneral* options)
 {
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
     ffStrbufDestroy(&options->playerName);
     #endif
 }
@@ -127,7 +127,7 @@ void ffOptionsGenerateGeneralJsonConfig(FFOptionsGeneral* options, yyjson_mut_do
 
     yyjson_mut_obj_add_bool(doc, obj, "detectVersion", options->detectVersion);
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__) || defined(__GNU__)
 
     yyjson_mut_obj_add_strbuf(doc, obj, "playerName", &options->playerName);
 
