@@ -4,6 +4,7 @@
 #include "util/stringUtils.h"
 
 #include <libgen.h>
+#include <string.h>
 #include <unistd.h>
 
 FF_MAYBE_UNUSED static bool extractSystemdVersion(const char* str, uint32_t len, void* userdata)
@@ -37,6 +38,20 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
     ffProcessGetInfoLinux((int) result->pid, &result->name, &result->exe, &_, NULL);
     if (result->exe.chars[0] == '/')
     {
+        if (ffStrbufEqualS(&result->name, "shepherd") ||
+            ffStrbufEqualS(&result->name, "guile"))
+        {
+          // guile --no-auto-compile shepherd
+          // find the shepherd script in /proc/1/cmdline
+            const char* tmp = result->exe.chars;
+            while(!ffStrbufEndsWithS(&result->exe, "/shepherd"))
+            {
+                tmp += result->exe.length + 1;
+                memmove(result->exe.chars, tmp, strlen(tmp) + 1);
+                ffStrbufRecalculateLength(&result->exe);
+            }
+        }
+
         // In some old system, /sbin/init is a symlink
         char buf[PATH_MAX];
         if (realpath(result->exe.chars, buf))
@@ -84,16 +99,19 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
         }
-        else if (ffStrbufEqualS(&result->name, "guile"))
+        else if (ffStrbufEqualS(&result->name, "shepherd"))
         {
-            // TODO: guile is actually shepherd
-            if (ffProcessAppendStdOut(&result->version, (char* const[]) {
-                ffStrbufEndsWithS(&result->exe, "/guile") ? result->exe.chars : "guile",
-                "--version",
+           if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+              ffStrbufEndsWithS(&result->exe, "/shepherd") ? result->exe.chars : "shepherd",
+              "--version",
                 NULL,
             }) == NULL && result->version.length)
             {
-                // guile (GNU Guile) 3.0.9
+                // shepherd (GNU Shepherd) 1.0.6
+                // The first line in the output might not contain the version
+                if (!ffStrbufStartsWithS(&result->version, "shepherd"))
+                    ffStrbufSubstrAfterFirstC(&result->version, '\n');
+
                 ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
