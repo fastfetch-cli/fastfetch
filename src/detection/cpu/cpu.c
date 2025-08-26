@@ -422,14 +422,128 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
 
     #undef HAS_CAP
 }
+#elif _WIN32
+#include <processthreadsapi.h>
+
+// Missing from winnt.h of MinGW-w64
+#define PF_ARM_LSE2_AVAILABLE                       62
+#define PF_RESERVED_FEATURE                         63
+#define PF_ARM_SHA3_INSTRUCTIONS_AVAILABLE          64
+#define PF_ARM_SHA512_INSTRUCTIONS_AVAILABLE        65
+#define PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE      66
+#define PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE      67
+#define PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE      68
+#define PF_ARM_V86_EBF16_INSTRUCTIONS_AVAILABLE     69
+#define PF_ARM_SME_INSTRUCTIONS_AVAILABLE           70
+#define PF_ARM_SME2_INSTRUCTIONS_AVAILABLE          71
+#define PF_ARM_SME2_1_INSTRUCTIONS_AVAILABLE        72
+#define PF_ARM_SME2_2_INSTRUCTIONS_AVAILABLE        73
+#define PF_ARM_SME_AES_INSTRUCTIONS_AVAILABLE       74
+#define PF_ARM_SME_SBITPERM_INSTRUCTIONS_AVAILABLE  75
+#define PF_ARM_SME_SF8MM4_INSTRUCTIONS_AVAILABLE    76
+#define PF_ARM_SME_SF8MM8_INSTRUCTIONS_AVAILABLE    77
+#define PF_ARM_SME_SF8DP2_INSTRUCTIONS_AVAILABLE    78
+#define PF_ARM_SME_SF8DP4_INSTRUCTIONS_AVAILABLE    79
+#define PF_ARM_SME_SF8FMA_INSTRUCTIONS_AVAILABLE    80
+#define PF_ARM_SME_F8F32_INSTRUCTIONS_AVAILABLE     81
+#define PF_ARM_SME_F8F16_INSTRUCTIONS_AVAILABLE     82
+#define PF_ARM_SME_F16F16_INSTRUCTIONS_AVAILABLE    83
+#define PF_ARM_SME_B16B16_INSTRUCTIONS_AVAILABLE    84
+#define PF_ARM_SME_F64F64_INSTRUCTIONS_AVAILABLE    85
+#define PF_ARM_SME_I16I64_INSTRUCTIONS_AVAILABLE    86
+#define PF_ARM_SME_LUTv2_INSTRUCTIONS_AVAILABLE     87
+#define PF_ARM_SME_FA64_INSTRUCTIONS_AVAILABLE      88
+
+void ffCPUDetectByCpuid(FFCPUResult* cpu)
+{
+    // ARMv8-A
+    bool has_vfp       = IsProcessorFeaturePresent(PF_ARM_VFP_32_REGISTERS_AVAILABLE); // Implies basic FP support
+    bool has_neon      = IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE); // NEON (ASIMD)
+
+    // ARMv8.1-A
+    bool has_atomics   = IsProcessorFeaturePresent(PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE); // LSE atomics
+    bool has_crc32     = IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE); // CRC32
+
+    // ARMv8.2-A
+    bool has_fp16      = IsProcessorFeaturePresent(PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE); // Half-precision FP
+
+    // ARMv8.3-A
+    bool has_lrcpc     = IsProcessorFeaturePresent(PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE); // LDAPR/LR with RCPC semantics
+    bool has_jscvt     = IsProcessorFeaturePresent(PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE); // FJCVTZS
+
+    // ARMv8.4-A
+    // My CPU (Apple M1 Pro in VM) does support LSE2, but Windows doesn't detect it for some reason
+    // bool has_lse2      = IsProcessorFeaturePresent(PF_ARM_LSE2_AVAILABLE); // Large System Extensions version 2, optional from v8.2
+    bool has_dp        = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE); // DotProd, optional from v8.1 (*)
+
+    // ARMv9.0-A
+    bool has_sve2      = IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE); // SVE2
+
+    // ARMv9.1-A
+    // ARMv8.6-A
+    bool has_bf16      = IsProcessorFeaturePresent(PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE); // BF16, optional from v8.2
+    bool has_i8mm      = IsProcessorFeaturePresent(PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE); // Int8 matrix multiply, optional from v8.2
+
+    // ARMv8.7-A
+    bool has_ebf16     = IsProcessorFeaturePresent(PF_ARM_V86_EBF16_INSTRUCTIONS_AVAILABLE); // Extended BFloat16 behaviors, optional from v8.2
+
+    // ARMv9.2-A
+    bool has_sme       = IsProcessorFeaturePresent(PF_ARM_SME_INSTRUCTIONS_AVAILABLE); // SME
+
+    // ARMv9.3-A
+    bool has_sme2      = IsProcessorFeaturePresent(PF_ARM_SME2_INSTRUCTIONS_AVAILABLE); // SME2
+
+    // ARMv9.4-A
+    bool has_sme2p1    = IsProcessorFeaturePresent(PF_ARM_SME2_1_INSTRUCTIONS_AVAILABLE); // SME2.1
+
+
+    if (has_sve2 || has_sme)
+    {
+        // ARMv9 family
+        if (has_sme2p1) {
+            cpu->march = "ARMv9.4-A";
+        } else if (has_sme2) {
+            cpu->march = "ARMv9.3-A";
+        } else if (has_sme) {
+            cpu->march = "ARMv9.2-A";
+        } else if (has_i8mm && has_bf16) {
+            cpu->march = "ARMv9.1-A";
+        } else {
+            cpu->march = "ARMv9.0-A";
+        }
+    }
+    else
+    {
+        // ARMv8 family
+        if (has_ebf16) {
+            cpu->march = "ARMv8.7-A";
+        } else if (has_i8mm && has_bf16) {
+            cpu->march = "ARMv8.6-A";
+        } else if (has_dp) {
+            cpu->march = "ARMv8.4-A";
+        } else if (has_lrcpc && has_jscvt) {
+            cpu->march = "ARMv8.3-A";
+        } else if (has_fp16) {
+            cpu->march = "ARMv8.2-A";
+        } else if (has_atomics && has_crc32) {
+            cpu->march = "ARMv8.1-A";
+        } else if (has_neon && has_vfp) {
+            cpu->march = "ARMv8-A";
+        }
+    }
+}
 #else
-#endif // __linux__
+void ffCPUDetectByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
+{
+    // Unsupported system
+}
+#endif
 
 #else
 
 void ffCPUDetectByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
 {
-    // Unsupported platform
+    // Unsupported architecture
 }
 
 #endif
