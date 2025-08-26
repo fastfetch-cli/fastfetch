@@ -72,7 +72,6 @@ static const char* detectFrequency(FFCPUResult* cpu)
 #else
 static const char* detectFrequency(FFCPUResult* cpu)
 {
-    ffCPUDetectByCpuid(cpu);
     cpu->frequencyBase = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency", 0) / 1000 / 1000);
     cpu->frequencyMax = (uint32_t) (ffSysctlGetInt64("hw.cpufrequency_max", 0) / 1000 / 1000);
     if(cpu->frequencyBase == 0)
@@ -127,6 +126,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if(cpu->coresOnline == 1)
         cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
+    ffCPUDetectByCpuid(cpu);
     detectFrequency(cpu);
     if (options->showPeCoreCount) detectCoreCount(cpu);
 
