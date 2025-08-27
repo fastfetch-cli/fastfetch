@@ -241,8 +241,35 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
 
     if(ffReadFileBuffer(filePath, exe))
     {
-        ffStrbufRecalculateLength(exe); //Trim the arguments
-        ffStrbufTrimRightSpace(exe);
+        const char* p = exe->chars;
+        uint32_t len = (uint32_t) strlen(p);
+
+        if (len + 1 < exe->length)
+        {
+            const char* name = memrchr(p, '/', len);
+            if (name) name++; else name = p;
+
+            // For interpreters, try to find the real script path in the arguments
+            if (ffStrStartsWith(name, "python")
+                #ifndef __ANDROID__
+                || ffStrEquals(name, "guile") // for shepherd
+                #endif
+            )
+            {
+                // `cmdline` always ends with a trailing '\0', and ffReadFileBuffer appends another \0
+                // So `exe->chars` is always double '\0' terminated
+                for (p = p + len + 1; *p && *p == '-'; p += strlen(p) + 1) // Skip arguments
+                    assert(p - exe->chars < exe->allocated);
+                if (*p)
+                {
+                    len = (uint32_t) strlen(p);
+                    memmove(exe->chars, p, len + 1);
+                }
+            }
+        }
+
+        assert(len < exe->allocated);
+        exe->length = len;
         ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
     }
 
@@ -463,6 +490,8 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
                 return "memrchr(stat, ')') failed";
             ffStrbufSetNS(name, (uint32_t) (end - start), start);
             ffStrbufTrimRightSpace(name);
+            if (name->chars[0] == '\0')
+                return "process name is empty";
             pState = end + 2; // skip ") "
         }
 
@@ -471,10 +500,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
         #endif
         {
             int ppid_, tty_;
-            if(
-                sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2 ||
-                name->chars[0] == '\0'
-            )
+            if(sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2)
                 return "sscanf(stat) failed";
 
             if (ppid)

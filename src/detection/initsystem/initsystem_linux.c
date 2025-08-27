@@ -84,16 +84,19 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
         }
-        else if (ffStrbufEqualS(&result->name, "guile"))
+        else if (ffStrbufEqualS(&result->name, "shepherd"))
         {
-            // TODO: guile is actually shepherd
-            if (ffProcessAppendStdOut(&result->version, (char* const[]) {
-                ffStrbufEndsWithS(&result->exe, "/guile") ? result->exe.chars : "guile",
-                "--version",
+           if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+              ffStrbufEndsWithS(&result->exe, "/shepherd") ? result->exe.chars : "shepherd",
+              "--version",
                 NULL,
             }) == NULL && result->version.length)
             {
-                // guile (GNU Guile) 3.0.9
+                // shepherd (GNU Shepherd) 1.0.6
+                // The first line in the output might not contain the version
+                if (!ffStrbufStartsWithS(&result->version, "shepherd"))
+                    ffStrbufSubstrAfterFirstC(&result->version, '\n');
+
                 ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
