@@ -258,6 +258,8 @@ static uint32_t getAMSystem(FFstrbuf* baseDir)
 
 static uint32_t getAMUser(void)
 {
+    if (instance.state.platform.configDirs.length == 0) return 0;
+
     // check if $XDG_CONFIG_HOME/appman/appman-config exists
     FFstrbuf* baseDir = FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0);
     uint32_t baseLen = baseDir->length;

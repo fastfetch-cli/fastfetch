@@ -435,6 +435,12 @@ static void generateConfigFile(bool force, const char* filePath, bool fullConfig
 {
     if (!filePath)
     {
+        if (instance.state.platform.configDirs.length == 0)
+        {
+            fprintf(stderr, "Error: No config directory found to generate config file in. Use --gen-config <path> to specify a path\n");
+            exit(477);
+        }
+
         ffStrbufSet(&instance.state.genConfigPath, FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0));
         ffStrbufAppendS(&instance.state.genConfigPath, "fastfetch/config.jsonc");
     }
