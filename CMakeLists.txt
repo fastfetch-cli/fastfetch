@@ -599,7 +599,7 @@ elseif(ANDROID)
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
         src/detection/font/font_nosupport.c
-        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_android.c
         src/detection/host/host_android.c
         src/detection/icons/icons_nosupport.c
         src/detection/initsystem/initsystem_linux.c

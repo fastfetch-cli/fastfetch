@@ -116,6 +116,13 @@ const char* ffDetectGPU(const FFGPUOptions* options, FFlist* result)
         {
             ffListDestroy(result);
             ffListInitMove(result, &vulkan->gpus);
+
+            #ifdef __ANDROID__
+            double ffGPUDetectTempFromTZ(void);
+            if (options->temp && result->length == 1)
+                FF_LIST_GET(FFGPUResult, *result, 0)->temperature = ffGPUDetectTempFromTZ();
+            #endif
+
             return NULL;
         }
     }
