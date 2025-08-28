@@ -6,14 +6,14 @@
 
 static double parseTZDir(int dfd, FFstrbuf* buffer)
 {
-    if(!ffReadFileBufferRelative(dfd, "temp", buffer))
+    if (!ffReadFileBufferRelative(dfd, "type", buffer) || !ffStrbufStartsWithS(buffer, "gpu"))
+        return FF_GPU_TEMP_UNSET;
+
+    if (!ffReadFileBufferRelative(dfd, "temp", buffer))
         return FF_GPU_TEMP_UNSET;
 
     double value = ffStrbufToDouble(buffer, FF_GPU_TEMP_UNSET);// millidegree Celsius
-    if(value == FF_GPU_TEMP_UNSET)
-        return FF_GPU_TEMP_UNSET;
-
-    if (!ffReadFileBufferRelative(dfd, "type", buffer) || ffStrbufStartsWithS(buffer, "gpu"))
+    if (value == FF_GPU_TEMP_UNSET)
         return FF_GPU_TEMP_UNSET;
 
     return value / 1000.;

@@ -15,14 +15,22 @@
 
 static double parseTZDir(int dfd, FFstrbuf* buffer)
 {
-    if(!ffReadFileBufferRelative(dfd, "temp", buffer))
+    if (!ffReadFileBufferRelative(dfd, "type", buffer))
+        return FF_CPU_TEMP_UNSET;
+
+    if (!ffStrbufStartsWithS(buffer, "cpu") &&
+        !ffStrbufStartsWithS(buffer, "soc") &&
+        #if __x86_64__ || __i386__
+        !ffStrbufEqualS(buffer, "x86_pkg_temp") &&
+        #endif
+        true
+    ) return FF_CPU_TEMP_UNSET;
+
+    if (!ffReadFileBufferRelative(dfd, "temp", buffer))
         return FF_CPU_TEMP_UNSET;
 
     double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
-    if(value == FF_CPU_TEMP_UNSET)
-        return FF_CPU_TEMP_UNSET;
-
-    if (!ffReadFileBufferRelative(dfd, "type", buffer) || ffStrbufStartsWithS(buffer, "cpu"))
+    if (value == FF_CPU_TEMP_UNSET)
         return FF_CPU_TEMP_UNSET;
 
     return value / 1000.;
@@ -30,30 +38,30 @@ static double parseTZDir(int dfd, FFstrbuf* buffer)
 
 static double parseHwmonDir(int dfd, FFstrbuf* buffer)
 {
-    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
-    if(!ffReadFileBufferRelative(dfd, "temp1_input", buffer))
-        return FF_CPU_TEMP_UNSET;
-
-    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
-    if(value == FF_CPU_TEMP_UNSET)
-        return FF_CPU_TEMP_UNSET;
-
-    if (!ffReadFileBufferRelative(dfd, "temp1_label", buffer))
+    if (!ffReadFileBufferRelative(dfd, "name", buffer))
         return FF_CPU_TEMP_UNSET;
 
     ffStrbufTrimRightSpace(buffer);
 
-    if(
-        ffStrbufContainS(buffer, "cpu") ||
+    if (
+        !ffStrbufContainS(buffer, "cpu") &&
         #if __x86_64__ || __i386__
-        ffStrbufEqualS(buffer, "k10temp") || // AMD
-        ffStrbufEqualS(buffer, "fam15h_power") || // AMD
-        ffStrbufEqualS(buffer, "coretemp") || // Intel
+        !ffStrbufEqualS(buffer, "k10temp") && // AMD
+        !ffStrbufEqualS(buffer, "fam15h_power") && // AMD
+        !ffStrbufEqualS(buffer, "coretemp") && // Intel
         #endif
-        false
-    ) return value / 1000.;
+        true
+    ) return FF_CPU_TEMP_UNSET;
 
-    return FF_CPU_TEMP_UNSET;
+    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
+    if (!ffReadFileBufferRelative(dfd, "temp1_input", buffer))
+        return FF_CPU_TEMP_UNSET;
+
+    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
+    if (value == FF_CPU_TEMP_UNSET)
+        return FF_CPU_TEMP_UNSET;
+
+    return value / 1000.;
 }
 
 static double detectCPUTemp(void)
