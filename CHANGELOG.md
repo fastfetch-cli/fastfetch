@@ -1,3 +1,61 @@
+# 2.51.0
+
+Changes:
+* Fastfetch now requires [yyjson 0.12](https://github.com/ibireme/yyjson/releases/tag/0.12.0) to build when using `-DENABLE_SYSTEM_YYJSON=ON`.
+* The Disk module no longer shows hyperlink mountpoints by default, which cause issues on some real consoles (Disk)
+    * Instead, the custom key for the Disk module now supports `{mountpoint-link}` and `{name-link}` to show hyperlinks for mountpoints and names. For example, `{ "type": "disk", "key": "Disk ({mountpoint-link})" }` can be used to restore the old behavior.
+
+Features:
+* Adds `succeeded` module condition to JSONC config. When set to `false`, the module will only run if the last module failed (#1908)
+    * Useful for displaying fallback placeholders when a module fails. For example:
+```jsonc
+{
+    "host",
+    // If fastfetch fails to detect host info, display "DIY PC" instead
+    {
+        "type": "custom",
+        "condition": {
+            "succeeded": false
+        },
+        "key": "Host",
+        "format": "DIY PC"
+    }
+}
+```
+* By upgrading to yyjson 0.12, fastfetch now adds [JSON5](https://json5.org/) format support for configuration files (#1907)
+    * [JSON5](https://json5.org/) is a superset of JSONC that allows unquoted keys, single quotes, multi-line strings, etc., and is fully compatible with JSONC and strict JSON.
+    * To use JSON5, simply name your config file with a `.json5` extension. The `.jsonc` extension is still supported and used as the default extension for better IDE syntax highlighting support.
+* Fastfetch has been ported to [`GNU/Hurd`](https://www.gnu.org/software/hurd/) (#1895)
+    * Thanks to the efforts of @yelninei!
+* Built-in logos now honor `logo.width` (#1905)
+    * When its value is larger than the actual logo width, the logo will be padded with spaces to the right
+* Adds Trinity DE version detection (#1917, DE, Linux)
+* Adds formatted free and available disk size fields (#1929, Disk)
+    * `{size-free}`: free size of the disk
+    * `{size-available}`: available size of the disk
+    * See [askubuntu.com](https://askubuntu.com/questions/249387/df-h-used-space-avail-free-space-is-less-than-the-total-size-of-home) for the difference between free and available size
+* Adds [x86_64 micro-architecture level](https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels) detection (#1928, CPU)
+    * Useful when installing software that requires or is optimized for specific CPU features. E.g., [CachyOS](https://wiki.cachyos.org/features/optimized_repos/)
+    * Exposed via `{march}` in custom format
+* Adds [Aarch64 micro-architecture level](https://en.wikipedia.org/wiki/AArch64#Profiles) detection (CPU)
+    * Supported on Linux (including Android), macOS and Windows
+    * This is not fully accurate because there are many optional features across different levels, and not all levels are detectable.
+    * Exposed via `{march}` in custom format.
+* Adds shepherd detection support (InitSystem, Linux)
+
+Bugfixes:
+* Refines GPU detection logic to correctly handle virtual devices (#1920, GPU, Windows)
+* Fixes possible default route detection failure when the route table is very large (#1919, LocalIP, Linux)
+* Fastfetch now correctly parses `hwdata/pci.ids` files alongside `pciids/pci.ids` on FreeBSD when detecting GPU names (#1924, GPU, FreeBSD)
+* Fixes twin WM detection (#1917, WM, Linux)
+* Various fixes for Android support
+    * Corrects WM name for Android (WM, Android)
+    * Fixes battery temperature detection when running in ADB (Battery, Android)
+    * Adds CPU and GPU temperature detection support (CPU, Android)
+
+Logos:
+* Adds AerynOS
+
 # 2.50.2
 
 Bugfixes:
