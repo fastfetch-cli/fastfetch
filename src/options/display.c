@@ -492,9 +492,14 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
         options->pipe = ffOptionParseBoolean(value);
     else if(ffStrEqualsIgnCase(key, "--show-errors"))
         options->showErrors = ffOptionParseBoolean(value);
-    #ifndef NDEBUG
     else if(ffStrEqualsIgnCase(key, "--debug"))
+    #ifndef NDEBUG
         options->debugMode = ffOptionParseBoolean(value);
+    #else
+    {
+        fprintf(stderr, "--debug is only available in debug builds\n");
+        exit(477);
+    }
     #endif
     else if(ffStrEqualsIgnCase(key, "--disable-linewrap"))
         options->disableLinewrap = ffOptionParseBoolean(value);
