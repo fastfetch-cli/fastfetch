@@ -1,3 +1,8 @@
+# 2.51.1
+
+Bugfixes:
+* Fix building on macOS 14 or older; no functional changes (CPU, macOS)
+
 # 2.51.0
 
 Changes:
