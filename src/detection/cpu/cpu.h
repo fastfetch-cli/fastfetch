@@ -15,6 +15,7 @@ typedef struct FFCPUResult
 {
     FFstrbuf name;
     FFstrbuf vendor;
+    const char* march; // Microarchitecture
 
     uint16_t packages;
     uint16_t coresPhysical;
@@ -32,29 +33,4 @@ typedef struct FFCPUResult
 const char* ffDetectCPU(const FFCPUOptions* options, FFCPUResult* cpu);
 const char* ffCPUAppleCodeToName(uint32_t code);
 const char* ffCPUQualcommCodeToName(uint32_t code);
-
-#if defined(__x86_64__) || defined(__i386__)
-
-#include <cpuid.h>
-
-// WARNING: CPUID may report frequencies of efficient cores
-inline static const char* ffCPUDetectSpeedByCpuid(FFCPUResult* cpu)
-{
-    uint32_t base = 0, max = 0, bus = 0, unused = 0;
-    if (!__get_cpuid(0x16, &base, &max, &bus, &unused))
-        return "Unsupported instruction";
-
-    // cpuid returns 0 MHz when hyper-v is enabled
-    if (base) cpu->frequencyBase = base;
-    if (max) cpu->frequencyMax = max;
-    return NULL;
-}
-
-#else
-
-inline static const char* ffCPUDetectSpeedByCpuid(FF_MAYBE_UNUSED FFCPUResult* cpu)
-{
-    return "Unsupported platform";
-}
-
-#endif
+void ffCPUDetectByCpuid(FFCPUResult* cpu);

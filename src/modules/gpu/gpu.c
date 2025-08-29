@@ -159,14 +159,14 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     }
 }
 
-void ffPrintGPU(FFGPUOptions* options)
+bool ffPrintGPU(FFGPUOptions* options)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);
     if (error)
     {
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     FF_LIST_AUTO_DESTROY selectedGPUs;
@@ -200,6 +200,8 @@ void ffPrintGPU(FFGPUOptions* options)
         ffStrbufDestroy(&gpu->platformApi);
         ffStrbufDestroy(&gpu->memoryType);
     }
+
+    return true;
 }
 
 void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
@@ -313,14 +315,14 @@ void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -408,6 +410,8 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         ffStrbufDestroy(&gpu->platformApi);
         ffStrbufDestroy(&gpu->memoryType);
     }
+
+    return true;
 }
 
 void ffInitGPUOptions(FFGPUOptions* options)

@@ -518,8 +518,9 @@ jobs:
           usesh: true
           prepare: |
             uname -a
+            pkg install pkg:/package/pkg
             pkg update --accept
-            pkg install gcc13 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
+            pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
 
           run: |
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
@@ -650,7 +651,6 @@ jobs:
   dragonfly-amd64:
     name: DragonFly-amd64
     runs-on: ubuntu-latest
-    if: false
     permissions:
       security-events: write
       contents: read

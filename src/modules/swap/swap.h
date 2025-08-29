@@ -4,7 +4,7 @@
 
 #define FF_SWAP_MODULE_NAME "Swap"
 
-void ffPrintSwap(FFSwapOptions* options);
+bool ffPrintSwap(FFSwapOptions* options);
 void ffInitSwapOptions(FFSwapOptions* options);
 void ffDestroySwapOptions(FFSwapOptions* options);
 

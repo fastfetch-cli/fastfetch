@@ -4,7 +4,7 @@
 
 #define FF_TERMINALTHEME_MODULE_NAME "TerminalTheme"
 
-void ffPrintTerminalTheme(FFTerminalThemeOptions* options);
+bool ffPrintTerminalTheme(FFTerminalThemeOptions* options);
 void ffInitTerminalThemeOptions(FFTerminalThemeOptions* options);
 void ffDestroyTerminalThemeOptions(FFTerminalThemeOptions* options);
 

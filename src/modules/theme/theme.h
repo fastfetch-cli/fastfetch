@@ -4,7 +4,7 @@
 
 #define FF_THEME_MODULE_NAME "Theme"
 
-void ffPrintTheme(FFThemeOptions* options);
+bool ffPrintTheme(FFThemeOptions* options);
 void ffInitThemeOptions(FFThemeOptions* options);
 void ffDestroyThemeOptions(FFThemeOptions* options);
 

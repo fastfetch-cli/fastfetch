@@ -76,7 +76,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     }
 }
 
-void ffPrintZpool(FFZpoolOptions* options)
+bool ffPrintZpool(FFZpoolOptions* options)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFZpoolResult));
 
@@ -85,12 +85,12 @@ void ffPrintZpool(FFZpoolOptions* options)
     if (error)
     {
         ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
     if(results.length == 0)
     {
         ffPrintError(FF_ZPOOL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No zpool found");
-        return;
+        return false;
     }
 
     for(uint32_t i = 0; i < results.length; i++)
@@ -105,6 +105,7 @@ void ffPrintZpool(FFZpoolOptions* options)
         ffStrbufDestroy(&result->name);
         ffStrbufDestroy(&result->state);
     }
+    return true;
 }
 
 void ffParseZpoolJsonObject(FFZpoolOptions* options, yyjson_val* module)
@@ -130,7 +131,7 @@ void ffGenerateZpoolJsonConfig(FFZpoolOptions* options, yyjson_mut_doc* doc, yyj
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFZpoolResult));
 
@@ -138,7 +139,7 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -162,6 +163,7 @@ void ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
         ffStrbufDestroy(&zpool->name);
         ffStrbufDestroy(&zpool->state);
     }
+    return true;
 }
 
 void ffInitZpoolOptions(FFZpoolOptions* options)

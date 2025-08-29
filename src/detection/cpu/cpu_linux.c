@@ -13,87 +13,129 @@
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
 
-static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
+static double parseTZDir(int dfd, FFstrbuf* buffer)
 {
-    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
-    uint32_t dirLength = dir->length;
-    ffStrbufAppendS(dir, "temp1_input");
-
-    if(!ffReadFileBuffer(dir->chars, buffer))
-    {
-        // Some badly implemented system put temp file in /hwmonN/device
-        ffStrbufSubstrBefore(dir, dirLength);
-        ffStrbufAppendS(dir, "device/");
-        dirLength = dir->length;
-        ffStrbufAppendS(dir, "temp1_input");
-
-        if(!ffReadFileBuffer(dir->chars, buffer))
-            return FF_CPU_TEMP_UNSET;
-    }
-
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
-
-    if(value == FF_CPU_TEMP_UNSET)
+    if (!ffReadFileBufferRelative(dfd, "type", buffer))
         return FF_CPU_TEMP_UNSET;
 
-    ffStrbufAppendS(dir, "name");
-    if (!ffReadFileBuffer(dir->chars, buffer))
+    if (!ffStrbufStartsWithS(buffer, "cpu") &&
+        !ffStrbufStartsWithS(buffer, "soc") &&
+        #if __x86_64__ || __i386__
+        !ffStrbufEqualS(buffer, "x86_pkg_temp") &&
+        #endif
+        true
+    ) return FF_CPU_TEMP_UNSET;
+
+    if (!ffReadFileBufferRelative(dfd, "temp", buffer))
+        return FF_CPU_TEMP_UNSET;
+
+    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
+    if (value == FF_CPU_TEMP_UNSET)
+        return FF_CPU_TEMP_UNSET;
+
+    return value / 1000.;
+}
+
+static double parseHwmonDir(int dfd, FFstrbuf* buffer)
+{
+    if (!ffReadFileBufferRelative(dfd, "name", buffer))
         return FF_CPU_TEMP_UNSET;
 
     ffStrbufTrimRightSpace(buffer);
 
-    if(
-        ffStrbufContainS(buffer, "cpu") ||
-        ffStrbufEqualS(buffer, "k10temp") || // AMD
-        ffStrbufEqualS(buffer, "fam15h_power") || // AMD
-        ffStrbufEqualS(buffer, "coretemp") // Intel
-    ) return value / 1000.;
+    if (
+        !ffStrbufContainS(buffer, "cpu") &&
+        #if __x86_64__ || __i386__
+        !ffStrbufEqualS(buffer, "k10temp") && // AMD
+        !ffStrbufEqualS(buffer, "fam15h_power") && // AMD
+        !ffStrbufEqualS(buffer, "coretemp") && // Intel
+        #endif
+        true
+    ) return FF_CPU_TEMP_UNSET;
 
-    return FF_CPU_TEMP_UNSET;
-}
+    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
+    if (!ffReadFileBufferRelative(dfd, "temp1_input", buffer))
+        return FF_CPU_TEMP_UNSET;
 
-static double detectTZTemp(FFstrbuf* buffer)
-{
-    if (ffReadFileBuffer("/sys/class/thermal/thermal_zone0/temp", buffer))
-    {
-        double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
-        return value != FF_CPU_TEMP_UNSET ? value / 1000. : FF_CPU_TEMP_UNSET;
-    }
-    return FF_CPU_TEMP_UNSET;
+    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
+    if (value == FF_CPU_TEMP_UNSET)
+        return FF_CPU_TEMP_UNSET;
+
+    return value / 1000.;
 }
 
 static double detectCPUTemp(void)
 {
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-    ffStrbufAppendS(&baseDir, "/sys/class/hwmon/");
-
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
-
-    uint32_t baseDirLength = baseDir.length;
-
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
-    if(dirp == NULL)
-        return FF_CPU_TEMP_UNSET;
-
-    struct dirent* entry;
-    while((entry = readdir(dirp)) != NULL)
     {
-        if(entry->d_name[0] == '.')
-            continue;
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/hwmon/");
+        if(dirp)
+        {
+            int dfd = dirfd(dirp);
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(entry->d_name[0] == '.')
+                    continue;
 
-        ffStrbufAppendS(&baseDir, entry->d_name);
-        ffStrbufAppendC(&baseDir, '/');
+                FF_AUTO_CLOSE_FD int subfd = openat(dfd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+                if(subfd < 0)
+                    continue;
 
-        double result = parseHwmonDir(&baseDir, &buffer);
-        if (result != FF_CPU_TEMP_UNSET)
-            return result;
+                double result = parseHwmonDir(subfd, &buffer);
+                if (result != FF_CPU_TEMP_UNSET)
+                    return result;
+            }
+        }
+    }
+    {
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/thermal/");
+        if(dirp)
+        {
+            int dfd = dirfd(dirp);
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(entry->d_name[0] == '.')
+                    continue;
+                if(!ffStrStartsWith(entry->d_name, "thermal_zone"))
+                    continue;
 
-        ffStrbufSubstrBefore(&baseDir, baseDirLength);
+                FF_AUTO_CLOSE_FD int subfd = openat(dfd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+                if(subfd < 0)
+                    continue;
+
+                double result = parseTZDir(subfd, &buffer);
+                if (result != FF_CPU_TEMP_UNSET)
+                    return result;
+            }
+        }
+    }
+    {
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/devices/platform/");
+        if(dirp)
+        {
+            int dfd = dirfd(dirp);
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(entry->d_name[0] == '.')
+                    continue;
+                if(!ffStrStartsWith(entry->d_name, "cputemp."))
+                    continue;
+
+                FF_AUTO_CLOSE_FD int subfd = openat(dfd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+                if(subfd < 0)
+                    continue;
+
+                double result = parseHwmonDir(subfd, &buffer);
+                if (result != FF_CPU_TEMP_UNSET)
+                    return result;
+            }
+        }
     }
 
-    return detectTZTemp(&buffer);
+    return FF_CPU_TEMP_UNSET;
 }
 
 #ifdef __ANDROID__
@@ -456,7 +498,7 @@ FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFC
         cpu->coresPhysical *= cpu->packages;
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
     if (!detectFrequency(cpu, options) || cpu->frequencyBase == 0)
         cpu->frequencyBase = (uint32_t) ffStrbufToUInt(&cpuMHz, 0);
 
@@ -733,6 +775,8 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
 
     if (cpu->coresPhysical == 0)
         detectPhysicalCores(cpu);
+
+    ffCPUDetectByCpuid(cpu);
 
     return NULL;
 }

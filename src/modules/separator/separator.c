@@ -33,7 +33,7 @@ static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate
     return result > 0 ? (uint32_t) result : mbstr->length;
 }
 
-void ffPrintSeparator(FFSeparatorOptions* options)
+bool ffPrintSeparator(FFSeparatorOptions* options)
 {
     ffLogoPrintLine();
 
@@ -111,6 +111,8 @@ void ffPrintSeparator(FFSeparatorOptions* options)
     if(options->outputColor.length && !instance.config.display.pipe)
         fputs(FASTFETCH_TEXT_MODIFIER_RESET, stdout);
     putchar('\n');
+
+    return true;
 }
 
 void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)

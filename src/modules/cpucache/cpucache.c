@@ -101,8 +101,9 @@ static void printCPUCacheCompact(const FFCPUCacheResult* result, FFCPUCacheOptio
     }
 }
 
-void ffPrintCPUCache(FFCPUCacheOptions* options)
+bool ffPrintCPUCache(FFCPUCacheOptions* options)
 {
+    bool success = false;
     FFCPUCacheResult result = {
         .caches = {
             ffListCreate(sizeof(FFCPUCache)),
@@ -124,12 +125,15 @@ void ffPrintCPUCache(FFCPUCacheOptions* options)
         printCPUCacheNormal(&result, options);
     else
         printCPUCacheCompact(&result, options);
+    success = true;
 
 exit:
     ffListDestroy(&result.caches[0]);
     ffListDestroy(&result.caches[1]);
     ffListDestroy(&result.caches[2]);
     ffListDestroy(&result.caches[3]);
+
+    return success;
 }
 
 void ffParseCPUCacheJsonObject(FFCPUCacheOptions* options, yyjson_val* module)
@@ -158,8 +162,9 @@ void ffGenerateCPUCacheJsonConfig(FFCPUCacheOptions* options, yyjson_mut_doc* do
     yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
-void ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFCPUCacheResult result = {
         .caches = {
             ffListCreate(sizeof(FFCPUCache)),
@@ -199,12 +204,14 @@ void ffGenerateCPUCacheJsonResult(FF_MAYBE_UNUSED FFCPUCacheOptions* options, yy
             yyjson_mut_obj_add_str(doc, item, "type", typeStr);
         }
     }
+    success = true;
 
 exit:
     ffListDestroy(&result.caches[0]);
     ffListDestroy(&result.caches[1]);
     ffListDestroy(&result.caches[2]);
     ffListDestroy(&result.caches[3]);
+    return success;
 }
 
 void ffInitCPUCacheOptions(FFCPUCacheOptions* options)

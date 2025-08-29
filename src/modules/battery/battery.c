@@ -125,7 +125,7 @@ static void printBattery(FFBatteryOptions* options, FFBatteryResult* result, uin
     }
 }
 
-void ffPrintBattery(FFBatteryOptions* options)
+bool ffPrintBattery(FFBatteryOptions* options)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 
@@ -134,12 +134,12 @@ void ffPrintBattery(FFBatteryOptions* options)
     if (error)
     {
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
     if(results.length == 0)
     {
         ffPrintError(FF_BATTERY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", "No batteries found");
-        return;
+        return false;
     }
 
     for(uint32_t i = 0; i < results.length; i++)
@@ -157,6 +157,7 @@ void ffPrintBattery(FFBatteryOptions* options)
         ffStrbufDestroy(&result->serial);
         ffStrbufDestroy(&result->manufactureDate);
     }
+    return true;
 }
 
 void ffParseBatteryJsonObject(FFBatteryOptions* options, yyjson_val* module)
@@ -198,7 +199,7 @@ void ffGenerateBatteryJsonConfig(FFBatteryOptions* options, yyjson_mut_doc* doc,
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBatteryResult));
 
@@ -206,7 +207,7 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -241,6 +242,8 @@ void ffGenerateBatteryJsonResult(FFBatteryOptions* options, yyjson_mut_doc* doc,
         ffStrbufDestroy(&battery->status);
         ffStrbufDestroy(&battery->serial);
     }
+
+    return true;
 }
 
 void ffInitBatteryOptions(FFBatteryOptions* options)

@@ -6,7 +6,7 @@
 
 void ffPrepareDiskIO(FFDiskIOOptions* options);
 
-void ffPrintDiskIO(FFDiskIOOptions* options);
+bool ffPrintDiskIO(FFDiskIOOptions* options);
 void ffInitDiskIOOptions(FFDiskIOOptions* options);
 void ffDestroyDiskIOOptions(FFDiskIOOptions* options);
 

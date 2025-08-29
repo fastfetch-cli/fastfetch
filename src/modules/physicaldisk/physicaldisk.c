@@ -31,7 +31,7 @@ static void formatKey(const FFPhysicalDiskOptions* options, FFPhysicalDiskResult
     }
 }
 
-void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
+bool ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalDiskResult));
     const char* error = ffDetectPhysicalDisk(&result, options);
@@ -39,7 +39,7 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
     if(error)
     {
         ffPrintError(FF_PHYSICALDISK_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     ffListSort(&result, (const void*) sortDevices);
@@ -131,6 +131,8 @@ void ffPrintPhysicalDisk(FFPhysicalDiskOptions* options)
         ffStrbufDestroy(&dev->serial);
         ffStrbufDestroy(&dev->revision);
     }
+
+    return true;
 }
 
 void ffParsePhysicalDiskJsonObject(FFPhysicalDiskOptions* options, yyjson_val* module)
@@ -164,7 +166,7 @@ void ffGeneratePhysicalDiskJsonConfig(FFPhysicalDiskOptions* options, yyjson_mut
     ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
 }
 
-void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFPhysicalDiskResult));
     const char* error = ffDetectPhysicalDisk(&result, options);
@@ -172,7 +174,7 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -223,6 +225,8 @@ void ffGeneratePhysicalDiskJsonResult(FFPhysicalDiskOptions* options, yyjson_mut
         ffStrbufDestroy(&dev->serial);
         ffStrbufDestroy(&dev->revision);
     }
+
+    return true;
 }
 
 void ffInitPhysicalDiskOptions(FFPhysicalDiskOptions* options)

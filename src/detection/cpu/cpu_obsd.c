@@ -56,7 +56,7 @@ const char *ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     cpu->coresLogical = cpu->coresPhysical;
     cpu->coresOnline = (uint16_t) ffSysctlGetInt(CTL_HW, HW_NCPUONLINE, cpu->coresLogical);
 
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
 
     uint32_t cpuspeed = (uint32_t) ffSysctlGetInt(CTL_HW, HW_CPUSPEED, 0);
     if (cpuspeed > cpu->frequencyBase) cpu->frequencyBase = cpuspeed;

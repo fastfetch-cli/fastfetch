@@ -4,7 +4,7 @@
 #include "modules/dns/dns.h"
 #include "util/stringUtils.h"
 
-void ffPrintDNS(FFDNSOptions* options)
+bool ffPrintDNS(FFDNSOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
 
@@ -13,13 +13,13 @@ void ffPrintDNS(FFDNSOptions* options)
     if (error)
     {
         ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (result.length == 0)
     {
         ffPrintError(FF_DNS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "NO DNS servers detected");
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
@@ -55,6 +55,8 @@ void ffPrintDNS(FFDNSOptions* options)
     {
         ffStrbufDestroy(item);
     }
+
+    return true;
 }
 
 void ffParseDNSJsonObject(FFDNSOptions* options, yyjson_val* module)
@@ -104,7 +106,7 @@ void ffGenerateDNSJsonConfig(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_
     }
 }
 
-void ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFstrbuf));
 
@@ -113,7 +115,7 @@ void ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        goto exit;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -123,11 +125,12 @@ void ffGenerateDNSJsonResult(FFDNSOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_arr_add_strbuf(doc, arr, item);
     }
 
-exit:
     FF_LIST_FOR_EACH(FFstrbuf, item, result)
     {
         ffStrbufDestroy(item);
     }
+
+    return true;
 }
 
 void ffInitDNSOptions(FFDNSOptions* options)

@@ -38,7 +38,7 @@ typedef struct FFDateTimeResult
     char timezoneName[FASTFETCH_STRBUF_DEFAULT_ALLOC];
 } FFDateTimeResult;
 
-void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
+static void printDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
 {
     FFDateTimeResult result;
 
@@ -93,7 +93,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     }));
 }
 
-void ffPrintDateTime(FFDateTimeOptions* options)
+bool ffPrintDateTime(FFDateTimeOptions* options)
 {
     uint64_t msNow = ffTimeGetNow();
     time_t sNow = (time_t) (msNow / 1000);
@@ -101,20 +101,21 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
     if(options->moduleArgs.outputFormat.length > 0)
     {
-        ffPrintDateTimeFormat(tm, &options->moduleArgs);
-        return;
+        printDateTimeFormat(tm, &options->moduleArgs);
+        return true;
     }
 
     char buffer[32];
     if (strftime(buffer, ARRAY_SIZE(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
     {
         ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
-        return;
+        return false;
     }
 
     ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
     puts(buffer);
+    return true;
 }
 
 void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
@@ -135,9 +136,10 @@ void ffGenerateDateTimeJsonConfig(FFDateTimeOptions* options, yyjson_mut_doc* do
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_obj_add_strcpy(doc, module, "result", ffTimeToFullStr(ffTimeGetNow()));
+    return true;
 }
 
 void ffInitDateTimeOptions(FFDateTimeOptions* options)

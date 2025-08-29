@@ -6,7 +6,7 @@
 
 void ffPrepareCPUUsage();
 
-void ffPrintCPUUsage(FFCPUUsageOptions* options);
+bool ffPrintCPUUsage(FFCPUUsageOptions* options);
 void ffInitCPUUsageOptions(FFCPUUsageOptions* options);
 void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options);
 

@@ -4,14 +4,14 @@
 #include "modules/terminal/terminal.h"
 #include "util/stringUtils.h"
 
-void ffPrintTerminal(FFTerminalOptions* options)
+bool ffPrintTerminal(FFTerminalOptions* options)
 {
     const FFTerminalResult* result = ffDetectTerminal();
 
     if(result->processName.length == 0)
     {
         ffPrintError(FF_TERMINAL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect terminal");
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -36,6 +36,8 @@ void ffPrintTerminal(FFTerminalOptions* options)
             FF_FORMAT_ARG(result->tty, "tty"),
         }));
     }
+
+    return true;
 }
 
 void ffParseTerminalJsonObject(FFTerminalOptions* options, yyjson_val* module)
@@ -56,14 +58,14 @@ void ffGenerateTerminalJsonConfig(FFTerminalOptions* options, yyjson_mut_doc* do
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFTerminalResult* result = ffDetectTerminal();
 
     if(result->processName.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect terminal");
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -76,6 +78,8 @@ void ffGenerateTerminalJsonResult(FF_MAYBE_UNUSED FFTerminalOptions* options, yy
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->prettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result->version);
     yyjson_mut_obj_add_strbuf(doc, obj, "tty", &result->tty);
+
+    return true;
 }
 
 void ffInitTerminalOptions(FFTerminalOptions* options)

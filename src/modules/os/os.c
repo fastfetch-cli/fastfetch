@@ -53,14 +53,14 @@ static void buildOutputDefault(const FFOSResult* os, FFstrbuf* result)
     }
 }
 
-void ffPrintOS(FFOSOptions* options)
+bool ffPrintOS(FFOSOptions* options)
 {
     const FFOSResult* os = ffDetectOS();
 
     if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0)
     {
         ffPrintError(FF_OS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Could not detect OS");
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -113,6 +113,8 @@ void ffPrintOS(FFOSOptions* options)
             FF_FORMAT_ARG(instance.state.platform.sysinfo.release, "kernel-release"),
         }));
     }
+
+    return true;
 }
 
 void ffParseOSJsonObject(FFOSOptions* options, yyjson_val* module)
@@ -133,14 +135,14 @@ void ffGenerateOSJsonConfig(FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mu
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFOSResult* os = ffDetectOS();
 
     if(os->name.length == 0 && os->prettyName.length == 0 && os->id.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Could not detect OS");
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -154,6 +156,8 @@ void ffGenerateOSJsonResult(FF_MAYBE_UNUSED FFOSOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "variantID", &os->variantID);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &os->version);
     yyjson_mut_obj_add_strbuf(doc, obj, "versionID", &os->versionID);
+
+    return true;
 }
 
 void ffInitOSOptions(FFOSOptions* options)
@@ -176,7 +180,7 @@ void ffInitOSOptions(FFOSOptions* options)
         #elif __Haiku__
             ""
         #else
-            "?"
+            "󰢻"
         #endif
     );
 }

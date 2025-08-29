@@ -4,7 +4,7 @@
 #include "modules/processes/processes.h"
 #include "util/stringUtils.h"
 
-void ffPrintProcesses(FFProcessesOptions* options)
+bool ffPrintProcesses(FFProcessesOptions* options)
 {
     uint32_t numProcesses = 0;
     const char* error = ffDetectProcesses(&numProcesses);
@@ -12,7 +12,7 @@ void ffPrintProcesses(FFProcessesOptions* options)
     if(error)
     {
         ffPrintError(FF_PROCESSES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -27,6 +27,8 @@ void ffPrintProcesses(FFProcessesOptions* options)
             FF_FORMAT_ARG(numProcesses, "result")
         }));
     }
+
+    return true;
 }
 
 void ffParseProcessesJsonObject(FFProcessesOptions* options, yyjson_val* module)
@@ -47,7 +49,7 @@ void ffGenerateProcessesJsonConfig(FFProcessesOptions* options, yyjson_mut_doc* 
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     uint32_t result;
     const char* error = ffDetectProcesses(&result);
@@ -55,10 +57,12 @@ void ffGenerateProcessesJsonResult(FF_MAYBE_UNUSED FFProcessesOptions* options, 
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_obj_add_uint(doc, module, "result", result);
+
+    return true;
 }
 
 void ffInitProcessesOptions(FFProcessesOptions* options)

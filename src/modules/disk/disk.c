@@ -15,31 +15,42 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
 
     if(options->moduleArgs.key.length == 0)
     {
-        if(instance.config.display.pipe)
-            ffStrbufAppendF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
-        else
-        {
-            #ifdef __linux__
-            if (getenv("WSL_DISTRO_NAME") != NULL && getenv("WT_SESSION") != NULL)
-            {
-                if (ffStrbufEqualS(&disk->filesystem, "9p") && ffStrbufStartsWithS(&disk->mountpoint, "/mnt/"))
-                    ffStrbufAppendF(&key, "%s (\e]8;;file:///%c:/\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars[5], disk->mountpoint.chars);
-                else
-                    ffStrbufAppendF(&key, "%s (\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->mountpoint.chars);
-            }
-            else
-            #endif
-            ffStrbufAppendF(&key, "%s (\e]8;;file://%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars, disk->mountpoint.chars);
-        }
+        ffStrbufSetF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY mountpointLink = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY nameLink = ffStrbufCreate();
+        #ifdef __linux__
+        if (getenv("WSL_DISTRO_NAME") != NULL && getenv("WT_SESSION") != NULL)
+        {
+            if (ffStrbufEqualS(&disk->filesystem, "9p") && ffStrbufStartsWithS(&disk->mountpoint, "/mnt/"))
+            {
+                ffStrbufSetF(&mountpointLink, "\e]8;;file:///%c:/\e\\%s\e]8;;\e\\", disk->mountpoint.chars[5], disk->mountpoint.chars);
+                ffStrbufSetF(&nameLink, "\e]8;;file:///%c:/\e\\%s\e]8;;\e\\", disk->mountpoint.chars[5], disk->name.chars);
+            }
+            else
+            {
+                ffStrbufSetF(&mountpointLink, "\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\", getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->mountpoint.chars);
+                ffStrbufSetF(&nameLink, "\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\", getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->name.chars);
+            }
+        }
+        else
+        #endif
+        {
+            ffStrbufSetF(&mountpointLink, "\e]8;;file://%s\e\\%s\e]8;;\e\\", disk->mountpoint.chars, disk->mountpoint.chars);
+            ffStrbufSetF(&nameLink, "\e]8;;file://%s\e\\%s\e]8;;\e\\", disk->mountpoint.chars, disk->name.chars);
+        }
+
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->name, "name"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
             FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(disk->filesystem, "filesystem"),
+            FF_FORMAT_ARG(mountpointLink, "mountpoint-link"),
+            FF_FORMAT_ARG(nameLink, "name-link"),
         }));
     }
 
@@ -125,6 +136,12 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
+        FF_STRBUF_AUTO_DESTROY freePretty = ffStrbufCreate();
+        ffSizeAppendNum(disk->bytesFree, &freePretty);
+
+        FF_STRBUF_AUTO_DESTROY availPretty = ffStrbufCreate();
+        ffSizeAppendNum(disk->bytesAvailable, &availPretty);
+
         uint64_t now = ffTimeGetNow();
         uint64_t duration = now - disk->createTime;
         uint32_t milliseconds = (uint32_t) (duration % 1000);
@@ -163,11 +180,13 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             FF_FORMAT_ARG(age.years, "years"),
             FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
             FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
+            FF_FORMAT_ARG(freePretty, "size-free"),
+            FF_FORMAT_ARG(availPretty, "size-available"),
         }));
     }
 }
 
-void ffPrintDisk(FFDiskOptions* options)
+bool ffPrintDisk(FFDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(options, &disks);
@@ -175,23 +194,22 @@ void ffPrintDisk(FFDiskOptions* options)
     if(error)
     {
         ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        return false;
     }
-    else
+
+    uint32_t index = 0;
+    FF_LIST_FOR_EACH(FFDisk, disk, disks)
     {
-        uint32_t index = 0;
-        FF_LIST_FOR_EACH(FFDisk, disk, disks)
-        {
-            if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
-                continue;
+        if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
+            continue;
 
-            if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
-                continue;
+        if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
+            continue;
 
-            if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
-                continue;
+        if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
+            continue;
 
-            printDisk(options, disk, ++index);
-        }
+        printDisk(options, disk, ++index);
     }
 
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
@@ -201,6 +219,8 @@ void ffPrintDisk(FFDiskOptions* options)
         ffStrbufDestroy(&disk->filesystem);
         ffStrbufDestroy(&disk->name);
     }
+
+    return true;
 }
 
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
@@ -327,7 +347,7 @@ void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(options, &disks);
@@ -335,7 +355,7 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "result", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -394,6 +414,8 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
         ffStrbufDestroy(&item->filesystem);
         ffStrbufDestroy(&item->name);
     }
+
+    return true;
 }
 
 void ffInitDiskOptions(FFDiskOptions* options)
@@ -454,5 +476,7 @@ FFModuleBaseInfo ffDiskModuleInfo = {
         {"Years integer after creation", "years"},
         {"Days of year after creation", "days-of-year"},
         {"Years fraction after creation", "years-fraction"},
+        {"Size free", "size-free"},
+        {"Size available", "size-available"},
     }))
 };

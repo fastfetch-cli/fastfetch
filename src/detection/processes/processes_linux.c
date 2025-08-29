@@ -16,7 +16,7 @@ const char* ffDetectProcesses(uint32_t* result)
     {
         if (
         #ifdef _DIRENT_HAVE_D_TYPE
-                entry->d_type == DT_DIR &&
+                (entry->d_type == DT_DIR || entry->d_type == DT_UNKNOWN) &&
         #endif
                 ffCharIsDigit(entry->d_name[0]))
             ++num;

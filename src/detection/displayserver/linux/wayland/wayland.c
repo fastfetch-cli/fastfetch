@@ -26,9 +26,9 @@
 
 static bool waylandDetectWM(int fd, FFDisplayServerResult* result)
 {
-#if __linux__ || (__FreeBSD__ && !__DragonFly__)
+#if __linux__ || __GNU__ || (__FreeBSD__ && !__DragonFly__)
 
-#if __linux
+#if __linux__ || __GNU__
     struct ucred ucred = {};
     socklen_t len = sizeof(ucred);
     if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &ucred, &len) == -1 || ucred.pid <= 0)

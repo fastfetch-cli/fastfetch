@@ -17,14 +17,14 @@ static int sortByNameDesc(FFDisplayResult* a, FFDisplayResult* b)
     return -ffStrbufComp(&a->name, &b->name);
 }
 
-void ffPrintDisplay(FFDisplayOptions* options)
+bool ffPrintDisplay(FFDisplayOptions* options)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if(dsResult->displays.length == 0)
     {
         ffPrintError(FF_DISPLAY_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Couldn't detect display");
-        return;
+        return false;
     }
 
     if (options->order != FF_DISPLAY_ORDER_NONE)
@@ -68,7 +68,7 @@ void ffPrintDisplay(FFDisplayOptions* options)
         ffStrbufTrimRight(&buffer, ' ');
         ffStrbufTrimRight(&buffer, ',');
         ffStrbufPutTo(&buffer, stdout);
-        return;
+        return true;
     }
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -215,6 +215,8 @@ void ffPrintDisplay(FFDisplayOptions* options)
             }));
         }
     }
+
+    return true;
 }
 
 void ffParseDisplayJsonObject(FFDisplayOptions* options, yyjson_val* module)
@@ -319,14 +321,14 @@ void ffGenerateDisplayJsonConfig(FFDisplayOptions* options, yyjson_mut_doc* doc,
     }
 }
 
-void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* dsResult = ffConnectDisplayServer();
 
     if(dsResult->displays.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "Couldn't detect display");
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -406,6 +408,8 @@ void ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
 
         yyjson_mut_obj_add_str(doc, obj, "platformApi", item->platformApi);
     }
+
+    return true;
 }
 
 void ffInitDisplayOptions(FFDisplayOptions* options)

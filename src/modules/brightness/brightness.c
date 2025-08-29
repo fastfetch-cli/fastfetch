@@ -5,7 +5,7 @@
 #include "modules/brightness/brightness.h"
 #include "util/stringUtils.h"
 
-void ffPrintBrightness(FFBrightnessOptions* options)
+bool ffPrintBrightness(FFBrightnessOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
@@ -14,13 +14,13 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     if(error)
     {
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(result.length == 0)
     {
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result is detected.");
-        return;
+        return false;
     }
 
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -40,7 +40,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         ffPrintLogoAndKey(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&str, stdout);
-        return;
+        return true;
     }
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -110,6 +110,8 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         ffStrbufDestroy(&item->name);
         ++index;
     }
+
+    return true;
 }
 
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
@@ -151,7 +153,7 @@ void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
-void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
@@ -160,7 +162,7 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_arr(doc);
@@ -180,6 +182,8 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     {
         ffStrbufDestroy(&item->name);
     }
+
+    return true;
 }
 
 void ffInitBrightnessOptions(FFBrightnessOptions* options)

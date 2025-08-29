@@ -351,7 +351,7 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
                 break;
         }
     }
-#elif __linux__
+#elif __linux__ || __GNU__
     FF_AUTO_CLOSE_DIR DIR* procdir = opendir("/proc");
     if(procdir == NULL)
         return "opendir(\"/proc\") failed";

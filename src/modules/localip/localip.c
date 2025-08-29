@@ -101,7 +101,7 @@ static void printIp(FFLocalIpResult* ip, bool markDefaultRoute, FFstrbuf* buffer
         ffStrbufAppendS(buffer, " *");
 }
 
-void ffPrintLocalIp(FFLocalIpOptions* options)
+bool ffPrintLocalIp(FFLocalIpOptions* options)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
 
@@ -110,13 +110,13 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
     if(error)
     {
         ffPrintError(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(results.length == 0)
     {
         ffPrintError(FF_LOCALIP_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Failed to detect any IPs");
-        return;
+        return false;
     }
 
     ffListSort(&results, (const void*) sortIps);
@@ -178,6 +178,8 @@ void ffPrintLocalIp(FFLocalIpOptions* options)
         ffStrbufDestroy(&ip->mac);
         ffStrbufDestroy(&ip->flags);
     }
+
+    return true;
 }
 
 void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
@@ -327,7 +329,7 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "namePrefix", &options->namePrefix);
 }
 
-void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFLocalIpResult));
 
@@ -336,7 +338,7 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -374,6 +376,8 @@ void ffGenerateLocalIpJsonResult(FF_MAYBE_UNUSED FFLocalIpOptions* options, yyjs
         ffStrbufDestroy(&ip->mac);
         ffStrbufDestroy(&ip->flags);
     }
+
+    return true;
 }
 
 void ffInitLocalIpOptions(FFLocalIpOptions* options)

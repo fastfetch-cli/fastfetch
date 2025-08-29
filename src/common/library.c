@@ -52,7 +52,7 @@ static void* libraryLoad(const char* path, int maxVersion)
     for(int i = maxVersion; i >= 0; --i)
     {
         uint32_t originalLength = pathbuf.length;
-        ffStrbufAppendF(&pathbuf, "%i", i);
+        ffStrbufAppendSInt(&pathbuf, i);
 
         result = dlopen(pathbuf.chars, FF_DLOPEN_FLAGS);
         if(result != NULL)

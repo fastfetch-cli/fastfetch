@@ -48,7 +48,7 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
 
     if (instance.config.general.detectVersion)
     {
-        #if __linux__ && !__ANDROID__
+        #if (defined(__linux__) && !defined(__ANDROID__)) || defined(__GNU__)
         if (ffStrbufEqualS(&result->name, "systemd"))
         {
             ffBinaryExtractStrings(result->exe.chars, extractSystemdVersion, &result->version, (uint32_t) strlen("systemd 0.0 running in x"));
@@ -81,6 +81,23 @@ const char* ffDetectInitSystem(FFInitSystemResult* result)
                 // Dinit version 0.18.0.
                 ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufTrimRight(&result->version, '.');
+                ffStrbufSubstrAfterLastC(&result->version, ' ');
+            }
+        }
+        else if (ffStrbufEqualS(&result->name, "shepherd"))
+        {
+           if (ffProcessAppendStdOut(&result->version, (char* const[]) {
+              ffStrbufEndsWithS(&result->exe, "/shepherd") ? result->exe.chars : "shepherd",
+              "--version",
+                NULL,
+            }) == NULL && result->version.length)
+            {
+                // shepherd (GNU Shepherd) 1.0.6
+                // The first line in the output might not contain the version
+                if (!ffStrbufStartsWithS(&result->version, "shepherd"))
+                    ffStrbufSubstrAfterFirstC(&result->version, '\n');
+
+                ffStrbufSubstrBeforeFirstC(&result->version, '\n');
                 ffStrbufSubstrAfterLastC(&result->version, ' ');
             }
         }

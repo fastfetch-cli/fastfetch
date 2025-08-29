@@ -4,7 +4,7 @@
 #include "modules/packages/packages.h"
 #include "util/stringUtils.h"
 
-void ffPrintPackages(FFPackagesOptions* options)
+bool ffPrintPackages(FFPackagesOptions* options)
 {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
@@ -14,7 +14,7 @@ void ffPrintPackages(FFPackagesOptions* options)
     if(error)
     {
         ffPrintError(FF_PACKAGES_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     uint32_t nixAll = counts.nixDefault + counts.nixSystem + counts.nixUser;
@@ -203,6 +203,8 @@ void ffPrintPackages(FFPackagesOptions* options)
     }
 
     ffStrbufDestroy(&counts.pacmanBranch);
+
+    return true;
 }
 
 void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
@@ -370,7 +372,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     yyjson_mut_obj_add_bool(doc, module, "combined", options->combined);
 }
 
-void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFPackagesResult counts = {};
     ffStrbufInit(&counts.pacmanBranch);
@@ -380,7 +382,7 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -427,6 +429,8 @@ void ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(winget)
     FF_APPEND_PACKAGE_COUNT(xbps)
     yyjson_mut_obj_add_strbuf(doc, obj, "pacmanBranch", &counts.pacmanBranch);
+
+    return true;
 }
 
 void ffInitPackagesOptions(FFPackagesOptions* options)

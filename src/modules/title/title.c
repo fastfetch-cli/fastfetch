@@ -21,7 +21,7 @@ static void appendText(FFstrbuf* output, const FFstrbuf* text, const FFstrbuf* c
         ffStrbufAppendS(output, FASTFETCH_TEXT_MODIFIER_RESET);
 }
 
-void ffPrintTitle(FFTitleOptions* options)
+bool ffPrintTitle(FFTitleOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY userNameColored = ffStrbufCreate();
     appendText(&userNameColored, &instance.state.platform.userName, &options->colorUser);
@@ -66,6 +66,8 @@ void ffPrintTitle(FFTitleOptions* options)
             FF_FORMAT_ARG(instance.state.platform.fullUserName, "full-user-name"),
         }));
     }
+
+    return true;
 }
 
 void ffParseTitleJsonObject(FFTitleOptions* options, yyjson_val* module)
@@ -116,7 +118,7 @@ void ffGenerateTitleJsonConfig(FFTitleOptions* options, yyjson_mut_doc* doc, yyj
     yyjson_mut_obj_add_strbuf(doc, color, "host", &options->colorHost);
 }
 
-void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
     yyjson_mut_obj_add_strbuf(doc, obj, "userName", &instance.state.platform.userName);
@@ -125,6 +127,8 @@ void ffGenerateTitleJsonResult(FF_MAYBE_UNUSED FFTitleOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, obj, "homeDir", &instance.state.platform.homeDir);
     yyjson_mut_obj_add_strbuf(doc, obj, "exePath", &instance.state.platform.exePath);
     yyjson_mut_obj_add_strbuf(doc, obj, "userShell", &instance.state.platform.userShell);
+
+    return true;
 }
 
 void ffInitTitleOptions(FFTitleOptions* options)

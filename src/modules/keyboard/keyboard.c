@@ -21,7 +21,7 @@ static void printDevice(FFKeyboardOptions* options, const FFKeyboardDevice* devi
     }
 }
 
-void ffPrintKeyboard(FFKeyboardOptions* options)
+bool ffPrintKeyboard(FFKeyboardOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFKeyboardDevice));
 
@@ -30,13 +30,13 @@ void ffPrintKeyboard(FFKeyboardOptions* options)
     if(error)
     {
         ffPrintError(FF_KEYBOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(!result.length)
     {
         ffPrintError(FF_KEYBOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No devices detected");
-        return;
+        return false;
     }
 
     uint8_t index = 0;
@@ -46,6 +46,8 @@ void ffPrintKeyboard(FFKeyboardOptions* options)
         ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->name);
     }
+
+    return true;
 }
 
 void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
@@ -66,7 +68,7 @@ void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* do
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFKeyboardDevice));
 
@@ -75,7 +77,7 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -91,6 +93,8 @@ void ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
         ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->name);
     }
+
+    return true;
 }
 
 void ffInitKeyboardOptions(FFKeyboardOptions* options)

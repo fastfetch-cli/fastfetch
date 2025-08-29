@@ -4,8 +4,9 @@
 #include "modules/host/host.h"
 #include "util/stringUtils.h"
 
-void ffPrintHost(FFHostOptions* options)
+bool ffPrintHost(FFHostOptions* options)
 {
+    bool success = false;
     FFHostResult host;
     ffStrbufInit(&host.family);
     ffStrbufInit(&host.name);
@@ -56,6 +57,7 @@ void ffPrintHost(FFHostOptions* options)
             FF_FORMAT_ARG(host.uuid, "uuid"),
         }));
     }
+    success = true;
 
 exit:
     ffStrbufDestroy(&host.family);
@@ -65,6 +67,8 @@ exit:
     ffStrbufDestroy(&host.serial);
     ffStrbufDestroy(&host.uuid);
     ffStrbufDestroy(&host.vendor);
+
+    return success;
 }
 
 void ffParseHostJsonObject(FFHostOptions* options, yyjson_val* module)
@@ -85,8 +89,9 @@ void ffGenerateHostJsonConfig(FFHostOptions* options, yyjson_mut_doc* doc, yyjso
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFHostResult host;
     ffStrbufInit(&host.family);
     ffStrbufInit(&host.name);
@@ -117,6 +122,7 @@ void ffGenerateHostJsonResult(FF_MAYBE_UNUSED FFHostOptions* options, yyjson_mut
     yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &host.vendor);
     yyjson_mut_obj_add_strbuf(doc, obj, "serial", &host.serial);
     yyjson_mut_obj_add_strbuf(doc, obj, "uuid", &host.uuid);
+    success = true;
 
 exit:
     ffStrbufDestroy(&host.family);
@@ -126,6 +132,8 @@ exit:
     ffStrbufDestroy(&host.serial);
     ffStrbufDestroy(&host.uuid);
     ffStrbufDestroy(&host.vendor);
+
+    return success;
 }
 
 void ffInitHostOptions(FFHostOptions* options)

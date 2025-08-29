@@ -234,15 +234,42 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     assert(processName->length > 0);
     ffStrbufClear(exe);
 
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__GNU__)
 
     char filePath[64];
     snprintf(filePath, sizeof(filePath), "/proc/%d/cmdline", (int)pid);
 
     if(ffReadFileBuffer(filePath, exe))
     {
-        ffStrbufRecalculateLength(exe); //Trim the arguments
-        ffStrbufTrimRightSpace(exe);
+        const char* p = exe->chars;
+        uint32_t len = (uint32_t) strlen(p);
+
+        if (len + 1 < exe->length)
+        {
+            const char* name = memrchr(p, '/', len);
+            if (name) name++; else name = p;
+
+            // For interpreters, try to find the real script path in the arguments
+            if (ffStrStartsWith(name, "python")
+                #ifndef __ANDROID__
+                || ffStrEquals(name, "guile") // for shepherd
+                #endif
+            )
+            {
+                // `cmdline` always ends with a trailing '\0', and ffReadFileBuffer appends another \0
+                // So `exe->chars` is always double '\0' terminated
+                for (p = p + len + 1; *p && *p == '-'; p += strlen(p) + 1) // Skip arguments
+                    assert(p - exe->chars < exe->allocated);
+                if (*p)
+                {
+                    len = (uint32_t) strlen(p);
+                    memmove(exe->chars, p, len + 1);
+                }
+            }
+        }
+
+        assert(len < exe->allocated);
+        exe->length = len;
         ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
     }
 
@@ -436,33 +463,53 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     if (pid <= 0)
         return "Invalid pid";
 
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__GNU__)
 
     char procFilePath[64];
-    if (ppid)
+    #if __linux__
+    if (ppid || tty)
+    #endif
     {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
         char buf[PROC_FILE_BUFFSIZ];
         ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
         if(nRead <= 8)
             return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
-        buf[nRead] = '\0';
+        buf[nRead] = '\0'; // pid (comm) state ppid pgrp session tty
 
-        *ppid = 0;
-        static_assert(sizeof(*ppid) == sizeof(int), "");
+        const char* pState = NULL;
 
-        ffStrbufEnsureFixedLengthFree(name, 255);
-        int tty_;
-        if(
-            sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name->chars, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
-            name->chars[0] == '\0'
-        )
-            return "sscanf(stat) failed";
+        {
+            // comm in `/proc/pid/stat` is not encoded, and may contain ' ', ')' or even `\n`
+            const char* start = memchr(buf, '(', (size_t) nRead);
+            if (!start)
+                return "memchr(stat, '(') failed";
+            start++;
+            const char* end = memrchr(start, ')', (size_t) nRead - (size_t) (start - buf));
+            if (!end)
+                return "memrchr(stat, ')') failed";
+            ffStrbufSetNS(name, (uint32_t) (end - start), start);
+            ffStrbufTrimRightSpace(name);
+            if (name->chars[0] == '\0')
+                return "process name is empty";
+            pState = end + 2; // skip ") "
+        }
 
-        ffStrbufRecalculateLength(name);
-        if (tty)
-            *tty = tty_ & 0xFF;
+        #if !__linux__
+        if (ppid || tty)
+        #endif
+        {
+            int ppid_, tty_;
+            if(sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2)
+                return "sscanf(stat) failed";
+
+            if (ppid)
+                *ppid = (pid_t) ppid_;
+            if (tty)
+                *tty = tty_ & 0xFF;
+        }
     }
+    #if __linux__
     else
     {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int)pid);
@@ -471,6 +518,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
             return "ffReadFileBuffer(/proc/pid/comm, name) failed";
         ffStrbufTrimRightSpace(name);
     }
+    #endif
 
     #elif defined(__APPLE__)
 

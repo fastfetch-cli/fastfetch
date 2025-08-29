@@ -126,6 +126,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if(cpu->coresOnline == 1)
         cpu->coresOnline = (uint16_t) ffSysctlGetInt("hw.activecpu", 1);
 
+    ffCPUDetectByCpuid(cpu);
     detectFrequency(cpu);
     if (options->showPeCoreCount) detectCoreCount(cpu);
 

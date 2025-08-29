@@ -5,14 +5,14 @@
 #include "modules/de/de.h"
 #include "util/stringUtils.h"
 
-void ffPrintDE(FFDEOptions* options)
+bool ffPrintDE(FFDEOptions* options)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if(result->dePrettyName.length == 0)
     {
         ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No DE found");
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY version = ffStrbufCreate();
@@ -40,6 +40,8 @@ void ffPrintDE(FFDEOptions* options)
             FF_FORMAT_ARG(version, "version")
         }));
     }
+
+    return true;
 }
 
 void ffParseDEJsonObject(FFDEOptions* options, yyjson_val* module)
@@ -68,14 +70,14 @@ void ffGenerateDEJsonConfig(FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mu
     yyjson_mut_obj_add_bool(doc, module, "slowVersionDetection", options->slowVersionDetection);
 }
 
-void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     const FFDisplayServerResult* result = ffConnectDisplayServer();
 
     if(result->dePrettyName.length == 0)
     {
         yyjson_mut_obj_add_str(doc, module, "error", "No DE found");
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY version = ffStrbufCreate();
@@ -85,6 +87,7 @@ void ffGenerateDEJsonResult(FF_MAYBE_UNUSED FFDEOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "processName", &result->deProcessName);
     yyjson_mut_obj_add_strbuf(doc, obj, "prettyName", &result->dePrettyName);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &version);
+    return true;
 }
 
 void ffInitDEOptions(FFDEOptions* options)

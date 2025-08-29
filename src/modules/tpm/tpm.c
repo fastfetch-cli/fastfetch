@@ -4,7 +4,7 @@
 #include "modules/tpm/tpm.h"
 #include "util/stringUtils.h"
 
-void ffPrintTPM(FFTPMOptions* options)
+bool ffPrintTPM(FFTPMOptions* options)
 {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
@@ -15,7 +15,7 @@ void ffPrintTPM(FFTPMOptions* options)
     if(error)
     {
         ffPrintError(FF_TPM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -36,6 +36,8 @@ void ffPrintTPM(FFTPMOptions* options)
 
     ffStrbufDestroy(&result.version);
     ffStrbufDestroy(&result.description);
+
+    return true;
 }
 
 void ffParseTPMJsonObject(FFTPMOptions* options, yyjson_val* module)
@@ -56,7 +58,7 @@ void ffGenerateTPMJsonConfig(FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFTPMResult result = {
         .version = ffStrbufCreate(),
@@ -67,7 +69,7 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_d
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -76,6 +78,8 @@ void ffGenerateTPMJsonResult(FF_MAYBE_UNUSED FFTPMOptions* options, yyjson_mut_d
 
     ffStrbufDestroy(&result.version);
     ffStrbufDestroy(&result.description);
+
+    return true;
 }
 
 void ffInitTPMOptions(FFTPMOptions* options)
