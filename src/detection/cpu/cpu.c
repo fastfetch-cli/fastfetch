@@ -296,23 +296,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
 }
 #elif __APPLE__
 #include <sys/sysctl.h>
-#include <arm/cpu_capabilities_public.h>
-
-#ifndef CAP_BIT_AdvSIMD
-#define CAP_BIT_AdvSIMD             49
-#endif
-#ifndef CAP_BIT_AdvSIMD_HPFPCvt
-#define CAP_BIT_AdvSIMD_HPFPCvt     50
-#endif
-#ifndef CAP_BIT_FEAT_CRC32
-#define CAP_BIT_FEAT_CRC32          51
-#endif
-#ifndef CAP_BIT_FEAT_HBC
-#define CAP_BIT_FEAT_HBC            64
-#endif
-#ifndef CAP_BIT_FEAT_CSSC
-#define CAP_BIT_FEAT_CSSC           67
-#endif
+// #include <arm/cpu_capabilities_public.h> // Not available in macOS 14-
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu)
 {
@@ -328,59 +312,59 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
     cpu->march = "unknown";
 
     // ARMv8-A
-    bool has_fp        = FF_HAS_CAP(CAP_BIT_AdvSIMD_HPFPCvt); // Full FP16 support (implies FP/ASIMD)
-    bool has_asimd     = FF_HAS_CAP(CAP_BIT_AdvSIMD);         // Advanced SIMD (NEON)
+    bool has_fp        = FF_HAS_CAP(50); /* CAP_BIT_AdvSIMD_HPFPCvt */ // Full FP16 support (implies FP/ASIMD)
+    bool has_asimd     = FF_HAS_CAP(49); /* CAP_BIT_AdvSIMD */         // Advanced SIMD (NEON)
 
     // ARMv8.1-A
-    bool has_lse       = FF_HAS_CAP(CAP_BIT_FEAT_LSE);        // Large System Extensions, optional in v8.0
-    bool has_crc32     = FF_HAS_CAP(CAP_BIT_FEAT_CRC32);      // CRC32 instructions, optional in v8.0
-    bool has_rdm       = FF_HAS_CAP(CAP_BIT_FEAT_RDM);        // AdvSIMD rounding double multiply accumulate, optional in v8.0
+    bool has_lse       = FF_HAS_CAP(6);  /* CAP_BIT_FEAT_LSE */        // Large System Extensions, optional in v8.0
+    bool has_crc32     = FF_HAS_CAP(51); /* CAP_BIT_FEAT_CRC32 */      // CRC32 instructions, optional in v8.0
+    bool has_rdm       = FF_HAS_CAP(5);  /* CAP_BIT_FEAT_RDM */        // AdvSIMD rounding double multiply accumulate, optional in v8.0
 
     // ARMv8.2-A
-    bool has_fp16      = FF_HAS_CAP(CAP_BIT_FEAT_FP16);       // Half-precision FP support, optional
-    bool has_dpb       = FF_HAS_CAP(CAP_BIT_FEAT_DPB);        // DC CVAP, optional from v8.1
+    bool has_fp16      = FF_HAS_CAP(34); /* CAP_BIT_FEAT_FP16 */       // Half-precision FP support, optional
+    bool has_dpb       = FF_HAS_CAP(22); /* CAP_BIT_FEAT_DPB */        // DC CVAP, optional from v8.1
 
     // ARMv8.3-A
-    bool has_pauth     = FF_HAS_CAP(CAP_BIT_FEAT_PAuth);      // Pointer Authentication (PAC), optional from v8.2
-    bool has_lrcpc     = FF_HAS_CAP(CAP_BIT_FEAT_LRCPC);      // LDAPR/LR with RCPC semantics, optional from v8.2
-    bool has_fcma      = FF_HAS_CAP(CAP_BIT_FEAT_FCMA);       // Complex number multiply-add, optional from v8.2
-    bool has_jscvt     = FF_HAS_CAP(CAP_BIT_FEAT_JSCVT);      // JavaScript-style conversion (FJCVTZS), optional from v8.2
+    bool has_pauth     = FF_HAS_CAP(19); /* CAP_BIT_FEAT_PAuth */      // Pointer Authentication (PAC), optional from v8.2
+    bool has_lrcpc     = FF_HAS_CAP(15); /* CAP_BIT_FEAT_LRCPC */      // LDAPR/LR with RCPC semantics, optional from v8.2
+    bool has_fcma      = FF_HAS_CAP(17); /* CAP_BIT_FEAT_FCMA */       // Complex number multiply-add, optional from v8.2
+    bool has_jscvt     = FF_HAS_CAP(18); /* CAP_BIT_FEAT_JSCVT */      // JavaScript-style conversion (FJCVTZS), optional from v8.2
 
     // ARMv8.4-A
-    bool has_lse2      = FF_HAS_CAP(CAP_BIT_FEAT_LSE2);       // Large System Extensions version 2, optional from v8.2
-    bool has_dit       = FF_HAS_CAP(CAP_BIT_FEAT_DIT);        // Data Independent Timing, optional from v8.3
-    bool has_flagm     = FF_HAS_CAP(CAP_BIT_FEAT_FlagM);      // Flag manipulation (FMOV/FCVT), optional from v8.1
-    bool has_lrcpc2    = FF_HAS_CAP(CAP_BIT_FEAT_LRCPC2);     // Enhanced RCPC (LDAPUR/LDAPST), optional from v8.2
+    bool has_lse2      = FF_HAS_CAP(30); /* CAP_BIT_FEAT_LSE2 */       // Large System Extensions version 2, optional from v8.2
+    bool has_dit       = FF_HAS_CAP(33); /* CAP_BIT_FEAT_DIT */        // Data Independent Timing, optional from v8.3
+    bool has_flagm     = FF_HAS_CAP(0);  /* CAP_BIT_FEAT_FlagM */      // Flag manipulation (FMOV/FCVT), optional from v8.1
+    bool has_lrcpc2    = FF_HAS_CAP(16); /* CAP_BIT_FEAT_LRCPC2 */     // Enhanced RCPC (LDAPUR/LDAPST), optional from v8.2
 
     // ARMv8.5-A
-    bool has_bti       = FF_HAS_CAP(CAP_BIT_FEAT_BTI);        // Branch Target Identification, optional from v8.4
-    bool has_sb        = FF_HAS_CAP(CAP_BIT_FEAT_SB);         // Speculative Barrier, optional from v8.0
-    bool has_dpb2      = FF_HAS_CAP(CAP_BIT_FEAT_DPB2);       // DC CVADP (DPB2), optional from v8.1
-    bool has_flagm2    = FF_HAS_CAP(CAP_BIT_FEAT_FlagM2);     // Enhanced FlagM, optional from v8.4
-    bool has_frintts   = FF_HAS_CAP(CAP_BIT_FEAT_FRINTTS);    // Floating-point to integer instructions, optional from v8.4
+    bool has_bti       = FF_HAS_CAP(36); /* CAP_BIT_FEAT_BTI */        // Branch Target Identification, optional from v8.4
+    bool has_sb        = FF_HAS_CAP(13); /* CAP_BIT_FEAT_SB */         // Speculative Barrier, optional from v8.0
+    bool has_dpb2      = FF_HAS_CAP(23); /* CAP_BIT_FEAT_DPB2 */       // DC CVADP (DPB2), optional from v8.1
+    bool has_flagm2    = FF_HAS_CAP(1);  /* CAP_BIT_FEAT_FlagM2 */     // Enhanced FlagM, optional from v8.4
+    bool has_frintts   = FF_HAS_CAP(14); /* CAP_BIT_FEAT_FRINTTS */    // Floating-point to integer instructions, optional from v8.4
 
     // ARMv9.0-A
-    bool has_sve2      = false;                               // Not exposed and not supported by Apple M4
+    bool has_sve2      = false;                                        // Not exposed and not supported by Apple M4
 
     // ARMv9.1-A
     // ARMv8.6-A
-    bool has_bf16      = FF_HAS_CAP(CAP_BIT_FEAT_BF16);       // Brain float16, optional from v8.2
-    bool has_i8mm      = FF_HAS_CAP(CAP_BIT_FEAT_I8MM);       // Int8 Matrix Multiply, optional from v8.1
+    bool has_bf16      = FF_HAS_CAP(24); /* CAP_BIT_FEAT_BF16 */       // Brain float16, optional from v8.2
+    bool has_i8mm      = FF_HAS_CAP(25); /* CAP_BIT_FEAT_I8MM */       // Int8 Matrix Multiply, optional from v8.1
 
     // ARMv8.7-A
-    bool has_afp       = FF_HAS_CAP(CAP_BIT_FEAT_AFP);        // Alternate FP16 (FEXPA), optional from v8.6
+    bool has_afp       = FF_HAS_CAP(29); /* CAP_BIT_FEAT_AFP */        // Alternate FP16 (FEXPA), optional from v8.6
 
     // ARMv9.2-A
-    bool has_sme       = FF_HAS_CAP(CAP_BIT_FEAT_SME);        // Scalable Matrix Extension, optional from v9.2
+    bool has_sme       = FF_HAS_CAP(40); /* CAP_BIT_FEAT_SME */        // Scalable Matrix Extension, optional from v9.2
 
     // ARMv9.3-A
-    bool has_sme2      = FF_HAS_CAP(CAP_BIT_FEAT_SME2);       // SME2, optional from v9.2
+    bool has_sme2      = FF_HAS_CAP(41); /* CAP_BIT_FEAT_SME2 */       // SME2, optional from v9.2
 
     // ARMv8.8-A
-    bool has_hbc       = FF_HAS_CAP(CAP_BIT_FEAT_HBC);        // Hinted conditional branches, optional from v8.7
+    bool has_hbc       = FF_HAS_CAP(64); /* CAP_BIT_FEAT_HBC */        // Hinted conditional branches, optional from v8.7
 
     // ARMv8.9-A
-    bool has_cssc      = FF_HAS_CAP(CAP_BIT_FEAT_CSSC);       // Common Short String Compare, optional from v8.7
+    bool has_cssc      = FF_HAS_CAP(67); /* CAP_BIT_FEAT_CSSC */       // Common Short String Compare, optional from v8.7
 
     // ARMv9.4-A+ are not exposed yet
 
