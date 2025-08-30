@@ -147,8 +147,10 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufSetStatic(&ds->wmProcessName, "surfaceflinger");
-    ffStrbufSetStatic(&ds->wmPrettyName, "SurfaceFlinger");
+    // https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager
+    ffStrbufSetStatic(&ds->wmProcessName, "system_server");
+    ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
+    ffStrbufSetStatic(&ds->wmProtocolName, "SurfaceFlinger");
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);
