@@ -227,7 +227,7 @@ static const FFlogo A[] = {
     },
     // AnduinOS
     {
-        .names = {"anduinos"},
+        .names = {"anduinos", "AnduinOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_ANDUINOS,
         .colors = {
             FF_COLOR_FG_CYAN,
