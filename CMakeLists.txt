@@ -1728,6 +1728,9 @@ elseif(GNU)
         PRIVATE "m"
     )
 elseif(ANDROID)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+    )
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
     if(HAVE_LIBANDROID_WORDEXP_STATIC)
         target_link_libraries(libfastfetch
