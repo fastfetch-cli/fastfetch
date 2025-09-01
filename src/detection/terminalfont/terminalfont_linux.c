@@ -167,7 +167,7 @@ static void detectXFCETerminal(FFTerminalFontResult* terminalFont)
         });
     }
 
-    if(configFound && (useSysFont.length == 0 || ffStrbufIgnCaseCompS(&useSysFont, "false") == 0))
+    if(configFound && (useSysFont.length == 0 || ffStrbufIgnCaseEqualS(&useSysFont, "false")))
     {
         if(fontName.length == 0)
             ffStrbufAppendF(&terminalFont->error, "Couldn't find FontName in %s", path);
@@ -433,7 +433,13 @@ static void detectHaikuTerminal(FFTerminalFontResult* terminalFont)
 }
 #endif
 
-void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
+bool
+#ifdef __ANDROID__
+ffDetectTerminalFontPlatformLinux
+#else
+ffDetectTerminalFontPlatform
+#endif
+(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminal->processName, "konsole"))
         detectKonsole(terminalFont, "konsolerc");
@@ -477,4 +483,7 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
     #endif
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "termite"))
         detectFromConfigFile("termite/config", "font =", terminalFont);
+    else
+        return false;
+    return true;
 }

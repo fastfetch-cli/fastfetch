@@ -91,7 +91,7 @@ static void detectWarpTerminal(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.UTF8String, fontSize.UTF8String);
 }
 
-void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
+bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminal->processName, "iterm.app") ||
         ffStrbufStartsWithIgnCaseS(&terminal->processName, "iTermServer-"))
@@ -100,4 +100,7 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectAppleTerminal(terminalFont);
     else if(ffStrbufIgnCaseEqualS(&terminal->processName, "WarpTerminal"))
         detectWarpTerminal(terminalFont);
+    else
+        return false;
+    return true;
 }

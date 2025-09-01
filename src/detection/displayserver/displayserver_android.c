@@ -1,6 +1,7 @@
 #include "displayserver.h"
 #include "common/settings.h"
 #include "common/processing.h"
+#include "linux/displayserver_linux.h"
 
 #include <math.h>
 
@@ -147,10 +148,19 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
+    const char* error = ffdsConnectXcbRandr(ds);
+    if (error)
+        error = ffdsConnectXrandr(ds);
+    if (!error)
+    {
+        ffdsDetectWMDE(ds);
+        return;
+    }
+
     // https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager
     ffStrbufSetStatic(&ds->wmProcessName, "system_server");
     ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
-    ffStrbufSetStatic(&ds->wmProtocolName, "SurfaceFlinger");
+    ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);
