@@ -414,6 +414,13 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
         FF_DEBUG("Processing adapter %s (IPv4 entries: %u, IPv6 entries: %u)",
                  adapter->mac->ifa_name, adapter->ipv4.length, adapter->ipv6.length);
 
+        if (adapter->ipv4.length == 0 && adapter->ipv6.length == 0 &&
+            !(options->showType & FF_LOCALIP_TYPE_MAC_BIT) )
+        {
+            FF_DEBUG("Skipping interface %s (no IP addresses)", adapter->mac->ifa_name);
+            continue;
+        }
+
         FFLocalIpResult* item = FF_LIST_ADD(FFLocalIpResult, *results);
         ffStrbufInitS(&item->name, adapter->mac->ifa_name);
         ffStrbufInit(&item->ipv4);
