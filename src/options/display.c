@@ -376,9 +376,12 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 {
                     if (yyjson_is_null(ndigits))
                         options->fractionNdigits = -1;
-                    else if (!yyjson_is_int(ndigits))
-                        return "display.fraction.ndigits must be an integer";
-                    options->fractionNdigits = (int8_t) yyjson_get_int(ndigits);
+                    else
+                    {
+                        if (!yyjson_is_int(ndigits))
+                            return "display.fraction.ndigits must be an integer";
+                        options->fractionNdigits = (int8_t) yyjson_get_int(ndigits);
+                    }
                 }
                 yyjson_val* trailingZeros = yyjson_obj_get(val, "trailingZeros");
                 if (trailingZeros)
