@@ -25,6 +25,13 @@ typedef enum __attribute__((__packed__)) FFSpaceBeforeUnitType
     FF_SPACE_BEFORE_UNIT_NEVER,
 } FFSpaceBeforeUnitType;
 
+typedef enum __attribute__((__packed__)) FFFractionTrailingZerosType
+{
+    FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT,
+    FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW,
+    FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE,
+} FFFractionTrailingZerosType;
+
 typedef struct FFOptionsDisplay
 {
     //If one of those is empty, ffLogoPrint will set them
@@ -81,6 +88,7 @@ typedef struct FFOptionsDisplay
     int8_t freqNdigits;
     FFSpaceBeforeUnitType freqSpaceBeforeUnit;
     int8_t fractionNdigits;
+    FFFractionTrailingZerosType fractionTrailingZeros;
 
     FFlist constants; // list of FFstrbuf
 } FFOptionsDisplay;
