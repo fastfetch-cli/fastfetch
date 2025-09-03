@@ -10,6 +10,65 @@
 #include <ctype.h>
 #include <inttypes.h>
 
+bool ffParseModuleOptions(const char* key, const char* value)
+{
+    if (!ffStrStartsWith(key, "--") || !ffCharIsEnglishAlphabet(key[2])) return false;
+    if (value && !*value) value = NULL;
+    for (FFModuleBaseInfo** modules = ffModuleInfos[toupper(key[2]) - 'A']; *modules; ++modules)
+    {
+        FFModuleBaseInfo* baseInfo = *modules;
+        const char* subKey = ffOptionTestPrefix(key, baseInfo->name);
+        if (subKey != NULL)
+        {
+            if (subKey[0] == '\0' || subKey[0] == '-') // Key is exactly the module name or has a leading '-'
+            {
+                fprintf(stderr, "Error: unknown module key %s\n", key);
+                exit(477);
+            }
+
+            FF_STRBUF_AUTO_DESTROY moduleName = ffStrbufCreateS(baseInfo->name);
+            ffStrbufLowerCase(&moduleName);
+
+            FF_STRBUF_AUTO_DESTROY jsonKey = ffStrbufCreate();
+            bool flag = false;
+            for (const char* p = subKey; *p; ++p)
+            {
+                if (*p == '-')
+                {
+                    if (flag)
+                    {
+                        fprintf(stderr, "Error: invalid double `-` in module key %s\n", key);
+                        exit(477);
+                    }
+                    flag = true;
+                }
+                else
+                {
+                    if (!isalpha((unsigned char)*p) && !isdigit((unsigned char)*p))
+                    {
+                        fprintf(stderr, "Error: invalid character `%c` in module key %s\n", *p, key);
+                        exit(477);
+                    }
+
+                    if (flag)
+                    {
+                        flag = false;
+                        ffStrbufAppendC(&jsonKey, (char) toupper((unsigned char) *p));
+                    }
+                    else
+                        ffStrbufAppendC(&jsonKey, *p);
+                }
+            }
+            fprintf(stderr, "Error: Unsupported module option: %s\n", key);
+            fputs("       Support of module options has been removed. Please add the flag to the JSON config instead.\n", stderr);
+            fprintf(stderr, "       Example (demonstration only): `{ \"modules\": [ { \"type\": \"%s\", \"%s\": %s%s%s } ] }`\n", moduleName.chars, jsonKey.chars, value ? "\"" : "", value ? value : "true", value ? "\"" : "");
+            fputs("       See <https://github.com/fastfetch-cli/fastfetch/wiki/Configuration> for more information.\n", stderr);
+            exit(477);
+        }
+    }
+    return false;
+}
+
 void ffPrepareCommandOption(FFdata* data)
 {
     //If we don't have a custom structure, use the default one
