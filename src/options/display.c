@@ -136,7 +136,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->sizeNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits)
+            {
+                if (!yyjson_is_uint(ndigits))
+                    return "display.size.ndigits must be an unsigned integer";
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9)
+                    return "display.size.ndigits must be between 0 and 9";
+                options->sizeNdigits = (uint8_t) val;
+            }
 
             yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
             if (spaceBeforeUnit)
@@ -177,7 +185,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->tempNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits)
+            {
+                if (!yyjson_is_uint(ndigits))
+                    return "display.temperature.ndigits must be an unsigned integer";
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9)
+                    return "display.temperature.ndigits must be between 0 and 9";
+                options->tempNdigits = (uint8_t) val;
+            }
 
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color)
@@ -222,7 +238,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits)
+            {
+                if (!yyjson_is_uint(ndigits))
+                    return "display.percent.ndigits must be an unsigned integer";
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9)
+                    return "display.percent.ndigits must be between 0 and 9";
+                options->percentNdigits = (uint8_t) val;
+            }
 
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color)
@@ -380,7 +404,10 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                     {
                         if (!yyjson_is_int(ndigits))
                             return "display.fraction.ndigits must be an integer";
-                        options->fractionNdigits = (int8_t) yyjson_get_int(ndigits);
+                        int64_t val = yyjson_get_int(ndigits);
+                        if (val < -1 || val > 9)
+                            return "display.fraction.ndigits must be between -1 and 9";
+                        options->fractionNdigits = (int8_t) val;
                     }
                 }
                 yyjson_val* trailingZeros = yyjson_obj_get(val, "trailingZeros");
@@ -452,7 +479,21 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 return "display.freq must be an object";
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
+            if (ndigits)
+            {
+                if (yyjson_is_null(ndigits))
+                    options->freqNdigits = -1;
+                else
+                {
+                    if (!yyjson_is_int(ndigits))
+                        return "display.freq.ndigits must be an integer";
+                    int64_t val = yyjson_get_int(ndigits);
+                    if (val < -1 || val > 9)
+                        return "display.freq.ndigits must be between -1 and 9";
+                    options->freqNdigits = (int8_t) val;
+                }
+                options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
+            }
 
             yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
             if (spaceBeforeUnit)

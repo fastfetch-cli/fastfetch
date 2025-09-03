@@ -1290,10 +1290,19 @@
                     "description": "Set how frequency values should be displayed",
                     "properties": {
                         "ndigits": {
-                            "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz with decimal\n-1 will show the frequency in MHz",
-                            "minimum": -1,
-                            "maximum": 9,
+                            "description": "Set the number of decimal places to display when formatting frequency values",
+                            "oneOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9,
+                                    "description": "Integer value displays the frequency in GHz with specified decimal places"
+                                },
+                                {
+                                    "type": "null",
+                                    "description": "Null value display the frequency as integer MHz"
+                                }
+                            ],
                             "default": 2
                         },
                         "spaceBeforeUnit": {
