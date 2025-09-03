@@ -711,6 +711,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     }
     else if(ffStrEqualsIgnCase(key, "--fraction-ndigits"))
         options->fractionNdigits = (int8_t) ffOptionParseInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--fraction-trailing-zeros"))
+    {
+        options->fractionTrailingZeros = (FFFractionTrailingZerosType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
+            { "show", FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW },
+            { "hide", FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE },
+            {},
+        });
+    }
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         options->noBuffer = ffOptionParseBoolean(value);
     else if(ffStrStartsWithIgnCase(key, "--bar-"))
