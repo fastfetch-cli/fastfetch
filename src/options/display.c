@@ -830,7 +830,7 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
 
     options->freqNdigits = 2;
     options->freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
-    options->fractionNdigits = -1;
+    options->fractionNdigits = 2;
     options->fractionTrailingZeros = FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));
