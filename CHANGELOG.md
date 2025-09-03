@@ -1,3 +1,25 @@
+# 2.52.0
+
+Changes:
+* New optional build dependencies on Android
+    * main: chafa dbus glib imagemagick libelf libxcb libxrandr pulseaudio zlib
+    * x11: dconf xfconf
+
+Bugfixes:
+* Fixes linking on 32-bit Android (#1939)
+* Skips network interfaces without IPs unless MAC address is requested (#1949, LocalIP)
+* Fixes unexpected padding when setting `logo.width` with chafa logos (#1947, Logo)
+    * Regression from v2.51.0
+
+Features:
+* Enables X11-related info (i.e., WM/DE) detection on Android (Global, Android)
+    * This requires many dependencies. See above.
+* Adds scale factor detection for X11 (Display, Linux)
+    * X11 doesn't natively report scale factor as Wayland does. Instead, Fastfetch tries to detect `Xft.dpi` (DPI used by X FreeType to scale fonts), which is usually set by the WM when DPI scaling is enabled.
+    * It's not always accurate. For example, XFCE4 has a separate config for text scaling, which is not affected by the global DPI scaling setting.
+* Adds `display.fraction.trailingZeros: [show|hide]` option for fraction formatting
+* Informs users that module-specific CLI options are no longer supported and provide guidance on transitioning to JSON config
+
 # 2.51.1
 
 Bugfixes:
