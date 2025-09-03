@@ -1333,6 +1333,28 @@
                                     "description": "The number of digits will be automatically determined based on the value"
                                 }
                             ],
+                            "default": 2
+                        },
+                        "trailingZeros": {
+                            "description": "Set when to keep trailing zeros",
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Same as `default`"
+                                },
+                                {
+                                    "const": "default",
+                                    "description": "Use the behavior defined internally"
+                                },
+                                {
+                                    "const": "show",
+                                    "description": "Always keep trailing zeros"
+                                },
+                                {
+                                    "const": "hide",
+                                    "description": "Never keep trailing zeros"
+                                }
+                            ],
                             "default": null
                         }
                     }
