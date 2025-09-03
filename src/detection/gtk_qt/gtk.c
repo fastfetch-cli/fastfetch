@@ -65,6 +65,8 @@ static void detectGTKFromSettings(FFGTKResult* result)
         wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitor0/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
         if (!wallpaper) // FIXME: find a way to enumerate possible properties
             wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitoreDP-1/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
+        if (!wallpaper)
+            wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitorbuiltin/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
     }
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_CINNAMON) == 0)
     {

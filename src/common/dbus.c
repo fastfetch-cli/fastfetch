@@ -162,14 +162,19 @@ bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result)
     return ffDBusGetUint(dbus, &subIter, result);
 }
 
-DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg)
+DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg1, const char* arg2)
 {
     DBusMessage* message = dbus->lib->ffdbus_message_new_method_call(busName, objectPath, interface, method);
     if(message == NULL)
         return NULL;
 
-    if (arg)
-        dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg, DBUS_TYPE_INVALID);
+    if (arg1)
+    {
+        if (arg2)
+            dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg1, DBUS_TYPE_STRING, &arg2, DBUS_TYPE_INVALID);
+        else
+            dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg1, DBUS_TYPE_INVALID);
+    }
 
     DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, NULL);
 

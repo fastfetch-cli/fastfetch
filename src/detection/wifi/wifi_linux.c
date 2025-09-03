@@ -57,7 +57,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 
     {
         FF_DEBUG("Getting device by IP interface name");
-        DBusMessage* device = ffDBusGetMethodReply(&dbus, "org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager", "org.freedesktop.NetworkManager", "GetDeviceByIpIface", item->inf.description.chars);
+        DBusMessage* device = ffDBusGetMethodReply(&dbus, "org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager", "org.freedesktop.NetworkManager", "GetDeviceByIpIface", item->inf.description.chars, NULL);
         if(!device)
         {
             FF_DEBUG("GetDeviceByIpIface failed for interface %s", item->inf.description.chars);
