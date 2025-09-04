@@ -81,6 +81,15 @@ static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buff
         item->allocation[index].used = ffStrbufToUInt(buffer, 0); \
     \
     item->allocation[index].dup = faccessat(subfd, #_type "/dup/", F_OK, 0) == 0; \
+    do { \
+        uint8_t _copies = 1; \
+        if (faccessat(subfd, #_type "/raid1c4/", F_OK, 0) == 0) _copies = 4; \
+        else if (faccessat(subfd, #_type "/raid1c3/", F_OK, 0) == 0) _copies = 3; \
+        else if (faccessat(subfd, #_type "/raid1/",   F_OK, 0) == 0) _copies = 2; \
+        else if (faccessat(subfd, #_type "/raid10/",  F_OK, 0) == 0) _copies = 2; \
+        else if (item->allocation[index].dup) _copies = 2; /* DUP on single device */ \
+        item->allocation[index].copies = _copies; \
+    } while(0); \
     \
     item->allocation[index].type = #_type;
 
@@ -89,6 +98,9 @@ static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buff
     FF_BTRFS_DETECT_TYPE(2, system);
 
     #undef FF_BTRFS_DETECT_TYPE
+
+    if (item->allocation[0].copies > 1) // index 0 = data
+        item->totalSize /= item->allocation[0].copies;
 
     return NULL;
 }

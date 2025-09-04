@@ -185,6 +185,7 @@ bool ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
             yyjson_mut_val* item = yyjson_mut_arr_add_obj(doc, allocation);
             yyjson_mut_obj_add_str(doc, item, "type", btrfs->allocation[i].type);
             yyjson_mut_obj_add_bool(doc, item, "dup", btrfs->allocation[i].dup);
+            yyjson_mut_obj_add_uint(doc, item, "copies", btrfs->allocation[i].copies);
             yyjson_mut_obj_add_uint(doc, item, "used", btrfs->allocation[i].used);
             yyjson_mut_obj_add_uint(doc, item, "total", btrfs->allocation[i].total);
         }
