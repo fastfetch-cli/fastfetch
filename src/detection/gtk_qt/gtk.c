@@ -34,6 +34,13 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
         ffStrbufAppendS(&result->wallpaper, wallpaper);
 }
 
+static bool testXfconfWallpaperPropKey(FF_MAYBE_UNUSED void* data, const char* key)
+{
+    int count = 0;
+    sscanf(key, "/backdrop/screen0/monitor%*[^/]/workspace0/last-image%n", &count);
+    return count == 0;
+}
+
 static void detectGTKFromSettings(FFGTKResult* result)
 {
     static const char* themeName = NULL;
@@ -62,11 +69,7 @@ static void detectGTKFromSettings(FFGTKResult* result)
         fontName = ffSettingsGetXFConf("xsettings", "/Gtk/FontName", FF_VARIANT_TYPE_STRING).strValue;
         cursorTheme = ffSettingsGetXFConf("xsettings", "/Gtk/CursorThemeName", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGetXFConf("xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
-        wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitor0/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
-        if (!wallpaper) // FIXME: find a way to enumerate possible properties
-            wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitoreDP-1/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
-        if (!wallpaper)
-            wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitorbuiltin/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
+        wallpaper = ffSettingsGetXFConfFirstMatch("xfce4-desktop", "/backdrop/screen0", FF_VARIANT_TYPE_STRING, NULL, testXfconfWallpaperPropKey).strValue;
     }
     else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_CINNAMON) == 0)
     {

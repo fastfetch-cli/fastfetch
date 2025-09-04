@@ -250,10 +250,94 @@ FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName,
 
     return FF_VARIANT_NULL;
 }
+
+#define FF_DBUS_ITER_CONTINUE(dbus, iterator) \
+    { \
+        if(!(dbus).lib->ffdbus_message_iter_next(iterator)) \
+            break; \
+        continue; \
+    }
+
+FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* propertyPrefix, FFvarianttype type, void* data, FFTestXfconfPropCallback* cb)
+{
+    FFDBusData dbus;
+    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL)
+        return FF_VARIANT_NULL;
+
+    DBusMessage* reply = ffDBusGetMethodReply(&dbus, "org.xfce.Xfconf", "/org/xfce/Xfconf", "org.xfce.Xfconf", "GetAllProperties", channelName, propertyPrefix);
+    if(!reply)
+        return FF_VARIANT_NULL;
+
+    DBusMessageIter rootIterator;
+    if(!dbus.lib->ffdbus_message_iter_init(reply, &rootIterator))
+    {
+        dbus.lib->ffdbus_message_unref(reply);
+        return FF_VARIANT_NULL;
+    }
+
+    DBusMessageIter arrayIterator;
+    dbus.lib->ffdbus_message_iter_recurse(&rootIterator, &arrayIterator);
+
+    while(true)
+    {
+        if(dbus.lib->ffdbus_message_iter_get_arg_type(&arrayIterator) != DBUS_TYPE_DICT_ENTRY)
+            FF_DBUS_ITER_CONTINUE(dbus, &arrayIterator)
+
+        DBusMessageIter dictIterator;
+        dbus.lib->ffdbus_message_iter_recurse(&arrayIterator, &dictIterator);
+
+        const char* key;
+        dbus.lib->ffdbus_message_iter_get_basic(&dictIterator, &key);
+
+        if (cb(data, key)) FF_DBUS_ITER_CONTINUE(dbus, &arrayIterator)
+        dbus.lib->ffdbus_message_iter_next(&dictIterator);
+
+        if(type == FF_VARIANT_TYPE_INT)
+        {
+            int32_t value;
+            if (ffDBusGetInt(&dbus, &dictIterator, &value))
+            {
+                dbus.lib->ffdbus_message_unref(reply);
+                return (FFvariant) { .intValue = value };
+            }
+            return FF_VARIANT_NULL;
+        }
+
+        if(type == FF_VARIANT_TYPE_STRING)
+        {
+            FFstrbuf value = ffStrbufCreate();
+            if (ffDBusGetString(&dbus, &dictIterator, &value))
+            {
+                dbus.lib->ffdbus_message_unref(reply);
+                return (FFvariant) { .strValue = value.chars }; // Leaks value.chars
+            }
+            return FF_VARIANT_NULL;
+        }
+
+        if(type == FF_VARIANT_TYPE_BOOL)
+        {
+            bool value;
+            if (ffDBusGetBool(&dbus, &dictIterator, &value))
+            {
+                dbus.lib->ffdbus_message_unref(reply);
+                return (FFvariant) { .boolValue = value, .boolValueSet = true };
+            }
+        }
+
+        return FF_VARIANT_NULL;
+    }
+
+    return FF_VARIANT_NULL;
+}
 #else //FF_HAVE_DBUS
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
 {
     FF_UNUSED(channelName, propertyName, type)
+    return FF_VARIANT_NULL;
+}
+FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* propertyPrefix, FFvarianttype type, void* data, FFTestXfconfPropCallback* cb)
+{
+    FF_UNUSED(channelName, propertyPrefix, type, data, cb);
     return FF_VARIANT_NULL;
 }
 #endif //FF_HAVE_DBUS
