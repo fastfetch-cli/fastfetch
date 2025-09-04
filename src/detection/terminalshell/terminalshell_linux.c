@@ -111,6 +111,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "proot")      ||
             ffStrbufEqualS(&result->processName, "script")     ||
             #ifdef __linux__
+            ffStrbufStartsWithS(&result->processName, "Relay(")   || // Unknown process in WSL2
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
             #endif
             ffStrbufEndsWithS(&result->processName, ".sh")
