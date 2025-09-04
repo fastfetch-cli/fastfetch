@@ -196,77 +196,67 @@ FFvariant ffSettingsGet(const char* dconfKey, const char* gsettingsSchemaName, c
     return ffSettingsGetDConf(dconfKey, type);
 }
 
-#ifdef FF_HAVE_XFCONF
-#include <xfconf/xfconf.h>
-
-typedef struct XFConfData
-{
-    FF_LIBRARY_SYMBOL(xfconf_channel_get)
-    FF_LIBRARY_SYMBOL(xfconf_channel_has_property)
-    FF_LIBRARY_SYMBOL(xfconf_channel_get_string)
-    FF_LIBRARY_SYMBOL(xfconf_channel_get_bool)
-    FF_LIBRARY_SYMBOL(xfconf_channel_get_int)
-    FF_LIBRARY_SYMBOL(xfconf_init)
-
-    bool inited;
-} XFConfData;
-
-static const XFConfData* getXFConfData(void)
-{
-    static XFConfData data;
-
-    if (!data.inited)
-    {
-        data.inited = true;
-        FF_LIBRARY_LOAD(libxfconf, NULL, "libxfconf-0" FF_LIBRARY_EXTENSION, 4);
-
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_has_property, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get_string, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get_bool, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_channel_get_int, NULL)
-        FF_LIBRARY_LOAD_SYMBOL_VAR(libxfconf, data, xfconf_init, NULL)
-        if(!data.ffxfconf_init(NULL))
-            data.ffxfconf_init = NULL;
-        else
-            libxfconf = NULL;
-    }
-
-    if(!data.ffxfconf_init)
-        return NULL;
-
-    return &data;
-}
+#ifdef FF_HAVE_DBUS
+#include "common/dbus.h"
 
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
 {
-    const XFConfData* data = getXFConfData();
-    if(data == NULL)
+    FFDBusData dbus;
+    if (ffDBusLoadData(DBUS_BUS_SESSION, &dbus) != NULL)
         return FF_VARIANT_NULL;
 
-    XfconfChannel* channel = data->ffxfconf_channel_get(channelName); // Never fails according to documentation but rather returns an empty channel
-
-    if(!data->ffxfconf_channel_has_property(channel, propertyName))
+    DBusMessage* reply = ffDBusGetMethodReply(&dbus, "org.xfce.Xfconf", "/org/xfce/Xfconf", "org.xfce.Xfconf", "GetProperty", channelName, propertyName);
+    if(!reply)
         return FF_VARIANT_NULL;
+
+    DBusMessageIter rootIterator;
+    if(!dbus.lib->ffdbus_message_iter_init(reply, &rootIterator))
+    {
+        dbus.lib->ffdbus_message_unref(reply);
+        return FF_VARIANT_NULL;
+    }
 
     if(type == FF_VARIANT_TYPE_INT)
-        return (FFvariant) {.intValue = data->ffxfconf_channel_get_int(channel, propertyName, 0)};
+    {
+        int32_t value;
+        if (ffDBusGetInt(&dbus, &rootIterator, &value))
+        {
+            dbus.lib->ffdbus_message_unref(reply);
+            return (FFvariant) { .intValue = value };
+        }
+        return FF_VARIANT_NULL;
+    }
 
     if(type == FF_VARIANT_TYPE_STRING)
-        return (FFvariant) {.strValue = data->ffxfconf_channel_get_string(channel, propertyName, NULL)};
+    {
+        FFstrbuf value = ffStrbufCreate();
+        if (ffDBusGetString(&dbus, &rootIterator, &value))
+        {
+            dbus.lib->ffdbus_message_unref(reply);
+            return (FFvariant) { .strValue = value.chars }; // Leaks value.chars
+        }
+        return FF_VARIANT_NULL;
+    }
 
     if(type == FF_VARIANT_TYPE_BOOL)
-        return (FFvariant) {.boolValue = data->ffxfconf_channel_get_bool(channel, propertyName, false), .boolValueSet = true};
+    {
+        bool value;
+        if (ffDBusGetBool(&dbus, &rootIterator, &value))
+        {
+            dbus.lib->ffdbus_message_unref(reply);
+            return (FFvariant) { .boolValue = value, .boolValueSet = true };
+        }
+    }
 
     return FF_VARIANT_NULL;
 }
-#else //FF_HAVE_XFCONF
+#else //FF_HAVE_DBUS
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type)
 {
     FF_UNUSED(channelName, propertyName, type)
     return FF_VARIANT_NULL;
 }
-#endif //FF_HAVE_XFCONF
+#endif //FF_HAVE_DBUS
 
 #ifdef FF_HAVE_SQLITE3
 #include <sqlite3.h>

@@ -208,9 +208,6 @@ void ffListFeatures(void)
         #if FF_HAVE_ZLIB
             "zlib\n"
         #endif
-        #if FF_HAVE_XFCONF
-            "xfconf\n"
-        #endif
         #if FF_HAVE_SQLITE3
             "sqlite3\n"
         #endif
