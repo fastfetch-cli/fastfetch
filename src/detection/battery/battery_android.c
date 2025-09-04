@@ -139,7 +139,11 @@ static const char* parseDumpsys(FFBatteryOptions* options, FFlist* results)
     if(options->temp)
     {
         if (ffParsePropLines(start, "temperature: ", &temp))
+        {
             battery->temperature = ffStrbufToDouble(&temp, FF_BATTERY_TEMP_UNSET);
+            if (battery->temperature != FF_BATTERY_TEMP_UNSET)
+                battery->temperature /= 10.0; // Android returns temperature in tenths of a degree
+        }
         ffStrbufClear(&temp);
     }
 

@@ -107,7 +107,7 @@ void ffStrbufAppendSInt(FFstrbuf* strbuf, int64_t value);
 void ffStrbufAppendUInt(FFstrbuf* strbuf, uint64_t value);
 // Appends a double value to the string buffer with the specified precision (0~15).
 // if `precision < 0`, let yyjson decide the precision
-void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision);
+void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision, bool trailingZeros);
 
 FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateA(uint32_t allocate)
 {

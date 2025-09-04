@@ -177,6 +177,7 @@ static struct kde_output_device_v2_listener outputListener = {
     .max_bits_per_color_range = (void*) stubListener,
     .automatic_max_bits_per_color_limit = (void*) stubListener,
     .edr_policy = (void*) stubListener,
+    .sharpness = (void*) stubListener,
 };
 
 const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* registry, uint32_t name, uint32_t version)
@@ -219,8 +220,8 @@ const char* ffWaylandHandleKdeOutput(WaylandData* wldata, struct wl_registry* re
         (uint32_t) display.width,
         (uint32_t) display.height,
         display.refreshRate / 1000.0,
-        (uint32_t) (display.width / display.scale),
-        (uint32_t) (display.height / display.scale),
+        (uint32_t) (display.width / display.scale + .5),
+        (uint32_t) (display.height / display.scale + .5),
         (uint32_t) display.preferredWidth,
         (uint32_t) display.preferredHeight,
         display.preferredRefreshRate / 1000.0,

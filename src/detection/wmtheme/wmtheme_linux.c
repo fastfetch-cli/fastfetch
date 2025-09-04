@@ -44,7 +44,7 @@ static bool detectWMThemeFromConfigFile(const char* configFile, const char* them
 
 static bool detectWMThemeFromSettings(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGet(dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGetGnome(dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
 
     if(!ffStrSet(theme))
     {
@@ -80,7 +80,7 @@ ok:
 
 static bool detectMutter(FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGet("/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGetGnome("/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
     if(ffStrSet(theme))
     {
         ffStrbufAppendS(themeOrError, theme);
@@ -92,8 +92,8 @@ static bool detectMutter(FFstrbuf* themeOrError)
 
 static bool detectMuffin(FFstrbuf* themeOrError)
 {
-    FF_AUTO_FREE const char* name = ffSettingsGet("/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
-    FF_AUTO_FREE const char* theme = ffSettingsGet("/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
+    FF_AUTO_FREE const char* name = ffSettingsGetGnome("/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    FF_AUTO_FREE const char* theme = ffSettingsGetGnome("/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
 
     if(name == NULL && theme == NULL)
     {
@@ -135,9 +135,9 @@ static bool detectOpenbox(const FFstrbuf* dePrettyName, FFstrbuf* themeOrError)
 {
     FF_STRBUF_AUTO_DESTROY absolutePath = ffStrbufCreateA(64);
     const char *configFileSubpath = "openbox/rc.xml";
-    if (ffStrbufIgnCaseCompS(dePrettyName, "LXQt") == 0)
+    if (ffStrbufIgnCaseEqualS(dePrettyName, "LXQt"))
         configFileSubpath = "openbox/lxqt-rc.xml";
-    else if (ffStrbufIgnCaseCompS(dePrettyName, "LXDE") == 0)
+    else if (ffStrbufIgnCaseEqualS(dePrettyName, "LXDE"))
         configFileSubpath = "openbox/lxde-rc.xml";
 
     if (!ffSearchUserConfigFile(&instance.state.platform.configDirs, configFileSubpath, &absolutePath))
@@ -197,16 +197,19 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError)
         return false;
     }
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN) == 0)
+    if(ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_KWIN))
         return detectWMThemeFromConfigFile("kwinrc", "theme =", "Breeze", themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_XFWM4) == 0)
+    if(
+        ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_XFWM4) ||
+        (ffStrbufIgnCaseEqualS(&wm->wmPrettyName, "labwc") && ffStrbufIgnCaseEqualS(&wm->dePrettyName, FF_DE_PRETTY_XFCE4))
+    )
         return detectXFWM4(themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUTTER) == 0)
+    if(ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_MUTTER))
     {
         if(
-            ffStrbufIgnCaseCompS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) == 0 ||
+            ffStrbufIgnCaseEqualS(&wm->dePrettyName, FF_DE_PRETTY_GNOME) ||
             ffStrbufIgnCaseEqualS(&wm->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC)
         )
             return detectMutter(themeOrError);
@@ -214,13 +217,13 @@ bool ffDetectWmTheme(FFstrbuf* themeOrError)
             return detectGTKThemeAsWMTheme(themeOrError);
     }
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MUFFIN) == 0)
+    if(ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_MUFFIN))
         return detectMuffin(themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_MARCO) == 0)
+    if(ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_MARCO))
         return detectWMThemeFromSettings("/org/mate/Marco/general/theme", "org.mate.Marco.general", NULL, "theme", themeOrError);
 
-    if(ffStrbufIgnCaseCompS(&wm->wmPrettyName, FF_WM_PRETTY_OPENBOX) == 0)
+    if(ffStrbufIgnCaseEqualS(&wm->wmPrettyName, FF_WM_PRETTY_OPENBOX))
         return detectOpenbox(&wm->dePrettyName, themeOrError);
 
     ffStrbufAppendS(themeOrError, "Unknown WM: ");

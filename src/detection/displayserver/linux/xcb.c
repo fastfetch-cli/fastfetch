@@ -3,7 +3,7 @@
 #ifdef FF_HAVE_XCB_RANDR
 
 #include "common/library.h"
-#include "common/time.h"
+#include "common/properties.h"
 #include "util/edidHelper.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
@@ -56,7 +56,7 @@ static void* xcbGetProperty(XcbPropertyData* data, xcb_connection_t* connection,
     if(requestAtomReply == NULL)
         return NULL;
 
-    xcb_get_property_cookie_t propertyCookie = data->ffxcb_get_property(connection, false, window, requestAtomReply->atom, XCB_ATOM_ANY, 0, 64);
+    xcb_get_property_cookie_t propertyCookie = data->ffxcb_get_property(connection, false, window, requestAtomReply->atom, XCB_ATOM_ANY, 0, 8 * 1024);
 
     FF_AUTO_FREE xcb_get_property_reply_t* propertyReply = data->ffxcb_get_property_reply(connection, propertyCookie, NULL);
     if(propertyReply == NULL)
@@ -138,86 +138,9 @@ typedef struct XcbRandrData
     xcb_connection_t* connection;
     FFDisplayServerResult* result;
     XcbPropertyData propData;
-
-    //init per screen
-    xcb_randr_get_screen_resources_current_reply_t* screenResources;
 } XcbRandrData;
 
-static bool xcbRandrHandleCrtc(XcbRandrData* data, xcb_randr_crtc_t crtc, FFstrbuf* name, bool primary, xcb_randr_get_output_info_reply_t* output, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength)
-{
-    xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, crtc, XCB_CURRENT_TIME);
-    FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
-    if(crtcInfoReply == NULL)
-        return false;
-
-    uint32_t rotation;
-    switch (crtcInfoReply->rotation)
-    {
-        case XCB_RANDR_ROTATION_ROTATE_90:
-            rotation = 90;
-            break;
-        case XCB_RANDR_ROTATION_ROTATE_180:
-            rotation = 180;
-            break;
-        case XCB_RANDR_ROTATION_ROTATE_270:
-            rotation = 270;
-            break;
-        default:
-            rotation = 0;
-            break;
-    }
-
-    xcb_randr_mode_info_t* currentMode = NULL;
-    xcb_randr_mode_info_t* preferredMode = NULL;
-
-    if(data->screenResources)
-    {
-        xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(data->screenResources);
-
-        if (output->num_preferred > 0)
-            preferredMode = modesIterator.data;
-
-        while (modesIterator.rem > 0)
-        {
-            if (modesIterator.data->id == crtcInfoReply->mode)
-            {
-                currentMode = modesIterator.data;
-                break;
-            }
-
-            data->ffxcb_randr_mode_info_next(&modesIterator);
-        }
-    }
-
-    FFDisplayResult* item = ffdsAppendDisplay(
-        data->result,
-        (uint32_t) crtcInfoReply->width,
-        (uint32_t) crtcInfoReply->height,
-        currentMode ? (double) currentMode->dot_clock / (double) ((uint32_t) currentMode->htotal * currentMode->vtotal) : 0,
-        (uint32_t) crtcInfoReply->width,
-        (uint32_t) crtcInfoReply->height,
-        preferredMode ? (uint32_t) preferredMode->width : 0,
-        preferredMode ? (uint32_t) preferredMode->height : 0,
-        preferredMode ? (double) preferredMode->dot_clock / (double) ((uint32_t) preferredMode->htotal * preferredMode->vtotal) : 0,
-        rotation,
-        name,
-        displayType,
-        primary,
-        0,
-        (uint32_t) output->mm_width,
-        (uint32_t) output->mm_height,
-        "xcb-randr-crtc"
-    );
-    if (item && edidLength)
-    {
-        item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-        ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
-    }
-
-    return !!item;
-}
-
-static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary, FFDisplayType displayType)
+static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, FFstrbuf* name, bool primary, FFDisplayType displayType, struct xcb_randr_get_screen_resources_current_reply_t* screenResources, uint8_t bitDepth, double scaleFactor)
 {
     xcb_randr_get_output_info_cookie_t outputInfoCookie = data->ffxcb_randr_get_output_info(data->connection, output, XCB_CURRENT_TIME);
     FF_AUTO_FREE xcb_randr_get_output_info_reply_t* outputInfoReply = data->ffxcb_randr_get_output_info_reply(data->connection, outputInfoCookie, NULL);
@@ -246,12 +169,80 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         }
     }
 
-    bool res = xcbRandrHandleCrtc(data, outputInfoReply->crtc, name, primary, outputInfoReply, displayType, edidData, edidLength);
+    xcb_randr_get_crtc_info_cookie_t crtcInfoCookie = data->ffxcb_randr_get_crtc_info(data->connection, outputInfoReply->crtc, XCB_CURRENT_TIME);
+    FF_AUTO_FREE xcb_randr_get_crtc_info_reply_t* crtcInfoReply = data->ffxcb_randr_get_crtc_info_reply(data->connection, crtcInfoCookie, NULL);
+    if(crtcInfoReply == NULL)
+        return false;
 
-    return res;
+    uint32_t rotation;
+    switch (crtcInfoReply->rotation)
+    {
+        case XCB_RANDR_ROTATION_ROTATE_90:
+            rotation = 90;
+            break;
+        case XCB_RANDR_ROTATION_ROTATE_180:
+            rotation = 180;
+            break;
+        case XCB_RANDR_ROTATION_ROTATE_270:
+            rotation = 270;
+            break;
+        default:
+            rotation = 0;
+            break;
+    }
+
+    xcb_randr_mode_info_t* currentMode = NULL;
+    xcb_randr_mode_info_t* preferredMode = NULL;
+
+    if(screenResources)
+    {
+        xcb_randr_mode_info_iterator_t modesIterator = data->ffxcb_randr_get_screen_resources_current_modes_iterator(screenResources);
+
+        if (outputInfoReply->num_preferred > 0)
+            preferredMode = modesIterator.data;
+
+        while (modesIterator.rem > 0)
+        {
+            if (modesIterator.data->id == crtcInfoReply->mode)
+            {
+                currentMode = modesIterator.data;
+                break;
+            }
+
+            data->ffxcb_randr_mode_info_next(&modesIterator);
+        }
+    }
+
+    FFDisplayResult* item = ffdsAppendDisplay(
+        data->result,
+        (uint32_t) crtcInfoReply->width,
+        (uint32_t) crtcInfoReply->height,
+        currentMode ? (double) currentMode->dot_clock / (double) ((uint32_t) currentMode->htotal * currentMode->vtotal) : 0,
+        (uint32_t) (crtcInfoReply->width / scaleFactor + .5),
+        (uint32_t) (crtcInfoReply->height / scaleFactor + .5),
+        preferredMode ? (uint32_t) preferredMode->width : 0,
+        preferredMode ? (uint32_t) preferredMode->height : 0,
+        preferredMode ? (double) preferredMode->dot_clock / (double) ((uint32_t) preferredMode->htotal * preferredMode->vtotal) : 0,
+        rotation,
+        name,
+        displayType,
+        primary,
+        0,
+        (uint32_t) outputInfoReply->mm_width,
+        (uint32_t) outputInfoReply->mm_height,
+        "xcb-randr-crtc"
+    );
+    if (item && edidLength)
+    {
+        item->hdrStatus = ffEdidGetHdrCompatible(edidData, (uint32_t) edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+        ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        item->bitDepth = bitDepth;
+    }
+
+    return !!item;
 }
 
-static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* monitor)
+static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* monitor, struct xcb_randr_get_screen_resources_current_reply_t* screenResources, uint8_t bitDepth, double scaleFactor)
 {
     //for some reasons, we have to construct this our self
     xcb_randr_output_iterator_t outputIterator = {
@@ -275,18 +266,20 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
 
     while(outputIterator.rem > 0)
     {
-        if(xcbRandrHandleOutput(data, *outputIterator.data, &name, monitor->primary, displayType))
+        if(xcbRandrHandleOutput(data, *outputIterator.data, &name, monitor->primary, displayType, screenResources, bitDepth, scaleFactor))
             foundOutput = true;
         data->ffxcb_randr_output_next(&outputIterator);
-    };
+    }
 
-    return foundOutput ? true : !!ffdsAppendDisplay(
+    if (foundOutput) return true;
+
+    FFDisplayResult* display = ffdsAppendDisplay(
         data->result,
         (uint32_t) monitor->width,
         (uint32_t) monitor->height,
         0,
-        (uint32_t) monitor->width,
-        (uint32_t) monitor->height,
+        (uint32_t) (monitor->width / scaleFactor + .5),
+        (uint32_t) (monitor->height / scaleFactor + .5),
         0, 0, 0,
         0,
         &name,
@@ -297,6 +290,8 @@ static bool xcbRandrHandleMonitor(XcbRandrData* data, xcb_randr_monitor_info_t* 
         (uint32_t) monitor->height_in_millimeters,
         "xcb-randr-monitor"
     );
+    if (display) display->bitDepth = bitDepth;
+    return !!display;
 }
 
 static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
@@ -306,13 +301,27 @@ static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
     if(monitorsReply == NULL)
         return false;
 
+    //Init screen resources. They are used to iterate over all modes. xcbRandrHandleMode checks for " == NULL", to fail as late as possible.
+    xcb_randr_get_screen_resources_current_cookie_t screenResourcesCookie = data->ffxcb_randr_get_screen_resources_current(data->connection, screen->root);
+    FF_AUTO_FREE struct xcb_randr_get_screen_resources_current_reply_t* screenResources = data->ffxcb_randr_get_screen_resources_current_reply(data->connection, screenResourcesCookie, NULL);
+
+    double scaleFactor = 1;
+    FF_AUTO_FREE const char* resourceManager = xcbGetProperty(&data->propData, data->connection, screen->root, "RESOURCE_MANAGER");
+    if (resourceManager)
+    {
+        FF_STRBUF_AUTO_DESTROY dpi = ffStrbufCreate();
+        if (ffParsePropLines(resourceManager, "Xft.dpi:", &dpi))
+            scaleFactor = ffStrbufToDouble(&dpi, 96) / 96;
+    }
+    uint8_t bitDepth = (uint8_t) (screen->root_depth / 3);
+
     xcb_randr_monitor_info_iterator_t monitorInfoIterator = data->ffxcb_randr_get_monitors_monitors_iterator(monitorsReply);
 
     bool foundMonitor = false;
 
     while(monitorInfoIterator.rem > 0)
     {
-        if(xcbRandrHandleMonitor(data, monitorInfoIterator.data))
+        if(xcbRandrHandleMonitor(data, monitorInfoIterator.data, screenResources, bitDepth, scaleFactor))
             foundMonitor = true;
         data->ffxcb_randr_monitor_info_next(&monitorInfoIterator);
     }
@@ -322,17 +331,8 @@ static bool xcbRandrHandleMonitors(XcbRandrData* data, xcb_screen_t* screen)
 
 static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
 {
-    //Init screen resources. They are used to iterate over all modes. xcbRandrHandleMode checks for " == NULL", to fail as late as possible.
-    xcb_randr_get_screen_resources_current_cookie_t screenResourcesCookie = data->ffxcb_randr_get_screen_resources_current(data->connection, screen->root);
-
-    data->screenResources = data->ffxcb_randr_get_screen_resources_current_reply(data->connection, screenResourcesCookie, NULL);
-
     //With all the initialisation done, start the detection
-    bool ret = xcbRandrHandleMonitors(data, screen);
-
-    free(data->screenResources);
-
-    if(ret)
+    if(xcbRandrHandleMonitors(data, screen))
         return;
 
     //If detetction failed, fallback to screen = monitor, like in the libxcb.so implementation
@@ -348,7 +348,7 @@ static void xcbRandrHandleScreen(XcbRandrData* data, xcb_screen_t* screen)
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
-        0,
+        (uint64_t) screen->root,
         (uint32_t) screen->width_in_millimeters,
         (uint32_t) screen->height_in_millimeters,
         "xcb-randr-screen"

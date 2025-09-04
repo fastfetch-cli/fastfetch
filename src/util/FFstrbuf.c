@@ -571,7 +571,7 @@ void ffStrbufAppendUInt(FFstrbuf* strbuf, uint64_t value)
     strbuf->length += (uint32_t)(end - start);
 }
 
-void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision)
+void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision, bool trailingZeros)
 {
     assert(precision <= 15); // yyjson_write_number supports up to 15 digits after the decimal point
 
@@ -598,18 +598,29 @@ void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision)
         return;
     }
 
-    if (precision > 1)
+    if (trailingZeros)
     {
-        for (char* p = end - 1; *p != '.' && p > start; --p)
-            --precision;
-        if (precision > 0)
-            ffStrbufAppendNC(strbuf, (uint32_t) precision, '0');
+        if (precision > 1)
+        {
+            for (char* p = end - 1; *p != '.' && p > start; --p)
+                --precision;
+            if (precision > 0)
+                ffStrbufAppendNC(strbuf, (uint32_t) precision, '0');
+        }
+        else if (precision == 0 || (precision < 0 && end[-1] == '0'))
+        {
+            goto removeDecimalPoint;
+        }
     }
-    else if (precision == 0 || (precision < 0 && end[-1] == '0'))
+    else
     {
-        // yyjson always appends ".0", so we need to remove it
-        strbuf->length -= 2;
-        strbuf->chars[strbuf->length] = '\0';
+        if (end[-1] == '0')
+        {
+        removeDecimalPoint:
+            // yyjson always appends ".0" to make it a float point number. We need to remove it
+            strbuf->length -= 2;
+            strbuf->chars[strbuf->length] = '\0';
+        }
     }
 }
 

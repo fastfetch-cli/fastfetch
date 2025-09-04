@@ -22,7 +22,7 @@
 static void getExePath(FFPlatform* platform)
 {
     char exePath[PATH_MAX + 1];
-    #ifdef __linux__
+    #if defined(__linux__) || defined (__GNU__)
         ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';

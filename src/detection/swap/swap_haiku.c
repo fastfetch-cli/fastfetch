@@ -16,7 +16,7 @@ const char* ffDetectSwap(FFlist* result)
     if (kvms)
     {
         const char* swapAuto = get_driver_parameter(kvms, "swap_auto", NULL, NULL);
-	if (swapAuto)
+        if (swapAuto)
             ffStrbufSetStatic(&swap->name, swapAuto[0] == 'y' ? "Auto" : "Manual");
         unload_driver_settings(kvms);
     }

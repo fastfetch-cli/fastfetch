@@ -318,7 +318,7 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format of the module `CPU`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count",
+            "description": "Output format of the module `CPU`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: X86-64 CPU microarchitecture",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -346,7 +346,7 @@
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation",
+            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
             "type": "string"
         },
         "diskioFormat": {
@@ -1290,10 +1290,19 @@
                     "description": "Set how frequency values should be displayed",
                     "properties": {
                         "ndigits": {
-                            "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz with decimal\n-1 will show the frequency in MHz",
-                            "minimum": -1,
-                            "maximum": 9,
+                            "description": "Set the number of decimal places to display when formatting frequency values",
+                            "oneOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9,
+                                    "description": "Integer value displays the frequency in GHz with specified decimal places"
+                                },
+                                {
+                                    "type": "null",
+                                    "description": "Null value display the frequency as integer MHz"
+                                }
+                            ],
                             "default": 2
                         },
                         "spaceBeforeUnit": {
@@ -1331,6 +1340,28 @@
                                 {
                                     "type": "null",
                                     "description": "The number of digits will be automatically determined based on the value"
+                                }
+                            ],
+                            "default": 2
+                        },
+                        "trailingZeros": {
+                            "description": "Set when to keep trailing zeros",
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Same as `default`"
+                                },
+                                {
+                                    "const": "default",
+                                    "description": "Use the behavior defined internally"
+                                },
+                                {
+                                    "const": "show",
+                                    "description": "Always keep trailing zeros"
+                                },
+                                {
+                                    "const": "hide",
+                                    "description": "Never keep trailing zeros"
                                 }
                             ],
                             "default": null

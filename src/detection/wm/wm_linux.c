@@ -13,6 +13,17 @@ const char* ffDetectWMPlugin(FF_MAYBE_UNUSED FFstrbuf* pluginName)
     return "Not supported on this platform";
 }
 
+static bool extractCommonWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    int count = 0;
+    sscanf(line, "%*d.%*d.%*d%n", &count);
+    if (count == 0) return true;
+
+    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
+    return false;
+}
+
+#if !__ANDROID__
 static bool extractHyprlandVersion(const char* line, uint32_t len, void *userdata)
 {
     if (line[0] != 'v') return true;
@@ -128,6 +139,48 @@ static const char* getSway(FFstrbuf* result)
     return "Failed to run command `sway --version`";
 }
 
+static const char* getLabwc(FFstrbuf* result)
+{
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("labwc", &path);
+    if (error) return "Failed to find labwc executable path";
+
+    ffBinaryExtractStrings(path.chars, extractCommonWmVersion, result, (uint32_t) strlen("0.0.0"));
+    if (result->length > 0) return NULL;
+
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        path.chars,
+        "--version",
+        NULL
+    }) == NULL)
+    { // labwc 0.9.0 (+xwayland +nls +rsvg +libsfdo)
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `labwc --version`";
+}
+
+#ifdef __linux__
+static const char* getWslg(FFstrbuf* result)
+{
+    if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result))
+        return "Failed to read /mnt/wslg/versions.txt";
+
+    if (!ffStrbufStartsWithS(result, "WSLg "))
+        return "Failed to find WSLg version";
+
+    ffStrbufSubstrBeforeFirstC(result, '\n');
+    ffStrbufSubstrBeforeFirstC(result, '+');
+    ffStrbufSubstrAfterFirstC(result, ':');
+    ffStrbufTrimLeft(result, ' ');
+    return NULL;
+}
+#endif
+
+#endif // !__ANDROID__
+
 static bool extractI3Version(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
 {
     int count = 0;
@@ -159,31 +212,6 @@ static const char* getI3(FFstrbuf* result)
     }
 
     return "Failed to run command `i3 --version`";
-}
-
-static const char* getWslg(FFstrbuf* result)
-{
-    if (!ffAppendFileBuffer("/mnt/wslg/versions.txt", result))
-        return "Failed to read /mnt/wslg/versions.txt";
-
-    if (!ffStrbufStartsWithS(result, "WSLg "))
-        return "Failed to find WSLg version";
-
-    ffStrbufSubstrBeforeFirstC(result, '\n');
-    ffStrbufSubstrBeforeFirstC(result, '+');
-    ffStrbufSubstrAfterFirstC(result, ':');
-    ffStrbufTrimLeft(result, ' ');
-    return NULL;
-}
-
-static bool extractCommonWmVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, void *userdata)
-{
-    int count = 0;
-    sscanf(line, "%*d.%*d.%*d%n", &count);
-    if (count == 0) return true;
-
-    ffStrbufSetNS((FFstrbuf*) userdata, len, line);
-    return false;
 }
 
 static const char* getCtwm(FFstrbuf* result)
@@ -255,45 +283,31 @@ static const char* getOpenbox(FFstrbuf* result)
     return "Failed to run command `openbox --version`";
 }
 
-static const char* getLabwc(FFstrbuf* result)
-{
-    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
-    const char* error = ffFindExecutableInPath("labwc", &path);
-    if (error) return "Failed to find labwc executable path";
-
-    ffBinaryExtractStrings(path.chars, extractCommonWmVersion, result, (uint32_t) strlen("0.0.0"));
-    if (result->length > 0) return NULL;
-
-    if (ffProcessAppendStdOut(result, (char* const[]){
-        path.chars,
-        "--version",
-        NULL
-    }) == NULL)
-    { // labwc 0.9.0 (+xwayland +nls +rsvg +libsfdo)
-        ffStrbufSubstrAfterFirstC(result, ' ');
-        ffStrbufSubstrBeforeFirstC(result, ' ');
-        return NULL;
-    }
-
-    return "Failed to run command `labwc --version`";
-}
-
 const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE_UNUSED FFWMOptions* options)
 {
     if (!wmName)
         return "No WM detected";
 
+    #if !__ANDROID__
+    // Wayland compositors
     if (ffStrbufIgnCaseEqualS(wmName, "Hyprland"))
         return getHyprland(result);
 
     if (ffStrbufEqualS(wmName, "sway"))
         return getSway(result);
 
-    if (ffStrbufEqualS(wmName, "i3"))
-        return getI3(result);
+    if (ffStrbufEqualS(wmName, "labwc"))
+        return getLabwc(result);
 
+    #if __linux__
     if (ffStrbufEqualS(wmName, "WSLg"))
         return getWslg(result);
+    #endif
+    #endif
+
+    // X11 WMs
+    if (ffStrbufEqualS(wmName, "i3"))
+        return getI3(result);
 
     if (ffStrbufEqualS(wmName, "ctwm"))
         return getCtwm(result);
@@ -303,9 +317,6 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "Openbox"))
         return getOpenbox(result);
-
-    if (ffStrbufEqualS(wmName, "labwc"))
-        return getLabwc(result);
 
     return "Unsupported WM";
 }
