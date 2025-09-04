@@ -44,7 +44,7 @@ static bool detectWMThemeFromConfigFile(const char* configFile, const char* them
 
 static bool detectWMThemeFromSettings(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGet(dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGetGnome(dconfKey, gsettingsSchemaName, gsettingsPath, gsettingsKey, FF_VARIANT_TYPE_STRING).strValue;
 
     if(!ffStrSet(theme))
     {
@@ -80,7 +80,7 @@ ok:
 
 static bool detectMutter(FFstrbuf* themeOrError)
 {
-    const char* theme = ffSettingsGet("/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    const char* theme = ffSettingsGetGnome("/org/gnome/shell/extensions/user-theme/name", "org.gnome.shell.extensions.user-theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
     if(ffStrSet(theme))
     {
         ffStrbufAppendS(themeOrError, theme);
@@ -92,8 +92,8 @@ static bool detectMutter(FFstrbuf* themeOrError)
 
 static bool detectMuffin(FFstrbuf* themeOrError)
 {
-    FF_AUTO_FREE const char* name = ffSettingsGet("/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
-    FF_AUTO_FREE const char* theme = ffSettingsGet("/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
+    FF_AUTO_FREE const char* name = ffSettingsGetGnome("/org/cinnamon/theme/name", "org.cinnamon.theme", NULL, "name", FF_VARIANT_TYPE_STRING).strValue;
+    FF_AUTO_FREE const char* theme = ffSettingsGetGnome("/org/cinnamon/desktop/wm/preferences/theme", "org.cinnamon.desktop.wm.preferences", NULL, "theme", FF_VARIANT_TYPE_STRING).strValue;
 
     if(name == NULL && theme == NULL)
     {

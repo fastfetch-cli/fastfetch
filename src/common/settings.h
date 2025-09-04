@@ -24,7 +24,7 @@ typedef union FFvariant
 
 FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type);
 FFvariant ffSettingsGetGSettings(const char* schemaName, const char* path, const char* key, FFvarianttype type);
-FFvariant ffSettingsGet(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
+FFvariant ffSettingsGetGnome(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type);
 FFvariant ffSettingsGetXFConf(const char* channelName, const char* propertyName, FFvarianttype type);
 typedef bool FFTestXfconfPropCallback(void* data, const char* propertyName); // Return false to break loop
 FFvariant ffSettingsGetXFConfFirstMatch(const char* channelName, const char* propertyPrefix, FFvarianttype type, void* data, FFTestXfconfPropCallback* cb);

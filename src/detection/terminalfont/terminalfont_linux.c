@@ -16,26 +16,26 @@ static const char* getSystemMonospaceFont(void)
 
     if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, "Cinnamon"))
     {
-        const char* systemMonospaceFont = ffSettingsGet("/org/cinnamon/desktop/interface/monospace-font-name", "org.cinnamon.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+        const char* systemMonospaceFont = ffSettingsGetGnome("/org/cinnamon/desktop/interface/monospace-font-name", "org.cinnamon.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemMonospaceFont))
             return systemMonospaceFont;
     }
     else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, "Mate"))
     {
-        const char* systemMonospaceFont = ffSettingsGet("/org/mate/interface/monospace-font-name", "org.mate.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+        const char* systemMonospaceFont = ffSettingsGetGnome("/org/mate/interface/monospace-font-name", "org.mate.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(systemMonospaceFont))
             return systemMonospaceFont;
     }
 
-    return ffSettingsGet("/org/gnome/desktop/interface/monospace-font-name", "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
+    return ffSettingsGetGnome("/org/gnome/desktop/interface/monospace-font-name", "org.gnome.desktop.interface", NULL, "monospace-font-name", FF_VARIANT_TYPE_STRING).strValue;
 }
 
 static void detectKgx(FFTerminalFontResult* terminalFont)
 {
     // kgx (gnome console) doesn't support profiles
-    if(!ffSettingsGet("/org/gnome/Console/use-system-font", "org.gnome.Console", NULL, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
+    if(!ffSettingsGetGnome("/org/gnome/Console/use-system-font", "org.gnome.Console", NULL, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
     {
-        FF_AUTO_FREE const char* fontName = ffSettingsGet("/org/gnome/Console/custom-font", "org.gnome.Console", NULL, "custom-font", FF_VARIANT_TYPE_STRING).strValue;
+        FF_AUTO_FREE const char* fontName = ffSettingsGetGnome("/org/gnome/Console/custom-font", "org.gnome.Console", NULL, "custom-font", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else
@@ -53,9 +53,9 @@ static void detectKgx(FFTerminalFontResult* terminalFont)
 
 static void detectPtyxis(FFTerminalFontResult* terminalFont)
 {
-    if(!ffSettingsGet("/org/gnome/Ptyxis/use-system-font", "org.gnome.Ptyxis", NULL, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
+    if(!ffSettingsGetGnome("/org/gnome/Ptyxis/use-system-font", "org.gnome.Ptyxis", NULL, "use-system-font", FF_VARIANT_TYPE_BOOL).boolValue)
     {
-        FF_AUTO_FREE const char* fontName = ffSettingsGet("/org/gnome/Ptyxis/font-name", "org.gnome.Ptyxis", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
+        FF_AUTO_FREE const char* fontName = ffSettingsGetGnome("/org/gnome/Ptyxis/font-name", "org.gnome.Ptyxis", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
         if(ffStrSet(fontName))
             ffFontInitPango(&terminalFont->font, fontName);
         else

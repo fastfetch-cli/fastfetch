@@ -184,7 +184,7 @@ FFvariant ffSettingsGetDConf(const char* key, FFvarianttype type)
 }
 #endif //FF_HAVE_DCONF
 
-FFvariant ffSettingsGet(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
+FFvariant ffSettingsGetGnome(const char* dconfKey, const char* gsettingsSchemaName, const char* gsettingsPath, const char* gsettingsKey, FFvarianttype type)
 {
     FFvariant gsettings = ffSettingsGetGSettings(gsettingsSchemaName, gsettingsPath, gsettingsKey, type);
 
