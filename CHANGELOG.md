@@ -12,6 +12,7 @@ Bugfixes:
 * Fixes unexpected padding when setting `logo.width` with chafa logos (#1947, Logo)
     * Regression from v2.51.0
 * Improves Wallpaper detection on XFCE4 (Wallpaper, Linux)
+* Ignores process `Relay(xxx)` when detecting terminal on WSL2 (Terminal, Linux)
 
 Features:
 * Enables X11-related info (i.e., WM/DE) detection on Android (Global, Android)
@@ -21,6 +22,8 @@ Features:
     * It's not always accurate. For example, XFCE4 has a separate config for text scaling, which is unaffected by the global DPI scaling setting.
 * Adds `display.fraction.trailingZeros: [show|hide]` option for fraction formatting
 * Informs users that module-specific CLI options are no longer supported and provide guidance on transitioning to JSON config
+* Adds CPU name detection support for IA64 (CPU, Linux)
+* Support Btrfs allocation profile detection (#1941, Btrfs, Linux)
 
 # 2.51.1
 
