@@ -27,9 +27,9 @@ static void printBtrfs(FFBtrfsOptions* options, FFBtrfsResult* result, uint8_t i
     }
 
     uint64_t used = 0, allocated = 0, total = result->totalSize;
-    for (int i = 0; i < 3; ++i)
+    for (uint32_t i = 0; i < ARRAY_SIZE(result->allocation); ++i)
     {
-        uint64_t times = result->allocation[i].dup ? 2 : 1;
+        uint64_t times = result->allocation[i].copies;
         used += result->allocation[i].used * times;
         allocated += result->allocation[i].total * times;
     }
@@ -180,11 +180,11 @@ bool ffGenerateBtrfsJsonResult(FF_MAYBE_UNUSED FFBtrfsOptions* options, yyjson_m
         yyjson_mut_obj_add_uint(doc, obj, "sectorSize", btrfs->sectorSize);
         yyjson_mut_obj_add_uint(doc, obj, "totalSize", btrfs->totalSize);
         yyjson_mut_val* allocation = yyjson_mut_obj_add_arr(doc, obj, "allocation");
-        for (int i = 0; i < 3; ++i)
+        for (uint32_t i = 0; i < ARRAY_SIZE(btrfs->allocation); ++i)
         {
             yyjson_mut_val* item = yyjson_mut_arr_add_obj(doc, allocation);
             yyjson_mut_obj_add_str(doc, item, "type", btrfs->allocation[i].type);
-            yyjson_mut_obj_add_bool(doc, item, "dup", btrfs->allocation[i].dup);
+            yyjson_mut_obj_add_str(doc, item, "profile", btrfs->allocation[i].profile);
             yyjson_mut_obj_add_uint(doc, item, "copies", btrfs->allocation[i].copies);
             yyjson_mut_obj_add_uint(doc, item, "used", btrfs->allocation[i].used);
             yyjson_mut_obj_add_uint(doc, item, "total", btrfs->allocation[i].total);
