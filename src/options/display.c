@@ -492,7 +492,6 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         return "display.freq.ndigits must be between -1 and 9";
                     options->freqNdigits = (int8_t) val;
                 }
-                options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
             }
 
             yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
