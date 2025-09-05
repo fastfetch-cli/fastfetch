@@ -420,8 +420,8 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         int value;
                         const char* error = ffJsonConfigParseEnum(trailingZeros, &value, (FFKeyValuePair[]) {
                             { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
-                            { "show", FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW },
-                            { "hide", FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE },
+                            { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+                            { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
                             {},
                         });
                         if (error) return error;
@@ -755,8 +755,8 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     {
         options->fractionTrailingZeros = (FFFractionTrailingZerosType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
-            { "show", FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW },
-            { "hide", FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE },
+            { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+            { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
             {},
         });
     }

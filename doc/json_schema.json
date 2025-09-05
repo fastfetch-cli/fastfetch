@@ -1356,11 +1356,11 @@
                                     "description": "Use the behavior defined internally"
                                 },
                                 {
-                                    "const": "show",
+                                    "const": "always",
                                     "description": "Always keep trailing zeros"
                                 },
                                 {
-                                    "const": "hide",
+                                    "const": "never",
                                     "description": "Never keep trailing zeros"
                                 }
                             ],

@@ -37,12 +37,12 @@ static void appendSpeed(FFLocalIpResult* ip, FFstrbuf* strbuf)
 {
     if (ip->speed >= 1000000)
     {
-        ffStrbufAppendDouble(strbuf, ip->speed / 1e6, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW);
+        ffStrbufAppendDouble(strbuf, ip->speed / 1e6, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
         ffStrbufAppendS(strbuf, " Tbps");
     }
     else if (ip->speed >= 1000)
     {
-        ffStrbufAppendDouble(strbuf, ip->speed / 1e3, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW);
+        ffStrbufAppendDouble(strbuf, ip->speed / 1e3, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
         ffStrbufAppendS(strbuf, " Gbps");
     }
     else

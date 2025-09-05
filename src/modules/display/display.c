@@ -114,7 +114,7 @@ bool ffPrintDisplay(FFDisplayOptions* options)
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
             {
                 ffStrbufAppendS(&buffer, " @ ");
-                ffStrbufAppendDouble(&buffer, scaleFactor, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW);
+                ffStrbufAppendDouble(&buffer, scaleFactor, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
                 ffStrbufAppendC(&buffer, 'x');
             }
 
