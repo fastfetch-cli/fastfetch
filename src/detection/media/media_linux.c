@@ -191,7 +191,7 @@ static void getBestBus(FFDBusData* data, FFMediaResult* result)
         getBusProperties(data, FF_DBUS_MPRIS_PREFIX "plasma-browser-integration", result)
     ) return;
 
-    DBusMessage* reply = ffDBusGetMethodReply(data, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames", NULL);
+    DBusMessage* reply = ffDBusGetMethodReply(data, "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "ListNames", NULL, NULL);
     if(reply == NULL)
         return;
 

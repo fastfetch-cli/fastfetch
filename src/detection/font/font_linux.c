@@ -28,7 +28,7 @@ const char* ffDetectFontImpl(FFFontResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         return "Font isn't supported in TTY";
 
     FFfont qt;

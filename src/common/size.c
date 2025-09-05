@@ -17,7 +17,7 @@ static void appendNum(FFstrbuf* result, uint64_t bytes, uint32_t base, const cha
     if (counter == 0)
         ffStrbufAppendUInt(result, bytes);
     else
-        ffStrbufAppendDouble(result, size, (int8_t) options->sizeNdigits);
+        ffStrbufAppendDouble(result, size, (int8_t) options->sizeNdigits, true);
     if (options->sizeSpaceBeforeUnit != FF_SPACE_BEFORE_UNIT_NEVER)
         ffStrbufAppendC(result, ' ');
     ffStrbufAppendS(result, prefixes[counter]);

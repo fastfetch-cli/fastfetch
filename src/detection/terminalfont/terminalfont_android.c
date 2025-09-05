@@ -13,6 +13,12 @@
 
 const char* detectTermux(FFTerminalFontResult* terminalFont)
 {
+    if(!ffPathExists(FF_TERMUX_FONT_PATH, FF_PATHTYPE_FILE))
+    {
+        ffFontInitCopy(&terminalFont->font, "monospace");
+        return NULL;
+    }
+
     #ifdef FF_HAVE_FREETYPE
 
     FF_LIBRARY_LOAD(freetype, "dlopen libfreetype"FF_LIBRARY_EXTENSION " failed", "libfreetype"FF_LIBRARY_EXTENSION, 2)
@@ -53,19 +59,15 @@ exit:
     #endif
 }
 
-void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
+bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
-    if(ffStrbufCompS(&terminal->processName, "com.termux") != 0)
+    if(ffStrbufEqualS(&terminal->processName, "com.termux"))
+        ffStrbufSetS(&terminalFont->error, detectTermux(terminalFont));
+    else
     {
-        ffStrbufSetS(&terminalFont->error, "Unsupported terminal");
-        return;
+        bool ffDetectTerminalFontPlatformLinux(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
+        return ffDetectTerminalFontPlatformLinux(terminal, terminalFont);
     }
 
-    if(!ffPathExists(FF_TERMUX_FONT_PATH, FF_PATHTYPE_FILE))
-    {
-        ffFontInitCopy(&terminalFont->font, "monospace");
-        return;
-    }
-
-    ffStrbufSetS(&terminalFont->error, detectTermux(terminalFont));
+    return true;
 }

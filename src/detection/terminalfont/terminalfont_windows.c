@@ -274,7 +274,7 @@ static void detectWarp(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
 }
 
-void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
+bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {
     if(ffStrbufIgnCaseEqualS(&terminal->processName, "Windows Terminal") ||
         ffStrbufIgnCaseEqualS(&terminal->processName, "WindowsTerminal.exe"))
@@ -287,4 +287,7 @@ void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFo
         detectConEmu(terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "warp"))
         detectWarp(terminalFont);
+    else
+        return false;
+    return true;
 }

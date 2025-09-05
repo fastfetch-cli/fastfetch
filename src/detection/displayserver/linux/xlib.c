@@ -3,7 +3,7 @@
 #ifdef FF_HAVE_XRANDR
 
 #include "common/library.h"
-#include "common/parsing.h"
+#include "common/properties.h"
 #include "util/edidHelper.h"
 #include "util/stringUtils.h"
 
@@ -70,8 +70,6 @@ static void x11FetchServerVendor(X11PropertyData* data, Display* display, FFDisp
     if (serverVendor && !ffStrEquals(serverVendor, "The X.Org Foundation")) {
         ffStrbufSetS(&result->wmProtocolName, serverVendor);
     }
-
-
 }
 
 typedef struct XrandrData
@@ -92,18 +90,16 @@ typedef struct XrandrData
     //Init once
     Display* display;
     FFDisplayServerResult* result;
-
-    //Init per screen
-    XRRScreenResources* screenResources;
+    X11PropertyData* propData;
 } XrandrData;
 
-static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength)
+static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* name, bool primary, FFDisplayType displayType, uint8_t* edidData, uint32_t edidLength, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
 {
     //We do the check here, because we want the best fallback display if this call failed
-    if(data->screenResources == NULL)
+    if(screenResources == NULL)
         return false;
 
-    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, data->screenResources, output->crtc);
+    XRRCrtcInfo* crtcInfo = data->ffXRRGetCrtcInfo(data->display, screenResources, output->crtc);
     if(crtcInfo == NULL)
         return false;
 
@@ -125,27 +121,24 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
     }
 
     XRRModeInfo* currentMode = NULL;
-    if (data->screenResources)
+    for(int i = 0; i < screenResources->nmode; i++)
     {
-        for(int i = 0; i < data->screenResources->nmode; i++)
+        if(screenResources->modes[i].id == crtcInfo->mode)
         {
-            if(data->screenResources->modes[i].id == crtcInfo->mode)
-            {
-                currentMode = &data->screenResources->modes[i];
-                break;
-            }
+            currentMode = &screenResources->modes[i];
+            break;
         }
     }
 
-    XRRModeInfo* preferredMode = data->screenResources && output->npreferred > 0 ? &data->screenResources->modes[0] : NULL;
+    XRRModeInfo* preferredMode = output->npreferred > 0 ? &screenResources->modes[0] : NULL;
 
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
         (uint32_t) crtcInfo->width,
         (uint32_t) crtcInfo->height,
         currentMode ? (double) currentMode->dotClock / (double) ((uint32_t) currentMode->hTotal * currentMode->vTotal) : 0,
-        (uint32_t) crtcInfo->width,
-        (uint32_t) crtcInfo->height,
+        (uint32_t) (crtcInfo->width / scaleFactor + .5),
+        (uint32_t) (crtcInfo->height / scaleFactor + .5),
         preferredMode ? (uint32_t) preferredMode->width : 0,
         preferredMode ? (uint32_t) preferredMode->height : 0,
         preferredMode ? (double) preferredMode->dotClock / (double) ((uint32_t) preferredMode->hTotal * preferredMode->vTotal) : 0,
@@ -159,19 +152,23 @@ static bool xrandrHandleCrtc(XrandrData* data, XRROutputInfo* output, FFstrbuf* 
         "xlib-randr-crtc"
     );
 
-    if (item && edidLength)
+    if (item)
     {
-        item->hdrStatus = ffEdidGetHdrCompatible(edidData, edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
-        ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        if (edidLength)
+        {
+            item->hdrStatus = ffEdidGetHdrCompatible(edidData, edidLength) ? FF_DISPLAY_HDR_STATUS_SUPPORTED : FF_DISPLAY_HDR_STATUS_UNSUPPORTED;
+            ffEdidGetSerialAndManufactureDate(edidData, &item->serial, &item->manufactureYear, &item->manufactureWeek);
+        }
+        item->bitDepth = bitDepth;
     }
 
     data->ffXRRFreeCrtcInfo(crtcInfo);
     return !!item;
 }
 
-static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType)
+static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name, bool primary, FFDisplayType displayType, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
 {
-    XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, data->screenResources, output);
+    XRROutputInfo* outputInfo = data->ffXRRGetOutputInfo(data->display, screenResources, output);
     if(outputInfo == NULL)
         return false;
 
@@ -195,7 +192,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
         }
     }
 
-    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, (uint32_t) edidLength);
+    bool res = xrandrHandleCrtc(data, outputInfo, name, primary, displayType, edidData, (uint32_t) edidLength, screenResources, bitDepth, scaleFactor);
 
     if (edidData)
         data->ffXFree(edidData);
@@ -204,7 +201,7 @@ static bool xrandrHandleOutput(XrandrData* data, RROutput output, FFstrbuf* name
     return res;
 }
 
-static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
+static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo, XRRScreenResources* screenResources, uint8_t bitDepth, double scaleFactor)
 {
     bool foundOutput = false;
     char* xname = data->ffXGetAtomName(data->display, monitorInfo->name);
@@ -213,17 +210,19 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
     FFDisplayType displayType = ffdsGetDisplayType(name.chars);
     for(int i = 0; i < monitorInfo->noutput; i++)
     {
-        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary, displayType))
+        if(xrandrHandleOutput(data, monitorInfo->outputs[i], &name, monitorInfo->primary, displayType, screenResources, bitDepth, scaleFactor))
             foundOutput = true;
     }
 
-    return foundOutput ? true : !!ffdsAppendDisplay(
+    if (foundOutput) return true;
+
+    FFDisplayResult* display = ffdsAppendDisplay(
         data->result,
         (uint32_t) monitorInfo->width,
         (uint32_t) monitorInfo->height,
         0,
-        (uint32_t) monitorInfo->width,
-        (uint32_t) monitorInfo->height,
+        (uint32_t) (monitorInfo->width / scaleFactor + .5),
+        (uint32_t) (monitorInfo->height / scaleFactor + .5),
         0, 0, 0,
         0,
         &name,
@@ -234,6 +233,8 @@ static bool xrandrHandleMonitor(XrandrData* data, XRRMonitorInfo* monitorInfo)
         (uint32_t) monitorInfo->mheight,
         "xlib-randr-monitor"
     );
+    if (display) display->bitDepth = bitDepth;
+    return !!display;
 }
 
 static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
@@ -243,29 +244,36 @@ static bool xrandrHandleMonitors(XrandrData* data, Screen* screen)
     if(monitorInfos == NULL)
         return false;
 
+    XRRScreenResources* screenResources = data->ffXRRGetScreenResourcesCurrent(data->display, RootWindowOfScreen(screen));
+
+    double scaleFactor = 1;
+    char* resourceManager = (char*) x11GetProperty(data->propData, data->display, screen->root, "RESOURCE_MANAGER");
+    if (resourceManager)
+    {
+        FF_STRBUF_AUTO_DESTROY dpi = ffStrbufCreate();
+        if (ffParsePropLines(resourceManager, "Xft.dpi:", &dpi))
+            scaleFactor = ffStrbufToDouble(&dpi, 96) / 96;
+        data->ffXFree(resourceManager);
+    }
+    uint8_t bitDepth = (uint8_t) (screen->root_depth / 3);
+
     bool foundAMonitor = false;
 
     for(int i = 0; i < numberOfMonitors; i++)
     {
-        if(xrandrHandleMonitor(data, &monitorInfos[i]))
+        if(xrandrHandleMonitor(data, &monitorInfos[i], screenResources, bitDepth, scaleFactor))
             foundAMonitor = true;
     }
 
     data->ffXRRFreeMonitors(monitorInfos);
+    data->ffXRRFreeScreenResources(screenResources);
 
     return foundAMonitor;
 }
 
 static void xrandrHandleScreen(XrandrData* data, Screen* screen)
 {
-    //Init screen resources
-    data->screenResources = data->ffXRRGetScreenResourcesCurrent(data->display, RootWindowOfScreen(screen));
-
-    bool ret = xrandrHandleMonitors(data, screen);
-
-    data->ffXRRFreeScreenResources(data->screenResources);
-
-    if(ret)
+    if(xrandrHandleMonitors(data, screen))
         return;
 
     //Fallback to screen
@@ -281,7 +289,7 @@ static void xrandrHandleScreen(XrandrData* data, Screen* screen)
         NULL,
         FF_DISPLAY_TYPE_UNKNOWN,
         false,
-        0,
+        RootWindowOfScreen(screen),
         (uint32_t) WidthMMOfScreen(screen),
         (uint32_t) HeightMMOfScreen(screen),
         "xlib-randr-screen"
@@ -312,6 +320,7 @@ const char* ffdsConnectXrandr(FFDisplayServerResult* result)
 
     X11PropertyData propertyData;
     bool propertyDataInitialized = x11InitPropertyData(xrandr, &propertyData);
+    data.propData = &propertyData;
 
     data.display = ffXOpenDisplay(NULL);
     if(data.display == NULL)

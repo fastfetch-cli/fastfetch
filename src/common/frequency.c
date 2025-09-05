@@ -11,7 +11,7 @@ bool ffFreqAppendNum(uint32_t mhz, FFstrbuf* result)
 
     if (ndigits >= 0)
     {
-        ffStrbufAppendDouble(result, mhz / 1000., ndigits);
+        ffStrbufAppendDouble(result, mhz / 1000., ndigits, true);
         if (spaceBeforeUnit) ffStrbufAppendC(result, ' ');
         ffStrbufAppendS(result, "GHz");
     }

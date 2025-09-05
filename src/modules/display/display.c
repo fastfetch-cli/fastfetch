@@ -101,6 +101,7 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
         FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
         double inch = sqrt(result->physicalWidth * result->physicalWidth + result->physicalHeight * result->physicalHeight) / 25.4;
+        double scaleFactor = (double) result->height / (double) result->scaledHeight;
 
         if(options->moduleArgs.outputFormat.length == 0)
         {
@@ -108,22 +109,27 @@ bool ffPrintDisplay(FFDisplayOptions* options)
 
             ffStrbufAppendF(&buffer, "%ix%i", result->width, result->height);
 
-            if(result->refreshRate > 0)
-            {
-                const char* space = instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ";
-                if(options->preciseRefreshRate)
-                    ffStrbufAppendF(&buffer, " @ %g%sHz", ((int) (result->refreshRate * 1000 + 0.5)) / 1000.0, space);
-                else
-                    ffStrbufAppendF(&buffer, " @ %i%sHz", (uint32_t) (result->refreshRate + 0.5), space);
-            }
-
             if(
                 result->scaledWidth > 0 && result->scaledWidth != result->width &&
                 result->scaledHeight > 0 && result->scaledHeight != result->height)
-                ffStrbufAppendF(&buffer, " (as %ix%i)", result->scaledWidth, result->scaledHeight);
+            {
+                ffStrbufAppendS(&buffer, " @ ");
+                ffStrbufAppendDouble(&buffer, scaleFactor, instance.config.display.fractionNdigits, instance.config.display.fractionTrailingZeros == FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS);
+                ffStrbufAppendC(&buffer, 'x');
+            }
 
             if (inch > 1)
                 ffStrbufAppendF(&buffer, " in %i\"", (uint32_t) (inch + 0.5));
+
+            if(result->refreshRate > 0)
+            {
+                ffStrbufAppendS(&buffer, ", ");
+                if(options->preciseRefreshRate)
+                    ffStrbufAppendDouble(&buffer, result->refreshRate, 3, false);
+                else
+                    ffStrbufAppendSInt(&buffer, (int) (result->refreshRate + 0.5));
+                ffStrbufAppendS(&buffer, instance.config.display.freqSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "Hz" : " Hz");
+            }
 
             bool flag = false;
             if (result->type != FF_DISPLAY_TYPE_UNKNOWN)
@@ -184,8 +190,6 @@ bool ffPrintDisplay(FFDisplayOptions* options)
             }
             else
                 buf[0] = '\0';
-
-            double scaleFactor = (double) result->height / (double) result->scaledHeight;
 
             FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
                 FF_FORMAT_ARG(result->width, "width"),

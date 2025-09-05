@@ -1,6 +1,7 @@
 #include "displayserver.h"
 #include "common/settings.h"
 #include "common/processing.h"
+#include "linux/displayserver_linux.h"
 
 #include <math.h>
 
@@ -82,13 +83,10 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
 
             ffStrbufRecalculateLength(&name);
             FFDisplayResult* display = ffdsAppendDisplay(ds,
-                (uint32_t)width,
-                (uint32_t)height,
+                (uint32_t)width, (uint32_t)height,
                 refreshRate,
-                0,
-                0,
-                0,
-                0,
+                0, 0,
+                0, 0,
                 0,
                 0,
                 &name,
@@ -121,13 +119,10 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         double scaleFactor = (double) ffStrbufToUInt(&buffer, 0) / 160.;
         FFDisplayResult* display = ffdsAppendDisplay(ds,
-            width,
-            height,
+            width, height,
             0,
-            (uint32_t) (width / scaleFactor + .5),
-            (uint32_t) (height / scaleFactor + .5),
-            0,
-            0,
+            (uint32_t) (width / scaleFactor + .5), (uint32_t) (height / scaleFactor + .5),
+            0, 0,
             0,
             0,
             NULL,
@@ -147,8 +142,19 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
 
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufSetStatic(&ds->wmProcessName, "surfaceflinger");
-    ffStrbufSetStatic(&ds->wmPrettyName, "SurfaceFlinger");
+    const char* error = ffdsConnectXcbRandr(ds);
+    if (error)
+        error = ffdsConnectXrandr(ds);
+    if (!error)
+    {
+        ffdsDetectWMDE(ds);
+        return;
+    }
+
+    // https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager
+    ffStrbufSetStatic(&ds->wmProcessName, "system_server");
+    ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
+    ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);

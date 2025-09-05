@@ -266,7 +266,7 @@ static bool detectRio(FFTerminalFontResult* terminalFont)
     return true;
 }
 
-void ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
+bool ffDetectTerminalFontPlatform(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont);
 
 static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTerminalFontResult* terminalFont)
 {

@@ -136,7 +136,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->sizeNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits)
+            {
+                if (!yyjson_is_uint(ndigits))
+                    return "display.size.ndigits must be an unsigned integer";
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9)
+                    return "display.size.ndigits must be between 0 and 9";
+                options->sizeNdigits = (uint8_t) val;
+            }
 
             yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
             if (spaceBeforeUnit)
@@ -177,7 +185,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->tempNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits)
+            {
+                if (!yyjson_is_uint(ndigits))
+                    return "display.temperature.ndigits must be an unsigned integer";
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9)
+                    return "display.temperature.ndigits must be between 0 and 9";
+                options->tempNdigits = (uint8_t) val;
+            }
 
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color)
@@ -222,7 +238,15 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
             }
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->percentNdigits = (uint8_t) yyjson_get_uint(ndigits);
+            if (ndigits)
+            {
+                if (!yyjson_is_uint(ndigits))
+                    return "display.percent.ndigits must be an unsigned integer";
+                uint64_t val = yyjson_get_uint(ndigits);
+                if (val > 9)
+                    return "display.percent.ndigits must be between 0 and 9";
+                options->percentNdigits = (uint8_t) val;
+            }
 
             yyjson_val* color = yyjson_obj_get(val, "color");
             if (color)
@@ -376,9 +400,33 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 {
                     if (yyjson_is_null(ndigits))
                         options->fractionNdigits = -1;
-                    else if (!yyjson_is_int(ndigits))
-                        return "display.fraction.ndigits must be an integer";
-                    options->fractionNdigits = (int8_t) yyjson_get_int(ndigits);
+                    else
+                    {
+                        if (!yyjson_is_int(ndigits))
+                            return "display.fraction.ndigits must be an integer";
+                        int64_t val = yyjson_get_int(ndigits);
+                        if (val < -1 || val > 9)
+                            return "display.fraction.ndigits must be between -1 and 9";
+                        options->fractionNdigits = (int8_t) val;
+                    }
+                }
+                yyjson_val* trailingZeros = yyjson_obj_get(val, "trailingZeros");
+                if (trailingZeros)
+                {
+                    if (yyjson_is_null(trailingZeros))
+                        options->fractionTrailingZeros = FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT;
+                    else
+                    {
+                        int value;
+                        const char* error = ffJsonConfigParseEnum(trailingZeros, &value, (FFKeyValuePair[]) {
+                            { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
+                            { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+                            { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
+                            {},
+                        });
+                        if (error) return error;
+                        options->fractionTrailingZeros = (FFFractionTrailingZerosType) value;
+                    }
                 }
             }
             else
@@ -431,7 +479,20 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                 return "display.freq must be an object";
 
             yyjson_val* ndigits = yyjson_obj_get(val, "ndigits");
-            if (ndigits) options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
+            if (ndigits)
+            {
+                if (yyjson_is_null(ndigits))
+                    options->freqNdigits = -1;
+                else
+                {
+                    if (!yyjson_is_int(ndigits))
+                        return "display.freq.ndigits must be an integer";
+                    int64_t val = yyjson_get_int(ndigits);
+                    if (val < -1 || val > 9)
+                        return "display.freq.ndigits must be between -1 and 9";
+                    options->freqNdigits = (int8_t) val;
+                }
+            }
 
             yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
             if (spaceBeforeUnit)
@@ -690,6 +751,15 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     }
     else if(ffStrEqualsIgnCase(key, "--fraction-ndigits"))
         options->fractionNdigits = (int8_t) ffOptionParseInt32(key, value);
+    else if(ffStrEqualsIgnCase(key, "--fraction-trailing-zeros"))
+    {
+        options->fractionTrailingZeros = (FFFractionTrailingZerosType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
+            { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+            { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
+            {},
+        });
+    }
     else if(ffStrEqualsIgnCase(key, "--no-buffer"))
         options->noBuffer = ffOptionParseBoolean(value);
     else if(ffStrStartsWithIgnCase(key, "--bar-"))
@@ -809,7 +879,8 @@ void ffOptionsInitDisplay(FFOptionsDisplay* options)
 
     options->freqNdigits = 2;
     options->freqSpaceBeforeUnit = FF_SPACE_BEFORE_UNIT_DEFAULT;
-    options->fractionNdigits = -1;
+    options->fractionNdigits = 2;
+    options->fractionTrailingZeros = FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT;
 
     ffListInit(&options->constants, sizeof(FFstrbuf));
 }

@@ -744,115 +744,230 @@ int main(void)
     }
 
     {
-        ffStrbufAppendDouble(&strbuf, 120.0, 0);
+        ffStrbufAppendDouble(&strbuf, 120.0, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.0, 1);
+        ffStrbufAppendDouble(&strbuf, 120.0, 1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120.0"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.0, 5);
+        ffStrbufAppendDouble(&strbuf, 120.0, 5, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120.00000"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.123456789, 5);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, 5, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120.12346"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.888888, 0);
+        ffStrbufAppendDouble(&strbuf, 120.888888, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "121"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.999999, 2);
+        ffStrbufAppendDouble(&strbuf, 120.999999, 2, true);
         VERIFY(ffStrbufEqualS(&strbuf, "121.00"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.123456789, 0);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.123456789, -1);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, -1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120.123456789"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 120.123, 5);
+        ffStrbufAppendDouble(&strbuf, 120.123, 5, true);
         VERIFY(ffStrbufEqualS(&strbuf, "120.12300"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.0, 0);
+        ffStrbufAppendDouble(&strbuf, -120.0, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.0, 1);
+        ffStrbufAppendDouble(&strbuf, -120.0, 1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.0"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.0, 5);
+        ffStrbufAppendDouble(&strbuf, -120.0, 5, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.00000"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.123456789, 5);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, 5, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.12346"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.123456789, 0);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.123456789, -1);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, -1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.123456789"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.123, 5);
+        ffStrbufAppendDouble(&strbuf, -120.123, 5, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-120.12300"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.888888, 0);
+        ffStrbufAppendDouble(&strbuf, -120.888888, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-121"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -120.999999, 2);
+        ffStrbufAppendDouble(&strbuf, -120.999999, 2, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-121.00"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 1.2345e50, 1);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, 1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -1.2345e50, 1);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, 1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 1.2345e50, 0);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -1.2345e50, 0);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 1.2345e50, -1);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, -1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -1.2345e50, -1);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, -1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, 1.2345e20, 1);
+        ffStrbufAppendDouble(&strbuf, 1.2345e20, 1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "123450000000000000000.0"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -1.2345e20, 1);
+        ffStrbufAppendDouble(&strbuf, -1.2345e20, 1, true);
         VERIFY(ffStrbufEqualS(&strbuf, "-123450000000000000000.0"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, +0.0, 0);
+        ffStrbufAppendDouble(&strbuf, +0.0, 0, true);
         VERIFY(ffStrbufEqualS(&strbuf, "0"));
 
         ffStrbufClear(&strbuf);
-        ffStrbufAppendDouble(&strbuf, -0.0, 0);
+        ffStrbufAppendDouble(&strbuf, -0.0, 0, true);
+        VERIFY(ffStrbufEqualS(&strbuf, "-0"));
+
+        ffStrbufDestroy(&strbuf);
+    }
+
+    {
+        ffStrbufAppendDouble(&strbuf, 120.0, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.0, 1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.0, 5, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, 5, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120.12346"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.888888, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "121"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.999999, 2, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "121"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.123456789, -1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120.123456789"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 120.123, 5, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "120.123"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.0, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.0, 1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.0, 5, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, 5, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120.12346"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.123456789, -1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120.123456789"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.123, 5, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-120.123"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.888888, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-121"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -120.999999, 2, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-121"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, 1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, 1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 1.2345e50, -1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -1.2345e50, -1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-1.2345e50"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, 1.2345e20, 1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "123450000000000000000"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -1.2345e20, 1, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "-123450000000000000000"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, +0.0, 0, false);
+        VERIFY(ffStrbufEqualS(&strbuf, "0"));
+
+        ffStrbufClear(&strbuf);
+        ffStrbufAppendDouble(&strbuf, -0.0, 0, false);
         VERIFY(ffStrbufEqualS(&strbuf, "-0"));
 
         ffStrbufDestroy(&strbuf);

@@ -65,7 +65,7 @@ static const char* parseEnv(void)
     if(getenv("SWAYSOCK") != NULL)
         return "Sway";
 
-    #ifdef __linux__
+    #if __linux__ && !__ANDROID__
     if(
         getenv("WAYLAND_DISPLAY") != NULL &&
         ffPathExists("/mnt/wslg/", FF_PATHTYPE_DIRECTORY)
@@ -433,6 +433,11 @@ static const char* getFromProcesses(FFDisplayServerResult* result)
 
 void ffdsDetectWMDE(FFDisplayServerResult* result)
 {
+    #if __ANDROID__
+    if(ffStrbufIgnCaseEqualS(&result->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER))
+        return; // Only supported when connected to X11
+    #endif
+
     const char* env = parseEnv();
 
     if(result->wmProcessName.length > 0)

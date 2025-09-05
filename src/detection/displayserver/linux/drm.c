@@ -396,13 +396,10 @@ static const char* drmConnectLibdrm(FFDisplayServerResult* result)
                 }
 
                 FFDisplayResult* item = ffdsAppendDisplay(result,
-                    width,
-                    height,
+                    width, height,
                     refreshRate,
-                    0,
-                    0,
-                    preferredWidth,
-                    preferredHeight,
+                    0, 0,
+                    preferredWidth, preferredHeight,
                     preferredRefreshRate,
                     0,
                     &name,

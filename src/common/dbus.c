@@ -162,14 +162,67 @@ bool ffDBusGetUint(FFDBusData* dbus, DBusMessageIter* iter, uint32_t* result)
     return ffDBusGetUint(dbus, &subIter, result);
 }
 
-DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg)
+bool ffDBusGetInt(FFDBusData* dbus, DBusMessageIter* iter, int32_t* result)
+{
+    int argType = dbus->lib->ffdbus_message_iter_get_arg_type(iter);
+
+    if(argType == DBUS_TYPE_INT16)
+    {
+        int16_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = value;
+        return true;
+    }
+
+    if(argType == DBUS_TYPE_INT32)
+    {
+        dbus->lib->ffdbus_message_iter_get_basic(iter, result);
+        return true;
+    }
+
+    if(argType == DBUS_TYPE_BYTE)
+    {
+        uint8_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = value;
+        return true;
+    }
+
+    if(argType == DBUS_TYPE_UINT16)
+    {
+        uint16_t value = 0;
+        dbus->lib->ffdbus_message_iter_get_basic(iter, &value);
+        *result = (int16_t) value;
+        return true;
+    }
+
+    if(argType == DBUS_TYPE_UINT32)
+    {
+        dbus->lib->ffdbus_message_iter_get_basic(iter, result);
+        return true;
+    }
+
+    if(argType != DBUS_TYPE_VARIANT)
+        return false;
+
+    DBusMessageIter subIter;
+    dbus->lib->ffdbus_message_iter_recurse(iter, &subIter);
+    return ffDBusGetInt(dbus, &subIter, result);
+}
+
+DBusMessage* ffDBusGetMethodReply(FFDBusData* dbus, const char* busName, const char* objectPath, const char* interface, const char* method, const char* arg1, const char* arg2)
 {
     DBusMessage* message = dbus->lib->ffdbus_message_new_method_call(busName, objectPath, interface, method);
     if(message == NULL)
         return NULL;
 
-    if (arg)
-        dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg, DBUS_TYPE_INVALID);
+    if (arg1)
+    {
+        if (arg2)
+            dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg1, DBUS_TYPE_STRING, &arg2, DBUS_TYPE_INVALID);
+        else
+            dbus->lib->ffdbus_message_append_args(message, DBUS_TYPE_STRING, &arg1, DBUS_TYPE_INVALID);
+    }
 
     DBusMessage* reply = dbus->lib->ffdbus_connection_send_with_reply_and_block(dbus->connection, message, instance.config.general.processingTimeout, NULL);
 
