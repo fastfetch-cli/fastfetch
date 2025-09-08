@@ -1,0 +1,88 @@
+plugins {
+    id 'base'
+}
+
+group 'com.fastfetch'
+version '1.0.0-dev'
+
+// Task to build FastFetch
+task Build(type: Exec) {
+    doFirst {
+        println "Building FastFetch version: ${version}"
+        delete 'build'
+        mkdir 'build'
+    }
+   
+    workingDir 'build'
+    commandLine 'cmake', '..', '-DCMAKE_BUILD_TYPE=Release', '-DBUILD_TESTS=ON'
+   
+    doLast {
+        exec {
+            workingDir 'build'
+            commandLine 'cmake', '--build', '.'
+        }
+        println "Build completed successfully"
+        println "Executable created: build/fastfetch"
+    }
+}
+
+// Task to run CTest
+task RunTest(type: Exec) {
+    dependsOn Build
+   
+    doFirst {
+        println "Running CTest..."
+    }
+   
+    workingDir 'build'
+    commandLine 'ctest', '--output-on-failure'
+   
+    doLast {
+        println "Test completed"
+    }
+}
+
+// Task to create distribution archive
+task CreateArchive(type: Zip) {
+    dependsOn Build
+   
+    from 'build/fastfetch'
+    from 'README.md'
+    from 'LICENSE'
+   
+    doFirst {
+        archiveFileName = "fastfetch-${version}.zip"
+        destinationDirectory = file('build/distributions')
+        println "Creating archive: ${archiveFileName.get()}"
+    }
+    
+    doLast {
+        println "Archive created in: ${destinationDirectory.get()}"
+    }
+}
+
+// Task to just run the built executable
+task Run(type: Exec) {
+    dependsOn Build
+    
+    doFirst {
+        println "Running FastFetch..."
+    }
+    
+    commandLine './build/fastfetch'
+    
+    doLast {
+        println "FastFetch execution completed"
+    }
+}
+
+// Task to clean build directory
+task Clean(type: Delete) {
+    delete 'build'
+    
+    doLast {
+        println "Build directory cleaned"
+    }
+}
+
+defaultTasks 'Build'
