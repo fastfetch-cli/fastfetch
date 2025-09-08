@@ -817,6 +817,8 @@ int main(int argc, char** argv)
     ffInitInstance();
     atexit(ffDestroyInstance);
 
+    printf("This is UECS2363 SOFTWARE CONSTRUCTION AND CONFIGURATION\n");
+
     //Data stores things only needed for the configuration of fastfetch
     FFdata data = {
         .structure = ffStrbufCreate(),
