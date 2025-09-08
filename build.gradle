@@ -85,4 +85,4 @@ task Clean(type: Delete) {
     }
 }
 
-defaultTasks 'Build'
+defaultTasks 'Build', 'RunTest'
