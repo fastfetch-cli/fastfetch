@@ -40,13 +40,13 @@ bool ffPrintSeparator(FFSeparatorOptions* options)
     if(options->outputColor.length && !instance.config.display.pipe)
         ffPrintColor(&options->outputColor);
 
-    if (options->length > 0)
+    if (options->times > 0)
     {
         if(__builtin_expect(options->string.length == 1, 1))
-            ffPrintCharTimes(options->string.chars[0], options->length);
+            ffPrintCharTimes(options->string.chars[0], options->times);
         else
         {
-            for (uint32_t i = 0; i < options->length; i++)
+            for (uint32_t i = 0; i < options->times; i++)
             {
                 fputs(options->string.chars, stdout);
             }
@@ -136,9 +136,15 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "times"))
+        {
+            options->times = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
         if (unsafe_yyjson_equals_str(key, "length"))
         {
-            options->length = (uint32_t) yyjson_get_uint(val);
+            ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "The option length has been renamed to times.");
             continue;
         }
 
@@ -150,14 +156,14 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
 {
     yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
     yyjson_mut_obj_add_strbuf(doc, module, "outputColor", &options->outputColor);
-    yyjson_mut_obj_add_uint(doc, module, "length", options->length);
+    yyjson_mut_obj_add_uint(doc, module, "times", options->times);
 }
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
     ffStrbufInitStatic(&options->string, "-");
     ffStrbufInit(&options->outputColor);
-    options->length = 0;
+    options->times = 0;
 }
 
 void ffDestroySeparatorOptions(FFSeparatorOptions* options)

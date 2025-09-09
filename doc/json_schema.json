@@ -3687,8 +3687,8 @@
                                         "description": "Set the color of the separator line",
                                         "$ref": "#/$defs/outputColor"
                                     },
-                                    "length": {
-                                        "description": "Set the length of the separator line, or 0 to auto-detect",
+                                    "times": {
+                                        "description": "Set the times of separator string to repeat, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
