@@ -1,16 +1,16 @@
 #pragma once
 
-#include <wchar.h>
+#include <stdint.h>
 
 #ifdef FF_HAVE_WCWIDTH
-static inline int mk_wcwidth(wchar_t ucs) {
-    return wcwidth(ucs);
-}
-static inline int mk_wcswidth(const wchar_t *pwcs, size_t n) {
-    return wcswidth(pwcs, n);
+#include <wchar.h>
+
+// Should be char32_t but it's not defined on macOS
+static_assert(sizeof(wchar_t) == sizeof(uint32_t), "wcwidth implementation requires wchar_t to be 32 bits");
+
+static inline int mk_wcwidth(uint32_t ucs) {
+    return wcwidth((wchar_t) ucs);
 }
 #else
-// https://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c
-int mk_wcwidth(wchar_t ucs);
-int mk_wcswidth(const wchar_t *pwcs, size_t n);
+int mk_wcwidth(uint32_t wc);
 #endif
