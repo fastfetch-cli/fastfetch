@@ -140,13 +140,24 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
 
         for (IP_ADAPTER_UNICAST_ADDRESS* ifa = adapter->FirstUnicastAddress; ifa; ifa = ifa->Next)
         {
-            FF_DEBUG("Processing unicast address: family=%d, DadState=%d",
-                     ifa->Address.lpSockaddr->sa_family, ifa->DadState);
+            FF_DEBUG("Processing unicast address: prefix origin=%d, suffix origin=%d, family=%d, DadState=%d",
+                     ifa->PrefixOrigin, ifa->SuffixOrigin, ifa->Address.lpSockaddr->sa_family, ifa->DadState);
 
-            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) && ifa->DadState != IpDadStatePreferred)
+            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
             {
-                FF_DEBUG("Skipping address (DadState=%d, not preferred)", ifa->DadState);
-                continue;
+                if (ifa->DadState != IpDadStatePreferred)
+                {
+                    FF_DEBUG("Skipping address (not preferred)");
+                    continue;
+                }
+
+                if (ifa->SuffixOrigin == IpSuffixOriginRandom)
+                {
+                    FF_DEBUG("Skipping temporary address (random suffix)");
+                    continue;
+                }
+
+                // MIB_UNICASTIPADDRESS_ROW::SkipAsSource
             }
 
             if (ifa->Address.lpSockaddr->sa_family == AF_INET)
@@ -192,6 +203,20 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     continue;
                 }
 
+                SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
+
+                FFLocalIpIpv6Type ipv6Type = FF_LOCALIP_IPV6_TYPE_NONE;
+                if (IN6_IS_ADDR_GLOBAL(&ipv6->sin6_addr)) ipv6Type |= FF_LOCALIP_IPV6_TYPE_GUA_BIT;
+                else if (IN6_IS_ADDR_UNIQUE_LOCAL(&ipv6->sin6_addr)) ipv6Type |= FF_LOCALIP_IPV6_TYPE_ULA_BIT;
+                else if (IN6_IS_ADDR_LINKLOCAL(&ipv6->sin6_addr)) ipv6Type |= FF_LOCALIP_IPV6_TYPE_LLA_BIT;
+                else ipv6Type |= FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT;
+
+                if (!(options->ipv6Type & ipv6Type))
+                {
+                    FF_DEBUG("Skipping IPv6 address (doesn't match requested type 0x%X)", options->ipv6Type);
+                    continue;
+                }
+
                 bool isDefaultRoute = ((options->showType & FF_LOCALIP_TYPE_IPV6_BIT) && ffNetifGetDefaultRouteV6()->ifIndex == adapter->IfIndex);
                 if ((options->showType & FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT) && !isDefaultRoute)
                 {
@@ -199,7 +224,6 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                     continue;
                 }
 
-                SOCKADDR_IN6* ipv6 = (SOCKADDR_IN6*) ifa->Address.lpSockaddr;
                 char addressBuffer[INET6_ADDRSTRLEN + 6];
                 inet_ntop(AF_INET6, &ipv6->sin6_addr, addressBuffer, INET6_ADDRSTRLEN);
 

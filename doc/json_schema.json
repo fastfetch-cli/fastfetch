@@ -2920,7 +2920,32 @@
                                     },
                                     "showIpv6": {
                                         "description": "Show IPv6 addresses",
-                                        "type": "boolean",
+                                        "oneOf": [
+                                            {
+                                                "const": true,
+                                                "description": "Show the most useful IPv6 addresses"
+                                            },
+                                            {
+                                                "const": false,
+                                                "description": "Do not show IPv6 addresses"
+                                            },
+                                            {
+                                                "const": "gua",
+                                                "description": "Show only global unicast IPv6 addresses (2000::/3)"
+                                            },
+                                            {
+                                                "const": "ula",
+                                                "description": "Show only unique local IPv6 addresses (fc00::/7)"
+                                            },
+                                            {
+                                                "const": "lla",
+                                                "description": "Show only link-local IPv6 addresses (fe80::/10)"
+                                            },
+                                            {
+                                                "const": "unknown",
+                                                "description": "Show only IPv6 addresses that are not gua, ula or lla"
+                                            }
+                                        ],
                                         "default": false
                                     },
                                     "showSpeed": {
