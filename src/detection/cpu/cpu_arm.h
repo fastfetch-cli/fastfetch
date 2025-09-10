@@ -213,6 +213,7 @@ static const char* nvidiaPartId2name(uint32_t partId)
     case 0x000: return "Denver";
     case 0x003: return "Denver 2";
     case 0x004: return "Carmel";
+    case 0x010: return "Olympus";
     default: return NULL;
     }
 }
