@@ -132,35 +132,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
 #ifdef __linux__
 #include "common/io/io.h"
 #include <elf.h>
-#include <asm/hwcap.h>
-
-#ifndef HWCAP2_SME
-#define HWCAP2_SME         (1UL << 23)
-#endif
-#ifndef HWCAP2_SME2
-#define HWCAP2_SME2        (1UL << 37)
-#endif
-#ifndef HWCAP2_CSSC
-#define HWCAP2_CSSC        (1UL << 34)
-#endif
-#ifndef HWCAP2_SME2P1
-#define HWCAP2_SME2P1      (1UL << 38)
-#endif
-#ifndef HWCAP2_MOPS
-#define HWCAP2_MOPS        (1UL << 43)
-#endif
-#ifndef HWCAP2_F8E4M3
-#define HWCAP2_F8E4M3      (1UL << 55)
-#endif
-#ifndef HWCAP2_F8E5M2
-#define HWCAP2_F8E5M2      (1UL << 56)
-#endif
-#ifndef HWCAP_CMPBR
-#define HWCAP_CMPBR        (1UL << 33)
-#endif
-#ifndef HWCAP_FPRCVT
-#define HWCAP_FPRCVT       (1UL << 34)
-#endif
+// #include <asm/hwcap.h>
 
 void ffCPUDetectByCpuid(FFCPUResult* cpu)
 {
@@ -188,69 +160,69 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
     cpu->march = "unknown";
 
     // ARMv8-A
-    bool has_fp = (hwcap & HWCAP_FP) != 0;
-    bool has_asimd = (hwcap & HWCAP_ASIMD) != 0;
+    bool has_fp = (hwcap & (1 << 0) /* HWCAP_FP */) != 0;
+    bool has_asimd = (hwcap & (1 << 1) /* HWCAP_ASIMD */) != 0;
 
     // ARMv8.1-A
-    bool has_atomics = (hwcap & HWCAP_ATOMICS) != 0; // optional from v8.0
-    bool has_crc32 = (hwcap & HWCAP_CRC32) != 0; // optional from v8.0
-    bool has_asimdrdm = (hwcap & HWCAP_ASIMDRDM) != 0; // optional from v8.0
+    bool has_atomics = (hwcap & (1 << 8) /* HWCAP_ATOMICS */) != 0; // optional from v8.0
+    bool has_crc32 = (hwcap & (1 << 7) /* HWCAP_CRC32 */) != 0; // optional from v8.0
+    bool has_asimdrdm = (hwcap & (1 << 12) /* HWCAP_ASIMDRDM */) != 0; // optional from v8.0
 
     // ARMv8.2-A
-    bool has_fphp = (hwcap & HWCAP_FPHP) != 0; // optional
-    bool has_dcpop = (hwcap & HWCAP_DCPOP) != 0; // DC CVAP, optional from v8.1
+    bool has_fphp = (hwcap & (1 << 9) /* HWCAP_FPHP */) != 0; // optional
+    bool has_dcpop = (hwcap & (1 << 16) /* HWCAP_DCPOP */) != 0; // DC CVAP, optional from v8.1
 
     // ARMv8.3-A
-    bool has_paca = (hwcap & HWCAP_PACA) != 0; // optional from v8.2
-    bool has_lrcpc = (hwcap & HWCAP_LRCPC) != 0; // optional from v8.2
-    bool has_fcma = (hwcap & HWCAP_FCMA) != 0; // optional from v8.2
-    bool has_jscvt = (hwcap & HWCAP_JSCVT) != 0; // optional from v8.2
+    bool has_paca = (hwcap & (1 << 30) /* HWCAP_PACA */) != 0; // optional from v8.2
+    bool has_lrcpc = (hwcap & (1 << 15) /* HWCAP_LRCPC */) != 0; // optional from v8.2
+    bool has_fcma = (hwcap & (1 << 14) /* HWCAP_FCMA */) != 0; // optional from v8.2
+    bool has_jscvt = (hwcap & (1 << 13) /* HWCAP_JSCVT */) != 0; // optional from v8.2
 
     // ARMv8.4-A
-    bool has_dit = (hwcap & HWCAP_DIT) != 0; // optional from v8.3
-    bool has_flagm = (hwcap & HWCAP_FLAGM) != 0; // optional from v8.1
-    bool has_ilrcpc = (hwcap & HWCAP_ILRCPC) != 0; // optional from v8.2
+    bool has_dit = (hwcap & (1 << 24) /* HWCAP_DIT */) != 0; // optional from v8.3
+    bool has_flagm = (hwcap & (1 << 27) /* HWCAP_FLAGM */) != 0; // optional from v8.1
+    bool has_ilrcpc = (hwcap & (1 << 26) /* HWCAP_ILRCPC */) != 0; // optional from v8.2
 
     // ARMv8.5-A
-    bool has_bti = (hwcap2 & HWCAP2_BTI) != 0; // optional from v8.4
-    bool has_sb = (hwcap & HWCAP_SB) != 0; // optional from v8.0
-    bool has_dcpodp = (hwcap2 & HWCAP2_DCPODP) != 0; // optional from v8.1
-    bool has_flagm2 = (hwcap2 & HWCAP2_FLAGM2) != 0; // optional from v8.4
-    bool has_frint = (hwcap2 & HWCAP2_FRINT) != 0; // optional from v8.4
+    bool has_bti = (hwcap2 & (1 << 17) /* HWCAP2_BTI */) != 0; // optional from v8.4
+    bool has_sb = (hwcap & (1 << 29) /* HWCAP_SB */) != 0; // optional from v8.0
+    bool has_dcpodp = (hwcap2 & (1 << 0) /* HWCAP2_DCPODP */) != 0; // optional from v8.1
+    bool has_flagm2 = (hwcap2 & (1 << 7) /* HWCAP2_FLAGM2 */) != 0; // optional from v8.4
+    bool has_frint = (hwcap2 & (1 << 8) /* HWCAP2_FRINT */) != 0; // optional from v8.4
 
     // ARMv9.0-A
-    bool has_sve2 = (hwcap2 & HWCAP2_SVE2) != 0;
+    bool has_sve2 = (hwcap2 & (1 << 1) /* HWCAP2_SVE2 */) != 0;
 
     // ARMv9.1-A
     // ARMv8.6-A
-    bool has_bf16 = (hwcap2 & HWCAP2_BF16) != 0; // optional from v8.2
-    bool has_i8mm = (hwcap2 & HWCAP2_I8MM) != 0; // optional from v8.1
+    bool has_bf16 = (hwcap2 & (1 << 14) /* HWCAP2_BF16 */) != 0; // optional from v8.2
+    bool has_i8mm = (hwcap2 & (1 << 13) /* HWCAP2_I8MM */) != 0; // optional from v8.1
 
     // ARMv8.7-A
-    bool has_afp = (hwcap2 & HWCAP2_AFP) != 0; // optional from v8.6
+    bool has_afp = (hwcap2 & (1 << 20) /* HWCAP2_AFP */) != 0; // optional from v8.6
 
     // ARMv9.2-A
-    bool has_sme = (hwcap2 & HWCAP2_SME) != 0;
+    bool has_sme = (hwcap2 & (1 << 23) /* HWCAP2_SME */) != 0;
 
     // ARMv9.3-A
-    bool has_sme2 = (hwcap2 & HWCAP2_SME2) != 0; // optional from v9.2
+    bool has_sme2 = (hwcap2 & (1UL << 37) /* HWCAP2_SME2 */) != 0; // optional from v9.2
 
     // ARMv8.8-A
-    bool has_mops = (hwcap2 & HWCAP2_MOPS) != 0; // optional from v8.7
+    bool has_mops = (hwcap2 & (1UL << 43) /* HWCAP2_MOPS */) != 0; // optional from v8.7
 
     // ARMv8.9-A
-    bool has_cssc = (hwcap2 & HWCAP2_CSSC) != 0; // optional from v8.7
+    bool has_cssc = (hwcap2 & (1UL << 34) /* HWCAP2_CSSC */) != 0; // optional from v8.7
 
     // ARMv9.4-A
-    bool has_sme2p1 = (hwcap2 & HWCAP2_SME2P1) != 0; // optional from v9.2
+    bool has_sme2p1 = (hwcap2 & (1UL << 38) /* HWCAP2_SME2P1 */) != 0; // optional from v9.2
 
     // ARMv9.5-A
-    bool has_f8e4m3 = (hwcap2 & HWCAP2_F8E4M3) != 0; // optional from v9.2
-    bool has_f8e5m2 = (hwcap2 & HWCAP2_F8E5M2) != 0; // optional from v9.2
+    bool has_f8e4m3 = (hwcap2 & (1UL << 55) /* HWCAP2_F8E4M3 */) != 0; // optional from v9.2
+    bool has_f8e5m2 = (hwcap2 & (1UL << 56) /* HWCAP2_F8E5M2 */) != 0; // optional from v9.2
 
     // ARMv9.6-A
-    bool has_cmpbr = (hwcap & HWCAP_CMPBR) != 0; // optional from v9.5
-    bool has_fprcvt = (hwcap & HWCAP_FPRCVT) != 0; // optional from v9.5
+    bool has_cmpbr = (hwcap & (1UL << 33) /* HWCAP_CMPBR */) != 0; // optional from v9.5
+    bool has_fprcvt = (hwcap & (1UL << 34) /* HWCAP_FPRCVT */) != 0; // optional from v9.5
 
     if (has_sve2 || has_sme) {
         // ARMv9
