@@ -1,0 +1,87 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": null,
+    "display": {
+        "key": {
+            "type": "both",
+            "paddingLeft": 6,
+            "width": 17
+        }
+    },
+    "modules": [
+        {
+            "type": "custom",
+            "format": "|---------------------: {#1}Hardware{#} : ---------------------|"
+        },
+        "break",
+        {
+            "keyColor": "green",
+            "type": "host"
+        },
+        {
+            "keyColor": "green",
+            "type": "cpu"
+        },
+        {
+            "keyColor": "yellow",
+            "type": "memory"
+        },
+        {
+            "keyColor": "yellow",
+            "type": "swap"
+        },
+        {
+            "type": "custom",
+            "keyIcon": "",
+            "key": "Disks"
+        },
+        {
+            "type": "disk",
+            "key": " ",
+            "format": "        [{mountpoint}] - {size-used} / {size-total} ({size-percentage})"
+        },
+        "break",
+        {
+            "type": "title",
+            "format": "|-------------------------------------------------------|\u001b[40D: {#1}{user-name} @ {host-name}{#} :"
+        },
+        "break",
+        {
+            "type": "os",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "kernel",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "packages",
+            "keyColor": "red",
+            "key": "Pkgs"
+        },
+        {
+            "type": "shell",
+            "keyColor": "red"
+        },
+        {
+            "type": "terminal",
+            "key": "Term",
+            "keyColor": "red"
+        },
+        {
+            "type": "locale",
+            "keyColor": "magenta"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": "|---------------------: {#1}Software{#} : ---------------------|"
+        },
+        "break",
+        {
+            "type": "colors",
+            "symbol": "circle",
+            "paddingLeft": 8
+        }
+    ]
+}
