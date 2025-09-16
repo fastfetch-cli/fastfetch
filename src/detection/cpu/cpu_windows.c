@@ -242,7 +242,8 @@ static const char* detectByRegistry(FFCPUResult* cpu)
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
-    ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
+    if (ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL))
+        ffStrbufTrimRightSpace(&cpu->vendor);
 
     if (cpu->coresLogical == 0)
     {
