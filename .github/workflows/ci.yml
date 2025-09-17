@@ -135,6 +135,15 @@ jobs:
         id: ffversion
         run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
 
+      - name: polyfill glibc
+        run: |
+          wget https://github.com/CarterLi/polyfill-glibc/releases/download/v0.0.1/polyfill-glibc-${{ matrix.arch }} -O polyfill-glibc
+          chmod +x polyfill-glibc
+          strip fastfetch && ./polyfill-glibc fastfetch --target-glibc=2.17
+          strip flashfetch && ./polyfill-glibc flashfetch --target-glibc=2.17
+          echo 'set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-polyfilled")' >> CPackConfig.cmake
+          cpack
+
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
