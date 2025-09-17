@@ -4615,16 +4615,6 @@ static const FFlogo S[] = {
             FF_COLOR_FG_WHITE,
         },
     },
-    // Starry
-    {
-        .names = {"Starry"},
-        .lines = FASTFETCH_DATATEXT_LOGO_STARRY,
-        .colors = {
-            FF_COLOR_FG_GREEN,
-        },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_DEFAULT,
-    },
     // StockLinux
     {
         .names = {"Stock Linux"},
