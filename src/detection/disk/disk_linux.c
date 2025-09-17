@@ -269,7 +269,7 @@ static void detectStats(FFDisk* disk)
     disk->createTime = 0;
     #ifdef SYS_statx
     struct statx stx;
-    if (syscall(SYS_statx, 0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME))
+    if (syscall(SYS_statx, 0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME) && stx.stx_btime.tv_sec > 685065600 /*birth of Linux*/)
         disk->createTime = (uint64_t)((stx.stx_btime.tv_sec * 1000) + (stx.stx_btime.tv_nsec / 1000000));
     #endif
 
