@@ -602,7 +602,7 @@ jobs:
         with:
           msystem: ${{ matrix.msystem }}
           update: true
-          install: git mingw-w64-clang-${{ matrix.msys-arch }}-7zip mingw-w64-clang-${{ matrix.msys-arch }}-cmake mingw-w64-clang-${{ matrix.msys-arch }}-clang mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-loader mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-headers mingw-w64-clang-${{ matrix.msys-arch }}-opencl-icd mingw-w64-clang-${{ matrix.msys-arch }}-opencl-headers mingw-w64-clang-${{ matrix.msys-arch }}-cppwinrt mingw-w64-clang-${{ matrix.msys-arch }}-imagemagick
+          install: git mingw-w64-clang-${{ matrix.msys-arch }}-7zip mingw-w64-clang-${{ matrix.msys-arch }}-cmake mingw-w64-clang-${{ matrix.msys-arch }}-clang mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-loader mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-headers mingw-w64-clang-${{ matrix.msys-arch }}-opencl-icd mingw-w64-clang-${{ matrix.msys-arch }}-opencl-headers mingw-w64-clang-${{ matrix.msys-arch }}-cppwinrt mingw-w64-clang-${{ matrix.msys-arch }}-imagemagick mingw-w64-clang-${{ matrix.msys-arch }}-chafa
 
       - name: print msys version
         run: uname -a
