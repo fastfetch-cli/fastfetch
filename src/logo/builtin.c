@@ -3408,6 +3408,7 @@ static const FFlogo O[] = {
         .colors = {
             FF_COLOR_FG_MAGENTA,
             FF_COLOR_FG_CYAN,
+            FF_COLOR_FG_LIGHT_BLUE,
         },
     },
     // OmniOS
