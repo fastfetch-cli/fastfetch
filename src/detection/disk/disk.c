@@ -2,18 +2,12 @@
 
 bool ffDiskMatchMountpoint(FFstrbuf* folders, const char* mountpoint)
 {
-    #ifdef _WIN32
-    const char separator = ';';
-    #else
-    const char separator = ':';
-    #endif
-
     uint32_t mountpointLength = (uint32_t) strlen(mountpoint);
 
     uint32_t startIndex = 0;
     while(startIndex < folders->length)
     {
-        uint32_t colonIndex = ffStrbufNextIndexC(folders, startIndex, separator);
+        uint32_t colonIndex = ffStrbufNextIndexC(folders, startIndex, FF_DISK_FOLDER_SEPARATOR);
 
         uint32_t folderLength = colonIndex - startIndex;
         if (folderLength == mountpointLength && memcmp(folders->chars + startIndex, mountpoint, mountpointLength) == 0)

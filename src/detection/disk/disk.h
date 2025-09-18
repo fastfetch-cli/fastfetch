@@ -3,6 +3,12 @@
 #include "fastfetch.h"
 #include "modules/disk/option.h"
 
+#ifdef _WIN32
+    #define FF_DISK_FOLDER_SEPARATOR ';'
+#else
+    #define FF_DISK_FOLDER_SEPARATOR ':'
+#endif
+
 typedef struct FFDisk
 {
     FFstrbuf mountFrom;

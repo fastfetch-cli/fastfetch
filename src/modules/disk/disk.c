@@ -223,6 +223,32 @@ bool ffPrintDisk(FFDiskOptions* options)
     return true;
 }
 
+static bool setSeparatedList(FFstrbuf* strbuf, yyjson_val* val, char separator)
+{
+    if (yyjson_is_str(val))
+    {
+        ffStrbufSetJsonVal(strbuf, val);
+        return true;
+    }
+    if (yyjson_is_arr(val))
+    {
+        ffStrbufClear(strbuf);
+        yyjson_val *elem;
+        size_t eidx, emax;
+        yyjson_arr_foreach(val, eidx, emax, elem)
+        {
+            if (yyjson_is_str(elem))
+            {
+                if (strbuf->length > 0)
+                    ffStrbufAppendC(strbuf, separator);
+                ffStrbufAppendJsonVal(strbuf, elem);
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 {
     yyjson_val *key, *val;
@@ -234,19 +260,19 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "folders"))
         {
-            ffStrbufSetJsonVal(&options->folders, val);
+            setSeparatedList(&options->folders, val, FF_DISK_FOLDER_SEPARATOR);
             continue;
         }
 
         if (unsafe_yyjson_equals_str(key, "hideFolders"))
         {
-            ffStrbufSetJsonVal(&options->hideFolders, val);
+            setSeparatedList(&options->hideFolders, val, FF_DISK_FOLDER_SEPARATOR);
             continue;
         }
 
         if (unsafe_yyjson_equals_str(key, "hideFS"))
         {
-            ffStrbufSetJsonVal(&options->hideFS, val);
+            setSeparatedList(&options->hideFS, val, ':');
             continue;
         }
 
