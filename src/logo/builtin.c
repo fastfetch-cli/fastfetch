@@ -4768,6 +4768,16 @@ static const FFlogo T[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // TempleOS
+    {
+        .names = {"TempleOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_TEMPLEOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_CYAN,
+        },
+    },
     // TileOS
     {
         .names = {"TileOS"},
