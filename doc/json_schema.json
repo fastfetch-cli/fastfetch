@@ -2636,6 +2636,15 @@
                                         "const": "gamepad",
                                         "description": "List connected gamepads"
                                     },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
@@ -2894,6 +2903,15 @@
                                     "type": {
                                         "const": "keyboard",
                                         "description": "List (connected) keyboards"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3217,6 +3235,15 @@
                                     "type": {
                                         "const": "mouse",
                                         "description": "List connected mouses"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
