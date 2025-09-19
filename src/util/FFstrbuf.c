@@ -730,7 +730,7 @@ bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
     return changed;
 }
 
-/// @brief Check if a separated string contains a substring.
+/// @brief Check if a separated string (comp) contains a substring (strbuf).
 /// @param strbuf The substring to check.
 /// @param compLength The length of the separated string to check.
 /// @param comp The separated string to check.
@@ -751,6 +751,31 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
 
         uint32_t substrLength = (uint32_t) (colon - p);
         if (strbuf->length == substrLength && memcmp(strbuf->chars, p, substrLength) == 0)
+            return true;
+
+        p = colon + 1;
+    }
+
+    return false;
+}
+
+/// @brief Case insensitive version of ffStrbufMatchSeparatedNS.
+bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    if (strbuf->length == 0)
+        return true;
+
+    if (compLength == 0)
+        return false;
+
+    for (const char* p = comp; p < comp + compLength;)
+    {
+        const char* colon = memchr(p, separator, compLength);
+        if (colon == NULL)
+            return strcasecmp(strbuf->chars, p) == 0;
+
+        uint32_t substrLength = (uint32_t) (colon - p);
+        if (strbuf->length == substrLength && strncasecmp(strbuf->chars, p, substrLength) == 0)
             return true;
 
         p = colon + 1;
@@ -789,4 +814,43 @@ int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint)
 
     ffStrbufAppendS(strbuf, "�"); // U+FFFD REPLACEMENT CHARACTER
     return 1;
+}
+
+/// @brief Check if a separated string (strbuf) contains a substring (comp).
+/// @param strbuf The separated to check.
+/// @param compLength The length of the separated string to check.
+/// @param comp The substring to check.
+/// @param separator The separator character.
+bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    uint32_t startIndex = 0;
+    while(startIndex < strbuf->length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
+
+        uint32_t folderLength = colonIndex - startIndex;
+        if (folderLength == compLength && memcmp(strbuf->chars + startIndex, comp, compLength) == 0)
+            return true;
+
+        startIndex = colonIndex + 1;
+    }
+
+    return false;
+}
+
+bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    uint32_t startIndex = 0;
+    while(startIndex < strbuf->length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
+
+        uint32_t folderLength = colonIndex - startIndex;
+        if (folderLength == compLength && strncasecmp(strbuf->chars + startIndex, comp, compLength) == 0)
+            return true;
+
+        startIndex = colonIndex + 1;
+    }
+
+    return false;
 }
