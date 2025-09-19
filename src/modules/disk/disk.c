@@ -203,10 +203,10 @@ bool ffPrintDisk(FFDiskOptions* options)
         if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
             continue;
 
-        if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
+        if (options->hideFolders.length && ffStrbufSeparatedContain(&options->hideFolders, &disk->mountpoint, FF_DISK_FOLDER_SEPARATOR))
             continue;
 
-        if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
+        if (options->hideFS.length && ffStrbufSeparatedContain(&options->hideFS, &disk->filesystem, ':'))
             continue;
 
         printDisk(options, disk, ++index);

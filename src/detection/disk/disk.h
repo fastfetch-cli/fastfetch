@@ -35,4 +35,3 @@ typedef struct FFDisk
 const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks /* list of FFDisk */);
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks);
-bool ffDiskMatchMountpoint(FFstrbuf* folders, const char* mountpoint);

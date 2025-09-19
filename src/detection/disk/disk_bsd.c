@@ -145,7 +145,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     {
         if(__builtin_expect(options->folders.length > 0, 0))
         {
-            if(!ffDiskMatchMountpoint(&options->folders, fs->f_mntonname))
+            if(!ffStrbufSeparatedContainS(&options->folders, fs->f_mntonname, FF_DISK_FOLDER_SEPARATOR))
                 continue;
         }
         else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs") && !ffStrEquals(fs->f_fstypename, "fusefs.sshfs"))
