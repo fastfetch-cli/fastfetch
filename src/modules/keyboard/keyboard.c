@@ -58,22 +58,25 @@ bool ffPrintKeyboard(FFKeyboardOptions* options)
         }
     }
 
+    bool ret = true;
     if(!filtered.length)
     {
         ffPrintError(FF_KEYBOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
-        return false;
+        ret = false;
     }
-
-    uint8_t index = 0;
-    FF_LIST_FOR_EACH(FFKeyboardDevice*, pdevice, filtered)
+    else
     {
-        FFKeyboardDevice* device = *pdevice;
-        printDevice(options, device, filtered.length > 1 ? ++index : 0);
-        ffStrbufDestroy(&device->serial);
-        ffStrbufDestroy(&device->name);
+        uint8_t index = 0;
+        FF_LIST_FOR_EACH(FFKeyboardDevice*, pdevice, filtered)
+        {
+            FFKeyboardDevice* device = *pdevice;
+            printDevice(options, device, filtered.length > 1 ? ++index : 0);
+            ffStrbufDestroy(&device->serial);
+            ffStrbufDestroy(&device->name);
+        }
     }
 
-    return true;
+    return ret;
 }
 
 void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)

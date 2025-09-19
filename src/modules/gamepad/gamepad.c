@@ -87,26 +87,29 @@ bool ffPrintGamepad(FFGamepadOptions* options)
         }
     }
 
+    bool ret = true;
     if(!filtered.length)
     {
         ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
-        return false;
+        ret = false;
     }
-
-    uint8_t index = 0;
-    FF_LIST_FOR_EACH(FFGamepadDevice*, pdevice, filtered)
+    else
     {
-        FFGamepadDevice* device = *pdevice;
-        printDevice(options, device, filtered.length > 1 ? ++index : 0);
+        uint8_t index = 0;
+        FF_LIST_FOR_EACH(FFGamepadDevice*, pdevice, filtered)
+        {
+            FFGamepadDevice* device = *pdevice;
+            printDevice(options, device, filtered.length > 1 ? ++index : 0);
+        }
+
+        FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
+        {
+            ffStrbufDestroy(&device->serial);
+            ffStrbufDestroy(&device->name);
+        }
     }
 
-    FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
-    {
-        ffStrbufDestroy(&device->serial);
-        ffStrbufDestroy(&device->name);
-    }
-
-    return true;
+    return ret;
 }
 
 void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)

@@ -58,22 +58,29 @@ bool ffPrintMouse(FFMouseOptions* options)
         }
     }
 
+    bool ret = true;
     if(!filtered.length)
     {
         ffPrintError(FF_MOUSE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
-        return false;
+        ret = false;
+    }
+    else
+    {
+        uint8_t index = 0;
+        FF_LIST_FOR_EACH(FFMouseDevice*, pdevice, filtered)
+        {
+            FFMouseDevice* device = *pdevice;
+            printDevice(options, device, filtered.length > 1 ? ++index : 0);
+        }
     }
 
-    uint8_t index = 0;
-    FF_LIST_FOR_EACH(FFMouseDevice*, pdevice, filtered)
+    FF_LIST_FOR_EACH(FFMouseDevice, device, result)
     {
-        FFMouseDevice* device = *pdevice;
-        printDevice(options, device, filtered.length > 1 ? ++index : 0);
         ffStrbufDestroy(&device->serial);
         ffStrbufDestroy(&device->name);
     }
 
-    return true;
+    return ret;
 }
 
 void ffParseMouseJsonObject(FFMouseOptions* options, yyjson_val* module)
