@@ -87,7 +87,7 @@ static bool parseGhosttyConfig(FFstrbuf* path, FFstrbuf* fontName, FFstrbuf* fon
     return true;
 }
 
-static void detectGhostty(FFTerminalFontResult* terminalFont)
+static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFont)
 {
     FF_DEBUG("detectGhostty: start");
     FF_STRBUF_AUTO_DESTROY configPath = ffStrbufCreate();
@@ -95,17 +95,47 @@ static void detectGhostty(FFTerminalFontResult* terminalFont)
     FF_STRBUF_AUTO_DESTROY fontNameFallback = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
-    #if __APPLE__
-    ffStrbufSet(&configPath, &instance.state.platform.homeDir);
-    ffStrbufAppendS(&configPath, "Library/Application Support/com.mitchellh.ghostty/config");
-    parseGhosttyConfig(&configPath, &fontName, &fontNameFallback, &fontSize);
-    #endif
-
-    if (instance.state.platform.configDirs.length > 0)
+    // Try ghostty +show-config first
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
+    if(!ffProcessAppendStdOut(&buf, (char* const[]){
+        exe->chars,
+        "+show-config",
+        NULL,
+    }))
     {
-        ffStrbufSet(&configPath, FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0));
-        ffStrbufAppendS(&configPath, "ghostty/config");
+        FF_DEBUG("using ghostty +show-config output");
+        ffParsePropLines(buf.chars, "font-family = ", &fontName);
+        ffParsePropLines(buf.chars, "font-size = ", &fontSize);
+
+        // Look for fallback font (second font-family occurrence)
+        if(fontName.length > 0) {
+            const char* secondFontFamily = strstr(buf.chars + (fontName.chars - buf.chars) + fontName.length, "\nfont-family = ");
+            if(secondFontFamily) {
+                secondFontFamily += strlen("\nfont-family = ");
+                const char* end = strchr(secondFontFamily, '\n');
+                if(end) {
+                    ffStrbufSetNS(&fontNameFallback, (uint32_t)(end - secondFontFamily), secondFontFamily);
+                    FF_DEBUG("found fallback font-family='%s'", fontNameFallback.chars);
+                }
+            }
+        }
+    }
+    else
+    {
+        FF_DEBUG("ghostty +show-config failed, falling back to config file parsing");
+
+        #if __APPLE__
+        ffStrbufSet(&configPath, &instance.state.platform.homeDir);
+        ffStrbufAppendS(&configPath, "Library/Application Support/com.mitchellh.ghostty/config");
         parseGhosttyConfig(&configPath, &fontName, &fontNameFallback, &fontSize);
+        #endif
+
+        if (instance.state.platform.configDirs.length > 0)
+        {
+            ffStrbufSet(&configPath, FF_LIST_GET(FFstrbuf, instance.state.platform.configDirs, 0));
+            ffStrbufAppendS(&configPath, "ghostty/config");
+            parseGhosttyConfig(&configPath, &fontName, &fontNameFallback, &fontSize);
+        }
     }
 
     if(fontName.length == 0) {
@@ -333,7 +363,7 @@ static bool detectTerminalFontCommon(const FFTerminalResult* terminal, FFTermina
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "contour"))
         detectContour(&terminal->exe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "ghostty"))
-        detectGhostty(terminalFont);
+        detectGhostty(&terminal->exe, terminalFont);
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "rio"))
         detectRio(terminalFont);
 
