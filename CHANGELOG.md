@@ -1,3 +1,32 @@
+# 2.53.0
+
+Changes:
+* JSON property `length` in `Separator` module has been renamed to `times` for clarity (Separator)
+
+Features:
+* Adds IPv6 type selection (#1459, LocalIP)
+    * For example: `{ "type": "localip", "showIpv6": "ula" /* Show ULA only */ }`
+* Adds more ARM CPU part IDs (CPU, Linux)
+* Improves Ghostty font config parsing with fallback font detection (#1967, TerminalFont)
+* Replaces statx(2) call with syscall(2) for better compatibility (Disk, Linux)
+* Allows array input for disk folder and filesystem options (Disk)
+    * For example: `{ "type": "disk", "folders": ["/", "/home"] }`
+* Adds support for ignoring input devices by name prefix (#1950, Keyboard / Mouse / Gamepad)
+    * For example: `{ "type": "keyboard", "ignores": ["Apple ", "Corsair "] }`
+* Adds support for (B)SSID detection on macOS Tahoe (Wifi, macOS)
+    * Please don't expect it to work on later macOS versions
+* Improves Ubuntu flavor detection (#1975, OS, Linux)
+* Refines ARMv8.4-A detection to require LSE2 (CPU, Windows)
+
+Bugfixes:
+* Handles zero temperature data (#1960, CPU, Windows)
+* Fixes `dlopen libzfs.so failed` error on Proxmox 9 (#1973, Zpool, Linux)
+
+Logos:
+* Removes Starry Linux
+* Adds TempleOS
+* Updates ObsidianOS
+
 # 2.52.0
 
 Changes:
