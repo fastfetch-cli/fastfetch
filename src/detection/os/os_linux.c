@@ -61,10 +61,6 @@ FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
 
 FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
 {
-    const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
-    if(!ffStrSet(xdgConfigDirs))
-        return;
-
     if (detectArmbianVersion(result))
         return;
     else if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
@@ -103,6 +99,10 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         return;
     }
+
+    const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
+    if(!ffStrSet(xdgConfigDirs))
+        return;
 
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
