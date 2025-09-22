@@ -429,7 +429,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
 
     // ARMv8.4-A
     // My CPU (Apple M1 Pro in VM) does support LSE2, but Windows doesn't detect it for some reason
-    // bool has_lse2      = IsProcessorFeaturePresent(PF_ARM_LSE2_AVAILABLE); // Large System Extensions version 2, optional from v8.2
+    bool has_lse2      = IsProcessorFeaturePresent(PF_ARM_LSE2_AVAILABLE); // Large System Extensions version 2, optional from v8.2
     bool has_dp        = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE); // DotProd, optional from v8.1 (*)
 
     // ARMv9.0-A
@@ -475,7 +475,7 @@ void ffCPUDetectByCpuid(FFCPUResult* cpu)
             cpu->march = "ARMv8.7-A";
         } else if (has_i8mm && has_bf16) {
             cpu->march = "ARMv8.6-A";
-        } else if (has_dp) {
+        } else if (has_dp && has_lse2) {
             cpu->march = "ARMv8.4-A";
         } else if (has_lrcpc && has_jscvt) {
             cpu->march = "ARMv8.3-A";
