@@ -47,7 +47,7 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
         if (__builtin_expect((long) options->folders.length, 0))
         {
-            if (!ffDiskMatchMountpoint(&options->folders, buffer.chars))
+            if (!ffStrbufSeparatedContain(&options->folders, &buffer, FF_DISK_FOLDER_SEPARATOR))
                 continue;
         }
         else if(driveType == DRIVE_NO_ROOT_DIR)

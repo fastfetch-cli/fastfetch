@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.52.0
+    VERSION 2.53.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1304,10 +1304,7 @@ endif()
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
-    list(APPEND LIBFASTFETCH_SRC src/3rdparty/mk_wcwidch/wcwidth.c)
-endif()
-if(LINUX)
-    check_function_exists(statx HAVE_STATX)
+    list(APPEND LIBFASTFETCH_SRC src/util/wcwidth.c)
 endif()
 if(NOT WIN32)
     check_function_exists(pipe2 HAVE_PIPE2)
@@ -1422,10 +1419,6 @@ if(FreeBSD OR OpenBSD OR NetBSD)
     target_compile_definitions(libfastfetch PUBLIC _IFI_OQDROPS FF_HAVE_IFI_OQDROPS)
     endif()
     unset(CMAKE_REQUIRED_DEFINITIONS)
-endif()
-
-if(HAVE_STATX)
-    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_STATX)
 endif()
 
 if(HAVE_WCWIDTH)

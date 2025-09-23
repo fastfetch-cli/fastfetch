@@ -102,12 +102,16 @@ const char* detectThermalTemp(double* result)
         if (pCounterData->dwDataSize == sizeof(int32_t))
         {
             DWORD* pCounterIds = (DWORD*)(pMultiCounters + 1);
+            int32_t value = *(int32_t*)(pCounterData + 1);
+            if (value == 0)
+                return "Temperature data is zero";
+
             switch (pCounterIds[iCounter]) {
             case 0: // Temperature
-                *result = *(int32_t*)(pCounterData + 1) - 273;
+                *result = value - 273;
                 break;
             case 3: // High Precision Temperature
-                *result = *(int32_t*)(pCounterData + 1) / 10.0 - 273;
+                *result = value / 10.0 - 273;
                 break;
             }
         }
@@ -238,7 +242,8 @@ static const char* detectByRegistry(FFCPUResult* cpu)
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
-    ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
+    if (ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL))
+        ffStrbufTrimRightSpace(&cpu->vendor);
 
     if (cpu->coresLogical == 0)
     {

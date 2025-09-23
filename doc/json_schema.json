@@ -2307,17 +2307,60 @@
                                         "const": "disk"
                                     },
                                     "folders": {
-                                        "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options"
+                                        "description": "A list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon (semicolon on Windows) separated list of folder paths to get disk usage from",
+                                                "default": "/"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of folder paths to get disk usage from",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ]
                                     },
                                     "hideFolders": {
-                                        "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
+                                        "description": "A list of folder paths to hide from the disk output",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of folder paths to hide from the disk output",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ],
                                         "default": "/efi:/boot:/boot/efi:/boot/firmware"
                                     },
                                     "hideFS": {
-                                        "type": "string",
-                                        "description": "A colon separated file systems to hide from the disk output"
+                                        "description": "A list of file systems to hide from the disk output",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon separated list of file systems to hide from the disk output"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of file systems to hide from the disk output",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ]
                                     },
                                     "showRegular": {
                                         "type": "boolean",
@@ -2593,6 +2636,15 @@
                                         "const": "gamepad",
                                         "description": "List connected gamepads"
                                     },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
@@ -2852,6 +2904,15 @@
                                         "const": "keyboard",
                                         "description": "List (connected) keyboards"
                                     },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2920,7 +2981,32 @@
                                     },
                                     "showIpv6": {
                                         "description": "Show IPv6 addresses",
-                                        "type": "boolean",
+                                        "oneOf": [
+                                            {
+                                                "const": true,
+                                                "description": "Show the most useful IPv6 addresses"
+                                            },
+                                            {
+                                                "const": false,
+                                                "description": "Do not show IPv6 addresses"
+                                            },
+                                            {
+                                                "const": "gua",
+                                                "description": "Show only global unicast IPv6 addresses (2000::/3)"
+                                            },
+                                            {
+                                                "const": "ula",
+                                                "description": "Show only unique local IPv6 addresses (fc00::/7)"
+                                            },
+                                            {
+                                                "const": "lla",
+                                                "description": "Show only link-local IPv6 addresses (fe80::/10)"
+                                            },
+                                            {
+                                                "const": "unknown",
+                                                "description": "Show only IPv6 addresses that are not gua, ula or lla"
+                                            }
+                                        ],
                                         "default": false
                                     },
                                     "showSpeed": {
@@ -3149,6 +3235,15 @@
                                     "type": {
                                         "const": "mouse",
                                         "description": "List connected mouses"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3687,8 +3782,8 @@
                                         "description": "Set the color of the separator line",
                                         "$ref": "#/$defs/outputColor"
                                     },
-                                    "length": {
-                                        "description": "Set the length of the separator line, or 0 to auto-detect",
+                                    "times": {
+                                        "description": "Set the times of separator string to repeat, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0

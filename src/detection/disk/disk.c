@@ -1,30 +1,5 @@
 #include "disk.h"
 
-bool ffDiskMatchMountpoint(FFstrbuf* folders, const char* mountpoint)
-{
-    #ifdef _WIN32
-    const char separator = ';';
-    #else
-    const char separator = ':';
-    #endif
-
-    uint32_t mountpointLength = (uint32_t) strlen(mountpoint);
-
-    uint32_t startIndex = 0;
-    while(startIndex < folders->length)
-    {
-        uint32_t colonIndex = ffStrbufNextIndexC(folders, startIndex, separator);
-
-        uint32_t folderLength = colonIndex - startIndex;
-        if (folderLength == mountpointLength && memcmp(folders->chars + startIndex, mountpoint, mountpointLength) == 0)
-            return true;
-
-        startIndex = colonIndex + 1;
-    }
-
-    return false;
-}
-
 static int compareDisks(const FFDisk* disk1, const FFDisk* disk2)
 {
     return ffStrbufComp(&disk1->mountpoint, &disk2->mountpoint);

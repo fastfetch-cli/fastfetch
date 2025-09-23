@@ -3,6 +3,12 @@
 #include "fastfetch.h"
 #include "modules/disk/option.h"
 
+#ifdef _WIN32
+    #define FF_DISK_FOLDER_SEPARATOR ';'
+#else
+    #define FF_DISK_FOLDER_SEPARATOR ':'
+#endif
+
 typedef struct FFDisk
 {
     FFstrbuf mountFrom;
@@ -29,4 +35,3 @@ typedef struct FFDisk
 const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks /* list of FFDisk */);
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks);
-bool ffDiskMatchMountpoint(FFstrbuf* folders, const char* mountpoint);

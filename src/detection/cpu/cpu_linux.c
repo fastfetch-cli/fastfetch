@@ -150,6 +150,8 @@ static void detectQualcomm(FFCPUResult* cpu)
 
     switch (code)
     {
+        case 8845: name = "8 Gen 5"; break; // ?
+        case 8850: name = "8 Elite Gen 5"; break;
         case 8735: name = "8s Gen 4"; break;
         case 8750: name = "8 Elite"; break;
         case 8635: name = "8s Gen 3"; break;
@@ -192,6 +194,7 @@ static void detectMediaTek(FFCPUResult* cpu)
 
     switch (code) // The SOC code of MTK Dimensity series is full of mess
     {
+        case 6993: name = "9500"; break;
         case 6991: name = "9400"; break;
         case 6989:
         case 8796: name = "9300"; break;

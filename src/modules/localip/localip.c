@@ -198,10 +198,33 @@ void ffParseLocalIpJsonObject(FFLocalIpOptions* options, yyjson_val* module)
 
         if (unsafe_yyjson_equals_str(key, "showIpv6"))
         {
-            if (yyjson_get_bool(val))
-                options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
-            else
-                options->showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
+            if (yyjson_is_bool(val))
+            {
+                options->ipv6Type = FF_LOCALIP_IPV6_TYPE_AUTO;
+                if (unsafe_yyjson_get_bool(val))
+                    options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
+                else
+                    options->showType &= ~FF_LOCALIP_TYPE_IPV6_BIT;
+            }
+            else if (yyjson_is_str(val))
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "auto", FF_LOCALIP_IPV6_TYPE_AUTO },
+                    { "gua", FF_LOCALIP_IPV6_TYPE_GUA_BIT },
+                    { "ula", FF_LOCALIP_IPV6_TYPE_ULA_BIT },
+                    { "lla", FF_LOCALIP_IPV6_TYPE_LLA_BIT },
+                    { "unknown", FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_LOCALIP_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                {
+                    options->showType |= FF_LOCALIP_TYPE_IPV6_BIT;
+                    options->ipv6Type = (FFLocalIpIpv6Type) value;
+                }
+            }
             continue;
         }
 
@@ -302,7 +325,21 @@ void ffGenerateLocalIpJsonConfig(FFLocalIpOptions* options, yyjson_mut_doc* doc,
 
     yyjson_mut_obj_add_bool(doc, module, "showIpv4", !!(options->showType & FF_LOCALIP_TYPE_IPV4_BIT));
 
-    yyjson_mut_obj_add_bool(doc, module, "showIpv6", !!(options->showType & FF_LOCALIP_TYPE_IPV6_BIT));
+    if (options->ipv6Type == FF_LOCALIP_IPV6_TYPE_AUTO)
+        yyjson_mut_obj_add_bool(doc, module, "showIpv6", !!(options->showType & FF_LOCALIP_TYPE_IPV6_BIT));
+    else
+    {
+        const char* str = NULL;
+        switch (options->ipv6Type)
+        {
+            case FF_LOCALIP_IPV6_TYPE_GUA_BIT:     str = "gua"; break;
+            case FF_LOCALIP_IPV6_TYPE_ULA_BIT:     str = "ula"; break;
+            case FF_LOCALIP_IPV6_TYPE_LLA_BIT:     str = "lla"; break;
+            case FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT: str = "unknown"; break;
+            default:                               str = "auto"; break;
+        }
+        yyjson_mut_obj_add_str(doc, module, "showIpv6", str);
+    }
 
     yyjson_mut_obj_add_bool(doc, module, "showMac", !!(options->showType & FF_LOCALIP_TYPE_MAC_BIT));
 
@@ -385,6 +422,7 @@ void ffInitLocalIpOptions(FFLocalIpOptions* options)
             | FF_LOCALIP_TYPE_DEFAULT_ROUTE_ONLY_BIT
         #endif
     ;
+    options->ipv6Type = FF_LOCALIP_IPV6_TYPE_AUTO;
     ffStrbufInit(&options->namePrefix);
 }
 

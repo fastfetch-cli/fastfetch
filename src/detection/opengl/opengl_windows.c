@@ -7,9 +7,6 @@
 
 typedef struct WGLData
 {
-    FFOpenGLResult* result;
-    const char* error;
-
     FF_LIBRARY_SYMBOL(glGetString)
     FF_LIBRARY_SYMBOL(wglMakeCurrent)
     FF_LIBRARY_SYMBOL(wglCreateContext)
@@ -18,82 +15,77 @@ typedef struct WGLData
 
 void ffOpenGLHandleResult(FFOpenGLResult* result, __typeof__(&glGetString) ffglGetString);
 
-static const char* wglHandleContext(WGLData* wglData, HDC hdc, HGLRC context)
+static const char* wglHandleContext(WGLData* wglData, FFOpenGLResult* result, HDC hdc, HGLRC context)
 {
     if(wglData->ffwglMakeCurrent(hdc, context) == FALSE)
         return "wglMakeCurrent() failed";
-    ffOpenGLHandleResult(wglData->result, wglData->ffglGetString);
-    ffStrbufSetStatic(&wglData->result->library, "WGL 1.0");
+    ffOpenGLHandleResult(result, wglData->ffglGetString);
+    ffStrbufSetStatic(&result->library, "WGL 1.0");
+    if(wglData->ffwglMakeCurrent(NULL, NULL) == FALSE)
+        return "wglMakeCurrent(NULL, NULL) failed";
     return NULL;
 }
 
-static const char* wglHandlePixelFormat(WGLData* wglData, HWND hWnd)
+static const char* wglHandlePixelFormat(WGLData* wglData, FFOpenGLResult* result, HWND hWnd)
 {
-    PIXELFORMATDESCRIPTOR pfd =
-    {
-        sizeof(pfd),
-        1,
-        PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
-        PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
-        32,                   // Colordepth of the framebuffer.
-        0, 0, 0, 0, 0, 0,
-        0,
-        0,
-        0,
-        0, 0, 0, 0,
-        24,                   // Number of bits for the depthbuffer
-        8,                    // Number of bits for the stencilbuffer
-        0,                    // Number of Aux buffers in the framebuffer.
-        PFD_MAIN_PLANE,
-        0,
-        0, 0, 0
-    };
-
     HDC hdc = GetDC(hWnd);
 
-    if(SetPixelFormat(hdc, ChoosePixelFormat(hdc, &pfd), &pfd) == FALSE)
+    if(hdc == NULL)
+        return "GetDC() failed";
+
+    PIXELFORMATDESCRIPTOR pfd = {
+        .nSize = sizeof(PIXELFORMATDESCRIPTOR),
+        .nVersion = 1,
+        .dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+        .iPixelType = PFD_TYPE_RGBA,
+        .cColorBits = 32,
+        .cDepthBits = 24,
+        .iLayerType = PFD_MAIN_PLANE
+    };
+    int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+    if(pixelFormat == 0)
+    {
+        ReleaseDC(hWnd, hdc);
+        return "ChoosePixelFormat() failed";
+    }
+
+    if(SetPixelFormat(hdc, pixelFormat, &pfd) == FALSE)
+    {
+        ReleaseDC(hWnd, hdc);
         return "SetPixelFormat() failed";
+    }
 
     HGLRC context = wglData->ffwglCreateContext(hdc);
     if(context == NULL)
+    {
+        ReleaseDC(hWnd, hdc);
         return "wglCreateContext() failed";
+    }
 
-    const char* error = wglHandleContext(wglData, hdc, context);
+    const char* error = wglHandleContext(wglData, result, hdc, context);
     wglData->ffwglDeleteContext(context);
 
-    return error;
-}
+    ReleaseDC(hWnd, hdc);
 
-static LRESULT CALLBACK wglHandleWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch(message)
-    {
-    case WM_CREATE: {
-        WGLData* wglData = (WGLData*)((CREATESTRUCT*)lParam)->lpCreateParams;
-        wglData->error = wglHandlePixelFormat(wglData, hWnd);
-        PostQuitMessage(0);
-        return 0;
-    }
-    default:
-        return DefWindowProcW(hWnd, message, wParam, lParam);
-    }
+    return error;
 }
 
 static const char* wglDetectOpenGL(FFOpenGLResult* result)
 {
     FF_LIBRARY_LOAD(opengl32, "dlopen opengl32" FF_LIBRARY_EXTENSION " failed", "opengl32" FF_LIBRARY_EXTENSION, 1);
 
-    WGLData data = { .result = result };
+    WGLData data = {};
 
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglMakeCurrent);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglCreateContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, wglDeleteContext);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(opengl32, data, glGetString);
 
-    MSG msg = {0};
+    HINSTANCE hInstance = GetModuleHandleW(NULL);
+
     WNDCLASSW wc = {
-        .lpfnWndProc = wglHandleWndProc,
-        .hInstance = NULL,
+        .lpfnWndProc = DefWindowProcW,
+        .hInstance = hInstance,
         .hbrBackground = (HBRUSH)COLOR_BACKGROUND,
         .lpszClassName = L"ogl_version_check",
         .style = CS_OWNDC,
@@ -101,12 +93,16 @@ static const char* wglDetectOpenGL(FFOpenGLResult* result)
     if(!RegisterClassW(&wc))
         return "RegisterClassW() failed";
 
-    HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, NULL, NULL, NULL, &data);
+    HWND hWnd = CreateWindowW(wc.lpszClassName, L"ogl_version_check", 0, 0, 0, FF_OPENGL_BUFFER_WIDTH, FF_OPENGL_BUFFER_HEIGHT, NULL, NULL, hInstance, NULL);
+    if(!hWnd)
+        return "CreateWindowW() failed";
 
-    while(GetMessageW(&msg, hWnd, 0, 0) > 0)
-        DispatchMessage(&msg);
+    const char* error = wglHandlePixelFormat(&data, result, hWnd);
 
-    return data.error;
+    DestroyWindow(hWnd);
+    UnregisterClassW(wc.lpszClassName, hInstance);
+
+    return error;
 }
 
 

@@ -71,42 +71,35 @@ bool ffParseModuleOptions(const char* key, const char* value)
 
 void ffPrepareCommandOption(FFdata* data)
 {
-    //If we don't have a custom structure, use the default one
-    if(data->structure.length == 0)
-        ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
-
-    if(ffStrbufContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME))
+    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_CPUUSAGE_MODULE_NAME, ':'))
         ffPrepareCPUUsage();
 
-    if(ffStrbufContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME))
+    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_DISKIO_MODULE_NAME, ':'))
     {
         __attribute__((__cleanup__(ffDestroyDiskIOOptions))) FFDiskIOOptions options;
         ffInitDiskIOOptions(&options);
         ffPrepareDiskIO(&options);
     }
 
-    if(ffStrbufContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME))
+    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_NETIO_MODULE_NAME, ':'))
     {
         __attribute__((__cleanup__(ffDestroyNetIOOptions))) FFNetIOOptions options;
         ffInitNetIOOptions(&options);
         ffPrepareNetIO(&options);
     }
 
-    if(instance.config.general.multithreading)
+    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME, ':'))
     {
-        if(ffStrbufContainIgnCaseS(&data->structure, FF_PUBLICIP_MODULE_NAME))
-        {
-            __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
-            ffInitPublicIpOptions(&options);
-            ffPreparePublicIp(&options);
-        }
+        __attribute__((__cleanup__(ffDestroyPublicIpOptions))) FFPublicIPOptions options;
+        ffInitPublicIpOptions(&options);
+        ffPreparePublicIp(&options);
+    }
 
-        if(ffStrbufContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME))
-        {
-            __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
-            ffInitWeatherOptions(&options);
-            ffPrepareWeather(&options);
-        }
+    if(ffStrbufSeparatedContainIgnCaseS(&data->structure, FF_WEATHER_MODULE_NAME, ':'))
+    {
+        __attribute__((__cleanup__(ffDestroyWeatherOptions))) FFWeatherOptions options;
+        ffInitWeatherOptions(&options);
+        ffPrepareWeather(&options);
     }
 }
 

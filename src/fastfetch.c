@@ -749,7 +749,12 @@ static void run(FFdata* data)
     if (useJsonConfig)
         ffPrintJsonConfig(true /* prepare */, instance.state.resultDoc);
     else
+    {
+        //If we don't have a custom structure, use the default one
+        if(data->structure.length == 0)
+            ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
         ffPrepareCommandOption(data);
+    }
 
     ffStart();
 

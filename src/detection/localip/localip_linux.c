@@ -111,47 +111,32 @@ static const FFLocalIpNIFlag niFlagOptions[] = {
     {},
 };
 
-typedef enum __attribute__((__packed__)) FFIPv6Type
-{
-    FF_IPV6_Other,
-    FF_IPV6_GUA            = 0b0001,
-    FF_IPV6_GUA_SECONDARY  = 0b0101,
-    FF_IPV6_ULA            = 0b0010,
-    FF_IPV6_ULA_SECONDARY  = 0b0110,
-    FF_IPV6_TYPE_MASK      = 0b0011,
-    FF_IPV6_SECONDARY_FLAG = 0b1100,
-    FF_IPV6_PREFERRED      = UINT8_MAX,
-} FFIPv6Type;
-
-static FFIPv6Type getIpType(struct ifaddrs* ifa)
+static FFLocalIpIpv6Type getIpv6Type(struct ifaddrs* ifa)
 {
     struct sockaddr_in6* addr = (struct sockaddr_in6*) ifa->ifa_addr;
 
     FF_DEBUG("Checking IPv6 type for interface %s", ifa->ifa_name);
 
-#ifndef IN6_IS_ADDR_GLOBAL
-#define IN6_IS_ADDR_GLOBAL(a) \
-        ((((const uint32_t *) (a))[0] & htonl(0x70000000)) == htonl(0x20000000))
-#endif
-#ifndef IN6_IS_ADDR_UNIQUE_LOCAL
-#define IN6_IS_ADDR_UNIQUE_LOCAL(a) \
-        ((((const uint32_t *) (a))[0] & htonl(0xfe000000)) == htonl(0xfc000000))
-#endif
-    FFIPv6Type result = FF_IPV6_Other;
+    FFLocalIpIpv6Type result = FF_LOCALIP_IPV6_TYPE_NONE;
     if (IN6_IS_ADDR_GLOBAL(&addr->sin6_addr))
     {
-        result = FF_IPV6_GUA;
+        result = FF_LOCALIP_IPV6_TYPE_GUA_BIT;
         FF_DEBUG("Interface %s has Global Unicast Address", ifa->ifa_name);
     }
     else if (IN6_IS_ADDR_UNIQUE_LOCAL(&addr->sin6_addr))
     {
-        result = FF_IPV6_ULA;
+        result = FF_LOCALIP_IPV6_TYPE_ULA_BIT;
         FF_DEBUG("Interface %s has Unique Local Address", ifa->ifa_name);
+    }
+    else if (IN6_IS_ADDR_LINKLOCAL(&addr->sin6_addr))
+    {
+        result = FF_LOCALIP_IPV6_TYPE_LLA_BIT;
+        FF_DEBUG("Interface %s has Link-Local Address", ifa->ifa_name);
     }
     else
     {
-        FF_DEBUG("Interface %s has other IPv6 address type", ifa->ifa_name);
-        return FF_IPV6_Other;
+        FF_DEBUG("Interface %s has unknown IPv6 address type", ifa->ifa_name);
+        return FF_LOCALIP_IPV6_TYPE_UNKNOWN_BIT;
     }
 
 #ifdef SIOCGIFAFLAG_IN6
@@ -178,13 +163,13 @@ static FFIPv6Type getIpType(struct ifaddrs* ifa)
 
     #ifdef IN6_IFF_PREFER_SOURCE
         if (ifr6.ifr_ifru.ifru_flags6 & IN6_IFF_PREFER_SOURCE)
-            return FF_IPV6_PREFERRED;
+            result |= FF_LOCALIP_IPV6_TYPE_PREFERRED_BIT;
     #endif
     if (ifr6.ifr_ifru.ifru_flags6 & (IN6_IFF_DEPRECATED | IN6_IFF_TEMPORARY | IN6_IFF_TENTATIVE | IN6_IFF_DUPLICATED
         #ifdef IN6_IFF_OPTIMISTIC
              | IN6_IFF_OPTIMISTIC
         #endif
-    )) result |= FF_IPV6_SECONDARY_FLAG;
+    )) result |= FF_LOCALIP_IPV6_TYPE_SECONDARY_BIT;
     return result;
 #elif __linux__
     static FFlist addresses = {};
@@ -220,13 +205,13 @@ static FFIPv6Type getIpType(struct ifaddrs* ifa)
         if (memcmp(&addr->sin6_addr, entry, sizeof(struct in6_addr)) == 0)
             return result;
     }
-    result |= FF_IPV6_SECONDARY_FLAG;
+    result |= FF_LOCALIP_IPV6_TYPE_SECONDARY_BIT;
     return result;
 #elif __sun
     if (ifa->ifa_flags & IFF_PREFERRED)
-        return FF_IPV6_PREFERRED;
+        result |= FF_LOCALIP_IPV6_TYPE_PREFERRED_BIT;
     if (ifa->ifa_flags & (IFF_DEPRECATED | IFF_TEMPORARY | IFF_DUPLICATE))
-        result |= FF_IPV6_SECONDARY_FLAG;
+        result |= FF_LOCALIP_IPV6_TYPE_SECONDARY_BIT;
     return result;
 #else
     return result;
@@ -509,46 +494,65 @@ const char* ffDetectLocalIps(const FFLocalIpOptions* options, FFlist* results)
                 }
             }
 
-            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
+            if (options->ipv6Type == FF_LOCALIP_IPV6_TYPE_AUTO)
             {
-                struct ifaddrs* selected = NULL;
-                struct ifaddrs* secondary = NULL;
-
-                FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv6)
+                if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
                 {
-                    FFIPv6Type type = getIpType(*pifa);
-                    if (type == FF_IPV6_PREFERRED)
+                    struct ifaddrs* selected = NULL;
+                    struct ifaddrs* secondary = NULL;
+
+                    FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv6)
                     {
-                        selected = *pifa;
-                        FF_DEBUG("Found preferred IPv6 address for interface %s", adapter->mac->ifa_name);
-                        break;
+                        FFLocalIpIpv6Type type = getIpv6Type(*pifa);
+                        if (type & FF_LOCALIP_IPV6_TYPE_PREFERRED_BIT)
+                        {
+                            selected = *pifa;
+                            FF_DEBUG("Found preferred IPv6 address for interface %s", adapter->mac->ifa_name);
+                            break;
+                        }
+                        else if ((type & FF_LOCALIP_IPV6_TYPE_GUA_BIT) && !(type & FF_LOCALIP_IPV6_TYPE_SECONDARY_BIT) && !selected)
+                        {
+                            selected = *pifa;
+                            FF_DEBUG("Found GUA IPv6 address for interface %s", adapter->mac->ifa_name);
+                        }
+                        else if ((type & FF_LOCALIP_IPV6_TYPE_ULA_BIT) && !(type & FF_LOCALIP_IPV6_TYPE_SECONDARY_BIT) && !secondary)
+                        {
+                            secondary = *pifa;
+                            FF_DEBUG("Found ULA IPv6 address for interface %s", adapter->mac->ifa_name);
+                        }
                     }
-                    else if (type == FF_IPV6_GUA && !selected)
+                    if (!selected) selected = secondary;
+
+                    if (selected)
+                        appendIpv6(options, &item->ipv6, selected);
+                    else if (adapter->ipv6.length > 0)
                     {
-                        selected = *pifa;
-                        FF_DEBUG("Found GUA IPv6 address for interface %s", adapter->mac->ifa_name);
-                    }
-                    else if (type == FF_IPV6_ULA && !secondary)
-                    {
-                        secondary = *pifa;
-                        FF_DEBUG("Found ULA IPv6 address for interface %s", adapter->mac->ifa_name);
+                        appendIpv6(options, &item->ipv6, *FF_LIST_GET(struct ifaddrs*, adapter->ipv6, 0));
+                        FF_DEBUG("Using first IPv6 address for interface %s", adapter->mac->ifa_name);
                     }
                 }
-                if (!selected) selected = secondary;
-
-                if (selected)
-                    appendIpv6(options, &item->ipv6, selected);
-                else if (adapter->ipv6.length > 0)
+                else
                 {
-                    appendIpv6(options, &item->ipv6, *FF_LIST_GET(struct ifaddrs*, adapter->ipv6, 0));
-                    FF_DEBUG("Using first IPv6 address for interface %s", adapter->mac->ifa_name);
+                    FF_DEBUG("Adding all IPv6 addresses for interface %s", adapter->mac->ifa_name);
+                    FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv6)
+                        appendIpv6(options, &item->ipv6, *pifa);
                 }
             }
             else
             {
-                FF_DEBUG("Adding all IPv6 addresses for interface %s", adapter->mac->ifa_name);
                 FF_LIST_FOR_EACH(struct ifaddrs*, pifa, adapter->ipv6)
-                    appendIpv6(options, &item->ipv6, *pifa);
+                {
+                    FFLocalIpIpv6Type type = getIpv6Type(*pifa);
+                    if (type & options->ipv6Type)
+                    {
+                        if ((options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT) || !(type & FF_LOCALIP_IPV6_TYPE_SECONDARY_BIT))
+                        {
+                            appendIpv6(options, &item->ipv6, *pifa);
+                            if (!(options->showType & FF_LOCALIP_TYPE_ALL_IPS_BIT))
+                                break;
+                        }
+                    }
+                }
             }
         }
     mac:

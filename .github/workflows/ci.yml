@@ -61,12 +61,19 @@ jobs:
       - name: run tests
         run: ctest --output-on-failure
 
-  linux-amd64:
-    name: Linux-amd64
-    runs-on: ubuntu-22.04
+  linux-hosts:
+    name: Linux-${{ matrix.arch }}
+    runs-on: ${{ matrix.runs-on }}
     permissions:
       security-events: write
       contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runs-on: ubuntu-22.04
+          - arch: aarch64
+            runs-on: ubuntu-22.04-arm
     outputs:
       ffversion: ${{ steps.ffversion.outputs.ffversion }}
     steps:
@@ -83,25 +90,27 @@ jobs:
         run: cat /proc/cpuinfo
 
       - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev directx-headers-dev
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev libddcutil-dev libchafa-dev directx-headers-dev rpm ninja-build
 
       - name: install linuxbrew packages
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
+          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick --ignore-dependencies
 
       - name: Initialize CodeQL
+        if: matrix.arch == 'amd64'
         uses: github/codeql-action/init@v3
         with:
           languages: c
 
       - name: configure project
-        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
+        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
 
       - name: perform CodeQL analysis
+        if: matrix.arch == 'amd64'
         uses: github/codeql-action/analyze@v3
 
       - name: list features
@@ -126,71 +135,19 @@ jobs:
         id: ffversion
         run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
 
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-linux-amd64
-          path: ./fastfetch-*.*
-
-  linux-aarch64:
-    name: Linux-aarch64
-    runs-on: ubuntu-22.04-arm
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v5
-
-      - name: uname -a
-        run: uname -a
-
-      - name: cat /etc/os-release
-        run: cat /etc/os-release
-
-      - name: cat /proc/cpuinfo
-        run: cat /proc/cpuinfo
-
-      - name: install required packages
-        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev libchafa-dev libddcutil-dev rpm
-
-      - name: install linuxbrew packages
+      - name: polyfill glibc
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          /home/linuxbrew/.linuxbrew/bin/brew install imagemagick chafa --ignore-dependencies
-
-      - name: configure project
-        run: PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr .
-
-      - name: build project
-        run: cmake --build . --target package --verbose -j4
-
-      - name: list features
-        run: ./fastfetch --list-features
-
-      - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --stat false
-
-      - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
-
-      - name: run flashfetch
-        run: time ./flashfetch
-
-      - name: print dependencies
-        run: ldd fastfetch
-
-      - name: run tests
-        run: ctest --output-on-failure
-
-      - name: get fastfetch version
-        id: ffversion
-        run: echo "ffversion=$(./fastfetch --version-raw)" >> $GITHUB_OUTPUT
+          wget https://github.com/CarterLi/polyfill-glibc/releases/download/v0.0.1/polyfill-glibc-${{ matrix.arch }} -O polyfill-glibc
+          chmod +x polyfill-glibc
+          strip fastfetch && ./polyfill-glibc fastfetch --target-glibc=2.17
+          strip flashfetch && ./polyfill-glibc flashfetch --target-glibc=2.17
+          echo 'set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-polyfilled")' >> CPackConfig.cmake
+          cpack
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-linux-aarch64
+          name: fastfetch-linux-${{ matrix.arch }}
           path: ./fastfetch-*.*
 
   linux-armv7l:
@@ -212,11 +169,11 @@ jobs:
           githubToken: ${{ github.token }}
           run: |
             uname -a
-            apt-get update && apt-get install -y wget
-            # CMake installed by apt has bug `list sub-command REMOVE_ITEM requires two or more arguments`
-            wget --no-check-certificate https://apt.kitware.com/ubuntu/pool/main/c/cmake/{cmake_3.29.2-0kitware1ubuntu20.04.1_armhf.deb,cmake-data_3.29.2-0kitware1ubuntu20.04.1_all.deb}
-            dpkg -i *.deb
-            apt-get install -y make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev rpm
+            apt-get update && apt-get install -y ca-certificates gpg curl
+            curl -L https://apt.kitware.com/keys/kitware-archive-latest.asc | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+            echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null
+            echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >> /etc/apt/apt.conf.d/99ignore-certificates
+            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev rpm
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
@@ -252,7 +209,7 @@ jobs:
           run: |
             uname -a
             apt-get update && apt-get install -y wget
-            apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev directx-headers-dev rpm
+            apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libelf-dev rpm
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
@@ -268,12 +225,18 @@ jobs:
           name: fastfetch-linux-armv6l
           path: ./fastfetch-*.*
 
-  linux-riscv64:
-    name: Linux-riscv64
-    runs-on: ubuntu-24.04
+  linux-vms:
+    name: Linux-${{ matrix.arch }}
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
       contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: riscv64
+          - arch: ppc64le
+          - arch: s390x
     steps:
       - name: checkout repository
         uses: actions/checkout@v5
@@ -282,47 +245,12 @@ jobs:
         uses: uraimo/run-on-arch-action@v3
         id: runcmd
         with:
-          arch: riscv64
-          distro: ubuntu22.04
-          githubToken: ${{ github.token }}
-          run: |
-            uname -a
-            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libddcutil-dev libchafa-dev libelf-dev directx-headers-dev rpm
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
-            cmake --build . --target package --verbose -j4
-            ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc --stat false
-            time ./fastfetch -c presets/ci.jsonc --format json
-            time ./flashfetch
-            ldd fastfetch
-            ctest --output-on-failure
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-linux-riscv64
-          path: ./fastfetch-*.*
-
-  linux-ppc64le:
-    name: Linux-ppc64le
-    runs-on: ubuntu-24.04
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v5
-
-      - name: run VM
-        uses: uraimo/run-on-arch-action@v3
-        id: runcmd
-        with:
-          arch: ppc64le
+          arch: ${{ matrix.arch }}
           distro: ubuntu20.04
           githubToken: ${{ github.token }}
           run: |
             uname -a
-            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libchafa-dev libelf-dev directx-headers-dev rpm
+            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libchafa-dev libelf-dev rpm
             cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
             cmake --build . --target package --verbose -j4
             ./fastfetch --list-features
@@ -335,42 +263,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-linux-ppc64le
-          path: ./fastfetch-*.*
-
-  linux-s390x:
-    name: Linux-s390x
-    runs-on: ubuntu-24.04
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v5
-
-      - name: run VM
-        uses: uraimo/run-on-arch-action@v3
-        id: runcmd
-        with:
-          arch: s390x
-          distro: ubuntu20.04
-          githubToken: ${{ github.token }}
-          run: |
-            uname -a
-            apt-get update && apt-get install -y cmake make g++ libvulkan-dev libwayland-dev libxrandr-dev libxcb-randr0-dev libdconf-dev libdbus-1-dev libmagickcore-dev libsqlite3-dev librpm-dev libegl-dev libglx-dev ocl-icd-opencl-dev libpulse-dev libdrm-dev libchafa-dev libelf-dev directx-headers-dev rpm
-            cmake -DSET_TWEAK=Off -DBUILD_TESTS=On -DCMAKE_INSTALL_PREFIX=/usr .
-            cmake --build . --target package --verbose -j4
-            ./fastfetch --list-features
-            time ./fastfetch -c presets/ci.jsonc --stat false
-            time ./fastfetch -c presets/ci.jsonc --format json
-            time ./flashfetch
-            ldd fastfetch
-            ctest --output-on-failure
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-linux-s390x
+          name: fastfetch-linux-${{ matrix.arch }}
           path: ./fastfetch-*.*
 
   musl-amd64:
@@ -411,12 +304,19 @@ jobs:
           name: fastfetch-musl-amd64
           path: ./fastfetch-*.*
 
-  macos-amd64:
-    name: macOS-amd64
-    runs-on: macos-13
+  macos-hosts:
+    name: macOS-${{ matrix.arch }}
+    runs-on: ${{ matrix.runs-on }}
     permissions:
       security-events: write
       contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runs-on: macos-15-intel
+          - arch: aarch64
+            runs-on: macos-latest
     steps:
       - name: checkout repository
         uses: actions/checkout@v5
@@ -455,54 +355,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-macos-amd64
-          path: ./fastfetch-*.*
-
-  macos-aarch64:
-    name: macOS-aarch64
-    runs-on: macos-latest
-    permissions:
-      security-events: write
-      contents: read
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v5
-
-      - name: uname -a
-        run: uname -a
-
-      - name: install required packages
-        run: |
-          HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1 brew install --overwrite vulkan-loader vulkan-headers molten-vk imagemagick chafa
-
-      - name: configure project
-        run: cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-
-      - name: build project
-        run: cmake --build . --target package --verbose -j4
-
-      - name: list features
-        run: ./fastfetch --list-features
-
-      - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --stat false
-
-      - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
-
-      - name: run flashfetch
-        run: time ./flashfetch
-
-      - name: print dependencies
-        run: otool -L fastfetch
-
-      - name: run tests
-        run: ctest --output-on-failure
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-macos-aarch64
+          name: fastfetch-macos-${{ matrix.arch }}
           path: ./fastfetch-*.*
 
   sunos-amd64:
@@ -718,12 +571,25 @@ jobs:
           name: fastfetch-haiku-amd64
           path: ./fastfetch-*.*
 
-  windows-amd64:
-    name: Windows-amd64
-    runs-on: windows-latest
+  windows-hosts:
+    name: Windows-${{ matrix.arch }}
+    runs-on: ${{ matrix.runs-on }}
     permissions:
       security-events: write
       contents: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runs-on: windows-latest
+            msystem: CLANG64
+            msystem-lower: clang64
+            msys-arch: x86_64
+          - arch: aarch64
+            runs-on: windows-11-arm
+            msystem: CLANGARM64
+            msystem-lower: clangarm64
+            msys-arch: aarch64
     defaults:
       run:
         shell: msys2 {0}
@@ -734,21 +600,21 @@ jobs:
       - name: setup-msys2
         uses: msys2/setup-msys2@v2
         with:
-          msystem: CLANG64
+          msystem: ${{ matrix.msystem }}
           update: true
-          install: git mingw-w64-clang-x86_64-7zip mingw-w64-clang-x86_64-cmake mingw-w64-clang-x86_64-clang mingw-w64-clang-x86_64-vulkan-loader mingw-w64-clang-x86_64-vulkan-headers mingw-w64-clang-x86_64-opencl-icd mingw-w64-clang-x86_64-opencl-headers mingw-w64-clang-x86_64-cppwinrt mingw-w64-clang-x86_64-imagemagick
+          install: git mingw-w64-clang-${{ matrix.msys-arch }}-7zip mingw-w64-clang-${{ matrix.msys-arch }}-cmake mingw-w64-clang-${{ matrix.msys-arch }}-clang mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-loader mingw-w64-clang-${{ matrix.msys-arch }}-vulkan-headers mingw-w64-clang-${{ matrix.msys-arch }}-opencl-icd mingw-w64-clang-${{ matrix.msys-arch }}-opencl-headers mingw-w64-clang-${{ matrix.msys-arch }}-cppwinrt mingw-w64-clang-${{ matrix.msys-arch }}-imagemagick mingw-w64-clang-${{ matrix.msys-arch }}-chafa
 
       - name: print msys version
         run: uname -a
 
       - name: configure project
-        run: env PKG_CONFIG_PATH=/clang64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
+        run: env PKG_CONFIG_PATH=/${{ matrix.msystem-lower }}/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
 
       - name: build project
         run: cmake --build . --verbose -j4
 
       - name: copy necessary dlls
-        run: cp /clang64/bin/{OpenCL,vulkan-1}.dll .
+        run: cp /${{ matrix.msystem-lower }}/bin/{OpenCL,vulkan-1}.dll .
 
       - name: list features
         run: ./fastfetch --list-features
@@ -769,101 +635,35 @@ jobs:
         run: ctest --output-on-failure
 
       - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-amd64.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-amd64.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
+        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fastfetch-windows-amd64
-          path: ./fastfetch-windows-amd64.*
-
-  windows-aarch64:
-    name: Windows-aarch64
-    runs-on: windows-11-arm
-    permissions:
-      security-events: write
-      contents: read
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - name: checkout repository
-        uses: actions/checkout@v5
-
-      - name: setup-msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANGARM64
-          update: true
-          install: git mingw-w64-clang-aarch64-7zip mingw-w64-clang-aarch64-cmake mingw-w64-clang-aarch64-clang mingw-w64-clang-aarch64-vulkan-loader mingw-w64-clang-aarch64-vulkan-headers mingw-w64-clang-aarch64-opencl-icd mingw-w64-clang-aarch64-opencl-headers mingw-w64-clang-aarch64-cppwinrt mingw-w64-clang-aarch64-imagemagick
-
-      - name: print msys version
-        run: uname -a
-
-      - name: configure project
-        run: env PKG_CONFIG_PATH=/clangarm64/lib/pkgconfig/:$PKG_CONFIG_PATH cmake -DSET_TWEAK=Off -DBUILD_TESTS=On .
-
-      - name: build project
-        run: cmake --build . --verbose -j4
-
-      - name: copy necessary dlls
-        run: cp /clangarm64/bin/{OpenCL,vulkan-1}.dll .
-
-      - name: list features
-        run: ./fastfetch --list-features
-
-      - name: run fastfetch
-        run: time ./fastfetch -c presets/ci.jsonc --stat false
-
-      - name: run fastfetch --format json
-        run: time ./fastfetch -c presets/ci.jsonc --format json
-
-      - name: run flashfetch
-        run: time ./flashfetch
-
-      - name: print dependencies
-        run: ldd fastfetch
-
-      - name: run tests
-        run: ctest --output-on-failure
-
-      - name: create zip archive
-        run: 7z a -tzip -mx9 -bd -y fastfetch-windows-aarch64.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
-
-      - name: create 7z archive
-        run: 7z a -t7z -mx9 -bd -y fastfetch-windows-aarch64.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
-
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastfetch-windows-aarch64
-          path: ./fastfetch-windows-aarch64.*
+          name: fastfetch-windows-${{ matrix.arch }}
+          path: ./fastfetch-windows-${{ matrix.arch }}.*
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
     name: Release
     runs-on: ubuntu-latest
     needs:
-      - linux-amd64
-      - linux-aarch64
+      - linux-hosts
       - linux-armv7l
       - linux-armv6l
-      - linux-riscv64
-      - linux-ppc64le
-      - linux-s390x
+      - linux-vms
       - musl-amd64
-      - macos-amd64
-      - macos-aarch64
+      - macos-hosts
       - freebsd-amd64
       - openbsd-amd64
       - netbsd-amd64
+      - dragonfly-amd64
       - sunos-amd64
       - haiku-amd64
-      - windows-amd64
-      - windows-aarch64
+      - windows-hosts
     permissions:
       contents: write
     steps:
