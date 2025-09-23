@@ -17,6 +17,7 @@ Features:
     * Please don't expect it to work on later macOS versions
 * Improves Ubuntu flavor detection (#1975, OS, Linux)
 * Refines ARMv8.4-A detection to require LSE2 (CPU, Windows)
+* Detects the latest Dimensity & Snapdragon SoC names (CPU, Android)
 
 Bugfixes:
 * Handles zero temperature data (#1960, CPU, Windows)
