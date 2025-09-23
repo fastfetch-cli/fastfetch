@@ -674,29 +674,29 @@ jobs:
           repository: ${{ github.repository }}
 
       - name: download artifacts
-        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
         uses: actions/download-artifact@v5
 
       - name: create release
-        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ needs.linux-amd64.outputs.ffversion }}
+          tag: ${{ needs.linux-hosts.outputs.ffversion }}
           commit: ${{ github.sha }}
           artifactErrorsFailBuild: true
           artifacts: fastfetch-*/fastfetch-*
-          body: "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux-amd64.outputs.ffversion }}/CHANGELOG.md) for details."
+          body: "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux-hosts.outputs.ffversion }}/CHANGELOG.md) for details."
 
       - name: download source tarballs
-        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
         run: |
-          for i in 1 2 3 4 5; do curl -L --remote-name-all --output-dir fastfetch-source --create-dirs https://github.com/${{ github.repository }}/archive/refs/tags/${{ needs.linux-amd64.outputs.ffversion }}.{tar.gz,zip} && break || sleep 5; done
+          for i in 1 2 3 4 5; do curl -L --remote-name-all --output-dir fastfetch-source --create-dirs https://github.com/${{ github.repository }}/archive/refs/tags/${{ needs.linux-hosts.outputs.ffversion }}.{tar.gz,zip} && break || sleep 5; done
           ls fastfetch-*/*
 
       - name: generate release notes
-        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
         run: |
-          echo "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux-amd64.outputs.ffversion }}/CHANGELOG.md) for details." > fastfetch-release-notes.md
+          echo "Please refer to [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ needs.linux-hosts.outputs.ffversion }}/CHANGELOG.md) for details." > fastfetch-release-notes.md
           echo -e "\n---\n\n<details><summary>SHA256SUMs</summary><br>\n\n\`\`\`" >> fastfetch-release-notes.md
           sha256sum fastfetch-*/* >> fastfetch-release-notes.md
           echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
@@ -705,10 +705,10 @@ jobs:
           echo -e "\`\`\`\n</details>" >> fastfetch-release-notes.md
 
       - name: update release body
-        if: needs.linux-amd64.outputs.ffversion != steps.get_version_release.outputs.release
+        if: needs.linux-hosts.outputs.ffversion != steps.get_version_release.outputs.release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ needs.linux-amd64.outputs.ffversion }}
+          tag: ${{ needs.linux-hosts.outputs.ffversion }}
           commit: ${{ github.sha }}
           bodyFile: fastfetch-release-notes.md
           allowUpdates: true
