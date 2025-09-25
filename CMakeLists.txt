@@ -9,6 +9,17 @@ project(fastfetch
 
 set(PROJECT_LICENSE "MIT license")
 
+if(DEFINED CMAKE_SYSTEM_PROCESSOR_OVERRIDE) # Used by github actions for i686 build
+    set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR_OVERRIDE} CACHE INTERNAL "")
+endif()
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR)
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(CMAKE_SYSTEM_PROCESSOR "amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
+endif()
+message(STATUS "Build for system processor: ${CMAKE_SYSTEM_PROCESSOR}")
+
 ###################
 # Target Platform #
 ###################
@@ -1682,7 +1693,7 @@ elseif(WIN32)
         PRIVATE "propsys"
         PRIVATE "secur32"
     )
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
         # WoA only works on Windows 10 or higher
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
@@ -2020,11 +2031,6 @@ install(
 ##################
 
 set(CPACK_GENERATOR "TGZ;ZIP")
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CMAKE_SYSTEM_PROCESSOR "amd64")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
-endif()
 if(APPLE)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
 elseif(IS_MUSL)
