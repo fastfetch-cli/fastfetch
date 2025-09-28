@@ -2077,7 +2077,7 @@ endif()
 
 set(CPACK_SET_DESTDIR ON)
 
-set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
+set(CPACK_PACKAGE_CONTACT "Carter Li <zhangsongcui@live.cn>")
 set(CPACK_PACKAGE_DESCRIPTION "\
 fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way. \
 It is written mostly in C to achieve much better performance.\
