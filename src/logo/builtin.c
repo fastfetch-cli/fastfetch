@@ -3990,7 +3990,7 @@ static const FFlogo P[] = {
     },
     // PureOSSmall
     {
-        .names = {"PureOS_small"},а
+        .names = {"PureOS_small"},
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_PUREOS_SMALL,
         .colors = {
