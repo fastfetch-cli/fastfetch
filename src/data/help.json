@@ -63,6 +63,17 @@
                 },
                 "default": "default"
             }
+        },
+        {
+            "long": "json",
+            "short": "j",
+            "arg": {
+                "type": "bool",
+                "default": false,
+                "optional": true
+            },
+            "desc": "Enable or disable JSON output",
+            "remark": "Shortcut for `--format json`"
         }
     ],
     "Config": [

@@ -549,6 +549,26 @@ static void printVersion()
     printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
 }
 
+static void enableJsonOutput(bool enable)
+{
+    if (!enable)
+    {
+        if (instance.state.resultDoc)
+        {
+            yyjson_mut_doc_free(instance.state.resultDoc);
+            instance.state.resultDoc = NULL;
+        }
+    }
+    else
+    {
+        if (!instance.state.resultDoc)
+        {
+            instance.state.resultDoc = yyjson_mut_doc_new(NULL);
+            yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
+        }
+    }
+}
+
 static void parseCommand(FFdata* data, char* key, char* value)
 {
     if(ffStrEqualsIgnCase(key, "-h") || ffStrEqualsIgnCase(key, "--help"))
@@ -640,29 +660,15 @@ static void parseCommand(FFdata* data, char* key, char* value)
         generateConfigFile(true, value, true);
     else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
+    else if(ffStrEqualsIgnCase(key, "-j") || ffStrEqualsIgnCase(key, "--json"))
+        enableJsonOutput(ffOptionParseBoolean(value));
     else if(ffStrEqualsIgnCase(key, "--format"))
     {
-        switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "default", 0},
-            { "json", 1 },
+        enableJsonOutput(!!ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "default", false},
+            { "json", true },
             {},
-        }))
-        {
-            case 0:
-                if (instance.state.resultDoc)
-                {
-                    yyjson_mut_doc_free(instance.state.resultDoc);
-                    instance.state.resultDoc = NULL;
-                }
-                break;
-            case 1:
-                if (!instance.state.resultDoc)
-                {
-                    instance.state.resultDoc = yyjson_mut_doc_new(NULL);
-                    yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
-                }
-                break;
-        }
+        }));
     }
     else
         return;
