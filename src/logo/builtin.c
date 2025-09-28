@@ -4379,6 +4379,16 @@ static const FFlogo S[] = {
             FF_COLOR_FG_RED,
         },
     },
+    // Secureblue
+    {
+        .names = {"secureblue"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SECUREBLUE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // Serpent OS
     {
         .names = {"Serpent OS"},
