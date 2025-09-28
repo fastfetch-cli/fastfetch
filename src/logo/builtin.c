@@ -4004,7 +4004,7 @@ static const FFlogo P[] = {
         .lines = FASTFETCH_DATATEXT_LOGO_PRISMLINUX,
         .colors = {
             FF_COLOR_FG_BLUE,
-            FF_COLOR_FG_WHITE,
+            FF_COLOR_FG_BLUE,
         },
     },
     // LAST
