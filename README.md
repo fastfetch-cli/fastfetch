@@ -314,7 +314,7 @@ Otherwise, please open a feature request in [GitHub Issues](https://github.com/f
 
 If you find Fastfetch useful, please consider donating.
 
-* Current maintainer: [@CarterLi](https://paypal.me/zhangsongcui)
+* Current maintainer: [@CarterLi](https://ko-fi.com/carterli)
 * Original author: [@LinusDierheimer](https://github.com/sponsors/LinusDierheimer)
 
 ## Star History
