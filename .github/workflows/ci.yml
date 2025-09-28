@@ -145,6 +145,7 @@ jobs:
           strip fastfetch && ./polyfill-glibc fastfetch --target-glibc=2.17
           strip flashfetch && ./polyfill-glibc flashfetch --target-glibc=2.17
           echo 'set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}-polyfilled")' >> CPackConfig.cmake
+          echo 'set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.17)")' >> CPackConfig.cmake
           cpack
 
       - name: upload artifacts
