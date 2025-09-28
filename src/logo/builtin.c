@@ -3990,11 +3990,20 @@ static const FFlogo P[] = {
     },
     // PureOSSmall
     {
-        .names = {"PureOS_small"},
+        .names = {"PureOS_small"},а
         .type = FF_LOGO_LINE_TYPE_SMALL_BIT,
         .lines = FASTFETCH_DATATEXT_LOGO_PUREOS_SMALL,
         .colors = {
             FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_WHITE,
+        },
+    },
+    // PrismLinux
+    {
+        .names = {"PrismLinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PRISMLINUX,
+        .colors = {
+            FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
         },
     },
