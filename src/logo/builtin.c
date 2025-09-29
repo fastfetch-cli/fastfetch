@@ -1558,6 +1558,15 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // EmperorOS
+    {
+        .names = {"Emperor"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EMPEROROS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // EncryptOS
     {
         .names = {"EncryptOS"},
