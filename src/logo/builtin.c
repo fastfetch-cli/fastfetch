@@ -3998,6 +3998,15 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // PrismLinux
+    {
+        .names = {"PrismLinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PRISMLINUX,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // LAST
     {},
 };
