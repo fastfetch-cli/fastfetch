@@ -254,27 +254,4 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     }
 
     detectDisplays(ds);
-
-    //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
-    const FFOSResult* os = ffDetectOS();
-    uint32_t ver = (uint32_t) ffStrbufToUInt(&os->version, 0);
-    if (ver > 1000)
-    {
-        // Windows Server
-        if (ver >= 2016)
-            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-        else if (ver >= 2012)
-            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
-        else
-            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
-    }
-    else
-    {
-        if (ver >= 10)
-            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-        else if (ver >= 8)
-            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
-        else
-            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
-    }
 }
