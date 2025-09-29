@@ -974,7 +974,7 @@ elseif(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_apple.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
