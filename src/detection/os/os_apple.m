@@ -80,27 +80,6 @@ static bool detectOSCodeName(FFOSResult* os)
     return false;
 }
 
-static void parseOSXSoftwareLicense(FFOSResult* os)
-{
-    FF_AUTO_CLOSE_FILE FILE* rtf = fopen("/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf", "r");
-    if(rtf == NULL)
-        return;
-
-    FF_AUTO_FREE char* line = NULL;
-    size_t len = 0;
-    const char* searchStr = "\\f0\\b SOFTWARE LICENSE AGREEMENT FOR macOS ";
-    while(getline(&line, &len, rtf) != EOF)
-    {
-        if (ffStrStartsWith(line, searchStr))
-        {
-            ffStrbufAppendS(&os->codename, line + strlen(searchStr));
-            ffStrbufTrimRight(&os->codename, '\n');
-            ffStrbufTrimRight(&os->codename, '\\');
-            break;
-        }
-    }
-}
-
 void ffDetectOSImpl(FFOSResult* os)
 {
     parseSystemVersion(os);
@@ -115,6 +94,5 @@ void ffDetectOSImpl(FFOSResult* os)
 
     ffStrbufAppend(&os->versionID, &os->version);
 
-    if(!detectOSCodeName(os))
-        parseOSXSoftwareLicense(os);
+    detectOSCodeName(os);
 }
