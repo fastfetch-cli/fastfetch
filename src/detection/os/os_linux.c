@@ -192,8 +192,10 @@ FF_MAYBE_UNUSED static void getDebianVersion(FFOSResult* result)
     ffAppendFileBuffer("/etc/debian_version", &debianVersion);
     ffStrbufTrimRightSpace(&debianVersion);
     if (!debianVersion.length) return;
-    ffStrbufSet(&result->version, &debianVersion);
-    ffStrbufSet(&result->versionID, &debianVersion);
+    ffStrbufDestroy(&result->versionID);
+    ffStrbufInitMove(&result->versionID, &debianVersion);
+
+    ffStrbufSetF(&result->prettyName, "%s %s (%s)", result->name.chars, result->versionID.chars, result->codename.chars);
 }
 
 FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
