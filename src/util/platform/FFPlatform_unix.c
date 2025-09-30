@@ -1,4 +1,5 @@
 #include "FFPlatform_private.h"
+#include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
 #include "fastfetch_config.h"
 #include "common/io/io.h"
@@ -182,7 +183,11 @@ static void getUserName(FFPlatform* platform, const struct passwd* pwd)
 
     ffStrbufAppendS(&platform->userName, user);
 
-    if (pwd) ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
+    if (pwd)
+    {
+        ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
+        ffStrbufTrimSpace(&platform->fullUserName);
+    }
 }
 
 static void getHostName(FFPlatform* platform, const struct utsname* uts)
