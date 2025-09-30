@@ -59,17 +59,18 @@ FF_MAYBE_UNUSED static bool detectArmbianVersion(FFOSResult* result)
     return true;
 }
 
-FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
+// Returns false if PrettyName should be updated by caller
+FF_MAYBE_UNUSED static bool getUbuntuFlavour(FFOSResult* result)
 {
     if (detectArmbianVersion(result))
-        return;
+        return true;
     else if(ffStrbufStartsWithS(&result->prettyName, "Linux Lite "))
     {
         ffStrbufSetStatic(&result->name, "Linux Lite");
         ffStrbufSetStatic(&result->id, "linuxlite");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Linux Lite "));
-        return;
+        return true;
     }
     else if(ffStrbufStartsWithS(&result->prettyName, "Rhino Linux "))
     {
@@ -77,12 +78,13 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
         ffStrbufSetStatic(&result->id, "rhinolinux");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
         ffStrbufSetS(&result->versionID, result->prettyName.chars + strlen("Rhino Linux "));
-        return;
+        return true;
     }
     else if(ffStrbufStartsWithS(&result->prettyName, "VanillaOS "))
     {
         ffStrbufSetStatic(&result->id, "vanilla");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
+        return true;
     }
 
     if (ffPathExists("/usr/bin/lliurex-version", FF_PATHTYPE_FILE))
@@ -97,93 +99,86 @@ FF_MAYBE_UNUSED static void getUbuntuFlavour(FFOSResult* result)
             ffStrbufTrimRightSpace(&result->version);
         ffStrbufSetF(&result->prettyName, "LliureX %s", result->version.chars);
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return true;
     }
 
     const char* xdgConfigDirs = getenv("XDG_CONFIG_DIRS");
     if(!ffStrSet(xdgConfigDirs))
-        return;
+        return false;
 
     if(ffStrContains(xdgConfigDirs, "kde") || ffStrContains(xdgConfigDirs, "plasma") || ffStrContains(xdgConfigDirs, "kubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Kubuntu");
-        ffStrbufSetF(&result->prettyName, "Kubuntu %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "kubuntu");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "xfce") || ffStrContains(xdgConfigDirs, "xubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Xubuntu");
-        ffStrbufSetF(&result->prettyName, "Xubuntu %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "xubuntu");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "lxqt") || ffStrContains(xdgConfigDirs, "lubuntu"))
     {
         ffStrbufSetStatic(&result->name, "Lubuntu");
-        ffStrbufSetF(&result->prettyName, "Lubuntu %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "lubuntu");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "budgie"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Budgie");
-        ffStrbufSetF(&result->prettyName, "Ubuntu Budgie %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-budgie");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "cinnamon"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Cinnamon");
-        ffStrbufSetF(&result->prettyName, "Ubuntu Cinnamon %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-cinnamon");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "mate"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu MATE");
-        ffStrbufSetF(&result->prettyName, "Ubuntu MATE %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-mate");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "studio"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Studio");
-        ffStrbufSetF(&result->prettyName, "Ubuntu Studio %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-studio");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "sway"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Sway");
-        ffStrbufSetF(&result->prettyName, "Ubuntu Sway %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-sway");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
 
     if(ffStrContains(xdgConfigDirs, "touch"))
     {
         ffStrbufSetStatic(&result->name, "Ubuntu Touch");
-        ffStrbufSetF(&result->prettyName, "Ubuntu Touch %s", result->version.chars);
         ffStrbufSetStatic(&result->id, "ubuntu-touch");
         ffStrbufSetStatic(&result->idLike, "ubuntu");
-        return;
+        return false;
     }
+
+    return false;
 }
 
 FF_MAYBE_UNUSED static void getDebianVersion(FFOSResult* result)
@@ -374,7 +369,10 @@ void ffDetectOSImpl(FFOSResult* os)
 
     #if __linux__ || __GNU__
     if(ffStrbufEqualS(&os->id, "ubuntu"))
-        getUbuntuFlavour(os);
+    {
+        if (!getUbuntuFlavour(os))
+            ffStrbufSetF(&os->prettyName, "%s %s", os->name.chars, os->version.chars); // os->version contains code name
+    }
     else if(ffStrbufEqualS(&os->id, "debian"))
     {
         if (!detectDebianDerived(os))
