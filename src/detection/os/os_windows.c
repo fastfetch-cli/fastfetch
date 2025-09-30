@@ -2,10 +2,27 @@
 #include "common/library.h"
 #include "util/windows/unicode.h"
 #include "util/stringUtils.h"
+#include "util/windows/registry.h"
 
 #include <windows.h>
 
 PWSTR WINAPI BrandingFormatString(PCWSTR format);
+
+static bool getCodeName(FFOSResult* os)
+{
+    FF_HKEY_AUTO_DESTROY hKey = NULL;
+    if(!ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", &hKey, NULL))
+        return false;
+
+    if(!ffRegReadStrbuf(hKey, L"DisplayVersion", &os->codename, NULL))
+    {
+        if (!ffRegReadStrbuf(hKey, L"CSDVersion", &os->codename, NULL)) // For Windows 7 and Windows 8
+            if (!ffRegReadStrbuf(hKey, L"ReleaseId", &os->codename, NULL)) // For old Windows 10
+                return false;
+    }
+
+    return true;
+}
 
 void ffDetectOSImpl(FFOSResult* os)
 {
@@ -57,4 +74,7 @@ void ffDetectOSImpl(FFOSResult* os)
 
     ffStrbufAppendF(&os->id, "%s %s", os->name.chars, os->version.chars);
     ffStrbufSetStatic(&os->idLike, "Windows");
+
+    if (getCodeName(os) && os->codename.length > 0)
+        ffStrbufAppendF(&os->prettyName, " (%s)", os->codename.chars);
 }

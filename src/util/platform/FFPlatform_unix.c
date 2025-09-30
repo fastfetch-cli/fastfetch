@@ -211,7 +211,6 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     else
     #endif
     ffStrbufAppendS(&info->architecture, uts->machine);
-    ffStrbufInit(&info->displayVersion);
 
     #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     size_t length = sizeof(info->pageSize);
