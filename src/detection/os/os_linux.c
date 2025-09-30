@@ -371,7 +371,10 @@ void ffDetectOSImpl(FFOSResult* os)
     if(ffStrbufEqualS(&os->id, "ubuntu"))
     {
         if (!getUbuntuFlavour(os))
-            ffStrbufSetF(&os->prettyName, "%s %s", os->name.chars, os->version.chars); // os->version contains code name
+        {
+            if (!ffStrbufEndsWithS(&os->prettyName, " (development branch)"))
+                ffStrbufSetF(&os->prettyName, "%s %s", os->name.chars, os->version.chars); // os->version contains code name
+        }
     }
     else if(ffStrbufEqualS(&os->id, "debian"))
     {
