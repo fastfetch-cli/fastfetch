@@ -28,7 +28,7 @@ const char* ffDetectMemory(FFMemoryResult* ram)
 
     if((token = strstr(buf, "MemAvailable:")) != NULL)
         memAvailable = strtoul(token + strlen("MemAvailable:"), NULL, 10);
-    else
+    if (memAvailable == 0 || memAvailable >= memTotal) // MemAvailable can be unreasonable. #1988
     {
         if((token = strstr(buf, "MemFree:")) != NULL)
             memFree = strtoul(token + strlen("MemFree:"), NULL, 10);
