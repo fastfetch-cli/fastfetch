@@ -105,7 +105,13 @@ static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFon
     }
 
     if (fontSize.length == 0) {
-        ffStrbufAppendS(&fontSize, "13");
+        ffStrbufAppendS(&fontSize,
+            #if __APPLE__
+                "13"
+            #else
+                "12"
+            #endif
+        );
         FF_DEBUG("using default size='%s'", fontSize.chars);
     }
 
