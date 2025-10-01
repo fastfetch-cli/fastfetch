@@ -203,6 +203,7 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
     const char* wineVersion = detectWine();
     if (wineVersion)
         ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
+    else
     {
         switch (osVersion.dwPlatformId)
         {
