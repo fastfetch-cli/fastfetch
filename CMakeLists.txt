@@ -1035,7 +1035,7 @@ elseif(WIN32)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
-        src/detection/os/os_windows.c
+        src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.c
@@ -1689,7 +1689,6 @@ elseif(WIN32)
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
-        PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
     )
