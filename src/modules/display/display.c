@@ -348,6 +348,21 @@ bool ffGenerateDisplayJsonResult(FF_MAYBE_UNUSED FFDisplayOptions* options, yyjs
         yyjson_mut_obj_add_uint(doc, output, "height", item->height);
         yyjson_mut_obj_add_real(doc, output, "refreshRate", item->refreshRate);
 
+        if (item->vrrStatus == FF_DISPLAY_VRR_STATUS_UNKNOWN)
+            yyjson_mut_obj_add_null(doc, output, "vrrStatus");
+        else switch (item->vrrStatus)
+        {
+            case FF_DISPLAY_VRR_STATUS_DISABLED:
+                yyjson_mut_obj_add_str(doc, output, "vrrStatus", "Disabled");
+                break;
+            case FF_DISPLAY_VRR_STATUS_ENABLED:
+                yyjson_mut_obj_add_str(doc, output, "vrrStatus", "Enabled");
+                break;
+            default:
+                yyjson_mut_obj_add_str(doc, output, "vrrStatus", "Unknown");
+                break;
+        }
+
         yyjson_mut_val* scaled = yyjson_mut_obj_add_obj(doc, obj, "scaled");
         yyjson_mut_obj_add_uint(doc, scaled, "width", item->scaledWidth);
         yyjson_mut_obj_add_uint(doc, scaled, "height", item->scaledHeight);

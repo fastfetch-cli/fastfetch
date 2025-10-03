@@ -45,6 +45,7 @@ FFDisplayResult* ffdsAppendDisplay(
     display->manufactureYear = 0;
     display->manufactureWeek = 0;
     display->serial = 0;
+    display->vrrStatus = FF_DISPLAY_VRR_STATUS_UNKNOWN;
 
     return display;
 }
