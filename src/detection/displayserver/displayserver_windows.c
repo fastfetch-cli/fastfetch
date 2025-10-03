@@ -1,8 +1,5 @@
 #include "displayserver.h"
-#include "detection/os/os.h"
 #include "util/windows/unicode.h"
-#include "util/windows/registry.h"
-#include "util/mallocHelper.h"
 #include "util/edidHelper.h"
 
 #include <dwmapi.h>
@@ -164,10 +161,11 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
             }
 
+            DISPLAYCONFIG_VIDEO_SIGNAL_INFO* signalInfo = &modes[path->targetInfo.modeInfoIdx].targetMode.targetVideoSignalInfo;
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
-                path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
+                signalInfo->vSyncFreq.Numerator / (double) signalInfo->vSyncFreq.Denominator,
                 (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left),
                 (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top),
                 preferredMode.width,
