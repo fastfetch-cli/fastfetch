@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 
-#ifdef STATX_BTIME
+#if defined(STATX_BTIME) && !defined(__ANDROID__)
     #include <sys/syscall.h>
 #endif
 
