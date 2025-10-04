@@ -161,11 +161,10 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 preferredRefreshRate = freq.Numerator / (double) freq.Denominator;
             }
 
-            DISPLAYCONFIG_VIDEO_SIGNAL_INFO* signalInfo = &modes[path->targetInfo.modeInfoIdx].targetMode.targetVideoSignalInfo;
             FFDisplayResult* display = ffdsAppendDisplay(ds,
                 width,
                 height,
-                signalInfo->vSyncFreq.Numerator / (double) signalInfo->vSyncFreq.Denominator,
+                path->targetInfo.refreshRate.Numerator / (double) path->targetInfo.refreshRate.Denominator,
                 (uint32_t) (monitorInfo->info.rcMonitor.right - monitorInfo->info.rcMonitor.left),
                 (uint32_t) (monitorInfo->info.rcMonitor.bottom - monitorInfo->info.rcMonitor.top),
                 preferredMode.width,
