@@ -360,6 +360,10 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor :", &cpu->vendor)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz :", cpuMHz)) ||
+            #elif __hppa__
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            #elif __sh__
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
             #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
