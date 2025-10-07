@@ -707,17 +707,41 @@ jobs:
       - name: run tests
         run: ctest --output-on-failure
 
+      - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
+        id: upload-unsigned-artifact
+        name: upload artifacts for signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastfetch-windows-${{ matrix.arch }}
+          path: |
+            *.dll
+            fastfetch.exe
+            flashfetch.exe
+
+      - if: github.event_name == 'push' && github.repository == 'fastfetch-cli/fastfetch'
+        name: submit signing request
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '${{ vars.SIGNPATH_ORG_ID }}'
+          project-slug: 'fastfetch'
+          signing-policy-slug: 'test-signing'
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: '.'
+
       - name: create zip archive
         run: 7z a -tzip -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.zip LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
       - name: create 7z archive
         run: 7z a -t7z -mx9 -bd -y fastfetch-windows-${{ matrix.arch }}.7z LICENSE *.dll fastfetch.exe flashfetch.exe presets
 
-      - name: upload artifacts
+      - name: upload true artifacts
         uses: actions/upload-artifact@v4
         with:
           name: fastfetch-windows-${{ matrix.arch }}
           path: ./fastfetch-windows-${{ matrix.arch }}.*
+          overwrite: true
 
   release:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && github.repository == 'fastfetch-cli/fastfetch'
