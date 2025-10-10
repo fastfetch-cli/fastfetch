@@ -1,3 +1,33 @@
+# 2.54.0
+
+Changes:
+* Moves macOS and Windows design language detection from the DE module to the Theme module
+
+Features:
+* Adds `--json` and `-j` command line flags as a shortcut for `--format json`
+* Various improvements to the OS module (OS)
+    * Displays point releases for Debian
+    * Displays code names for Ubuntu
+    * Displays build ID for macOS
+    * Displays code names for Windows (previously shown in the Kernel module)
+* Adds basic support for Wine (Windows)
+* Adds basic support for hppa and sh architectures (CPU, Linux)
+* Improves T-Head SoC name detection from the device tree (#1997, CPU, Linux)
+
+Bugfixes:
+* Avoids integer overflow when calculating swap size (#1988, Swap, Windows)
+* Trims whitespace from full user name (Title, macOS)
+* Fixes default font size for Ghostty (#1986, TerminalFont, Linux)
+* Works around an issue that could report impossibly high memory usage in rare cases (#1988, Memory, Linux)
+* Fixes incorrect glibc dependency in polyfilled DEB packages (#1983, Linux)
+* Fixes corrupted binaries in polyfilled RPM packages (#1990, Linux)
+* Fixes crashes on ancient Android kernels (#1993, Disk, Android)
+* Prefers resolutions reported by randr mode info, fixing incorrect resolutions reported on XFCE when scaling is enabled (Display, Linux)
+
+Logos:
+* Adds secureblue, PrismLinux, EmperorOS
+* Updates T2
+
 # 2.53.0
 
 Changes:
