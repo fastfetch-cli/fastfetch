@@ -716,6 +716,13 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
         for (const char* p = model; *p; ++p)
             ffStrbufAppendC(&cpu->name, (char) toupper(*p));
     }
+    else if (ffStrEquals(vendor, "thead"))
+    {
+        // Lichee Pi?
+        ffStrbufSetStatic(&cpu->vendor, "T-Head");
+        for (const char* p = model; *p; ++p)
+            ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+    }
     else
     {
         ffStrbufSetS(&cpu->name, model);
