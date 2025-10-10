@@ -621,19 +621,46 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
     if (cpu->name.length > 0)
         return;
 
-    // device-vendor,device-model\0soc-vendor,soc-model\0
-    char content[256];
+    // [x-vendor,x-model\0]*N
+    char content[512];
     ssize_t length = ffReadFileData("/proc/device-tree/compatible", ARRAY_SIZE(content), content);
-    if (length <= 2) return;
+    if (length < 4) return; // v,m\0
 
-    // get the second NUL terminated string if it exists
-    char* vendor = memchr(content, '\0', (size_t) length) + 1;
-    if (!vendor || vendor - content >= length) vendor = content;
+    if (content[length - 1] != '\0') return; // must end with \0
 
-    char* model = strchr(vendor, ',');
-    if (!model) return;
-    *model = '\0';
-    ++model;
+    --length;
+
+    char* vendor = NULL;
+    char* model = NULL;
+
+    for (char* p; length > 0; length = p ? (ssize_t) (p - content) - 1 : 0)
+    {
+        p = memrchr(content, '\0', (size_t) length);
+
+        vendor = p /* first entry */ ? p + 1 : content;
+
+        size_t partLen = (size_t) (length - (vendor - content));
+        if (partLen < 3) continue;
+
+        char* comma = memchr(vendor, ',', partLen);
+        if (!comma) continue;
+
+        size_t vendorLen = (size_t) (comma - vendor);
+        if (vendorLen == 0) continue;
+
+        model = comma + 1;
+        size_t modelLen = (size_t) (partLen - (size_t) (model - vendor));
+        if (modelLen == 0) continue;
+
+        if ((modelLen >= strlen("-platform") && ffStrEndsWith(model, "-platform")) ||
+            (modelLen >= strlen("-soc") && ffStrEndsWith(model, "-soc")))
+            continue;
+
+        *comma = '\0';
+        break;
+    }
+
+    if (!length) return;
 
     if (false) {}
     #if __aarch64__
