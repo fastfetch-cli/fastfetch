@@ -123,38 +123,70 @@ static const char* detectWithDdcci(FF_MAYBE_UNUSED const FFDisplayServerResult* 
     return NULL;
 }
 #else
+static IOOptionBits getSupportedTransactionType(void) {
+    FF_IOOBJECT_AUTO_RELEASE io_iterator_t iterator = IO_OBJECT_NULL;
+
+    if (IOServiceGetMatchingServices(MACH_PORT_NULL, IOServiceNameMatching("IOFramebufferI2CInterface"), &iterator) != KERN_SUCCESS)
+        return 0;
+
+    io_registry_entry_t registryEntry;
+    while ((registryEntry = IOIteratorNext(iterator)) != MACH_PORT_NULL)
+    {
+        FF_IOOBJECT_AUTO_RELEASE io_service_t io_service = registryEntry;
+        FF_CFTYPE_AUTO_RELEASE CFNumberRef IOI2CTransactionTypes = IORegistryEntryCreateCFProperty(io_service, CFSTR(kIOI2CTransactionTypesKey), kCFAllocatorDefault, kNilOptions);
+
+        if (IOI2CTransactionTypes)
+        {
+            int64_t types = 0;
+            ffCfNumGetInt64(IOI2CTransactionTypes, &types);
+
+            /*
+             We want DDCciReply but Simple is better than No-thing.
+             Combined and DisplayPortNative are not useful in our case.
+             */
+            if (types) {
+                if ((1 << kIOI2CSimpleTransactionType) & (uint64_t) types)
+                    return kIOI2CSimpleTransactionType;
+                if ((1 << kIOI2CDDCciReplyTransactionType) & (uint64_t) types)
+                    return kIOI2CDDCciReplyTransactionType;
+                if ((1 << kIOI2CCombinedTransactionType) & (uint64_t) types)
+                    return kIOI2CCombinedTransactionType;
+                if ((1 << kIOI2CDisplayPortNativeTransactionType) & (uint64_t) types)
+                    return kIOI2CDisplayPortNativeTransactionType;
+            }
+        }
+        break;
+    }
+
+    return 0;
+}
+
 static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, FFBrightnessOptions* options, FFlist* result)
 {
     if (!CGSServiceForDisplayNumber) return "CGSServiceForDisplayNumber is not available";
+    IOOptionBits transactionType = getSupportedTransactionType();
 
     FF_LIST_FOR_EACH(FFDisplayResult, display, displayServer->displays)
     {
         if (display->type == FF_DISPLAY_TYPE_EXTERNAL)
         {
-            io_service_t framebuffer = 0;
+            FF_IOOBJECT_AUTO_RELEASE io_service_t framebuffer = IO_OBJECT_NULL;
             CGSServiceForDisplayNumber((CGDirectDisplayID)display->id, &framebuffer);
-            if (framebuffer == 0) continue;
+            if (framebuffer == IO_OBJECT_NULL) continue;
 
             IOItemCount count;
             if (IOFBGetI2CInterfaceCount(framebuffer, &count) != KERN_SUCCESS || count == 0)
-            {
-                IOObjectRelease(framebuffer);
                 continue;
-            }
 
-            bool found = false;
-            for (IOItemCount bus = 0; bus < count && !found; ++bus)
+            for (IOItemCount bus = 0; bus < count; ++bus)
             {
-                io_service_t interface = 0;
-                if (IOFBCopyI2CInterfaceForBus(framebuffer, 0, &interface) != KERN_SUCCESS) continue;
+                FF_IOOBJECT_AUTO_RELEASE io_service_t interface = IO_OBJECT_NULL;
+                if (IOFBCopyI2CInterfaceForBus(framebuffer, bus, &interface) != KERN_SUCCESS) continue;
 
                 uint8_t i2cOut[12] = {};
-                IOI2CConnectRef connect;
+                IOI2CConnectRef connect = NULL;
                 if (IOI2CInterfaceOpen(interface, kNilOptions, &connect) != KERN_SUCCESS)
-                {
-                    IOObjectRelease(interface);
                     continue;
-                }
 
                 uint8_t i2cIn[] = { 0x51, 0x82, 0x01, 0x10 /* luminance */, 0 };
                 i2cIn[4] = 0x6E ^ i2cIn[0] ^ i2cIn[1] ^ i2cIn[2] ^ i2cIn[3];
@@ -168,13 +200,12 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                     .minReplyDelay = options->ddcciSleep * 1000ULL,
                     .replyAddress = 0x6F,
                     .replySubAddress = 0x51,
-                    .replyTransactionType = kIOI2CDDCciReplyTransactionType,
+                    .replyTransactionType = transactionType,
                     .replyBytes = ARRAY_SIZE(i2cOut),
                     .replyBuffer = (vm_address_t) i2cOut,
                 };
                 IOReturn ret = IOI2CSendRequest(connect, kNilOptions, &request);
                 IOI2CInterfaceClose(connect, kNilOptions);
-                IOObjectRelease(interface);
 
                 if (ret != KERN_SUCCESS || request.result != kIOReturnSuccess || request.replyBytes < 10) continue;
                 if (i2cOut[2] != 0x02 || i2cOut[3] != 0x00) continue;
@@ -189,10 +220,8 @@ static const char* detectWithDdcci(const FFDisplayServerResult* displayServer, F
                 ffStrbufInitCopy(&brightness->name, &display->name);
                 brightness->builtin = false;
 
-                found = true;
+                break;
             }
-
-            IOObjectRelease(framebuffer);
         }
     }
 
