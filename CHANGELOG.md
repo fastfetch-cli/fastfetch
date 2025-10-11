@@ -13,6 +13,8 @@ Features:
 * Adds basic support for Wine (Windows)
 * Adds basic support for hppa and sh architectures (CPU, Linux)
 * Improves T-Head SoC name detection from the device tree (#1997, CPU, Linux)
+* `Disk.hideFolders` now supports glob patterns (Disk)
+    * For example, `/boot/*` will match both `/boot/efi` and `/boot/firmware`
 
 Bugfixes:
 * Avoids integer overflow when calculating swap size (#1988, Swap, Windows)

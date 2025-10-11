@@ -230,11 +230,8 @@ bool ffPrintDisk(FFDiskOptions* options)
         if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
             continue;
 
-        if (options->hideFolders.length)
-        {
-            if (isMatchFolders(&options->hideFolders, &disk->mountpoint, FF_DISK_FOLDER_SEPARATOR))
-                continue;
-        }
+        if (options->hideFolders.length && isMatchFolders(&options->hideFolders, &disk->mountpoint, FF_DISK_FOLDER_SEPARATOR))
+            continue;
 
         if (options->hideFS.length && ffStrbufSeparatedContain(&options->hideFS, &disk->filesystem, ':'))
             continue;
@@ -482,7 +479,7 @@ void ffInitDiskOptions(FFDiskOptions* options)
     #if _WIN32 || __APPLE__ || __ANDROID__
     ffStrbufInit(&options->hideFolders);
     #else
-    ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
+    ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/*");
     #endif
     ffStrbufInit(&options->hideFS);
     options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
