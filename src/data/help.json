@@ -566,7 +566,12 @@
                     "none": "Disable keys",
                     "string": "Show string",
                     "icon": "Show icon (requires newest nerd font)",
-                    "both": "Show both icon and string"
+                    "both": "Show both icon and string (alias of `both-1`)",
+                    "both-0": "Show both icon and string with no spaces between them",
+                    "both-1": "Show both icon and string with a space between them",
+                    "both-2": "Show both icon and string with 2 spaces between them",
+                    "both-3": "Show both icon and string with 3 spaces between them",
+                    "both-4": "Show both icon and string with 4 spaces between them"
                 },
                 "default": "string"
             }
