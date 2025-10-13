@@ -13,8 +13,12 @@ Features:
 * Adds basic support for Wine (Windows)
 * Adds basic support for hppa and sh architectures (CPU, Linux)
 * Improves T-Head SoC name detection from the device tree (#1997, CPU, Linux)
-* `Disk.hideFolders` now supports glob patterns (Disk)
+* Supports glob patterns in `Disk.hideFolders` (Disk)
     * For example, `/boot/*` will match both `/boot/efi` and `/boot/firmware`
+* Adds brightness-level detection for external monitor support on Intel macOS (Brightness, macOS)
+* Adds configurable spacing between icon and text in keys
+    * `display.key.type: "both-N"` where N is `0-4`
+    * Useful for non-monospaced Nerd Fonts
 
 Bugfixes:
 * Avoids integer overflow when calculating swap size (#1988, Swap, Windows)
@@ -24,7 +28,7 @@ Bugfixes:
 * Fixes incorrect glibc dependency in polyfilled DEB packages (#1983, Linux)
 * Fixes corrupted binaries in polyfilled RPM packages (#1990, Linux)
 * Fixes crashes on ancient Android kernels (#1993, Disk, Android)
-* Prefers resolutions reported by randr mode info, fixing incorrect resolutions reported on XFCE when scaling is enabled (Display, Linux)
+* Prefers resolutions reported by RandR mode info, fixing incorrect resolutions on XFCE when DPI scaling is enabled (Display, Linux)
 
 Logos:
 * Adds secureblue, PrismLinux, EmperorOS
