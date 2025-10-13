@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "smc_temps.h"
+#include "util/apple/cf_helpers.h"
 #include "util/stringUtils.h"
 
 #include <stdint.h>
@@ -137,14 +137,11 @@ static const char *smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
 
 static const char *smcOpen(io_connect_t *conn)
 {
-    io_object_t device = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMC"));
+    FF_IOOBJECT_AUTO_RELEASE io_object_t device = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMC"));
     if (!device)
         return "No SMC device found";
 
-    kern_return_t result = IOServiceOpen(device, mach_task_self(), 0, conn);
-    IOObjectRelease(device);
-
-    if (result != kIOReturnSuccess)
+    if (IOServiceOpen(device, mach_task_self(), 0, conn) != kIOReturnSuccess)
         return "IOServiceOpen() failed";
 
     return NULL;

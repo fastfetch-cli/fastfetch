@@ -39,7 +39,7 @@ static const char* detectFrequency(FFCPUResult* cpu)
 
     FF_IOOBJECT_AUTO_RELEASE io_registry_entry_t entryDevice = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceNameMatching("pmgr"));
     if (!entryDevice)
-        return "IOServiceGetMatchingServices() failed";
+        return "IOServiceGetMatchingService() failed";
 
     if (!IOObjectConformsTo(entryDevice, "AppleARMIODevice"))
         return "\"pmgr\" should conform to \"AppleARMIODevice\"";
