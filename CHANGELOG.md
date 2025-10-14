@@ -19,6 +19,7 @@ Features:
 * Adds configurable spacing between icon and text in keys
     * `display.key.type: "both-N"` where N is `0-4`
     * Useful for non-monospaced Nerd Fonts
+* Adds detection support for modern Samsung Exynos SoCs (CPU, Android)
 
 Bugfixes:
 * Avoids integer overflow when calculating swap size (#1988, Swap, Windows)
@@ -29,6 +30,7 @@ Bugfixes:
 * Fixes corrupted binaries in polyfilled RPM packages (#1990, Linux)
 * Fixes crashes on ancient Android kernels (#1993, Disk, Android)
 * Prefers resolutions reported by RandR mode info, fixing incorrect resolutions on XFCE when DPI scaling is enabled (Display, Linux)
+* Various code cleanups and minor fixes
 
 Logos:
 * Adds secureblue, PrismLinux, EmperorOS
