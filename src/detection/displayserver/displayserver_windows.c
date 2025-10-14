@@ -3,7 +3,7 @@
 #include "util/edidHelper.h"
 
 #include <dwmapi.h>
-#include <WinUser.h>
+#include <winuser.h>
 #include <wchar.h>
 
 typedef struct FFMonitorInfo

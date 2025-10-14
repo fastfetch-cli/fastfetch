@@ -2,7 +2,7 @@
 #include "common/processing.h"
 #include "common/io/io.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <ntstatus.h>
 #include <winternl.h>
 

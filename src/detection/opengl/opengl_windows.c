@@ -2,7 +2,7 @@
 #include "common/library.h"
 #include "common/printing.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <GL/gl.h>
 
 typedef struct WGLData

@@ -6,7 +6,7 @@
 #include "util/windows/registry.h"
 #include "util/windows/nt.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <shlobj.h>
 
 #define SECURITY_WIN32 1 // For secext.h
