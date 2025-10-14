@@ -9,7 +9,7 @@ featuring a personalized configuration for my workflow and my desired displayed 
 - Tweaked performance flags. 📈
 
 ## Credits
-All core features and structure belong to the original Fasfetch project.
+All core features and structure belong to the original Fasfetch project. Just submitted my own personal config.
 
 ## Below is everything you need to know about installing, modifying and/or building Fastfetch.
 
