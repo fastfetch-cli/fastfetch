@@ -221,6 +221,45 @@ static void detectMediaTek(FFCPUResult* cpu)
     }
 }
 
+static void detectExynos(FFCPUResult* cpu)
+{
+    // https://en.wikipedia.org/wiki/Exynos
+
+    assert(cpu->name.length > 3);
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 3, NULL, 10);
+    const char* name = NULL;
+
+    switch (code)
+    {
+        case 9955: name = "2500"; break;
+        case 9945: name = "2400"; break;
+        // No 2300
+        case 9925: name = "2200"; break;
+        case 9840: name = "2100"; break;
+
+        case 8855: name = "1580"; break;
+        case 8845: name = "1480"; break;
+        case 8835: name = "1380"; break;
+        case 8535: name = "1330"; break;
+        case 8825: name = "1280"; break;
+        case 9815: name = "1080"; break;
+
+        case 9830: name = "990"; break;
+        case 9630: name = "980"; break;
+
+        case 8805: name = "880"; break;
+        case 3830: name = "850"; break;
+    }
+
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "Samsung Exynos %s [%s]", name, str);
+        return;
+    }
+}
+
 static void detectAndroid(FFCPUResult* cpu)
 {
     if (cpu->name.length == 0)
@@ -248,6 +287,12 @@ static void detectAndroid(FFCPUResult* cpu)
         detectQualcomm(cpu);
     else if (ffStrbufEqualS(&cpu->vendor, "MediaTek") && ffStrbufStartsWithS(&cpu->name, "MT"))
         detectMediaTek(cpu);
+    else if (ffStrbufEqualS(&cpu->vendor, "Samsung") && ffStrbufStartsWithS(&cpu->name, "s5e"))
+    {
+        cpu->name.chars[0] = 'S';
+        cpu->name.chars[2] = 'E';
+        detectExynos(cpu);
+    }
 }
 #endif
 
