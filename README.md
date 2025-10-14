@@ -2,7 +2,7 @@
 
 This is my customized version of [Fasfetch](https://github.com/fastfetch-cli/fastfetch),
 featuring a personalized configuration for my workflow and my desired displayed about my system.
-[My personal config file] (deib-sconfig/deib.jsonc)
+[My personal config file](deibs-config/deib.jsonc)
 
 ## Custom Changes
 - Added a custom config file with my preferred layout and colors. 🎨
