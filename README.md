@@ -1,4 +1,17 @@
-# Fastfetch
+# Fasfetch - Dieb's Custom Build
+
+This is my customized version of [Fasfetch](https://github.com/fastfetch-cli/fastfetch),
+featuring a personalized configuration for my workflow and my desired displayed about my system.
+
+## Custom Changes
+- Added a custom config file with my preferred layout and colors.
+- Adjusted system info output.
+- Tweaked performance flags.
+
+## Credits
+All core features and structure belong to the original Fasfetch project.
+
+## Below is everything you need to know about installing, modifying and/or building Fastfetch.
 
 [![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/fastfetch-cli/fastfetch/ci.yml)](https://github.com/fastfetch-cli/fastfetch/actions)
 [![GitHub license](https://img.shields.io/github/license/fastfetch-cli/fastfetch)](https://github.com/fastfetch-cli/fastfetch/blob/dev/LICENSE)
