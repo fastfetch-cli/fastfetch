@@ -1,12 +1,12 @@
-# Fasfetch - Dieb's Custom Build
+# Fasfetch - Deib's Custom Build
 
 This is my customized version of [Fasfetch](https://github.com/fastfetch-cli/fastfetch),
 featuring a personalized configuration for my workflow and my desired displayed about my system.
 
 ## Custom Changes
-- Added a custom config file with my preferred layout and colors.
-- Adjusted system info output.
-- Tweaked performance flags.
+- Added a custom config file with my preferred layout and colors. 🎨
+- Adjusted system info output. ℹ️
+- Tweaked performance flags. 📈
 
 ## Credits
 All core features and structure belong to the original Fasfetch project.
