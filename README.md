@@ -18,7 +18,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 
 ### MacOS
 
-1. Navigate through your files until you get to '/.config/fastfetch', it is under your User folder. For me it's like this (/Users/deib/.config/fastfetch).
+1. Navigate through your files until you get to '/.config/fastfetch', it is under your User folder. Example: (/Users/deib/.config/fastfetch).
 
 2. Once you are there, I suggest opening it with your preferred IDE (Vscode, Cursor, JetBrains IDEs, etc.).
 
