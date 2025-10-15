@@ -21,7 +21,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 1. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
    Example: `(/Users/deib/.config/fastfetch)`.
 
-3. Once you are there, I suggest using you desired IDE for editing this file. I used Vscode and worked just fine.
+3. Once you are there, I suggest using your desired IDE for editing this file. I used Vscode and worked just fine.
 
 4. Find `config.json` and edit it.
 
