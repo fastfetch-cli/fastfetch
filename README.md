@@ -8,7 +8,7 @@ featuring a personalized configuration for my workflow and my desired displayed 
 <img src="screenshots/deib.png" width="100%" align="center" />
 
 ## Custom Changes
-- Added a custom config file with my preferred layout and colors. 🎨
+- Added a custom config file with my preferred layout. 🎨
 - Adjusted system info output. ℹ️
 - Tweaked performance flags. 📈
 
