@@ -18,7 +18,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 
 ### MacOS 🍎
 
-1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and the path of this will be displayed.
+1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and it's location will be displayed.
  
 2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
    Example: `(/Users/deib/.config/fastfetch)`.
@@ -33,7 +33,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 
 ### Windows 🪟
 
-1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and the path of this will be displayed.
+1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and it's location will be displayed.
  
 2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
    Example: `/c/Users/deib/fastfetch`.
@@ -48,7 +48,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 
 ### Linux 🐧
 
-1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and the path of this will be displayed.
+1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and it's location will be displayed.
  
 2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
    Example: `/home/deib/.config/fastfetch/`.
