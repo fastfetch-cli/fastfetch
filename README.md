@@ -5,7 +5,7 @@ featuring a personalized configuration for my workflow and my desired displayed 
 
 ## 📍 [My personal config file](deibs-config/deib.jsonc) 
 
-img=src()
+<img src="screenshots/deib.png" width="49%" align="left" />
 
 ## Custom Changes
 - Added a custom config file with my preferred layout and colors. 🎨
