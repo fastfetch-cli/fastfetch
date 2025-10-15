@@ -36,7 +36,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and it's location will be displayed.
  
 2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
-   Example: `/c/Users/deib/fastfetch`.
+   Example: `C:\Users\deib\fastfetch`.
 
 3. Once you are there, I suggest using your preferred IDE for editing this file. I used Vscode and worked just fine but any other IDE, nano or vim also work.
 
