@@ -1,7 +1,7 @@
 # Fastfetch - Deib's Custom Build
 
 This is my custom version of [Fastfetch](https://github.com/fastfetch-cli/fastfetch),
-featuring a personalized configuration for my workflow and my desired displayed about my system.
+featuring a personalized configuration for my workflow and my desired displayed information about my system.
 
 ## 📍 [My personal config file](deibs-config/deib.jsonc) 
 
