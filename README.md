@@ -16,23 +16,50 @@ featuring a personalized configuration for my workflow and my desired displayed 
 
 First of all you need to install Fastfetch first, [here's](#installation) how.
 
-### MacOS
+### MacOS 🍎
 
-1. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
+1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and the path of this will be displayed.
+ 
+2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
    Example: `(/Users/deib/.config/fastfetch)`.
 
-3. Once you are there, I suggest using your desired IDE for editing this file. I used Vscode and worked just fine.
+3. Once you are there, I suggest using your preferred IDE for editing this file. I used Vscode and worked just fine but any other IDE, nano or vim also work.
 
 4. Find `config.json` and edit it.
 
 5. Copy and paste [this](deibs-config/deib.jsonc) in your own file.
 
-6. Now enjoy what works with me since `2025-10-14`. Using `YYYY/MM/DD`.
+6. Save the file and execute `fastfetch` to apply the config file.
 
+### Windows 🪟
 
-### Windows
+1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and the path of this will be displayed.
+ 
+2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
+   Example: `/c/Users/deib/fastfetch`.
 
-### Linux
+3. Once you are there, I suggest using your preferred IDE for editing this file. I used Vscode and worked just fine but any other IDE, nano or vim also work.
+
+4. Find `config.json` and edit it.
+
+5. Copy and paste [this](deibs-config/deib.jsonc) in your own file.
+
+6. Save the file and execute `fastfetch` to apply the config file.
+
+### Linux 🐧
+
+1. Once installed go to your terminal and type `fastfetch --gen-config`, this will generate a config file and the path of this will be displayed.
+ 
+2. Navigate through your files until you get to `/.config/fastfetch`, it is under your User folder.
+   Example: `/home/deib/.config/fastfetch/`.
+
+3. Once you are there, I suggest using your preferred IDE for editing this file. I used Vscode and worked just fine but any other IDE, nano or vim also work.
+
+4. Find `config.json` and edit it.
+
+5. Copy and paste [this](deibs-config/deib.jsonc) in your own file.
+
+6. Save the file and execute `fastfetch` to apply the config file.
 
 ## Credits
 All core features and structure belong to the original Fasfetch project. Just submitted my own personal config.
