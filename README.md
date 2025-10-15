@@ -1,14 +1,38 @@
-# Fasfetch - Deib's Custom Build
+# Fastfetch - Deib's Custom Build
 
-This is my customized version of [Fasfetch](https://github.com/fastfetch-cli/fastfetch),
+This is my custom version of [Fastfetch](https://github.com/fastfetch-cli/fastfetch),
 featuring a personalized configuration for my workflow and my desired displayed about my system.
 
 ## 📍 [My personal config file](deibs-config/deib.jsonc) 
+
+img=src()
 
 ## Custom Changes
 - Added a custom config file with my preferred layout and colors. 🎨
 - Adjusted system info output. ℹ️
 - Tweaked performance flags. 📈
+
+## How to run this exact same config?
+
+First of all you need to install Fastfetch first, [here's](#installation) how.
+
+### MacOS
+
+1. Navigate through your files until you get to '/.config/fastfetch', it is under your User folder. For me it's like this (/Users/deib/.config/fastfetch).
+
+2. Once you are there, I suggest opening it with your preferred IDE (Vscode, Cursor, JetBrains IDEs, etc.).
+
+3. You should have 'config.json', edit it.
+
+4. Copy and paste [this](deibs-config/deib.jsonc) in your own file.
+
+5. Now enjoy what works with me since 2025-10-14, using ISO8601 format.
+
+I recommend using you desired IDE for editing this file. I used Vscode and worked just fine.
+
+### Windows
+
+### Linux
 
 ## Credits
 All core features and structure belong to the original Fasfetch project. Just submitted my own personal config.
