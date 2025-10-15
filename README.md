@@ -27,7 +27,7 @@ First of all you need to install Fastfetch first, [here's](#installation) how.
 
 5. Copy and paste [this](deibs-config/deib.jsonc) in your own file.
 
-6. Now enjoy what works with me since 2025-10-14. Using YYYY/MM/DD.
+6. Now enjoy what works with me since `2025-10-14`. Using `YYYY/MM/DD`.
 
 
 ### Windows
