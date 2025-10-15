@@ -177,7 +177,11 @@ static int ftty = -1;
 static struct termios oldTerm;
 void restoreTerm(void)
 {
-    tcsetattr(ftty, TCSAFLUSH, &oldTerm);
+    tcsetattr(ftty, TCSANOW, &oldTerm);
+}
+
+static size_t min(size_t left, size_t right) {
+    return left < right ? left : right;
 }
 
 const char* ffGetTerminalResponse(const char* request, int nParams, const char* format, ...)
@@ -193,8 +197,8 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
         struct termios newTerm = oldTerm;
         newTerm.c_lflag &= (tcflag_t) ~(ICANON | ECHO);
-        if(tcsetattr(ftty, TCSAFLUSH, &newTerm) == -1)
-            return "tcsetattr(STDIN_FILENO, TCSAFLUSH, &newTerm)";
+        if(tcsetattr(ftty, TCSANOW, &newTerm) == -1)
+            return "tcsetattr(STDIN_FILENO, TCSANOW, &newTerm)";
         atexit(restoreTerm);
     }
 
@@ -224,7 +228,8 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
 
     while (true)
     {
-        ssize_t nRead = read(ftty, buffer + bytesRead, sizeof(buffer) - bytesRead - 1);
+        ssize_t nRead = read(ftty, buffer + bytesRead,
+                             min(1, sizeof(buffer) - bytesRead - 1));
 
         if (nRead <= 0)
         {
