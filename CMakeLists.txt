@@ -1743,6 +1743,7 @@ elseif(ANDROID)
     target_link_libraries(libfastfetch
         PRIVATE "m"
     )
+    # https://github.com/termux/termux-packages/pull/7056
     CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
     if(HAVE_LIBANDROID_WORDEXP_STATIC)
         target_link_libraries(libfastfetch
@@ -1818,10 +1819,6 @@ if(NOT WIN32)
     CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
     if(HAVE_WORDEXP)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
-    endif()
-    CHECK_INCLUDE_FILE("glob.h" HAVE_GLOB)
-    if(HAVE_GLOB)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLOB=1)
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)

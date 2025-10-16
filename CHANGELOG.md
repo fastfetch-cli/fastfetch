@@ -29,6 +29,7 @@ Bugfixes:
 * Fixes incorrect glibc dependency in polyfilled DEB packages (#1983, Linux)
 * Fixes corrupted binaries in polyfilled RPM packages (#1990, Linux)
 * Fixes crashes on ancient Android kernels (#1993, Disk, Android)
+* Fixes incorrect usage of `glob(3)` (OpenBSD)
 * Prefers resolutions reported by RandR mode info, fixing incorrect resolutions on XFCE when DPI scaling is enabled (Display, Linux)
 * Various code cleanups and minor fixes
 
