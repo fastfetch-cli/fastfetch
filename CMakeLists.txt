@@ -106,6 +106,7 @@ option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -1743,18 +1744,20 @@ elseif(ANDROID)
     target_link_libraries(libfastfetch
         PRIVATE "m"
     )
-    # https://github.com/termux/termux-packages/pull/7056
-    CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
-    if(HAVE_LIBANDROID_WORDEXP_STATIC)
-        target_link_libraries(libfastfetch
-            PRIVATE -l:libandroid-wordexp.a
-        )
-    else()
-        CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
-        if(HAVE_LIBANDROID_WORDEXP)
+    if(ENABLE_WORDEXP)
+        # https://github.com/termux/termux-packages/pull/7056
+        CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
+        if(HAVE_LIBANDROID_WORDEXP_STATIC)
             target_link_libraries(libfastfetch
-                PRIVATE android-wordexp
+                PRIVATE -l:libandroid-wordexp.a
             )
+        else()
+            CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+            if(HAVE_LIBANDROID_WORDEXP)
+                target_link_libraries(libfastfetch
+                    PRIVATE android-wordexp
+                )
+            endif()
         endif()
     endif()
 elseif(Haiku)
@@ -1816,9 +1819,11 @@ if(NOT WIN32)
     if(HAVE_UTMPX)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX=1)
     endif()
-    CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
-    if(HAVE_WORDEXP)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+    if(ENABLE_WORDEXP)
+        CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
+        if(HAVE_WORDEXP)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+        endif()
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)

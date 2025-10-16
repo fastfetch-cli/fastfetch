@@ -20,6 +20,9 @@ Features:
     * `display.key.type: "both-N"` where N is `0-4`
     * Useful for non-monospaced Nerd Fonts
 * Adds detection support for modern Samsung Exynos SoCs (CPU, Android)
+* Adds a new CMake option `-DENABLE_WORDEXP=<ON|OFF>` to enable or disable using `wordexp(3)` for acquiring logo file paths (`logo.source`)
+    * Enabled by default for compatibility
+    * Disabling this option reverts to using `glob(3)`, which is less functional but more secure
 
 Bugfixes:
 * Avoids integer overflow when calculating swap size (#1988, Swap, Windows)
