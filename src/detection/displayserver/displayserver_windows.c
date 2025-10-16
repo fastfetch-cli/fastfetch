@@ -229,7 +229,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 if (edidLength > 0)
                     ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
-                display->vrrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_VRR_STATUS_ENABLED : FF_DISPLAY_VRR_STATUS_DISABLED;
+                display->drrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_DRR_STATUS_ENABLED : FF_DISPLAY_DRR_STATUS_DISABLED;
             }
         }
     }

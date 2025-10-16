@@ -62,9 +62,9 @@ typedef enum __attribute__((__packed__)) FFDisplayHdrStatus
 
 typedef enum __attribute__((__packed__)) FFDisplayVrrStatus
 {
-    FF_DISPLAY_VRR_STATUS_UNKNOWN,
-    FF_DISPLAY_VRR_STATUS_DISABLED,
-    FF_DISPLAY_VRR_STATUS_ENABLED,
+    FF_DISPLAY_DRR_STATUS_UNKNOWN,
+    FF_DISPLAY_DRR_STATUS_DISABLED,
+    FF_DISPLAY_DRR_STATUS_ENABLED,
 } FFDisplayVrrStatus;
 
 typedef struct FFDisplayResult
@@ -90,7 +90,7 @@ typedef struct FFDisplayResult
     uint16_t manufactureYear;
     uint16_t manufactureWeek;
     uint32_t serial;
-    FFDisplayVrrStatus vrrStatus;
+    FFDisplayVrrStatus drrStatus;
 } FFDisplayResult;
 
 typedef struct FFDisplayServerResult
