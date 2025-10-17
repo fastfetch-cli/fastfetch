@@ -1,5 +1,7 @@
 # 2.54.0
 
+Windows binaries in Release page are now signed using SignPath.
+
 Changes:
 * Moves macOS and Windows design language detection from the DE module to the Theme module
 
