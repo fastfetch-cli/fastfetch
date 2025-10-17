@@ -140,15 +140,11 @@ static IOOptionBits getSupportedTransactionType(void) {
             int64_t types = 0;
             ffCfNumGetInt64(IOI2CTransactionTypes, &types);
 
-            /*
-             We want DDCciReply but Simple is better than No-thing.
-             Combined and DisplayPortNative are not useful in our case.
-             */
             if (types) {
-                if ((1 << kIOI2CSimpleTransactionType) & (uint64_t) types)
-                    return kIOI2CSimpleTransactionType;
                 if ((1 << kIOI2CDDCciReplyTransactionType) & (uint64_t) types)
                     return kIOI2CDDCciReplyTransactionType;
+                if ((1 << kIOI2CSimpleTransactionType) & (uint64_t) types)
+                    return kIOI2CSimpleTransactionType;
                 if ((1 << kIOI2CCombinedTransactionType) & (uint64_t) types)
                     return kIOI2CCombinedTransactionType;
                 if ((1 << kIOI2CDisplayPortNativeTransactionType) & (uint64_t) types)
