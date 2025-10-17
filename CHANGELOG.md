@@ -39,7 +39,7 @@ Bugfixes:
 * Various code cleanups and minor fixes
 
 Logos:
-* Adds secureblue, PrismLinux, EmperorOS
+* Adds secureblue, PrismLinux, EmperorOS and Zraxyl
 * Updates T2
 
 # 2.53.0
