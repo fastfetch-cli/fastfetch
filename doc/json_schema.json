@@ -1024,8 +1024,29 @@
                                 },
                                 {
                                     "const": "both",
-                                    "description": "Show both icon and string keys"
+                                    "description": "Show both icon and string keys (alias of `both-1`)"
+                                },
+                                {
+                                    "const": "both-0",
+                                    "description": "Show both icon and string with no spaces between them"
+                                },
+                                {
+                                    "const": "both-1",
+                                    "description": "Show both icon and string with a space between them"
+                                },
+                                {
+                                    "const": "both-2",
+                                    "description": "Show both icon and string with 2 spaces between them"
+                                },
+                                {
+                                    "const": "both-3",
+                                    "description": "Show both icon and string with 3 spaces between them"
+                                },
+                                {
+                                    "const": "both-4",
+                                    "description": "Show both icon and string with 4 spaces between them"
                                 }
+                            ],
                             ],
                             "default": "string"
                         },
@@ -2326,7 +2347,7 @@
                                         ]
                                     },
                                     "hideFolders": {
-                                        "description": "A list of folder paths to hide from the disk output",
+                                        "description": "A list of folder paths (or glob patterns) to hide from the disk output",
                                         "oneOf": [
                                             {
                                                 "type": "string",
@@ -2342,7 +2363,7 @@
                                                 "uniqueItems": true
                                             }
                                         ],
-                                        "default": "/efi:/boot:/boot/efi:/boot/firmware"
+                                        "default": "/efi:/boot:/boot/*"
                                     },
                                     "hideFS": {
                                         "description": "A list of file systems to hide from the disk output",

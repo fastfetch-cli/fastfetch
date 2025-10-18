@@ -1558,6 +1558,15 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_DEFAULT,
         .colorTitle = FF_COLOR_FG_CYAN,
     },
+    // EmperorOS
+    {
+        .names = {"Emperor"},
+        .lines = FASTFETCH_DATATEXT_LOGO_EMPEROROS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // EncryptOS
     {
         .names = {"EncryptOS"},
@@ -3998,6 +4007,15 @@ static const FFlogo P[] = {
             FF_COLOR_FG_WHITE,
         },
     },
+    // PrismLinux
+    {
+        .names = {"PrismLinux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_PRISMLINUX,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_BLUE,
+        },
+    },
     // LAST
     {},
 };
@@ -4377,6 +4395,16 @@ static const FFlogo S[] = {
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_WHITE,
             FF_COLOR_FG_RED,
+        },
+    },
+    // Secureblue
+    {
+        .names = {"secureblue"},
+        .lines = FASTFETCH_DATATEXT_LOGO_SECUREBLUE,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_MAGENTA,
+            FF_COLOR_FG_DEFAULT,
         },
     },
     // Serpent OS
@@ -5460,6 +5488,16 @@ static const FFlogo Z[] = {
         .colors = {
             FF_COLOR_FG_BLUE,
         },
+    },
+    // Zraxyl
+    {
+        .names = {"Zraxyl" },
+        .lines = FASTFETCH_DATATEXT_LOGO_ZRAXYL,
+        .colors = {
+            FF_COLOR_FG_BLUE,
+        },
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // LAST
     {},

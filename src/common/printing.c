@@ -28,17 +28,12 @@ void ffPrintLogoAndKey(const char* moduleName, uint8_t moduleIndex, const FFModu
                 ffPrintColor(&instance.config.display.colorKeys);
         }
 
-        bool hasIcon = false;
         if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_ICON && moduleArgs && moduleArgs->keyIcon.length > 0)
-        {
             ffStrbufWriteTo(&moduleArgs->keyIcon, stdout);
-            hasIcon = true;
-        }
 
         if (instance.config.display.keyType & FF_MODULE_KEY_TYPE_STRING)
         {
-            if(hasIcon)
-                putchar(' ');
+            ffPrintCharTimes(' ', instance.config.display.keyType >> FF_MODULE_KEY_TYPE_SPACE_SHIFT);
 
             //NULL check is required for modules with custom keys, e.g. disk with the folder path
             if((printType & FF_PRINT_TYPE_NO_CUSTOM_KEY) || !moduleArgs || moduleArgs->key.length == 0)
@@ -135,6 +130,12 @@ void ffPrintCharTimes(char c, uint32_t times)
 {
     if(times == 0)
         return;
+
+    if(times == 1)
+    {
+        putchar(c);
+        return;
+    }
 
     char str[32];
     memset(str, c, sizeof(str)); //2 instructions when compiling with AVX2 enabled

@@ -1,3 +1,47 @@
+# 2.54.0
+
+Windows binaries in Release page are now signed using SignPath.
+
+Changes:
+* Moves macOS and Windows design language detection from the DE module to the Theme module
+
+Features:
+* Adds `--json` and `-j` command line flags as a shortcut for `--format json`
+* Various improvements to the OS module (OS)
+    * Displays point releases for Debian
+    * Displays code names for Ubuntu
+    * Displays build ID for macOS
+    * Displays code names for Windows (previously shown in the Kernel module)
+* Adds basic support for Wine (Windows)
+* Adds basic support for hppa and sh architectures (CPU, Linux)
+* Improves T-Head SoC name detection from the device tree (#1997, CPU, Linux)
+* Supports glob patterns in `Disk.hideFolders` (Disk)
+    * For example, `/boot/*` will match both `/boot/efi` and `/boot/firmware`
+* Adds brightness-level detection for external monitor support on Intel macOS (Brightness, macOS)
+* Adds configurable spacing between icon and text in keys
+    * `display.key.type: "both-N"` where N is `0-4`
+    * Useful for non-monospaced Nerd Fonts
+* Adds detection support for modern Samsung Exynos SoCs (CPU, Android)
+* Adds a new CMake option `-DENABLE_WORDEXP=<ON|OFF>` to enable or disable using `wordexp(3)` for acquiring logo file paths (`logo.source`)
+    * Enabled by default for compatibility
+    * Disabling this option reverts to using `glob(3)`, which is less functional but more secure
+
+Bugfixes:
+* Avoids integer overflow when calculating swap size (#1988, Swap, Windows)
+* Trims whitespace from full user name (Title, macOS)
+* Fixes default font size for Ghostty (#1986, TerminalFont, Linux)
+* Works around an issue that could report impossibly high memory usage in rare cases (#1988, Memory, Linux)
+* Fixes incorrect glibc dependency in polyfilled DEB packages (#1983, Linux)
+* Fixes corrupted binaries in polyfilled RPM packages (#1990, Linux)
+* Fixes crashes on ancient Android kernels (#1993, Disk, Android)
+* Fixes incorrect usage of `glob(3)` (OpenBSD)
+* Prefers resolutions reported by RandR mode info, fixing incorrect resolutions on XFCE when DPI scaling is enabled (Display, Linux)
+* Various code cleanups and minor fixes
+
+Logos:
+* Adds secureblue, PrismLinux, EmperorOS and Zraxyl
+* Updates T2
+
 # 2.53.0
 
 Changes:

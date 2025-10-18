@@ -8,14 +8,14 @@
 #include <string.h>
 #import <Foundation/Foundation.h>
 
-static void parseSystemVersion(FFOSResult* os)
+static bool parseSystemVersion(FFOSResult* os)
 {
     NSError* error;
     NSString* fileName = @"file:///System/Library/CoreServices/SystemVersion.plist";
     NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL:[NSURL URLWithString:fileName]
                                        error:&error];
     if(error)
-        return;
+        return false;
 
     NSString* value;
 
@@ -30,6 +30,8 @@ static void parseSystemVersion(FFOSResult* os)
         // macOS 26 Tahoe. #1809
         os->version.chars[0] = '2';
     }
+
+    return true;
 }
 
 static bool detectOSCodeName(FFOSResult* os)
@@ -80,41 +82,24 @@ static bool detectOSCodeName(FFOSResult* os)
     return false;
 }
 
-static void parseOSXSoftwareLicense(FFOSResult* os)
-{
-    FF_AUTO_CLOSE_FILE FILE* rtf = fopen("/System/Library/CoreServices/Setup Assistant.app/Contents/Resources/en.lproj/OSXSoftwareLicense.rtf", "r");
-    if(rtf == NULL)
-        return;
-
-    FF_AUTO_FREE char* line = NULL;
-    size_t len = 0;
-    const char* searchStr = "\\f0\\b SOFTWARE LICENSE AGREEMENT FOR macOS ";
-    while(getline(&line, &len, rtf) != EOF)
-    {
-        if (ffStrStartsWith(line, searchStr))
-        {
-            ffStrbufAppendS(&os->codename, line + strlen(searchStr));
-            ffStrbufTrimRight(&os->codename, '\n');
-            ffStrbufTrimRight(&os->codename, '\\');
-            break;
-        }
-    }
-}
-
 void ffDetectOSImpl(FFOSResult* os)
 {
     parseSystemVersion(os);
 
     ffStrbufSetStatic(&os->id, "macos");
 
-    if(os->version.length == 0)
+    if(__builtin_expect(os->name.length == 0, 0))
+        ffStrbufSetStatic(&os->name, "macOS");
+
+    if(__builtin_expect(os->version.length == 0, 0))
         ffSysctlGetString("kern.osproductversion", &os->version);
 
-    if(os->buildID.length == 0)
+    if(__builtin_expect(os->buildID.length == 0, 0))
         ffSysctlGetString("kern.osversion", &os->buildID);
 
     ffStrbufAppend(&os->versionID, &os->version);
 
-    if(!detectOSCodeName(os))
-        parseOSXSoftwareLicense(os);
+    detectOSCodeName(os);
+
+    ffStrbufSetF(&os->prettyName, "%s %s %s (%s)", os->name.chars, os->codename.chars, os->version.chars, os->buildID.chars);
 }

@@ -21,8 +21,8 @@ const char* ffDetectSwap(FFlist* result)
         ffStrbufInitNWS(&swap->name, current->FileName.Length / sizeof(wchar_t), current->FileName.Buffer);
         if (ffStrbufStartsWithS(&swap->name, "\\??\\"))
             ffStrbufSubstrAfter(&swap->name, strlen("\\??\\") - 1);
-        swap->bytesUsed = current->TotalUsed * pageSize;
-        swap->bytesTotal = current->CurrentSize * pageSize;
+        swap->bytesUsed = (uint64_t) current->TotalUsed * pageSize;
+        swap->bytesTotal = (uint64_t) current->CurrentSize * pageSize;
         if (current->NextEntryOffset == 0)
             break;
     }

@@ -1,13 +1,24 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.53.0
+    VERSION 2.54.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
 )
 
 set(PROJECT_LICENSE "MIT license")
+
+if(DEFINED CMAKE_SYSTEM_PROCESSOR_OVERRIDE) # Used by github actions for i686 build
+    set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR_OVERRIDE} CACHE INTERNAL "")
+endif()
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR)
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(CMAKE_SYSTEM_PROCESSOR "amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
+endif()
+message(STATUS "Build for system processor: ${CMAKE_SYSTEM_PROCESSOR}")
 
 ###################
 # Target Platform #
@@ -95,6 +106,7 @@ option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -963,7 +975,7 @@ elseif(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_apple.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -1024,7 +1036,7 @@ elseif(WIN32)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
-        src/detection/os/os_windows.c
+        src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.c
@@ -1033,7 +1045,7 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_windows.c
         src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
@@ -1678,11 +1690,10 @@ elseif(WIN32)
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
-        PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
     )
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
         # WoA only works on Windows 10 or higher
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
@@ -1733,17 +1744,20 @@ elseif(ANDROID)
     target_link_libraries(libfastfetch
         PRIVATE "m"
     )
-    CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
-    if(HAVE_LIBANDROID_WORDEXP_STATIC)
-        target_link_libraries(libfastfetch
-            PRIVATE -l:libandroid-wordexp.a
-        )
-    else()
-        CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
-        if(HAVE_LIBANDROID_WORDEXP)
+    if(ENABLE_WORDEXP)
+        # https://github.com/termux/termux-packages/pull/7056
+        CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
+        if(HAVE_LIBANDROID_WORDEXP_STATIC)
             target_link_libraries(libfastfetch
-                PRIVATE android-wordexp
+                PRIVATE -l:libandroid-wordexp.a
             )
+        else()
+            CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+            if(HAVE_LIBANDROID_WORDEXP)
+                target_link_libraries(libfastfetch
+                    PRIVATE android-wordexp
+                )
+            endif()
         endif()
     endif()
 elseif(Haiku)
@@ -1805,13 +1819,11 @@ if(NOT WIN32)
     if(HAVE_UTMPX)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX=1)
     endif()
-    CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
-    if(HAVE_WORDEXP)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
-    endif()
-    CHECK_INCLUDE_FILE("glob.h" HAVE_GLOB)
-    if(HAVE_GLOB)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLOB=1)
+    if(ENABLE_WORDEXP)
+        CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
+        if(HAVE_WORDEXP)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+        endif()
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
@@ -2020,11 +2032,6 @@ install(
 ##################
 
 set(CPACK_GENERATOR "TGZ;ZIP")
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CMAKE_SYSTEM_PROCESSOR "amd64")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
-endif()
 if(APPLE)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
 elseif(IS_MUSL)
@@ -2071,7 +2078,7 @@ endif()
 
 set(CPACK_SET_DESTDIR ON)
 
-set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
+set(CPACK_PACKAGE_CONTACT "Carter Li <zhangsongcui@live.cn>")
 set(CPACK_PACKAGE_DESCRIPTION "\
 fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way. \
 It is written mostly in C to achieve much better performance.\

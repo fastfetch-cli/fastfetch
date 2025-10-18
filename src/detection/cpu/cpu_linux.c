@@ -145,6 +145,7 @@ static void detectQualcomm(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips
 
+    assert(cpu->name.length >= 2);
     uint32_t code = (uint32_t) strtoul(cpu->name.chars + 2, NULL, 10);
     const char* name = NULL;
 
@@ -189,6 +190,7 @@ static void detectMediaTek(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_MediaTek_systems_on_chips
 
+    assert(cpu->name.length >= 2);
     uint32_t code = (uint32_t) strtoul(cpu->name.chars + 2, NULL, 10);
     const char* name = NULL;
 
@@ -219,25 +221,78 @@ static void detectMediaTek(FFCPUResult* cpu)
     }
 }
 
+static void detectExynos(FFCPUResult* cpu)
+{
+    // https://en.wikipedia.org/wiki/Exynos
+
+    assert(cpu->name.length > 3);
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 3, NULL, 10);
+    const char* name = NULL;
+
+    switch (code)
+    {
+        case 9955: name = "2500"; break;
+        case 9945: name = "2400"; break;
+        // No 2300
+        case 9925: name = "2200"; break;
+        case 9840: name = "2100"; break;
+
+        case 8855: name = "1580"; break;
+        case 8845: name = "1480"; break;
+        case 8835: name = "1380"; break;
+        case 8535: name = "1330"; break;
+        case 8825: name = "1280"; break;
+        case 9815: name = "1080"; break;
+
+        case 9830: name = "990"; break;
+        case 9630: name = "980"; break;
+
+        case 8805: name = "880"; break;
+        case 3830: name = "850"; break;
+    }
+
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "Samsung Exynos %s [%s]", name, str);
+        return;
+    }
+}
+
 static void detectAndroid(FFCPUResult* cpu)
 {
     if (cpu->name.length == 0)
     {
         if (ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name))
             ffStrbufClear(&cpu->vendor); // We usually detect the vendor of CPU core as ARM, but instead we want the vendor of SOC
-        else if(ffSettingsGetAndroidProperty("ro.mediatek.platform", &cpu->name))
-            ffStrbufSetStatic(&cpu->vendor, "MTK");
     }
     if (cpu->vendor.length == 0)
     {
         if (!ffSettingsGetAndroidProperty("ro.soc.manufacturer", &cpu->vendor))
-            ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor);
+            if (!ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor))
+                if (!ffSettingsGetAndroidProperty("ro.product.vendor.manufacturer", &cpu->vendor))
+                    if(ffSettingsGetAndroidProperty("ro.mediatek.platform", &cpu->name))
+                        ffStrbufSetStatic(&cpu->vendor, "MediaTek");
     }
 
-    if (ffStrbufEqualS(&cpu->vendor, "QTI") && ffStrbufStartsWithS(&cpu->name, "SM"))
+    if (ffStrbufEqualS(&cpu->vendor, "QTI"))
+        ffStrbufSetStatic(&cpu->vendor, "Qualcomm");
+    else if (ffStrbufIgnCaseEqualS(&cpu->vendor, "MediaTek")) // sometimes "Mediatek"
+        ffStrbufSetStatic(&cpu->vendor, "MediaTek");
+    else if (cpu->vendor.length > 0)
+        cpu->vendor.chars[0] = (char) toupper(cpu->vendor.chars[0]);
+
+    if (ffStrbufEqualS(&cpu->vendor, "Qualcomm") && ffStrbufStartsWithS(&cpu->name, "SM"))
         detectQualcomm(cpu);
-    else if (ffStrbufEqualS(&cpu->vendor, "MTK") && ffStrbufStartsWithS(&cpu->name, "MT"))
+    else if (ffStrbufEqualS(&cpu->vendor, "MediaTek") && ffStrbufStartsWithS(&cpu->name, "MT"))
         detectMediaTek(cpu);
+    else if (ffStrbufEqualS(&cpu->vendor, "Samsung") && ffStrbufStartsWithS(&cpu->name, "s5e"))
+    {
+        cpu->name.chars[0] = 'S';
+        cpu->name.chars[2] = 'E';
+        detectExynos(cpu);
+    }
 }
 #endif
 
@@ -360,6 +415,10 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor :", &cpu->vendor)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz :", cpuMHz)) ||
+            #elif __hppa__
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            #elif __sh__
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
             #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
@@ -617,19 +676,46 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
     if (cpu->name.length > 0)
         return;
 
-    // device-vendor,device-model\0soc-vendor,soc-model\0
-    char content[256];
+    // [x-vendor,x-model\0]*N
+    char content[512];
     ssize_t length = ffReadFileData("/proc/device-tree/compatible", ARRAY_SIZE(content), content);
-    if (length <= 2) return;
+    if (length < 4) return; // v,m\0
 
-    // get the second NUL terminated string if it exists
-    char* vendor = memchr(content, '\0', (size_t) length) + 1;
-    if (!vendor || vendor - content >= length) vendor = content;
+    if (content[length - 1] != '\0') return; // must end with \0
 
-    char* model = strchr(vendor, ',');
-    if (!model) return;
-    *model = '\0';
-    ++model;
+    --length;
+
+    char* vendor = NULL;
+    char* model = NULL;
+
+    for (char* p; length > 0; length = p ? (ssize_t) (p - content) - 1 : 0)
+    {
+        p = memrchr(content, '\0', (size_t) length);
+
+        vendor = p /* first entry */ ? p + 1 : content;
+
+        size_t partLen = (size_t) (length - (vendor - content));
+        if (partLen < 3) continue;
+
+        char* comma = memchr(vendor, ',', partLen);
+        if (!comma) continue;
+
+        size_t vendorLen = (size_t) (comma - vendor);
+        if (vendorLen == 0) continue;
+
+        model = comma + 1;
+        size_t modelLen = (size_t) (partLen - (size_t) (model - vendor));
+        if (modelLen == 0) continue;
+
+        if ((modelLen >= strlen("-platform") && ffStrEndsWith(model, "-platform")) ||
+            (modelLen >= strlen("-soc") && ffStrEndsWith(model, "-soc")))
+            continue;
+
+        *comma = '\0';
+        break;
+    }
+
+    if (!length) return;
 
     if (false) {}
     #if __aarch64__
@@ -682,6 +768,13 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
     {
         // Raspberry Pi
         ffStrbufSetStatic(&cpu->vendor, "Broadcom");
+        for (const char* p = model; *p; ++p)
+            ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+    }
+    else if (ffStrEquals(vendor, "thead"))
+    {
+        // Lichee Pi?
+        ffStrbufSetStatic(&cpu->vendor, "T-Head");
         for (const char* p = model; *p; ++p)
             ffStrbufAppendC(&cpu->name, (char) toupper(*p));
     }

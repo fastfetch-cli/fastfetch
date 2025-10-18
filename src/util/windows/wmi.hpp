@@ -7,7 +7,7 @@ extern "C" {
 }
 
 #include <initguid.h>
-#include <Wbemidl.h>
+#include <wbemidl.h>
 #include <cassert>
 
 #include "variant.hpp"

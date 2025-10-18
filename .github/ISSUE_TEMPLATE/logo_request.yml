@@ -36,3 +36,5 @@ body:
           required: true
         - label: The ASCII art contains color codes, or the color codes are available in `os-release`
           required: true
+        - label: The ASCII art contains no internal paddings (spaces at the start and the end of lines)
+          required: true
