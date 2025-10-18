@@ -1008,7 +1008,7 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set whether to show icon before string keys",
+                            "description": "Set whether to show builtin icon before string keys",
                             "oneOf": [
                                 {
                                     "const": "none",
@@ -1020,7 +1020,7 @@
                                 },
                                 {
                                     "const": "icon",
-                                    "description": "Show icon keys (requires newest nerd font)"
+                                    "description": "Show builtin icon (requires newest nerd font)"
                                 },
                                 {
                                     "const": "both",
@@ -1046,7 +1046,6 @@
                                     "const": "both-4",
                                     "description": "Show both icon and string with 4 spaces between them"
                                 }
-                            ],
                             ],
                             "default": "string"
                         },
