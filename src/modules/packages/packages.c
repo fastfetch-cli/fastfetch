@@ -146,6 +146,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(mport)
         FF_PRINT_PACKAGE(pisi)
         FF_PRINT_PACKAGE(soar)
+	FF_PRINT_PACKAGE(kiss)
 
         putchar('\n');
     }
@@ -194,7 +195,8 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.hpkgUser, "hpkg-user"),
             FF_FORMAT_ARG(counts.pisi, "pisi"),
             FF_FORMAT_ARG(counts.soar, "soar"),
-            FF_FORMAT_ARG(nixAll, "nix-all"),
+            FF_FORMAT_ARG(counts.kiss, "kiss"),
+	    FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
             FF_FORMAT_ARG(guixAll, "guix-all"),
@@ -268,7 +270,10 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'H': if (false);
                             FF_TEST_PACKAGE_NAME(HPKG)
                             break;
-                        case 'L': if (false);
+             	        case 'K': if (false);
+			    FF_TEST_PACKAGE_NAME(KISS)
+			    break;
+	                case 'L': if (false);
                             FF_TEST_PACKAGE_NAME(LPKG)
                             FF_TEST_PACKAGE_NAME(LPKGBUILD)
                             FF_TEST_PACKAGE_NAME(LINGLONG)
@@ -346,6 +351,7 @@ void ffGeneratePackagesJsonConfig(FFPackagesOptions* options, yyjson_mut_doc* do
     FF_TEST_PACKAGE_NAME(FLATPAK)
     FF_TEST_PACKAGE_NAME(GUIX)
     FF_TEST_PACKAGE_NAME(HPKG)
+    FF_TEST_PACKAGE_NAME(KISS)
     FF_TEST_PACKAGE_NAME(LINGLONG)
     FF_TEST_PACKAGE_NAME(LPKG)
     FF_TEST_PACKAGE_NAME(LPKGBUILD)
@@ -406,6 +412,7 @@ bool ffGeneratePackagesJsonResult(FF_MAYBE_UNUSED FFPackagesOptions* options, yy
     FF_APPEND_PACKAGE_COUNT(guixHome)
     FF_APPEND_PACKAGE_COUNT(hpkgSystem)
     FF_APPEND_PACKAGE_COUNT(hpkgUser)
+    FF_APPEND_PACKAGE_COUNT(kiss)
     FF_APPEND_PACKAGE_COUNT(linglong)
     FF_APPEND_PACKAGE_COUNT(mport)
     FF_APPEND_PACKAGE_COUNT(nixDefault)
@@ -498,6 +505,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of hpkg-user packages", "hpkg-user"},
         {"Number of pisi packages", "pisi"},
         {"Number of soar packages", "soar"},
+	{"Number of kiss packages", "kiss"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},

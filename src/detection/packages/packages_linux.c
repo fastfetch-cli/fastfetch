@@ -411,6 +411,26 @@ static uint32_t getFlatpakPackages(FFstrbuf* baseDir, const char* dirname)
 
     return num_elements;
 }
+static uint32_t getKissPackages(FFstrbuf* baseDir)
+{
+    uint32_t baseDirLength = baseDir->length;
+    ffStrbufAppendS(baseDir, "/var/db/kiss/installed");
+    
+    uint32_t count = 0;
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir(baseDir->chars);
+    if (dir)
+    {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != NULL)
+        {
+            if (entry->d_type == DT_DIR && entry->d_name[0] != '.')
+                count++;
+        }
+    }
+    
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+    return count;
+}
 
 static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
 {
@@ -452,6 +472,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
+    if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
@@ -558,4 +579,7 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 
     if (!(options->disabled & FF_PACKAGES_FLAG_SOAR_BIT))
         result->soar += getSQLite3Int(&baseDir, ".local/share/soar/db/soar.db", "SELECT COUNT(DISTINCT pkg_id || pkg_name) FROM packages WHERE is_installed = true", "soar");
+    
+    if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) 
+	result->kiss += getKissPackages(&baseDir);
 }
