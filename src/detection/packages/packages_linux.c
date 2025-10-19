@@ -472,7 +472,7 @@ static void getPackageCounts(FFstrbuf* baseDir, FFPackagesResult* packageCounts,
     if (!(options->disabled & FF_PACKAGES_FLAG_PACSTALL_BIT)) packageCounts->pacstall += getNumElements(baseDir, "/var/lib/pacstall/metadata", false);
     if (!(options->disabled & FF_PACKAGES_FLAG_PISI_BIT)) packageCounts->pisi += getNumElements(baseDir, "/var/lib/pisi/package", true);
     if (!(options->disabled & FF_PACKAGES_FLAG_PKGSRC_BIT)) packageCounts->pkgsrc += getNumElements(baseDir, "/usr/pkg/pkgdb", DT_DIR);
-    if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) packageCounts->kiss += getNumElements(baseDir, "/var/db/kiss/installed", true);
+    if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) packageCounts->kiss += getKissPackages(baseDir, "/var/db/kiss/installed");
 }
 
 static void getPackageCountsRegular(FFstrbuf* baseDir, FFPackagesResult* packageCounts, FFPackagesOptions* options)
