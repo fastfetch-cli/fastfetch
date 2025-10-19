@@ -6,6 +6,7 @@
 #include "util/binary.h"
 
 #include <ctype.h>
+#include <stdint.h>
 #ifdef __FreeBSD__
     #include <paths.h>
     #ifndef _PATH_LOCALBASE
@@ -85,8 +86,10 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
     if(!getExeVersionRaw(exe, version))
         return false;
 
-    //fish, version 4.0.2-1 (Built by MSYS2 project)
-    ffStrbufSubstrAfterFirstS(version, "version ");
+    //fish, version 4.0.2-1 (Built by MSYS2 project) // version can be localized if LC_ALL is set
+    if (version->length < strlen("fish, v")) return false;
+    uint32_t index = ffStrbufNextIndexC(version, strlen("fish, "), ' ');
+    ffStrbufSubstrAfter(version, index);
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return true;
 }
