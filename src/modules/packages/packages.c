@@ -196,7 +196,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.pisi, "pisi"),
             FF_FORMAT_ARG(counts.soar, "soar"),
             FF_FORMAT_ARG(counts.kiss, "kiss"),
-	    FF_FORMAT_ARG(nixAll, "nix-all"),
+            FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
             FF_FORMAT_ARG(guixAll, "guix-all"),
