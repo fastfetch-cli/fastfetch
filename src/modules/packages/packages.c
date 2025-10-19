@@ -146,7 +146,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(mport)
         FF_PRINT_PACKAGE(pisi)
         FF_PRINT_PACKAGE(soar)
-	FF_PRINT_PACKAGE(kiss)
+        FF_PRINT_PACKAGE(kiss)
 
         putchar('\n');
     }
