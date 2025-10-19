@@ -294,6 +294,8 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
         return getShellVersionAsh(exe, version);
     if(ffStrEqualsIgnCase(exeName, "xonsh"))
         return getShellVersionXonsh(exe, version);
+    if(ffStrEqualsIgnCase(exeName, "brush"))
+        return getExeVersionGeneral(exe, version); // brush 0.2.23 (git:2835487)
 
     #ifdef _WIN32
     if(ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise"))
