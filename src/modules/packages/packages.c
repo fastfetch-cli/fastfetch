@@ -505,7 +505,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of hpkg-user packages", "hpkg-user"},
         {"Number of pisi packages", "pisi"},
         {"Number of soar packages", "soar"},
-	{"Number of kiss packages", "kiss"},
+        {"Number of kiss packages", "kiss"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
