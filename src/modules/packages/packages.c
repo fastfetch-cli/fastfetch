@@ -270,10 +270,10 @@ void ffParsePackagesJsonObject(FFPackagesOptions* options, yyjson_val* module)
                         case 'H': if (false);
                             FF_TEST_PACKAGE_NAME(HPKG)
                             break;
-             	        case 'K': if (false);
-			    FF_TEST_PACKAGE_NAME(KISS)
-			    break;
-	                case 'L': if (false);
+                        case 'K': if (false);
+                            FF_TEST_PACKAGE_NAME(KISS)
+                            break;
+                        case 'L': if (false);
                             FF_TEST_PACKAGE_NAME(LPKG)
                             FF_TEST_PACKAGE_NAME(LPKGBUILD)
                             FF_TEST_PACKAGE_NAME(LINGLONG)
