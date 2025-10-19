@@ -581,5 +581,5 @@ void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
         result->soar += getSQLite3Int(&baseDir, ".local/share/soar/db/soar.db", "SELECT COUNT(DISTINCT pkg_id || pkg_name) FROM packages WHERE is_installed = true", "soar");
     
     if (!(options->disabled & FF_PACKAGES_FLAG_KISS_BIT)) 
-	result->kiss += getKissPackages(&baseDir);
+    result->kiss += getKissPackages(&baseDir);
 }
