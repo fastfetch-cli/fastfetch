@@ -322,6 +322,11 @@ If you find Fastfetch useful, please consider donating.
 * Current maintainer: [@CarterLi](https://paypal.me/zhangsongcui)
 * Original author: [@LinusDierheimer](https://github.com/sponsors/LinusDierheimer)
 
+## Code signing
+
+* Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/)
+* This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it
+
 ## Star History
 
 Give us a star to show your support!
