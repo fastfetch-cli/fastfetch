@@ -1,3 +1,16 @@
+fastfetch (2.54.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Fix building on plucky
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 20 Oct 2025 14:27:02 +0800
+
+fastfetch (2.54.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.54.0
+  * Test independent changelog entries for different Ubuntu releases
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 20 Oct 2025 10:47:02 +0800
+
 fastfetch (2.53.0) jammy; urgency=medium
 
   * Update to 2.53.0
@@ -435,4 +448,3 @@ fastfetch (2.7.1) jammy; urgency=medium
   * Initial release.
 
  -- Carter Li <zhangsongcui@live.cn>  Tue, 06 Feb 2024 15:01:11 +0800
-
