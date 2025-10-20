@@ -30,6 +30,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result)
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
+            ffCfDictGetDataAsString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkData"), &result->cover);
         }
         else
             error = "MRMediaRemoteGetNowPlayingInfo() failed";
@@ -80,6 +81,7 @@ int ffPrintMediaByMediaRemote(void)
         .album = ffStrbufCreate(),
         .playerId = ffStrbufCreate(),
         .player = ffStrbufCreate(),
+        .cover = ffStrbufCreate(),
     };
     if (getMediaByMediaRemote(&media) != NULL)
         return 1;
@@ -89,12 +91,14 @@ int ffPrintMediaByMediaRemote(void)
     ffStrbufPutTo(&media.album, stdout);
     ffStrbufPutTo(&media.playerId, stdout);
     ffStrbufPutTo(&media.player, stdout);
+    ffStrbufWriteTo(&media.cover, stdout); // Raw data
     ffStrbufDestroy(&media.status);
     ffStrbufDestroy(&media.song);
     ffStrbufDestroy(&media.artist);
     ffStrbufDestroy(&media.album);
     ffStrbufDestroy(&media.playerId);
     ffStrbufDestroy(&media.player);
+    ffStrbufDestroy(&media.cover);
     return 0;
 }
 
@@ -119,6 +123,10 @@ static const char* getMediaByAuthorizedProcess(FFMediaResult* result)
     size_t len = 0;
     for (uint32_t i = 0; i < ARRAY_SIZE(varList) && ffStrbufGetline(&line, &len, &buffer); ++i)
         ffStrbufSetS(varList[i], line);
+    ffStrbufGetlineRestore(&line, &len, &buffer);
+    line++; // Skip the newline before the cover data
+    if (line < buffer.chars + buffer.length)
+        ffStrbufSetNS(&result->cover, buffer.length - (uint32_t) (line - buffer.chars), line);
     return NULL;
 }
 

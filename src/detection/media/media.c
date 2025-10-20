@@ -16,6 +16,7 @@ const FFMediaResult* ffDetectMedia(void)
         ffStrbufInit(&result.album);
         ffStrbufInit(&result.url);
         ffStrbufInit(&result.status);
+        ffStrbufInit(&result.cover);
         ffDetectMediaImpl(&result);
 
         if(result.song.length == 0 && result.error.length == 0)

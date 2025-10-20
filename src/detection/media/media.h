@@ -13,6 +13,7 @@ typedef struct FFMediaResult
     FFstrbuf album;
     FFstrbuf url;
     FFstrbuf status;
+    FFstrbuf cover;
 } FFMediaResult;
 
 const FFMediaResult* ffDetectMedia();
