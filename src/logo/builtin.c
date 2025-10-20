@@ -2856,6 +2856,17 @@ static const FFlogo L[] = {
 };
 
 static const FFlogo M[] = {
+    // Macaroni
+    {
+        .names = {"Macaroni"},
+        .lines = FASTFETCH_DATATEXT_LOGO_MACARONIOS,
+        .colors = {
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_WHITE,
+		},
+        .colorKeys = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // MacOS
     {
         .names = {"macos", "mac"},
