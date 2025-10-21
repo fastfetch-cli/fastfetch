@@ -5,6 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import <CoreServices/CoreServices.h>
 
 // https://github.com/andrewwiik/iOS-Blocks/blob/master/Widgets/Music/MediaRemote.h
 extern void MRMediaRemoteGetNowPlayingInfo(dispatch_queue_t dispatcher, void(^callback)(_Nullable CFDictionaryRef info)) __attribute__((weak_import));
@@ -30,7 +31,21 @@ static const char* getMediaByMediaRemote(FFMediaResult* result)
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
-            ffCfDictGetDataAsString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkData"), &result->cover);
+            NSData* artworkData = (__bridge NSData*) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkData"));
+            if (artworkData)
+            {
+                CFStringRef mime = (CFStringRef) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkMIMEType"));
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                FF_CFTYPE_AUTO_RELEASE CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+                FF_CFTYPE_AUTO_RELEASE CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
+#pragma clang diagnostic pop
+                NSString *tmpDir = NSTemporaryDirectory();
+                NSString *uuid = [[NSUUID UUID] UUIDString];
+                NSString *path = [tmpDir stringByAppendingPathComponent:[NSString stringWithFormat:@"ff_%@.%@", uuid, ext ? (__bridge NSString *) ext : @"img"]];
+                if ([artworkData writeToFile:path atomically:NO])
+                    ffStrbufSetS(&result->cover, path.UTF8String);
+            }
         }
         else
             error = "MRMediaRemoteGetNowPlayingInfo() failed";
@@ -91,7 +106,7 @@ int ffPrintMediaByMediaRemote(void)
     ffStrbufPutTo(&media.album, stdout);
     ffStrbufPutTo(&media.playerId, stdout);
     ffStrbufPutTo(&media.player, stdout);
-    ffStrbufWriteTo(&media.cover, stdout); // Raw data
+    ffStrbufWriteTo(&media.cover, stdout);
     ffStrbufDestroy(&media.status);
     ffStrbufDestroy(&media.song);
     ffStrbufDestroy(&media.artist);
@@ -118,15 +133,11 @@ static const char* getMediaByAuthorizedProcess(FFMediaResult* result)
     if (buffer.length == 0) return "No media found";
 
     // status\ntitle\nartist\nalbum\nbundleName\nappName
-    FFstrbuf* const varList[] = { &result->status, &result->song, &result->artist, &result->album, &result->playerId, &result->player };
+    FFstrbuf* const varList[] = { &result->status, &result->song, &result->artist, &result->album, &result->playerId, &result->player, &result->cover };
     char* line = NULL;
     size_t len = 0;
     for (uint32_t i = 0; i < ARRAY_SIZE(varList) && ffStrbufGetline(&line, &len, &buffer); ++i)
         ffStrbufSetS(varList[i], line);
-    ffStrbufGetlineRestore(&line, &len, &buffer);
-    line++; // Skip the newline before the cover data
-    if (line < buffer.chars + buffer.length)
-        ffStrbufSetNS(&result->cover, buffer.length - (uint32_t) (line - buffer.chars), line);
     return NULL;
 }
 

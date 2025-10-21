@@ -2,9 +2,9 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Media.Control.h>
 #include <winrt/Windows.Storage.Streams.h>
+#include <winrt/Windows.Storage.h>
 #include <wchar.h>
-#include <stdlib.h>
-
+#include <windows.h>
 
 extern "C"
 {
@@ -16,6 +16,7 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
     // Make it a separate dll in order not to break Windows 7 support
     using namespace winrt::Windows::Media::Control;
     using namespace winrt::Windows::ApplicationModel;
+    using namespace winrt::Windows::Storage;
     using namespace winrt::Windows::Storage::Streams;
 
     try
@@ -69,20 +70,24 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
         {
             try
             {
-                auto stream = thumbRef.OpenReadAsync().get();
-                uint64_t size = stream.Size();
-                if (size > 0)
+                if (auto stream = thumbRef.OpenReadAsync().get())
                 {
-                    auto contentType = stream.ContentType();
-                    auto ibuffer = Buffer(static_cast<uint32_t>(size));
-                    auto readBuffer = stream.ReadAsync(ibuffer, static_cast<uint32_t>(size), InputStreamOptions::None).get();
-                    uint32_t length = readBuffer.Length();
-                    auto reader = DataReader::FromBuffer(readBuffer);
+                    if (stream.Size() > 0)
+                    {
+                        Buffer buffer(static_cast<uint32_t>(stream.Size()));
+                        stream.ReadAsync(buffer, buffer.Capacity(), InputStreamOptions::None).get();
 
-                    result->coverImageSize = length;
-                    result->coverImageData = (uint8_t*) ::malloc(length + 1);
-                    reader.ReadBytes(winrt::array_view<uint8_t>(result->coverImageData, result->coverImageSize));
-                    result->coverImageData[length] = 0;
+                        wchar_t tempPath[MAX_PATH];
+                        if (GetTempPathW(MAX_PATH, tempPath) > 0)
+                        {
+                            auto tempFolder = StorageFolder::GetFolderFromPathAsync(tempPath).get();
+                            auto tempFile = tempFolder.CreateFileAsync(L"ff_thumb.img", CreationCollisionOption::GenerateUniqueName).get();
+                            FileIO::WriteBufferAsync(tempFile, buffer).get();
+
+                            ::wcsncpy(result->cover, tempFile.Path().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+                            result->cover[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
+                        }
+                    }
                 }
             }
             catch (...)

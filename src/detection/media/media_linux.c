@@ -77,8 +77,8 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                 ffDBusGetString(data, &dictIterator, &path);
                 if (ffStrbufStartsWithS(&path, "file:///"))
                 {
-                    uint32_t j = 0;
-                    for (uint32_t i = (uint32_t) strlen("file:///") - 1; i < path.length; ++i, ++j)
+                    ffStrbufEnsureFree(&result->cover, path.length - (uint32_t) strlen("file://"));
+                    for (uint32_t i = (uint32_t) strlen("file://"); i < path.length; ++i)
                     {
                         if (path.chars[i] == '%')
                         {
@@ -86,17 +86,14 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                                 break;
                             char str[] = { path.chars[i + 1], path.chars[i + 2], 0 };
                             const char decodedChar = (char) strtoul(str, NULL, 16);
-                            path.chars[j] = decodedChar;
                             i += 2;
+                            ffStrbufAppendC(&result->cover, decodedChar);
                         }
                         else
                         {
-                            path.chars[j] = path.chars[i];
+                            ffStrbufAppendC(&result->cover, path.chars[i]);
                         }
                     }
-                    path.chars[j] = '\0';
-                    path.length = j;
-                    ffReadFileBuffer(path.chars, &result->cover);
                 }
             }
         }

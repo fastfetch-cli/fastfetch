@@ -32,12 +32,8 @@ static const char* getMedia(FFMediaResult* media)
     ffStrbufSetWS(&media->song, result.song);
     ffStrbufSetWS(&media->artist, result.artist);
     ffStrbufSetWS(&media->album, result.album);
+    ffStrbufSetWS(&media->cover, result.cover);
     ffStrbufSetStatic(&media->status, result.status);
-
-    ffStrbufDestroy(&media->cover);
-    media->cover.chars = (char*) result.coverImageData;
-    media->cover.length = result.coverImageSize;
-    media->cover.allocated = result.coverImageSize + 1;
     return NULL;
 }
 
