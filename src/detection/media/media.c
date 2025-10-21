@@ -1,8 +1,8 @@
 #include "media.h"
 
-void ffDetectMediaImpl(FFMediaResult* media);
+void ffDetectMediaImpl(FFMediaResult* media, bool saveCover);
 
-const FFMediaResult* ffDetectMedia(void)
+const FFMediaResult* ffDetectMedia(bool saveCover)
 {
     static FFMediaResult result;
 
@@ -17,7 +17,7 @@ const FFMediaResult* ffDetectMedia(void)
         ffStrbufInit(&result.url);
         ffStrbufInit(&result.status);
         ffStrbufInit(&result.cover);
-        ffDetectMediaImpl(&result);
+        ffDetectMediaImpl(&result, saveCover);
 
         if(result.song.length == 0 && result.error.length == 0)
             ffStrbufAppendS(&result.error, "No media found");

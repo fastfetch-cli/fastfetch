@@ -2,6 +2,7 @@
 #include "fastfetch.h"
 #include "detection/media/media.h"
 #include "util/stringUtils.h"
+#include "util/unused.h"
 
 #include <string.h>
 
@@ -271,8 +272,9 @@ static const char* getMedia(FFMediaResult* result)
 
 #endif
 
-void ffDetectMediaImpl(FFMediaResult* media)
+void ffDetectMediaImpl(FFMediaResult* media, bool saveCover)
 {
+    FF_UNUSED(saveCover); // We don't save the cover to a file for Mpris implementation
     #ifdef FF_HAVE_DBUS
         const char* error = getMedia(media);
         ffStrbufAppendS(&media->error, error);

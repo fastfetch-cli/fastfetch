@@ -13,7 +13,7 @@ extern void MRMediaRemoteGetNowPlayingApplicationIsPlaying(dispatch_queue_t queu
 extern void MRMediaRemoteGetNowPlayingApplicationDisplayID(dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef displayID)) __attribute__((weak_import));
 extern void MRMediaRemoteGetNowPlayingApplicationDisplayName(int unknown, dispatch_queue_t queue, void (^callback)(_Nullable CFStringRef name)) __attribute__((weak_import));
 
-static const char* getMediaByMediaRemote(FFMediaResult* result)
+static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover)
 {
     #define FF_TEST_FN_EXISTANCE(fn) if (!fn) return "MediaRemote function " #fn " is not available"
     FF_TEST_FN_EXISTANCE(MRMediaRemoteGetNowPlayingInfo);
@@ -31,20 +31,24 @@ static const char* getMediaByMediaRemote(FFMediaResult* result)
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoTitle"), &result->song);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtist"), &result->artist);
             ffCfDictGetString(info, CFSTR("kMRMediaRemoteNowPlayingInfoAlbum"), &result->album);
-            NSData* artworkData = (__bridge NSData*) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkData"));
-            if (artworkData)
+
+            if (saveCover)
             {
-                CFStringRef mime = (CFStringRef) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkMIMEType"));
+                NSData* artworkData = (__bridge NSData*) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkData"));
+                if (artworkData)
+                {
+                    CFStringRef mime = (CFStringRef) CFDictionaryGetValue(info, CFSTR("kMRMediaRemoteNowPlayingInfoArtworkMIMEType"));
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                FF_CFTYPE_AUTO_RELEASE CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
-                FF_CFTYPE_AUTO_RELEASE CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
+                    FF_CFTYPE_AUTO_RELEASE CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
+                    FF_CFTYPE_AUTO_RELEASE CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
 #pragma clang diagnostic pop
-                NSString *tmpDir = NSTemporaryDirectory();
-                NSString *uuid = [[NSUUID UUID] UUIDString];
-                NSString *path = [tmpDir stringByAppendingPathComponent:[NSString stringWithFormat:@"ff_%@.%@", uuid, ext ? (__bridge NSString *) ext : @"img"]];
-                if ([artworkData writeToFile:path atomically:NO])
-                    ffStrbufSetS(&result->cover, path.UTF8String);
+                    NSString *tmpDir = NSTemporaryDirectory();
+                    NSString *uuid = [[NSUUID UUID] UUIDString];
+                    NSString *path = [tmpDir stringByAppendingPathComponent:[NSString stringWithFormat:@"ff_%@.%@", uuid, ext ? (__bridge NSString *) ext : @"img"]];
+                    if ([artworkData writeToFile:path atomically:NO])
+                        ffStrbufSetS(&result->cover, path.UTF8String);
+                }
             }
         }
         else
@@ -87,7 +91,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result)
 }
 
 __attribute__((visibility("default"), used))
-int ffPrintMediaByMediaRemote(void)
+int ffPrintMediaByMediaRemote(bool saveCover)
 {
     FFMediaResult media = {
         .status = ffStrbufCreate(),
@@ -98,7 +102,7 @@ int ffPrintMediaByMediaRemote(void)
         .player = ffStrbufCreate(),
         .cover = ffStrbufCreate(),
     };
-    if (getMediaByMediaRemote(&media) != NULL)
+    if (getMediaByMediaRemote(&media, saveCover) != NULL)
         return 1;
     ffStrbufPutTo(&media.status, stdout);
     ffStrbufPutTo(&media.song, stdout);
@@ -117,10 +121,10 @@ int ffPrintMediaByMediaRemote(void)
     return 0;
 }
 
-static const char* getMediaByAuthorizedProcess(FFMediaResult* result)
+static const char* getMediaByAuthorizedProcess(FFMediaResult* result, bool saveCover)
 {
     // #1737
-    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("import ctypes;ctypes.CDLL('%s').ffPrintMediaByMediaRemote()", instance.state.platform.exePath.chars);
+    FF_STRBUF_AUTO_DESTROY script = ffStrbufCreateF("import ctypes;ctypes.CDLL('%s').ffPrintMediaByMediaRemote(%s)", instance.state.platform.exePath.chars, saveCover ? "True" : "False");
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
     const char* error = ffProcessAppendStdOut(&buffer, (char* const[]) {
@@ -141,13 +145,13 @@ static const char* getMediaByAuthorizedProcess(FFMediaResult* result)
     return NULL;
 }
 
-void ffDetectMediaImpl(FFMediaResult* media)
+void ffDetectMediaImpl(FFMediaResult* media, bool saveCover)
 {
     const char* error;
     if (@available(macOS 15.4, *))
-        error = getMediaByAuthorizedProcess(media);
+        error = getMediaByAuthorizedProcess(media, saveCover);
     else
-        error = getMediaByMediaRemote(media);
+        error = getMediaByMediaRemote(media, saveCover);
     if (error)
         ffStrbufAppendS(&media->error, error);
     else if (media->player.length == 0 && media->playerId.length > 0)

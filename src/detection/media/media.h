@@ -16,4 +16,4 @@ typedef struct FFMediaResult
     FFstrbuf cover;
 } FFMediaResult;
 
-const FFMediaResult* ffDetectMedia();
+const FFMediaResult* ffDetectMedia(bool saveCover);

@@ -43,7 +43,7 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
 
 bool ffPrintMedia(FFMediaOptions* options)
 {
-    const FFMediaResult* media = ffDetectMedia();
+    const FFMediaResult* media = ffDetectMedia(false);
 
     if(media->error.length > 0)
     {
@@ -128,7 +128,7 @@ void ffGenerateMediaJsonConfig(FFMediaOptions* options, yyjson_mut_doc* doc, yyj
 
 bool ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    const FFMediaResult* media = ffDetectMedia();
+    const FFMediaResult* media = ffDetectMedia(false);
 
     if(media->error.length > 0)
     {
@@ -143,6 +143,10 @@ bool ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, song, "artist", &media->artist);
     yyjson_mut_obj_add_strbuf(doc, song, "album", &media->album);
     yyjson_mut_obj_add_strbuf(doc, song, "status", &media->status);
+    if (media->cover.length > 0)
+        yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->status);
+    else
+        yyjson_mut_obj_add_null(doc, song, "cover");
 
     yyjson_mut_val* player = yyjson_mut_obj_add_obj(doc, obj, "player");
     yyjson_mut_obj_add_strbuf(doc, player, "name", &media->player);

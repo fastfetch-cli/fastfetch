@@ -10,14 +10,12 @@ extern "C"
 {
 #include "media_windows.dll.h"
 
-const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
+const char* ffWinrtDetectMedia(FFWinrtMediaResult* result, bool saveCover)
 {
     // C++/WinRT requires Windows 8.1+ and C++ runtime (std::string, exceptions and other stuff)
     // Make it a separate dll in order not to break Windows 7 support
     using namespace winrt::Windows::Media::Control;
     using namespace winrt::Windows::ApplicationModel;
-    using namespace winrt::Windows::Storage;
-    using namespace winrt::Windows::Storage::Streams;
 
     try
     {
@@ -66,33 +64,38 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
             result->playerName[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
         } catch (...) { }
 
-        if (auto thumbRef = mediaProps.Thumbnail())
+        if (saveCover)
         {
-            try
+            using namespace winrt::Windows::Storage;
+            using namespace winrt::Windows::Storage::Streams;
+            if (auto thumbRef = mediaProps.Thumbnail())
             {
-                if (auto stream = thumbRef.OpenReadAsync().get())
+                try
                 {
-                    if (stream.Size() > 0)
+                    if (auto stream = thumbRef.OpenReadAsync().get())
                     {
-                        Buffer buffer(static_cast<uint32_t>(stream.Size()));
-                        stream.ReadAsync(buffer, buffer.Capacity(), InputStreamOptions::None).get();
-
-                        wchar_t tempPath[MAX_PATH];
-                        if (GetTempPathW(MAX_PATH, tempPath) > 0)
+                        if (stream.Size() > 0)
                         {
-                            auto tempFolder = StorageFolder::GetFolderFromPathAsync(tempPath).get();
-                            auto tempFile = tempFolder.CreateFileAsync(L"ff_thumb.img", CreationCollisionOption::GenerateUniqueName).get();
-                            FileIO::WriteBufferAsync(tempFile, buffer).get();
+                            Buffer buffer(static_cast<uint32_t>(stream.Size()));
+                            stream.ReadAsync(buffer, buffer.Capacity(), InputStreamOptions::None).get();
 
-                            ::wcsncpy(result->cover, tempFile.Path().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
-                            result->cover[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
+                            wchar_t tempPath[MAX_PATH];
+                            if (GetTempPathW(MAX_PATH, tempPath) > 0)
+                            {
+                                auto tempFolder = StorageFolder::GetFolderFromPathAsync(tempPath).get();
+                                auto tempFile = tempFolder.CreateFileAsync(L"ff_thumb.img", CreationCollisionOption::GenerateUniqueName).get();
+                                FileIO::WriteBufferAsync(tempFile, buffer).get();
+
+                                ::wcsncpy(result->cover, tempFile.Path().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+                                result->cover[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
+                            }
                         }
                     }
                 }
-            }
-            catch (...)
-            {
-                // Ignore thumbnail errors
+                catch (...)
+                {
+                    // Ignore thumbnail errors
+                }
             }
         }
 

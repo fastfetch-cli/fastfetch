@@ -3,7 +3,7 @@
 #include "media.h"
 #include "media_windows.dll.h"
 
-static const char* getMedia(FFMediaResult* media)
+static const char* getMedia(FFMediaResult* media, bool saveCover)
 {
     FF_LIBRARY_LOAD(libffwinrt, "dlopen libffwinrt" FF_LIBRARY_EXTENSION " failed", "libffwinrt" FF_LIBRARY_EXTENSION, 0)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libffwinrt, ffWinrtDetectMedia)
@@ -11,7 +11,7 @@ static const char* getMedia(FFMediaResult* media)
 
     FFWinrtMediaResult result = {};
 
-    const char* error = ffffWinrtDetectMedia(&result);
+    const char* error = ffffWinrtDetectMedia(&result, saveCover);
     if (error)
     {
         ffStrbufSetStatic(&media->error, error);
@@ -37,8 +37,8 @@ static const char* getMedia(FFMediaResult* media)
     return NULL;
 }
 
-void ffDetectMediaImpl(FFMediaResult* media)
+void ffDetectMediaImpl(FFMediaResult* media, bool saveCover)
 {
-    const char* error = getMedia(media);
+    const char* error = getMedia(media, saveCover);
     ffStrbufAppendS(&media->error, error);
 }

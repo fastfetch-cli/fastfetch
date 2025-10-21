@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
+#include "detection/media/media.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "util/textModifier.h"
@@ -482,6 +483,15 @@ static bool updateLogoPath(void)
 
     if (ffStrbufEqualS(&options->source, "-")) // stdin
         return true;
+
+    if (ffStrbufIgnCaseEqualS(&options->source, "mediacover"))
+    {
+        const FFMediaResult* media = ffDetectMedia(true);
+        if (media->cover.length == 0)
+            return false;
+        ffStrbufSet(&options->source, &media->cover);
+        return true;
+    }
 
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))

@@ -14,4 +14,4 @@ typedef struct FFWinrtMediaResult
 } FFWinrtMediaResult;
 
 __attribute__((__dllexport__))
-const char* ffWinrtDetectMedia(FFWinrtMediaResult* result);
+const char* ffWinrtDetectMedia(FFWinrtMediaResult* result, bool saveCover);
