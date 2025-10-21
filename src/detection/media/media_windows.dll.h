@@ -10,6 +10,10 @@ typedef struct FFWinrtMediaResult
     wchar_t artist[FF_MEDIA_WIN_RESULT_BUFLEN];
     wchar_t album[FF_MEDIA_WIN_RESULT_BUFLEN];
     const char* status;
+
+    // Caller is responsible for freeing it using free()
+    uint8_t* coverImageData;
+    uint32_t coverImageSize;
 } FFWinrtMediaResult;
 
 __attribute__((__dllexport__))
