@@ -34,6 +34,8 @@ static const char* getMedia(FFMediaResult* media, bool saveCover)
     ffStrbufSetWS(&media->album, result.album);
     ffStrbufSetWS(&media->cover, result.cover);
     ffStrbufSetStatic(&media->status, result.status);
+    if (media->cover.length > 0)
+        media->removeCoverAfterUse = true;
     return NULL;
 }
 

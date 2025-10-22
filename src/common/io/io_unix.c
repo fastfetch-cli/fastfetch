@@ -372,3 +372,8 @@ FFNativeFD ffGetNullFD(void)
     hNullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
     return hNullFile;
 }
+
+bool ffRemoveFile(const char* fileName)
+{
+    return unlink(fileName) == 0;
+}

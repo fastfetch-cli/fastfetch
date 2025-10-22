@@ -241,6 +241,7 @@ static inline bool ffSearchUserConfigFile(const FFlist* configDirs, const char* 
 }
 
 FFNativeFD ffGetNullFD(void);
+bool ffRemoveFile(const char* fileName);
 
 #ifdef _WIN32
 // Only O_RDONLY is supported

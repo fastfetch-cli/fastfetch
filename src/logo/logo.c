@@ -9,6 +9,7 @@
 #include "util/stringUtils.h"
 
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef enum __attribute__((__packed__)) FFLogoSize
@@ -474,6 +475,16 @@ static bool logoPrintData(bool doColorReplacement, FFstrbuf* source)
     return true;
 }
 
+static void removeMediaCoverFile(void)
+{
+    const FFMediaResult* media = ffDetectMedia(true);
+    if (media->cover.length > 0)
+    {
+        ffRemoveFile(media->cover.chars);
+        ffStrbufDestroy((FFstrbuf*) &media->cover);
+    }
+}
+
 static bool updateLogoPath(void)
 {
     FFOptionsLogo* options = &instance.config.logo;
@@ -490,6 +501,7 @@ static bool updateLogoPath(void)
         if (media->cover.length == 0)
             return false;
         ffStrbufSet(&options->source, &media->cover);
+        if (media->removeCoverAfterUse) atexit(removeMediaCoverFile);
         return true;
     }
 

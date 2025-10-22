@@ -17,6 +17,7 @@ const FFMediaResult* ffDetectMedia(bool saveCover)
         ffStrbufInit(&result.url);
         ffStrbufInit(&result.status);
         ffStrbufInit(&result.cover);
+        result.removeCoverAfterUse = false;
         ffDetectMediaImpl(&result, saveCover);
 
         if(result.song.length == 0 && result.error.length == 0)

@@ -14,6 +14,7 @@ typedef struct FFMediaResult
     FFstrbuf url;
     FFstrbuf status;
     FFstrbuf cover;
+    bool removeCoverAfterUse;
 } FFMediaResult;
 
 const FFMediaResult* ffDetectMedia(bool saveCover);

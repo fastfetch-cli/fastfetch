@@ -44,7 +44,7 @@ static const char* getMediaByMediaRemote(FFMediaResult* result, bool saveCover)
                     FF_CFTYPE_AUTO_RELEASE CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
 #pragma clang diagnostic pop
                     NSString *tmpDir = NSTemporaryDirectory();
-                    NSString *uuid = [[NSUUID UUID] UUIDString];
+                    NSString *uuid = NSUUID.UUID.UUIDString;
                     NSString *path = [tmpDir stringByAppendingPathComponent:[NSString stringWithFormat:@"ff_%@.%@", uuid, ext ? (__bridge NSString *) ext : @"img"]];
                     if ([artworkData writeToFile:path atomically:NO])
                         ffStrbufSetS(&result->cover, path.UTF8String);
@@ -160,5 +160,7 @@ void ffDetectMediaImpl(FFMediaResult* media, bool saveCover)
         if (ffStrbufStartsWithIgnCaseS(&media->player, "com."))
             ffStrbufSubstrAfter(&media->player, strlen("com.") - 1);
         ffStrbufReplaceAllC(&media->player, '.', ' ');
+        if (media->cover.length > 0)
+            media->removeCoverAfterUse = true;
     }
 }
