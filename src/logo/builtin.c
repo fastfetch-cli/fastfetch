@@ -1704,6 +1704,16 @@ static const FFlogo E[] = {
         .colorKeys = FF_COLOR_FG_MAGENTA,
         .colorTitle = FF_COLOR_FG_MAGENTA,
     },
+        // ERROR OS
+    {
+        .names = {"ERROR OS", "error-os", "ID10T ERROR OS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_ERROR_OS,
+        .colors = {
+            FF_COLOR_FG_RED,
+        },
+        .colorKeys = FF_COLOR_FG_RED,
+        .colorTitle = FF_COLOR_FG_RED,
+    },
     // LAST
     {},
 };
