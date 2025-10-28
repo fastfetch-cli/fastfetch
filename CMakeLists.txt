@@ -1340,15 +1340,15 @@ add_library(libfastfetch OBJECT
 )
 
 if(yyjson_FOUND)
-    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)
+    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON=1)
     target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
-else()
-    # Used for dlopen finding dylibs installed by homebrew
-    # `/opt/homebrew/lib` is not on in dlopen search path by default
-    if(APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
-    endif()
+endif()
+
+# Used for dlopen finding dylibs installed by homebrew
+# `/opt/homebrew/lib` is not on in dlopen search path by default
+if(APPLE AND NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 
 if(ANDROID)
