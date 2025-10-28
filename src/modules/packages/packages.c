@@ -146,7 +146,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
         FF_PRINT_PACKAGE(mport)
         FF_PRINT_PACKAGE(pisi)
         FF_PRINT_PACKAGE(soar)
-        FF_PRINT_PACKAGE(sdkman)
+        FF_PRINT_PACKAGE_NAME(sdkman, "sdk")
 
         putchar('\n');
     }
@@ -195,7 +195,7 @@ bool ffPrintPackages(FFPackagesOptions* options)
             FF_FORMAT_ARG(counts.hpkgUser, "hpkg-user"),
             FF_FORMAT_ARG(counts.pisi, "pisi"),
             FF_FORMAT_ARG(counts.soar, "soar"),
-            FF_FORMAT_ARG(counts.sdkman, "sdkman"),
+            FF_FORMAT_ARG(counts.sdkman, "sdk"),
             FF_FORMAT_ARG(nixAll, "nix-all"),
             FF_FORMAT_ARG(flatpakAll, "flatpak-all"),
             FF_FORMAT_ARG(brewAll, "brew-all"),
@@ -503,7 +503,7 @@ FFModuleBaseInfo ffPackagesModuleInfo = {
         {"Number of hpkg-user packages", "hpkg-user"},
         {"Number of pisi packages", "pisi"},
         {"Number of soar packages", "soar"},
-        {"Number of sdkman packages", "sdkman"},
+        {"Number of SDKMAN! SDK packages", "sdk"},
         {"Total number of all nix packages", "nix-all"},
         {"Total number of all flatpak app packages", "flatpak-all"},
         {"Total number of all brew packages", "brew-all"},
