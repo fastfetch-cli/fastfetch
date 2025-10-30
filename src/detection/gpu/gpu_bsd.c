@@ -179,6 +179,9 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus)
     {
         struct pci_conf* pc = &confs[i];
 
+        if (pc->pc_sel.pc_func > 0 && pc->pc_subclass == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+            continue; // Likely an auxiliary display controller (#2034)
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(pc->pc_vendor));
         ffStrbufInit(&gpu->name);

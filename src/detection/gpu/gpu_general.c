@@ -30,6 +30,11 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (dev->device_class >> 16 != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
             continue;
 
+        uint8_t subclass = (dev->device_class >> 8) & 0xFF;
+
+        if (dev->func > 0 && subclass == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+            continue; // Likely an auxiliary display controller (#2034)
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev->vendor_id));
         ffStrbufInit(&gpu->name);
@@ -48,7 +53,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             ffGPUQueryAmdGpuName(dev->device_id, dev->revision, gpu);
 
         if (gpu->name.length == 0)
-            ffGPUFillVendorAndName((dev->device_class >> 8) & 0xFF, dev->vendor_id, dev->device_id, gpu);
+            ffGPUFillVendorAndName(subclass, dev->vendor_id, dev->device_id, gpu);
     }
     ffpci_iterator_destroy(iter);
 

@@ -19,6 +19,9 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
         if (dev.class_base != 0x03 /*PCI_BASE_CLASS_DISPLAY*/)
             continue;
 
+        if (dev.function > 0 && dev.class_sub == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+            continue; // Likely an auxiliary display controller (#2034)
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev.vendor_id));
         ffStrbufInit(&gpu->name);
