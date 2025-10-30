@@ -79,6 +79,13 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         gpu->deviceId = 0;
         ffStrbufInitStatic(&gpu->platformApi, "DXCore");
 
+        LUID luid;
+        if (SUCCEEDED(adapter->GetProperty(DXCoreAdapterProperty::InstanceLuid, sizeof(luid), &luid)))
+        {
+            static_assert(sizeof(luid) == sizeof(uint64_t), "LUID size mismatch");
+            gpu->deviceId = ffGPUGeneral2Id(*(uint64_t*)&luid);
+        }
+
         ffStrbufInit(&gpu->driver);
         uint64_t value = 0;
         if (SUCCEEDED(adapter->GetProperty(DXCoreAdapterProperty::DriverVersion, sizeof(value), &value)))

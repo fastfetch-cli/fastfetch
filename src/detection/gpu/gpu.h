@@ -78,3 +78,9 @@ static inline uint64_t ffGPUPciAddr2Id(uint64_t domain, uint64_t bus, uint64_t d
 {
     return (domain << 16) | (bus << 8) | (device << 3) | function;
 }
+
+static inline uint64_t ffGPUGeneral2Id(uint64_t originalId)
+{
+    // Note: originalId may already have the MSB set
+    return (1ULL << 63) | originalId;
+}

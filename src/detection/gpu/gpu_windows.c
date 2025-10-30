@@ -182,7 +182,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     if (ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL))
                     {
                         FF_DEBUG("Found adapter LUID: %llu", adapterLuid);
-                        if (!gpu->deviceId) gpu->deviceId = adapterLuid;
+                        if (!gpu->deviceId) gpu->deviceId = ffGPUGeneral2Id(adapterLuid);
                     }
 
                     uint32_t featureLevel = 0;
