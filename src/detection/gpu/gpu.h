@@ -73,3 +73,8 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd);
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);
 #endif // defined(XXX)
+
+static inline uint64_t ffGPUPciAddr2Id(uint64_t domain, uint64_t bus, uint64_t device, uint64_t function)
+{
+    return (domain << 16) | (bus << 8) | (device << 3) | function;
+}

@@ -198,7 +198,7 @@ static void pciDetectIntelSpecific(const FFGPUOptions* options, FFGPUResult* gpu
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
 
     // 0000:00:02.0 is reserved for Intel integrated graphics
-    gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+    gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
 
     if (!drmKey) return;
 
@@ -354,7 +354,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->type = FF_GPU_TYPE_UNKNOWN;
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-    gpu->deviceId = (pciDomain * 100000ull) + (pciBus * 1000ull) + (pciDevice * 10ull) + pciFunc;
+    gpu->deviceId = ffGPUPciAddr2Id(pciDomain, pciBus, pciDevice, pciFunc);
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
     char drmKeyBuffer[8];
