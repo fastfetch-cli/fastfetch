@@ -794,7 +794,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_nbsd.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nbsd.c
@@ -1725,6 +1725,7 @@ elseif(NetBSD)
         PRIVATE "bluetooth"
         PRIVATE "m"
         PRIVATE "prop"
+        PRIVATE "pci"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch
