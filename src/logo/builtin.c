@@ -1388,6 +1388,19 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
+    // Iridium Linux
+    {
+        .names = {"Iridium", "iridium-linux"},
+        .lines = FASTFETCH_DATATEXT_LOGO_IRIDIUM,
+        .colors = {
+            FF_COLOR_FG_256 "93",   // c1
+            FF_COLOR_FG_256 "129",  // c2
+            FF_COLOR_FG_256 "135",  // c3
+            FF_COLOR_FG_256 "201",  // c4
+        },
+        .colorKeys  = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "201",
+        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "201",
+    },
     // Deepin
     {
         .names = {"Deepin", "deepin-linux"},
