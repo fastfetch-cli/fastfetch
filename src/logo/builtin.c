@@ -5211,6 +5211,15 @@ static const FFlogo V[] = {
             FF_COLOR_FG_BLUE,
         },
     },
+    // VincentOS
+    {
+        .names = {"VincentOS"},
+        .lines = FASTFETCH_DATATEXT_LOGO_VINCENTOS,
+        .colors = {
+            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // Vnux
     {
         .names = {"Vnux"},
