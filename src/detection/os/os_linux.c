@@ -240,7 +240,7 @@ FF_MAYBE_UNUSED static bool detectDebianDerived(FFOSResult* result)
         ffStrbufSetStatic(&result->id, "raspbian");
         ffStrbufSetStatic(&result->idLike, "debian");
         ffStrbufSetStatic(&result->name, "Raspberry Pi OS");
-        ffStrbufSetStatic(&result->prettyName, "Raspberry Pi OS");
+        getDebianVersion(result);
         return true;
     }
     else if (ffPathExists("/boot/dietpi/.version", FF_PATHTYPE_FILE))
