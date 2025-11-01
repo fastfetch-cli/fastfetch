@@ -1,25 +1,23 @@
-.############################:               =@@@@@@@@=
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@               @@@@@@@@@@
-#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@               @@@@@@@@@%
-%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@     #####%    %@@@@@@@@@
-#@@@@@@@@@@@@@@###@@@@@@@@@@@@#  @@@@@@@@@@  @@@@@@@@@%
- @@@@@@@@@@@@@       +########. #@@@@@@@@@@@ @@%%%%@%%-
- @@@@@@@@@@@@                   #@@@@@@@@@@@           
- @@@@@@@@@@@@                    @@@@@@@@@@# @@@@%@@@@-
- @@@@@@@@@@@@@@############@       @######   @@@@@@@@@%
- @@@@@@@@@@@@@@@@@@@@@@@@@@@%  .#@           %@@@@@@@@%
- @@@@@@@@@@@@@@@@@@@@@@@@@@@#  @@@@@##%      %@@@@@@@@%
- @@@@@@@@@@@@@@@@@@@@@@@@@@@@ *@@@@@@@@@@#.  :%%%%%%%%:
- @@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@             
- @@@@@@@@@@@@@#############@ @@@@@@@@@@@@*   :@@@@%%%%:
- @@@@@@@@@@@@               @@@@@@@@@@@@@    %@@@@@@@@%
- @@@@@@@@@@@@               @@@@@@@@@@@@     %@@@@@@@@%
- @@@@@@@@@@@@              #@@@@@@@@@@@      %@@@@@@@@%
- @@@@@@@@@@@@              @@@@@@@@@@@%      %@@@@@@@@%
- @@@@@@@@@@@@             @@@@@@@@@@@@       .%%%%%%%%.
- @@@@@@@@@@@@            @@@@@@@@@@@@                  
- @@@@@@@@@@@@           #@@@@@@@@@@@         .%%%%%%%%.
- ###########%          #@@@@@@@@@@@*         %@@@@@@@@%
-                       @@@@@@@@@@@%          %@@@@@@@@%
-                        ###@@@@@@@           %@@@@@@@@%
-                            .####.           .%%%%%%%%.
+.+++++++++++++++++++++++++.             =%%%%%%%-
++OOOOOOOOOOOOOOOOOOOOOOOOO+             %OOOOOOO%
++OOOOOOOOOOOOOOOOOOOOOOOOOO             %OOOOOOO%
++OOOOOOOOOOOOOOOOOOOOOOOOOO   .+++++%   %OOOO===%
++OOOOOOOOOOOO+++++++++++++*= OOOOOOOOO* O#%#%%#%:
++OOOOOOOOOOO                OOOAAAAAAOO          
++OOOOOOOOOOO                .OOOOOOOOOO O%%%%%%%:
+#OOOOOOOOOOOO+++++*+++++.     OOOOOOOO  %OOOOOOO#
+-OOOOOOOOOOOOOOOOOOOOOOOO               %OOOO===#
+#OOOOOOOOOOOOOOOOOOOOOOOO*  #OOOOO      %OOOOOOO%
+ OOOOOOOOOOOOOOOOOOOOOOOOO =OOOOOOOO+.  .#######.
+=OOOOOOOOOOOOOOOOOOOOOOOOO OOOOOOOOOOO           
++OOOOOOOOOOOO+++++++++++O OOOOOOOOOOO   .%##%##%.
+#OOOOOOOOOO              %OOOOOOOOOO    #OOOOOOO#
++OOOOOOOOOO=             OOOOOOOOOO     #===OOOO#
++OOOOOOOOOO*            +OOOOOOOOOO     #OOOOOOO#
+=OOOOOOOOOO+           *OOOOOOOOOO      .#######.
++OOOOOOOOOO+          =OOOOOOOOOO                
+*OOOOOOOOOO+          OOOOOOOOOO+       .#######.
+.++++++++++.         OOOOOOOOOOO        #OOOOOOO#
+                     OOOOOOOOOO         #OOOOOOO#
+                     #++OOOOOOO         #===OOOO#
+                         .+++#          .##*####.
