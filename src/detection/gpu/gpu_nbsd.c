@@ -4,33 +4,55 @@
 #include <sys/param.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <pci.h>
 #include <dev/pci/pcireg.h>
 #include <dev/pci/pcidevs.h>
 #include <dev/pci/pciio.h>
 
-const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
+static inline int pcibus_conf_read(int fd, uint32_t bus, uint32_t device, uint32_t func, uint32_t reg, uint32_t* result)
 {
-    FF_AUTO_CLOSE_FD int pcifd = open("/dev/pci0", O_RDONLY | O_CLOEXEC);
-    if (pcifd < 0)
-        return "open(\"/dev/pci0\", O_RDONLY | O_CLOEXEC, 0) failed";
+    struct pciio_bdf_cfgreg bdfr = {
+        .bus = bus,
+        .device = device,
+        .function = func,
+        .cfgreg = {
+            .reg = reg,
+        },
+    };
 
-    struct pciio_businfo businfo;
-    if (ioctl(pcifd, PCI_IOC_BUSINFO, &businfo) != 0)
-        return "ioctl(pcifd, PCI_IOC_BUSINFO, &businfo) failed";
+    if (ioctl(fd, PCI_IOC_BDF_CFGREAD, &bdfr) == -1)
+        return -1;
 
-    for (uint32_t bus = 0; bus <= 255; bus++)
+    *result = bdfr.cfgreg.val;
+    return 0;
+}
+
+const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist* gpus)
+{
+    char pciDevPath[] = "/dev/pciXXX";
+
+    for (uint32_t idev = 0; idev <= 255; idev++)
     {
+        snprintf(pciDevPath + strlen("/dev/pci"), 4, "%u", idev);
+
+        FF_AUTO_CLOSE_FD int pcifd = open(pciDevPath, O_RDONLY | O_CLOEXEC);
+        if (pcifd < 0)
+        {
+            if (errno == ENOENT)
+                break; // No more /dev/pciN devices
+            return "open(\"/dev/pciN\", O_RDONLY | O_CLOEXEC) failed";
+        }
+
+        struct pciio_businfo businfo;
+        if (ioctl(pcifd, PCI_IOC_BUSINFO, &businfo) != 0)
+            continue;
+
+        uint32_t bus = businfo.busno;
         for (uint32_t dev = 0; dev < businfo.maxdevs; dev++)
         {
-            pcireg_t bhlcr;
-            if (pcibus_conf_read(pcifd, bus, dev, 0, PCI_BHLC_REG, &bhlcr) != 0)
-                continue;
-
-            uint32_t maxfunc = PCI_HDRTYPE_MULTIFN(bhlcr) ? 7 : 0;
-            for (uint32_t func = 0; func <= maxfunc; func++)
+            uint32_t maxfuncs = 0;
+            for (uint32_t func = 0; func <= maxfuncs; func++)
             {
-                pcireg_t pciid, pciclass;
+                uint32_t pciid, pciclass;
                 if (pcibus_conf_read(pcifd, bus, dev, func, PCI_ID_REG, &pciid) != 0)
                     continue;
 
@@ -40,21 +62,28 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                 if (pcibus_conf_read(pcifd, bus, dev, func, PCI_CLASS_REG, &pciclass) != 0)
                     continue;
 
+                if (func == 0)
+                {
+                    // For some reason, pcibus_conf_read returns success even for non-existing devices.
+                    // So we need to check for `PCI_VENDOR(pciid) == PCI_VENDOR_INVALID` above to filter them out.
+                    uint32_t bhlcr;
+                    if (pcibus_conf_read(pcifd, bus, dev, 0, PCI_BHLC_REG, &bhlcr) != 0)
+                        continue;
+
+                    if (PCI_HDRTYPE_MULTIFN(bhlcr)) maxfuncs = 7;
+                }
+
                 if (PCI_CLASS(pciclass) != PCI_CLASS_DISPLAY)
                     continue;
 
                 if (func > 0 && PCI_SUBCLASS(pciclass) == PCI_SUBCLASS_DISPLAY_MISC)
                     continue; // Likely an auxiliary display controller (#2034)
 
-                char drvname[32];
-                if (pci_drvnameonbus(pcifd, bus, dev, func, drvname, ARRAY_SIZE(drvname)) != 0)
-                    drvname[0] = '\0';
-
                 FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
                 ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(PCI_VENDOR(pciid)));
                 ffStrbufInit(&gpu->name);
-                ffStrbufInitS(&gpu->driver, drvname);
-                ffStrbufInitStatic(&gpu->platformApi, "/dev/pci0");
+                ffStrbufInit(&gpu->driver);
+                ffStrbufInitS(&gpu->platformApi, pciDevPath);
                 ffStrbufInit(&gpu->memoryType);
                 gpu->index = FF_GPU_INDEX_UNSET;
                 gpu->temperature = FF_GPU_TEMP_UNSET;
@@ -69,6 +98,13 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
                     ffGPUQueryAmdGpuName(PCI_PRODUCT(pciid), PCI_REVISION(pciid), gpu);
                 if (gpu->name.length == 0)
                     ffGPUFillVendorAndName(PCI_SUBCLASS(pciclass), PCI_VENDOR(pciid), PCI_PRODUCT(pciid), gpu);
+
+                struct pciio_drvname drvname = {
+                    .device = dev,
+                    .function = func,
+                };
+                if (ioctl(pcifd, PCI_IOC_DRVNAME, &drvname) == 0)
+                    ffStrbufInitS(&gpu->driver, drvname.name);
             }
         }
     }

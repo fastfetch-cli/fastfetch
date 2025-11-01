@@ -93,7 +93,7 @@ cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" O
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
+cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "OpenBSD" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -1725,7 +1725,6 @@ elseif(NetBSD)
         PRIVATE "bluetooth"
         PRIVATE "m"
         PRIVATE "prop"
-        PRIVATE "pci"
     )
 elseif(SunOS)
     target_link_libraries(libfastfetch
