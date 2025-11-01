@@ -2345,13 +2345,11 @@ static const FFlogo I[] = {
         .names = {"Iridium"},
         .lines = FASTFETCH_DATATEXT_LOGO_IRIDIUM,
         .colors = {
-            FF_COLOR_FG_256 "93",   // c1
-            FF_COLOR_FG_256 "129",  // c2
-            FF_COLOR_FG_256 "135",  // c3
-            FF_COLOR_FG_256 "201",  // c4
+            FF_COLOR_FG_256 "93",   
+            FF_COLOR_FG_256 "129",  
         },
-        .colorKeys  = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "201",
-        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "201",
+        .colorKeys  = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "93",
+        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "93",
     },
     // Iglunix
     {
