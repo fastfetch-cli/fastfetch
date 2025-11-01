@@ -878,7 +878,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_pci.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_obsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
         src/detection/lm/lm_nosupport.c
