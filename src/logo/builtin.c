@@ -2348,8 +2348,8 @@ static const FFlogo I[] = {
             FF_COLOR_FG_256 "93",   
             FF_COLOR_FG_256 "129",  
         },
-        .colorKeys  = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "93",
-        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "93",
+        .colorKeys  = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "129",
+        .colorTitle = FF_COLOR_MODE_BOLD FF_COLOR_FG_256 "129",
     },
     // Iglunix
     {
