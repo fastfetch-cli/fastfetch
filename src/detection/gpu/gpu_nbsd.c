@@ -8,7 +8,7 @@
 #include <dev/pci/pcidevs.h>
 #include <dev/pci/pciio.h>
 
-static inline int pcibus_conf_read(int fd, uint32_t bus, uint32_t device, uint32_t func, uint32_t reg, uint32_t* result)
+static inline int pciReadConf(int fd, uint32_t bus, uint32_t device, uint32_t func, uint32_t reg, uint32_t* result)
 {
     struct pciio_bdf_cfgreg bdfr = {
         .bus = bus,
@@ -53,21 +53,21 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             for (uint32_t func = 0; func <= maxfuncs; func++)
             {
                 uint32_t pciid, pciclass;
-                if (pcibus_conf_read(pcifd, bus, dev, func, PCI_ID_REG, &pciid) != 0)
+                if (pciReadConf(pcifd, bus, dev, func, PCI_ID_REG, &pciid) != 0)
                     continue;
 
                 if (PCI_VENDOR(pciid) == PCI_VENDOR_INVALID || PCI_VENDOR(pciid) == 0)
                     continue;
 
-                if (pcibus_conf_read(pcifd, bus, dev, func, PCI_CLASS_REG, &pciclass) != 0)
+                if (pciReadConf(pcifd, bus, dev, func, PCI_CLASS_REG, &pciclass) != 0)
                     continue;
 
                 if (func == 0)
                 {
-                    // For some reason, pcibus_conf_read returns success even for non-existing devices.
+                    // For some reason, pciReadConf returns success even for non-existing devices.
                     // So we need to check for `PCI_VENDOR(pciid) == PCI_VENDOR_INVALID` above to filter them out.
                     uint32_t bhlcr;
-                    if (pcibus_conf_read(pcifd, bus, dev, 0, PCI_BHLC_REG, &bhlcr) != 0)
+                    if (pciReadConf(pcifd, bus, dev, 0, PCI_BHLC_REG, &bhlcr) != 0)
                         continue;
 
                     if (PCI_HDRTYPE_MULTIFN(bhlcr)) maxfuncs = 7;
