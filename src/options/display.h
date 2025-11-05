@@ -2,6 +2,7 @@
 
 #include "common/percent.h"
 #include "util/FFstrbuf.h"
+#include "util/FFlist.h"
 
 typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
 {
