@@ -728,6 +728,9 @@ void ffLogoPrintLine(void)
     if(instance.state.logoWidth > 0)
         printf("\033[%uC", instance.state.logoWidth);
 
+    if (instance.state.dynamicInterval > 0)
+        fputs("\033[K", stdout);
+
     ++instance.state.keysHeight;
 }
 

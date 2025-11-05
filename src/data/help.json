@@ -74,6 +74,15 @@
             },
             "desc": "Enable or disable JSON output",
             "remark": "Shortcut for `--format json`"
+        },
+        {
+            "long": "dynamic-interval",
+            "desc": "Keep fastfetch open and update the output every <num> milliseconds",
+            "remark": "0 (default) to disable the behavior; don't work with --json",
+            "arg": {
+                "type": "num",
+                "default": 0
+            }
         }
     ],
     "Config": [

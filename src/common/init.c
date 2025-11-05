@@ -30,6 +30,7 @@ static void initState(FFstate* state)
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
     state->resultDoc = NULL;
+    state->dynamicInterval = 0;
 
     {
         // don't enable bright color if the terminal is in light mode
@@ -74,6 +75,9 @@ static void resetConsole(void)
     #if defined(_WIN32)
         fflush(stdout);
     #endif
+
+    if(instance.state.dynamicInterval > 0)
+        fputs("\033[?1049l", stdout); // Disable alternate buffer
 }
 
 #ifdef _WIN32
@@ -130,14 +134,17 @@ void ffStart(void)
     if(ffDisableLinewrap)
         fputs("\033[?7l", stdout);
 
+    if(instance.state.dynamicInterval > 0)
+    {
+        fputs("\033[?1049h\033[H", stdout); // Enable alternate buffer
+        fflush(stdout);
+    }
+
     ffLogoPrint();
 }
 
 void ffFinish(void)
 {
-    if(instance.config.logo.printRemaining)
-        ffLogoPrintRemaining();
-
     resetConsole();
 }
 
