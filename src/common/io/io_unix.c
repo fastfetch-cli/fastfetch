@@ -16,7 +16,6 @@
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
 #else
-    #warning "<wordexp.h> is not available, use glob(3) instead"
     #include <glob.h>
 #endif
 
