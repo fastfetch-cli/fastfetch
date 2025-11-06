@@ -151,6 +151,12 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         else if(!ffStrEquals(fs->f_mntonname, "/") && !ffStrStartsWith(fs->f_mntfromname, "/dev/") && !ffStrEquals(fs->f_fstypename, "zfs") && !ffStrEquals(fs->f_fstypename, "fusefs.sshfs"))
             continue;
 
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, fs->f_mntonname, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, fs->f_fstypename, ':'))
+            continue;
+
         #ifdef __FreeBSD__
         // f_bavail and f_ffree are signed on FreeBSD...
         if(fs->f_bavail < 0) fs->f_bavail = 0;

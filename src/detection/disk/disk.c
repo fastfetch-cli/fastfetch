@@ -10,7 +10,7 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
     const char* error = ffDetectDisksImpl(options, disks);
 
     if (error) return error;
-    if (disks->length == 0) return "No disks found";
+    if (disks->length == 0) return NULL;
 
     //We need to sort the disks, so that we can detect, which disk a path resides on
     // For example for /boot/efi/bootmgr we need to check /boot/efi before /boot
@@ -31,3 +31,27 @@ const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks)
 
     return NULL;
 }
+
+#ifndef _WIN32
+#include <fnmatch.h>
+
+bool ffDiskMatchesFolderPatterns(FFstrbuf* folders, const char* path, char separator)
+{
+    uint32_t startIndex = 0;
+    while(startIndex < folders->length)
+    {
+        uint32_t sepIndex = ffStrbufNextIndexC(folders, startIndex, separator);
+
+        char savedSep = folders->chars[sepIndex]; // Can be '\0' if at end
+        folders->chars[sepIndex] = '\0';
+
+        bool matched = fnmatch(&folders->chars[startIndex], path, 0) == 0;
+        folders->chars[sepIndex] = savedSep;
+
+        if (matched) return true;
+
+        startIndex = sepIndex + 1;
+    }
+    return false;
+}
+#endif
