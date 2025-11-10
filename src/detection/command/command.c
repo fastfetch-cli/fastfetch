@@ -42,7 +42,7 @@ bool ffPrepareCommand(FFCommandOptions* options)
 
 const char* ffDetectCommand(FFCommandOptions* options, FFstrbuf* result)
 {
-    FFCommandResultBundle bundle;
+    FFCommandResultBundle bundle = {};
     if (!options->parallel)
         bundle.error = spawnProcess(options, &bundle.handle);
     else
