@@ -45,12 +45,13 @@ static void argvToCmdline(char* const argv[], FFstrbuf* result)
     }
 }
 
-const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
+const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle)
 {
-    int timeout = instance.config.general.processingTimeout;
+    const int32_t timeout = instance.config.general.processingTimeout;
 
     wchar_t pipeName[32];
-    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u", GetCurrentProcessId());
+    static unsigned pidCounter = 0;
+    swprintf(pipeName, ARRAY_SIZE(pipeName), L"\\\\.\\pipe\\FASTFETCH-%u-%u", GetCurrentProcessId(), ++pidCounter);
 
     FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = CreateNamedPipeW(
         pipeName,
@@ -82,52 +83,67 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         return "CreateFileW(L\"\\\\.\\pipe\\FASTFETCH-$(PID)\") failed";
 
     PROCESS_INFORMATION piProcInfo = {};
-
-    BOOL success;
-
+    STARTUPINFOA siStartInfo = {
+        .cb = sizeof(siStartInfo),
+        .dwFlags = STARTF_USESTDHANDLES,
+    };
+    if (useStdErr)
     {
-        STARTUPINFOA siStartInfo = {
-            .cb = sizeof(siStartInfo),
-            .dwFlags = STARTF_USESTDHANDLES,
-        };
-        if (useStdErr)
-        {
-            siStartInfo.hStdOutput = ffGetNullFD();
-            siStartInfo.hStdError = hChildPipeWrite;
-        }
-        else
-        {
-            siStartInfo.hStdOutput = hChildPipeWrite;
-            siStartInfo.hStdError = ffGetNullFD();
-        }
-
-        FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreate();
-        argvToCmdline(argv, &cmdline);
-
-        success = CreateProcessA(
-            NULL,          // application name
-            cmdline.chars, // command line
-            NULL,          // process security attributes
-            NULL,          // primary thread security attributes
-            TRUE,          // handles are inherited
-            0,             // creation flags
-            NULL,          // use parent's environment
-            NULL,          // use parent's current directory
-            &siStartInfo,  // STARTUPINFO pointer
-            &piProcInfo    // receives PROCESS_INFORMATION
-        );
+        siStartInfo.hStdOutput = ffGetNullFD();
+        siStartInfo.hStdError = hChildPipeWrite;
     }
+    else
+    {
+        siStartInfo.hStdOutput = hChildPipeWrite;
+        siStartInfo.hStdError = ffGetNullFD();
+    }
+
+    FF_STRBUF_AUTO_DESTROY cmdline = ffStrbufCreate();
+    argvToCmdline(argv, &cmdline);
+
+    BOOL success = CreateProcessA(
+        NULL,          // application name
+        cmdline.chars, // command line
+        NULL,          // process security attributes
+        NULL,          // primary thread security attributes
+        TRUE,          // handles are inherited
+        0,             // creation flags
+        NULL,          // use parent's environment
+        NULL,          // use parent's current directory
+        &siStartInfo,  // STARTUPINFO pointer
+        &piProcInfo    // receives PROCESS_INFORMATION
+    );
 
     CloseHandle(hChildPipeWrite);
     if(!success)
+    {
+        if (GetLastError() == ERROR_FILE_NOT_FOUND)
+            return "command not found";
         return "CreateProcessA() failed";
+    }
 
-    FF_AUTO_CLOSE_FD HANDLE hProcess = piProcInfo.hProcess;
-    FF_MAYBE_UNUSED FF_AUTO_CLOSE_FD HANDLE hThread = piProcInfo.hThread;
+    CloseHandle(piProcInfo.hThread); // we don't need the thread handle
+    outHandle->pid   = piProcInfo.hProcess;
+    outHandle->pipeRead  = hChildPipeRead;
+    hChildPipeRead = INVALID_HANDLE_VALUE; // ownership transferred, don't close it
+
+    return NULL;
+}
+
+const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
+{
+    assert(handle->pipeRead != INVALID_HANDLE_VALUE);
+    assert(handle->pid != INVALID_HANDLE_VALUE);
+
+    int32_t timeout = instance.config.general.processingTimeout;
+    FF_AUTO_CLOSE_FD HANDLE hProcess = handle->pid;
+    FF_AUTO_CLOSE_FD HANDLE hChildPipeRead = handle->pipeRead;
+    handle->pid = INVALID_HANDLE_VALUE;
+    handle->pipeRead = INVALID_HANDLE_VALUE;
 
     char str[FF_PIPE_BUFSIZ];
     DWORD nRead = 0;
-    OVERLAPPED overlapped = { };
+    OVERLAPPED overlapped = {};
     // ReadFile always completes synchronously if the pipe is not created with FILE_FLAG_OVERLAPPED
     do
     {
@@ -164,7 +180,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 break;
 
             case ERROR_BROKEN_PIPE:
-                return NULL;
+                goto exit;
 
             default:
                 CancelIo(hChildPipeRead);
@@ -174,6 +190,13 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
         }
         ffStrbufAppendNS(buffer, nRead, str);
     } while (nRead > 0);
+
+exit:
+    {
+        DWORD exitCode = 0;
+        if (GetExitCodeProcess(hProcess, &exitCode) && exitCode != STILL_ACTIVE && exitCode != 0)
+            return "Child process exited with an error";
+    }
 
     return NULL;
 }
