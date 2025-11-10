@@ -174,7 +174,8 @@
             "keyIcon": "",                                   // Custom icon override
             "key": "│{#red}│ {icon}  Rust      │{$4}│{#keys}│{$2}",
             "text": "rustc --version",
-            "format": "rustc {~6,13}"                         // Print 6th to 13th characters (version number)
+            "format": "rustc {~6,13}",                        // Print 6th to 13th characters (version number)
+            "parallel": true                                  // Enable parallel execution for performance
         },
         {
             "type": "command",
@@ -194,28 +195,32 @@
             "keyIcon": "",
             "key": "│{#red}│ {icon}  Clang     │{$4}│{#keys}│{$2}",
             "text": "clang --version | findstr version",      // Finds the line with "version"
-            "format": "clang {~-6}"                           // Prints the last 6 characters (version number)
+            "format": "clang {~-6}",                          // Prints the last 6 characters (version number)
+            "parallel": true
         },
         {
             "type": "command",
             "keyIcon": "",
             "key": "│{#red}│ {icon}  NodeJS    │{$4}│{#keys}│{$2}",
             "text": "node --version",
-            "format": "node {~1}"                             // {~1} removes first character (v)
+            "format": "node {~1}",                            // {~1} removes first character (v)
+            "parallel": true
         },
         {
             "type": "command",
             "keyIcon": "",
             "key": "│{#red}│ {icon}  Go        │{$4}│{#keys}│{$2}",
             "text": "go version | cut -d' ' -f3",
-            "format": "go {~2}"                               // {~2} removes first 2 characters (go)
+            "format": "go {~2}",                              // {~2} removes first 2 characters (go)
+            "parallel": true
         },
         {
             "type": "command",
             "keyIcon": "",
             "key": "│{#red}│ {icon}  Zig       │{$4}│{#keys}│{$2}",
             "text": "zig version",
-            "format": "zig {}"
+            "format": "zig {}",
+            "parallel": true
         },
         {
             "type": "editor",
@@ -226,7 +231,8 @@
             "keyIcon": "󰊢",
             "key": "│{#red}│ {icon}  Git       │{$4}│{#keys}│{$2}",
             "text": "git version",
-            "format": "git {~12}"
+            "format": "git {~12}",
+            "parallel": true
         },
         {
             "type": "font",

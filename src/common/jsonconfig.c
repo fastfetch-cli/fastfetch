@@ -158,6 +158,16 @@ static void prepareModuleJsonObject(const char* type, yyjson_val* module)
                 ffPrepareCPUUsage();
             break;
         }
+        case 'c': case 'C': {
+            if (ffStrEqualsIgnCase(type, FF_COMMAND_MODULE_NAME))
+            {
+                __attribute__((__cleanup__(ffDestroyCommandOptions))) FFCommandOptions options;
+                ffInitCommandOptions(&options);
+                if (module) ffCommandModuleInfo.parseJsonObject(&options, module);
+                ffPrepareCommand(&options);
+            }
+            break;
+        }
         case 'd': case 'D': {
             if (ffStrEqualsIgnCase(type, FF_DISKIO_MODULE_NAME))
             {
