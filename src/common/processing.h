@@ -2,6 +2,10 @@
 
 #include "util/FFstrbuf.h"
 
+#ifndef _WIN32
+#include <sys/types.h> // pid_t
+#endif
+
 typedef struct FFProcessHandle {
     #if _WIN32
     void* pid; // HANDLE
