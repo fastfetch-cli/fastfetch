@@ -1,6 +1,40 @@
+# 2.55.0
+
+Changes:
+* Commands are now executed in parallel by default to improve performance (#2045, Command)
+    * This behavior can be disabled in the config file with `"parallel": false` if it causes problems with certain scripts
+* Folder/filesystem hiding is moved to the detection stage; hidden entries are no longer probed, improving performance (#2043, Disk)
+
+Features:
+* Adds `command.parallel` and `command.useStdErr` config options (Command)
+    * `parallel`: set to `false` to disable parallel execution (see Changes above)
+    * `useStdErr`: set to `true` to use stderr output instead of stdout
+* Adds the command-line flag `--dynamic-interval <interval-in-ms>` to enable dynamic output auto-refresh (#2041)
+* Adds support for using the current playing media's cover art as a logo source (Media / Logo)
+    * Usage: `"logo": { "type": "<image-protocol>", "source": "mediacover" }`
+    * Supports local sources only
+* Adds native GPU detection support on OpenBSD and NetBSD (instead of depending on `libpciaccess`) (GPU)
+    * No functional changes
+    * Root privileges are required to access PCI config space on OpenBSD (as always)
+* Adds GPU detection support on GNU/Hurd (GPU)
+    * Requires building with `libpciaccess`
+* Shows Debian point release on Raspberry Pi OS (#2032, OS, Linux)
+* Adds `Brush` shell version detection (Shell)
+* Improves Mac family detection via prefix matching (Host)
+
+Bugfixes:
+* Ignores `run-parts` during terminal/shell detection (#2048, Terminal / Shell, Linux)
+* Fixes fish version detection when `LC_ALL` is set (#2014, Shell, Linux)
+* Hides the module when no desktop icons are found (#2023, Icons, Windows)
+* Skips auxiliary display controllers to prevent the module from reporting duplicate entries (#2034, GPU, Linux)
+* Refines Apple rpath handling; fixes building for the Homebrew version on macOS (#1998, CMake)
+
+Logos:
+* Adds Vincent OS and MacaroniOS
+
 # 2.54.0
 
-Windows binaries in Release page are now signed using SignPath.
+Windows binaries in Release page are now signed by SignPath.
 
 Changes:
 * Moves macOS and Windows design language detection from the DE module to the Theme module
