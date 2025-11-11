@@ -87,7 +87,7 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
         return false;
 
     //fish, version 4.0.2-1 (Built by MSYS2 project) // version can be localized if LC_ALL is set
-    if (!ffStrbufStartsWithS(version, "fish, ")) return false;
+    if (version->length < strlen("fish, v") || !ffStrbufStartsWithS(version, "fish")) return false;
     uint32_t index = ffStrbufNextIndexC(version, strlen("fish, "), ' ');
     ffStrbufSubstrAfter(version, index);
     ffStrbufSubstrBeforeFirstC(version, ' ');
