@@ -2107,9 +2107,9 @@
                                         "default": false
                                     },
                                     "parallel": {
-                                        "description": "Set if the command should be executed in parallel with other commands\nMight improve performance when using multiple commands, but may cause issues with some commands",
+                                        "description": "Set if the command should be executed in parallel with other commands\nImprove performance when using multiple commands, but may cause issues with some commands",
                                         "type": "boolean",
-                                        "default": false
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

@@ -131,7 +131,7 @@ void ffInitCommandOptions(FFCommandOptions* options)
     );
     ffStrbufInit(&options->text);
     options->useStdErr = false;
-    options->parallel = false;
+    options->parallel = true;
 }
 
 void ffDestroyCommandOptions(FFCommandOptions* options)

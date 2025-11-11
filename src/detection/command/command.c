@@ -45,8 +45,8 @@ const char* ffDetectCommand(FFCommandOptions* options, FFstrbuf* result)
     FFCommandResultBundle bundle = {};
     if (!options->parallel)
         bundle.error = spawnProcess(options, &bundle.handle);
-    else
-        ffListShift(&commandQueue, &bundle);
+    else if (!ffListShift(&commandQueue, &bundle))
+        return "[BUG] command queue is empty";
 
     if (bundle.error)
         return bundle.error;
