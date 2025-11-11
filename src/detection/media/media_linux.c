@@ -86,9 +86,15 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
                             if (i + 2 >= path.length)
                                 break;
                             char str[] = { path.chars[i + 1], path.chars[i + 2], 0 };
-                            const char decodedChar = (char) strtoul(str, NULL, 16);
-                            i += 2;
-                            ffStrbufAppendC(&result->cover, decodedChar);
+                            char* end = NULL;
+                            const char decodedChar = (char) strtoul(str, &end, 16);
+                            if (end == &str[2])
+                            {
+                                i += 2;
+                                ffStrbufAppendC(&result->cover, decodedChar);
+                            }
+                            else
+                                ffStrbufAppendC(&result->cover, '%');
                         }
                         else
                         {
