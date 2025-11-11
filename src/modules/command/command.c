@@ -1,30 +1,20 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/processing.h"
 #include "modules/command/command.h"
-#include "util/stringUtils.h"
+#include "detection/command/command.h"
 
 bool ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
-        options->shell.chars,
-        options->param.chars,
-        options->text.chars,
-        NULL
-    } : (char* const[]){
-        options->shell.chars,
-        options->text.chars,
-        NULL
-    });
+    const char* error = ffDetectCommand(options, &result);
 
-    if(error)
+    if (error)
     {
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
         return false;
     }
 
-    if(!result.length)
+    if (!result.length)
     {
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
         return false;
@@ -72,6 +62,18 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "useStdErr"))
+        {
+            options->useStdErr = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (unsafe_yyjson_equals_str(key, "parallel"))
+        {
+            options->parallel = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
@@ -81,25 +83,16 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
     yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
-
     yyjson_mut_obj_add_strbuf(doc, module, "param", &options->param);
-
     yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
+    yyjson_mut_obj_add_bool(doc, module, "useStdErr", options->useStdErr);
+    yyjson_mut_obj_add_bool(doc, module, "parallel", options->parallel);
 }
 
 bool ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
-        options->shell.chars,
-        options->param.chars,
-        options->text.chars,
-        NULL
-    } : (char* const[]){
-        options->shell.chars,
-        options->text.chars,
-        NULL
-    });
+    const char* error = ffDetectCommand(options, &result);
 
     if(error)
     {
@@ -137,6 +130,8 @@ void ffInitCommandOptions(FFCommandOptions* options)
         #endif
     );
     ffStrbufInit(&options->text);
+    options->useStdErr = false;
+    options->parallel = true;
 }
 
 void ffDestroyCommandOptions(FFCommandOptions* options)

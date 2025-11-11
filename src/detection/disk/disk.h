@@ -35,3 +35,7 @@ typedef struct FFDisk
 const char* ffDetectDisks(FFDiskOptions* options, FFlist* disks /* list of FFDisk */);
 
 const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks);
+
+#ifndef _WIN32
+bool ffDiskMatchesFolderPatterns(FFstrbuf* folders, const char* path, char separator);
+#endif

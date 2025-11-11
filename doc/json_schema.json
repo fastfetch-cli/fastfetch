@@ -1008,7 +1008,7 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set whether to show icon before string keys",
+                            "description": "Set whether to show builtin icon before string keys",
                             "oneOf": [
                                 {
                                     "const": "none",
@@ -1020,7 +1020,7 @@
                                 },
                                 {
                                     "const": "icon",
-                                    "description": "Show icon keys (requires newest nerd font)"
+                                    "description": "Show builtin icon (requires newest nerd font)"
                                 },
                                 {
                                     "const": "both",
@@ -1046,7 +1046,6 @@
                                     "const": "both-4",
                                     "description": "Show both icon and string with 4 spaces between them"
                                 }
-                            ],
                             ],
                             "default": "string"
                         },
@@ -2101,6 +2100,16 @@
                                     "text": {
                                         "description": "Set the command text to be executed",
                                         "type": "string"
+                                    },
+                                    "useStdErr": {
+                                        "description": "Set if stderr should be used instead of stdout for command output",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "parallel": {
+                                        "description": "Set if the command should be executed in parallel with other commands\nImprove performance when using multiple commands, but may cause issues with some commands",
+                                        "type": "boolean",
+                                        "default": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"

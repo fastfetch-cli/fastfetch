@@ -371,3 +371,8 @@ FFNativeFD ffGetNullFD(void)
         });
     return hNullFile;
 }
+
+bool ffRemoveFile(const char* fileName)
+{
+    return DeleteFileA(fileName) != FALSE;
+}

@@ -1,6 +1,8 @@
+#include "common/io/io.h"
 #include "fastfetch.h"
 #include "detection/media/media.h"
 #include "util/stringUtils.h"
+#include "util/unused.h"
 
 #include <string.h>
 
@@ -52,21 +54,56 @@ static bool parseMprisMetadata(FFDBusData* data, DBusMessageIter* rootIterator, 
 
         data->lib->ffdbus_message_iter_next(&dictIterator);
 
-        if(!ffStrStartsWith(key, "xesam:"))
-            FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
+        if(ffStrStartsWith(key, "xesam:"))
+        {
+            const char* xesam = key + strlen("xesam:");
+            if(ffStrEquals(xesam, "title"))
+                ffDBusGetString(data, &dictIterator, &result->song);
+            else if(ffStrEquals(xesam, "album"))
+                ffDBusGetString(data, &dictIterator, &result->album);
+            else if(ffStrEquals(xesam, "artist"))
+                ffDBusGetString(data, &dictIterator, &result->artist);
+            else if(ffStrEquals(xesam, "url"))
+                ffDBusGetString(data, &dictIterator, &result->url);
 
-        key += strlen("xesam:");
-        if(ffStrEquals(key, "title"))
-            ffDBusGetString(data, &dictIterator, &result->song);
-        else if(ffStrEquals(key, "album"))
-            ffDBusGetString(data, &dictIterator, &result->album);
-        else if(ffStrEquals(key, "artist"))
-            ffDBusGetString(data, &dictIterator, &result->artist);
-        else if(ffStrEquals(key, "url"))
-            ffDBusGetString(data, &dictIterator, &result->url);
-
-        if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0 && result->url.length > 0)
-            break;
+            if(result->song.length > 0 && result->artist.length > 0 && result->album.length > 0 && result->url.length > 0)
+                break;
+        }
+        else if (ffStrStartsWith(key, "mpris:"))
+        {
+            const char* xesam = key + strlen("mpris:");
+            if(ffStrEquals(xesam, "artUrl"))
+            {
+                FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+                ffDBusGetString(data, &dictIterator, &path);
+                if (ffStrbufStartsWithS(&path, "file:///"))
+                {
+                    ffStrbufEnsureFree(&result->cover, path.length - (uint32_t) strlen("file://"));
+                    for (uint32_t i = (uint32_t) strlen("file://"); i < path.length; ++i)
+                    {
+                        if (path.chars[i] == '%')
+                        {
+                            if (i + 2 >= path.length)
+                                break;
+                            char str[] = { path.chars[i + 1], path.chars[i + 2], 0 };
+                            char* end = NULL;
+                            const char decodedChar = (char) strtoul(str, &end, 16);
+                            if (end == &str[2])
+                            {
+                                i += 2;
+                                ffStrbufAppendC(&result->cover, decodedChar);
+                            }
+                            else
+                                ffStrbufAppendC(&result->cover, '%');
+                        }
+                        else
+                        {
+                            ffStrbufAppendC(&result->cover, path.chars[i]);
+                        }
+                    }
+                }
+            }
+        }
 
         FF_DBUS_ITER_CONTINUE(data, &arrayIterator)
     }
@@ -241,8 +278,9 @@ static const char* getMedia(FFMediaResult* result)
 
 #endif
 
-void ffDetectMediaImpl(FFMediaResult* media)
+void ffDetectMediaImpl(FFMediaResult* media, bool saveCover)
 {
+    FF_UNUSED(saveCover); // We don't save the cover to a file for Mpris implementation
     #ifdef FF_HAVE_DBUS
         const char* error = getMedia(media);
         ffStrbufAppendS(&media->error, error);

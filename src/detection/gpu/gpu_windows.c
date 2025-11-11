@@ -95,7 +95,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             {
                 pciDev = (pciAddr >> 16) & 0xFFFF;
                 pciFunc = pciAddr & 0xFFFF;
-                gpu->deviceId = (pciBus * 1000ull) + (pciDev * 10ull) + pciFunc;
+                gpu->deviceId = ffGPUPciAddr2Id(0, pciBus, pciDev, pciFunc);
                 pciAddr = 1; // Set to 1 to indicate that the device is a PCI device
                 FF_DEBUG("PCI location - Bus: %u, Device: %u, Function: %u, DeviceID: %llu", pciBus, pciDev, pciFunc, gpu->deviceId);
             }
@@ -182,7 +182,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
                     if (ffRegReadUint64(hDirectxKey, L"AdapterLuid", &adapterLuid, NULL))
                     {
                         FF_DEBUG("Found adapter LUID: %llu", adapterLuid);
-                        if (!gpu->deviceId) gpu->deviceId = adapterLuid;
+                        if (!gpu->deviceId) gpu->deviceId = ffGPUGeneral2Id(adapterLuid);
                     }
 
                     uint32_t featureLevel = 0;
@@ -449,7 +449,7 @@ const char* ffDetectGPUImpl(FF_MAYBE_UNUSED const FFGPUOptions* options, FFlist*
             FF_DEBUG("Using fallback GPU type detection");
             if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
             {
-                gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+                gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
                 FF_DEBUG("Intel GPU type determined: %s", gpu->type == FF_GPU_TYPE_INTEGRATED ? "Integrated" : "Discrete");
             }
             else if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET)

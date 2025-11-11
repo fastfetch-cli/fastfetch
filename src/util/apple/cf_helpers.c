@@ -40,11 +40,9 @@ const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result)
 
 const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result)
 {
+    ffStrbufClear(result);
     if (!cf)
-    {
-        ffStrbufClear(result);
         return NULL;
-    }
 
     if (CFGetTypeID(cf) == CFStringGetTypeID())
     {
@@ -56,6 +54,8 @@ const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result)
         else
         {
             uint32_t length = (uint32_t) CFStringGetLength(cfStr);
+            if (length == 0)
+                return NULL;
             ffStrbufEnsureFixedLengthFree(result, (uint32_t) CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8));
             if(!CFStringGetCString(cfStr, result->chars, result->allocated, kCFStringEncodingUTF8))
                 return "CFStringGetCString() failed";
@@ -68,13 +68,38 @@ const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result)
     {
         CFDataRef cfData = (CFDataRef)cf;
         uint32_t length = (uint32_t)CFDataGetLength(cfData);
-        ffStrbufEnsureFree(result, length + 1);
+        if (length == 0)
+            return NULL;
+        ffStrbufEnsureFixedLengthFree(result, length + 1);
         CFDataGetBytes(cfData, CFRangeMake(0, length), (uint8_t*)result->chars);
         result->length = (uint32_t)strnlen(result->chars, length);
         result->chars[result->length] = '\0';
     }
     else
         return "TypeID is neither 'CFString' nor 'CFData'";
+
+    return NULL;
+}
+
+const char* ffCfDataGetDataAsString(CFTypeRef cf, FFstrbuf* result)
+{
+    ffStrbufClear(result);
+    if (!cf)
+        return NULL;
+
+    if (CFGetTypeID(cf) == CFDataGetTypeID())
+    {
+        CFDataRef cfData = (CFDataRef)cf;
+        uint32_t length = (uint32_t)CFDataGetLength(cfData);
+        if (length == 0)
+            return NULL;
+        ffStrbufEnsureFixedLengthFree(result, length + 1);
+        CFDataGetBytes(cfData, CFRangeMake(0, length), (uint8_t*)result->chars);
+        result->length = length;
+        result->chars[result->length] = '\0';
+    }
+    else
+        return "TypeID is not 'CFData'";
 
     return NULL;
 }
@@ -86,6 +111,15 @@ const char* ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* r
         return "CFDictionaryGetValue() failed";
 
     return ffCfStrGetString(cf, result);
+}
+
+const char* ffCfDictGetDataAsString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result)
+{
+    CFTypeRef cf = (CFTypeRef)CFDictionaryGetValue(dict, key);
+    if(cf == NULL)
+        return "CFDictionaryGetValue() failed";
+
+    return ffCfDataGetDataAsString(cf, result);
 }
 
 const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result)

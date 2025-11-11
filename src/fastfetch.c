@@ -3,6 +3,7 @@
 #include "common/init.h"
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
+#include "common/time.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
 #include "util/stringUtils.h"
@@ -670,6 +671,8 @@ static void parseCommand(FFdata* data, char* key, char* value)
             {},
         }));
     }
+    else if(ffStrEqualsIgnCase(key, "--dynamic-interval"))
+        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
     else
         return;
 
@@ -768,15 +771,31 @@ static void run(FFdata* data)
         if (!instance.config.display.noBuffer) fflush(stdout);
     #endif
 
-    if (useJsonConfig)
-        ffPrintJsonConfig(false, instance.state.resultDoc);
-    else
-        ffPrintCommandOption(data, instance.state.resultDoc);
+    while (true)
+    {
+        if (useJsonConfig)
+            ffPrintJsonConfig(false, instance.state.resultDoc);
+        else
+            ffPrintCommandOption(data, instance.state.resultDoc);
+
+        if (instance.state.dynamicInterval > 0)
+        {
+            fflush(stdout);
+            ffTimeSleep(instance.state.dynamicInterval);
+            fputs("\e[H", stdout);
+        }
+        else
+            break;
+    }
 
     if (instance.state.resultDoc)
         yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES | YYJSON_WRITE_NEWLINE_AT_END, NULL, NULL);
     else
+    {
+        if (instance.config.logo.printRemaining)
+            ffLogoPrintRemaining();
         ffFinish();
+    }
 }
 
 static void writeConfigFile(FFdata* data)
@@ -835,6 +854,12 @@ int main(int argc, char** argv)
     };
 
     parseArguments(&data, argc, argv, parseCommand);
+    if(instance.state.dynamicInterval && instance.state.resultDoc)
+    {
+        fprintf(stderr, "Error: --dynamic-interval cannot be used with --json\n");
+        exit(400);
+    }
+
     if(!data.configLoaded && !getenv("NO_CONFIG"))
         parseConfigFiles();
     parseArguments(&data, argc, argv, (void*) parseOption);

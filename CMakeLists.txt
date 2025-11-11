@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.54.0
+    VERSION 2.55.0
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -93,7 +93,7 @@ cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" O
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
 cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
+cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "GNU" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -389,6 +389,7 @@ set(LIBFASTFETCH_SRC
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
+    src/detection/command/command.c
     src/detection/disk/disk.c
     src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
@@ -794,7 +795,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_nbsd.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nbsd.c
@@ -878,7 +879,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_pci.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_obsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
         src/detection/lm/lm_nosupport.c
@@ -1254,7 +1255,7 @@ elseif(GNU)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_general.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nosupport.c
@@ -1340,15 +1341,15 @@ add_library(libfastfetch OBJECT
 )
 
 if(yyjson_FOUND)
-    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)
+    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON=1)
     target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
-else()
-    # Used for dlopen finding dylibs installed by homebrew
-    # `/opt/homebrew/lib` is not on in dlopen search path by default
-    if(APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
-    endif()
+endif()
+
+# Used for dlopen finding dylibs installed by homebrew
+# `/opt/homebrew/lib` is not on in dlopen search path by default
+if(APPLE AND NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 
 if(ANDROID)
@@ -1823,7 +1824,13 @@ if(NOT WIN32)
         CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
         if(HAVE_WORDEXP)
             target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+            message(STATUS "wordexp.h found, wordexp support enabled")
+        else()
+            set(ENABLE_WORDEXP OFF)
         endif()
+    endif()
+    if(NOT ENABLE_WORDEXP)
+        message(STATUS "wordexp.h not found or disabled, glob used instead")
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)

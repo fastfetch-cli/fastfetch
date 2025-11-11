@@ -190,10 +190,13 @@ jobs:
         run: cmake --version
 
       - name: configure project
-        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_DIRECTX_HEADERS=Off .
+        run: CC=gcc-13 PKG_CONFIG_PATH=/home/linuxbrew/.linuxbrew/lib/pkgconfig:$PKG_CONFIG_PATH cmake -DCMAKE_C_FLAGS="-m32 -march=i686 -mtune=i686" -DCMAKE_SYSTEM_PROCESSOR_OVERRIDE=i686 -DCPACK_DEBIAN_PACKAGE_ARCHITECTURE=i386 -GNinja -DSET_TWEAK=Off -DBUILD_TESTS=On -DENABLE_EMBEDDED_PCIIDS=On -DENABLE_EMBEDDED_AMDGPUIDS=On -DCMAKE_INSTALL_PREFIX=/usr -DENABLE_DIRECTX_HEADERS=Off .
 
       - name: build project
         run: cmake --build . --target package --verbose -j4
+
+      - name: check deb package
+        run: dpkg -I fastfetch-*.deb
 
       - name: list features
         run: ./fastfetch --list-features

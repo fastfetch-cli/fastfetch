@@ -16,7 +16,6 @@
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
 #else
-    #warning "<wordexp.h> is not available, use glob(3) instead"
     #include <glob.h>
 #endif
 
@@ -371,4 +370,9 @@ FFNativeFD ffGetNullFD(void)
         return hNullFile;
     hNullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
     return hNullFile;
+}
+
+bool ffRemoveFile(const char* fileName)
+{
+    return unlink(fileName) == 0;
 }

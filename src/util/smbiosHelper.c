@@ -402,7 +402,7 @@ const FFSmbiosHeaderTable* ffGetSmbiosHeaderTable()
         #endif
 
         FF_DEBUG("Parsing SMBIOS table structures");
-        int structureCount = 0;
+        FF_MAYBE_UNUSED int structureCount = 0;
         for (
             const FFSmbiosHeader* header = (const FFSmbiosHeader*) buffer.chars;
             (const uint8_t*) header < (const uint8_t*) buffer.chars + buffer.length;

@@ -6,6 +6,7 @@
 #include "util/binary.h"
 
 #include <ctype.h>
+#include <stdint.h>
 #ifdef __FreeBSD__
     #include <paths.h>
     #ifndef _PATH_LOCALBASE
@@ -85,8 +86,10 @@ static bool getShellVersionFish(FFstrbuf* exe, FFstrbuf* version)
     if(!getExeVersionRaw(exe, version))
         return false;
 
-    //fish, version 4.0.2-1 (Built by MSYS2 project)
-    ffStrbufSubstrAfterFirstS(version, "version ");
+    //fish, version 4.0.2-1 (Built by MSYS2 project) // version can be localized if LC_ALL is set
+    if (version->length < strlen("fish, v") || !ffStrbufStartsWithS(version, "fish")) return false;
+    uint32_t index = ffStrbufNextIndexC(version, strlen("fish, "), ' ');
+    ffStrbufSubstrAfter(version, index);
     ffStrbufSubstrBeforeFirstC(version, ' ');
     return true;
 }
@@ -291,6 +294,8 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
         return getShellVersionAsh(exe, version);
     if(ffStrEqualsIgnCase(exeName, "xonsh"))
         return getShellVersionXonsh(exe, version);
+    if(ffStrEqualsIgnCase(exeName, "brush"))
+        return getExeVersionGeneral(exe, version); // brush 0.2.23 (git:2835487)
 
     #ifdef _WIN32
     if(ffStrEqualsIgnCase(exeName, "powershell") || ffStrEqualsIgnCase(exeName, "powershell_ise"))

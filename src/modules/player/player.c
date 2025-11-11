@@ -10,7 +10,7 @@
 
 bool ffPrintPlayer(FFPlayerOptions* options)
 {
-    const FFMediaResult* media = ffDetectMedia();
+    const FFMediaResult* media = ffDetectMedia(false);
 
     if(media->error.length > 0)
     {

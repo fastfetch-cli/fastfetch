@@ -297,6 +297,12 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
         else if(!isPhysicalDevice(device))
             continue;
 
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, device->mnt_dir, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, device->mnt_type, ':'))
+            continue;
+
         //We have a valid device, add it to the list
         FFDisk* disk = ffListAdd(disks);
         disk->type = FF_DISK_VOLUME_TYPE_NONE;

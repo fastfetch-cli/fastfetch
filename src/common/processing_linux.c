@@ -58,11 +58,9 @@ static inline int ffPipe2(int* fds, int flags)
 
 
 // Not thread-safe
-const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
+const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle)
 {
     int pipes[2];
-    const int timeout = instance.config.general.processingTimeout;
-
     if(ffPipe2(pipes, O_CLOEXEC) == -1)
         return "pipe() failed";
 
@@ -146,7 +144,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     if(childPid == 0)
     {
-        //Child
+        // Child process
         dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
         dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
         putenv("LANG=C.UTF-8");
@@ -157,11 +155,24 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
     #endif
 
     close(pipes[1]);
+    outHandle->pid = childPid;
+    outHandle->pipeRead = pipes[0];
+    return NULL;
+}
 
-    int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
+const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
+{
+    assert(handle->pipeRead != -1);
+    assert(handle->pid != -1);
+
+    const int32_t timeout = instance.config.general.processingTimeout;
+    FF_AUTO_CLOSE_FD int childPipeFd = handle->pipeRead;
+    pid_t childPid = handle->pid;
+    handle->pipeRead = -1;
+    handle->pid = -1;
     char str[FF_PIPE_BUFSIZ];
 
-    while(1)
+    for (;;)
     {
         if (timeout >= 0)
         {
@@ -189,14 +200,14 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 {
                     kill(childPid, SIGTERM);
                     waitpid(childPid, NULL, 0);
-                    return "poll(&pollfd, 1, timeout) error";
+                    return "poll(&pollfd, 1, timeout) error: not EINTR";
                 }
             }
             else if (pollfd.revents & POLLERR)
             {
                 kill(childPid, SIGTERM);
                 waitpid(childPid, NULL, 0);
-                return "poll(&pollfd, 1, timeout) error";
+                return "poll(&pollfd, 1, timeout) error: POLLERR";
             }
         }
 
@@ -211,7 +222,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 if (!WIFEXITED(stat_loc))
                     return "child process exited abnormally";
                 if (WEXITSTATUS(stat_loc) == 127)
-                    return "command was not found";
+                    return "command not found";
                 // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
                 return NULL;
             }
@@ -224,7 +235,7 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
             else
                 break;
         }
-    };
+    }
 
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
 }
