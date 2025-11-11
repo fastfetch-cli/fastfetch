@@ -12,7 +12,7 @@ Features:
 * Adds the command-line flag `--dynamic-interval <interval-in-ms>` to enable dynamic output auto-refresh (#2041)
     * Due to internal limitations, some modules do not support dynamic updates (notably Display and Media)
 * Adds support for using the current playing media's cover art as a logo source (Media / Logo)
-    * Usage: `"logo": { "type": "<image-protocol>", "source": "mediacover" }`
+    * Usage: `"logo": { "type": "<image-protocol>", "source": "media-cover" }` in JSON config; or `--<image-protocol> media-cover` in command line
     * Supports local sources only
 * Adds native GPU detection support on OpenBSD and NetBSD (instead of depending on `libpciaccess`) (GPU)
     * No functional changes

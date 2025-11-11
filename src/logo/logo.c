@@ -485,7 +485,7 @@ static bool updateLogoPath(void)
     if (ffStrbufEqualS(&options->source, "-")) // stdin
         return true;
 
-    if (ffStrbufIgnCaseEqualS(&options->source, "mediacover"))
+    if (ffStrbufIgnCaseEqualS(&options->source, "media-cover"))
     {
         const FFMediaResult* media = ffDetectMedia(true);
         if (media->cover.length == 0)
