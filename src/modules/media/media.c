@@ -144,7 +144,7 @@ bool ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, song, "album", &media->album);
     yyjson_mut_obj_add_strbuf(doc, song, "status", &media->status);
     if (media->cover.length > 0)
-        yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->status);
+        yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->cover);
     else
         yyjson_mut_obj_add_null(doc, song, "cover");
 
