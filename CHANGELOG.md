@@ -10,6 +10,7 @@ Features:
     * `parallel`: set to `false` to disable parallel execution (see Changes above)
     * `useStdErr`: set to `true` to use stderr output instead of stdout
 * Adds the command-line flag `--dynamic-interval <interval-in-ms>` to enable dynamic output auto-refresh (#2041)
+    * Due to internal limitations, some modules do not support dynamic updates (notably Display and Media)
 * Adds support for using the current playing media's cover art as a logo source (Media / Logo)
     * Usage: `"logo": { "type": "<image-protocol>", "source": "mediacover" }`
     * Supports local sources only
