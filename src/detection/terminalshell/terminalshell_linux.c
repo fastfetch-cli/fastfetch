@@ -57,6 +57,9 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
                 ffStrbufEqualS(&result->processName, "proot")               ||
                 ffStrbufEqualS(&result->processName, "script")              ||
+                #ifdef __linux__
+                ffStrbufEqualS(&result->processName, "run-parts")           ||
+                #endif
                 ffStrbufContainS(&result->processName, "debug")             ||
                 ffStrbufContainS(&result->processName, "command-not-")      ||
                 ffStrbufEndsWithS(&result->processName, ".sh")
@@ -113,6 +116,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             #ifdef __linux__
             ffStrbufStartsWithS(&result->processName, "Relay(")   || // Unknown process in WSL2
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
+            ffStrbufEqualS(&result->processName, "run-parts")  || // #2048
             #endif
             ffStrbufEndsWithS(&result->processName, ".sh")
         )
