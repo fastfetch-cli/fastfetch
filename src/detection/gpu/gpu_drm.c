@@ -153,7 +153,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
 
     return NULL;
 #else
-    FF_UNUSED(gpu, renderPath);
+    FF_UNUSED(options, gpu, renderPath);
     return "Fastfetch is compiled without libdrm support";
 #endif
 }
