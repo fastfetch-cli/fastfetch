@@ -1,3 +1,12 @@
+# 2.55.1
+
+Bugfixes:
+* Fix parallel command execution breaks randomly (#2056 / #2058, Command)
+    * Regression from v2.55.0
+* Fix `dylib` searching path on macOS (macOS)
+    * Regression from v2.55.0
+* Fix an uninitialized field (#2057, Display)
+
 # 2.55.0
 
 Changes:
