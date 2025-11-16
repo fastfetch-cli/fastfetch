@@ -1,3 +1,9 @@
+fastfetch (2.55.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 12 Nov 2025 09:15:24 +0800
+
 fastfetch (2.54.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
 
   * Fix building on plucky

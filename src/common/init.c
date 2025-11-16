@@ -92,10 +92,6 @@ static void exitSignalHandler(FF_MAYBE_UNUSED int signal)
     resetConsole();
     exit(0);
 }
-static void chldSignalHandler(FF_MAYBE_UNUSED int signal)
-{
-    // empty; used to interrupt the poll and read syscalls
-}
 #endif
 
 void ffStart(void)
@@ -121,7 +117,10 @@ void ffStart(void)
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
-    sigaction(SIGCHLD, &(struct sigaction) { .sa_handler = chldSignalHandler }, NULL);
+    sigset_t newmask;
+    sigemptyset(&newmask);
+    sigaddset(&newmask, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &newmask, NULL);
     #endif
 
     //reset everything to default before we start printing

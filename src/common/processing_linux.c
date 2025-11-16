@@ -184,30 +184,13 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
                 waitpid(childPid, NULL, 0);
                 return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
             }
-            else if (pollret < 0)
-            {
-                if (errno == EINTR)
-                {
-                    // The child process has been terminated. See `chldSignalHandler` in `common/init.c`
-                    if (waitpid(childPid, NULL, WNOHANG) == childPid)
-                    {
-                        // Read remaining data from the pipe
-                        fcntl(childPipeFd, F_SETFL, O_CLOEXEC | O_NONBLOCK);
-                        childPid = -1;
-                    }
-                }
-                else
-                {
-                    kill(childPid, SIGTERM);
-                    waitpid(childPid, NULL, 0);
-                    return "poll(&pollfd, 1, timeout) error: not EINTR";
-                }
-            }
-            else if (pollfd.revents & POLLERR)
+            else if (pollret < 0 || (pollfd.revents & POLLERR))
             {
                 kill(childPid, SIGTERM);
                 waitpid(childPid, NULL, 0);
-                return "poll(&pollfd, 1, timeout) error: POLLERR";
+                return pollret < 0
+                    ? "poll(&pollfd, 1, timeout) error: pollret < 0"
+                    : "poll(&pollfd, 1, timeout) error: pollfd.revents & POLLERR";
             }
         }
 
@@ -229,12 +212,7 @@ const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
             return NULL;
         }
         else if (nRead < 0)
-        {
-            if (errno == EAGAIN)
-                return NULL;
-            else
-                break;
-        }
+            break;
     }
 
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";

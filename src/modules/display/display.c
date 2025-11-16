@@ -436,6 +436,7 @@ void ffInitDisplayOptions(FFDisplayOptions* options)
     ffOptionInitModuleArg(&options->moduleArgs, "󰍹");
     options->compactType = FF_DISPLAY_COMPACT_TYPE_NONE;
     options->preciseRefreshRate = false;
+    options->order = FF_DISPLAY_ORDER_NONE;
 }
 
 void ffDestroyDisplayOptions(FFDisplayOptions* options)
