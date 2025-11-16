@@ -109,9 +109,53 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
 
 #else
 
+#include "common/processing.h"
+#include "util/path.h"
+
 const char* ffDetectZpool(FF_MAYBE_UNUSED FFlist* result)
 {
-    return "Fastfetch was compiled without libzfs support";
+    FF_STRBUF_AUTO_DESTROY path = ffStrbufCreate();
+    const char* error = ffFindExecutableInPath("zpool", &path);
+    if (error) return "Failed to find zpool executable path";
+
+    FF_STRBUF_AUTO_DESTROY output = ffStrbufCreate();
+    if (ffProcessAppendStdOut(&output, (char* const[]){
+        path.chars,
+        "get",
+        "-Hp",
+        "health,version,size,allocated,fragmentation",
+        NULL
+    }) == NULL)
+    {
+        if (output.length == 0)
+            return NULL;
+
+        char* line = NULL;
+        size_t len = 0;
+        while (ffStrbufGetline(&line, &len, &output))
+        {
+            FFZpoolResult* item = ffListAdd(result);
+            ffStrbufInitS(&item->name, line);
+            ffStrbufSubstrBeforeFirstC(&item->name, '\t');
+            uint32_t startIndex = item->name.length;
+            ffStrbufInitS(&item->state, line + startIndex + sizeof("health\t"));
+            ffStrbufSubstrBeforeFirstC(&item->state, '\t');
+            ffStrbufGetline(&line, &len, &output);
+            item->version = ffStrbufToUInt(
+                &(FFstrbuf){.chars = line + startIndex + sizeof("version\t")} , 5000);
+            ffStrbufGetline(&line, &len, &output);
+            item->total = ffStrbufToUInt(
+                &(FFstrbuf){.chars = line + startIndex + sizeof("size\t")}, 0);
+            ffStrbufGetline(&line, &len, &output);
+            item->used = ffStrbufToUInt(
+                &(FFstrbuf){.chars = line + startIndex + sizeof("allocated\t")}, 0);
+            ffStrbufGetline(&line, &len, &output);
+            item->fragmentation = ffStrbufToDouble(
+                &(FFstrbuf){.chars = line + startIndex + sizeof("fragmentation\t")}, -DBL_MAX);
+        }
+        return NULL;
+    }
+    return "Failed to run zpool get -Hp health,version,size,allocated,fragmentation";
 }
 
 #endif
