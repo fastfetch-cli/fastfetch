@@ -1348,7 +1348,7 @@ endif()
 
 # Used for dlopen finding dylibs installed by homebrew
 # `/opt/homebrew/lib` is not on in dlopen search path by default
-if(APPLE AND NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 
