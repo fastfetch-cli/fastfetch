@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.55.0
+    VERSION 2.55.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -1348,7 +1348,7 @@ endif()
 
 # Used for dlopen finding dylibs installed by homebrew
 # `/opt/homebrew/lib` is not on in dlopen search path by default
-if(APPLE AND NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 

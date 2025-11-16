@@ -120,7 +120,7 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
         #endif
     }
     #else
-    FF_UNUSED(gpu, drmKey, buffer);
+    FF_UNUSED(options, gpu, drmKey, buffer);
     return "Fastfetch is not compiled with drm support";
     #endif
 }
