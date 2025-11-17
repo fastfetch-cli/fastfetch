@@ -100,5 +100,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
             detectThermalTemp(&cpu->temperature);
     }
 
+    cpu->numaNodes = (uint16_t) ffSysctlGetInt("vm.ndomains", 0);
+
     return NULL;
 }

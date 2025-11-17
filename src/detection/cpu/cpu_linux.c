@@ -138,6 +138,21 @@ static double detectCPUTemp(void)
     return FF_CPU_TEMP_UNSET;
 }
 
+static void detectNumaNodes(FFCPUResult* cpu)
+{
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir("/sys/devices/system/node/");
+    if (!dir) return;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_type != DT_DIR && entry->d_type != DT_UNKNOWN)
+            continue;
+        if (ffStrStartsWith(entry->d_name, "node") && ffCharIsDigit(entry->d_name[strlen("node")]))
+            cpu->numaNodes++;
+    }
+}
+
 #ifdef __ANDROID__
 #include "common/settings.h"
 
@@ -568,6 +583,8 @@ FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFC
     if (!detectFrequency(cpu, options) || cpu->frequencyBase == 0)
         cpu->frequencyBase = (uint32_t) ffStrbufToUInt(&cpuMHz, 0);
 
+    detectNumaNodes(cpu);
+
     return NULL;
 }
 
@@ -877,6 +894,7 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
         detectPhysicalCores(cpu);
 
     ffCPUDetectByCpuid(cpu);
+    detectNumaNodes(cpu);
 
     return NULL;
 }

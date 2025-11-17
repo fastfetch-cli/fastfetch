@@ -217,6 +217,11 @@ bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, obj, "march");
 
+        if (cpu.numaNodes > 0)
+            yyjson_mut_obj_add_uint(doc, obj, "numaNodes", cpu.numaNodes);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "numaNodes");
+
         success = true;
     }
 
@@ -259,6 +264,6 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         {"Temperature (formatted)", "temperature"},
         {"Logical core count grouped by frequency", "core-types"},
         {"Processor package count", "packages"},
-        {"X86-64 CPU microarchitecture", "march"},
+        {"CPU microarchitecture", "march"},
     }))
 };
