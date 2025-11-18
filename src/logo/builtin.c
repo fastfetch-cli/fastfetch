@@ -181,6 +181,20 @@ static const FFlogo A[] = {
             FF_COLOR_FG_256 "178",
         }
     },
+    // Amiga
+    {
+        .names = {"Amiga"},
+        .lines = FASTFETCH_DATATEXT_LOGO_AMIGA,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_LIGHT_RED,
+            FF_COLOR_FG_YELLOW,
+            FF_COLOR_FG_BLUE,
+            FF_COLOR_FG_CYAN,
+    	    FF_COLOR_FG_LIGHT_YELLOW,
+            FF_COLOR_FG_GREEN,
+        }
+    },
     // AmogOS
     {
         .names = {"AmogOS"},
