@@ -18,6 +18,19 @@ typedef struct FFZfsData
     FF_LIBRARY_SYMBOL(zpool_get_prop)
     FF_LIBRARY_SYMBOL(zpool_close)
 
+    // The fields in this struct store property IDs returned by `zpool_name_to_prop`,
+    // not the property values themselves.
+    struct {
+        int name;
+        int health;
+        int guid;
+        int size;
+        int free;
+        int allocated;
+        int fragmentation;
+        int readonly;
+    } props;
+
     libzfs_handle_t* handle;
     FFlist* result;
 } FFZfsData;
@@ -37,21 +50,21 @@ static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
     zprop_source_t source;
     FFZpoolResult* item = ffListAdd(data->result);
     char buf[1024];
-    if (data->ffzpool_get_prop(zpool, ZPOOL_PROP_NAME, buf, ARRAY_SIZE(buf), &source, false) == 0)
+    if (data->ffzpool_get_prop(zpool, data->props.name, buf, ARRAY_SIZE(buf), &source, false) == 0)
         ffStrbufInitS(&item->name, buf);
     else
         ffStrbufInitStatic(&item->name, "unknown");
-    if (data->ffzpool_get_prop(zpool, ZPOOL_PROP_HEALTH, buf, ARRAY_SIZE(buf), &source, false) == 0)
+    if (data->ffzpool_get_prop(zpool, data->props.health, buf, ARRAY_SIZE(buf), &source, false) == 0)
         ffStrbufInitS(&item->state, buf);
     else
         ffStrbufInitStatic(&item->state, "unknown");
-    item->guid = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_GUID, &source);
-    item->total = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_SIZE, &source);
-    item->used = item->total - data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FREE, &source);
-    item->allocated = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_ALLOCATED, &source);
-    uint64_t fragmentation = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FRAGMENTATION, &source);
+    item->guid = data->ffzpool_get_prop_int(zpool, data->props.guid, &source);
+    item->total = data->ffzpool_get_prop_int(zpool, data->props.size, &source);
+    item->used = item->total - data->ffzpool_get_prop_int(zpool, data->props.free, &source);
+    item->allocated = data->ffzpool_get_prop_int(zpool, data->props.allocated, &source);
+    uint64_t fragmentation = data->ffzpool_get_prop_int(zpool, data->props.fragmentation, &source);
     item->fragmentation = fragmentation == UINT64_MAX ? -DBL_MAX : (double) fragmentation;
-    item->readOnly = (bool) data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_READONLY, &source);
+    item->readOnly = (bool) data->ffzpool_get_prop_int(zpool, data->props.readonly, &source);
     data->ffzpool_close(zpool);
     return 0;
 }
@@ -72,6 +85,23 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
         .handle = handle,
         .result = result,
     };
+
+    FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libzfs, zpool_name_to_prop);
+
+    #define FF_QUERY_ZPOOL_PROP_FROM_NAME(prop_name) do { \
+        data.props.prop_name = ffzpool_name_to_prop(#prop_name); \
+        if (data.props.prop_name < 0) \
+            return "Failed to query prop: " #prop_name; \
+    } while (false)
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(name);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(health);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(guid);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(size);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(free);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(allocated);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(fragmentation);
+    FF_QUERY_ZPOOL_PROP_FROM_NAME(readonly);
+    #undef FF_QUERY_ZPOOL_PROP_FROM_NAME
 
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libzfs, zpool_iter);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, libzfs_fini);
