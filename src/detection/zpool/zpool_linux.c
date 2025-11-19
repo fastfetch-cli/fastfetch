@@ -1,41 +1,10 @@
 #include "zpool.h"
 
-#ifdef FF_HAVE_LIBZFS
 #include "util/kmod.h"
 
 #ifdef __sun
 #define FF_DISABLE_DLOPEN
 #include <libzfs.h>
-
-const char* zpool_get_state_str(zpool_handle_t* zpool)
-{
-    if (zpool_get_state(zpool) == POOL_STATE_UNAVAIL)
-        return "FAULTED";
-    else
-    {
-        const char *str;
-        zpool_errata_t errata;
-        zpool_status_t status = zpool_get_status(zpool, (char**) &str, &errata);
-        if (status == ZPOOL_STATUS_IO_FAILURE_WAIT ||
-            status == ZPOOL_STATUS_IO_FAILURE_CONTINUE ||
-            status == ZPOOL_STATUS_IO_FAILURE_MMP)
-            return "SUSPENDED";
-        else
-        {
-            nvlist_t *nvroot = fnvlist_lookup_nvlist(zpool_get_config(zpool, NULL), ZPOOL_CONFIG_VDEV_TREE);
-            uint_t vsc;
-            vdev_stat_t *vs;
-            #ifdef __x86_64__
-            if (nvlist_lookup_uint64_array(nvroot, ZPOOL_CONFIG_VDEV_STATS, (uint64_t**) &vs, &vsc) != 0)
-            #else
-            if (nvlist_lookup_uint32_array(nvroot, ZPOOL_CONFIG_VDEV_STATS, (uint32_t**) &vs, &vsc) != 0)
-            #endif
-                return "UNKNOWN";
-            else
-                return zpool_state_to_name(vs->vs_state, vs->vs_aux);
-        }
-    }
-}
 #else
 #include "libzfs_simplified.h"
 #endif
@@ -45,10 +14,9 @@ const char* zpool_get_state_str(zpool_handle_t* zpool)
 typedef struct FFZfsData
 {
     FF_LIBRARY_SYMBOL(libzfs_fini)
-    FF_LIBRARY_SYMBOL(zpool_iter)
     FF_LIBRARY_SYMBOL(zpool_get_prop_int)
-    FF_LIBRARY_SYMBOL(zpool_get_name)
-    FF_LIBRARY_SYMBOL(zpool_get_state_str)
+    FF_LIBRARY_SYMBOL(zpool_get_prop)
+    FF_LIBRARY_SYMBOL(zpool_close)
 
     libzfs_handle_t* handle;
     FFlist* result;
@@ -68,13 +36,23 @@ static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
     FFZfsData* data = (FFZfsData*) param;
     zprop_source_t source;
     FFZpoolResult* item = ffListAdd(data->result);
-    ffStrbufInitS(&item->name, data->ffzpool_get_name(zpool));
-    ffStrbufInitS(&item->state, data->ffzpool_get_state_str(zpool));
-    item->version = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_VERSION, &source);
+    char buf[1024];
+    if (data->ffzpool_get_prop(zpool, ZPOOL_PROP_NAME, buf, ARRAY_SIZE(buf), &source, false) == 0)
+        ffStrbufInitS(&item->name, buf);
+    else
+        ffStrbufInitStatic(&item->name, "unknown");
+    if (data->ffzpool_get_prop(zpool, ZPOOL_PROP_HEALTH, buf, ARRAY_SIZE(buf), &source, false) == 0)
+        ffStrbufInitS(&item->state, buf);
+    else
+        ffStrbufInitStatic(&item->state, "unknown");
+    item->guid = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_GUID, &source);
     item->total = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_SIZE, &source);
     item->used = item->total - data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FREE, &source);
+    item->allocated = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_ALLOCATED, &source);
     uint64_t fragmentation = data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_FRAGMENTATION, &source);
     item->fragmentation = fragmentation == UINT64_MAX ? -DBL_MAX : (double) fragmentation;
+    item->readOnly = (bool) data->ffzpool_get_prop_int(zpool, ZPOOL_PROP_READONLY, &source);
+    data->ffzpool_close(zpool);
     return 0;
 }
 
@@ -98,20 +76,11 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
     FF_LIBRARY_LOAD_SYMBOL_MESSAGE(libzfs, zpool_iter);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, libzfs_fini);
     FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_prop_int);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_name);
-    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_state_str);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_get_prop);
+    FF_LIBRARY_LOAD_SYMBOL_VAR_MESSAGE(libzfs, data, zpool_close);
 
     if (ffzpool_iter(handle, enumZpoolCallback, &data) < 0)
         return "zpool_iter() failed";
 
     return NULL;
 }
-
-#else
-
-const char* ffDetectZpool(FF_MAYBE_UNUSED FFlist* result)
-{
-    return "Fastfetch was compiled without libzfs support";
-}
-
-#endif

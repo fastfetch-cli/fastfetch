@@ -84,6 +84,7 @@ extern int zpool_iter(libzfs_handle_t *, zpool_iter_f, void *);
 
 extern libzfs_handle_t *libzfs_init(void);
 extern void libzfs_fini(libzfs_handle_t *);
-extern uint64_t zpool_get_prop_int(zpool_handle_t *, zpool_prop_t, zprop_source_t *);
-extern const char *zpool_get_name(zpool_handle_t *);
-extern const char *zpool_get_state_str(zpool_handle_t *);
+// https://github.com/openzfs/zfs/blob/06c73cffabc30b61a695988ec8e290f43cb3768d/lib/libzfs/libzfs_pool.c#L300
+extern uint64_t zpool_get_prop_int(zpool_handle_t *zhp, zpool_prop_t prop, zprop_source_t *srctype);
+extern int zpool_get_prop(zpool_handle_t *zhp, zpool_prop_t prop, char *buf, size_t len, zprop_source_t *srctype, boolean_t literal);
+extern void zpool_close(zpool_handle_t *);
