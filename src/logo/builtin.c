@@ -3700,6 +3700,15 @@ static const FFlogo O[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    // OS/2 Warp
+    {
+        .names = {"OS2Warp"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OS2WARP,
+        .colors = {
+            FF_COLOR_FG_LIGHT_WHITE,
+            FF_COLOR_FG_LIGHT_BLUE,
+        }
+    },
     // OS_Elbrus
     {
         .names = {"OS Elbrus"},
