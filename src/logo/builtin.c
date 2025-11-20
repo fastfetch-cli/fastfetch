@@ -3688,7 +3688,7 @@ static const FFlogo O[] = {
     },
     // OS/2 Warp
     {
-        .names = {"os2warp", "OS2 Warp"},
+        .names = {"OS2Warp"},
         .lines = FASTFETCH_DATATEXT_LOGO_OS2WARP,
         .colors = {
             FF_COLOR_FG_LIGHT_WHITE,
