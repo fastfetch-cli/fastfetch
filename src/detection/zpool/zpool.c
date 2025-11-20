@@ -3,7 +3,6 @@
 #include "util/kmod.h"
 
 #ifdef __sun
-#define FF_DISABLE_DLOPEN
 #include <libzfs.h>
 #else
 #include "libzfs_simplified.h"

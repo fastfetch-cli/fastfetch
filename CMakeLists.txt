@@ -92,7 +92,6 @@ cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS OR NetBSD" OFF)
 cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "GNU" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
@@ -410,6 +409,7 @@ set(LIBFASTFETCH_SRC
     src/detection/version/version.c
     src/detection/vulkan/vulkan.c
     src/detection/weather/weather.c
+    src/detection/zpool/zpool.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c
@@ -582,7 +582,6 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -656,7 +655,6 @@ elseif(ANDROID)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -739,7 +737,6 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -833,7 +830,6 @@ elseif(NetBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -916,7 +912,6 @@ elseif(OpenBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/smbiosHelper.c
@@ -986,7 +981,6 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
-        src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/apple/smc_temps.c
@@ -1056,7 +1050,6 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
-        src/detection/zpool/zpool_nosupport.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -1145,7 +1138,6 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -1214,7 +1206,6 @@ elseif(Haiku)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/haiku/version.cpp
@@ -1294,7 +1285,6 @@ elseif(GNU)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
    )
@@ -1611,24 +1601,6 @@ ff_lib_enable(PCIACCESS
     "pciaccess"
     "pciaccess"
 )
-# The system <libzfs.h> is only usable on SunOS. We provide our local copy of it so it's always available.
-if(ENABLE_LIBZFS)
-    if(BINARY_LINK_TYPE STREQUAL "dlopen")
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-    else()
-        set(CMAKE_REQUIRED_LIBRARIES_BACKUP ${CMAKE_REQUIRED_LIBRARIES})
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} zfs)
-        check_function_exists("libzfs_init" LIBZFS_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACKUP})
-        if(NOT LIBZFS_FOUND)
-            message(STATUS "Library: missing: LIBZFS")
-        else()
-            message(STATUS "Library: found LIBZFS")
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-            target_link_libraries(libfastfetch PRIVATE zfs)
-        endif()
-    endif()
-endif()
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)

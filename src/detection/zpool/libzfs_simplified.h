@@ -32,7 +32,7 @@
 // the correct value for a property at runtime.
 typedef int zpool_prop_t;
 typedef int zprop_source_t;
-typedef bool boolean_t;
+typedef int boolean_t;
 
 typedef struct libzfs_handle libzfs_handle_t;
 typedef struct zpool_handle zpool_handle_t;
