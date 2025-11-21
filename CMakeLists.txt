@@ -1705,7 +1705,6 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
-        PRIVATE "zfs"
         PRIVATE "nvpair"
         PRIVATE "devinfo"
     )
