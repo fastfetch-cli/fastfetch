@@ -140,6 +140,61 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
     return false;
 }
 
+static bool detectDE(FFDisplayServerResult* ds)
+{
+    if (ffSettingsGetAndroidProperty("ro.vivo.os.build.display.id", &ds->dePrettyName)) // OriginOS 6
+    {
+        ffStrbufAppendC(&ds->dePrettyName, ' ');
+        ffSettingsGetAndroidProperty("ro.vivo.product.version", &ds->dePrettyName); // PD2505D_xxx
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.build.version.magic", &ds->dePrettyName) ||
+        ffSettingsGetAndroidProperty("ro.build.version.emui", &ds->dePrettyName))
+    {
+        ffStrbufReplaceAllC(&ds->dePrettyName, '_', ' ');
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.mi.os.version.name", &ds->dePrettyName))
+    {
+        // MiUI like
+        ffStrbufClear(&ds->dePrettyName);
+        ffSettingsGetAndroidProperty("ro.build.version.incremental", &ds->dePrettyName); // Detail version number
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "OS"))
+        {
+            ds->dePrettyName.chars[0] = 'S';
+            ds->dePrettyName.chars[1] = ' ';
+            ffStrbufPrependS(&ds->dePrettyName, "HyperO");
+        }
+        else if (ffStrbufStartsWithS(&ds->dePrettyName, "V"))
+        {
+            ds->dePrettyName.chars[0] = ' ';
+            ffStrbufPrependS(&ds->dePrettyName, "MiUI");
+        }
+        else
+            ffStrbufSetStatic(&ds->dePrettyName, "MiUI");
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.build.version.oplusrom", &ds->dePrettyName))
+    {
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "V"))
+            ffStrbufSubstrAfter(&ds->dePrettyName, 0);
+        ffStrbufPrependS(&ds->dePrettyName, "ColorOS");
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.oxygen.version", &ds->dePrettyName))
+    {
+        ffStrbufPrependS(&ds->dePrettyName, "OxygenOS");
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName) && ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS"))
+    {
+        ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
+        return true;
+    }
+
+    return false;
+}
+
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
     const char* error = ffdsConnectXcbRandr(ds);
@@ -158,4 +213,6 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);
+
+    detectDE(ds);
 }
