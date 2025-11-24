@@ -733,22 +733,23 @@ void ffLogoPrintRemaining(void)
 void ffLogoBuiltinPrint(void)
 {
     FFOptionsLogo* options = &instance.config.logo;
+    options->position = FF_LOGO_POSITION_TOP;
+    options->paddingRight = 2; // empty line after logo printing
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
     for(uint8_t ch = 0; ch < 26; ++ch)
     {
         for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
         {
-            printf("\033[%sm%s:\033[0m\n", logo->colors[0], logo->names[0]);
+            if (instance.config.display.pipe)
+                ffStrbufSetF(&buf, "%s:\n", logo->names[0]);
+            else
+                ffStrbufSetF(&buf, "\e[%sm%s:\e[0m\n", logo->colors[0], logo->names[0]);
+            ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
             logoPrintStruct(logo);
-            ffLogoPrintRemaining();
 
-            //reset everything
-            instance.state.logoHeight = 0;
-            instance.state.keysHeight = 0;
             for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
                 ffStrbufClear(&options->colors[i]);
-
-            putchar('\n');
         }
     }
 }
