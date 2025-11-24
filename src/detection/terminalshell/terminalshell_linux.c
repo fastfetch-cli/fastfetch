@@ -383,7 +383,10 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
-    fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
+    FFstrbuf *exe = &result->exe;
+    if (result->exePath.length != 0)
+        exe = &result->exePath;
+    fftsGetTerminalVersion(&result->processName, exe, &result->version);
 }
 
 #if defined(MAXPATH)
