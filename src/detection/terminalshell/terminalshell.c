@@ -64,12 +64,9 @@ static bool extractBashVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, v
     return false;
 }
 
-static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
 {
-    const char* path = exePath->chars;
-    if (*path == '\0')
-        path = exe->chars;
-    ffBinaryExtractStrings(path, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
+    ffBinaryExtractStrings(exe->chars, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
     if (version->length > 0) return true;
 
     if(!getExeVersionRaw(exe, version))
@@ -230,13 +227,9 @@ static bool extractZshVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, vo
     return false;
 }
 
-static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
 {
-    const char* path = exePath->chars;
-    if (*path == '\0')
-        path = exe->chars;
-
-    ffBinaryExtractStrings(path, extractZshVersion, version, (uint32_t) strlen("zsh-0.0-0"));
+    ffBinaryExtractStrings(exe->chars, extractZshVersion, version, (uint32_t) strlen("zsh-0.0-0"));
     if (version->length) return true;
 
     return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
@@ -270,10 +263,13 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
     if(ffStrEqualsIgnCase(exeName, "sh")) // #849
         return false;
 
+    if (exePath->length > 0)
+      exe = exePath;
+
     if(ffStrEqualsIgnCase(exeName, "bash"))
-        return getShellVersionBash(exe, exePath, version);
+        return getShellVersionBash(exe, version);
     if(ffStrEqualsIgnCase(exeName, "zsh"))
-        return getShellVersionZsh(exe, exePath, version);
+        return getShellVersionZsh(exe, version);
     if(ffStrEqualsIgnCase(exeName, "fish"))
         return getShellVersionFish(exe, version);
     if(ffStrEqualsIgnCase(exeName, "pwsh"))
