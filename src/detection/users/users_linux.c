@@ -123,6 +123,35 @@ const char* detectBySystemd(FFUsersOptions* options, FFlist* users)
 }
 #endif
 
+#if __linux__ || __GNU__
+static void fillUtmpIpAddr(FFUserResult* user, struct utmpx* n)
+{
+    bool isIpv6 = false;
+    for (int i = 1; i < 4; ++i) {
+        if (n->ut_addr_v6[i] != 0) {
+            isIpv6 = true;
+            break;
+        }
+    }
+
+    if (isIpv6) {
+        char ipv6_str[INET6_ADDRSTRLEN];
+        if (inet_ntop(AF_INET6, n->ut_addr_v6, ipv6_str, INET6_ADDRSTRLEN) != NULL) {
+            ffStrbufSetS(&user->clientIp, ipv6_str);
+        }
+    } else if (n->ut_addr_v6[0] != 0) {
+        char ipv4_str[INET_ADDRSTRLEN];
+        if (inet_ntop(AF_INET, n->ut_addr_v6, ipv4_str, INET_ADDRSTRLEN) != NULL) {
+            ffStrbufSetS(&user->clientIp, ipv4_str);
+        }
+    }
+}
+#else
+static void fillUtmpIpAddr(FF_MAYBE_UNUSED FFUserResult* user, FF_MAYBE_UNUSED struct utmpx* n)
+{
+}
+#endif
+
 const char* detectByUtmp(FFUsersOptions* options, FFlist* users)
 {
     struct utmpx* n = NULL;
@@ -140,7 +169,17 @@ next:
         FF_LIST_FOR_EACH(FFUserResult, user, *users)
         {
             if(ffStrbufEqualS(&user->name, n->ut_user))
+            {
+                uint64_t newLoginTime = (uint64_t) n->ut_tv.tv_sec * 1000 + (uint64_t) n->ut_tv.tv_usec / 1000;
+                if (newLoginTime > user->loginTime)
+                {
+                    ffStrbufSetS(&user->hostName, n->ut_host);
+                    ffStrbufSetS(&user->sessionName, n->ut_line);
+                    fillUtmpIpAddr(user, n);
+                    user->loginTime = newLoginTime;
+                }
                 goto next;
+            }
         }
 
         FFUserResult* user = FF_LIST_ADD(FFUserResult, *users);
@@ -148,27 +187,7 @@ next:
         ffStrbufInitS(&user->hostName, n->ut_host);
         ffStrbufInitS(&user->sessionName, n->ut_line);
         ffStrbufInit(&user->clientIp);
-        #if __linux__ || __GNU__
-        bool isIpv6 = false;
-        for (int i = 1; i < 4; ++i) {
-            if (n->ut_addr_v6[i] != 0) {
-                isIpv6 = true;
-                break;
-            }
-        }
-
-        if (isIpv6) {
-            char ipv6_str[INET6_ADDRSTRLEN];
-            if (inet_ntop(AF_INET6, n->ut_addr_v6, ipv6_str, INET6_ADDRSTRLEN) != NULL) {
-                ffStrbufSetS(&user->clientIp, ipv6_str);
-            }
-        } else if (n->ut_addr_v6[0] != 0) {
-            char ipv4_str[INET_ADDRSTRLEN];
-            if (inet_ntop(AF_INET, n->ut_addr_v6, ipv4_str, INET_ADDRSTRLEN) != NULL) {
-                ffStrbufSetS(&user->clientIp, ipv4_str);
-            }
-        }
-        #endif
+        fillUtmpIpAddr(user, n);
         user->loginTime = (uint64_t) n->ut_tv.tv_sec * 1000 + (uint64_t) n->ut_tv.tv_usec / 1000;
     }
 
