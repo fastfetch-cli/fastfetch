@@ -12,7 +12,7 @@
 #include <wchar.h>
 #include <tlhelp32.h>
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, const FFstrbuf* exePath, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 static uint32_t getShellInfo(FFShellResult* result, uint32_t pid)
 {
@@ -332,7 +332,7 @@ const FFShellResult* ffDetectShell(void)
         strcpy(tmp, result.exeName);
         char* ext = strrchr(tmp, '.');
         if (ext) *ext = '\0';
-        fftsGetShellVersion(&result.exe, tmp, &result.exePath, &result.version);
+        fftsGetShellVersion(result.exePath.length > 0 ? &result.exePath : &result.exe, tmp, &result.version);
     }
 
     return &result;
@@ -368,7 +368,7 @@ const FFTerminalResult* ffDetectTerminal(void)
     if(result.processName.length > 0)
     {
         setTerminalInfoDetails(&result);
-        fftsGetTerminalVersion(&result.processName, &result.exe, &result.version);
+        fftsGetTerminalVersion(&result.processName, result.exePath.length > 0 ? &result.exePath : &result.exe, &result.version);
     }
 
     return &result;
