@@ -1,6 +1,7 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "util/FFstrbuf.h"
+#include "util/stringUtils.h"
 
 const char* ffFindExecutableInPath(const char* name, FFstrbuf* result);
 static inline bool ffIsAbsolutePath(const char* path)
