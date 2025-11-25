@@ -648,19 +648,7 @@ void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c)
     strbuf->length += num;
 }
 
-/**
- * @brief Read a line from a FFstrbuf.
- *
- * @details Behaves like getline(3) but reads from a FFstrbuf.
- *
- * @param[in,out] lineptr The pointer to a pointer that will be set to the start of the line.
- *                         Can be NULL for the first call.
- * @param[in,out] n The pointer to the size of the buffer of lineptr.
- * @param[in] buffer The buffer to read from. The buffer must not be a string literal.
- *
- * @return true if a line has been read, false if the end of the buffer has been reached.
- */
-bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
+bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer)
 {
     assert(lineptr && n && buffer);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
@@ -674,14 +662,14 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
         *lineptr += *n;
         if (*lineptr >= pBufferEnd) // non-empty last line
             return false;
-        **lineptr = '\n';
+        **lineptr = delimiter;
         ++*lineptr;
     }
     if (*lineptr >= pBufferEnd) // empty last line
         return false;
 
     size_t remaining = (size_t) (pBufferEnd - *lineptr);
-    char* ending = memchr(*lineptr, '\n', remaining);
+    char* ending = memchr(*lineptr, delimiter, remaining);
     if (ending)
     {
         *n = (size_t) (ending - *lineptr);
@@ -692,9 +680,7 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
     return true;
 }
 
-/// @brief Restore the end of a line that was modified by ffStrbufGetline.
-/// @warning This function should be called before breaking an ffStrbufGetline loop.
-void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
+void ffStrbufGetdelimRestore(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer)
 {
     assert(buffer && lineptr && n);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
@@ -705,7 +691,7 @@ void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
 
     *lineptr += *n;
     if (*lineptr < buffer->chars + buffer->length)
-        **lineptr = '\n';
+        **lineptr = delimiter;
 }
 
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
