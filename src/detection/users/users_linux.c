@@ -64,5 +64,7 @@ next:
         user->loginTime = (uint64_t) n->ut_tv.tv_sec * 1000 + (uint64_t) n->ut_tv.tv_usec / 1000;
     }
 
+    endutxent();
+
     return NULL;
 }
