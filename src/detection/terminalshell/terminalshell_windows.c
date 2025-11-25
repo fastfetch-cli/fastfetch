@@ -369,9 +369,9 @@ const FFTerminalResult* ffDetectTerminal(void)
     {
         setTerminalInfoDetails(&result);
 
-        FFstrbuf *exe = &result->exe;
-        if (result->exePath.length != 0)
-            exe = &result->exePath;
+        FFstrbuf *exe = &result.exe;
+        if (result.exePath.length != 0)
+            exe = &result.exePath;
         fftsGetTerminalVersion(&result.processName, exe, &result.version);
     }
 
