@@ -264,7 +264,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
         return false;
 
     if (exePath->length > 0)
-      exe = exePath;
+        exe = exePath;
 
     if(ffStrEqualsIgnCase(exeName, "bash"))
         return getShellVersionBash(exe, version);

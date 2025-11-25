@@ -384,7 +384,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
     FFstrbuf *exe = &result->exe;
-    if (result->exePath.length != 0)
+    if(result->exePath.length != 0)
         exe = &result->exePath;
     fftsGetTerminalVersion(&result->processName, exe, &result->version);
 }
