@@ -331,7 +331,12 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufStartsWithS(&result->processName, "screen-"))
         ffStrbufInitStatic(&result->prettyName, "screen");
     else if(ffStrbufEqualS(&result->processName, "sshd") || ffStrbufStartsWithS(&result->processName, "sshd-"))
-        ffStrbufInitCopy(&result->prettyName, &result->tty);
+    {
+        if (result->tty.length)
+            ffStrbufInitCopy(&result->prettyName, &result->tty);
+        else
+            ffStrbufSetStatic(&result->prettyName, "sshd");
+    }
 
     #if defined(__ANDROID__)
 

@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
+#include "util/path.h"
 #include "util/stringUtils.h"
 #include "util/binary.h"
 
@@ -318,7 +319,7 @@ static bool extractGeneralVersion(const char *str, FF_MAYBE_UNUSED uint32_t len,
 
 FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (exe->chars[0] == '/')
+    if (ffIsAbsolutePath(exe->chars))
     {
         ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
@@ -338,7 +339,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
 
 FF_MAYBE_UNUSED static bool getTerminalVersionXfce4Terminal(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (exe->chars[0] == '/')
+    if (ffIsAbsolutePath(exe->chars))
     {
         ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
@@ -575,6 +576,44 @@ static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool extractSshdVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    if (!ffStrStartsWith(str, "OpenSSH_") || !ffCharIsDigit(str[strlen("OpenSSH_")])) return true;
+    str += strlen("OpenSSH_");
+    int count = 0;
+    sscanf(str, "%*d.%*dp%*d%n", &count);
+    if (count == 0) return true;
+    ffStrbufSetS((FFstrbuf*) userdata, str);
+    return false;
+}
+
+static bool getTerminalVersionSshd(FFstrbuf* exe, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY exePath = ffStrbufCreate();
+    if (ffIsAbsolutePath(exe->chars))
+        ffStrbufSet(&exePath, exe);
+    else if (ffFindExecutableInPath("sshd", &exePath) != NULL)
+        return false;
+
+    ffBinaryExtractStrings(exePath.chars, extractSshdVersion, version, (uint32_t) strlen("OpenSSH0.0"));
+    if (version->length) return true;
+
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exePath.chars,
+        "-V",
+        NULL
+    }) != NULL)
+        return false;
+
+    if (ffStrbufStartsWithS(version, "unknown ")) // `unknown option -- V` (ancient OpenSSH version)
+        ffStrbufSubstrAfterFirstC(version, '\n');
+
+    // OpenSSH_10.0p2 Ubuntu-5ubuntu5, OpenSSL 3.5.3 16 Sep 2025
+    ffStrbufSubstrAfterFirstC(version, '_');
+    ffStrbufSubstrBeforeFirstC(version, ',');
+    return true;
+}
+
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -674,7 +713,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* e
 
 FF_MAYBE_UNUSED static bool getTerminalVersionTilix(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (exe->chars[0] == '/')
+    if (ffIsAbsolutePath(exe->chars))
     {
         ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
@@ -917,6 +956,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "tmux"))
         return getTerminalVersionTmux(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "sshd") || ffStrbufStartsWithIgnCaseS(processName, "sshd-"))
+        return getTerminalVersionSshd(exe, version);
 
     #ifdef _WIN32
 
