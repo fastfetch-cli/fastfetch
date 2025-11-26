@@ -5243,6 +5243,16 @@ static const FFlogo V[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+    //Viper
+    {
+        .names = {"Viper"},
+        .lines = FASTFETCH_DATATEXT_LOGO_VIPER,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+        }
+    },
     // Vnux
     {
         .names = {"Vnux"},
