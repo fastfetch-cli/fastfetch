@@ -15,11 +15,18 @@ extern const char* FF_GPU_VENDOR_NAME_AMD;
 extern const char* FF_GPU_VENDOR_NAME_INTEL;
 extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
 extern const char* FF_GPU_VENDOR_NAME_MTHREADS;
+extern const char* FF_GPU_VENDOR_NAME_QUALCOMM;
+extern const char* FF_GPU_VENDOR_NAME_MTK;
 extern const char* FF_GPU_VENDOR_NAME_VMWARE;
 extern const char* FF_GPU_VENDOR_NAME_PARALLEL;
 extern const char* FF_GPU_VENDOR_NAME_MICROSOFT;
 extern const char* FF_GPU_VENDOR_NAME_REDHAT;
 extern const char* FF_GPU_VENDOR_NAME_ORACLE;
+extern const char* FF_GPU_VENDOR_NAME_BROADCOM;
+extern const char* FF_GPU_VENDOR_NAME_LOONGSON;
+extern const char* FF_GPU_VENDOR_NAME_JINGJIA_MICRO;
+extern const char* FF_GPU_VENDOR_NAME_HUAWEI;
+extern const char* FF_GPU_VENDOR_NAME_ZHAOXIN;
 
 typedef struct FFGPUMemory
 {
