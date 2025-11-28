@@ -15,6 +15,7 @@ void ffFontInit(FFfont* font);
 void ffFontInitQt(FFfont* font, const char* data);
 void ffFontInitPango(FFfont* font, const char* data);
 void ffFontInitValues(FFfont* font, const char* name, const char* size);
+void ffFontInitMoveValues(FFfont* font, FFstrbuf* name, FFstrbuf* size, FFstrbuf* style);
 void ffFontInitWithSpace(FFfont* font, const char* rawName);
 void ffFontDestroy(FFfont* font);
 

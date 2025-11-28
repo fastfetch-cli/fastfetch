@@ -1,4 +1,6 @@
 #include "fastfetch.h"
+#include "util/FFlist.h"
+#include "util/FFstrbuf.h"
 #include "common/font.h"
 
 #include <string.h>
@@ -188,6 +190,21 @@ void ffFontInitValues(FFfont* font, const char* name, const char* size)
     ffStrbufAppendS(&font->name, name);
     ffStrbufTrim(&font->name, '"');
     ffStrbufAppendS(&font->size, size);
+
+    fontInitPretty(font);
+}
+
+void ffFontInitMoveValues(FFfont* font, FFstrbuf* name, FFstrbuf* size, FFstrbuf* style)
+{
+    ffFontInit(font);
+
+    if (name) ffStrbufInitMove(&font->name, name);
+    if (size) ffStrbufInitMove(&font->size, size);
+    if (style)
+    {
+        FFstrbuf* styleBuf = FF_LIST_ADD(FFstrbuf, font->styles);
+        ffStrbufInitMove(styleBuf, style);
+    }
 
     fontInitPretty(font);
 }
