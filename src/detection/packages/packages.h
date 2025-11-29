@@ -40,6 +40,7 @@ typedef struct FFPackagesResult
     uint32_t rpm;
     uint32_t scoopUser;
     uint32_t scoopGlobal;
+    uint32_t sdkman;
     uint32_t snap;
     uint32_t soar;
     uint32_t sorcery;
