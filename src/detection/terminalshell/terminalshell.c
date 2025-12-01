@@ -120,35 +120,39 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 
 static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
 {
-#if __OpenBSD__ || __NetBSD__
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) == NULL && ffStrbufSubstrAfterFirstS(version, " (AT&T Research) "))
+    {
+        //  version         sh (AT&T Research) 93u+ 2012-08-01
+        ffStrbufSubstrBeforeFirstC(version, ' ');
+        return true;
+    }
+
+    ffStrbufClear(version);
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-c",
         "echo $KSH_VERSION",
         NULL
-    }) != NULL)
-        return false;
+    }) == NULL && ffStrbufSubstrAfterFirstS(version, " KSH "))
+    {
+        // OKSH: @(#)PD KSH v5.2.14 99/07/13.2
+        // MKSH: @(#)MIRBSD KSH R59 2025/04/26 +Debian
+        // $OKSH_VERSION doesn't exist on OpenBSD
+        ffStrbufSubstrBeforeFirstC(version, ' ');
+        ffStrbufTrimLeft(version, 'v');
+        return true;
+    }
 
-    // @(#)PD KSH v5.2.14 99/07/13.2
-    ffStrbufSubstrAfterFirstC(version, 'v');
-    ffStrbufSubstrBeforeFirstC(version, ' ');
-#else
-    if(ffProcessAppendStdErr(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    }) != NULL)
-        return false;
-
-    //  version         sh (AT&T Research) 93u+ 2012-08-01
-    ffStrbufSubstrAfterLastC(version, ')');
-    ffStrbufTrim(version, ' ');
-#endif
-    return true;
+    return false;
 }
 
 static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
 {
+    // Homebrew version
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-c",
@@ -276,7 +280,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(ffStrEqualsIgnCase(exeName, "nu"))
         return getShellVersionNushell(exe, version);
-    if(ffStrEqualsIgnCase(exeName, "ksh"))
+    if(ffStrEqualsIgnCase(exeName, "ksh") || ffStrEqualsIgnCase(exeName, "mksh"))
         return getShellVersionKsh(exe, version);
     if(ffStrEqualsIgnCase(exeName, "oksh"))
         return getShellVersionOksh(exe, version);
