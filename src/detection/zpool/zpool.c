@@ -1,5 +1,7 @@
 #include "zpool.h"
 
+#if FF_HAVE_LIBZFS
+
 #include "util/kmod.h"
 
 #ifdef __sun
@@ -113,3 +115,12 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
 
     return NULL;
 }
+
+#else
+
+const char* ffDetectZpool(FF_MAYBE_UNUSED FFlist* result)
+{
+    return "fastfetch was compiled without libzfs support";
+}
+
+#endif

@@ -106,6 +106,7 @@ option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
+option(ENABLE_ZFS "Enable libzfs" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -1615,6 +1616,15 @@ endif()
 if(ENABLE_EMBEDDED_AMDGPUIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
 endif()
+if(ENABLE_LIBZFS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_libraries(libfastfetch
+            PRIVATE "zfs"
+        )
+    endif()
+endif()
 
 if(LINUX)
     target_link_libraries(libfastfetch
@@ -1705,7 +1715,6 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
-        PRIVATE "nvpair"
         PRIVATE "devinfo"
     )
 elseif(GNU)
