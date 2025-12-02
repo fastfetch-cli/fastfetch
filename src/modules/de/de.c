@@ -14,7 +14,14 @@ bool ffPrintDE(FFDEOptions* options)
         ffPrintError(FF_DE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No DE found");
         return false;
     }
-
+        // --- Sonic Desktop (XLibre) branding override --
+        if(access("/usr/share/xlibre/xlibre-release", F_OK) == 0 ||
+           system("pacman -Q kwin-x11-sonic > /dev/null 2>&1") == 0)
+        {
+            ffStrbufSetS((FFstrbuf*)&result->dePrettyName, "Sonic Desktop (XLibre)");
+        }
+    }
+    
     FF_STRBUF_AUTO_DESTROY version = ffStrbufCreate();
     ffDetectDEVersion(&result->dePrettyName, &version, options);
 
