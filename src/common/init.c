@@ -49,7 +49,7 @@ static void defaultConfig(void)
 
 void ffInitInstance(void)
 {
-    #ifdef WIN32
+    #ifdef _WIN32
         // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
         setlocale(LC_ALL, ".UTF8");
     #else
