@@ -171,19 +171,27 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 void ffListFilesRecursively(const char* path, bool pretty);
 
+static inline bool ffIsValidNativeFD(FFNativeFD fd)
+{
+    #ifndef _WIN32
+        return fd >= 0;
+    #else
+        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
+        return fd != INVALID_HANDLE_VALUE && fd != NULL;
+    #endif
+}
+
 FF_C_NONNULL(1)
 static inline bool wrapClose(FFNativeFD* pfd)
 {
     assert(pfd);
 
-    #ifndef WIN32
-        if (*pfd < 0)
-            return false;
+    if (!ffIsValidNativeFD(*pfd))
+        return false;
+
+    #ifndef _WIN32
         close(*pfd);
     #else
-        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
-        if (*pfd == NULL || *pfd == INVALID_HANDLE_VALUE)
-            return false;
         CloseHandle(*pfd);
     #endif
 
