@@ -39,7 +39,7 @@ static const FFlogo A[] = {
             FF_COLOR_FG_256 "36",
         },
     },
-    // Aeon
+    // AerynOS
     {
         .names = {"AerynOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_AERYNOS,
