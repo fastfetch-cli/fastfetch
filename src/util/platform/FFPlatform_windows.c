@@ -164,8 +164,12 @@ static void getHostName(FFPlatform* platform)
 static void getUserShell(FFPlatform* platform)
 {
     // Works in MSYS2
-    ffStrbufAppendS(&platform->userShell, getenv("SHELL"));
-    ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
+    const char* userShell = getenv("SHELL");
+    if (userShell)
+    {
+        ffStrbufAppendS(&platform->userShell, userShell);
+        ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
+    }
 }
 
 static const char* detectWine(void)
