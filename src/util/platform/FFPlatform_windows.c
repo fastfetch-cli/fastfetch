@@ -16,7 +16,7 @@ static void getExePath(FFPlatform* platform)
 {
     wchar_t exePathW[MAX_PATH];
     DWORD exePathWLen = GetModuleFileNameW(NULL, exePathW, MAX_PATH);
-    if (exePathWLen == 0 && exePathWLen >= MAX_PATH) return;
+    if (exePathWLen == 0 || exePathWLen >= MAX_PATH) return;
 
     FF_AUTO_CLOSE_FD HANDLE hPath = CreateFileW(exePathW, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     if (hPath != INVALID_HANDLE_VALUE)
