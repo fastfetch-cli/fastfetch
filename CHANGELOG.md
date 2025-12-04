@@ -1,3 +1,51 @@
+# 2.56.0
+
+Features:
+* Adds NUMA node count detection (CPU)
+    * Exposed via `{numa-nodes}` in custom format
+    * Supported on Linux, FreeBSD and Windows
+* Supports the newest Alacritty config format (#2070, TerminalFont)
+* Detects driver specific info for Zhaoxin GPUs (GPU, Linux)
+* Detects Android OEM UI for certain OSes (DE, Android)
+* Improves users detection on Linux (#2064, Users, Linux)
+    * Adds systemd fallback when utmp is unavailable
+    * Fixes resource leaks
+    * Always reports the newest session info
+* Adds kiss package manager support (#2072, Packages, Linux)
+* Reports `sshd` if `$SSH_TTY` is not available (Terminal)
+* Zpool module rewrite (#2051, Zpool)
+    * Adds new Zpool properties: allocated, guid, readOnly
+    * Zpool module now uses runtime lookup for properties to ensure portability
+    * Adds NetBSD (requires `sudo`) and macOS support
+* Adds `splitLines` option for Command module, which splits the output into sub modules, each containing one line of the output (Command)  
+```
+* Command output:
+Line 1
+Line 2
+Line 3
+
+* Old behavior:
+Command: Line 1
+Line 2
+Line 3
+
+* With `splitLines: true`:
+Command 1: Line 1
+Command 2: Line 2
+Command 3: Line 3
+```
+
+Bugfixes:
+* Fixes {m,o}ksh version detection on Linux (Shell)
+* Fixes Alacritty config parsing for TOML format (#2070, TerminalFont)
+* Improves builtin logo printing for piping and buffering (#2065, Logo)
+* Uses absolute path when detecting shell and terminal version if available (#2067, TerminalShell)
+
+Logos:
+* Updates Codex Linux logo (#2071)
+* Adds OS/2 Warp logo (#2062)
+* Adds Amiga logo (#2061)
+
 # 2.55.1
 
 Bugfixes:
