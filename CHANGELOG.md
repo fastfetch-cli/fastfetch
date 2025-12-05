@@ -1,6 +1,8 @@
 # 2.56.0
 
 Features:
+* Enhances config file loading. `--config` and `-c` with relative path now also searches paths defined in `fastfetch --list-config-paths` (typically `~/.config/fastfetch/`)
+    * This allows users to use `fastfetch -c my-config` without needing to specify the full path.
 * Adds NUMA node count detection (CPU)
     * Exposed via `{numa-nodes}` in custom format
     * Supported on Linux, FreeBSD and Windows
