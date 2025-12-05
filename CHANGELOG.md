@@ -19,7 +19,7 @@ Features:
     * Adds new Zpool properties: allocated, guid, readOnly
     * Zpool module now uses runtime lookup for properties to ensure portability
     * Adds NetBSD (requires `sudo`) and macOS support
-* Adds `splitLines` option for Command module, which splits the output into sub modules, each containing one line of the output (Command)  
+* Adds `splitLines` option for Command module, which splits the output into sub modules, each containing one line of the output (Command)
 ```
 * Command output:
 Line 1
@@ -31,7 +31,7 @@ Command: Line 1
 Line 2
 Line 3
 
-* With `splitLines: true`:
+* With `"splitLines": true`:
 Command 1: Line 1
 Command 2: Line 2
 Command 3: Line 3
