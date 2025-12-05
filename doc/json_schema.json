@@ -2111,6 +2111,11 @@
                                         "type": "boolean",
                                         "default": true
                                     },
+                                    "splitLines": {
+                                        "description": "Set if the command output should be split into multiple lines",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },

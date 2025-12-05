@@ -20,16 +20,39 @@ bool ffPrintCommand(FFCommandOptions* options)
         return false;
     }
 
-    if (options->moduleArgs.outputFormat.length == 0)
+    if (options->splitLines)
     {
-        ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&result, stdout);
+        uint8_t index = 0;
+        char* line = NULL;
+        size_t len = 0;
+        while (ffStrbufGetline(&line, &len, &result))
+        {
+            if (options->moduleArgs.outputFormat.length == 0)
+            {
+                ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+                puts(line);
+            }
+            else
+            {
+                FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+                    FF_FORMAT_ARG(line, "result")
+                }));
+            }
+        }
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result, "result")
-        }));
+        if (options->moduleArgs.outputFormat.length == 0)
+        {
+            ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffStrbufPutTo(&result, stdout);
+        }
+        else
+        {
+            FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+                FF_FORMAT_ARG(result, "result")
+            }));
+        }
     }
 
     return true;
@@ -74,6 +97,12 @@ void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "splitLines"))
+        {
+            options->splitLines = yyjson_get_bool(val);
+            continue;
+        }
+
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
@@ -87,6 +116,7 @@ void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc,
     yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
     yyjson_mut_obj_add_bool(doc, module, "useStdErr", options->useStdErr);
     yyjson_mut_obj_add_bool(doc, module, "parallel", options->parallel);
+    yyjson_mut_obj_add_bool(doc, module, "splitLines", options->splitLines);
 }
 
 bool ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -106,7 +136,16 @@ bool ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjs
         return false;
     }
 
-    yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
+    if (options->splitLines)
+    {
+        yyjson_mut_val* jsonArray = yyjson_mut_obj_add_arr(doc, module, "result");
+        char* line = NULL;
+        size_t len = 0;
+        while (ffStrbufGetline(&line, &len, &result))
+            yyjson_mut_arr_add_strncpy(doc, jsonArray, line, len);
+    }
+    else
+        yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 
     return true;
 }
@@ -132,6 +171,7 @@ void ffInitCommandOptions(FFCommandOptions* options)
     ffStrbufInit(&options->text);
     options->useStdErr = false;
     options->parallel = true;
+    options->splitLines = false;
 }
 
 void ffDestroyCommandOptions(FFCommandOptions* options)

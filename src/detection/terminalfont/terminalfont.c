@@ -8,13 +8,18 @@
 
 static void detectAlacritty(FFTerminalFontResult* terminalFont)
 {
-    FF_STRBUF_AUTO_DESTROY fontName = ffStrbufCreate();
+    // Maybe using a toml parser to read the config file is better?
+    // https://github.com/cktan/tomlc17
+
+    // Doc: https://alacritty.org/config-alacritty.html#s26
+    FF_STRBUF_AUTO_DESTROY fontNormal = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontFamily = ffStrbufCreate();
+    FF_STRBUF_AUTO_DESTROY fontStyle = ffStrbufCreate();
     FF_STRBUF_AUTO_DESTROY fontSize = ffStrbufCreate();
 
     do {
-        // Latest alacritty uses toml instead of yaml
         FFpropquery fontQueryToml[] = {
-            {"family =", &fontName},
+            {"normal =", &fontNormal},
             {"size =", &fontSize},
         };
 
@@ -25,29 +30,39 @@ static void detectAlacritty(FFTerminalFontResult* terminalFont)
             break;
         if(ffParsePropFileConfigValues(".alacritty.toml", 2, fontQueryToml))
             break;
-
-        FFpropquery fontQueryYaml[] = {
-            {"family:", &fontName},
-            {"size:", &fontSize},
-        };
-
-        if(ffParsePropFileConfigValues("alacritty/alacritty.yml", 2, fontQueryYaml))
-            break;
-        if(ffParsePropFileConfigValues("alacritty.yml", 2, fontQueryYaml))
-            break;
-        if(ffParsePropFileConfigValues(".alacritty.yml", 2, fontQueryYaml))
-            break;
     } while (false);
 
-    //by default alacritty uses its own font called alacritty
-    if(fontName.length == 0)
-        ffStrbufAppendS(&fontName, "alacritty");
+    if(fontNormal.length > 0)
+    {
+        // { family = "Fira Code", style = "Medium" }
+        ffStrbufTrimSpace(&fontNormal);
+        ffStrbufTrimRight(&fontNormal, '}');
+        ffStrbufTrimLeft(&fontNormal, '{');
+        ffStrbufTrimSpace(&fontNormal);
 
-    // the default font size is 11
+        // family = "Fira Code", style = "Medium"
+        ffStrbufReplaceAllC(&fontNormal, ',', '\n'); // Assume no commas in font names
+        ffParsePropLines(fontNormal.chars, "family =", &fontFamily);
+        ffParsePropLines(fontNormal.chars, "style =", &fontStyle);
+    }
+
+    if (fontFamily.length == 0)
+    {
+        #if __APPLE__
+        ffStrbufSetStatic(&fontFamily, "Menlo");
+        #elif _WIN32
+        ffStrbufSetStatic(&fontFamily, "Consolas");
+        #else
+        ffStrbufSetStatic(&fontFamily, "monospace");
+        #endif
+    }
+    if (fontStyle.length == 0)
+        ffStrbufSetStatic(&fontStyle, "Regular");
+
     if(fontSize.length == 0)
-        ffStrbufAppendS(&fontSize, "11");
+        ffStrbufSetStatic(&fontSize, "11.25");
 
-    ffFontInitValues(&terminalFont->font, fontName.chars, fontSize.chars);
+    ffFontInitMoveValues(&terminalFont->font, &fontFamily, &fontSize, &fontStyle);
 }
 
 static void detectGhostty(const FFstrbuf* exe, FFTerminalFontResult* terminalFont)

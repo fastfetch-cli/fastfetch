@@ -273,6 +273,10 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
             ffStrbufAppendNS(exePath, (uint32_t)length, buf);
         }
+        else
+        {
+            ffStrbufSetS(exePath, filePath);
+        }
     }
 
     #elif defined(__APPLE__)

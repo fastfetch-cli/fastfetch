@@ -292,14 +292,14 @@ static void getUserShellFromEnv(FFShellResult* result)
     }
 }
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
 static void setShellInfoDetails(FFShellResult* result)
 {
     ffStrbufClear(&result->version);
-    fftsGetShellVersion(&result->exe, result->exeName, &result->exePath, &result->version);
+    fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version);
 
     if(ffStrbufEqualS(&result->processName, "pwsh"))
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
@@ -331,7 +331,12 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufStartsWithS(&result->processName, "screen-"))
         ffStrbufInitStatic(&result->prettyName, "screen");
     else if(ffStrbufEqualS(&result->processName, "sshd") || ffStrbufStartsWithS(&result->processName, "sshd-"))
-        ffStrbufInitCopy(&result->prettyName, &result->tty);
+    {
+        if (result->tty.length)
+            ffStrbufInitCopy(&result->prettyName, &result->tty);
+        else
+            ffStrbufSetStatic(&result->prettyName, "sshd");
+    }
 
     #if defined(__ANDROID__)
 
@@ -383,7 +388,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
-    fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
+    fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version);
 }
 
 #if defined(MAXPATH)

@@ -11,6 +11,7 @@ typedef struct FFCommandOptions
     FFstrbuf text;
     bool useStdErr;
     bool parallel;
+    bool splitLines;
 } FFCommandOptions;
 
 static_assert(sizeof(FFCommandOptions) <= FF_OPTION_MAX_SIZE, "FFCommandOptions size exceeds maximum allowed size");

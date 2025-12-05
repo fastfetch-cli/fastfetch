@@ -4,6 +4,7 @@
 #include "common/size.h"
 #include "detection/zpool/zpool.h"
 #include "modules/zpool/zpool.h"
+#include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
 
 static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t index)
@@ -22,6 +23,7 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
         FF_PARSE_FORMAT_STRING_CHECKED(&buffer, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(index, "index"),
             FF_FORMAT_ARG(result->name, "name"),
+            FF_FORMAT_ARG(result->guid, "guid"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
         }));
     }
@@ -29,10 +31,14 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
     ffSizeAppendNum(result->used, &usedPretty);
 
+    FF_STRBUF_AUTO_DESTROY allocatedPretty = ffStrbufCreate();
+    ffSizeAppendNum(result->allocated, &allocatedPretty);
+
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
     ffSizeAppendNum(result->total, &totalPretty);
 
-    double bytesPercentage = result->total > 0 ? (double) result->used / (double) result->total * 100.0 : 0;
+    double usedPercentage = result->total > 0 ? (double) result->used / (double) result->total * 100.0 : 0;
+    double allocatedPercentage = result->total > 0 ? (double) result->allocated / (double) result->total * 100.0 : 0;
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -41,20 +47,31 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
 
         ffStrbufClear(&buffer);
         ffStrbufSetF(&buffer, "%s / %s (", usedPretty.chars, totalPretty.chars);
-        ffPercentAppendNum(&buffer, bytesPercentage, options->percent, false, &options->moduleArgs);
+        ffPercentAppendNum(&buffer, usedPercentage, options->percent, false, &options->moduleArgs);
         ffStrbufAppendS(&buffer, ", ");
+        ffPercentAppendNum(&buffer, allocatedPercentage, options->percent, false, &options->moduleArgs);
+        ffStrbufAppendS(&buffer, " allocated, ");
         ffPercentAppendNum(&buffer, result->fragmentation, options->percent, false, &options->moduleArgs);
         ffStrbufAppendF(&buffer, " frag) - %s", result->state.chars);
+        if (result->readOnly)
+            ffStrbufAppendS(&buffer, " [Read-only]");
         ffStrbufPutTo(&buffer, stdout);
     }
     else
     {
-        FF_STRBUF_AUTO_DESTROY bytesPercentageNum = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY usedPercentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
-            ffPercentAppendNum(&bytesPercentageNum, bytesPercentage, options->percent, false, &options->moduleArgs);
-        FF_STRBUF_AUTO_DESTROY bytesPercentageBar = ffStrbufCreate();
+            ffPercentAppendNum(&usedPercentageNum, usedPercentage, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY usedPercentageBar = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
-            ffPercentAppendBar(&bytesPercentageBar, bytesPercentage, options->percent, &options->moduleArgs);
+            ffPercentAppendBar(&usedPercentageBar, usedPercentage, options->percent, &options->moduleArgs);
+
+        FF_STRBUF_AUTO_DESTROY allocatedPercentageNum = ffStrbufCreate();
+        if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
+            ffPercentAppendNum(&allocatedPercentageNum, allocatedPercentage, options->percent, false, &options->moduleArgs);
+        FF_STRBUF_AUTO_DESTROY allocatedPercentageBar = ffStrbufCreate();
+        if (percentType & FF_PERCENTAGE_TYPE_BAR_BIT)
+            ffPercentAppendBar(&allocatedPercentageBar, allocatedPercentage, options->percent, &options->moduleArgs);
 
         FF_STRBUF_AUTO_DESTROY fragPercentageNum = ffStrbufCreate();
         if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
@@ -65,13 +82,18 @@ static void printZpool(FFZpoolOptions* options, FFZpoolResult* result, uint8_t i
 
         FF_PRINT_FORMAT_CHECKED(buffer.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(result->name, "name"),
+            FF_FORMAT_ARG(result->guid, "guid"),
             FF_FORMAT_ARG(result->state, "state"),
             FF_FORMAT_ARG(usedPretty, "size-used"),
+            FF_FORMAT_ARG(allocatedPretty, "size-allocated"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
-            FF_FORMAT_ARG(bytesPercentageNum, "size-percentage"),
+            FF_FORMAT_ARG(usedPercentageNum, "used-percentage"),
+            FF_FORMAT_ARG(allocatedPercentageNum, "allocated-percentage"),
             FF_FORMAT_ARG(fragPercentageNum, "frag-percentage"),
-            FF_FORMAT_ARG(bytesPercentageBar, "size-percentage-bar"),
+            FF_FORMAT_ARG(usedPercentageBar, "used-percentage-bar"),
+            FF_FORMAT_ARG(allocatedPercentageBar, "allocated-percentage-bar"),
             FF_FORMAT_ARG(fragPercentageBar, "frag-percentage-bar"),
+            FF_FORMAT_ARG(result->readOnly, "is-readonly"),
         }));
     }
 }
@@ -149,13 +171,15 @@ bool ffGenerateZpoolJsonResult(FF_MAYBE_UNUSED FFZpoolOptions* options, yyjson_m
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &zpool->name);
         yyjson_mut_obj_add_strbuf(doc, obj, "state", &zpool->state);
+        yyjson_mut_obj_add_uint(doc, obj, "guid", zpool->guid);
         yyjson_mut_obj_add_uint(doc, obj, "used", zpool->used);
+        yyjson_mut_obj_add_uint(doc, obj, "allocated", zpool->allocated);
         yyjson_mut_obj_add_uint(doc, obj, "total", zpool->total);
-        yyjson_mut_obj_add_uint(doc, obj, "version", zpool->version);
         if (zpool->fragmentation != -DBL_MAX)
             yyjson_mut_obj_add_real(doc, obj, "fragmentation", zpool->fragmentation);
         else
             yyjson_mut_obj_add_null(doc, obj, "fragmentation");
+        yyjson_mut_obj_add_bool(doc, obj, "readOnly", zpool->readOnly);
     }
 
     FF_LIST_FOR_EACH(FFZpoolResult, zpool, results)
@@ -188,12 +212,16 @@ FFModuleBaseInfo ffZpoolModuleInfo = {
     .generateJsonConfig = (void*) ffGenerateZpoolJsonConfig,
     .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
         {"Zpool name", "name"},
+        {"Zpool guid", "guid"},
         {"Zpool state", "state"},
         {"Size used", "used"},
+        {"Size allocated", "allocated"},
         {"Size total", "total"},
-        {"Size percentage num", "used-percentage"},
+        {"Size used percentage num", "used-percentage"},
+        {"Size allocated percentage num", "allocated-percentage"},
         {"Fragmentation percentage num", "fragmentation-percentage"},
-        {"Size percentage bar", "used-percentage-bar"},
+        {"Size used percentage bar", "used-percentage-bar"},
+        {"Size allocated percentage bar", "allocated-percentage-bar"},
         {"Fragmentation percentage bar", "fragmentation-percentage-bar"},
     }))
 };

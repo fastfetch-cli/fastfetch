@@ -96,8 +96,33 @@ FF_C_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultV
 void ffStrbufUpperCase(FFstrbuf* strbuf);
 void ffStrbufLowerCase(FFstrbuf* strbuf);
 
-bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
-void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
+bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer);
+void ffStrbufGetdelimRestore(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer);
+
+/**
+ * @brief Read a line from a FFstrbuf.
+ *
+ * @details Behaves like getline(3) but reads from a FFstrbuf.
+ *
+ * @param[in,out] lineptr The pointer to a pointer that will be set to the start of the line.
+ *                         Can be NULL for the first call.
+ * @param[in,out] n The pointer to the size of the buffer of lineptr.
+ * @param[in] buffer The buffer to read from. The buffer must not be a string literal.
+ *
+ * @return true if a line has been read, false if the end of the buffer has been reached.
+ */
+static inline bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    return ffStrbufGetdelim(lineptr, n, '\n', buffer);
+}
+/**
+ * @brief Restore the end of a line that was modified by ffStrbufGetline.
+ * @warning This function should be called before breaking an ffStrbufGetline loop.
+ */
+static inline void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    ffStrbufGetdelimRestore(lineptr, n, '\n', buffer);
+}
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
 bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);

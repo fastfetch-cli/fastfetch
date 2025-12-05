@@ -2,6 +2,7 @@
 #include "common/io/io.h"
 #include "common/processing.h"
 #include "common/properties.h"
+#include "util/path.h"
 #include "util/stringUtils.h"
 #include "util/binary.h"
 
@@ -64,12 +65,9 @@ static bool extractBashVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, v
     return false;
 }
 
-static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+static bool getShellVersionBash(FFstrbuf* exe, FFstrbuf* version)
 {
-    const char* path = exePath->chars;
-    if (*path == '\0')
-        path = exe->chars;
-    ffBinaryExtractStrings(path, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
+    ffBinaryExtractStrings(exe->chars, extractBashVersion, version, (uint32_t) strlen("@(#)Bash version 0.0.0(0) release GNU"));
     if (version->length > 0) return true;
 
     if(!getExeVersionRaw(exe, version))
@@ -122,35 +120,39 @@ static bool getShellVersionPwsh(FFstrbuf* exe, FFstrbuf* version)
 
 static bool getShellVersionKsh(FFstrbuf* exe, FFstrbuf* version)
 {
-#if __OpenBSD__ || __NetBSD__
+    if(ffProcessAppendStdErr(version, (char* const[]) {
+        exe->chars,
+        "--version",
+        NULL
+    }) == NULL && ffStrbufSubstrAfterFirstS(version, " (AT&T Research) "))
+    {
+        //  version         sh (AT&T Research) 93u+ 2012-08-01
+        ffStrbufSubstrBeforeFirstC(version, ' ');
+        return true;
+    }
+
+    ffStrbufClear(version);
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-c",
         "echo $KSH_VERSION",
         NULL
-    }) != NULL)
-        return false;
+    }) == NULL && ffStrbufSubstrAfterFirstS(version, " KSH "))
+    {
+        // OKSH: @(#)PD KSH v5.2.14 99/07/13.2
+        // MKSH: @(#)MIRBSD KSH R59 2025/04/26 +Debian
+        // $OKSH_VERSION doesn't exist on OpenBSD
+        ffStrbufSubstrBeforeFirstC(version, ' ');
+        ffStrbufTrimLeft(version, 'v');
+        return true;
+    }
 
-    // @(#)PD KSH v5.2.14 99/07/13.2
-    ffStrbufSubstrAfterFirstC(version, 'v');
-    ffStrbufSubstrBeforeFirstC(version, ' ');
-#else
-    if(ffProcessAppendStdErr(version, (char* const[]) {
-        exe->chars,
-        "--version",
-        NULL
-    }) != NULL)
-        return false;
-
-    //  version         sh (AT&T Research) 93u+ 2012-08-01
-    ffStrbufSubstrAfterLastC(version, ')');
-    ffStrbufTrim(version, ' ');
-#endif
-    return true;
+    return false;
 }
 
 static bool getShellVersionOksh(FFstrbuf* exe, FFstrbuf* version)
 {
+    // Homebrew version
     if(ffProcessAppendStdOut(version, (char* const[]) {
         exe->chars,
         "-c",
@@ -230,13 +232,9 @@ static bool extractZshVersion(const char* line, FF_MAYBE_UNUSED uint32_t len, vo
     return false;
 }
 
-static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* exePath, FFstrbuf* version)
+static bool getShellVersionZsh(FFstrbuf* exe, FFstrbuf* version)
 {
-    const char* path = exePath->chars;
-    if (*path == '\0')
-        path = exe->chars;
-
-    ffBinaryExtractStrings(path, extractZshVersion, version, (uint32_t) strlen("zsh-0.0-0"));
+    ffBinaryExtractStrings(exe->chars, extractZshVersion, version, (uint32_t) strlen("zsh-0.0-0"));
     if (version->length) return true;
 
     return getExeVersionGeneral(exe, version); //zsh 5.9 (arm-apple-darwin21.3.0)
@@ -263,7 +261,7 @@ static bool getShellVersionWinPowerShell(FFstrbuf* exe, FFstrbuf* version)
 }
 #endif
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, FFstrbuf* version)
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version)
 {
     if (!instance.config.general.detectVersion) return false;
 
@@ -271,9 +269,9 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
         return false;
 
     if(ffStrEqualsIgnCase(exeName, "bash"))
-        return getShellVersionBash(exe, exePath, version);
+        return getShellVersionBash(exe, version);
     if(ffStrEqualsIgnCase(exeName, "zsh"))
-        return getShellVersionZsh(exe, exePath, version);
+        return getShellVersionZsh(exe, version);
     if(ffStrEqualsIgnCase(exeName, "fish"))
         return getShellVersionFish(exe, version);
     if(ffStrEqualsIgnCase(exeName, "pwsh"))
@@ -282,7 +280,7 @@ bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, 
         return getExeVersionGeneral(exe, version); //tcsh 6.24.07 (Astron) 2022-12-21 (aarch64-apple-darwin) options wide,nls,dl,al,kan,sm,rh,color,filec
     if(ffStrEqualsIgnCase(exeName, "nu"))
         return getShellVersionNushell(exe, version);
-    if(ffStrEqualsIgnCase(exeName, "ksh"))
+    if(ffStrEqualsIgnCase(exeName, "ksh") || ffStrEqualsIgnCase(exeName, "mksh"))
         return getShellVersionKsh(exe, version);
     if(ffStrEqualsIgnCase(exeName, "oksh"))
         return getShellVersionOksh(exe, version);
@@ -325,7 +323,7 @@ static bool extractGeneralVersion(const char *str, FF_MAYBE_UNUSED uint32_t len,
 
 FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (exe->chars[0] == '/')
+    if (ffIsAbsolutePath(exe->chars))
     {
         ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
@@ -345,7 +343,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionGnome(FFstrbuf* exe, FFstrbuf* ver
 
 FF_MAYBE_UNUSED static bool getTerminalVersionXfce4Terminal(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (exe->chars[0] == '/')
+    if (ffIsAbsolutePath(exe->chars))
     {
         ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
@@ -582,6 +580,44 @@ static bool getTerminalVersionZed(FFstrbuf* exe, FFstrbuf* version)
     return true;
 }
 
+static bool extractSshdVersion(const char *str, FF_MAYBE_UNUSED uint32_t len, void *userdata)
+{
+    if (!ffStrStartsWith(str, "OpenSSH_") || !ffCharIsDigit(str[strlen("OpenSSH_")])) return true;
+    str += strlen("OpenSSH_");
+    int count = 0;
+    sscanf(str, "%*d.%*dp%*d%n", &count);
+    if (count == 0) return true;
+    ffStrbufSetS((FFstrbuf*) userdata, str);
+    return false;
+}
+
+static bool getTerminalVersionSshd(FFstrbuf* exe, FFstrbuf* version)
+{
+    FF_STRBUF_AUTO_DESTROY exePath = ffStrbufCreate();
+    if (ffIsAbsolutePath(exe->chars))
+        ffStrbufSet(&exePath, exe);
+    else if (ffFindExecutableInPath("sshd", &exePath) != NULL)
+        return false;
+
+    ffBinaryExtractStrings(exePath.chars, extractSshdVersion, version, (uint32_t) strlen("OpenSSH0.0"));
+    if (version->length) return true;
+
+    if(ffProcessAppendStdOut(version, (char* const[]) {
+        exePath.chars,
+        "-V",
+        NULL
+    }) != NULL)
+        return false;
+
+    if (ffStrbufStartsWithS(version, "unknown ")) // `unknown option -- V` (ancient OpenSSH version)
+        ffStrbufSubstrAfterFirstC(version, '\n');
+
+    // OpenSSH_10.0p2 Ubuntu-5ubuntu5, OpenSSL 3.5.3 16 Sep 2025
+    ffStrbufSubstrAfterFirstC(version, '_');
+    ffStrbufSubstrBeforeFirstC(version, ',');
+    return true;
+}
+
 #ifndef _WIN32
 static bool getTerminalVersionKitty(FFstrbuf* exe, FFstrbuf* version)
 {
@@ -681,7 +717,7 @@ FF_MAYBE_UNUSED static bool getTerminalVersionPtyxis(FF_MAYBE_UNUSED FFstrbuf* e
 
 FF_MAYBE_UNUSED static bool getTerminalVersionTilix(FFstrbuf* exe, FFstrbuf* version)
 {
-    if (exe->chars[0] == '/')
+    if (ffIsAbsolutePath(exe->chars))
     {
         ffBinaryExtractStrings(exe->chars, extractGeneralVersion, version, (uint32_t) strlen("0.0.0"));
         if (version->length) return true;
@@ -924,6 +960,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
 
     if(ffStrbufStartsWithIgnCaseS(processName, "tmux"))
         return getTerminalVersionTmux(exe, version);
+
+    if(ffStrbufIgnCaseEqualS(processName, "sshd") || ffStrbufStartsWithIgnCaseS(processName, "sshd-"))
+        return getTerminalVersionSshd(exe, version);
 
     #ifdef _WIN32
 

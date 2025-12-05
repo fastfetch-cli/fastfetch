@@ -230,6 +230,8 @@ static const char* detectNCores(FFCPUResult* cpu)
             ++cpu->coresPhysical;
         else if (ptr->Relationship == RelationProcessorPackage)
             ++cpu->packages;
+        else if (ptr->Relationship == RelationNumaNode)
+            ++cpu->numaNodes;
     }
 
     return NULL;

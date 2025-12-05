@@ -37,7 +37,8 @@ Some distributions package outdated versions of fastfetch. Older versions receiv
     <img src="https://repology.org/badge/vertical-allrepos/fastfetch.svg?columns=2" alt="Packaging status" align="right">
 </a>
 
-* Debian: `apt install fastfetch` (for Debian 13 or newer)
+* Ubuntu: [`ppa:zhangsongcui3371/fastfetch`](https://launchpad.net/~zhangsongcui3371/+archive/ubuntu/fastfetch) (Ubuntu 22.04 or newer; latest version)
+* Debian / Ubuntu: `apt install fastfetch` (Debian 13 or newer; Ubuntu 25.04 or newer)
 * Debian / Ubuntu: Download `fastfetch-linux-<proper architecture>.deb` from [Github release page](https://github.com/fastfetch-cli/fastfetch/releases/latest) and double-click it (for Ubuntu 20.04 or newer and Debian 11 or newer).
 * Arch Linux: `pacman -S fastfetch`
 * Fedora: `dnf install fastfetch`
