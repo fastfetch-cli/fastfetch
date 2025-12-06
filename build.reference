@@ -1,0 +1,23 @@
+
+-	Started new Solaris 11.4 VM
+
+-	pkg update --accept
+
+-	pkg install cmake gcc pkg-config
+
+-	mkdir fastfetch
+
+-	wget https://github.com/ThatSmittyDude/fastfetch/archive/refs/tags/2.56.0.tar.gz
+
+-	tar -xvf 2.55.1.tar.gz
+
+-	cd fastfetch-2.55.1
+
+-	export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
+
+-	mkdir build && cd build
+
+-	cmake ..
+
+-	cmake --build . --target fastfetch
+
