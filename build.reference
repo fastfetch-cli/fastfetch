@@ -1,6 +1,4 @@
 
--	Started new Solaris 11.4 VM
-
 -	pkg update --accept
 
 -	pkg install cmake gcc pkg-config
