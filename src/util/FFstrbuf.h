@@ -121,7 +121,7 @@ static inline bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
  */
 static inline void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
 {
-    return ffStrbufGetdelimRestore(lineptr, n, '\n', buffer);
+    ffStrbufGetdelimRestore(lineptr, n, '\n', buffer);
 }
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);

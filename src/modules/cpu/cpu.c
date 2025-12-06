@@ -5,7 +5,6 @@
 #include "common/frequency.h"
 #include "detection/cpu/cpu.h"
 #include "modules/cpu/cpu.h"
-#include "util/stringUtils.h"
 
 static int sortCores(const FFCPUCore* a, const FFCPUCore* b)
 {
@@ -111,6 +110,7 @@ bool ffPrintCPU(FFCPUOptions* options)
                 FF_FORMAT_ARG(coreTypes, "core-types"),
                 FF_FORMAT_ARG(cpu.packages, "packages"),
                 FF_FORMAT_ARG(cpu.march, "march"),
+                FF_FORMAT_ARG(cpu.numaNodes, "numa-nodes"),
             }));
         }
         success = true;
@@ -265,5 +265,6 @@ FFModuleBaseInfo ffCPUModuleInfo = {
         {"Logical core count grouped by frequency", "core-types"},
         {"Processor package count", "packages"},
         {"CPU microarchitecture", "march"},
+        {"NUMA node count", "numa-nodes"},
     }))
 };
