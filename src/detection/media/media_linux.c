@@ -154,7 +154,7 @@ static bool getBusProperties(FFDBusData* data, const char* busName, FFMediaResul
     {
         if(result->url.length)
         {
-            const char* fileName = memrchr(result->url.chars, '/', result->url.length);
+            const char* fileName = memchr(result->url.chars, '/', result->url.length);
             assert(fileName);
             ++fileName;
             ffStrbufEnsureFixedLengthFree(&result->song, result->url.length - (uint32_t) (fileName - result->url.chars));

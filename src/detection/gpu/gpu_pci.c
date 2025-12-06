@@ -107,7 +107,7 @@ static void parsePciIdsFile(const FFstrbuf* content, uint8_t subclass, uint16_t 
                 char* closingBracket = end - 1;
                 if (*closingBracket == ']')
                 {
-                    char* openingBracket = memrchr(start, '[', (size_t) (closingBracket - start));
+                    char* openingBracket = memchr(start, '[', (size_t) (closingBracket - start));
                     if (openingBracket)
                     {
                         openingBracket++;
@@ -158,7 +158,7 @@ static bool loadPciidsInc(uint8_t subclass, uint16_t vendor, uint16_t device, FF
             const char* closingBracket = pdevice->name + nameLen - 1;
             if (*closingBracket == ']')
             {
-                const char* openingBracket = memrchr(pdevice->name, '[', nameLen - 1);
+                const char* openingBracket = memchr(pdevice->name, '[', nameLen - 1);
                 if (openingBracket)
                 {
                     openingBracket++;

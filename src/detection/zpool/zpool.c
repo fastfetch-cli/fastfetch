@@ -3,7 +3,6 @@
 #if FF_HAVE_LIBZFS
 
 #include "util/kmod.h"
-
 #ifdef __sun
 #include <libzfs.h>
 #else
@@ -45,20 +44,32 @@ static inline void cleanLibzfs(FFZfsData* data)
     }
 }
 
+/* Portable wrapper for zpool_get_prop */
+#ifdef __sun
+#define FF_ZPOOL_GET_PROP(zpool, prop, buf, len, src) \
+    data->ffzpool_get_prop(zpool, prop, buf, len, src)
+#else
+#define FF_ZPOOL_GET_PROP(zpool, prop, buf, len, src) \
+    data->ffzpool_get_prop(zpool, prop, buf, len, src, false)
+#endif
+
 static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
 {
     FFZfsData* data = (FFZfsData*) param;
     zprop_source_t source;
     FFZpoolResult* item = ffListAdd(data->result);
     char buf[1024];
-    if (data->ffzpool_get_prop(zpool, data->props.name, buf, ARRAY_SIZE(buf), &source, false) == 0)
+
+    if (FF_ZPOOL_GET_PROP(zpool, data->props.name, buf, ARRAY_SIZE(buf), &source) == 0)
         ffStrbufInitS(&item->name, buf);
     else
         ffStrbufInitStatic(&item->name, "unknown");
-    if (data->ffzpool_get_prop(zpool, data->props.health, buf, ARRAY_SIZE(buf), &source, false) == 0)
+
+    if (FF_ZPOOL_GET_PROP(zpool, data->props.health, buf, ARRAY_SIZE(buf), &source) == 0)
         ffStrbufInitS(&item->state, buf);
     else
         ffStrbufInitStatic(&item->state, "unknown");
+
     item->guid = data->ffzpool_get_prop_int(zpool, data->props.guid, &source);
     item->total = data->ffzpool_get_prop_int(zpool, data->props.size, &source);
     item->used = item->total - data->ffzpool_get_prop_int(zpool, data->props.free, &source);
@@ -66,6 +77,7 @@ static int enumZpoolCallback(zpool_handle_t* zpool, void* param)
     uint64_t fragmentation = data->ffzpool_get_prop_int(zpool, data->props.fragmentation, &source);
     item->fragmentation = fragmentation == UINT64_MAX ? -DBL_MAX : (double) fragmentation;
     item->readOnly = (bool) data->ffzpool_get_prop_int(zpool, data->props.readonly, &source);
+
     data->ffzpool_close(zpool);
     return 0;
 }
@@ -94,6 +106,7 @@ const char* ffDetectZpool(FFlist* result /* list of FFZpoolResult */)
         if (data.props.prop_name < 0) \
             return "Failed to query prop: " #prop_name; \
     } while (false)
+
     FF_QUERY_ZPOOL_PROP_FROM_NAME(name);
     FF_QUERY_ZPOOL_PROP_FROM_NAME(health);
     FF_QUERY_ZPOOL_PROP_FROM_NAME(guid);
