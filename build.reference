@@ -9,9 +9,9 @@
 
 -	wget https://github.com/ThatSmittyDude/fastfetch/archive/refs/tags/2.56.0.tar.gz
 
--	tar -xvf 2.55.1.tar.gz
+-	tar -xvf 2.56.0.tar.gz
 
--	cd fastfetch-2.55.1
+-	cd fastfetch-2.56.0
 
 -	export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig
 
