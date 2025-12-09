@@ -254,4 +254,5 @@ bool ffRemoveFile(const char* fileName);
 #ifdef _WIN32
 // Only O_RDONLY is supported
 HANDLE openat(HANDLE dfd, const char* fileName, bool directory);
+HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
 #endif
