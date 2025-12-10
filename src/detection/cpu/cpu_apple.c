@@ -3,26 +3,34 @@
 #include "util/apple/smc_temps.h"
 #include "util/stringUtils.h"
 
-static double detectCpuTemp(const FFstrbuf* cpuName)
+static double detectCpuTemp(const FFCPUOptions* options, const FFstrbuf* cpuName)
 {
     double result = 0;
 
     const char* error = NULL;
-    if (ffStrbufStartsWithS(cpuName, "Apple M"))
-    {
-        switch (strtol(cpuName->chars + strlen("Apple M"), NULL, 10))
-        {
-            case 1: error = ffDetectSmcTemps(FF_TEMP_CPU_M1X, &result); break;
-            case 2: error = ffDetectSmcTemps(FF_TEMP_CPU_M2X, &result); break;
-            case 3: error = ffDetectSmcTemps(FF_TEMP_CPU_M3X, &result); break;
-            case 4: error = ffDetectSmcTemps(FF_TEMP_CPU_M4X, &result); break;
-            default: error = "Unsupported Apple Silicon CPU";
-        }
-    }
-    else // PPC?
-        error = ffDetectSmcTemps(FF_TEMP_CPU_X64, &result);
 
-    if(error)
+    if (options->tempSensor.length)
+    {
+        error = ffDetectSmcSpecificTemp(options->tempSensor.chars, &result);
+    }
+    else
+    {
+        if (ffStrbufStartsWithS(cpuName, "Apple M"))
+        {
+            switch (strtol(cpuName->chars + strlen("Apple M"), NULL, 10))
+            {
+                case 1: error = ffDetectSmcTemps(FF_TEMP_CPU_M1X, &result); break;
+                case 2: error = ffDetectSmcTemps(FF_TEMP_CPU_M2X, &result); break;
+                case 3: error = ffDetectSmcTemps(FF_TEMP_CPU_M3X, &result); break;
+                case 4: error = ffDetectSmcTemps(FF_TEMP_CPU_M4X, &result); break;
+                default: error = "Unsupported Apple Silicon CPU";
+            }
+        }
+        else // PPC?
+            error = ffDetectSmcTemps(FF_TEMP_CPU_X64, &result);
+    }
+
+    if (error)
         return FF_CPU_TEMP_UNSET;
 
     return result;
@@ -130,7 +138,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     detectFrequency(cpu);
     if (options->showPeCoreCount) detectCoreCount(cpu);
 
-    cpu->temperature = options->temp ? detectCpuTemp(&cpu->name) : FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? detectCpuTemp(options, &cpu->name) : FF_CPU_TEMP_UNSET;
 
     return NULL;
 }

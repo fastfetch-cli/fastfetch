@@ -277,15 +277,32 @@ static bool detectTemp(io_connect_t conn, const char* sensor, double* sum)
     return true;
 }
 
-const char* ffDetectSmcTemps(enum FFTempType type, double* result)
+static io_connect_t conn;
+
+const char* ffDetectSmcSpecificTemp(const char* sensor, double* result)
 {
-    static io_connect_t conn;
     if (!conn)
     {
         if (smcOpen(&conn) != NULL)
             conn = (io_connect_t) -1;
     }
-    else if (conn == (io_connect_t) -1)
+    if (conn == (io_connect_t) -1)
+        return "Could not open SMC connection";
+
+    if (!detectTemp(conn, sensor, result))
+        return "Could not read SMC temperature";
+
+    return NULL;
+}
+
+const char* ffDetectSmcTemps(enum FFTempType type, double* result)
+{
+    if (!conn)
+    {
+        if (smcOpen(&conn) != NULL)
+            conn = (io_connect_t) -1;
+    }
+    if (conn == (io_connect_t) -1)
         return "Could not open SMC connection";
 
     uint32_t count = 0;
