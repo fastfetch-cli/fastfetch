@@ -83,6 +83,13 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
 FF_C_NONNULL(2, 3)
 bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
 
+FF_C_NONNULL(2)
+static inline bool ffReadFDBuffer(FFNativeFD fd, FFstrbuf* buffer)
+{
+    ffStrbufClear(buffer);
+    return ffAppendFDBuffer(fd, buffer);
+}
+
 FF_C_NONNULL(1, 2)
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
