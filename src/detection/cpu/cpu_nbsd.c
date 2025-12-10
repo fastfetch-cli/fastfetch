@@ -16,7 +16,7 @@ static void freePropDict(prop_dictionary_t* pdict)
     prop_object_release(*pdict);
 }
 
-static const char* detectCpuTemp(double* current)
+static const char* detectCpuTemp(const FFCPUOptions* options, double* current)
 {
     FF_AUTO_CLOSE_FD int fd = open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC);
     if (fd < 0) return "open(_PATH_SYSMON, O_RDONLY | O_CLOEXEC) failed";
@@ -25,11 +25,21 @@ static const char* detectCpuTemp(double* current)
     if (prop_dictionary_recv_ioctl(fd, ENVSYS_GETDICTIONARY, &root) < 0)
         return "prop_dictionary_recv_ioctl(ENVSYS_GETDICTIONARY) failed";
 
-    prop_array_t array = prop_dictionary_get(root, "coretemp0");
-    if (!array) array = prop_dictionary_get(root, "amdzentemp0");
-    if (!array) array = prop_dictionary_get(root, "viac7temp0");
-    if (!array) array = prop_dictionary_get(root, "acpitz0"); // Thermal Zones
-    if (!array) return "No temp data found in root dictionary";
+    prop_array_t array;
+
+    if (options->tempSensor.length > 0)
+    {
+        array = prop_dictionary_get(root, options->tempSensor.chars);
+        if (!array) return "No temp data found in specified sensor";
+    }
+    else
+    {
+        array = prop_dictionary_get(root, "coretemp0");
+        if (!array) array = prop_dictionary_get(root, "amdzentemp0");
+        if (!array) array = prop_dictionary_get(root, "viac7temp0");
+        if (!array) array = prop_dictionary_get(root, "acpitz0"); // Thermal Zones
+        if (!array) return "No temp data found in root dictionary";
+    }
 
     if (prop_array_count(array) != 2)
         return "Unexpected `xtemp0` data";
@@ -73,7 +83,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     cpu->temperature = FF_CPU_TEMP_UNSET;
 
-    if (options->temp) detectCpuTemp(&cpu->temperature);
+    if (options->temp) detectCpuTemp(options, &cpu->temperature);
 
     return NULL;
 }
