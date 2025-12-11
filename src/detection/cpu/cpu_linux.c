@@ -14,6 +14,10 @@
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
 
+#ifndef O_PATH
+#define O_PATH 0
+#endif
+
 static double readTempFile(int dfd, const char* filename, FFstrbuf* buffer)
 {
     if (filename ? !ffReadFileBufferRelative(dfd, filename, buffer) : !ffReadFDBuffer(dfd, buffer))
