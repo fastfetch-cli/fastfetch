@@ -862,9 +862,9 @@ FF_MAYBE_UNUSED static uint16_t getLoongarchPropCount(FFstrbuf* cpuinfo, const c
         char* pend;
         unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false))
-            high |= 1 << (id - 64);
+            high |= 1UL << (id - 64);
         else
-            low |= 1 << id;
+            low |= 1UL << id;
         p = pend;
     }
 
