@@ -1880,6 +1880,10 @@
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
                                     },
+                                    "tempSensor": {
+                                        "description": "Set the temperature sensor to use for CPU temperature detection\n* Linux: `hwmon` or `thermal` path name (eg. `hwmonN`, `thermal_zoneN)`\n* macOS: SMC sensor key (eg. `Tp01`)\n* Windows: thermal zone key (eg. `\\_TZ.CPUZ`)\n* FreeBSD: sysctl key (eg. `dev.cpu.0.temperature`)\n* NetBSD: sysmon sensor key (eg. `coretemp0`)",
+                                        "type": "string"
+                                    },
                                     "showPeCoreCount": {
                                         "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
                                         "type": "boolean",
