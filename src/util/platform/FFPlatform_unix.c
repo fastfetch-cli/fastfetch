@@ -22,7 +22,7 @@
 
 static void getExePath(FFPlatform* platform)
 {
-    char exePath[PATH_MAX + 1];
+    char exePath[PATH_MAX];
     #if defined(__linux__) || defined (__GNU__)
         ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
         if (exePathLen >= 0)
@@ -58,7 +58,7 @@ static void getExePath(FFPlatform* platform)
 
         while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
             if (info.type == B_APP_IMAGE) {
-                exePathLen = strlcpy(exePath, info.name, PATH_MAX);
+                exePathLen = strlcpy(exePath, info.name, sizeof(exePath));
                 break;
             }
         }
