@@ -2157,7 +2157,7 @@ static const FFlogo G[] = {
     // GXDE
     {
         .names = {"GXDE"},
-        .lines = FASTFETCH_DATATEXT_LOGO_DEEPIN,
+        .lines = FASTFETCH_DATATEXT_LOGO_GXDE,
         .colors = {
             FF_COLOR_FG_RED,
         },
