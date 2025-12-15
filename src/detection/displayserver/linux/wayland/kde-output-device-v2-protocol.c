@@ -67,12 +67,13 @@ static const struct wl_message kde_output_device_v2_events[] = {
 	{ "automatic_max_bits_per_color_limit", "15u", kde_output_device_v2_types + 0 },
 	{ "edr_policy", "16u", kde_output_device_v2_types + 0 },
 	{ "sharpness", "17u", kde_output_device_v2_types + 0 },
+	{ "priority", "18u", kde_output_device_v2_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_v2_interface = {
-	"kde_output_device_v2", 17,
+	"kde_output_device_v2", 19,
 	0, NULL,
-	34, kde_output_device_v2_events,
+	35, kde_output_device_v2_events,
 };
 
 static const struct wl_message kde_output_device_mode_v2_events[] = {
@@ -80,12 +81,13 @@ static const struct wl_message kde_output_device_mode_v2_events[] = {
 	{ "refresh", "i", kde_output_device_v2_types + 0 },
 	{ "preferred", "", kde_output_device_v2_types + 0 },
 	{ "removed", "", kde_output_device_v2_types + 0 },
+	{ "flags", "19u", kde_output_device_v2_types + 0 },
 };
 
 WL_EXPORT const struct wl_interface kde_output_device_mode_v2_interface = {
-	"kde_output_device_mode_v2", 1,
+	"kde_output_device_mode_v2", 19,
 	0, NULL,
-	4, kde_output_device_mode_v2_events,
+	5, kde_output_device_mode_v2_events,
 };
 
 #endif

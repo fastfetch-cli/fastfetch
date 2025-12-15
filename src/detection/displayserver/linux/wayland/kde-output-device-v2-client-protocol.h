@@ -239,6 +239,11 @@ enum kde_output_device_v2_capability {
 	 * @since 17
 	 */
 	KDE_OUTPUT_DEVICE_V2_CAPABILITY_SHARPNESS = 0x1000,
+	/**
+	 * if this outputdevice supports custom modes
+	 * @since 18
+	 */
+	KDE_OUTPUT_DEVICE_V2_CAPABILITY_CUSTOM_MODES = 0x2000,
 };
 /**
  * @ingroup iface_kde_output_device_v2
@@ -280,6 +285,10 @@ enum kde_output_device_v2_capability {
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_SHARPNESS_SINCE_VERSION 17
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_CAPABILITY_CUSTOM_MODES_SINCE_VERSION 18
 #endif /* KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
@@ -794,6 +803,23 @@ struct kde_output_device_v2_listener {
 	void (*sharpness)(void *data,
 			  struct kde_output_device_v2 *kde_output_device_v2,
 			  uint32_t sharpness);
+	/**
+	 * output priority
+	 *
+	 * Describes the position of the output in the output order list,
+	 * with lower values being earlier in the list. There's no specific
+	 * value the list has to start at, this value is only used in
+	 * sorting outputs.
+	 *
+	 * Note that the output order protocol is not sufficient for this,
+	 * as an output may not be in the output order if it's disabled or
+	 * mirroring another screen.
+	 * @param priority priority
+	 * @since 18
+	 */
+	void (*priority)(void *data,
+			 struct kde_output_device_v2 *kde_output_device_v2,
+			 uint32_t priority);
 };
 
 /**
@@ -943,6 +969,10 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2 *kde_output_device
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_SHARPNESS_SINCE_VERSION 17
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_PRIORITY_SINCE_VERSION 18
 
 
 /** @ingroup iface_kde_output_device_v2 */
@@ -971,6 +1001,18 @@ kde_output_device_v2_destroy(struct kde_output_device_v2 *kde_output_device_v2)
 {
 	wl_proxy_destroy((struct wl_proxy *) kde_output_device_v2);
 }
+
+#ifndef KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
+#define KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM
+/**
+ * @ingroup iface_kde_output_device_mode_v2
+ * mode flags
+ */
+enum kde_output_device_mode_v2_flags {
+	KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_CUSTOM = 0x1,
+	KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_REDUCED_BLANKING = 0x2,
+};
+#endif /* KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_ENUM */
 
 /**
  * @ingroup iface_kde_output_device_mode_v2
@@ -1017,6 +1059,15 @@ struct kde_output_device_mode_v2_listener {
 	 */
 	void (*removed)(void *data,
 			struct kde_output_device_mode_v2 *kde_output_device_mode_v2);
+	/**
+	 * mode flags
+	 *
+	 * This event describes the mode's flags.
+	 * @since 19
+	 */
+	void (*flags)(void *data,
+		      struct kde_output_device_mode_v2 *kde_output_device_mode_v2,
+		      uint32_t flags);
 };
 
 /**
@@ -1046,6 +1097,10 @@ kde_output_device_mode_v2_add_listener(struct kde_output_device_mode_v2 *kde_out
  * @ingroup iface_kde_output_device_mode_v2
  */
 #define KDE_OUTPUT_DEVICE_MODE_V2_REMOVED_SINCE_VERSION 1
+/**
+ * @ingroup iface_kde_output_device_mode_v2
+ */
+#define KDE_OUTPUT_DEVICE_MODE_V2_FLAGS_SINCE_VERSION 19
 
 
 /** @ingroup iface_kde_output_device_mode_v2 */
