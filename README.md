@@ -71,6 +71,14 @@ If fastfetch is not packaged for your distribution or an outdated version is pac
 
 You may also download the program directly from [the GitHub releases page](https://github.com/fastfetch-cli/fastfetch/releases/latest) in the form of an archive file.
 
+### Using mise
+
+On MacOS and Linux, if you are using [mise](https://github.com/jdx/mise), the polyglot tool versions manager, you can install the last version using this command :
+
+```shell
+mise use -g neofetch@latest
+```
+
 ### BSD systems
 
 * FreeBSD: `pkg install fastfetch`
