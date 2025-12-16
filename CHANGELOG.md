@@ -10,6 +10,10 @@ Features:
 Bugfixes:
 * Fixes cache line size detection (CPU, macOS)
 
+Logos:
+* Removes Opak
+* Updates GXDE
+
 # 2.56.0
 
 Features:
