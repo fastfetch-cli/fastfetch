@@ -5,6 +5,7 @@ Features:
 * Adds a `tempSensor` option to specify the sensor name used for CPU temperature detection (CPU)
     * Example: `{ "type": "cpu", "tempSensor": "hwmon0" /* Use /sys/class/hwmon/hwmon0 for temperature detection */ }`
 * Minor optimizations
+* Reports usable RAM size to match other platforms (Memory, macOS)
 
 Bugfixes:
 * Fixes cache line size detection (CPU, macOS)
