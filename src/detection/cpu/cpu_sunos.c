@@ -3,7 +3,7 @@
 #include "util/stringUtils.h"
 #include <kstat.h>
 
-static const char* detectCPUTempByKstat(FFCPUOptions* options, kstat_ctl_t* kc, FFCPUResult* cpu)
+static const char* detectCPUTempByKstat(const FFCPUOptions* options, kstat_ctl_t* kc, FFCPUResult* cpu)
 {
     const char* possibleModules[] = {"temperature", "cpu_temp", "acpi_thermal", NULL};
 
