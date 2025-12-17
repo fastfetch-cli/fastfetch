@@ -6,7 +6,7 @@
 #include "util/mallocHelper.h"
 #include "common/io/io.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include "util/windows/nt.h"
 #include <ntstatus.h>
 
