@@ -133,7 +133,7 @@ HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
     wchar_t fileNameW[MAX_PATH];
     int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, fileName, -1, fileNameW, ARRAY_SIZE(fileNameW));
     if (len == 0) return INVALID_HANDLE_VALUE;
-    fileNameW[len] = L'\0';
+    // Implies `fileNameW[len] = L'\0';` and `len` includes the null terminator
 
     for (int i = 0; i < len - 1; ++i)
     {
