@@ -20,6 +20,8 @@ static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t
     uint8_t buffer[64 * 1024] __attribute__((aligned(8))); // Required for WoA
     BOOLEAN firstScan = TRUE;
 
+    size_t ignoreLen = ignore ? wcslen(ignore) : 0;
+
     while (true) {
         IO_STATUS_BLOCK ioStatus = {};
         NTSTATUS status = NtQueryDirectoryFile(
@@ -42,7 +44,9 @@ static uint32_t getNumElements(const char* searchPath, DWORD type, const wchar_t
         {
             if (!(entry->FileAttributes & type)) continue;
 
-            if (!flag && _wcsicmp(entry->FileName, ignore) == 0)
+            if (!flag &&
+                ignoreLen == entry->FileNameLength / sizeof(*entry->FileName) &&
+                _wcsnicmp(entry->FileName, ignore, ignoreLen) == 0)
             {
                 flag = true;
                 continue;
