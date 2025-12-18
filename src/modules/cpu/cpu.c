@@ -134,6 +134,12 @@ void ffParseCPUJsonObject(FFCPUOptions* options, yyjson_val* module)
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
 
+        if (unsafe_yyjson_equals_str(key, "tempSensor"))
+        {
+            ffStrbufSetS(&options->tempSensor, unsafe_yyjson_get_str(val));
+            continue;
+        }
+
         if (unsafe_yyjson_equals_str(key, "freqNdigits"))
         {
             ffPrintError(FF_CPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "modules.CPU.freqNdigits has been moved to display.freq.ndigits");
@@ -234,6 +240,7 @@ bool ffGenerateCPUJsonResult(FFCPUOptions* options, yyjson_mut_doc* doc, yyjson_
 void ffInitCPUOptions(FFCPUOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
+    ffStrbufInit(&options->tempSensor);
     options->temp = false;
     options->tempConfig = (FFColorRangeConfig) { 60, 80 };
     options->showPeCoreCount = false;
@@ -242,6 +249,7 @@ void ffInitCPUOptions(FFCPUOptions* options)
 void ffDestroyCPUOptions(FFCPUOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->tempSensor);
 }
 
 FFModuleBaseInfo ffCPUModuleInfo = {

@@ -4,6 +4,7 @@
 #include "common/properties.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
+#include "util/path.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -12,6 +13,22 @@
 #include <fcntl.h>
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
+
+#ifndef O_PATH
+#define O_PATH 0
+#endif
+
+static double readTempFile(int dfd, const char* filename, FFstrbuf* buffer)
+{
+    if (filename ? !ffReadFileBufferRelative(dfd, filename, buffer) : !ffReadFDBuffer(dfd, buffer))
+        return FF_CPU_TEMP_UNSET;
+
+    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET); // millidegree Celsius
+    if (value == FF_CPU_TEMP_UNSET)
+        return FF_CPU_TEMP_UNSET;
+
+    return value / 1000.;
+}
 
 static double parseTZDir(int dfd, FFstrbuf* buffer)
 {
@@ -26,18 +43,12 @@ static double parseTZDir(int dfd, FFstrbuf* buffer)
         true
     ) return FF_CPU_TEMP_UNSET;
 
-    if (!ffReadFileBufferRelative(dfd, "temp", buffer))
-        return FF_CPU_TEMP_UNSET;
-
-    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
-    if (value == FF_CPU_TEMP_UNSET)
-        return FF_CPU_TEMP_UNSET;
-
-    return value / 1000.;
+    return readTempFile(dfd, "temp", buffer);
 }
 
 static double parseHwmonDir(int dfd, FFstrbuf* buffer)
 {
+    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
     if (!ffReadFileBufferRelative(dfd, "name", buffer))
         return FF_CPU_TEMP_UNSET;
 
@@ -53,25 +64,64 @@ static double parseHwmonDir(int dfd, FFstrbuf* buffer)
         true
     ) return FF_CPU_TEMP_UNSET;
 
-    //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
-    if (!ffReadFileBufferRelative(dfd, "temp1_input", buffer))
-        return FF_CPU_TEMP_UNSET;
-
-    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET);// millidegree Celsius
-    if (value == FF_CPU_TEMP_UNSET)
-        return FF_CPU_TEMP_UNSET;
-
-    return value / 1000.;
+    return readTempFile(dfd, "temp1_input", buffer);
 }
 
-static double detectCPUTemp(void)
+static double detectCPUTemp(const FFCPUOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
+    if (options->tempSensor.length > 0)
+    {
+        FF_AUTO_CLOSE_FD int subfd = -1;
+        const char* fileName = NULL;
+        if (ffStrbufStartsWithS(&options->tempSensor, "hwmon") && ffCharIsDigit(options->tempSensor.chars[strlen("hwmon")]))
+        {
+            FF_AUTO_CLOSE_FD int dfd = open("/sys/class/hwmon/", O_PATH | O_CLOEXEC);
+            subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp1_input";
+            else
+                subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        else if (ffStrbufStartsWithS(&options->tempSensor, "thermal_zone") && ffCharIsDigit(options->tempSensor.chars[strlen("thermal_zone")]))
+        {
+            FF_AUTO_CLOSE_FD int dfd = open("/sys/class/thermal/", O_PATH | O_CLOEXEC);
+            subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp";
+            else
+                subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        else if (ffStrbufStartsWithS(&options->tempSensor, "cputemp.") && ffCharIsDigit(options->tempSensor.chars[strlen("cputemp.")]))
+        {
+            FF_AUTO_CLOSE_FD int dfd = open("/sys/class/platform/", O_PATH | O_CLOEXEC);
+            subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp1_input";
+            else
+                subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        else if (ffIsAbsolutePath(options->tempSensor.chars))
+        {
+            subfd = open(options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp1_input";
+            else
+                subfd = open(options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        if (subfd < 0)
+            return FF_CPU_TEMP_UNSET;
+
+        return readTempFile(subfd, fileName, &buffer);
+    }
+
     {
         FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/hwmon/");
         if(dirp)
         {
             int dfd = dirfd(dirp);
+
             struct dirent* entry;
             while((entry = readdir(dirp)) != NULL)
             {
@@ -816,9 +866,9 @@ FF_MAYBE_UNUSED static uint16_t getLoongarchPropCount(FFstrbuf* cpuinfo, const c
         char* pend;
         unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false))
-            high |= 1 << (id - 64);
+            high |= 1UL << (id - 64);
         else
-            low |= 1 << id;
+            low |= 1UL << id;
         p = pend;
     }
 
@@ -902,7 +952,7 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? detectCPUTemp(options) : FF_CPU_TEMP_UNSET;
 
     #if __x86_64__ || __i386__
     return detectCPUX86(options, cpu);

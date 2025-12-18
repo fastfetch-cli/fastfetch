@@ -41,7 +41,7 @@ static const char* detectWithBacklight(FFlist* result)
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
                 ffStrbufSubstrBeforeLastC(&backlightDir, '/');
                 ffStrbufAppendS(&backlightDir, "/device");
-                ffStrbufInitA(&brightness->name, PATH_MAX + 1);
+                ffStrbufInitA(&brightness->name, PATH_MAX);
                 if(realpath(backlightDir.chars, brightness->name.chars))
                 {
                     ffStrbufRecalculateLength(&brightness->name);

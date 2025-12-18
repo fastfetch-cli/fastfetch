@@ -45,7 +45,8 @@ const char* getOthersByIokit(FFHostResult* host)
 
 const char* ffDetectHost(FFHostResult* host)
 {
-    const char* error = ffSysctlGetString("hw.model", &host->family);
+    const char* error = ffSysctlGetString("hw.product", &host->family);
+    if (error) error = ffSysctlGetString("hw.model", &host->family);
     if (error) return error;
 
     ffStrbufSetStatic(&host->name, ffHostGetMacProductNameWithHwModel(&host->family));

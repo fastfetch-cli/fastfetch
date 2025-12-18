@@ -1,3 +1,19 @@
+# 2.56.1
+
+Features:
+* Improves compatibility with KDE Plasma 6.5 (#2093, Display)
+* Adds a `tempSensor` option to specify the sensor name used for CPU temperature detection (CPU)
+    * Example: `{ "type": "cpu", "tempSensor": "hwmon0" /* Use /sys/class/hwmon/hwmon0 for temperature detection */ }`
+* Refines Memory usage detection on macOS to match Activity Monitor more closely (Memory, macOS)
+* Minor optimizations
+
+Bugfixes:
+* Fixes cache line size detection (CPU, macOS)
+
+Logos:
+* Removes Opak
+* Updates GXDE
+
 # 2.56.0
 
 Features:

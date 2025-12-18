@@ -4,11 +4,18 @@
 #include <wchar.h>
 
 void ffStrbufSetNWS(FFstrbuf* result, uint32_t length, const wchar_t* source);
+void ffStrbufAppendNWS(FFstrbuf* result, uint32_t length, const wchar_t* source);
 
 static inline void ffStrbufSetWS(FFstrbuf* result, const wchar_t* source)
 {
     if (!source) return ffStrbufClear(result);
     return ffStrbufSetNWS(result, (uint32_t)wcslen(source), source);
+}
+
+static inline void ffStrbufAppendWS(FFstrbuf* result, const wchar_t* source)
+{
+    if (!source) return;
+    return ffStrbufAppendNWS(result, (uint32_t)wcslen(source), source);
 }
 
 static inline void ffStrbufInitNWS(FFstrbuf* result, uint32_t length, const wchar_t* source)

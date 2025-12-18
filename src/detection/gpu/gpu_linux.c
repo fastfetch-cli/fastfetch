@@ -605,7 +605,7 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
         if (ffStrbufStartsWithS(&buffer, "pci:"))
             detectPci(options, gpus, &buffer, &drmDir, entry->d_name);
-        else if (ffStrbufStartsWithS(&buffer, "of:"))
+        else if (ffStrbufStartsWithS(&buffer, "of:")) // Open Firmware
             detectOf(gpus, &buffer, &drmDir, entry->d_name);
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);

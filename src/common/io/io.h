@@ -83,6 +83,13 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
 FF_C_NONNULL(2, 3)
 bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
 
+FF_C_NONNULL(2)
+static inline bool ffReadFDBuffer(FFNativeFD fd, FFstrbuf* buffer)
+{
+    ffStrbufClear(buffer);
+    return ffAppendFDBuffer(fd, buffer);
+}
+
 FF_C_NONNULL(1, 2)
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
@@ -254,4 +261,5 @@ bool ffRemoveFile(const char* fileName);
 #ifdef _WIN32
 // Only O_RDONLY is supported
 HANDLE openat(HANDLE dfd, const char* fileName, bool directory);
+HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
 #endif
