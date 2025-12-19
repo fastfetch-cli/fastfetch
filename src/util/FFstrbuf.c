@@ -1,4 +1,5 @@
 #include "FFstrbuf.h"
+#include "util/mallocHelper.h"
 
 #include <ctype.h>
 #include <inttypes.h>
@@ -21,11 +22,27 @@ void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments)
 {
     assert(format != NULL);
 
-    int len = vasprintf(&strbuf->chars, format, arguments);
+    char* buffer = NULL;
+    int len = vasprintf(&buffer, format, arguments);
     assert(len >= 0);
 
-    strbuf->allocated = (uint32_t)(len + 1);
-    strbuf->length = (uint32_t)len;
+    ffStrbufInitMoveNS(strbuf, (uint32_t)len, buffer);
+}
+
+// Takes ownership of `heapStr`. The caller must not free `heapStr` after calling this
+// function; the memory will be managed and freed via the associated FFstrbuf.
+void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr)
+{
+    assert(heapStr != NULL);
+
+    strbuf->length = length;
+    size_t allocSize = ffMallocUsableSize(heapStr);
+    if (allocSize == 0)
+        allocSize = length + 1;
+    else if (allocSize > UINT32_MAX)
+        allocSize = UINT32_MAX;
+    strbuf->allocated = (uint32_t) allocSize;
+    strbuf->chars = heapStr;
 }
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free)

@@ -229,9 +229,18 @@ int main(void)
 
     ffStrbufDestroy(&strbuf);
 
+    //initMoveS
+    {
+        char* heapStr = strdup("1234567890");
+        ffStrbufInitMoveS(&strbuf, heapStr);
+        VERIFY(ffStrbufEqualS(&strbuf, "1234567890"));
+        VERIFY(strbuf.allocated >= 11);
+        ffStrbufDestroy(&strbuf);
+    }
+
     //initF
     ffStrbufInitF(&strbuf, "%s", "1234567890123456789012345678901");
-    VERIFY(strbuf.allocated == 32);
+    VERIFY(strbuf.allocated >= 32);
     VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
 
     //containC
