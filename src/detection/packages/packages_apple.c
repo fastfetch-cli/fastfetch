@@ -4,91 +4,66 @@
 #include "common/processing.h"
 #include "util/stringUtils.h"
 
-static void countBrewPackages(const char* dirname, FFPackagesResult* result)
+static void countBrewPackages(FFstrbuf* baseDir, FFPackagesResult* result)
 {
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
 
-    uint32_t baseDirLength = baseDir.length;
-
-    ffStrbufAppendS(&baseDir, "/Caskroom");
-    result->brewCask += ffPackagesGetNumElements(baseDir.chars, true);
-    ffStrbufSubstrBefore(&baseDir, baseDirLength);
-
-    ffStrbufAppendS(&baseDir, "/Cellar");
-    result->brew += ffPackagesGetNumElements(baseDir.chars, true);
-    ffStrbufSubstrBefore(&baseDir, baseDirLength);
-}
-
-static void getBrewPackages(FFPackagesResult* result)
-{
-    const char* prefix = getenv("HOMEBREW_PREFIX");
-    if(ffStrSet(prefix))
-        return countBrewPackages(prefix, result);
-
-    countBrewPackages(FASTFETCH_TARGET_DIR_ROOT "/opt/homebrew", result);
-    countBrewPackages(FASTFETCH_TARGET_DIR_USR "/local", result);
-}
-
-static uint32_t countMacPortsPackages(const char* dirname)
-{
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(dirname);
-    ffStrbufAppendS(&baseDir, "/var/macports/software");
-
-    return ffPackagesGetNumElements(baseDir.chars, true);
-}
-
-static uint32_t getMacPortsPackages()
-{
-    const char* prefix = getenv("MACPORTS_PREFIX");
-    if(ffStrSet(prefix))
-        return countMacPortsPackages(prefix);
-
-    return countMacPortsPackages(FASTFETCH_TARGET_DIR_ROOT "/opt/local");
-}
-
-static uint32_t getNixPackagesImpl(const char* path)
-{
-    //Nix detection is kinda slow, so we only do it if the dir exists
-    if(!ffPathExists(path, FF_PATHTYPE_DIRECTORY))
-        return 0;
-
-    FF_STRBUF_AUTO_DESTROY output = ffStrbufCreateA(128);
-
-    //https://github.com/fastfetch-cli/fastfetch/issues/195#issuecomment-1191748222
-    FF_STRBUF_AUTO_DESTROY command = ffStrbufCreateA(255);
-    ffStrbufAppendS(&command, "for x in $(nix-store --query --requisites ");
-    ffStrbufAppendS(&command, path);
-    ffStrbufAppendS(&command, "); do if [ -d $x ]; then echo $x ; fi ; done | cut -d- -f2- | egrep '([0-9]{1,}\\.)+[0-9]{1,}' | egrep -v '\\-doc$|\\-man$|\\-info$|\\-dev$|\\-bin$|^nixos-system-nixos-' | uniq | wc -l");
-
-    ffProcessAppendStdOut(&output, (char* const[]) {
-        FASTFETCH_TARGET_DIR_ROOT "/bin/sh",
-        "-c",
-        command.chars,
-        NULL
-    });
-
-    return (uint32_t) strtoul(output.chars, NULL, 10);
-}
-
-static uint32_t getNixPackages(FFstrbuf* baseDir, const char* dirname)
-{
     uint32_t baseDirLength = baseDir->length;
-    ffStrbufAppendS(baseDir, dirname);
-    uint32_t num_elements = getNixPackagesImpl(baseDir->chars);
+
+    ffStrbufAppendS(baseDir, "/Caskroom");
+    result->brewCask += ffPackagesGetNumElements(baseDir->chars, true);
     ffStrbufSubstrBefore(baseDir, baseDirLength);
-    return num_elements;
+
+    ffStrbufAppendS(baseDir, "/Cellar");
+    result->brew += ffPackagesGetNumElements(baseDir->chars, true);
+    ffStrbufSubstrBefore(baseDir, baseDirLength);
+}
+
+static uint32_t getMacPortsPackages(FFstrbuf* baseDir)
+{
+    ffStrbufAppendS(baseDir, "/var/macports/software");
+    return ffPackagesGetNumElements(baseDir->chars, true);
 }
 
 void ffDetectPackagesImpl(FFPackagesResult* result, FFPackagesOptions* options)
 {
-    if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT)) getBrewPackages(result);
-    if (!(options->disabled & FF_PACKAGES_FLAG_MACPORTS_BIT)) result->macports = getMacPortsPackages();
+    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreate();
+    if (!(options->disabled & FF_PACKAGES_FLAG_BREW_BIT))
+    {
+        const char* prefix = getenv("HOMEBREW_PREFIX");
+        if (ffStrSet(prefix))
+        {
+            ffStrbufSetS(&baseDir, prefix);
+        }
+        else
+        {
+            #ifdef __aarch64__
+            ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT "/opt/homebrew");
+            #else
+            ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_USR "/local");
+            #endif
+        }
+        countBrewPackages(&baseDir, result);
+    }
+    if (!(options->disabled & FF_PACKAGES_FLAG_MACPORTS_BIT))
+    {
+        const char* prefix = getenv("MACPORTS_PREFIX");
+        if (ffStrSet(prefix))
+        {
+            ffStrbufSetS(&baseDir, prefix);
+        }
+        else
+        {
+            ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT "/opt/local");
+        }
+
+        result->macports = getMacPortsPackages(&baseDir);
+    }
     if (!(options->disabled & FF_PACKAGES_FLAG_NIX_BIT))
     {
-        FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateS(FASTFETCH_TARGET_DIR_ROOT);
-        result->nixDefault += getNixPackages(&baseDir, "/nix/var/nix/profiles/default");
-        result->nixSystem += getNixPackages(&baseDir, "/run/current-system");
+        ffStrbufSetS(&baseDir, FASTFETCH_TARGET_DIR_ROOT);
+        result->nixDefault += ffPackagesGetNix(&baseDir, "/nix/var/nix/profiles/default");
+        result->nixSystem += ffPackagesGetNix(&baseDir, "/run/current-system");
         ffStrbufSet(&baseDir, &instance.state.platform.homeDir);
-        result->nixUser = getNixPackages(&baseDir, "/.nix-profile");
+        result->nixUser = ffPackagesGetNix(&baseDir, "/.nix-profile");
     }
 }

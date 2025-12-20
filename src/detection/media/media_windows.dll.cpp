@@ -1,13 +1,16 @@
+#include <winrt/Windows.ApplicationModel.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Windows.Media.Control.h>
-#include <winrt/Windows.ApplicationModel.h>
+#include <winrt/Windows.Storage.Streams.h>
+#include <winrt/Windows.Storage.h>
 #include <wchar.h>
+#include <windows.h>
 
 extern "C"
 {
 #include "media_windows.dll.h"
 
-const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
+const char* ffWinrtDetectMedia(FFWinrtMediaResult* result, bool saveCover)
 {
     // C++/WinRT requires Windows 8.1+ and C++ runtime (std::string, exceptions and other stuff)
     // Make it a separate dll in order not to break Windows 7 support
@@ -47,14 +50,54 @@ const char* ffWinrtDetectMedia(FFWinrtMediaResult* result)
         }
 
         ::wcsncpy(result->playerId, session.SourceAppUserModelId().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+        result->playerId[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
         ::wcsncpy(result->song, mediaProps.Title().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+        result->song[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
         ::wcsncpy(result->artist, mediaProps.Artist().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+        result->artist[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
         ::wcsncpy(result->album, mediaProps.AlbumTitle().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+        result->album[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
         try
         {
             // Only works for UWP apps
             ::wcsncpy(result->playerName, AppInfo::GetFromAppUserModelId(session.SourceAppUserModelId()).DisplayInfo().DisplayName().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+            result->playerName[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
         } catch (...) { }
+
+        if (saveCover)
+        {
+            using namespace winrt::Windows::Storage;
+            using namespace winrt::Windows::Storage::Streams;
+            if (auto thumbRef = mediaProps.Thumbnail())
+            {
+                try
+                {
+                    if (auto stream = thumbRef.OpenReadAsync().get())
+                    {
+                        if (stream.Size() > 0)
+                        {
+                            Buffer buffer(static_cast<uint32_t>(stream.Size()));
+                            stream.ReadAsync(buffer, buffer.Capacity(), InputStreamOptions::None).get();
+
+                            wchar_t tempPath[MAX_PATH];
+                            if (GetTempPathW(MAX_PATH, tempPath) > 0)
+                            {
+                                auto tempFolder = StorageFolder::GetFolderFromPathAsync(tempPath).get();
+                                auto tempFile = tempFolder.CreateFileAsync(L"ff_thumb.img", CreationCollisionOption::GenerateUniqueName).get();
+                                FileIO::WriteBufferAsync(tempFile, buffer).get();
+
+                                ::wcsncpy(result->cover, tempFile.Path().data(), FF_MEDIA_WIN_RESULT_BUFLEN);
+                                result->cover[FF_MEDIA_WIN_RESULT_BUFLEN - 1] = L'\0';
+                            }
+                        }
+                    }
+                }
+                catch (...)
+                {
+                    // Ignore thumbnail errors
+                }
+            }
+        }
 
         return NULL;
     }

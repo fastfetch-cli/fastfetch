@@ -36,7 +36,7 @@ static void printDevice(FFCameraOptions* options, const FFCameraResult* device, 
     }
 }
 
-void ffPrintCamera(FFCameraOptions* options)
+bool ffPrintCamera(FFCameraOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
     const char* error = ffDetectCamera(&result);
@@ -44,13 +44,13 @@ void ffPrintCamera(FFCameraOptions* options)
     if (error)
     {
         ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (result.length == 0)
     {
         ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No camera found");
-        return;
+        return false;
     }
 
     for(uint32_t i = 0; i < result.length; i++)
@@ -65,44 +65,29 @@ void ffPrintCamera(FFCameraOptions* options)
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
-}
 
-bool ffParseCameraCommandOptions(FFCameraOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CAMERA_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseCameraJsonObject(FFCameraOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_CAMERA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateCameraJsonConfig(FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCameraOptions))) FFCameraOptions defaultOptions;
-    ffInitCameraOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFCameraResult));
     const char* error = ffDetectCamera(&result);
@@ -110,7 +95,7 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -132,12 +117,25 @@ void ffGenerateCameraJsonResult(FF_MAYBE_UNUSED FFCameraOptions* options, yyjson
         ffStrbufDestroy(&dev->id);
         ffStrbufDestroy(&dev->colorspace);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCameraOptions(FFCameraOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
+}
+
+void ffDestroyCameraOptions(FFCameraOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCameraModuleInfo = {
     .name = FF_CAMERA_MODULE_NAME,
     .description = "Print available cameras",
-    .parseCommandOptions = (void*) ffParseCameraCommandOptions,
+    .initOptions = (void*) ffInitCameraOptions,
+    .destroyOptions = (void*) ffDestroyCameraOptions,
     .parseJsonObject = (void*) ffParseCameraJsonObject,
     .printModule = (void*) ffPrintCamera,
     .generateJsonResult = (void*) ffGenerateCameraJsonResult,
@@ -151,14 +149,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Height (in px)", "height"},
     }))
 };
-
-void ffInitCameraOptions(FFCameraOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰄀");
-}
-
-void ffDestroyCameraOptions(FFCameraOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -2,19 +2,30 @@
 
 #import <Foundation/Foundation.h>
 
-static void appendColor(FFstrbuf* str, NSDictionary* color)
+static void appendColor(FFstrbuf* str, NSDictionary* dict)
 {
-    int r = (int) (((NSNumber*) color[@"red"]).doubleValue * 255);
-    int g = (int) (((NSNumber*) color[@"green"]).doubleValue * 255);
-    int b = (int) (((NSNumber*) color[@"blue"]).doubleValue * 255);
-    int a = (int) (((NSNumber*) color[@"alpha"]).doubleValue * 255);
+    uint32_t r = (uint32_t) (((NSNumber*) dict[@"red"]).doubleValue * 255 + .5);
+    uint32_t g = (uint32_t) (((NSNumber*) dict[@"green"]).doubleValue * 255 + .5);
+    uint32_t b = (uint32_t) (((NSNumber*) dict[@"blue"]).doubleValue * 255 + .5);
+    uint32_t a = (uint32_t) (((NSNumber*) dict[@"alpha"]).doubleValue * 255 + .5);
+    uint32_t color = (r << 24) | (g << 16) | (b << 8) | a;
 
-    if (r == 255 && g == 255 && b == 255 && a == 255)
-        ffStrbufAppendS(str, "White");
-    else if (r == 0 && g == 0 && b == 0 && a == 255)
-        ffStrbufAppendS(str, "Black");
-    else
-        ffStrbufAppendF(str, "#%02X%02X%02X%02X", r, g, b, a);
+    switch (color)
+    {
+        case 0x000000FF: ffStrbufAppendS(str, "Black"); return;
+        case 0x0433FFFF: ffStrbufAppendS(str, "Blue"); return;
+        case 0xAA7942FF: ffStrbufAppendS(str, "Brown"); return;
+        case 0x00FDFFFF: ffStrbufAppendS(str, "Cyan"); return;
+        case 0x00F900FF: ffStrbufAppendS(str, "Green"); return;
+        case 0xFF40FFFF: ffStrbufAppendS(str, "Magenta"); return;
+        case 0xFF9300FF: ffStrbufAppendS(str, "Orange"); return;
+        case 0x942192FF: ffStrbufAppendS(str, "Purple"); return;
+        case 0xFF2600FF: ffStrbufAppendS(str, "Red"); return;
+        case 0xFFFB00FF: ffStrbufAppendS(str, "Yellow"); return;
+        case 0xFFFFFFFF: ffStrbufAppendS(str, "White"); return;
+        case 0x00000000: ffStrbufAppendS(str, "Transparent"); return;
+        default: ffStrbufAppendF(str, "#%08X", color); return;
+    }
 }
 
 void ffDetectCursor(FFCursorResult* result)
@@ -46,7 +57,7 @@ void ffDetectCursor(FFCursorResult* result)
 
     NSNumber* mouseDriverCursorSize = dict[@"mouseDriverCursorSize"];
     if (mouseDriverCursorSize)
-        ffStrbufAppendF(&result->size, "%d", (int) (mouseDriverCursorSize.doubleValue * 32));
+        ffStrbufAppendF(&result->size, "%d", (int) (mouseDriverCursorSize.doubleValue * 32 + 0.5));
     else
         ffStrbufAppendS(&result->size, "32");
 }

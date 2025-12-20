@@ -5,7 +5,7 @@
 #include "modules/brightness/brightness.h"
 #include "util/stringUtils.h"
 
-void ffPrintBrightness(FFBrightnessOptions* options)
+bool ffPrintBrightness(FFBrightnessOptions* options)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
@@ -14,13 +14,13 @@ void ffPrintBrightness(FFBrightnessOptions* options)
     if(error)
     {
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(result.length == 0)
     {
         ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result is detected.");
-        return;
+        return false;
     }
 
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -40,7 +40,7 @@ void ffPrintBrightness(FFBrightnessOptions* options)
 
         ffPrintLogoAndKey(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
         ffStrbufPutTo(&str, stdout);
-        return;
+        return true;
     }
 
     FF_STRBUF_AUTO_DESTROY key = ffStrbufCreate();
@@ -110,53 +110,26 @@ void ffPrintBrightness(FFBrightnessOptions* options)
         ffStrbufDestroy(&item->name);
         ++index;
     }
-}
 
-bool ffParseBrightnessCommandOptions(FFBrightnessOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BRIGHTNESS_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "ddcci-sleep"))
-    {
-        options->ddcciSleep = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "compact"))
-    {
-        options->compact = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "ddcciSleep"))
+        if (unsafe_yyjson_equals_str(key, "ddcciSleep"))
         {
             options->ddcciSleep = (uint32_t) yyjson_get_uint(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "compact"))
+        if (unsafe_yyjson_equals_str(key, "compact"))
         {
             options->compact = (uint32_t) yyjson_get_bool(val);
             continue;
@@ -165,27 +138,22 @@ void ffParseBrightnessJsonObject(FFBrightnessOptions* options, yyjson_val* modul
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BRIGHTNESS_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateBrightnessJsonConfig(FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBrightnessOptions))) FFBrightnessOptions defaultOptions;
-    ffInitBrightnessOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
 
-    if (defaultOptions.ddcciSleep != options->ddcciSleep)
-        yyjson_mut_obj_add_uint(doc, module, "ddcciSleep", options->ddcciSleep);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
-
-    if (defaultOptions.compact != options->compact)
-        yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
+    yyjson_mut_obj_add_bool(doc, module, "compact", options->compact);
 }
 
-void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFBrightnessResult));
 
@@ -194,7 +162,7 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_arr(doc);
@@ -214,12 +182,29 @@ void ffGenerateBrightnessJsonResult(FF_MAYBE_UNUSED FFBrightnessOptions* options
     {
         ffStrbufDestroy(&item->name);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
+
+    options->ddcciSleep = 10;
+    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
+    options->compact = false;
+}
+
+void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBrightnessModuleInfo = {
     .name = FF_BRIGHTNESS_MODULE_NAME,
     .description = "Print current brightness level of your monitors",
-    .parseCommandOptions = (void*) ffParseBrightnessCommandOptions,
+    .initOptions = (void*) ffInitBrightnessOptions,
+    .destroyOptions = (void*) ffDestroyBrightnessOptions,
     .parseJsonObject = (void*) ffParseBrightnessJsonObject,
     .printModule = (void*) ffPrintBrightness,
     .generateJsonResult = (void*) ffGenerateBrightnessJsonResult,
@@ -234,18 +219,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Is built-in screen", "is-builtin"},
     }))
 };
-
-void ffInitBrightnessOptions(FFBrightnessOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰯪");
-
-    options->ddcciSleep = 10;
-    options->percent = (FFPercentageModuleConfig) { 100, 100, 0 };
-    options->compact = false;
-}
-
-void ffDestroyBrightnessOptions(FFBrightnessOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

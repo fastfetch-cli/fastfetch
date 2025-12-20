@@ -57,7 +57,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
 
     {
         FF_DEBUG("Getting device by IP interface name");
-        DBusMessage* device = ffDBusGetMethodReply(&dbus, "org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager", "org.freedesktop.NetworkManager", "GetDeviceByIpIface", item->inf.description.chars);
+        DBusMessage* device = ffDBusGetMethodReply(&dbus, "org.freedesktop.NetworkManager", "/org/freedesktop/NetworkManager", "org.freedesktop.NetworkManager", "GetDeviceByIpIface", item->inf.description.chars, NULL);
         if(!device)
         {
             FF_DEBUG("GetDeviceByIpIface failed for interface %s", item->inf.description.chars);
@@ -76,7 +76,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
         dbus.lib->ffdbus_message_unref(device);
     }
 
-    if (item->conn.txRate != item->conn.txRate)
+    if (item->conn.txRate == -DBL_MAX)
     {
         FF_DEBUG("Getting bitrate from NetworkManager");
         uint32_t bitrate;
@@ -162,7 +162,7 @@ static const char* detectWifiWithNm(FFWifiResult* item, FFstrbuf* buffer)
         }
         else if (ffStrEquals(key, "Strength"))
         {
-            if (item->conn.signalQuality != item->conn.signalQuality)
+            if (item->conn.signalQuality == -DBL_MAX)
             {
                 FF_DEBUG("Found Strength property");
                 uint32_t strengthPercent;
@@ -314,14 +314,14 @@ static const char* detectWifiWithIw(FFWifiResult* item, FFstrbuf* buffer)
     ffStrbufClear(buffer);
     if(ffParsePropLines(output.chars, "rx bitrate: ", buffer))
     {
-        item->conn.rxRate = ffStrbufToDouble(buffer);
+        item->conn.rxRate = ffStrbufToDouble(buffer, -DBL_MAX);
         FF_DEBUG("RX bitrate: %.2f Mbps", item->conn.rxRate);
     }
 
     ffStrbufClear(buffer);
     if(ffParsePropLines(output.chars, "tx bitrate: ", buffer))
     {
-        item->conn.txRate = ffStrbufToDouble(buffer);
+        item->conn.txRate = ffStrbufToDouble(buffer, -DBL_MAX);
         FF_DEBUG("TX bitrate: %.2f Mbps (raw: %s)", item->conn.txRate, buffer->chars);
 
         if(ffStrbufContainS(buffer, " EHT-MCS "))
@@ -548,26 +548,53 @@ const char* ffDetectWifi(FF_MAYBE_UNUSED FFlist* result)
         ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
-        item->conn.signalQuality = 0.0/0.0;
-        item->conn.rxRate = 0.0/0.0;
-        item->conn.txRate = 0.0/0.0;
+        item->conn.signalQuality = -DBL_MAX;
+        item->conn.rxRate = -DBL_MAX;
+        item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
         item->conn.frequency = 0;
 
+        char operstate;
         ffStrbufSetF(&buffer, "/sys/class/net/%s/operstate", i->if_name);
-        if (!ffAppendFileBuffer(buffer.chars, &item->inf.status))
+        if (!ffReadFileData(buffer.chars, 1, &operstate))
         {
             FF_DEBUG("Failed to read operstate file");
             continue;
         }
 
-        ffStrbufTrimRightSpace(&item->inf.status);
-        FF_DEBUG("Interface status: %s", item->inf.status.chars);
-        if (!ffStrbufEqualS(&item->inf.status, "up"))
+        FF_DEBUG("Connection status: %c", operstate);
+        if (operstate != 'u')
         {
             FF_DEBUG("Skipping interface as it's not up");
+            ffStrbufSetStatic(&item->conn.status, "disconnected");
+
+            ffStrbufSetF(&buffer, "/sys/class/net/%s/flags", i->if_name);
+            char flags[16];
+            ssize_t len = ffReadFileData(buffer.chars, sizeof(flags), flags);
+            if (len <= 0)
+            {
+                FF_DEBUG("Failed to read flags file");
+                ffStrbufSetStatic(&item->inf.status, "unknown");
+                continue;
+            }
+            flags[len] = '\0';
+            FF_DEBUG("Interface flags: %s", flags);
+            unsigned flagsVal = (unsigned) strtoul(flags, NULL, 16);
+            if (flagsVal & IFF_UP)
+            {
+                ffStrbufSetStatic(&item->inf.status, "up");
+                FF_DEBUG("Interface is up but not connected");
+            }
+            else
+            {
+                ffStrbufSetStatic(&item->inf.status, "down");
+                FF_DEBUG("Interface is down");
+            }
+
             continue;
         }
+
+        ffStrbufSetStatic(&item->inf.status, "up");
 
         FF_DEBUG("Trying to detect wifi with iw");
         if (detectWifiWithIw(item, &buffer) != NULL)

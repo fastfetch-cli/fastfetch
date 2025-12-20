@@ -1,4 +1,5 @@
 #include "FFPlatform_private.h"
+#include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
 #include "fastfetch_config.h"
 #include "common/io/io.h"
@@ -21,8 +22,8 @@
 
 static void getExePath(FFPlatform* platform)
 {
-    char exePath[PATH_MAX + 1];
-    #ifdef __linux__
+    char exePath[PATH_MAX];
+    #if defined(__linux__) || defined (__GNU__)
         ssize_t exePathLen = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
         if (exePathLen >= 0)
             exePath[exePathLen] = '\0';
@@ -57,7 +58,7 @@ static void getExePath(FFPlatform* platform)
 
         while (get_next_image_info(B_CURRENT_TEAM, &cookie, &info) == B_OK) {
             if (info.type == B_APP_IMAGE) {
-                exePathLen = strlcpy(exePath, info.name, PATH_MAX);
+                exePathLen = strlcpy(exePath, info.name, sizeof(exePath));
                 break;
             }
         }
@@ -182,7 +183,11 @@ static void getUserName(FFPlatform* platform, const struct passwd* pwd)
 
     ffStrbufAppendS(&platform->userName, user);
 
-    if (pwd) ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
+    if (pwd)
+    {
+        ffStrbufAppendS(&platform->fullUserName, pwd->pw_gecos);
+        ffStrbufTrimSpace(&platform->fullUserName);
+    }
 }
 
 static void getHostName(FFPlatform* platform, const struct utsname* uts)
@@ -211,7 +216,6 @@ static void getSysinfo(FFPlatformSysinfo* info, const struct utsname* uts)
     else
     #endif
     ffStrbufAppendS(&info->architecture, uts->machine);
-    ffStrbufInit(&info->displayVersion);
 
     #if defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__NetBSD__)
     size_t length = sizeof(info->pageSize);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/bootmgr/option.h"
 
 typedef struct FFBootmgrResult
 {

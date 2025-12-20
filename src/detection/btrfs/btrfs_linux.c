@@ -73,20 +73,40 @@ static const char* detectAllocation(FFBtrfsResult* item, int dfd, FFstrbuf* buff
         item->globalReservationUsed = ffStrbufToUInt(buffer, 0);
     item->globalReservationUsed = item->globalReservationTotal - item->globalReservationUsed;
 
-    #define FF_BTRFS_DETECT_TYPE(index, _type) \
-    if (ffReadFileBufferRelative(subfd, #_type "/total_bytes", buffer)) \
-        item->allocation[index].total = ffStrbufToUInt(buffer, 0); \
-    \
-    if (ffReadFileBufferRelative(subfd, #_type "/bytes_used", buffer)) \
-        item->allocation[index].used = ffStrbufToUInt(buffer, 0); \
-    \
-    item->allocation[index].dup = faccessat(subfd, #_type "/dup/", F_OK, 0) == 0; \
-    \
-    item->allocation[index].type = #_type;
+    #define FF_BTRFS_DETECT_PROFILE(_index, _type, _profile, _copies) \
+        else if (faccessat(subfd, _type "/" _profile "/", F_OK, 0) == 0) { \
+            item->allocation[_index].profile = _profile; \
+            item->allocation[_index].copies = _copies; \
+        }
 
-    FF_BTRFS_DETECT_TYPE(0, data);
-    FF_BTRFS_DETECT_TYPE(1, metadata);
-    FF_BTRFS_DETECT_TYPE(2, system);
+    #define FF_BTRFS_DETECT_TYPE(_index, _type) \
+    do { \
+        item->allocation[_index].type = _type; \
+        if (ffReadFileBufferRelative(subfd, _type "/total_bytes", buffer)) \
+            item->allocation[_index].total = ffStrbufToUInt(buffer, 0); \
+        \
+        if (ffReadFileBufferRelative(subfd, _type "/bytes_used", buffer)) \
+            item->allocation[_index].used = ffStrbufToUInt(buffer, 0); \
+        \
+        if (false) {} \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "single", 1) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "dup", 2) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid0", 1) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1", 2) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid10", 2) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1c3", 3) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid1c4", 4) \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid5", 1) /* (n-1)/n */ \
+        FF_BTRFS_DETECT_PROFILE(_index, _type, "raid6", 1) /* (n-2)/n */ \
+        else { \
+            item->allocation[_index].profile = "unknown"; \
+            item->allocation[_index].copies = 1; \
+        } \
+    } while (0)
+
+    FF_BTRFS_DETECT_TYPE(0, "data");
+    FF_BTRFS_DETECT_TYPE(1, "metadata");
+    FF_BTRFS_DETECT_TYPE(2, "system");
 
     #undef FF_BTRFS_DETECT_TYPE
 

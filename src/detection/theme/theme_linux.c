@@ -7,7 +7,7 @@ const char* ffDetectTheme(FFThemeResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         return "Theme isn't supported in TTY";
 
     const FFQtResult* plasma = ffDetectQt();

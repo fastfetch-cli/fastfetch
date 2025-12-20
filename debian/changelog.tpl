@@ -1,3 +1,70 @@
+fastfetch (2.56.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.56.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 08 Dec 2025 09:21:58 +0800
+
+fastfetch (2.55.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.1
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 17 Nov 2025 10:15:44 +0800
+
+fastfetch (2.55.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.55.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Wed, 12 Nov 2025 09:15:24 +0800
+
+fastfetch (2.54.1~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Fix building on plucky
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 20 Oct 2025 14:27:02 +0800
+
+fastfetch (2.54.0~#UBUNTU_CODENAME#) #UBUNTU_CODENAME#; urgency=medium
+
+  * Update to 2.54.0
+  * Test independent changelog entries for different Ubuntu releases
+
+ -- Carter Li <zhangsongcui@live.cn>  Mon, 20 Oct 2025 10:47:02 +0800
+
+fastfetch (2.53.0) jammy; urgency=medium
+
+  * Update to 2.53.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Tue, 23 Sep 2025 09:58:48 +0800
+
+fastfetch (2.52.0) jammy; urgency=medium
+
+  * Update to 2.52.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 05 Sep 2025 14:59:44 +0800
+
+fastfetch (2.51.0) jammy; urgency=medium
+
+  * Update to 2.51.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Fri, 29 Aug 2025 08:55:03 +0800
+
+fastfetch (2.50.2) jammy; urgency=medium
+
+  * Update to 2.50.2
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 21 Aug 2025 10:33:07 +0800
+
+fastfetch (2.49.0) jammy; urgency=medium
+
+  * Update to 2.49.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 31 Jul 2025 14:32:59 +0800
+
+fastfetch (2.48.0) jammy; urgency=medium
+
+  * Update to 2.48.0
+
+ -- Carter Li <zhangsongcui@live.cn>  Thu, 17 Jul 2025 16:16:52 +0800
+
 fastfetch (2.47.0) jammy; urgency=medium
 
   * Update to 2.47.0
@@ -399,4 +466,3 @@ fastfetch (2.7.1) jammy; urgency=medium
   * Initial release.
 
  -- Carter Li <zhangsongcui@live.cn>  Tue, 06 Feb 2024 15:01:11 +0800
-

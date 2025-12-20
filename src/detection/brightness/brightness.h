@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
-#include "util/FFlist.h"
+#include "modules/brightness/option.h"
 
 typedef struct FFBrightnessResult
 {

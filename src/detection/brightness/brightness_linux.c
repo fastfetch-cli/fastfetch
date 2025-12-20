@@ -32,7 +32,7 @@ static const char* detectWithBacklight(FFlist* result)
         ffStrbufAppendS(&backlightDir, "/brightness");
         if(ffReadFileBuffer(backlightDir.chars, &buffer))
         {
-            double actualBrightness = ffStrbufToDouble(&buffer);
+            double actualBrightness = ffStrbufToDouble(&buffer, 0);
             ffStrbufSubstrBefore(&backlightDir, backlightDirLength);
             ffStrbufAppendS(&backlightDir, entry->d_name);
             ffStrbufAppendS(&backlightDir, "/max_brightness");
@@ -41,7 +41,7 @@ static const char* detectWithBacklight(FFlist* result)
                 FFBrightnessResult* brightness = (FFBrightnessResult*) ffListAdd(result);
                 ffStrbufSubstrBeforeLastC(&backlightDir, '/');
                 ffStrbufAppendS(&backlightDir, "/device");
-                ffStrbufInitA(&brightness->name, PATH_MAX + 1);
+                ffStrbufInitA(&brightness->name, PATH_MAX);
                 if(realpath(backlightDir.chars, brightness->name.chars))
                 {
                     ffStrbufRecalculateLength(&brightness->name);
@@ -71,7 +71,7 @@ static const char* detectWithBacklight(FFlist* result)
                 }
                 else
                     ffStrbufInitS(&brightness->name, entry->d_name);
-                brightness->max = ffStrbufToDouble(&buffer);
+                brightness->max = ffStrbufToDouble(&buffer, 0);
                 brightness->min = 0;
                 brightness->current = actualBrightness;
                 brightness->builtin = true;

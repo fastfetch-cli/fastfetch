@@ -25,10 +25,12 @@ static void initState(FFstate* state)
     state->logoHeight = 0;
     state->keysHeight = 0;
     state->terminalLightTheme = false;
+    state->titleFqdn = false;
 
     ffPlatformInit(&state->platform);
     state->configDoc = NULL;
     state->resultDoc = NULL;
+    state->dynamicInterval = 0;
 
     {
         // don't enable bright color if the terminal is in light mode
@@ -42,14 +44,13 @@ static void defaultConfig(void)
 {
     ffOptionsInitLogo(&instance.config.logo);
     ffOptionsInitGeneral(&instance.config.general);
-    ffOptionsInitModules(&instance.config.modules);
     ffOptionsInitDisplay(&instance.config.display);
 }
 
 void ffInitInstance(void)
 {
-    #ifdef WIN32
-        //https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendations&view=msvc-170#utf-8-support
+    #ifdef _WIN32
+        // https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale?source=recommendat>
         setlocale(LC_ALL, ".UTF8");
     #else
         // Never use `setlocale(LC_ALL, "")`
@@ -74,6 +75,9 @@ static void resetConsole(void)
     #if defined(_WIN32)
         fflush(stdout);
     #endif
+
+    if(instance.state.dynamicInterval > 0)
+        fputs("\033[?1049l", stdout); // Disable alternate buffer
 }
 
 #ifdef _WIN32
@@ -88,19 +92,10 @@ static void exitSignalHandler(FF_MAYBE_UNUSED int signal)
     resetConsole();
     exit(0);
 }
-static void chldSignalHandler(FF_MAYBE_UNUSED int signal)
-{
-    // empty; used to interrupt the poll and read syscalls
-}
 #endif
 
 void ffStart(void)
 {
-    #ifdef FF_START_DETECTION_THREADS
-        if(instance.config.general.multithreading)
-            startDetectionThreads();
-    #endif
-
     ffDisableLinewrap = instance.config.display.disableLinewrap && !instance.config.display.pipe && !instance.state.resultDoc;
     ffHideCursor = instance.config.display.hideCursor && !instance.config.display.pipe && !instance.state.resultDoc;
 
@@ -122,7 +117,10 @@ void ffStart(void)
     sigaction(SIGINT, &action, NULL);
     sigaction(SIGTERM, &action, NULL);
     sigaction(SIGQUIT, &action, NULL);
-    sigaction(SIGCHLD, &(struct sigaction) { .sa_handler = chldSignalHandler }, NULL);
+    sigset_t newmask;
+    sigemptyset(&newmask);
+    sigaddset(&newmask, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &newmask, NULL);
     #endif
 
     //reset everything to default before we start printing
@@ -135,14 +133,17 @@ void ffStart(void)
     if(ffDisableLinewrap)
         fputs("\033[?7l", stdout);
 
+    if(instance.state.dynamicInterval > 0)
+    {
+        fputs("\033[?1049h\033[H", stdout); // Enable alternate buffer
+        fflush(stdout);
+    }
+
     ffLogoPrint();
 }
 
 void ffFinish(void)
 {
-    if(instance.config.logo.printRemaining)
-        ffLogoPrintRemaining();
-
     resetConsole();
 }
 
@@ -150,7 +151,6 @@ static void destroyConfig(void)
 {
     ffOptionsDestroyLogo(&instance.config.logo);
     ffOptionsDestroyGeneral(&instance.config.general);
-    ffOptionsDestroyModules(&instance.config.modules);
     ffOptionsDestroyDisplay(&instance.config.display);
 }
 
@@ -213,9 +213,6 @@ void ffListFeatures(void)
         #endif
         #if FF_HAVE_ZLIB
             "zlib\n"
-        #endif
-        #if FF_HAVE_XFCONF
-            "xfconf\n"
         #endif
         #if FF_HAVE_SQLITE3
             "sqlite3\n"

@@ -1,6 +1,4 @@
 #include "gpu.h"
-#include "common/library.h"
-#include "detection/cpu/cpu.h"
 #include "util/apple/cf_helpers.h"
 #include "util/apple/smc_temps.h"
 
@@ -59,7 +57,7 @@ static const char* detectFrequency(FFGPUResult* gpu)
     if (!freqProperty || CFGetTypeID(freqProperty) != CFDataGetTypeID())
         return "\"voltage-states9-sram\" in \"pmgr\" is not found";
 
-    // voltage-states5-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
+    // voltage-states9-sram stores supported <frequency / voltage> pairs of gpu from the lowest to the highest
     CFIndex propLength = CFDataGetLength(freqProperty);
     if (propLength == 0 || propLength % (CFIndex) sizeof(uint32_t) * 2 != 0)
         return "Invalid \"voltage-states9-sram\" length";
@@ -109,7 +107,7 @@ const char* ffDetectGPUImpl(const FFGPUOptions* options, FFlist* gpus)
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
         IORegistryEntryGetRegistryEntryID(registryEntry, &gpu->deviceId);
-        ffStrbufInitStatic(&gpu->platformApi, "Metal");
+        ffStrbufInitStatic(&gpu->platformApi, "IOKit");
 
         ffStrbufInit(&gpu->driver); // Ok for both Apple and Intel
         ffCfDictGetString(properties, CFSTR("CFBundleIdentifier"), &gpu->driver);

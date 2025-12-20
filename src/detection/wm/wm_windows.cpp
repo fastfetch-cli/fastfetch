@@ -12,7 +12,7 @@ extern "C"
 #include <windows.h>
 #include <tlhelp32.h>
 #include <shlobj.h>
-#include <Propkey.h>
+#include <propkey.h>
 
 template <typename Fn>
 struct on_scope_exit {

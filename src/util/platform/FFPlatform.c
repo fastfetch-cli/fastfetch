@@ -56,7 +56,6 @@ void ffPlatformDestroy(FFPlatform* platform)
     ffStrbufDestroy(&info->name);
     ffStrbufDestroy(&info->release);
     ffStrbufDestroy(&info->version);
-    ffStrbufDestroy(&info->displayVersion);
 }
 
 void ffPlatformPathAddAbsolute(FFlist* dirs, const char* path)

@@ -34,6 +34,13 @@ static inline void applyGTKSettings(FFGTKResult* result, const char* themeName, 
         ffStrbufAppendS(&result->wallpaper, wallpaper);
 }
 
+static bool testXfconfWallpaperPropKey(FF_MAYBE_UNUSED void* data, const char* key)
+{
+    int count = 0;
+    sscanf(key, "/backdrop/screen0/monitor%*[^/]/workspace0/last-image%n", &count);
+    return count == 0;
+}
+
 static void detectGTKFromSettings(FFGTKResult* result)
 {
     static const char* themeName = NULL;
@@ -55,47 +62,45 @@ static void detectGTKFromSettings(FFGTKResult* result)
 
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_XFCE4) == 0)
+    if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_XFCE4))
     {
         themeName = ffSettingsGetXFConf("xsettings", "/Net/ThemeName", FF_VARIANT_TYPE_STRING).strValue;
         iconsName = ffSettingsGetXFConf("xsettings", "/Net/IconThemeName", FF_VARIANT_TYPE_STRING).strValue;
         fontName = ffSettingsGetXFConf("xsettings", "/Gtk/FontName", FF_VARIANT_TYPE_STRING).strValue;
         cursorTheme = ffSettingsGetXFConf("xsettings", "/Gtk/CursorThemeName", FF_VARIANT_TYPE_STRING).strValue;
         cursorSize = ffSettingsGetXFConf("xsettings", "/Gtk/CursorThemeSize", FF_VARIANT_TYPE_INT).intValue;
-        wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitor0/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
-        if (!wallpaper) // FIXME: find a way to enumerate possible properties
-            wallpaper = ffSettingsGetXFConf("xfce4-desktop", "/backdrop/screen0/monitoreDP-1/workspace0/last-image", FF_VARIANT_TYPE_STRING).strValue;
+        wallpaper = ffSettingsGetXFConfFirstMatch("xfce4-desktop", "/backdrop/screen0", FF_VARIANT_TYPE_STRING, NULL, testXfconfWallpaperPropKey).strValue;
     }
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_CINNAMON) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_CINNAMON))
     {
-        themeName = ffSettingsGet("/org/cinnamon/desktop/interface/gtk-theme", "org.cinnamon.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
-        iconsName = ffSettingsGet("/org/cinnamon/desktop/interface/icon-theme", "org.cinnamon.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
-        fontName = ffSettingsGet("/org/cinnamon/desktop/interface/font-name", "org.cinnamon.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
-        cursorTheme = ffSettingsGet("/org/cinnamon/desktop/interface/cursor-theme", "org.cinnamon.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
-        cursorSize = ffSettingsGet("/org/cinnamon/desktop/interface/cursor-size", "org.cinnamon.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
-        wallpaper = ffSettingsGet("/org/cinnamon/desktop/background/picture-uri", "org.cinnamon.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
+        themeName = ffSettingsGetGnome("/org/cinnamon/desktop/interface/gtk-theme", "org.cinnamon.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
+        iconsName = ffSettingsGetGnome("/org/cinnamon/desktop/interface/icon-theme", "org.cinnamon.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
+        fontName = ffSettingsGetGnome("/org/cinnamon/desktop/interface/font-name", "org.cinnamon.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
+        cursorTheme = ffSettingsGetGnome("/org/cinnamon/desktop/interface/cursor-theme", "org.cinnamon.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
+        cursorSize = ffSettingsGetGnome("/org/cinnamon/desktop/interface/cursor-size", "org.cinnamon.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+        wallpaper = ffSettingsGetGnome("/org/cinnamon/desktop/background/picture-uri", "org.cinnamon.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
     }
-    else if(ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_MATE) == 0)
+    else if(ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_MATE))
     {
-        themeName = ffSettingsGet("/org/mate/interface/gtk-theme", "org.mate.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
-        iconsName = ffSettingsGet("/org/mate/interface/icon-theme", "org.mate.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
-        fontName = ffSettingsGet("/org/mate/interface/font-name", "org.mate.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
-        cursorTheme = ffSettingsGet("/org/mate/peripherals-mouse/cursor-theme", "org.mate.peripherals-mouse", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
-        cursorSize = ffSettingsGet("/org/mate/peripherals-mouse/cursor-size", "org.mate.peripherals-mouse", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
-        wallpaper = ffSettingsGet("/org/mate/desktop/background", "org.mate.background", NULL, "picture-filename", FF_VARIANT_TYPE_STRING).strValue;
+        themeName = ffSettingsGetGnome("/org/mate/interface/gtk-theme", "org.mate.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
+        iconsName = ffSettingsGetGnome("/org/mate/interface/icon-theme", "org.mate.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
+        fontName = ffSettingsGetGnome("/org/mate/interface/font-name", "org.mate.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
+        cursorTheme = ffSettingsGetGnome("/org/mate/peripherals-mouse/cursor-theme", "org.mate.peripherals-mouse", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
+        cursorSize = ffSettingsGetGnome("/org/mate/peripherals-mouse/cursor-size", "org.mate.peripherals-mouse", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+        wallpaper = ffSettingsGetGnome("/org/mate/desktop/background", "org.mate.background", NULL, "picture-filename", FF_VARIANT_TYPE_STRING).strValue;
     }
     else if(
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME) == 0 ||
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC) == 0 ||
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_UNITY) == 0 ||
-        ffStrbufIgnCaseCompS(&wmde->dePrettyName, FF_DE_PRETTY_BUDGIE) == 0
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME) ||
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_GNOME_CLASSIC) ||
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_UNITY) ||
+        ffStrbufIgnCaseEqualS(&wmde->dePrettyName, FF_DE_PRETTY_BUDGIE)
     ) {
-        themeName = ffSettingsGet("/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
-        iconsName = ffSettingsGet("/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
-        fontName = ffSettingsGet("/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
-        cursorTheme = ffSettingsGet("/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
-        cursorSize = ffSettingsGet("/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
-        wallpaper = ffSettingsGet("/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
+        themeName = ffSettingsGetGnome("/org/gnome/desktop/interface/gtk-theme", "org.gnome.desktop.interface", NULL, "gtk-theme", FF_VARIANT_TYPE_STRING).strValue;
+        iconsName = ffSettingsGetGnome("/org/gnome/desktop/interface/icon-theme", "org.gnome.desktop.interface", NULL, "icon-theme", FF_VARIANT_TYPE_STRING).strValue;
+        fontName = ffSettingsGetGnome("/org/gnome/desktop/interface/font-name", "org.gnome.desktop.interface", NULL, "font-name", FF_VARIANT_TYPE_STRING).strValue;
+        cursorTheme = ffSettingsGetGnome("/org/gnome/desktop/interface/cursor-theme", "org.gnome.desktop.interface", NULL, "cursor-theme", FF_VARIANT_TYPE_STRING).strValue;
+        cursorSize = ffSettingsGetGnome("/org/gnome/desktop/interface/cursor-size", "org.gnome.desktop.interface", NULL, "cursor-size", FF_VARIANT_TYPE_INT).intValue;
+        wallpaper = ffSettingsGetGnome("/org/gnome/desktop/background/picture-uri", "org.gnome.desktop.background", NULL, "picture-uri", FF_VARIANT_TYPE_STRING).strValue;
     }
 
     applyGTKSettings(result, themeName, iconsName, fontName, cursorTheme, cursorSize, wallpaper);

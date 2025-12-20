@@ -1,13 +1,24 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.47.0
+    VERSION 2.56.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
 )
 
 set(PROJECT_LICENSE "MIT license")
+
+if(DEFINED CMAKE_SYSTEM_PROCESSOR_OVERRIDE) # Used by github actions for i686 build
+    set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR_OVERRIDE} CACHE INTERNAL "")
+endif()
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR)
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(CMAKE_SYSTEM_PROCESSOR "amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
+endif()
+message(STATUS "Build for system processor: ${CMAKE_SYSTEM_PROCESSOR}")
 
 ###################
 # Target Platform #
@@ -32,6 +43,8 @@ elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "SunOS")
     set(SunOS TRUE CACHE BOOL "..." FORCE)
 elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Haiku")
     set(Haiku TRUE CACHE BOOL "..." FORCE)
+elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "GNU")
+    set(GNU TRUE CACHE BOOL "..." FORCE)
 elseif(NOT APPLE AND NOT WIN32)
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
@@ -56,34 +69,32 @@ include(CheckIncludeFile)
 
 include(CMakeDependentOption)
 
-cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD" OFF)
-cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD" OFF)
-cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_XFCONF "Enable libxfconf-0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR WIN32 OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS" OFF)
+cmake_dependent_option(ENABLE_VULKAN "Enable vulkan" ON "LINUX OR APPLE OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_WAYLAND "Enable wayland-client" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR GNU" OFF)
+cmake_dependent_option(ENABLE_XCB_RANDR "Enable xcb-randr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_XRANDR "Enable xrandr" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_DRM "Enable libdrm" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_DRM_AMDGPU "Enable libdrm_amdgpu" ON "LINUX OR FreeBSD OR GNU" OFF)
+cmake_dependent_option(ENABLE_GIO "Enable gio-2.0" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_DCONF "Enable dconf" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_DBUS "Enable dbus-1" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_SQLITE3 "Enable sqlite3" ON "LINUX OR FreeBSD OR APPLE OR OpenBSD OR NetBSD OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_RPM "Enable rpm" ON "LINUX OR GNU" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK7 "Enable imagemagick 7" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_IMAGEMAGICK6 "Enable imagemagick 6" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR APPLE OR SunOS OR GNU" OFF)
 cmake_dependent_option(ENABLE_CHAFA "Enable chafa" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
-cmake_dependent_option(ENABLE_ZLIB "Enable zlib" ON "ENABLE_IMAGEMAGICK6 OR ENABLE_IMAGEMAGICK7" OFF)
-cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku" OFF)
-cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS" OFF)
-cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku" OFF)
+cmake_dependent_option(ENABLE_EGL "Enable egl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR WIN32 OR SunOS OR Haiku OR GNU" OFF)
+cmake_dependent_option(ENABLE_GLX "Enable glx" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR ANDROID OR SunOS OR GNU" OFF)
+cmake_dependent_option(ENABLE_OPENCL "Enable opencl" ON "LINUX OR FreeBSD OR OpenBSD OR NetBSD OR WIN32 OR ANDROID OR SunOS OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_FREETYPE "Enable freetype" ON "ANDROID" OFF)
-cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX" OFF)
+cmake_dependent_option(ENABLE_PULSE "Enable pulse" ON "LINUX OR ANDROID OR GNU" OFF)
 cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
-cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku" OFF)
+cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
+cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "GNU" OFF)
 
+option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
 option(ENABLE_ASAN "Build fastfetch with ASAN (address sanitizer)" OFF)
 option(ENABLE_LTO "Enable link-time optimization in release mode if supported" ON)
@@ -94,6 +105,8 @@ option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
+option(ENABLE_LIBZFS "Enable libzfs" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -336,7 +349,7 @@ endif()
 # Ascii image data #
 ####################
 
-file(GLOB LOGO_FILES "src/logo/ascii/*.txt")
+file(GLOB LOGO_FILES CONFIGURE_DEPENDS "src/logo/ascii/*.txt")
 set(LOGO_BUILTIN_H "#pragma once\n#pragma GCC diagnostic ignored \"-Wtrigraphs\"\n\n")
 foreach(file ${LOGO_FILES})
     fastfetch_load_text("${file}" content)
@@ -351,10 +364,11 @@ file(GENERATE OUTPUT logo_builtin.h CONTENT "${LOGO_BUILTIN_H}")
 #######################
 
 set(LIBFASTFETCH_SRC
-    src/common/percent.c
     src/common/commandoption.c
+    src/common/duration.c
     src/common/font.c
     src/common/format.c
+    src/common/frequency.c
     src/common/init.c
     src/common/jsonconfig.c
     src/common/library.c
@@ -363,15 +377,19 @@ set(LIBFASTFETCH_SRC
     src/common/networking/networking_common.c
     src/common/option.c
     src/common/parsing.c
+    src/common/percent.c
     src/common/printing.c
     src/common/properties.c
     src/common/settings.c
+    src/common/size.c
     src/common/temps.c
+    src/common/time.c
     src/detection/bluetoothradio/bluetoothradio.c
     src/detection/bootmgr/bootmgr.c
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
+    src/detection/command/command.c
     src/detection/disk/disk.c
     src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
@@ -392,6 +410,7 @@ set(LIBFASTFETCH_SRC
     src/detection/version/version.c
     src/detection/vulkan/vulkan.c
     src/detection/weather/weather.c
+    src/detection/zpool/zpool.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c
@@ -471,7 +490,6 @@ set(LIBFASTFETCH_SRC
     src/modules/wmtheme/wmtheme.c
     src/modules/zpool/zpool.c
     src/options/display.c
-    src/options/modules.c
     src/options/logo.c
     src/options/general.c
     src/util/edidHelper.c
@@ -510,6 +528,7 @@ if(LINUX)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
@@ -545,6 +564,7 @@ if(LINUX)
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_linux.c
         src/detection/packages/packages_linux.c
+        src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_linux.c
         src/detection/processes/processes_linux.c
         src/detection/gtk_qt/qt.c
@@ -563,12 +583,12 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
 elseif(ANDROID)
     list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
         src/common/io/io_unix.c
         src/common/netif/netif_linux.c
         src/common/networking/networking_linux.c
@@ -584,7 +604,7 @@ elseif(ANDROID)
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
         src/detection/cpucache/cpucache_linux.c
-        src/detection/cursor/cursor_nosupport.c
+        src/detection/cursor/cursor_linux.c
         src/detection/cpuusage/cpuusage_linux.c
         src/detection/disk/disk_linux.c
         src/detection/dns/dns_linux.c
@@ -592,10 +612,16 @@ elseif(ANDROID)
         src/detection/physicalmemory/physicalmemory_nosupport.c
         src/detection/diskio/diskio_linux.c
         src/detection/displayserver/displayserver_android.c
-        src/detection/font/font_nosupport.c
-        src/detection/gpu/gpu_nosupport.c
+        src/detection/displayserver/linux/common.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/gtk_qt/qt.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_android.c
         src/detection/host/host_android.c
-        src/detection/icons/icons_nosupport.c
+        src/detection/icons/icons_linux.c
         src/detection/initsystem/initsystem_linux.c
         src/detection/keyboard/keyboard_nosupport.c
         src/detection/libc/libc_android.c
@@ -604,31 +630,32 @@ elseif(ANDROID)
         src/detection/locale/locale_linux.c
         src/detection/localip/localip_linux.c
         src/detection/gamepad/gamepad_nosupport.c
-        src/detection/media/media_nosupport.c
+        src/detection/media/media_linux.c
         src/detection/memory/memory_linux.c
         src/detection/mouse/mouse_nosupport.c
         src/detection/netio/netio_linux.c
         src/detection/opengl/opengl_linux.c
         src/detection/os/os_android.c
         src/detection/packages/packages_linux.c
+        src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_linux.c
-        src/detection/sound/sound_nosupport.c
+        src/detection/sound/sound_linux.c
         src/detection/swap/swap_linux.c
         src/detection/terminalfont/terminalfont_android.c
+        src/detection/terminalfont/terminalfont_linux.c
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_linux.c
         src/detection/tpm/tpm_nosupport.c
         src/detection/uptime/uptime_linux.c
         src/detection/users/users_linux.c
-        src/detection/wallpaper/wallpaper_nosupport.c
+        src/detection/wallpaper/wallpaper_linux.c
         src/detection/wifi/wifi_android.c
-        src/detection/wm/wm_nosupport.c
-        src/detection/de/de_nosupport.c
-        src/detection/wmtheme/wmtheme_nosupport.c
+        src/detection/wm/wm_linux.c
+        src/detection/de/de_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -658,6 +685,7 @@ elseif(FreeBSD)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_bsd.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
@@ -710,7 +738,6 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -752,6 +779,7 @@ elseif(NetBSD)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_nbsd.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
@@ -765,7 +793,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_nbsd.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nbsd.c
@@ -803,7 +831,6 @@ elseif(NetBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -834,6 +861,7 @@ elseif(OpenBSD)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_obsd.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
@@ -848,7 +876,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_pci.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_obsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
         src/detection/lm/lm_nosupport.c
@@ -885,7 +913,6 @@ elseif(OpenBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/smbiosHelper.c
@@ -893,7 +920,7 @@ elseif(OpenBSD)
 elseif(APPLE)
     list(APPEND LIBFASTFETCH_SRC
         src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
+        src/common/netif/netif_apple.c
         src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/common/sysctl.c
@@ -937,6 +964,7 @@ elseif(APPLE)
         src/detection/opengl/opengl_apple.c
         src/detection/os/os_apple.m
         src/detection/packages/packages_apple.c
+        src/detection/packages/packages_nix.c
         src/detection/poweradapter/poweradapter_apple.c
         src/detection/processes/processes_bsd.c
         src/detection/sound/sound_apple.c
@@ -944,7 +972,7 @@ elseif(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_apple.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -954,7 +982,6 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
-        src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/apple/smc_temps.c
@@ -1005,7 +1032,7 @@ elseif(WIN32)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
-        src/detection/os/os_windows.c
+        src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.c
@@ -1014,7 +1041,7 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_windows.c
         src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
@@ -1024,7 +1051,6 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
-        src/detection/zpool/zpool_nosupport.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -1039,7 +1065,7 @@ elseif(SunOS)
     list(APPEND LIBFASTFETCH_SRC
         src/common/dbus.c
         src/common/io/io_unix.c
-        src/common/netif/netif_bsd.c
+        src/common/netif/netif_apple.c
         src/common/networking/networking_linux.c
         src/common/processing_linux.c
         src/detection/battery/battery_nosupport.c
@@ -1061,6 +1087,7 @@ elseif(SunOS)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/diskio/diskio_sunos.c
         src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/common.c
         src/detection/displayserver/linux/drm.c
         src/detection/displayserver/linux/wayland/wayland.c
         src/detection/displayserver/linux/wayland/global-output.c
@@ -1112,7 +1139,6 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -1181,11 +1207,88 @@ elseif(Haiku)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/haiku/version.cpp
     )
+elseif(GNU)
+    list(APPEND LIBFASTFETCH_SRC
+        src/common/dbus.c
+        src/common/io/io_unix.c
+        src/common/netif/netif_gnu.c
+        src/common/networking/networking_linux.c
+        src/common/processing_linux.c
+        src/detection/battery/battery_nosupport.c
+        src/detection/bios/bios_nosupport.c
+        src/detection/board/board_nosupport.c
+        src/detection/bootmgr/bootmgr_nosupport.c
+        src/detection/brightness/brightness_nosupport.c
+        src/detection/btrfs/btrfs_nosupport.c
+        src/detection/chassis/chassis_nosupport.c
+        src/detection/cpu/cpu_linux.c
+        src/detection/cpucache/cpucache_nosupport.c
+        src/detection/cpuusage/cpuusage_linux.c
+        src/detection/cursor/cursor_linux.c
+        src/detection/bluetooth/bluetooth_linux.c
+        src/detection/bluetoothradio/bluetoothradio_linux.c
+        src/detection/disk/disk_linux.c
+        src/detection/dns/dns_linux.c
+        src/detection/physicaldisk/physicaldisk_nosupport.c
+        src/detection/physicalmemory/physicalmemory_nosupport.c
+        src/detection/diskio/diskio_nosupport.c
+        src/detection/displayserver/linux/displayserver_linux.c
+        src/detection/displayserver/linux/common.c
+        src/detection/displayserver/linux/drm.c
+        src/detection/displayserver/linux/wayland/wayland.c
+        src/detection/displayserver/linux/wayland/global-output.c
+        src/detection/displayserver/linux/wayland/zwlr-output.c
+        src/detection/displayserver/linux/wayland/wlr-output-management-unstable-v1-protocol.c
+        src/detection/displayserver/linux/wmde.c
+        src/detection/displayserver/linux/xcb.c
+        src/detection/displayserver/linux/xlib.c
+        src/detection/font/font_linux.c
+        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_pci.c
+        src/detection/gtk_qt/gtk.c
+        src/detection/host/host_nosupport.c
+        src/detection/icons/icons_linux.c
+        src/detection/initsystem/initsystem_linux.c
+        src/detection/keyboard/keyboard_nosupport.c
+        src/detection/libc/libc_linux.c
+        src/detection/lm/lm_linux.c
+        src/detection/loadavg/loadavg_linux.c
+        src/detection/locale/locale_linux.c
+        src/detection/localip/localip_linux.c
+        src/detection/gamepad/gamepad_nosupport.c
+        src/detection/media/media_linux.c
+        src/detection/memory/memory_linux.c
+        src/detection/mouse/mouse_nosupport.c
+        src/detection/netio/netio_nosupport.c
+        src/detection/opengl/opengl_linux.c
+        src/detection/os/os_linux.c
+        src/detection/packages/packages_linux.c
+        src/detection/packages/packages_nix.c
+        src/detection/poweradapter/poweradapter_nosupport.c
+        src/detection/processes/processes_linux.c
+        src/detection/gtk_qt/qt.c
+        src/detection/sound/sound_linux.c
+        src/detection/swap/swap_linux.c
+        src/detection/terminalfont/terminalfont_linux.c
+        src/detection/terminalshell/terminalshell_linux.c
+        src/detection/terminalsize/terminalsize_linux.c
+        src/detection/theme/theme_linux.c
+        src/detection/tpm/tpm_nosupport.c
+        src/detection/uptime/uptime_linux.c
+        src/detection/users/users_linux.c
+        src/detection/wallpaper/wallpaper_linux.c
+        src/detection/wifi/wifi_nosupport.c
+        src/detection/wm/wm_linux.c
+        src/detection/de/de_linux.c
+        src/detection/wmtheme/wmtheme_linux.c
+        src/detection/camera/camera_nosupport.c
+        src/util/platform/FFPlatform_unix.c
+        src/util/binary_linux.c
+   )
 endif()
 
 if(ENABLE_DIRECTX_HEADERS)
@@ -1205,10 +1308,7 @@ endif()
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
-    list(APPEND LIBFASTFETCH_SRC src/3rdparty/mk_wcwidch/wcwidth.c)
-endif()
-if(LINUX)
-    check_function_exists(statx HAVE_STATX)
+    list(APPEND LIBFASTFETCH_SRC src/util/wcwidth.c)
 endif()
 if(NOT WIN32)
     check_function_exists(pipe2 HAVE_PIPE2)
@@ -1232,15 +1332,15 @@ add_library(libfastfetch OBJECT
 )
 
 if(yyjson_FOUND)
-    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)
+    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON=1)
     target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
-else()
-    # Used for dlopen finding dylibs installed by homebrew
-    # `/opt/homebrew/lib` is not on in dlopen search path by default
-    if(APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
-    endif()
+endif()
+
+# Used for dlopen finding dylibs installed by homebrew
+# `/opt/homebrew/lib` is not on in dlopen search path by default
+if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 
 if(ANDROID)
@@ -1309,6 +1409,10 @@ elseif(NetBSD)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/usr/X11R7/lib -Wl,-rpath,/usr/pkg/lib") # ditto
 elseif(Haiku)
     target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+elseif(GNU)
+    target_compile_definitions(libfastfetch PUBLIC _GNU_SOURCE)
+    # On Hurd PATH_MAX is not defined. Set an arbitrary limit as workaround.
+    target_compile_definitions(libfastfetch PUBLIC PATH_MAX=4096)
 endif()
 
 if(FreeBSD OR OpenBSD OR NetBSD)
@@ -1319,10 +1423,6 @@ if(FreeBSD OR OpenBSD OR NetBSD)
     target_compile_definitions(libfastfetch PUBLIC _IFI_OQDROPS FF_HAVE_IFI_OQDROPS)
     endif()
     unset(CMAKE_REQUIRED_DEFINITIONS)
-endif()
-
-if(HAVE_STATX)
-    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_STATX)
 endif()
 
 if(HAVE_WCWIDTH)
@@ -1435,10 +1535,6 @@ ff_lib_enable(DBUS
     "dbus-1"
     "DBus"
 )
-ff_lib_enable(XFCONF
-    "libxfconf-0"
-    "XFConf"
-)
 ff_lib_enable(SQLITE3
     "sqlite3"
     "SQLite3"
@@ -1506,24 +1602,6 @@ ff_lib_enable(PCIACCESS
     "pciaccess"
     "pciaccess"
 )
-# The system <libzfs.h> is only usable on SunOS. We provide our local copy of it so it's always available.
-if(ENABLE_LIBZFS)
-    if(BINARY_LINK_TYPE STREQUAL "dlopen")
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-    else()
-        set(CMAKE_REQUIRED_LIBRARIES_BACKUP ${CMAKE_REQUIRED_LIBRARIES})
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} zfs)
-        check_function_exists("libzfs_init" LIBZFS_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACKUP})
-        if(NOT LIBZFS_FOUND)
-            message(STATUS "Library: missing: LIBZFS")
-        else()
-            message(STATUS "Library: found LIBZFS")
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-            target_link_libraries(libfastfetch PRIVATE zfs)
-        endif()
-    endif()
-endif()
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
@@ -1537,6 +1615,15 @@ if(ENABLE_EMBEDDED_PCIIDS)
 endif()
 if(ENABLE_EMBEDDED_AMDGPUIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
+endif()
+if(ENABLE_LIBZFS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_libraries(libfastfetch
+            PRIVATE "zfs"
+        )
+    endif()
 endif()
 
 if(LINUX)
@@ -1586,11 +1673,10 @@ elseif(WIN32)
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
-        PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
     )
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
         # WoA only works on Windows 10 or higher
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
@@ -1629,22 +1715,30 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
-        PRIVATE "zfs"
-        PRIVATE "nvpair"
         PRIVATE "devinfo"
     )
+elseif(GNU)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+    )
 elseif(ANDROID)
-    CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
-    if(HAVE_LIBANDROID_WORDEXP_STATIC)
-        target_link_libraries(libfastfetch
-            PRIVATE -l:libandroid-wordexp.a
-        )
-    else()
-        CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
-        if(HAVE_LIBANDROID_WORDEXP)
+    target_link_libraries(libfastfetch
+        PRIVATE "m"
+    )
+    if(ENABLE_WORDEXP)
+        # https://github.com/termux/termux-packages/pull/7056
+        CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
+        if(HAVE_LIBANDROID_WORDEXP_STATIC)
             target_link_libraries(libfastfetch
-                PRIVATE android-wordexp
+                PRIVATE -l:libandroid-wordexp.a
             )
+        else()
+            CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+            if(HAVE_LIBANDROID_WORDEXP)
+                target_link_libraries(libfastfetch
+                    PRIVATE android-wordexp
+                )
+            endif()
         endif()
     endif()
 elseif(Haiku)
@@ -1706,13 +1800,17 @@ if(NOT WIN32)
     if(HAVE_UTMPX)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX=1)
     endif()
-    CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
-    if(HAVE_WORDEXP)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+    if(ENABLE_WORDEXP)
+        CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
+        if(HAVE_WORDEXP)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+            message(STATUS "wordexp.h found, wordexp support enabled")
+        else()
+            set(ENABLE_WORDEXP OFF)
+        endif()
     endif()
-    CHECK_INCLUDE_FILE("glob.h" HAVE_GLOB)
-    if(HAVE_GLOB)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLOB=1)
+    if(NOT ENABLE_WORDEXP)
+        message(STATUS "wordexp.h not found or disabled, glob used instead")
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
@@ -1921,11 +2019,6 @@ install(
 ##################
 
 set(CPACK_GENERATOR "TGZ;ZIP")
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CMAKE_SYSTEM_PROCESSOR "amd64")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
-endif()
 if(APPLE)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
 elseif(IS_MUSL)
@@ -1972,7 +2065,7 @@ endif()
 
 set(CPACK_SET_DESTDIR ON)
 
-set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
+set(CPACK_PACKAGE_CONTACT "Carter Li <zhangsongcui@live.cn>")
 set(CPACK_PACKAGE_DESCRIPTION "\
 fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way. \
 It is written mostly in C to achieve much better performance.\

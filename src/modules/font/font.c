@@ -4,8 +4,9 @@
 #include "modules/font/font.h"
 #include "util/stringUtils.h"
 
-void ffPrintFont(FFFontOptions* options)
+bool ffPrintFont(FFFontOptions* options)
 {
+    bool success = false;
     FFFontResult font;
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufInit(&font.fonts[i]);
@@ -34,50 +35,38 @@ void ffPrintFont(FFFontOptions* options)
                 FF_FORMAT_ARG(font.display, "combined"),
             }));
         }
+
+        success = true;
     }
 
     ffStrbufDestroy(&font.display);
     for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufDestroy(&font.fonts[i]);
-}
 
-bool ffParseFontCommandOptions(FFFontOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_FONT_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return success;
 }
 
 void ffParseFontJsonObject(FFFontOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_FONT_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateFontJsonConfig(FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyFontOptions))) FFFontOptions defaultOptions;
-    ffInitFontOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFFontResult font;
     for(uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufInit(&font.fonts[i]);
@@ -95,17 +84,31 @@ void ffGenerateFontJsonResult(FF_MAYBE_UNUSED FFFontOptions* options, yyjson_mut
         yyjson_mut_val* fontsArr = yyjson_mut_obj_add_arr(doc, obj, "fonts");
         for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
             yyjson_mut_arr_add_strbuf(doc, fontsArr, &font.fonts[i]);
+        success = true;
     }
 
     ffStrbufDestroy(&font.display);
     for (uint32_t i = 0; i < FF_DETECT_FONT_NUM_FONTS; ++i)
         ffStrbufDestroy(&font.fonts[i]);
+
+    return success;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitFontOptions(FFFontOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyFontOptions(FFFontOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffFontModuleInfo = {
     .name = FF_FONT_MODULE_NAME,
     .description = "Print system font names",
-    .parseCommandOptions = (void*) ffParseFontCommandOptions,
+    .initOptions = (void*) ffInitFontOptions,
+    .destroyOptions = (void*) ffDestroyFontOptions,
     .parseJsonObject = (void*) ffParseFontJsonObject,
     .printModule = (void*) ffPrintFont,
     .generateJsonResult = (void*) ffGenerateFontJsonResult,
@@ -118,14 +121,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Combined fonts for display", "combined"},
     }))
 };
-
-void ffInitFontOptions(FFFontOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyFontOptions(FFFontOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

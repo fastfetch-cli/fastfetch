@@ -9,7 +9,10 @@
 #include <mntent.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#include <sys/mount.h>
+
+#if defined(STATX_BTIME) && !defined(__ANDROID__)
+    #include <sys/syscall.h>
+#endif
 
 #ifdef __USE_LARGEFILE64
     #define stat stat64
@@ -54,6 +57,9 @@ static bool isPhysicalDevice(const struct mntent* device)
         ffStrStartsWith(device->mnt_fsname + 5, "ram")  || //Ignore ram devices
         ffStrStartsWith(device->mnt_fsname + 5, "fd")      //Ignore fd devices
     ) return false;
+
+    if (ffStrStartsWith(device->mnt_dir, "/bedrock/")) // Ignore Bedrock Linux subvolumes
+        return false;
 
     struct stat deviceStat;
     if(stat(device->mnt_fsname, &deviceStat) != 0)
@@ -261,9 +267,9 @@ static void detectStats(FFDisk* disk)
     }
 
     disk->createTime = 0;
-    #ifdef FF_HAVE_STATX
+    #ifdef SYS_statx
     struct statx stx;
-    if (statx(0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME))
+    if (syscall(SYS_statx, 0, disk->mountpoint.chars, 0, STATX_BTIME, &stx) == 0 && (stx.stx_mask & STATX_BTIME) && stx.stx_btime.tv_sec > 685065600 /*birth of Linux*/)
         disk->createTime = (uint64_t)((stx.stx_btime.tv_sec * 1000) + (stx.stx_btime.tv_nsec / 1000000));
     #endif
 
@@ -283,12 +289,18 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
 
     while((device = getmntent(mountsFile)))
     {
-        if (__builtin_expect(options->folders.length, 0))
+        if (__builtin_expect(options->folders.length > 0, false))
         {
-            if (!ffDiskMatchMountpoint(&options->folders, device->mnt_dir))
+            if (!ffStrbufSeparatedContainS(&options->folders, device->mnt_dir, FF_DISK_FOLDER_SEPARATOR))
                 continue;
         }
         else if(!isPhysicalDevice(device))
+            continue;
+
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, device->mnt_dir, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, device->mnt_type, ':'))
             continue;
 
         //We have a valid device, add it to the list

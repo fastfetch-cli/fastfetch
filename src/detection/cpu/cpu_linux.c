@@ -4,6 +4,7 @@
 #include "common/properties.h"
 #include "util/mallocHelper.h"
 #include "util/stringUtils.h"
+#include "util/path.h"
 
 #include <sys/sysinfo.h>
 #include <stdlib.h>
@@ -13,84 +14,193 @@
 
 #define FF_CPUINFO_PATH "/proc/cpuinfo"
 
-static double parseHwmonDir(FFstrbuf* dir, FFstrbuf* buffer)
+#ifndef O_PATH
+#define O_PATH 0
+#endif
+
+static double readTempFile(int dfd, const char* filename, FFstrbuf* buffer)
+{
+    if (filename ? !ffReadFileBufferRelative(dfd, filename, buffer) : !ffReadFDBuffer(dfd, buffer))
+        return FF_CPU_TEMP_UNSET;
+
+    double value = ffStrbufToDouble(buffer, FF_CPU_TEMP_UNSET); // millidegree Celsius
+    if (value == FF_CPU_TEMP_UNSET)
+        return FF_CPU_TEMP_UNSET;
+
+    return value / 1000.;
+}
+
+static double parseTZDir(int dfd, FFstrbuf* buffer)
+{
+    if (!ffReadFileBufferRelative(dfd, "type", buffer))
+        return FF_CPU_TEMP_UNSET;
+
+    if (!ffStrbufStartsWithS(buffer, "cpu") &&
+        !ffStrbufStartsWithS(buffer, "soc") &&
+        #if __x86_64__ || __i386__
+        !ffStrbufEqualS(buffer, "x86_pkg_temp") &&
+        #endif
+        true
+    ) return FF_CPU_TEMP_UNSET;
+
+    return readTempFile(dfd, "temp", buffer);
+}
+
+static double parseHwmonDir(int dfd, FFstrbuf* buffer)
 {
     //https://www.kernel.org/doc/Documentation/hwmon/sysfs-interface
-    uint32_t dirLength = dir->length;
-    ffStrbufAppendS(dir, "temp1_input");
-
-    if(!ffReadFileBuffer(dir->chars, buffer))
-    {
-        // Some badly implemented system put temp file in /hwmonN/device
-        ffStrbufSubstrBefore(dir, dirLength);
-        ffStrbufAppendS(dir, "device/");
-        dirLength = dir->length;
-        ffStrbufAppendS(dir, "temp1_input");
-
-        if(!ffReadFileBuffer(dir->chars, buffer))
-            return 0.0/0.0;
-    }
-
-    ffStrbufSubstrBefore(dir, dirLength);
-
-    double value = ffStrbufToDouble(buffer);// millidegree Celsius
-
-    if(value != value)
-        return 0.0/0.0;
-
-    ffStrbufAppendS(dir, "name");
-    if (!ffReadFileBuffer(dir->chars, buffer))
-        return 0.0/0.0;
+    if (!ffReadFileBufferRelative(dfd, "name", buffer))
+        return FF_CPU_TEMP_UNSET;
 
     ffStrbufTrimRightSpace(buffer);
 
-    if(
-        ffStrbufContainS(buffer, "cpu") ||
-        ffStrbufEqualS(buffer, "k10temp") || // AMD
-        ffStrbufEqualS(buffer, "fam15h_power") || // AMD
-        ffStrbufEqualS(buffer, "coretemp") // Intel
-    ) return value / 1000.;
+    if (
+        !ffStrbufContainS(buffer, "cpu") &&
+        #if __x86_64__ || __i386__
+        !ffStrbufEqualS(buffer, "k10temp") && // AMD
+        !ffStrbufEqualS(buffer, "fam15h_power") && // AMD
+        !ffStrbufEqualS(buffer, "coretemp") && // Intel
+        #endif
+        true
+    ) return FF_CPU_TEMP_UNSET;
 
-    return 0.0/0.0;
+    return readTempFile(dfd, "temp1_input", buffer);
 }
 
-static double detectTZTemp(FFstrbuf* buffer)
+static double detectCPUTemp(const FFCPUOptions* options)
 {
-    if (ffReadFileBuffer("/sys/class/thermal/thermal_zone0/temp", buffer))
-        return ffStrbufToDouble(buffer) / 1000.;
-    return 0.0/0.0;
-}
-
-static double detectCPUTemp(void)
-{
-    FF_STRBUF_AUTO_DESTROY baseDir = ffStrbufCreateA(64);
-    ffStrbufAppendS(&baseDir, "/sys/class/hwmon/");
-
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    uint32_t baseDirLength = baseDir.length;
-
-    FF_AUTO_CLOSE_DIR DIR* dirp = opendir(baseDir.chars);
-    if(dirp == NULL)
-        return 0.0/0.0;
-
-    struct dirent* entry;
-    while((entry = readdir(dirp)) != NULL)
+    if (options->tempSensor.length > 0)
     {
-        if(entry->d_name[0] == '.')
-            continue;
+        FF_AUTO_CLOSE_FD int subfd = -1;
+        const char* fileName = NULL;
+        if (ffStrbufStartsWithS(&options->tempSensor, "hwmon") && ffCharIsDigit(options->tempSensor.chars[strlen("hwmon")]))
+        {
+            FF_AUTO_CLOSE_FD int dfd = open("/sys/class/hwmon/", O_PATH | O_CLOEXEC);
+            subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp1_input";
+            else
+                subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        else if (ffStrbufStartsWithS(&options->tempSensor, "thermal_zone") && ffCharIsDigit(options->tempSensor.chars[strlen("thermal_zone")]))
+        {
+            FF_AUTO_CLOSE_FD int dfd = open("/sys/class/thermal/", O_PATH | O_CLOEXEC);
+            subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp";
+            else
+                subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        else if (ffStrbufStartsWithS(&options->tempSensor, "cputemp.") && ffCharIsDigit(options->tempSensor.chars[strlen("cputemp.")]))
+        {
+            FF_AUTO_CLOSE_FD int dfd = open("/sys/class/platform/", O_PATH | O_CLOEXEC);
+            subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp1_input";
+            else
+                subfd = openat(dfd, options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        else if (ffIsAbsolutePath(options->tempSensor.chars))
+        {
+            subfd = open(options->tempSensor.chars, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+            if (subfd >= 0)
+                fileName = "temp1_input";
+            else
+                subfd = open(options->tempSensor.chars, O_RDONLY | O_CLOEXEC);
+        }
+        if (subfd < 0)
+            return FF_CPU_TEMP_UNSET;
 
-        ffStrbufAppendS(&baseDir, entry->d_name);
-        ffStrbufAppendC(&baseDir, '/');
-
-        double result = parseHwmonDir(&baseDir, &buffer);
-        if (result == result)
-            return result;
-
-        ffStrbufSubstrBefore(&baseDir, baseDirLength);
+        return readTempFile(subfd, fileName, &buffer);
     }
 
-    return detectTZTemp(&buffer);
+    {
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/hwmon/");
+        if(dirp)
+        {
+            int dfd = dirfd(dirp);
+
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(entry->d_name[0] == '.')
+                    continue;
+
+                FF_AUTO_CLOSE_FD int subfd = openat(dfd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+                if(subfd < 0)
+                    continue;
+
+                double result = parseHwmonDir(subfd, &buffer);
+                if (result != FF_CPU_TEMP_UNSET)
+                    return result;
+            }
+        }
+    }
+    {
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/class/thermal/");
+        if(dirp)
+        {
+            int dfd = dirfd(dirp);
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(entry->d_name[0] == '.')
+                    continue;
+                if(!ffStrStartsWith(entry->d_name, "thermal_zone"))
+                    continue;
+
+                FF_AUTO_CLOSE_FD int subfd = openat(dfd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+                if(subfd < 0)
+                    continue;
+
+                double result = parseTZDir(subfd, &buffer);
+                if (result != FF_CPU_TEMP_UNSET)
+                    return result;
+            }
+        }
+    }
+    {
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir("/sys/devices/platform/");
+        if(dirp)
+        {
+            int dfd = dirfd(dirp);
+            struct dirent* entry;
+            while((entry = readdir(dirp)) != NULL)
+            {
+                if(entry->d_name[0] == '.')
+                    continue;
+                if(!ffStrStartsWith(entry->d_name, "cputemp."))
+                    continue;
+
+                FF_AUTO_CLOSE_FD int subfd = openat(dfd, entry->d_name, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+                if(subfd < 0)
+                    continue;
+
+                double result = parseHwmonDir(subfd, &buffer);
+                if (result != FF_CPU_TEMP_UNSET)
+                    return result;
+            }
+        }
+    }
+
+    return FF_CPU_TEMP_UNSET;
+}
+
+static void detectNumaNodes(FFCPUResult* cpu)
+{
+    FF_AUTO_CLOSE_DIR DIR* dir = opendir("/sys/devices/system/node/");
+    if (!dir) return;
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_type != DT_DIR && entry->d_type != DT_UNKNOWN)
+            continue;
+        if (ffStrStartsWith(entry->d_name, "node") && ffCharIsDigit(entry->d_name[strlen("node")]))
+            cpu->numaNodes++;
+    }
 }
 
 #ifdef __ANDROID__
@@ -100,85 +210,119 @@ static void detectQualcomm(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_Qualcomm_Snapdragon_systems_on_chips
 
-    if (ffStrbufEqualS(&cpu->name, "SM8750-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite for Galaxy [SM8750-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8750-3"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750-3]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8750"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Elite [SM8750]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8635"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8s Gen 3 [SM8635]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8650-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 3 for Galaxy [SM8650-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8650"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 3 [SM8650]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8550-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 2 for Galaxy [SM8550-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8550"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 2 [SM8550]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8475"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8+ Gen 1 [SM8475]");
-    else if (ffStrbufEqualS(&cpu->name, "SM8450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 8 Gen 1 [SM8450]");
+    assert(cpu->name.length >= 2);
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 2, NULL, 10);
+    const char* name = NULL;
 
-    else if (ffStrbufEqualS(&cpu->name, "SM7675"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 3 [SM7675]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7635"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7s Gen 3 [SM7635]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7550"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 3 [SM7550]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7475"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7+ Gen 2 [SM7550]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7435"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7s Gen 2 [SM7435]");
-    else if (ffStrbufEqualS(&cpu->name, "SM7450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 7 Gen 1 [SM7450]");
+    switch (code)
+    {
+        case 8845: name = "8 Gen 5"; break; // ?
+        case 8850: name = "8 Elite Gen 5"; break;
+        case 8735: name = "8s Gen 4"; break;
+        case 8750: name = "8 Elite"; break;
+        case 8635: name = "8s Gen 3"; break;
+        case 8650: name = "8 Gen 3"; break;
+        case 8550: name = "8 Gen 2"; break;
+        case 8475: name = "8+ Gen 1"; break;
+        case 8450: name = "8 Gen 1"; break;
+        case 7750: name = "7 Gen 4"; break;
+        case 7675: name = "7+ Gen 3"; break;
+        case 7635: name = "7s Gen 3"; break;
+        case 7550: name = "7 Gen 3"; break;
+        case 7475: name = "7+ Gen 2"; break;
+        case 7435: name = "7s Gen 2"; break;
+        case 7450: name = "7 Gen 1"; break;
+        case 6650: name = "6 Gen 4"; break;
+        case 6375: name = "6s Gen 3"; break;
+        case 6475: name = "6 Gen 3"; break;
+        case 6115: name = "6s Gen 1"; break;
+        case 6450: name = "6 Gen 1"; break;
+        case 4635: name = "4s Gen 2"; break;
+        case 4450: name = "4 Gen 2"; break;
+        case 4375: name = "4 Gen 1"; break;
+    }
 
-    else if (ffStrbufEqualS(&cpu->name, "SM6375-AC"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6s Gen 3 [SM6375-AC]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6475"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 3 [SM6475]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6115"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6s Gen 1 [SM6115]");
-    else if (ffStrbufEqualS(&cpu->name, "SM6450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 6 Gen 1 [SM6450]");
-
-    else if (ffStrbufEqualS(&cpu->name, "SM4635"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4s Gen 2 [SM4635]");
-    else if (ffStrbufEqualS(&cpu->name, "SM4450"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 2 [SM4450]");
-    else if (ffStrbufEqualS(&cpu->name, "SM4375"))
-        ffStrbufSetStatic(&cpu->name, "Qualcomm Snapdragon 4 Gen 1 [SM4375]");
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "Qualcomm Snapdragon %s [%s]", name, str);
+        return;
+    }
 }
 
 static void detectMediaTek(FFCPUResult* cpu)
 {
     // https://en.wikipedia.org/wiki/List_of_MediaTek_systems_on_chips
 
-    if (ffStrbufEqualS(&cpu->name, "MT6991"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6991Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9400 [MT6991Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6989Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT6989Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8796Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300+ [MT8796Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6989"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT6989]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8796"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9300 [MT8796]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6985W"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200+ [MT6985W]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6985"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9200 [MT6985]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6983W"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT6983W]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/T"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000+ [MT8798Z/T]");
-    else if (ffStrbufEqualS(&cpu->name, "MT6983Z"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT6983Z]");
-    else if (ffStrbufEqualS(&cpu->name, "MT8798Z/C"))
-        ffStrbufSetStatic(&cpu->name, "MediaTek Dimensity 9000 [MT8798Z/C]");
+    assert(cpu->name.length >= 2);
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 2, NULL, 10);
+    const char* name = NULL;
+
+    switch (code) // The SOC code of MTK Dimensity series is full of mess
+    {
+        case 6993: name = "9500"; break;
+        case 6991: name = "9400"; break;
+        case 6989:
+        case 8796: name = "9300"; break;
+        case 6985: name = "9200"; break;
+        case 6983:
+        case 8798: name = "9000"; break;
+
+        case 6899: name = "8400"; break;
+        case 6897:
+        case 8792: name = "8300"; break;
+        case 6896: name = "8200"; break;
+        case 8795: name = "8100"; break;
+        case 6895: name = "8000"; break;
+    }
+
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "MediaTek Dimensity %s [%s]", name, str);
+        return;
+    }
+}
+
+static void detectExynos(FFCPUResult* cpu)
+{
+    // https://en.wikipedia.org/wiki/Exynos
+
+    assert(cpu->name.length > 3);
+    uint32_t code = (uint32_t) strtoul(cpu->name.chars + 3, NULL, 10);
+    const char* name = NULL;
+
+    switch (code)
+    {
+        case 9955: name = "2500"; break;
+        case 9945: name = "2400"; break;
+        // No 2300
+        case 9925: name = "2200"; break;
+        case 9840: name = "2100"; break;
+
+        case 8855: name = "1580"; break;
+        case 8845: name = "1480"; break;
+        case 8835: name = "1380"; break;
+        case 8535: name = "1330"; break;
+        case 8825: name = "1280"; break;
+        case 9815: name = "1080"; break;
+
+        case 9830: name = "990"; break;
+        case 9630: name = "980"; break;
+
+        case 8805: name = "880"; break;
+        case 3830: name = "850"; break;
+    }
+
+    if (name)
+    {
+        char str[32];
+        ffStrCopy(str, cpu->name.chars, sizeof(str));
+        ffStrbufSetF(&cpu->name, "Samsung Exynos %s [%s]", name, str);
+        return;
+    }
 }
 
 static void detectAndroid(FFCPUResult* cpu)
@@ -187,19 +331,33 @@ static void detectAndroid(FFCPUResult* cpu)
     {
         if (ffSettingsGetAndroidProperty("ro.soc.model", &cpu->name))
             ffStrbufClear(&cpu->vendor); // We usually detect the vendor of CPU core as ARM, but instead we want the vendor of SOC
-        else if(ffSettingsGetAndroidProperty("ro.mediatek.platform", &cpu->name))
-            ffStrbufSetStatic(&cpu->vendor, "MTK");
     }
     if (cpu->vendor.length == 0)
     {
         if (!ffSettingsGetAndroidProperty("ro.soc.manufacturer", &cpu->vendor))
-            ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor);
+            if (!ffSettingsGetAndroidProperty("ro.product.product.manufacturer", &cpu->vendor))
+                if (!ffSettingsGetAndroidProperty("ro.product.vendor.manufacturer", &cpu->vendor))
+                    if(ffSettingsGetAndroidProperty("ro.mediatek.platform", &cpu->name))
+                        ffStrbufSetStatic(&cpu->vendor, "MediaTek");
     }
 
-    if (ffStrbufEqualS(&cpu->vendor, "QTI") && ffStrbufStartsWithS(&cpu->name, "SM"))
+    if (ffStrbufEqualS(&cpu->vendor, "QTI"))
+        ffStrbufSetStatic(&cpu->vendor, "Qualcomm");
+    else if (ffStrbufIgnCaseEqualS(&cpu->vendor, "MediaTek")) // sometimes "Mediatek"
+        ffStrbufSetStatic(&cpu->vendor, "MediaTek");
+    else if (cpu->vendor.length > 0)
+        cpu->vendor.chars[0] = (char) toupper(cpu->vendor.chars[0]);
+
+    if (ffStrbufEqualS(&cpu->vendor, "Qualcomm") && ffStrbufStartsWithS(&cpu->name, "SM"))
         detectQualcomm(cpu);
-    else if (ffStrbufEqualS(&cpu->vendor, "MTK") && ffStrbufStartsWithS(&cpu->name, "MT"))
+    else if (ffStrbufEqualS(&cpu->vendor, "MediaTek") && ffStrbufStartsWithS(&cpu->name, "MT"))
         detectMediaTek(cpu);
+    else if (ffStrbufEqualS(&cpu->vendor, "Samsung") && ffStrbufStartsWithS(&cpu->name, "s5e"))
+    {
+        cpu->name.chars[0] = 'S';
+        cpu->name.chars[2] = 'E';
+        detectExynos(cpu);
+    }
 }
 #endif
 
@@ -318,6 +476,14 @@ static const char* parseCpuInfo(
             (cpu->name.length == 0 && ffParsePropLine(line, "processor 0:", &cpu->name)) ||
             (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor_id :", &cpu->vendor)) ||
             (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz static :", cpuMHz)) || // This one cannot be detected because of early return
+            #elif __ia64__
+            (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
+            (cpu->vendor.length == 0 && ffParsePropLine(line, "vendor :", &cpu->vendor)) ||
+            (cpuMHz->length == 0 && ffParsePropLine(line, "cpu MHz :", cpuMHz)) ||
+            #elif __hppa__
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu :", &cpu->name)) ||
+            #elif __sh__
+            (cpu->name.length == 0 && ffParsePropLine(line, "cpu type :", &cpu->name)) ||
             #else
             (cpu->name.length == 0 && ffParsePropLine(line, "model name :", &cpu->name)) ||
             (cpu->name.length == 0 && ffParsePropLine(line, "model :", &cpu->name)) ||
@@ -463,9 +629,11 @@ FF_MAYBE_UNUSED static const char* detectCPUX86(const FFCPUOptions* options, FFC
         cpu->coresPhysical *= cpu->packages;
 
     // Ref https://github.com/fastfetch-cli/fastfetch/issues/1194#issuecomment-2295058252
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
     if (!detectFrequency(cpu, options) || cpu->frequencyBase == 0)
         cpu->frequencyBase = (uint32_t) ffStrbufToUInt(&cpuMHz, 0);
+
+    detectNumaNodes(cpu);
 
     return NULL;
 }
@@ -575,19 +743,46 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
     if (cpu->name.length > 0)
         return;
 
-    // device-vendor,device-model\0soc-vendor,soc-model\0
-    char content[256];
+    // [x-vendor,x-model\0]*N
+    char content[512];
     ssize_t length = ffReadFileData("/proc/device-tree/compatible", ARRAY_SIZE(content), content);
-    if (length <= 2) return;
+    if (length < 4) return; // v,m\0
 
-    // get the second NUL terminated string if it exists
-    char* vendor = memchr(content, '\0', (size_t) length) + 1;
-    if (!vendor || vendor - content >= length) vendor = content;
+    if (content[length - 1] != '\0') return; // must end with \0
 
-    char* model = strchr(vendor, ',');
-    if (!model) return;
-    *model = '\0';
-    ++model;
+    --length;
+
+    char* vendor = NULL;
+    char* model = NULL;
+
+    for (char* p; length > 0; length = p ? (ssize_t) (p - content) - 1 : 0)
+    {
+        p = memrchr(content, '\0', (size_t) length);
+
+        vendor = p /* first entry */ ? p + 1 : content;
+
+        size_t partLen = (size_t) (length - (vendor - content));
+        if (partLen < 3) continue;
+
+        char* comma = memchr(vendor, ',', partLen);
+        if (!comma) continue;
+
+        size_t vendorLen = (size_t) (comma - vendor);
+        if (vendorLen == 0) continue;
+
+        model = comma + 1;
+        size_t modelLen = (size_t) (partLen - (size_t) (model - vendor));
+        if (modelLen == 0) continue;
+
+        if ((modelLen >= strlen("-platform") && ffStrEndsWith(model, "-platform")) ||
+            (modelLen >= strlen("-soc") && ffStrEndsWith(model, "-soc")))
+            continue;
+
+        *comma = '\0';
+        break;
+    }
+
+    if (!length) return;
 
     if (false) {}
     #if __aarch64__
@@ -643,6 +838,13 @@ FF_MAYBE_UNUSED static void detectSocName(FFCPUResult* cpu)
         for (const char* p = model; *p; ++p)
             ffStrbufAppendC(&cpu->name, (char) toupper(*p));
     }
+    else if (ffStrEquals(vendor, "thead"))
+    {
+        // Lichee Pi?
+        ffStrbufSetStatic(&cpu->vendor, "T-Head");
+        for (const char* p = model; *p; ++p)
+            ffStrbufAppendC(&cpu->name, (char) toupper(*p));
+    }
     else
     {
         ffStrbufSetS(&cpu->name, model);
@@ -664,9 +866,9 @@ FF_MAYBE_UNUSED static uint16_t getLoongarchPropCount(FFstrbuf* cpuinfo, const c
         char* pend;
         unsigned long id = strtoul(p, &pend, 10);
         if (__builtin_expect(id > 64, false))
-            high |= 1 << (id - 64);
+            high |= 1UL << (id - 64);
         else
-            low |= 1 << id;
+            low |= 1UL << id;
         p = pend;
     }
 
@@ -741,13 +943,16 @@ FF_MAYBE_UNUSED static const char* detectCPUOthers(const FFCPUOptions* options, 
     if (cpu->coresPhysical == 0)
         detectPhysicalCores(cpu);
 
+    ffCPUDetectByCpuid(cpu);
+    detectNumaNodes(cpu);
+
     return NULL;
 }
 #endif
 
 const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 {
-    cpu->temperature = options->temp ? detectCPUTemp() : FF_CPU_TEMP_UNSET;
+    cpu->temperature = options->temp ? detectCPUTemp(options) : FF_CPU_TEMP_UNSET;
 
     #if __x86_64__ || __i386__
     return detectCPUX86(options, cpu);

@@ -1,173 +1,157 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/processing.h"
 #include "modules/command/command.h"
-#include "util/stringUtils.h"
+#include "detection/command/command.h"
 
-void ffPrintCommand(FFCommandOptions* options)
+bool ffPrintCommand(FFCommandOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
-        options->shell.chars,
-        options->param.chars,
-        options->text.chars,
-        NULL
-    } : (char* const[]){
-        options->shell.chars,
-        options->text.chars,
-        NULL
-    });
+    const char* error = ffDetectCommand(options, &result);
 
-    if(error)
+    if (error)
     {
         ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
-    if(!result.length)
+    if (!result.length)
     {
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result printed");
-        return;
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No result generated");
+        return false;
     }
 
-    if (options->moduleArgs.outputFormat.length == 0)
+    if (options->splitLines)
     {
-        ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufPutTo(&result, stdout);
+        uint8_t index = 0;
+        char* line = NULL;
+        size_t len = 0;
+        while (ffStrbufGetline(&line, &len, &result))
+        {
+            if (options->moduleArgs.outputFormat.length == 0)
+            {
+                ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+                puts(line);
+            }
+            else
+            {
+                FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, ++index, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+                    FF_FORMAT_ARG(line, "result")
+                }));
+            }
+        }
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
-            FF_FORMAT_ARG(result, "result")
-        }));
-    }
-}
-
-bool ffParseCommandCommandOptions(FFCommandOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_COMMAND_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if(ffStrEqualsIgnCase(subKey, "shell"))
-    {
-        ffOptionParseString(key, value, &options->shell);
-        return true;
+        if (options->moduleArgs.outputFormat.length == 0)
+        {
+            ffPrintLogoAndKey(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffStrbufPutTo(&result, stdout);
+        }
+        else
+        {
+            FF_PRINT_FORMAT_CHECKED(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]){
+                FF_FORMAT_ARG(result, "result")
+            }));
+        }
     }
 
-    if(ffStrEqualsIgnCase(subKey, "param"))
-    {
-        ffOptionParseString(key, value, &options->param);
-        return true;
-    }
-
-    if(ffStrEqualsIgnCase(subKey, "text"))
-    {
-        ffOptionParseString(key, value, &options->text);
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void ffParseCommandJsonObject(FFCommandOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "shell"))
+        if (unsafe_yyjson_equals_str(key, "shell"))
         {
-            ffStrbufSetS(&options->shell, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->shell, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "param"))
+        if (unsafe_yyjson_equals_str(key, "param"))
         {
-            ffStrbufSetS(&options->param, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->param, val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "text"))
+        if (unsafe_yyjson_equals_str(key, "text"))
         {
-            ffStrbufSetS(&options->text, yyjson_get_str(val));
+            ffStrbufSetJsonVal(&options->text, val);
             continue;
         }
 
-        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        if (unsafe_yyjson_equals_str(key, "useStdErr"))
+        {
+            options->useStdErr = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (unsafe_yyjson_equals_str(key, "parallel"))
+        {
+            options->parallel = yyjson_get_bool(val);
+            continue;
+        }
+
+        if (unsafe_yyjson_equals_str(key, "splitLines"))
+        {
+            options->splitLines = yyjson_get_bool(val);
+            continue;
+        }
+
+        ffPrintError(FF_COMMAND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateCommandJsonConfig(FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCommandOptions))) FFCommandOptions defaultOptions;
-    ffInitCommandOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (!ffStrbufEqual(&defaultOptions.shell, &options->shell))
-        yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
-
-    if (!ffStrbufEqual(&defaultOptions.param, &options->param))
-        yyjson_mut_obj_add_strbuf(doc, module, "param", &options->param);
-
-    if (!ffStrbufEqual(&defaultOptions.text, &options->text))
-        yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
+    yyjson_mut_obj_add_strbuf(doc, module, "shell", &options->shell);
+    yyjson_mut_obj_add_strbuf(doc, module, "param", &options->param);
+    yyjson_mut_obj_add_strbuf(doc, module, "text", &options->text);
+    yyjson_mut_obj_add_bool(doc, module, "useStdErr", options->useStdErr);
+    yyjson_mut_obj_add_bool(doc, module, "parallel", options->parallel);
+    yyjson_mut_obj_add_bool(doc, module, "splitLines", options->splitLines);
 }
 
-void ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCommandJsonResult(FF_MAYBE_UNUSED FFCommandOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY result = ffStrbufCreate();
-    const char* error = ffProcessAppendStdOut(&result, options->param.length ? (char* const[]){
-        options->shell.chars,
-        options->param.chars,
-        options->text.chars,
-        NULL
-    } : (char* const[]){
-        options->shell.chars,
-        options->text.chars,
-        NULL
-    });
+    const char* error = ffDetectCommand(options, &result);
 
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     if(!result.length)
     {
-        yyjson_mut_obj_add_str(doc, module, "error", "No result printed");
-        return;
+        yyjson_mut_obj_add_str(doc, module, "error", "No result generated");
+        return false;
     }
 
-    yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
-}
+    if (options->splitLines)
+    {
+        yyjson_mut_val* jsonArray = yyjson_mut_obj_add_arr(doc, module, "result");
+        char* line = NULL;
+        size_t len = 0;
+        while (ffStrbufGetline(&line, &len, &result))
+            yyjson_mut_arr_add_strncpy(doc, jsonArray, line, len);
+    }
+    else
+        yyjson_mut_obj_add_strbuf(doc, module, "result", &result);
 
-static FFModuleBaseInfo ffModuleInfo = {
-    .name = FF_COMMAND_MODULE_NAME,
-    .description = "Run custom shell scripts",
-    .parseCommandOptions = (void*) ffParseCommandCommandOptions,
-    .parseJsonObject = (void*) ffParseCommandJsonObject,
-    .printModule = (void*) ffPrintCommand,
-    .generateJsonResult = (void*) ffGenerateCommandJsonResult,
-    .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
-    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
-        {"Command result", "result"},
-    }))
-};
+    return true;
+}
 
 void ffInitCommandOptions(FFCommandOptions* options)
 {
-    options->moduleInfo = ffModuleInfo;
     ffOptionInitModuleArg(&options->moduleArgs, "");
 
     ffStrbufInitStatic(&options->shell,
@@ -185,6 +169,9 @@ void ffInitCommandOptions(FFCommandOptions* options)
         #endif
     );
     ffStrbufInit(&options->text);
+    options->useStdErr = false;
+    options->parallel = true;
+    options->splitLines = false;
 }
 
 void ffDestroyCommandOptions(FFCommandOptions* options)
@@ -194,3 +181,17 @@ void ffDestroyCommandOptions(FFCommandOptions* options)
     ffStrbufDestroy(&options->param);
     ffStrbufDestroy(&options->text);
 }
+
+FFModuleBaseInfo ffCommandModuleInfo = {
+    .name = FF_COMMAND_MODULE_NAME,
+    .description = "Run custom shell scripts",
+    .initOptions = (void*) ffInitCommandOptions,
+    .destroyOptions = (void*) ffDestroyCommandOptions,
+    .parseJsonObject = (void*) ffParseCommandJsonObject,
+    .printModule = (void*) ffPrintCommand,
+    .generateJsonResult = (void*) ffGenerateCommandJsonResult,
+    .generateJsonConfig = (void*) ffGenerateCommandJsonConfig,
+    .formatArgs = FF_FORMAT_ARG_LIST(((FFModuleFormatArg[]) {
+        {"Command result", "result"},
+    }))
+};

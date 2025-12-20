@@ -4,8 +4,9 @@
 #include "modules/cursor/cursor.h"
 #include "util/stringUtils.h"
 
-void ffPrintCursor(FFCursorOptions* options)
+bool ffPrintCursor(FFCursorOptions* options)
 {
+    bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
     ffStrbufInit(&result.theme);
@@ -41,50 +42,38 @@ void ffPrintCursor(FFCursorOptions* options)
                 FF_FORMAT_ARG(result.size, "size"),
             }));
         }
+
+        success = true;
     }
 
     ffStrbufDestroy(&result.error);
     ffStrbufDestroy(&result.theme);
     ffStrbufDestroy(&result.size);
-}
 
-bool ffParseCursorCommandOptions(FFCursorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CURSOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return success;
 }
 
 void ffParseCursorJsonObject(FFCursorOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_CURSOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateCursorJsonConfig(FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCursorOptions))) FFCursorOptions defaultOptions;
-    ffInitCursorOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFCursorResult result;
     ffStrbufInit(&result.error);
     ffStrbufInit(&result.theme);
@@ -101,17 +90,31 @@ void ffGenerateCursorJsonResult(FF_MAYBE_UNUSED FFCursorOptions* options, yyjson
         yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
         yyjson_mut_obj_add_strbuf(doc, obj, "theme", &result.theme);
         yyjson_mut_obj_add_strbuf(doc, obj, "size", &result.size);
+        success = true;
     }
 
     ffStrbufDestroy(&result.error);
     ffStrbufDestroy(&result.theme);
     ffStrbufDestroy(&result.size);
+
+    return success;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCursorOptions(FFCursorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
+}
+
+void ffDestroyCursorOptions(FFCursorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCursorModuleInfo = {
     .name = FF_CURSOR_MODULE_NAME,
     .description = "Print cursor style name",
-    .parseCommandOptions = (void*) ffParseCursorCommandOptions,
+    .initOptions = (void*) ffInitCursorOptions,
+    .destroyOptions = (void*) ffDestroyCursorOptions,
     .parseJsonObject = (void*) ffParseCursorJsonObject,
     .printModule = (void*) ffPrintCursor,
     .generateJsonResult = (void*) ffGenerateCursorJsonResult,
@@ -121,14 +124,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Cursor size", "size"},
     })),
 };
-
-void ffInitCursorOptions(FFCursorOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰆿");
-}
-
-void ffDestroyCursorOptions(FFCursorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

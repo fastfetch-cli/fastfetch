@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/terminaltheme/option.h"
 
 typedef struct FFTerminalThemeColor
 {

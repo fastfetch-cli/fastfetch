@@ -30,7 +30,7 @@ static void fillGPUTypeGeneric(FFGPUResult* gpu)
         else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_INTEL)
         {
             // 0000:00:02.0 is reserved for Intel integrated graphics
-            gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+            gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
         }
     }
 }
@@ -80,7 +80,7 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
         {
         case DRM_BUS_PCI:
             ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(dev->deviceinfo.pci->vendor_id));
-            gpu->deviceId = (dev->businfo.pci->domain * 100000ull) + (dev->businfo.pci->bus * 1000ull) + (dev->businfo.pci->dev * 10ull) + dev->businfo.pci->func;
+            gpu->deviceId = ffGPUPciAddr2Id(dev->businfo.pci->domain, dev->businfo.pci->bus, dev->businfo.pci->dev, dev->businfo.pci->func);
             break;
         case DRM_BUS_HOST1X:
             ffStrbufSetS(&gpu->name, dev->deviceinfo.host1x->compatible[0]);
@@ -106,7 +106,10 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
             .name_len = ARRAY_SIZE(driverName),
         };
         if (ioctl(fd, DRM_IOCTL_VERSION, &ver) == 0)
-            ffStrbufSetF(&gpu->driver, "%*s %d.%d.%d", (int) ver.name_len, ver.name, ver.version_major, ver.version_minor, ver.version_patchlevel);
+        {
+            driverName[ver.name_len] = '\0';
+            ffStrbufSetF(&gpu->driver, "%s %d.%d.%d", ver.name, ver.version_major, ver.version_minor, ver.version_patchlevel);
+        }
 
         if (ffStrStartsWith(driverName, "i915"))
             ffDrmDetectI915(gpu, fd);
@@ -118,6 +121,8 @@ static const char* detectByDrm(const FFGPUOptions* options, FFlist* gpus)
             ffDrmDetectXe(gpu, fd);
         else if (ffStrStartsWith(driverName, "asahi"))
             ffDrmDetectAsahi(gpu, fd);
+        else if (ffStrStartsWith(driverName, "nouveau"))
+            ffDrmDetectNouveau(gpu, fd);
         else if (dev->bustype == DRM_BUS_PCI)
         {
             ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId) {
@@ -174,6 +179,9 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus)
     {
         struct pci_conf* pc = &confs[i];
 
+        if (pc->pc_sel.pc_func > 0 && pc->pc_subclass == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+            continue; // Likely an auxiliary display controller (#2034)
+
         FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
         ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString(pc->pc_vendor));
         ffStrbufInit(&gpu->name);
@@ -186,7 +194,7 @@ static const char* detectByPci(const FFGPUOptions* options, FFlist* gpus)
         gpu->coreUsage = FF_GPU_CORE_USAGE_UNSET;
         gpu->type = FF_GPU_TYPE_UNKNOWN;
         gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-        gpu->deviceId = (pc->pc_sel.pc_domain * 100000ull) + (pc->pc_sel.pc_bus * 1000ull) + (pc->pc_sel.pc_dev * 10ull) + pc->pc_sel.pc_func;
+        gpu->deviceId = ffGPUPciAddr2Id(pc->pc_sel.pc_domain, pc->pc_sel.pc_bus, pc->pc_sel.pc_dev, pc->pc_sel.pc_func);
         gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
         ffGPUDetectDriverSpecific(options, gpu, (FFGpuDriverPciBusId) {

@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <inttypes.h>
+#include <math.h>
 
 char* CHAR_NULL_PTR = "";
 
@@ -219,12 +220,6 @@ void ffStrbufPrependC(FFstrbuf* strbuf, char c)
     strbuf->length += 1;
 }
 
-void ffStrbufSetNS(FFstrbuf* strbuf, uint32_t length, const char* value)
-{
-    ffStrbufClear(strbuf);
-    ffStrbufAppendNS(strbuf, length, value);
-}
-
 void ffStrbufTrimLeft(FFstrbuf* strbuf, char c)
 {
     if(strbuf->length == 0)
@@ -398,7 +393,8 @@ bool ffStrbufSubstrBefore(FFstrbuf* strbuf, uint32_t index)
     if(strbuf->allocated == 0)
     {
         //static string
-        ffStrbufInitNS(strbuf, strbuf->length, strbuf->chars);
+        if (index < strbuf->length)
+            ffStrbufInitNS(strbuf, index, strbuf->chars);
         return true;
     }
 
@@ -461,6 +457,26 @@ bool ffStrbufSubstrAfterLastC(FFstrbuf* strbuf, char c)
     return true;
 }
 
+bool ffStrbufSubstr(FFstrbuf* strbuf, uint32_t start, uint32_t end)
+{
+    if (__builtin_expect(start >= end, false))
+    {
+        ffStrbufClear(strbuf);
+        return false;
+    }
+
+    if (__builtin_expect(start == 0, false)) return ffStrbufSubstrBefore(strbuf, end);
+    if (__builtin_expect(end >= strbuf->length, false)) return ffStrbufSubstrAfter(strbuf, start - 1);
+
+    uint32_t len = end - start;
+    ffStrbufEnsureFixedLengthFree(strbuf, len); // In case of static string
+    memmove(strbuf->chars, strbuf->chars + start, len);
+
+    strbuf->length = len;
+    strbuf->chars[len] = '\0';
+    return true;
+}
+
 uint32_t ffStrbufCountC(const FFstrbuf* strbuf, char c)
 {
     uint32_t result = 0;
@@ -506,11 +522,11 @@ void ffStrbufPutTo(const FFstrbuf* strbuf, FILE* file)
     fputc('\n', file);
 }
 
-double ffStrbufToDouble(const FFstrbuf* strbuf)
+double ffStrbufToDouble(const FFstrbuf* strbuf, double defaultValue)
 {
     char* str_end;
     double result = strtod(strbuf->chars, &str_end);
-    return str_end == strbuf->chars ? 0.0/0.0 : result;
+    return str_end == strbuf->chars ? defaultValue : result;
 }
 
 uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultValue)
@@ -525,6 +541,87 @@ int64_t ffStrbufToSInt(const FFstrbuf* strbuf, int64_t defaultValue)
     char* str_end;
     long long result = strtoll(strbuf->chars, &str_end, 10);
     return str_end == strbuf->chars ? defaultValue : (int64_t)result;
+}
+
+void ffStrbufAppendSInt(FFstrbuf* strbuf, int64_t value)
+{
+    ffStrbufEnsureFree(strbuf, 21); // Required by yyjson_write_number
+    char* start = strbuf->chars + strbuf->length;
+
+    yyjson_val val = {};
+    unsafe_yyjson_set_sint(&val, value);
+    char* end = yyjson_write_number(&val, start);
+
+    assert(end != NULL);
+
+    strbuf->length += (uint32_t)(end - start);
+}
+
+void ffStrbufAppendUInt(FFstrbuf* strbuf, uint64_t value)
+{
+    ffStrbufEnsureFree(strbuf, 21); // Required by yyjson_write_number
+    char* start = strbuf->chars + strbuf->length;
+
+    yyjson_val val = {};
+    unsafe_yyjson_set_uint(&val, value);
+    char* end = yyjson_write_number(&val, start);
+
+    assert(end != NULL);
+
+    strbuf->length += (uint32_t)(end - start);
+}
+
+void ffStrbufAppendDouble(FFstrbuf* strbuf, double value, int8_t precision, bool trailingZeros)
+{
+    assert(precision <= 15); // yyjson_write_number supports up to 15 digits after the decimal point
+
+    ffStrbufEnsureFree(strbuf, 40); // Required by yyjson_write_number
+    char* start = strbuf->chars + strbuf->length;
+
+    if (precision == 0)
+        value = round(value);
+    yyjson_val val = {};
+    unsafe_yyjson_set_double(&val, value);
+    if (precision > 0)
+        unsafe_yyjson_set_fp_to_fixed(&val, precision);
+
+    // Write at most <precision> digits after the decimal point; doesn't append trailing zeros
+    char* end = yyjson_write_number(&val, start);
+
+    assert(end > start);
+
+    strbuf->length += (uint32_t)(end - start);
+
+    if (__builtin_expect(value > 1e21 || value < -1e21, false))
+    {
+        // If the value is too large, yyjson_write_number will write it in scientific notation
+        return;
+    }
+
+    if (trailingZeros)
+    {
+        if (precision > 1)
+        {
+            for (char* p = end - 1; *p != '.' && p > start; --p)
+                --precision;
+            if (precision > 0)
+                ffStrbufAppendNC(strbuf, (uint32_t) precision, '0');
+        }
+        else if (precision == 0 || (precision < 0 && end[-1] == '0'))
+        {
+            goto removeDecimalPoint;
+        }
+    }
+    else
+    {
+        if (end[-1] == '0')
+        {
+        removeDecimalPoint:
+            // yyjson always appends ".0" to make it a float point number. We need to remove it
+            strbuf->length -= 2;
+            strbuf->chars[strbuf->length] = '\0';
+        }
+    }
 }
 
 void ffStrbufUpperCase(FFstrbuf* strbuf)
@@ -551,19 +648,7 @@ void ffStrbufInsertNC(FFstrbuf* strbuf, uint32_t index, uint32_t num, char c)
     strbuf->length += num;
 }
 
-/**
- * @brief Read a line from a FFstrbuf.
- *
- * @details Behaves like getline(3) but reads from a FFstrbuf.
- *
- * @param[in,out] lineptr The pointer to a pointer that will be set to the start of the line.
- *                         Can be NULL for the first call.
- * @param[in,out] n The pointer to the size of the buffer of lineptr.
- * @param[in] buffer The buffer to read from. The buffer must not be a string literal.
- *
- * @return true if a line has been read, false if the end of the buffer has been reached.
- */
-bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
+bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer)
 {
     assert(lineptr && n && buffer);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
@@ -577,14 +662,14 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
         *lineptr += *n;
         if (*lineptr >= pBufferEnd) // non-empty last line
             return false;
-        **lineptr = '\n';
+        **lineptr = delimiter;
         ++*lineptr;
     }
     if (*lineptr >= pBufferEnd) // empty last line
         return false;
 
     size_t remaining = (size_t) (pBufferEnd - *lineptr);
-    char* ending = memchr(*lineptr, '\n', remaining);
+    char* ending = memchr(*lineptr, delimiter, remaining);
     if (ending)
     {
         *n = (size_t) (ending - *lineptr);
@@ -595,9 +680,7 @@ bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
     return true;
 }
 
-/// @brief Restore the end of a line that was modified by ffStrbufGetline.
-/// @warning This function should be called before breaking an ffStrbufGetline loop.
-void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
+void ffStrbufGetdelimRestore(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer)
 {
     assert(buffer && lineptr && n);
     assert(buffer->allocated > 0 || (buffer->allocated == 0 && buffer->length == 0));
@@ -608,7 +691,7 @@ void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
 
     *lineptr += *n;
     if (*lineptr < buffer->chars + buffer->length)
-        **lineptr = '\n';
+        **lineptr = delimiter;
 }
 
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
@@ -633,7 +716,7 @@ bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf)
     return changed;
 }
 
-/// @brief Check if a separated string contains a substring.
+/// @brief Check if a separated string (comp) contains a substring (strbuf).
 /// @param strbuf The substring to check.
 /// @param compLength The length of the separated string to check.
 /// @param comp The separated string to check.
@@ -657,6 +740,102 @@ bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const
             return true;
 
         p = colon + 1;
+    }
+
+    return false;
+}
+
+/// @brief Case insensitive version of ffStrbufMatchSeparatedNS.
+bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    if (strbuf->length == 0)
+        return true;
+
+    if (compLength == 0)
+        return false;
+
+    for (const char* p = comp; p < comp + compLength;)
+    {
+        const char* colon = memchr(p, separator, compLength);
+        if (colon == NULL)
+            return strcasecmp(strbuf->chars, p) == 0;
+
+        uint32_t substrLength = (uint32_t) (colon - p);
+        if (strbuf->length == substrLength && strncasecmp(strbuf->chars, p, substrLength) == 0)
+            return true;
+
+        p = colon + 1;
+    }
+
+    return false;
+}
+
+int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint)
+{
+    if (codepoint <= 0x7F) {
+        ffStrbufAppendC(strbuf, (char)codepoint);
+        return 1;
+    } else if (codepoint <= 0x7FF) {
+        ffStrbufAppendNS(strbuf, 2, (char[]){
+            (char) (0xC0 | (codepoint >> 6)),
+            (char) (0x80 | (codepoint & 0x3F))
+        });
+        return 2;
+    } else if (codepoint <= 0xFFFF) {
+        ffStrbufAppendNS(strbuf, 3, (char[]){
+            (char) (0xE0 | (codepoint >> 12)),
+            (char) (0x80 | ((codepoint >> 6) & 0x3F)),
+            (char) (0x80 | (codepoint & 0x3F))
+        });
+        return 3;
+    } else if (codepoint <= 0x10FFFF) {
+        ffStrbufAppendNS(strbuf, 4, (char[]){
+            (char) (0xF0 | (codepoint >> 18)),
+            (char) (0x80 | ((codepoint >> 12) & 0x3F)),
+            (char) (0x80 | ((codepoint >> 6) & 0x3F)),
+            (char) (0x80 | (codepoint & 0x3F))
+        });
+        return 4;
+    }
+
+    ffStrbufAppendS(strbuf, "�"); // U+FFFD REPLACEMENT CHARACTER
+    return 1;
+}
+
+/// @brief Check if a separated string (strbuf) contains a substring (comp).
+/// @param strbuf The separated to check.
+/// @param compLength The length of the separated string to check.
+/// @param comp The substring to check.
+/// @param separator The separator character.
+bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    uint32_t startIndex = 0;
+    while(startIndex < strbuf->length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
+
+        uint32_t folderLength = colonIndex - startIndex;
+        if (folderLength == compLength && memcmp(strbuf->chars + startIndex, comp, compLength) == 0)
+            return true;
+
+        startIndex = colonIndex + 1;
+    }
+
+    return false;
+}
+
+bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator)
+{
+    uint32_t startIndex = 0;
+    while(startIndex < strbuf->length)
+    {
+        uint32_t colonIndex = ffStrbufNextIndexC(strbuf, startIndex, separator);
+
+        uint32_t folderLength = colonIndex - startIndex;
+        if (folderLength == compLength && strncasecmp(strbuf->chars + startIndex, comp, compLength) == 0)
+            return true;
+
+        startIndex = colonIndex + 1;
     }
 
     return false;

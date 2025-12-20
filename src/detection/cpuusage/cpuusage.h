@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/cpuusage/option.h"
 
 typedef struct FFCpuUsageInfo {
     uint64_t inUseAll;

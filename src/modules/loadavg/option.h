@@ -1,15 +1,14 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFLoadavgOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;
     uint8_t ndigits;
     bool compact;
 } FFLoadavgOptions;
+
+static_assert(sizeof(FFLoadavgOptions) <= FF_OPTION_MAX_SIZE, "FFLoadavgOptions size exceeds maximum allowed size");

@@ -5,14 +5,14 @@
 #include "modules/opencl/opencl.h"
 #include "util/stringUtils.h"
 
-void ffPrintOpenCL(FFOpenCLOptions* options)
+bool ffPrintOpenCL(FFOpenCLOptions* options)
 {
     FFOpenCLResult* result = ffDetectOpenCL();
 
     if(result->error != NULL)
     {
         ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", result->error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -28,51 +28,36 @@ void ffPrintOpenCL(FFOpenCLOptions* options)
             FF_FORMAT_ARG(result->vendor, "vendor"),
         }));
     }
-}
 
-bool ffParseOpenCLCommandOptions(FFOpenCLOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_OPENCL_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseOpenCLJsonObject(FFOpenCLOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_OPENCL_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateOpenCLJsonConfig(FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyOpenCLOptions))) FFOpenCLOptions defaultOptions;
-    ffInitOpenCLOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFOpenCLResult* result = ffDetectOpenCL();
 
     if(result->error != NULL)
     {
         yyjson_mut_obj_add_str(doc, module, "error", result->error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -126,12 +111,25 @@ void ffGenerateOpenCLJsonResult(FF_MAYBE_UNUSED FFOpenCLOptions* options, yyjson
 
         yyjson_mut_obj_add_uint(doc, gpuObj, "deviceId", gpu->deviceId);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitOpenCLOptions(FFOpenCLOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffOpenCLModuleInfo = {
     .name = FF_OPENCL_MODULE_NAME,
     .description = "Print highest OpenCL version supported by the GPU",
-    .parseCommandOptions = (void*) ffParseOpenCLCommandOptions,
+    .initOptions = (void*) ffInitOpenCLOptions,
+    .destroyOptions = (void*) ffDestroyOpenCLOptions,
     .parseJsonObject = (void*) ffParseOpenCLJsonObject,
     .printModule = (void*) ffPrintOpenCL,
     .generateJsonResult = (void*) ffGenerateOpenCLJsonResult,
@@ -142,14 +140,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Platform vendor", "vendor"},
     }))
 };
-
-void ffInitOpenCLOptions(FFOpenCLOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyOpenCLOptions(FFOpenCLOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

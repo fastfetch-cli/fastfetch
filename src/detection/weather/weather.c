@@ -44,6 +44,10 @@ const char* ffDetectWeather(FFWeatherOptions* options, FFstrbuf* result)
 
     ffStrbufEnsureFree(result, 4095);
     const char* error = ffNetworkingRecvHttpResponse(&state, result);
+
+    state = (FFNetworkingState){};
+    status = FF_UNITIALIZED;
+
     if (error == NULL)
     {
         ffStrbufSubstrAfterFirstS(result, "\r\n\r\n");

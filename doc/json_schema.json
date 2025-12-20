@@ -2,32 +2,41 @@
     "$schema": "https://json-schema.org/draft-07/schema",
     "$defs": {
         "colors": {
-            "type": "string",
-            "enum": [
-                "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
-                "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
+            "oneOf": [
+                {
+                    "type": "string",
+                    "$comment": "https://github.com/fastfetch-cli/fastfetch/wiki/Color-Format-Specification",
+                    "examples": [
+                        "reset_", "bright_", "dim_", "italic_", "underline_", "blink_", "inverse_", "hidden_", "strike_", "light_",
+                        "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "default"
+                    ]
+                },
+                {
+                    "type": "null",
+                    "$comment": "Disable default color"
+                }
             ]
         },
         "key": {
-            "description": "Key of the module",
-            "type": "string"
+            "description": "Key of the module\nOne whitespace character (` `) can be used to hide the key",
+            "type": "string",
+            "minLength": 1
         },
         "keyColor": {
-            "description": "Color of the module key. Left empty to use `display.color.keys`",
+            "description": "Color of the module key to override the global setting `display.color.key`",
             "$ref": "#/$defs/colors"
         },
         "keyWidth": {
-            "description": "Width of the module key. Use 0 to use `display.keyWidth`",
+            "description": "Width of the module key to override the global setting `display.keyWidth`",
             "type": "integer",
-            "minimum": 0,
-            "default": 0
+            "minimum": 1
         },
         "keyIcon": {
             "description": "Set the icon to be displayed by `display.keyType: \"icon\"`",
             "type": "string"
         },
         "outputColor": {
-            "description": "Output color of the module. Left empty to use `display.color.output`",
+            "description": "Output color of the module to override the global setting `display.color.output`",
             "$ref": "#/$defs/colors"
         },
         "percentType": {
@@ -52,6 +61,7 @@
                             "bar-monochrome"
                         ]
                     },
+                    "uniqueItems": true,
                     "default": [
                         "num",
                         "num-color"
@@ -108,10 +118,163 @@
                 }
             ]
         },
+        "systems": {
+            "type": "string",
+            "enum": [
+                "Android",
+                "Linux",
+                "DragonFly",
+                "MidnightBSD",
+                "FreeBSD",
+                "macOS",
+                "Windows",
+                "SunOS",
+                "OpenBSD",
+                "NetBSD",
+                "Haiku"
+            ]
+        },
+        "architectures": {
+            "type": "string",
+            "enum": [
+                "x86_64",
+                "i386",
+                "ia64",
+                "aarch64",
+                "arm",
+                "mips",
+                "powerpc",
+                "riscv",
+                "s390x",
+                "loongarch",
+                "sparc",
+                "alpha",
+                "hppa",
+                "m68k"
+            ]
+        },
+        "conditions": {
+            "description": "Only show the module if conditions are met",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "system": {
+                    "description": "System name to match",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/systems"
+                        },
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "$ref": "#/$defs/systems"
+                            },
+                            "description": "Array of system names to match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "!system": {
+                    "description": "System name to not match",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/systems"
+                        },
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "$ref": "#/$defs/systems"
+                            },
+                            "description": "Array of system names to not match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "arch": {
+                    "description": "Architecture to match",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/architectures"
+                        },
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "$ref": "#/$defs/architectures"
+                            },
+                            "description": "Array of architectures to match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "!arch": {
+                    "description": "Architecture to not match",
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/architectures"
+                        },
+                        {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": {
+                                "$ref": "#/$defs/architectures"
+                            },
+                            "description": "Array of architectures to not match"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                },
+                "succeeded": {
+                    "description": "Whether the module succeeded in the last run",
+                    "oneOf": [
+                        {
+                            "type": "boolean",
+                            "description": "True to only show the module if it succeeded, false to only show it if it failed"
+                        },
+                        {
+                            "type": "null",
+                            "description": "Null to disable this condition"
+                        }
+                    ]
+                }
+            }
+        },
+        "spaceBeforeUnit": {
+            "type": "string",
+            "description": "Whether to put a space before the unit",
+            "oneOf": [
+                {
+                    "const": "default",
+                    "description": "Use the default behavior of the module"
+                },
+                {
+                    "const": "always",
+                    "description": "Always add a space before the unit"
+                },
+                {
+                    "const": "never",
+                    "description": "Never add a space before the unit"
+                }
+            ]
+        },
 
 
         "batteryFormat": {
-            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds",
+            "description": "Output format of the module `Battery`. See Wiki for formatting syntax\n    1. {manufacturer}: Battery manufacturer\n    2. {model-name}: Battery model name\n    3. {technology}: Battery technology\n    4. {capacity}: Battery capacity (percentage num)\n    5. {status}: Battery status\n    6. {temperature}: Battery temperature (formatted)\n    7. {cycle-count}: Battery cycle count\n    8. {serial}: Battery serial number\n    9. {manufacture-date}: Battery manufactor date\n    10. {capacity-bar}: Battery capacity (percentage bar)\n    11. {time-days}: Battery time remaining days\n    12. {time-hours}: Battery time remaining hours\n    13. {time-minutes}: Battery time remaining minutes\n    14. {time-seconds}: Battery time remaining seconds\n    15. {time-formatted}: Battery time remaining (formatted)",
             "type": "string"
         },
         "biosFormat": {
@@ -155,7 +318,7 @@
             "type": "string"
         },
         "cpuFormat": {
-            "description": "Output format of the module `CPU`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count",
+            "description": "Output format of the module `CPU`. See Wiki for formatting syntax\n    1. {name}: Name\n    2. {vendor}: Vendor\n    3. {cores-physical}: Physical core count\n    4. {cores-logical}: Logical core count\n    5. {cores-online}: Online core count\n    6. {freq-base}: Base frequency (formatted)\n    7. {freq-max}: Max frequency (formatted)\n    8. {temperature}: Temperature (formatted)\n    9. {core-types}: Logical core count grouped by frequency\n    10. {packages}: Processor package count\n    11. {march}: X86-64 CPU microarchitecture",
             "type": "string"
         },
         "cpucacheFormat": {
@@ -183,7 +346,7 @@
             "type": "string"
         },
         "diskFormat": {
-            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)",
+            "description": "Output format of the module `Disk`. See Wiki for formatting syntax\n    1. {size-used}: Size used\n    2. {size-total}: Size total\n    3. {size-percentage}: Size percentage num\n    4. {files-used}: Files used\n    5. {files-total}: Files total\n    6. {files-percentage}: Files percentage num\n    7. {is-external}: True if external volume\n    8. {is-hidden}: True if hidden volume\n    9. {filesystem}: Filesystem\n    10. {name}: Label / name\n    11. {is-readonly}: True if read-only\n    12. {create-time}: Create time in local timezone\n    13. {size-percentage-bar}: Size percentage bar\n    14. {files-percentage-bar}: Files percentage bar\n    15. {days}: Days after creation\n    16. {hours}: Hours after creation\n    17. {minutes}: Minutes after creation\n    18. {seconds}: Seconds after creation\n    19. {milliseconds}: Milliseconds after creation\n    20. {mountpoint}: Mount point / drive letter\n    21. {mount-from}: Mount from (device path)\n    22. {years}: Years integer after creation\n    23. {days-of-year}: Days of year after creation\n    24. {years-fraction}: Years fraction after creation\n    25. {size-free}: Size free\n    26. {size-available}: Size available",
             "type": "string"
         },
         "diskioFormat": {
@@ -195,7 +358,7 @@
             "type": "string"
         },
         "editorFormat": {
-            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {full-path}: Full path of real path\n    5. {version}: Version",
+            "description": "Output format of the module `Editor`. See Wiki for formatting syntax\n    1. {type}: Type (Visual / Editor)\n    2. {name}: Name\n    3. {exe-name}: Exe name of real path\n    4. {path}: Full path of real path\n    5. {version}: Version",
             "type": "string"
         },
         "fontFormat": {
@@ -279,7 +442,7 @@
             "type": "string"
         },
         "packagesFormat": {
-            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop}: Number of scoop packages\n    21. {choco}: Number of choco packages\n    22. {pkgtool}: Number of pkgtool packages\n    23. {paludis}: Number of paludis packages\n    24. {winget}: Number of winget packages\n    25. {opkg}: Number of opkg packages\n    26. {am-system}: Number of am-system packages\n    27. {sorcery}: Number of sorcery packages\n    28. {lpkg}: Number of lpkg packages\n    29. {lpkgbuild}: Number of lpkgbuild packages\n    30. {guix-system}: Number of guix-system packages\n    31. {guix-user}: Number of guix-user packages\n    32. {guix-home}: Number of guix-home packages\n    33. {linglong}: Number of linglong packages\n    34. {pacstall}: Number of pacstall packages\n    35. {mport}: Number of mport packages\n    36. {qi}: Number of qi packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {nix-all}: Total number of all nix packages\n    44. {flatpak-all}: Total number of all flatpak app packages\n    45. {brew-all}: Total number of all brew packages\n    46. {guix-all}: Total number of all guix packages\n    47. {hpkg-all}: Total number of all hpkg packages",
+            "description": "Output format of the module `Packages`. See Wiki for formatting syntax\n    1. {all}: Number of all packages\n    2. {pacman}: Number of pacman packages\n    3. {pacman-branch}: Pacman branch on manjaro\n    4. {dpkg}: Number of dpkg packages\n    5. {rpm}: Number of rpm packages\n    6. {emerge}: Number of emerge packages\n    7. {eopkg}: Number of eopkg packages\n    8. {xbps}: Number of xbps packages\n    9. {nix-system}: Number of nix-system packages\n    10. {nix-user}: Number of nix-user packages\n    11. {nix-default}: Number of nix-default packages\n    12. {apk}: Number of apk packages\n    13. {pkg}: Number of pkg packages\n    14. {flatpak-system}: Number of flatpak-system app packages\n    15. {flatpak-user}: Number of flatpak-user app packages\n    16. {snap}: Number of snap packages\n    17. {brew}: Number of brew packages\n    18. {brew-cask}: Number of brew-cask packages\n    19. {macports}: Number of macports packages\n    20. {scoop-user}: Number of scoop-user packages\n    21. {scoop-global}: Number of scoop-global packages\n    22. {choco}: Number of choco packages\n    23. {pkgtool}: Number of pkgtool packages\n    24. {paludis}: Number of paludis packages\n    25. {winget}: Number of winget packages\n    26. {opkg}: Number of opkg packages\n    27. {am-system}: Number of am-system packages\n    28. {sorcery}: Number of sorcery packages\n    29. {lpkg}: Number of lpkg packages\n    30. {lpkgbuild}: Number of lpkgbuild packages\n    31. {guix-system}: Number of guix-system packages\n    32. {guix-user}: Number of guix-user packages\n    33. {guix-home}: Number of guix-home packages\n    34. {linglong}: Number of linglong packages\n    35. {pacstall}: Number of pacstall packages\n    36. {mport}: Number of mport packages\n    37. {am-user}: Number of am-user (aka appman) packages\n    38. {pkgsrc}: Number of pkgsrc packages\n    39. {hpkg-system}: Number of hpkg-system packages\n    40. {hpkg-user}: Number of hpkg-user packages\n    41. {pisi}: Number of pisi packages\n    42. {soar}: Number of soar packages\n    43. {nix-all}: Total number of all nix packages\n    44. {flatpak-all}: Total number of all flatpak app packages\n    45. {brew-all}: Total number of all brew packages\n    46. {guix-all}: Total number of all guix packages\n    47. {hpkg-all}: Total number of all hpkg packages",
             "type": "string"
         },
         "physicaldiskFormat": {
@@ -306,10 +469,6 @@
             "description": "Output format of the module `PublicIp`. See Wiki for formatting syntax\n    1. {ip}: Public IP address\n    2. {location}: Location",
             "type": "string"
         },
-        "separatorFormat": {
-            "description": "Output format of the module `Separator`. See Wiki for formatting syntax\n    1. {string}: Separator string\n    2. {outputColor}: Output color\n    3. {length}: Length",
-            "type": "string"
-        },
         "shellFormat": {
             "description": "Output format of the module `Shell`. See Wiki for formatting syntax\n    1. {process-name}: Shell process name\n    2. {exe}: The first argument of the command line when running the shell\n    3. {exe-name}: Shell base name of arg0\n    4. {version}: Shell version\n    5. {pid}: Shell pid\n    6. {pretty-name}: Shell pretty name\n    7. {exe-path}: Shell full exe path\n    8. {tty}: Shell tty used",
             "type": "string"
@@ -319,7 +478,7 @@
             "type": "string"
         },
         "swapFormat": {
-            "description": "Output format of the module `Swap`. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)",
+            "description": "Output format of the module `Swap`. See Wiki for formatting syntax\n    1. {used}: Used size\n    2. {total}: Total size\n    3. {percentage}: Percentage used (num)\n    4. {percentage-bar}: Percentage used (bar)\n    5. {name}: Name",
             "type": "string"
         },
         "terminalFormat": {
@@ -351,15 +510,15 @@
             "type": "string"
         },
         "uptimeFormat": {
-            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days\n    2. {hours}: Hours\n    3. {minutes}: Minutes\n    4. {seconds}: Seconds\n    5. {milliseconds}: Milliseconds\n    6. {boot-time}: Boot time in local timezone",
+            "description": "Output format of the module `Uptime`. See Wiki for formatting syntax\n    1. {days}: Days after boot\n    2. {hours}: Hours after boot\n    3. {minutes}: Minutes after boot\n    4. {seconds}: Seconds after boot\n    5. {milliseconds}: Milliseconds after boot\n    6. {boot-time}: Boot time in local timezone\n    7. {years}: Years integer after boot\n    8. {days-of-year}: Days of year after boot\n    9. {years-fraction}: Years fraction after boot\n    10. {formatted}: Formatted uptime",
             "type": "string"
         },
         "usersFormat": {
-            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login",
+            "description": "Output format of the module `Users`. See Wiki for formatting syntax\n    1. {name}: User name\n    2. {host-name}: Host name\n    3. {session-name}: Session name\n    4. {client-ip}: Client IP\n    5. {login-time}: Login Time in local timezone\n    6. {days}: Days after login\n    7. {hours}: Hours after login\n    8. {minutes}: Minutes after login\n    9. {seconds}: Seconds after login\n    10. {milliseconds}: Milliseconds after login\n    11. {years}: Years integer after login\n    12. {days-of-year}: Days of year after login\n    13. {years-fraction}: Years fraction after login",
             "type": "string"
         },
         "versionFormat": {
-            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
+            "description": "Output format of the module `Version`. See Wiki for formatting syntax\n    1. {project-name}: Project name\n    2. {version}: Version\n    3. {version-tweak}: Version tweak\n    4. {build-type}: Build type (debug or release)\n    5. {sysname}: System name\n    6. {arch}: Architecture\n    7. {cmake-built-type}: CMake build type when compiling (Debug, Release, RelWithDebInfo, MinSizeRel)\n    8. {compile-time}: Date time when compiling\n    9. {compiler}: Compiler used when compiling\n    10. {libc}: Libc used when compiling",
             "type": "string"
         },
         "vulkanFormat": {
@@ -411,7 +570,7 @@
                     "const": null
                 },
                 {
-                    "description": "Set the source file of the logo",
+                    "description": "Set the source file of the logo or built-in ASCII art name",
                     "type": "string"
                 },
                 {
@@ -421,23 +580,67 @@
                     "properties": {
                         "type": {
                             "description": "Set the type of the logo",
-                            "enum": [
-                                "auto",
-                                "builtin",
-                                "small",
-                                "file",
-                                "file-raw",
-                                "data",
-                                "data-raw",
-                                "command-raw",
-                                "sixel",
-                                "kitty",
-                                "kitty-direct",
-                                "kitty-icat",
-                                "iterm",
-                                "chafa",
-                                "raw",
-                                "none"
+                            "oneOf": [
+                                {
+                                    "const": "auto",
+                                    "description": "If something is given, first try built-in, then file. Otherwise detect logo"
+                                },
+                                {
+                                    "const": "builtin",
+                                    "description": "Built-in ASCII art"
+                                },
+                                {
+                                    "const": "small",
+                                    "description": "Built-in ASCII art, small version (not all logos support this option)"
+                                },
+                                {
+                                    "const": "file",
+                                    "description": "Text file, printed with color code replacement"
+                                },
+                                {
+                                    "const": "file-raw",
+                                    "description": "Text file, printed as is"
+                                },
+                                {
+                                    "const": "data",
+                                    "description": "Text data, printed with color code replacement"
+                                },
+                                {
+                                    "const": "data-raw",
+                                    "description": "Text data, printed as is"
+                                },
+                                {
+                                    "const": "sixel",
+                                    "description": "Image file, printed as sixel codes"
+                                },
+                                {
+                                    "const": "kitty",
+                                    "description": "Image file, printed using kitty graphics protocol"
+                                },
+                                {
+                                    "const": "kitty-direct",
+                                    "description": "Image file, tells the terminal emulator to read image data from the specified file"
+                                },
+                                {
+                                    "const": "kitty-icat",
+                                    "description": "Image file, uses `kitten icat` to display the image. Requires binary `kitten` to be installed"
+                                },
+                                {
+                                    "const": "iterm",
+                                    "description": "Image file, uses `iTerm` image protocol"
+                                },
+                                {
+                                    "const": "chafa",
+                                    "description": "Image file, prints `ASCII` art image generated by `libchafa`"
+                                },
+                                {
+                                    "const": "raw",
+                                    "description": "Image file, printed as `raw` binary string image"
+                                },
+                                {
+                                    "const": "none",
+                                    "description": "Disable logo printing"
+                                }
                             ],
                             "default": "auto"
                         },
@@ -489,14 +692,30 @@
                             }
                         },
                         "width": {
-                            "type": "integer",
-                            "description": "Set the width of the logo (in characters). Required for iTerm image protocol",
-                            "minimum": 1
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detect width (default)"
+                                },
+                                {
+                                    "type": "integer",
+                                    "description": "Set the width of the logo (in characters). Required for some image protocols",
+                                    "minimum": 1
+                                }
+                            ]
                         },
                         "height": {
-                            "type": "integer",
-                            "description": "Set the height of the logo (in characters). Required for iTerm image protocol",
-                            "minimum": 1
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Auto detect width (default)"
+                                },
+                                {
+                                    "type": "integer",
+                                    "description": "Set the height of the logo (in characters). Required for some image protocols",
+                                    "minimum": 1
+                                }
+                            ]
                         },
                         "padding": {
                             "type": "object",
@@ -562,32 +781,71 @@
                                 "canvasMode": {
                                     "type": "string",
                                     "description": "Determine how colors are used in the output. This value maps to enum ChafaCanvasMode.",
-                                    "enum": [
-                                        "TRUECOLOR",
-                                        "INDEXED_256",
-                                        "INDEXED_240",
-                                        "INDEXED_16",
-                                        "FGBG_BGFG",
-                                        "FGBG",
-                                        "INDEXED_8",
-                                        "INDEXED_16_8"
+                                    "oneOf": [
+                                        {
+                                            "const": "TRUECOLOR",
+                                            "description": "Use 24-bit true colors"
+                                        },
+                                        {
+                                            "const": "INDEXED_256",
+                                            "description": "Use 256 colors"
+                                        },
+                                        {
+                                            "const": "INDEXED_240",
+                                            "description": "Use 240 colors, but avoid using the lower 16 whose values vary between terminal environments"
+                                        },
+                                        {
+                                            "const": "INDEXED_16",
+                                            "description": "Use 16 colors using the aixterm ANSI extension"
+                                        },
+                                        {
+                                            "const": "FGBG_BGFG",
+                                            "description": "Use default foreground and background colors, plus inversion"
+                                        },
+                                        {
+                                            "const": "FGBG",
+                                            "description": "Use default foreground and background colors. No ANSI codes will be used"
+                                        },
+                                        {
+                                            "const": "INDEXED_8",
+                                            "description": "Use 8 colors, compatible with original ANSI X3.64"
+                                        },
+                                        {
+                                            "const": "INDEXED_16_8",
+                                            "description": "Use 16 FG colors (8 of which enabled with bold/bright) and 8 BG colors"
+                                        }
                                     ]
                                 },
                                 "colorSpace": {
                                     "type": "string",
                                     "description": "Set color space used for quantization. This value maps to enum ChafaColorSpace.",
-                                    "enum": [
-                                        "RGB",
-                                        "DIN99D"
+                                    "oneOf": [
+                                        {
+                                            "const": "RGB",
+                                            "description": "RGB color space. Fast but imprecise"
+                                        },
+                                        {
+                                            "const": "DIN99D",
+                                            "description": "DIN99d color space. Slower, but good perceptual color precision"
+                                        }
                                     ]
                                 },
                                 "ditherMode": {
                                     "type": "string",
                                     "description": "Set output dither mode (No effect with 24-bit color). This value maps to enum ChafaDitherMode.",
-                                    "enum": [
-                                        "NONE",
-                                        "ORDERED",
-                                        "DIFFUSION"
+                                    "oneOf": [
+                                        {
+                                            "const": "NONE",
+                                            "description": "No dithering"
+                                        },
+                                        {
+                                            "const": "ORDERED",
+                                            "description": "Ordered dithering (Bayer or similar)"
+                                        },
+                                        {
+                                            "const": "DIFFUSION",
+                                            "description": "Error diffusion dithering (Floyd-Steinberg or similar)"
+                                        }
                                     ]
                                 }
                             }
@@ -750,12 +1008,44 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set whether to show icon before string keys",
-                            "enum": [
-                                "none",
-                                "string",
-                                "icon",
-                                "both"
+                            "description": "Set whether to show builtin icon before string keys",
+                            "oneOf": [
+                                {
+                                    "const": "none",
+                                    "description": "Disable keys"
+                                },
+                                {
+                                    "const": "string",
+                                    "description": "Show string keys"
+                                },
+                                {
+                                    "const": "icon",
+                                    "description": "Show builtin icon (requires newest nerd font)"
+                                },
+                                {
+                                    "const": "both",
+                                    "description": "Show both icon and string keys (alias of `both-1`)"
+                                },
+                                {
+                                    "const": "both-0",
+                                    "description": "Show both icon and string with no spaces between them"
+                                },
+                                {
+                                    "const": "both-1",
+                                    "description": "Show both icon and string with a space between them"
+                                },
+                                {
+                                    "const": "both-2",
+                                    "description": "Show both icon and string with 2 spaces between them"
+                                },
+                                {
+                                    "const": "both-3",
+                                    "description": "Show both icon and string with 3 spaces between them"
+                                },
+                                {
+                                    "const": "both-4",
+                                    "description": "Show both icon and string with 4 spaces between them"
+                                }
                             ],
                             "default": "string"
                         },
@@ -803,6 +1093,9 @@
                             "minimum": 0,
                             "maximum": 9,
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -814,7 +1107,24 @@
                         "unit": {
                             "type": "string",
                             "description": "Set the unit of temperature",
-                            "enum": ["D", "Default", "Celsius", "C", "Fahrenheit", "F", "Kelvin", "K"],
+                            "oneOf": [
+                                {
+                                    "const": "C",
+                                    "description": "Celsius"
+                                },
+                                {
+                                    "const": "F",
+                                    "description": "Fahrenheit"
+                                },
+                                {
+                                    "const": "K",
+                                    "description": "Kelvin"
+                                },
+                                {
+                                    "const": "D",
+                                    "description": "Default (alias for Celsius)"
+                                }
+                            ],
                             "default": "D"
                         },
                         "ndigits": {
@@ -845,6 +1155,9 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
                         }
                     }
                 },
@@ -853,25 +1166,87 @@
                     "additionalProperties": false,
                     "description": "Set the bar configuration",
                     "properties": {
-                        "charElapsed": {
-                            "type": "string",
-                            "description": "Set the character to use in elapsed part",
-                            "default": "■"
+                        "char": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "description": "Set the characters used in the bar",
+                            "properties": {
+                                "elapsed": {
+                                    "type": "string",
+                                    "description": "Set the character to use in elapsed part",
+                                    "default": "■"
+                                },
+                                "total": {
+                                    "type": "string",
+                                    "description": "Set the character to use in total part",
+                                    "default": "-"
+                                }
+                            }
                         },
-                        "charTotal": {
-                            "type": "string",
-                            "description": "Set the character to use in total part",
-                            "default": "-"
+                        "border": {
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Disable bar borders"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "Set the string to use of borders of percentage bars",
+                                    "properties": {
+                                        "left": {
+                                            "type": "string",
+                                            "description": "Set the string to use at left border",
+                                            "default": "[ "
+                                        },
+                                        "right": {
+                                            "type": "string",
+                                            "description": "Set the string to use at right border",
+                                            "default": " ]"
+                                        },
+                                        "leftElapsed": {
+                                            "type": "string",
+                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "default": ""
+                                        },
+                                        "rightElapsed": {
+                                            "type": "string",
+                                            "description": "If both leftElapsed and rightElapsed are set, the border will be used as parts of bar content",
+                                            "default": ""
+                                        }
+                                    }
+                                }
+                            ]
                         },
-                        "borderLeft": {
-                            "type": "string",
-                            "description": "Set the string to use at left border",
-                            "default": "[ "
-                        },
-                        "borderRight": {
-                            "type": "string",
-                            "description": "Set the string to use at right border",
-                            "default": " ]"
+                        "color": {
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Disable color in percentage bars"
+                                },
+                                {
+                                    "type": "object",
+                                    "additionalProperties": false,
+                                    "description": "Set the color to use of percentage bars",
+                                    "properties": {
+                                        "elapsed": {
+                                            "description": "Color to use in the elapsed part of percentage bars\nBy default, auto selected by percent.color.{green,yellow,red}",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "auto"
+                                        },
+                                        "total": {
+                                            "description": "Color to use in the total part of percentage bars",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "light_white"
+                                        },
+                                        "border": {
+                                            "description": "Color to use in the borders of percentage bars",
+                                            "$ref": "#/$defs/colors",
+                                            "default": "light_white"
+                                        }
+                                    }
+                                }
+                            ]
                         },
                         "width": {
                             "type": "integer",
@@ -917,6 +1292,15 @@
                                     "default": "light_red"
                                 }
                             }
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        },
+                        "width": {
+                            "type": "integer",
+                            "description": "Set the width of the percentage number, in number of characters",
+                            "minimum": 0,
+                            "default": 0
                         }
                     }
                 },
@@ -926,11 +1310,81 @@
                     "description": "Set how frequency values should be displayed",
                     "properties": {
                         "ndigits": {
-                            "type": "integer",
-                            "description": "Set the number of digits to keep after the decimal point when formatting frequency values\nA positive value will show the frequency in GHz with decimal\n-1 will show the frequency in MHz",
-                            "minimum": -1,
-                            "maximum": 9,
+                            "description": "Set the number of decimal places to display when formatting frequency values",
+                            "oneOf": [
+                                {
+                                    "type": "integer",
+                                    "minimum": 0,
+                                    "maximum": 9,
+                                    "description": "Integer value displays the frequency in GHz with specified decimal places"
+                                },
+                                {
+                                    "type": "null",
+                                    "description": "Null value display the frequency as integer MHz"
+                                }
+                            ],
                             "default": 2
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        }
+                    }
+                },
+                "duration": {
+                    "type": "object",
+                    "description": "Set how duration values should be displayed",
+                    "properties": {
+                        "abbreviation": {
+                            "type": "boolean",
+                            "description": "Set whether to abbreviate duration values\nIf true, the output will be in the form of \"1h 2m\" instead of \"1 hour, 2 mins\"",
+                            "default": false
+                        },
+                        "spaceBeforeUnit": {
+                            "$ref": "#/$defs/spaceBeforeUnit"
+                        }
+                    }
+                },
+                "fraction": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "description": "Set how ordinary fraction numbers should be displayed",
+                    "properties": {
+                        "ndigits": {
+                            "oneOf": [
+                                {
+                                    "type": "number",
+                                    "description": "Set the number of digits to keep after the decimal point when formatting ordinary fraction numbers",
+                                    "minimum": 0,
+                                    "maximum": 9
+                                },
+                                {
+                                    "type": "null",
+                                    "description": "The number of digits will be automatically determined based on the value"
+                                }
+                            ],
+                            "default": 2
+                        },
+                        "trailingZeros": {
+                            "description": "Set when to keep trailing zeros",
+                            "oneOf": [
+                                {
+                                    "type": "null",
+                                    "description": "Same as `default`"
+                                },
+                                {
+                                    "const": "default",
+                                    "description": "Use the behavior defined internally"
+                                },
+                                {
+                                    "const": "always",
+                                    "description": "Always keep trailing zeros"
+                                },
+                                {
+                                    "const": "never",
+                                    "description": "Never keep trailing zeros"
+                                }
+                            ],
+                            "default": null
                         }
                     }
                 },
@@ -987,6 +1441,7 @@
                             "host",
                             "icons",
                             "initsystem",
+                            "keyboard",
                             "kernel",
                             "lm",
                             "loadavg",
@@ -995,6 +1450,7 @@
                             "media",
                             "memory",
                             "monitor",
+                            "mouse",
                             "netio",
                             "opencl",
                             "opengl",
@@ -1049,6 +1505,9 @@
                                     "type": {
                                         "const": "break",
                                         "description": "Print a empty line"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1089,6 +1548,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/batteryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1118,6 +1580,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/biosFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1155,6 +1620,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/bluetoothFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1184,6 +1652,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/bluetoothradioFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1213,6 +1684,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/boardFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1242,6 +1716,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/bootmgrFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1286,6 +1763,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/brightnessFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1318,6 +1798,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/btrfsFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1347,6 +1830,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cameraFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1376,6 +1862,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/chassisFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1390,6 +1879,10 @@
                                     },
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
+                                    },
+                                    "tempSensor": {
+                                        "description": "Set the temperature sensor to use for CPU temperature detection\n* Linux: `hwmon` or `thermal` path name (eg. `hwmon0`, `thermal_zone0)`\n* macOS: SMC sensor key (eg. `Tp01`)\n* Windows: thermal zone key (eg. `\\_TZ.CPUZ`)\n* FreeBSD: sysctl key (eg. `dev.cpu.0.temperature`)\n* NetBSD: sysmon sensor key (eg. `coretemp0`)",
+                                        "type": "string"
                                     },
                                     "showPeCoreCount": {
                                         "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
@@ -1413,6 +1906,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cpuFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1445,6 +1941,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cpucacheFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1488,6 +1987,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cpuusageFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1503,14 +2005,35 @@
                                     "symbol": {
                                         "description": "Set the symbol to use",
                                         "type": "string",
-                                        "enum": [
-                                            "block",
-                                            "background",
-                                            "circle",
-                                            "diamond",
-                                            "triangle",
-                                            "square",
-                                            "star"
+                                        "oneOf": [
+                                            {
+                                                "const": "block",
+                                                "description": "\u2588\u2588\u2588"
+                                            },
+                                            {
+                                                "const": "background",
+                                                "description": "(whitespaces with background)"
+                                            },
+                                            {
+                                                "const": "circle",
+                                                "description": "\u25cf"
+                                            },
+                                            {
+                                                "const": "diamond",
+                                                "description": "\u25c6"
+                                            },
+                                            {
+                                                "const": "triangle",
+                                                "description": "\u25b2"
+                                            },
+                                            {
+                                                "const": "square",
+                                                "description": "\u25a0"
+                                            },
+                                            {
+                                                "const": "star",
+                                                "description": "\u2605"
+                                            }
                                         ],
                                         "default": "background"
                                     },
@@ -1547,8 +2070,17 @@
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
                                     "keyIcon": {
                                         "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1566,12 +2098,27 @@
                                         "type": "string"
                                     },
                                     "param": {
-                                        "description": "Set the parameter used when starting the shell\nDefault: /c for Windows, -c for *nix",
+                                        "description": "Set the parameter used when starting the shell\nIf set to an empty string, it will be ignored\nDefault: /c for Windows, -c for *nix",
                                         "type": "string"
                                     },
                                     "text": {
                                         "description": "Set the command text to be executed",
                                         "type": "string"
+                                    },
+                                    "useStdErr": {
+                                        "description": "Set if stderr should be used instead of stdout for command output",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "parallel": {
+                                        "description": "Set if the command should be executed in parallel with other commands\nImprove performance when using multiple commands, but may cause issues with some commands",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "splitLines": {
+                                        "description": "Set if the command output should be split into multiple lines",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1590,6 +2137,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/commandFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1622,6 +2172,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/cursorFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1653,6 +2206,9 @@
                                     "format": {
                                         "description": "Text to print",
                                         "type": "string"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1685,6 +2241,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/datetimeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1698,15 +2257,34 @@
                                         "const": "display"
                                     },
                                     "compactType": {
-                                        "enum": [
-                                            "none",
-                                            "original",
-                                            "scaled",
-                                            "original-with-refresh-rate",
-                                            "scaled-with-refresh-rate"
-                                        ],
                                         "description": "Set if all displays should be printed in one line",
-                                        "default": "none"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Disable compact mode"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Disable compact mode (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "original",
+                                                "description": "Print original resolutions"
+                                            },
+                                            {
+                                                "const": "scaled",
+                                                "description": "Print scaled resolutions"
+                                            },
+                                            {
+                                                "const": "original-with-refresh-rate",
+                                                "description": "Print original resolutions with refresh rates"
+                                            },
+                                            {
+                                                "const": "scaled-with-refresh-rate",
+                                                "description": "Print scaled resolutions with refresh rates"
+                                            }
+                                        ],
+                                        "default": null
                                     },
                                     "preciseRefreshRate": {
                                         "description": "Set if decimal refresh rates should not be rounded into integers when printing",
@@ -1715,12 +2293,25 @@
                                     },
                                     "order": {
                                         "description": "Set the order should be used when printing",
-                                        "enum": [
-                                            "none",
-                                            "asc",
-                                            "desc"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Use the default order"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Use the detected order (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "asc",
+                                                "description": "Sort by display name in ascending order"
+                                            },
+                                            {
+                                                "const": "desc",
+                                                "description": "Sort by display name in descending order"
+                                            }
                                         ],
-                                        "default": "none"
+                                        "default": null
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1739,6 +2330,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/displayFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1752,16 +2346,65 @@
                                         "const": "disk"
                                     },
                                     "folders": {
-                                        "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options"
+                                        "description": "A list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon (semicolon on Windows) separated list of folder paths to get disk usage from",
+                                                "default": "/"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of folder paths to get disk usage from",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ]
                                     },
                                     "hideFolders": {
-                                        "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output\nDefault: /efi:/boot:/boot/efi"
+                                        "description": "A list of folder paths (or glob patterns) to hide from the disk output",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of folder paths to hide from the disk output",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ],
+                                        "default": "/efi:/boot:/boot/*"
                                     },
                                     "hideFS": {
-                                        "type": "string",
-                                        "description": "A colon separated file systems to hide from the disk output"
+                                        "description": "A list of file systems to hide from the disk output",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon separated list of file systems to hide from the disk output"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of file systems to hide from the disk output",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ]
+                                    },
+                                    "showRegular": {
+                                        "type": "boolean",
+                                        "description": "Set if regular volume should be printed",
+                                        "default": true
                                     },
                                     "showExternal": {
                                         "type": "boolean",
@@ -1790,7 +2433,7 @@
                                     },
                                     "useAvailable": {
                                         "type": "boolean",
-                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes",
+                                        "description": "Use f_bavail (lpFreeBytesAvailableToCaller for Windows) instead of f_bfree to calculate used bytes\nMay be required for macOS to display correct results",
                                         "default": false
                                     },
                                     "percent": {
@@ -1813,6 +2456,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/diskFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1857,6 +2503,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/diskioFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1871,8 +2520,8 @@
                                     },
                                     "slowVersionDetection": {
                                         "type": "boolean",
-                                        "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.",
-                                        "default": "false"
+                                        "description": "Set if DE version should be detected with slow operations.\nShould be unnecessary for most cases.\nThis is only used as a fallback method. Please file a bug report if you encounter any issues.",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -1891,6 +2540,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/deFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1904,10 +2556,19 @@
                                         "description": "Print DNS servers"
                                     },
                                     "showType": {
-                                        "enum": [
-                                            "ipv4",
-                                            "ipv6",
-                                            "both"
+                                        "oneOf": [
+                                            {
+                                                "const": "ipv4",
+                                                "description": "Show IPv4 addresses only"
+                                            },
+                                            {
+                                                "const": "ipv6",
+                                                "description": "Show IPv6 addresses only"
+                                            },
+                                            {
+                                                "const": "both",
+                                                "description": "Show both IPv4 and IPv6 addresses"
+                                            }
                                         ],
                                         "default": "both",
                                         "description": "Specify the type of DNS servers should be detected"
@@ -1929,6 +2590,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/dnsFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1961,6 +2625,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/editorFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -1993,6 +2660,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/fontFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2004,6 +2674,15 @@
                                     "type": {
                                         "const": "gamepad",
                                         "description": "List connected gamepads"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
@@ -2025,6 +2704,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/gamepadFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2041,31 +2723,65 @@
                                         "$ref": "#/$defs/temperature"
                                     },
                                     "driverSpecific": {
-                                        "description": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)",
+                                        "description": "Use driver specific method to detect more detailed GPU information (memory usage, core count, etc)\nRequires the latest GPU drivers to be installed.",
                                         "type": "boolean",
                                         "default": false
                                     },
                                     "detectionMethod": {
                                         "description": "Force using a specified method to detect GPUs",
                                         "type": "string",
-                                        "enum": [
-                                            "auto",
-                                            "pci",
-                                            "vulkan",
-                                            "opencl",
-                                            "opengl"
+                                        "oneOf": [
+                                            {
+                                                "const": "auto",
+                                                "description": "Query platform-specific graphics APIs.\nRequires proper GPU drivers to be installed.\nSupported on Linux, FreeBSD, Windows and macOS"
+                                            },
+                                            {
+                                                "const": "pci",
+                                                "description": "Search PCI devices, which does not require GPU drivers to be installed.\nNot supported on Windows and macOS"
+                                            },
+                                            {
+                                                "const": "vulkan",
+                                                "description": "Use Vulkan API.\nSlow and requires proper Vulkan drivers to be installed.\nUsed for Android"
+                                            },
+                                            {
+                                                "const": "opencl",
+                                                "description": "Use OpenCL API.\nSlow and requires proper OpenCL drivers to be installed"
+                                            },
+                                            {
+                                                "const": "opengl",
+                                                "description": "Use OpenGL API.\nSlow and only detects one GPU.\nUsed for OpenBSD"
+                                            }
                                         ],
-                                        "default": "auto"
+                                        "default": "<varies-by-platform>"
                                     },
                                     "hideType": {
                                         "description": "Specify the type of GPUs should not be printed",
-                                        "enum": [
-                                            "integrated",
-                                            "discrete",
-                                            "unknown",
-                                            "none"
+                                        "oneOf": [
+                                            {
+                                                "const": null,
+                                                "description": "Do not hide any GPUs"
+                                            },
+                                            {
+                                                "const": "none",
+                                                "description": "Do not hide any GPUs (kept for compatibility)"
+                                            },
+                                            {
+                                                "const": "integrated",
+                                                "description": "Hide integrated GPUs"
+                                            },
+                                            {
+                                                "const": "discrete",
+                                                "description": "Hide discrete GPUs"
+                                            },
+                                            {
+                                                "const": "unknown",
+                                                "description": "Hide unknown (unrecognized) GPUs"
+                                            }
                                         ],
-                                        "default": "none"
+                                        "default": null
+                                    },
+                                    "percent": {
+                                        "$ref": "#/$defs/percent"
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2084,6 +2800,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/gpuFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2113,6 +2832,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/hostFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2142,6 +2864,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/iconsFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2171,6 +2896,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/initsystemFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2200,6 +2928,47 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/kernelFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Keyboard",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "keyboard",
+                                        "description": "List (connected) keyboards"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/memoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2229,6 +2998,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/lmFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2248,7 +3020,32 @@
                                     },
                                     "showIpv6": {
                                         "description": "Show IPv6 addresses",
-                                        "type": "boolean",
+                                        "oneOf": [
+                                            {
+                                                "const": true,
+                                                "description": "Show the most useful IPv6 addresses"
+                                            },
+                                            {
+                                                "const": false,
+                                                "description": "Do not show IPv6 addresses"
+                                            },
+                                            {
+                                                "const": "gua",
+                                                "description": "Show only global unicast IPv6 addresses (2000::/3)"
+                                            },
+                                            {
+                                                "const": "ula",
+                                                "description": "Show only unique local IPv6 addresses (fc00::/7)"
+                                            },
+                                            {
+                                                "const": "lla",
+                                                "description": "Show only link-local IPv6 addresses (fe80::/10)"
+                                            },
+                                            {
+                                                "const": "unknown",
+                                                "description": "Show only IPv6 addresses that are not gua, ula or lla"
+                                            }
+                                        ],
                                         "default": false
                                     },
                                     "showSpeed": {
@@ -2277,7 +3074,7 @@
                                         "default": true
                                     },
                                     "showAllIps": {
-                                        "description": "Show all IPs bound to the same interface.\nBy default only the first IP is shown",
+                                        "description": "Show all IPs bound to the same interface.\nBy default only the firstly detected IP is shown",
                                         "type": "boolean",
                                         "default": false
                                     },
@@ -2296,7 +3093,7 @@
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "description": "Show ips that are used for default routing only",
+                                        "description": "Show ips that are used for default routing only\nDoesn't work on Android",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -2317,6 +3114,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/localipFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2361,6 +3161,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/loadavgFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2390,6 +3193,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/localeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2419,6 +3225,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/mediaFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2451,6 +3260,47 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/memoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
+                                    }
+                                }
+                            },
+                            {
+                                "title": "Mouse",
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "type": {
+                                        "const": "mouse",
+                                        "description": "List connected mouses"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
+                                    "key": {
+                                        "$ref": "#/$defs/key"
+                                    },
+                                    "keyColor": {
+                                        "$ref": "#/$defs/keyColor"
+                                    },
+                                    "keyIcon": {
+                                        "$ref": "#/$defs/keyIcon"
+                                    },
+                                    "keyWidth": {
+                                        "$ref": "#/$defs/keyWidth"
+                                    },
+                                    "format": {
+                                        "$ref": "#/$defs/memoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2480,6 +3330,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/monitorFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2497,7 +3350,7 @@
                                         "type": "string"
                                     },
                                     "defaultRouteOnly": {
-                                        "description": "Show ips that are used for default routing only",
+                                        "description": "Show ips that are used for default routing only\nDoesn't work on Android",
                                         "type": "boolean",
                                         "default": true
                                     },
@@ -2508,7 +3361,7 @@
                                     },
                                     "waitTime": {
                                         "type": "integer",
-                                        "description": "Wait time (in ms). Disk I/O = (totalBytesEnd - totalBytesStart) / waitTime",
+                                        "description": "Wait time (in ms). Net I/O = (totalBytesEnd - totalBytesStart) / waitTime",
                                         "default": 200,
                                         "minimum": 1
                                     },
@@ -2529,6 +3382,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/netioFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2558,6 +3414,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/openclFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2572,10 +3431,19 @@
                                     },
                                     "library": {
                                         "description": "Set the OpenGL context creation library to use",
-                                        "enum": [
-                                            "auto",
-                                            "egl",
-                                            "glx"
+                                        "oneOf": [
+                                            {
+                                                "const": "auto",
+                                                "description": "Prefer EGL on *nix; prefer platform-specific implementation on others"
+                                            },
+                                            {
+                                                "const": "egl",
+                                                "description": "Use EGL, which works on TTY"
+                                            },
+                                            {
+                                                "const": "glx",
+                                                "description": "Use GLX, requires X session (*nix only)"
+                                            }
                                         ],
                                         "default": "auto"
                                     },
@@ -2596,6 +3464,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/openglFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2625,6 +3496,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/osFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2638,45 +3512,57 @@
                                         "description": "List installed package managers and count of installed packages"
                                     },
                                     "disabled": {
-                                        "description": "List of package managers to be disabled when detecting",
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "am",
-                                                "apk",
-                                                "brew",
-                                                "choco",
-                                                "dpkg",
-                                                "emerge",
-                                                "eopkg",
-                                                "flatpak",
-                                                "guix",
-                                                "hpkg",
-                                                "linglong",
-                                                "lpkg",
-                                                "lpkgbuild",
-                                                "macports",
-                                                "mport",
-                                                "nix",
-                                                "opkg",
-                                                "pacman",
-                                                "pacstall",
-                                                "paludis",
-                                                "pisi",
-                                                "pkg",
-                                                "pkgtool",
-                                                "qi",
-                                                "rpm",
-                                                "scoop",
-                                                "snap",
-                                                "sorcery",
-                                                "winget",
-                                                "xbps"
-                                            ],
-                                            "uniqueItems": true
-                                        },
+                                        "oneOf": [
+                                            {
+                                                "description": "List of package managers to be disabled when detecting\nWarning: Some detection methods can be very slow.",
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "am",
+                                                        "apk",
+                                                        "brew",
+                                                        "choco",
+                                                        "dpkg",
+                                                        "emerge",
+                                                        "eopkg",
+                                                        "flatpak",
+                                                        "guix",
+                                                        "hpkg",
+                                                        "linglong",
+                                                        "lpkg",
+                                                        "lpkgbuild",
+                                                        "macports",
+                                                        "mport",
+                                                        "nix",
+                                                        "opkg",
+                                                        "pacman",
+                                                        "pacstall",
+                                                        "paludis",
+                                                        "pisi",
+                                                        "pkg",
+                                                        "pkgtool",
+                                                        "rpm",
+                                                        "scoop",
+                                                        "snap",
+                                                        "sorcery",
+                                                        "winget",
+                                                        "xbps"
+                                                    ],
+                                                    "uniqueItems": true
+                                                }
+                                            },
+                                            {
+                                                "description": "Enable all package managers",
+                                                "type": "null"
+                                            }
+                                        ],
                                         "default": ["winget"]
+                                    },
+                                    "combined": {
+                                        "description": "Whether to combine related package managers into single counts (e.g., nix-system + nix-user = nix)",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2695,6 +3581,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/packagesFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2731,6 +3620,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/physicaldiskFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2760,6 +3652,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/physicalmemoryFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2789,6 +3684,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/playerFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2818,6 +3716,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/poweradapterFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2847,6 +3748,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/processesFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2866,10 +3770,10 @@
                                         "default": "http://ipinfo.io/ip"
                                     },
                                     "timeout": {
-                                        "description": "Time in milliseconds to wait for the public ip server to respond",
+                                        "description": "Time in milliseconds to wait for the public ip server to respond.\n0 to disable timeout",
                                         "type": "integer",
                                         "minimum": 0,
-                                        "default": "disabled (0)"
+                                        "default": 0
                                     },
                                     "ipv6": {
                                         "description": "Whether to use IPv6 for public IP detection server",
@@ -2893,6 +3797,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/publicipFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2914,11 +3821,14 @@
                                         "description": "Set the color of the separator line",
                                         "$ref": "#/$defs/outputColor"
                                     },
-                                    "length": {
-                                        "description": "Set the length of the separator line, or 0 to auto-detect",
+                                    "times": {
+                                        "description": "Set the times of separator string to repeat, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2948,6 +3858,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/shellFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -2963,10 +3876,19 @@
                                     "soundType": {
                                         "description": "Set what type of sound devices should be printed",
                                         "type": "string",
-                                        "enum": [
-                                            "main",
-                                            "active",
-                                            "all"
+                                        "oneOf": [
+                                            {
+                                                "const": "main",
+                                                "description": "Print only main sound devices"
+                                            },
+                                            {
+                                                "const": "active",
+                                                "description": "Print only active sound devices"
+                                            },
+                                            {
+                                                "const": "all",
+                                                "description": "Print all sound devices"
+                                            }
                                         ],
                                         "default": "main"
                                     },
@@ -2990,6 +3912,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/soundFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3027,6 +3952,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/swapFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3056,6 +3984,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3085,6 +4016,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalfontFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3114,6 +4048,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalsizeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3143,6 +4080,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/terminalthemeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3172,6 +4112,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/themeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3225,6 +4168,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/titleFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3254,6 +4200,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/tpmFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3293,6 +4242,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/usersFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3322,6 +4274,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/uptimeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3351,6 +4306,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/versionFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3380,6 +4338,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/vulkanFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3409,6 +4370,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wallpaperFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3422,14 +4386,14 @@
                                         "const": "weather"
                                     },
                                     "location": {
-                                        "description": "The location to display",
+                                        "description": "The location to display\nMust be URI encoded (e.g., a whitespace must be encoded as \"+\")",
                                         "type": "string"
                                     },
                                     "timeout": {
-                                        "description": "Time in milliseconds to wait for the weather server to respond",
+                                        "description": "Time in milliseconds to wait for the weather server to respond.\n0 to disable timeout",
                                         "type": "integer",
                                         "minimum": 0,
-                                        "default": "disabled (0)"
+                                        "default": 0
                                     },
                                     "outputFormat": {
                                         "description": "The output weather format to be used (must be URI encoded)",
@@ -3453,6 +4417,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/weatherFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3482,6 +4449,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wifiFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3516,6 +4486,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wmFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3545,6 +4518,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/wmthemeFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             },
@@ -3577,6 +4553,9 @@
                                     },
                                     "format": {
                                         "$ref": "#/$defs/zpoolFormat"
+                                    },
+                                    "condition": {
+                                        "$ref": "#/$defs/conditions"
                                     }
                                 }
                             }

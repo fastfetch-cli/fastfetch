@@ -4,10 +4,13 @@
 #include "detection/gpu/gpu_driver_specific.h"
 #include "common/io/io.h"
 #include "common/library.h"
+#include "modules/gpu/option.h"
+#include "util/FFstrbuf.h"
 #include "util/stringUtils.h"
 #include "util/mallocHelper.h"
 
 #include <inttypes.h>
+#include <stdint.h>
 
 #ifdef FF_HAVE_DRM_AMDGPU
     #include <amdgpu.h>
@@ -120,7 +123,7 @@ static const char* drmDetectAmdSpecific(const FFGPUOptions* options, FFGPUResult
         #endif
     }
     #else
-    FF_UNUSED(gpu, drmKey, buffer);
+    FF_UNUSED(options, gpu, drmKey, buffer);
     return "Fastfetch is not compiled with drm support";
     #endif
 }
@@ -198,7 +201,7 @@ static void pciDetectIntelSpecific(const FFGPUOptions* options, FFGPUResult* gpu
     // https://patchwork.kernel.org/project/intel-gfx/patch/1422039866-11572-3-git-send-email-ville.syrjala@linux.intel.com/
 
     // 0000:00:02.0 is reserved for Intel integrated graphics
-    gpu->type = gpu->deviceId == 20 ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
+    gpu->type = gpu->deviceId == ffGPUPciAddr2Id(0, 0, 2, 0) ? FF_GPU_TYPE_INTEGRATED : FF_GPU_TYPE_DISCRETE;
 
     if (!drmKey) return;
 
@@ -263,6 +266,91 @@ static const char* drmDetectIntelSpecific(FFGPUResult* gpu, const char* drmKey, 
     #endif
 }
 
+static const char* pciDetectTempGeneral(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+{
+    if (options->temp)
+    {
+        const uint32_t pciDirLen = pciDir->length;
+        ffStrbufAppendS(pciDir, "/hwmon/");
+        FF_AUTO_CLOSE_DIR DIR* dirp = opendir(pciDir->chars);
+        if (dirp)
+        {
+            struct dirent* entry;
+            while ((entry = readdir(dirp)))
+            {
+                if (entry->d_name[0] == '.') continue;
+                ffStrbufAppendS(pciDir, entry->d_name);
+                ffStrbufAppendS(pciDir, "/temp1_input");
+                if (ffReadFileBuffer(pciDir->chars, buffer))
+                {
+                    uint64_t value = ffStrbufToUInt(buffer, 0);
+                    if (value > 0) gpu->temperature = (double) value / 1000.0;
+                }
+                break;
+            }
+        }
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+    }
+    return NULL;
+}
+
+static const char* drmDetectNouveauSpecific(FFGPUResult* gpu, const char* drmKey, FFstrbuf* buffer)
+{
+    #if FF_HAVE_DRM
+    ffStrbufSetS(buffer, "/dev/dri/");
+    ffStrbufAppendS(buffer, drmKey);
+    FF_AUTO_CLOSE_FD int fd = open(buffer->chars, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return "Failed to open drm device";
+
+    return ffDrmDetectNouveau(gpu, fd);
+    #else
+    FF_UNUSED(gpu, drmKey, buffer);
+    return "Fastfetch is not compiled with drm support";
+    #endif
+}
+
+static const char* pciDetectZxSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFstrbuf* pciDir, FFstrbuf* buffer)
+{
+    gpu->type = FF_GPU_TYPE_INTEGRATED;
+
+    const uint32_t pciDirLen = pciDir->length;
+    ffStrbufAppendS(pciDir, "/zx_info/eclk");
+    if (ffReadFileBuffer(pciDir->chars, buffer))
+        gpu->frequency = (uint32_t) ffStrbufToUInt(buffer, FF_GPU_FREQUENCY_UNSET);
+    ffStrbufSubstrBefore(pciDir, pciDirLen);
+
+    if (options->driverSpecific)
+    {
+        ffStrbufAppendS(pciDir, "/zx_info/engine_3d_usage");
+        if (ffReadFileBuffer(pciDir->chars, buffer))
+            gpu->coreUsage = ffStrbufToDouble(buffer, FF_GPU_CORE_USAGE_UNSET);
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+
+        ffStrbufAppendS(pciDir, "/zx_info/fb_size");
+        if (ffReadFileBuffer(pciDir->chars, buffer))
+            gpu->shared.total = ffStrbufToUInt(buffer, FF_GPU_VMEM_SIZE_UNSET);
+        ffStrbufSubstrBefore(pciDir, pciDirLen);
+
+        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET)
+        {
+            gpu->shared.total *= 1024 * 1024;
+
+            ffStrbufAppendS(pciDir, "/zx_info/free_fb_mem");
+            if (ffReadFileBuffer(pciDir->chars, buffer))
+                gpu->shared.used = ffStrbufToUInt(buffer, FF_GPU_VMEM_SIZE_UNSET);
+            ffStrbufSubstrBefore(pciDir, pciDirLen);
+
+            if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
+            {
+                gpu->shared.used *= 1024 * 1024;
+                gpu->shared.used = gpu->shared.total - gpu->shared.used;
+            }
+        }
+    }
+
+    return NULL;
+}
+
 static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf* buffer, FFstrbuf* deviceDir, const char* drmKey)
 {
     const uint32_t drmDirPathLength = deviceDir->length;
@@ -299,6 +387,9 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     if (sscanf(pPciPath, "%" SCNx32 ":%" SCNx32 ":%" SCNx32 ".%" SCNx32, &pciDomain, &pciBus, &pciDevice, &pciFunc) != 4)
         return "Invalid PCI device path";
 
+    if (pciFunc > 0 && subclassId == 0x80 /*PCI_CLASS_DISPLAY_OTHER*/)
+        return "Likely an auxiliary display controller"; // #2034
+
     FFGPUResult* gpu = (FFGPUResult*)ffListAdd(gpus);
     ffStrbufInitStatic(&gpu->vendor, ffGPUGetVendorString((uint16_t) vendorId));
     ffStrbufInit(&gpu->name);
@@ -311,7 +402,7 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
     gpu->coreCount = FF_GPU_CORE_COUNT_UNSET;
     gpu->type = FF_GPU_TYPE_UNKNOWN;
     gpu->dedicated.total = gpu->dedicated.used = gpu->shared.total = gpu->shared.used = FF_GPU_VMEM_SIZE_UNSET;
-    gpu->deviceId = (pciDomain * 100000ull) + (pciBus * 1000ull) + (pciDevice * 10ull) + pciFunc;
+    gpu->deviceId = ffGPUPciAddr2Id(pciDomain, pciBus, pciDevice, pciFunc);
     gpu->frequency = FF_GPU_FREQUENCY_UNSET;
 
     char drmKeyBuffer[8];
@@ -368,6 +459,17 @@ static const char* detectPci(const FFGPUOptions* options, FFlist* gpus, FFstrbuf
         ffStrbufSubstrBefore(deviceDir, drmDirPathLength);
         if (options->driverSpecific && drmKey)
             drmDetectIntelSpecific(gpu, drmKey, buffer);
+    }
+    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_NVIDIA && ffStrbufEqualS(&gpu->driver, "nouveau"))
+    {
+        pciDetectTempGeneral(options, gpu, deviceDir, buffer);
+        if (options->driverSpecific && drmKey)
+            drmDetectNouveauSpecific(gpu, drmKey, buffer);
+    }
+    else if (gpu->vendor.chars == FF_GPU_VENDOR_NAME_ZHAOXIN && ffStrbufStartsWithS(&gpu->driver, "zx"))
+    {
+        pciDetectTempGeneral(options, gpu, deviceDir, buffer);
+        pciDetectZxSpecific(options, gpu, deviceDir, buffer);
     }
     else
     {
@@ -503,7 +605,7 @@ static const char* drmDetectGPUs(const FFGPUOptions* options, FFlist* gpus)
 
         if (ffStrbufStartsWithS(&buffer, "pci:"))
             detectPci(options, gpus, &buffer, &drmDir, entry->d_name);
-        else if (ffStrbufStartsWithS(&buffer, "of:"))
+        else if (ffStrbufStartsWithS(&buffer, "of:")) // Open Firmware
             detectOf(gpus, &buffer, &drmDir, entry->d_name);
 
         ffStrbufSubstrBefore(&drmDir, drmDirLength);

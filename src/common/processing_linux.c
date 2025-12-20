@@ -11,7 +11,10 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <spawn.h>
+
+#if !(__ANDROID__ || __OpenBSD__)
+    #include <spawn.h>
+#endif
 
 #if defined(__FreeBSD__) || defined(__APPLE__)
     #include <sys/types.h>
@@ -53,30 +56,64 @@ static inline int ffPipe2(int* fds, int flags)
     #endif
 }
 
-const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool useStdErr)
+
+// Not thread-safe
+const char* ffProcessSpawn(char* const argv[], bool useStdErr, FFProcessHandle* outHandle)
 {
     int pipes[2];
-    const int timeout = instance.config.general.processingTimeout;
-
     if(ffPipe2(pipes, O_CLOEXEC) == -1)
         return "pipe() failed";
+
+    pid_t childPid = -1;
+    int nullFile = ffGetNullFD();
+
+    #if !(__ANDROID__ || __OpenBSD__)
+
+    // NetBSD / Darwin: native syscall
+    // Linux (glibc): clone3-execve
+    // FreeBSD: vfork-execve
+    // illumos: vforkx-execve
+    // OpenBSD / Android (bionic): fork-execve
 
     posix_spawn_file_actions_t file_actions;
     posix_spawn_file_actions_init(&file_actions);
     posix_spawn_file_actions_adddup2(&file_actions, pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
-    posix_spawn_file_actions_addopen(&file_actions, useStdErr ? STDOUT_FILENO : STDERR_FILENO, "/dev/null", O_WRONLY, 0);
-    pid_t childPid = -1;
+    posix_spawn_file_actions_adddup2(&file_actions, nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
 
-    char* oldLang = NULL;
-    int langIndex = -1;
-    for (int i = 0; environ[i] != NULL; i++)
+    static char* oldLang = NULL;
+    static int langIndex = -1;
+
+    if (langIndex >= 0)
     {
-        if (ffStrStartsWith(environ[i], "LANG="))
+        // Found before
+        if (oldLang) // oldLang was set only if it needed to be changed
         {
-            oldLang = environ[i];
-            environ[i] = (char*) "LANG=C";
-            langIndex = i;
-            break;
+            if (environ[langIndex] != oldLang)
+            {
+                // environ is changed outside of this function
+                langIndex = -1;
+            }
+            else
+                environ[langIndex] = (char*) "LANG=C.UTF-8";
+        }
+    }
+    if (langIndex < 0)
+    {
+        for (int i = 0; environ[i] != NULL; i++)
+        {
+            if (ffStrStartsWith(environ[i], "LANG="))
+            {
+                langIndex = i;
+                const char* langValue = environ[i] + 5; // Skip "LANG="
+                if (ffStrEqualsIgnCase(langValue, "C") ||
+                    ffStrStartsWithIgnCase(environ[i], "C.") ||
+                    ffStrEqualsIgnCase(langValue, "en_US") ||
+                    ffStrStartsWithIgnCase(langValue, "en_US."))
+                    break; // No need to change LANG
+                oldLang = environ[i];
+                environ[i] = (char*) "LANG=C.UTF-8"; // Set LANG to C.UTF-8 for consistent output
+                break;
+            }
         }
     }
 
@@ -87,17 +124,55 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
 
     posix_spawn_file_actions_destroy(&file_actions);
 
-    close(pipes[1]);
     if (ret != 0)
     {
         close(pipes[0]);
+        close(pipes[1]);
         return "posix_spawnp() failed";
     }
 
-    int FF_AUTO_CLOSE_FD childPipeFd = pipes[0];
+    #else
+
+    // https://github.com/termux/termux-packages/issues/25369
+    childPid = fork();
+    if(childPid == -1)
+    {
+        close(pipes[0]);
+        close(pipes[1]);
+        return "fork() failed";
+    }
+
+    if(childPid == 0)
+    {
+        // Child process
+        dup2(pipes[1], useStdErr ? STDERR_FILENO : STDOUT_FILENO);
+        dup2(nullFile, useStdErr ? STDOUT_FILENO : STDERR_FILENO);
+        putenv("LANG=C.UTF-8");
+        execvp(argv[0], argv);
+        _exit(127);
+    }
+
+    #endif
+
+    close(pipes[1]);
+    outHandle->pid = childPid;
+    outHandle->pipeRead = pipes[0];
+    return NULL;
+}
+
+const char* ffProcessReadOutput(FFProcessHandle* handle, FFstrbuf* buffer)
+{
+    assert(handle->pipeRead != -1);
+    assert(handle->pid != -1);
+
+    const int32_t timeout = instance.config.general.processingTimeout;
+    FF_AUTO_CLOSE_FD int childPipeFd = handle->pipeRead;
+    pid_t childPid = handle->pid;
+    handle->pipeRead = -1;
+    handle->pid = -1;
     char str[FF_PIPE_BUFSIZ];
 
-    while(1)
+    for (;;)
     {
         if (timeout >= 0)
         {
@@ -109,30 +184,13 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 waitpid(childPid, NULL, 0);
                 return "poll(&pollfd, 1, timeout) timeout (try increasing --processing-timeout)";
             }
-            else if (pollret < 0)
-            {
-                if (errno == EINTR)
-                {
-                    // The child process has been terminated. See `chldSignalHandler` in `common/init.c`
-                    if (waitpid(childPid, NULL, WNOHANG) == childPid)
-                    {
-                        // Read remaining data from the pipe
-                        fcntl(childPipeFd, F_SETFL, O_CLOEXEC | O_NONBLOCK);
-                        childPid = -1;
-                    }
-                }
-                else
-                {
-                    kill(childPid, SIGTERM);
-                    waitpid(childPid, NULL, 0);
-                    return "poll(&pollfd, 1, timeout) error";
-                }
-            }
-            else if (pollfd.revents & POLLERR)
+            else if (pollret < 0 || (pollfd.revents & POLLERR))
             {
                 kill(childPid, SIGTERM);
                 waitpid(childPid, NULL, 0);
-                return "poll(&pollfd, 1, timeout) error";
+                return pollret < 0
+                    ? "poll(&pollfd, 1, timeout) error: pollret < 0"
+                    : "poll(&pollfd, 1, timeout) error: pollfd.revents & POLLERR";
             }
         }
 
@@ -147,20 +205,15 @@ const char* ffProcessAppendOutput(FFstrbuf* buffer, char* const argv[], bool use
                 if (!WIFEXITED(stat_loc))
                     return "child process exited abnormally";
                 if (WEXITSTATUS(stat_loc) == 127)
-                    return "command was not found";
+                    return "command not found";
                 // We only handle 127 as an error. See `getTerminalVersionUrxvt` in `terminalshell.c`
                 return NULL;
             }
             return NULL;
         }
         else if (nRead < 0)
-        {
-            if (errno == EAGAIN)
-                return NULL;
-            else
-                break;
-        }
-    };
+            break;
+    }
 
     return "read(childPipeFd, str, FF_PIPE_BUFSIZ) failed";
 }
@@ -170,15 +223,42 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
     assert(processName->length > 0);
     ffStrbufClear(exe);
 
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__GNU__)
 
     char filePath[64];
     snprintf(filePath, sizeof(filePath), "/proc/%d/cmdline", (int)pid);
 
     if(ffReadFileBuffer(filePath, exe))
     {
-        ffStrbufRecalculateLength(exe); //Trim the arguments
-        ffStrbufTrimRightSpace(exe);
+        const char* p = exe->chars;
+        uint32_t len = (uint32_t) strlen(p);
+
+        if (len + 1 < exe->length)
+        {
+            const char* name = memrchr(p, '/', len);
+            if (name) name++; else name = p;
+
+            // For interpreters, try to find the real script path in the arguments
+            if (ffStrStartsWith(name, "python")
+                #ifndef __ANDROID__
+                || ffStrEquals(name, "guile") // for shepherd
+                #endif
+            )
+            {
+                // `cmdline` always ends with a trailing '\0', and ffReadFileBuffer appends another \0
+                // So `exe->chars` is always double '\0' terminated
+                for (p = p + len + 1; *p && *p == '-'; p += strlen(p) + 1) // Skip arguments
+                    assert(p - exe->chars < exe->allocated);
+                if (*p)
+                {
+                    len = (uint32_t) strlen(p);
+                    memmove(exe->chars, p, len + 1);
+                }
+            }
+        }
+
+        assert(len < exe->allocated);
+        exe->length = len;
         ffStrbufTrimLeft(exe, '-'); //Login shells start with a dash
     }
 
@@ -192,6 +272,10 @@ void ffProcessGetInfoLinux(pid_t pid, FFstrbuf* processName, FFstrbuf* exe, cons
             buf[length] = '\0';
             ffStrbufEnsureFixedLengthFree(exePath, (uint32_t)length);
             ffStrbufAppendNS(exePath, (uint32_t)length, buf);
+        }
+        else
+        {
+            ffStrbufSetS(exePath, filePath);
         }
     }
 
@@ -372,33 +456,53 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
     if (pid <= 0)
         return "Invalid pid";
 
-    #ifdef __linux__
+    #if defined(__linux__) || defined(__GNU__)
 
     char procFilePath[64];
-    if (ppid)
+    #if __linux__
+    if (ppid || tty)
+    #endif
     {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/stat", (int)pid);
         char buf[PROC_FILE_BUFFSIZ];
         ssize_t nRead = ffReadFileData(procFilePath, sizeof(buf) - 1, buf);
         if(nRead <= 8)
             return "ffReadFileData(/proc/pid/stat, PROC_FILE_BUFFSIZ-1, buf) failed";
-        buf[nRead] = '\0';
+        buf[nRead] = '\0'; // pid (comm) state ppid pgrp session tty
 
-        *ppid = 0;
-        static_assert(sizeof(*ppid) == sizeof(int), "");
+        const char* pState = NULL;
 
-        ffStrbufEnsureFixedLengthFree(name, 255);
-        int tty_;
-        if(
-            sscanf(buf, "%*s (%255[^)]) %*c %d %*d %*d %d", name->chars, ppid, &tty_) < 2 || //stat (comm) state ppid pgrp session tty
-            name->chars[0] == '\0'
-        )
-            return "sscanf(stat) failed";
+        {
+            // comm in `/proc/pid/stat` is not encoded, and may contain ' ', ')' or even `\n`
+            const char* start = memchr(buf, '(', (size_t) nRead);
+            if (!start)
+                return "memchr(stat, '(') failed";
+            start++;
+            const char* end = memrchr(start, ')', (size_t) nRead - (size_t) (start - buf));
+            if (!end)
+                return "memrchr(stat, ')') failed";
+            ffStrbufSetNS(name, (uint32_t) (end - start), start);
+            ffStrbufTrimRightSpace(name);
+            if (name->chars[0] == '\0')
+                return "process name is empty";
+            pState = end + 2; // skip ") "
+        }
 
-        ffStrbufRecalculateLength(name);
-        if (tty)
-            *tty = tty_ & 0xFF;
+        #if !__linux__
+        if (ppid || tty)
+        #endif
+        {
+            int ppid_, tty_;
+            if(sscanf(pState + 2, "%d %*d %*d %d", &ppid_, &tty_) < 2)
+                return "sscanf(stat) failed";
+
+            if (ppid)
+                *ppid = (pid_t) ppid_;
+            if (tty)
+                *tty = tty_ & 0xFF;
+        }
     }
+    #if __linux__
     else
     {
         snprintf(procFilePath, sizeof(procFilePath), "/proc/%d/comm", (int)pid);
@@ -407,6 +511,7 @@ const char* ffProcessGetBasicInfoLinux(pid_t pid, FFstrbuf* name, pid_t* ppid, i
             return "ffReadFileBuffer(/proc/pid/comm, name) failed";
         ffStrbufTrimRightSpace(name);
     }
+    #endif
 
     #elif defined(__APPLE__)
 

@@ -5,7 +5,7 @@
 #include "modules/editor/editor.h"
 #include "util/stringUtils.h"
 
-void ffPrintEditor(FFEditorOptions* options)
+bool ffPrintEditor(FFEditorOptions* options)
 {
     FFEditorResult result = {
         .type = "Unknown",
@@ -19,7 +19,7 @@ void ffPrintEditor(FFEditorOptions* options)
     if (error)
     {
         ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if (options->moduleArgs.outputFormat.length == 0)
@@ -52,44 +52,29 @@ void ffPrintEditor(FFEditorOptions* options)
     ffStrbufDestroy(&result.path);
     ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
-}
 
-bool ffParseEditorCommandOptions(FFEditorOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_EDITOR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseEditorJsonObject(FFEditorOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_EDITOR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateEditorJsonConfig(FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyEditorOptions))) FFEditorOptions defaultOptions;
-    ffInitEditorOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FFEditorResult result = {
         .name = ffStrbufCreate(),
@@ -102,7 +87,7 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -116,12 +101,25 @@ void ffGenerateEditorJsonResult(FF_MAYBE_UNUSED FFEditorOptions* options, yyjson
     ffStrbufDestroy(&result.path);
     ffStrbufDestroy(&result.exe);
     ffStrbufDestroy(&result.version);
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitEditorOptions(FFEditorOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
+}
+
+void ffDestroyEditorOptions(FFEditorOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffEditorModuleInfo = {
     .name = FF_EDITOR_MODULE_NAME,
     .description = "Print information of the default editor ($VISUAL or $EDITOR)",
-    .parseCommandOptions = (void*) ffParseEditorCommandOptions,
+    .initOptions = (void*) ffInitEditorOptions,
+    .destroyOptions = (void*) ffDestroyEditorOptions,
     .parseJsonObject = (void*) ffParseEditorJsonObject,
     .printModule = (void*) ffPrintEditor,
     .generateJsonResult = (void*) ffGenerateEditorJsonResult,
@@ -130,18 +128,7 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Type (Visual / Editor)", "type"},
         {"Name", "name"},
         {"Exe name of real path", "exe-name"},
-        {"Full path of real path", "full-path"},
+        {"Full path of real path", "path"},
         {"Version", "version"},
     }))
 };
-
-void ffInitEditorOptions(FFEditorOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󱞎");
-}
-
-void ffDestroyEditorOptions(FFEditorOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

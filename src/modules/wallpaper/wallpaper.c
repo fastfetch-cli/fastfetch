@@ -4,7 +4,7 @@
 #include "modules/wallpaper/wallpaper.h"
 #include "util/stringUtils.h"
 
-void ffPrintWallpaper(FFWallpaperOptions* options)
+bool ffPrintWallpaper(FFWallpaperOptions* options)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
     const char* error = ffDetectWallpaper(&fullpath);
@@ -23,7 +23,7 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
     if(error)
     {
         ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -38,59 +38,57 @@ void ffPrintWallpaper(FFWallpaperOptions* options)
             FF_FORMAT_ARG(fullpath, "full-path"),
         }));
     }
-}
 
-bool ffParseWallpaperCommandOptions(FFWallpaperOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_WALLPAPER_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseWallpaperJsonObject(FFWallpaperOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_WALLPAPER_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateWallpaperJsonConfig(FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyWallpaperOptions))) FFWallpaperOptions defaultOptions;
-    ffInitWallpaperOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateWallpaperJsonResult(FF_MAYBE_UNUSED FFWallpaperOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_STRBUF_AUTO_DESTROY fullpath = ffStrbufCreate();
     const char* error = ffDetectWallpaper(&fullpath);
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
     yyjson_mut_obj_add_strbuf(doc, module, "result", &fullpath);
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
+}
+
+void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffWallpaperModuleInfo = {
     .name = FF_WALLPAPER_MODULE_NAME,
     .description = "Print image file path of current wallpaper",
-    .parseCommandOptions = (void*) ffParseWallpaperCommandOptions,
+    .initOptions = (void*) ffInitWallpaperOptions,
+    .destroyOptions = (void*) ffDestroyWallpaperOptions,
     .parseJsonObject = (void*) ffParseWallpaperJsonObject,
     .printModule = (void*) ffPrintWallpaper,
     .generateJsonResult = (void*) ffGenerateWallpaperJsonResult,
@@ -100,14 +98,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Full path", "full-path"},
     }))
 };
-
-void ffInitWallpaperOptions(FFWallpaperOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰸉");
-}
-
-void ffDestroyWallpaperOptions(FFWallpaperOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

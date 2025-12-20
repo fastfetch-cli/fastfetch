@@ -113,10 +113,16 @@ const char* ffDetectDisksImpl(FFDiskOptions* options, FFlist* disks)
     {
         if (__builtin_expect(options->folders.length, 0))
         {
-            if (!ffDiskMatchMountpoint(&options->folders, device.mnt_mountp))
+            if (!ffStrbufSeparatedContainS(&options->folders, device.mnt_mountp, FF_DISK_FOLDER_SEPARATOR))
                 continue;
         }
         else if(!isPhysicalDevice(&device))
+            continue;
+
+        if (options->hideFolders.length && ffDiskMatchesFolderPatterns(&options->hideFolders, device.mnt_mountp, FF_DISK_FOLDER_SEPARATOR))
+            continue;
+
+        if (options->hideFS.length && ffStrbufSeparatedContainS(&options->hideFS, device.mnt_fstype, ':'))
             continue;
 
         //We have a valid device, add it to the list

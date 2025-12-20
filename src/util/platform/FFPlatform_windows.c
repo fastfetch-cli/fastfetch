@@ -6,7 +6,7 @@
 #include "util/windows/registry.h"
 #include "util/windows/nt.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <shlobj.h>
 
 #define SECURITY_WIN32 1 // For secext.h
@@ -16,7 +16,7 @@ static void getExePath(FFPlatform* platform)
 {
     wchar_t exePathW[MAX_PATH];
     DWORD exePathWLen = GetModuleFileNameW(NULL, exePathW, MAX_PATH);
-    if (exePathWLen == 0 && exePathWLen >= MAX_PATH) return;
+    if (exePathWLen == 0 || exePathWLen >= MAX_PATH) return;
 
     FF_AUTO_CLOSE_FD HANDLE hPath = CreateFileW(exePathW, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
     if (hPath != INVALID_HANDLE_VALUE)
@@ -164,19 +164,22 @@ static void getHostName(FFPlatform* platform)
 static void getUserShell(FFPlatform* platform)
 {
     // Works in MSYS2
-    ffStrbufAppendS(&platform->userShell, getenv("SHELL"));
-    ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
+    const char* userShell = getenv("SHELL");
+    if (userShell)
+    {
+        ffStrbufAppendS(&platform->userShell, userShell);
+        ffStrbufReplaceAllC(&platform->userShell, '\\', '/');
+    }
 }
 
-static void detectWine(FFstrbuf* buf)
+static const char* detectWine(void)
 {
     const char * __cdecl wine_get_version(void);
     HMODULE hntdll = GetModuleHandleW(L"ntdll.dll");
-    if (!hntdll) return;
+    if (!hntdll) return NULL;
     FF_LIBRARY_LOAD_SYMBOL_LAZY(hntdll, wine_get_version);
-    if (!ffwine_get_version) return;
-    ffStrbufAppendS(buf, buf->length ? " - wine " : "wine ");
-    ffStrbufAppendS(buf, ffwine_get_version());
+    if (!ffwine_get_version) return NULL;
+    return ffwine_get_version();
 }
 
 static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
@@ -199,29 +202,25 @@ static void getSystemReleaseAndVersion(FFPlatformSysinfo* info)
         (unsigned) osVersion.dwBuildNumber,
         (unsigned) ubr);
 
-    ffStrbufInit(&info->displayVersion);
-    if(!ffRegReadStrbuf(hKey, L"DisplayVersion", &info->displayVersion, NULL))
-    {
-        if (osVersion.szCSDVersion[0])
-            ffStrbufSetWS(&info->displayVersion, osVersion.szCSDVersion);
-        else
-            ffRegReadStrbuf(hKey, L"ReleaseId", &info->displayVersion, NULL); // For old Windows 10
-    }
-    detectWine(&info->displayVersion);
-
     ffRegReadStrbuf(hKey, L"BuildLabEx", &info->version, NULL);
 
-    switch (osVersion.dwPlatformId)
+    const char* wineVersion = detectWine();
+    if (wineVersion)
+        ffStrbufSetF(&info->name, "Wine_%s", wineVersion);
+    else
     {
-    case VER_PLATFORM_WIN32s:
-        ffStrbufSetStatic(&info->name, "WIN32s");
-        break;
-    case VER_PLATFORM_WIN32_WINDOWS:
-        ffStrbufSetStatic(&info->name, "WIN32_WINDOWS");
-        break;
-    case VER_PLATFORM_WIN32_NT:
-        ffStrbufSetStatic(&info->name, "WIN32_NT");
-        break;
+        switch (osVersion.dwPlatformId)
+        {
+        case VER_PLATFORM_WIN32s:
+            ffStrbufSetStatic(&info->name, "WIN32s");
+            break;
+        case VER_PLATFORM_WIN32_WINDOWS:
+            ffStrbufSetStatic(&info->name, "WIN32_WINDOWS");
+            break;
+        case VER_PLATFORM_WIN32_NT:
+            ffStrbufSetStatic(&info->name, "WIN32_NT");
+            break;
+        }
     }
 }
 

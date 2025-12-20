@@ -41,14 +41,14 @@ static bool artistInSongTitle(const FFstrbuf* song, const FFstrbuf* artist)
     return false;
 }
 
-void ffPrintMedia(FFMediaOptions* options)
+bool ffPrintMedia(FFMediaOptions* options)
 {
-    const FFMediaResult* media = ffDetectMedia();
+    const FFMediaResult* media = ffDetectMedia(false);
 
     if(media->error.length > 0)
     {
         ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", media->error.chars);
-        return;
+        return false;
     }
 
     FF_STRBUF_AUTO_DESTROY songPretty = ffStrbufCreateCopy(&media->song);
@@ -104,51 +104,36 @@ void ffPrintMedia(FFMediaOptions* options)
             FF_FORMAT_ARG(media->url, "url"),
         }));
     }
-}
 
-bool ffParseMediaCommandOptions(FFMediaOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_MEDIA_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseMediaJsonObject(FFMediaOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_MEDIA_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateMediaJsonConfig(FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyMediaOptions))) FFMediaOptions defaultOptions;
-    ffInitMediaOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    const FFMediaResult* media = ffDetectMedia();
+    const FFMediaResult* media = ffDetectMedia(false);
 
     if(media->error.length > 0)
     {
         yyjson_mut_obj_add_strbuf(doc, module, "error", &media->error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* obj = yyjson_mut_obj_add_obj(doc, module, "result");
@@ -158,17 +143,34 @@ void ffGenerateMediaJsonResult(FF_MAYBE_UNUSED FFMediaOptions* options, yyjson_m
     yyjson_mut_obj_add_strbuf(doc, song, "artist", &media->artist);
     yyjson_mut_obj_add_strbuf(doc, song, "album", &media->album);
     yyjson_mut_obj_add_strbuf(doc, song, "status", &media->status);
+    if (media->cover.length > 0)
+        yyjson_mut_obj_add_strbuf(doc, song, "cover", &media->cover);
+    else
+        yyjson_mut_obj_add_null(doc, song, "cover");
 
     yyjson_mut_val* player = yyjson_mut_obj_add_obj(doc, obj, "player");
     yyjson_mut_obj_add_strbuf(doc, player, "name", &media->player);
     yyjson_mut_obj_add_strbuf(doc, player, "id", &media->playerId);
     yyjson_mut_obj_add_strbuf(doc, player, "url", &media->url);
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitMediaOptions(FFMediaOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyMediaOptions(FFMediaOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffMediaModuleInfo = {
     .name = FF_MEDIA_MODULE_NAME,
     .description = "Print playing song name",
-    .parseCommandOptions = (void*) ffParseMediaCommandOptions,
+    .initOptions = (void*) ffInitMediaOptions,
+    .destroyOptions = (void*) ffDestroyMediaOptions,
     .parseJsonObject = (void*) ffParseMediaJsonObject,
     .printModule = (void*) ffPrintMedia,
     .generateJsonResult = (void*) ffGenerateMediaJsonResult,
@@ -181,14 +183,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Status", "status"},
     }))
 };
-
-void ffInitMediaOptions(FFMediaOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyMediaOptions(FFMediaOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

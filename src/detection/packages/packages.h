@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/packages/option.h"
 
 typedef struct FFPackagesResult
 {
@@ -20,6 +21,7 @@ typedef struct FFPackagesResult
     uint32_t guixUser;
     uint32_t hpkgSystem;
     uint32_t hpkgUser;
+    uint32_t kiss;
     uint32_t linglong;
     uint32_t lpkg;
     uint32_t lpkgbuild;
@@ -36,9 +38,9 @@ typedef struct FFPackagesResult
     uint32_t pkg;
     uint32_t pkgsrc;
     uint32_t pkgtool;
-    uint32_t qi;
     uint32_t rpm;
-    uint32_t scoop;
+    uint32_t scoopUser;
+    uint32_t scoopGlobal;
     uint32_t snap;
     uint32_t soar;
     uint32_t sorcery;
@@ -54,6 +56,9 @@ const char* ffDetectPackages(FFPackagesResult* result, FFPackagesOptions* option
 bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char* filePath, const char* packageId, uint32_t* result);
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements);
 
+#if defined(__linux__) || defined(__APPLE__) || defined(__GNU__)
+uint32_t ffPackagesGetNix(FFstrbuf* baseDir, const char* dirname);
+#endif
 #ifndef _WIN32
 uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir);
 #endif

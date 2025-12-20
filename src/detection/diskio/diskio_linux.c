@@ -23,8 +23,8 @@ static const char* parseDiskIOCounters(int dfd, const char* devName, FFlist* res
                 ffStrbufAppendC(&name, ' ');
         }
 
-        if (ffAppendFileBufferRelative(devfd, "model", &name))
-            ffStrbufTrimRightSpace(&name);
+        ffAppendFileBufferRelative(devfd, "model", &name);
+        ffStrbufTrimRightSpace(&name);
 
         if (name.length == 0)
             ffStrbufSetS(&name, devName);

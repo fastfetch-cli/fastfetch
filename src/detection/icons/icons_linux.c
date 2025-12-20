@@ -7,7 +7,7 @@ const char* ffDetectIcons(FFIconsResult* result)
 {
     const FFDisplayServerResult* wmde = ffConnectDisplayServer();
 
-    if(ffStrbufIgnCaseCompS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY) == 0)
+    if(ffStrbufIgnCaseEqualS(&wmde->wmProtocolName, FF_WM_PROTOCOL_TTY))
         return "Icons aren't supported in TTY";
 
     const FFstrbuf* plasma = &ffDetectQt()->icons;

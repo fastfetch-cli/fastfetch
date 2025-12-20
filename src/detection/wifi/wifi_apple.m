@@ -4,42 +4,14 @@
 
 #import <CoreWLAN/CoreWLAN.h>
 
-static bool queryIpconfig(const char* ifName, FFstrbuf* result)
+static inline double rssiToSignalQuality(int rssi)
 {
-    return ffProcessAppendStdOut(result, (char* const[]) {
-        "/usr/sbin/ipconfig",
-        "getsummary",
-        (char* const) ifName,
-        NULL
-    }) == NULL;
+    return (double) (rssi >= -50 ? 100 : rssi <= -100 ? 0 : (rssi + 100) * 2);
 }
 
-static bool getWifiInfoByIpconfig(FFstrbuf* ipconfig, const char* prefix, FFstrbuf* result)
-{
-    // `ipconfig getsummary <interface>` returns a string like this:
-    // <dictionary> {
-    //   BSSID : <redacted>
-    //   IPv4 : <array> {
-    //   ...
-    //   }
-    //   IPv6 : <array> {
-    //   ...
-    //   }
-    //   InterfaceType : WiFi
-    //   LinkStatusActive : TRUE
-    //   NetworkID : XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
-    //   SSID : XXXXXX
-    //   Security : WPA2_PSK
-    // }
-
-    const char* start = memmem(ipconfig->chars, ipconfig->length, prefix, strlen(prefix));
-    if (!start) return false;
-    start += strlen(prefix);
-    const char* end = strchr(start, '\n');
-    if (!end) return false;
-    ffStrbufSetNS(result, (uint32_t) (end - start), start);
-    return true;
-}
+@interface CWNetworkProfile()
+@property(readonly, retain, nullable) NSArray<NSDictionary *> *bssidList;
+@end
 
 const char* ffDetectWifi(FFlist* result)
 {
@@ -49,7 +21,7 @@ const char* ffDetectWifi(FFlist* result)
 
     for (CWInterface* inf in interfaces)
     {
-        FFWifiResult* item = (FFWifiResult*)ffListAdd(result);
+        FFWifiResult* item = (FFWifiResult*) ffListAdd(result);
         ffStrbufInit(&item->inf.description);
         ffStrbufInit(&item->inf.status);
         ffStrbufInit(&item->conn.status);
@@ -57,9 +29,9 @@ const char* ffDetectWifi(FFlist* result)
         ffStrbufInit(&item->conn.bssid);
         ffStrbufInit(&item->conn.protocol);
         ffStrbufInit(&item->conn.security);
-        item->conn.signalQuality = 0.0/0.0;
-        item->conn.rxRate = 0.0/0.0;
-        item->conn.txRate = 0.0/0.0;
+        item->conn.signalQuality = -DBL_MAX;
+        item->conn.rxRate = -DBL_MAX;
+        item->conn.txRate = -DBL_MAX;
         item->conn.channel = 0;
         item->conn.frequency = 0;
 
@@ -74,17 +46,21 @@ const char* ffDetectWifi(FFlist* result)
 
         FF_STRBUF_AUTO_DESTROY ipconfig = ffStrbufCreate();
 
+        CWNetworkProfile* networkProfile = inf.configuration.networkProfiles.firstObject;
+
         if (inf.ssid) // https://developer.apple.com/forums/thread/732431
             ffStrbufAppendS(&item->conn.ssid, inf.ssid.UTF8String);
-        else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
-            getWifiInfoByIpconfig(&ipconfig, "\n  SSID : ", &item->conn.ssid);
+        else if (networkProfile.ssid)
+            ffStrbufSetStatic(&item->conn.ssid, inf.configuration.networkProfiles.firstObject.ssid.UTF8String);
         else
-            ffStrbufSetStatic(&item->conn.ssid, "<unknown ssid>"); // https://developer.apple.com/forums/thread/732431
+            ffStrbufSetStatic(&item->conn.ssid, "<redacted>"); // https://developer.apple.com/forums/thread/732431
 
         if (inf.bssid)
             ffStrbufAppendS(&item->conn.bssid, inf.bssid.UTF8String);
-        else if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
-            getWifiInfoByIpconfig(&ipconfig, "\n  BSSID : ", &item->conn.bssid);
+        else if (networkProfile.bssidList)
+            ffStrbufSetStatic(&item->conn.bssid, [networkProfile.bssidList.firstObject[@"BSSID"] UTF8String]);
+        else
+            ffStrbufSetStatic(&item->conn.bssid, "<redacted>");
 
         switch(inf.activePHYMode)
         {
@@ -117,7 +93,7 @@ const char* ffDetectWifi(FFlist* result)
                     ffStrbufAppendF(&item->conn.protocol, "Unknown (%ld)", inf.activePHYMode);
                 break;
         }
-        item->conn.signalQuality = (double) (inf.rssiValue >= -50 ? 100 : inf.rssiValue <= -100 ? 0 : (inf.rssiValue + 100) * 2);
+        item->conn.signalQuality = rssiToSignalQuality((int) inf.rssiValue);
         item->conn.txRate = inf.transmitRate;
 
         switch(inf.security)
@@ -170,11 +146,6 @@ const char* ffDetectWifi(FFlist* result)
             case 15 /*kCWSecurityOWETransition*/:
                 ffStrbufSetStatic(&item->conn.security, "OWE Transition");
                 break;
-            case kCWSecurityUnknown:
-                // Sonoma?
-                if (ipconfig.length || (queryIpconfig(item->inf.description.chars, &ipconfig)))
-                    getWifiInfoByIpconfig(&ipconfig, "\n  Security : ", &item->conn.security);
-                break;
             default:
                 ffStrbufAppendF(&item->conn.security, "Unknown (%ld)", inf.security);
                 break;
@@ -189,5 +160,6 @@ const char* ffDetectWifi(FFlist* result)
             default: item->conn.frequency = 0; break;
         }
     }
+
     return NULL;
 }

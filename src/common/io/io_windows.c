@@ -3,8 +3,8 @@
 #include "util/stringUtils.h"
 
 #include <windows.h>
+#include "util/windows/nt.h"
 #include <ntstatus.h>
-#include <winternl.h>
 
 static void createSubfolders(const char* fileName)
 {
@@ -102,29 +102,46 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer)
     return ffAppendFDBuffer(handle, buffer);
 }
 
-HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
+HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory)
 {
-    NTSTATUS ret;
-    UNICODE_STRING fileNameW;
-    ret = RtlAnsiStringToUnicodeString(&fileNameW, &(ANSI_STRING) {
-        .Length = (USHORT) strlen(fileName),
-        .Buffer = (PCHAR) fileName
-    }, TRUE);
-    if (!NT_SUCCESS(ret)) return INVALID_HANDLE_VALUE;
+    assert(fileNameLen <= 0x7FFF);
 
-    FF_AUTO_CLOSE_FD HANDLE hFile;
+    HANDLE hFile;
     IO_STATUS_BLOCK iosb = {};
-    ret = NtOpenFile(&hFile, FILE_READ_DATA | SYNCHRONIZE, &(OBJECT_ATTRIBUTES) {
-        .Length = sizeof(OBJECT_ATTRIBUTES),
-        .RootDirectory = dfd,
-        .ObjectName = &fileNameW,
-    }, &iosb, FILE_SHARE_READ, FILE_SYNCHRONOUS_IO_NONALERT | (directory ? FILE_DIRECTORY_FILE : FILE_NON_DIRECTORY_FILE));
-    RtlFreeUnicodeString(&fileNameW);
-
-    if(!NT_SUCCESS(ret) || iosb.Information != FILE_OPENED)
+    if(!NT_SUCCESS(NtOpenFile(&hFile,
+        (directory ? FILE_LIST_DIRECTORY | FILE_TRAVERSE : FILE_READ_DATA | FILE_READ_EA) | FILE_READ_ATTRIBUTES | SYNCHRONIZE, &(OBJECT_ATTRIBUTES) {
+            .Length = sizeof(OBJECT_ATTRIBUTES),
+            .RootDirectory = dfd,
+            .ObjectName = &(UNICODE_STRING) {
+                .Buffer = (PWSTR) fileName,
+                .Length = fileNameLen * (USHORT) sizeof(wchar_t),
+                .MaximumLength = (fileNameLen + 1) * (USHORT) sizeof(wchar_t),
+            },
+            .Attributes = OBJ_CASE_INSENSITIVE,
+        },
+        &iosb,
+        FILE_SHARE_READ | (directory ? FILE_SHARE_WRITE | FILE_SHARE_DELETE : 0),
+        FILE_SYNCHRONOUS_IO_NONALERT | (directory ? FILE_DIRECTORY_FILE : FILE_NON_DIRECTORY_FILE)
+    )))
         return INVALID_HANDLE_VALUE;
 
     return hFile;
+}
+
+HANDLE openat(HANDLE dfd, const char* fileName, bool directory)
+{
+    wchar_t fileNameW[MAX_PATH];
+    int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, fileName, -1, fileNameW, ARRAY_SIZE(fileNameW));
+    if (len == 0) return INVALID_HANDLE_VALUE;
+    // Implies `fileNameW[len] = L'\0';` and `len` includes the null terminator
+
+    for (int i = 0; i < len - 1; ++i)
+    {
+        if (fileNameW[i] == L'/')
+            fileNameW[i] = L'\\';
+    }
+
+    return openatW(dfd, fileNameW, (uint16_t)(len - 1), directory);
 }
 
 bool ffAppendFileBufferRelative(HANDLE dfd, const char* fileName, FFstrbuf* buffer)
@@ -175,7 +192,7 @@ bool ffSuppressIO(bool suppress)
     static bool init = false;
     static HANDLE hOrigOut = INVALID_HANDLE_VALUE;
     static HANDLE hOrigErr = INVALID_HANDLE_VALUE;
-    static HANDLE hNullFile = INVALID_HANDLE_VALUE;
+    HANDLE hNullFile = ffGetNullFD();
     static int fOrigOut = -1;
     static int fOrigErr = -1;
     static int fNullFile = -1;
@@ -187,7 +204,6 @@ bool ffSuppressIO(bool suppress)
 
         hOrigOut = GetStdHandle(STD_OUTPUT_HANDLE);
         hOrigErr = GetStdHandle(STD_ERROR_HANDLE);
-        hNullFile = CreateFileW(L"NUL", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, NULL);
         fOrigOut = _dup(STDOUT_FILENO);
         fOrigErr = _dup(STDERR_FILENO);
         fNullFile = _open_osfhandle((intptr_t) hNullFile, 0);
@@ -351,4 +367,29 @@ const char* ffGetTerminalResponse(const char* request, int nParams, const char* 
     va_end(args);
 
     return NULL;
+}
+
+FFNativeFD ffGetNullFD(void)
+{
+    static FFNativeFD hNullFile = INVALID_HANDLE_VALUE;
+    if (hNullFile != INVALID_HANDLE_VALUE)
+        return hNullFile;
+    hNullFile = CreateFileW(
+        L"NUL",
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_WRITE,
+        0,
+        OPEN_EXISTING,
+        0,
+        &(SECURITY_ATTRIBUTES){
+            .nLength = sizeof(SECURITY_ATTRIBUTES),
+            .lpSecurityDescriptor = NULL,
+            .bInheritHandle = TRUE,
+        });
+    return hNullFile;
+}
+
+bool ffRemoveFile(const char* fileName)
+{
+    return DeleteFileA(fileName) != FALSE;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/memory/option.h"
 
 typedef struct FFMemoryResult
 {

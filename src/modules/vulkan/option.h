@@ -1,11 +1,10 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 
 typedef struct FFVulkanOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 } FFVulkanOptions;
+
+static_assert(sizeof(FFVulkanOptions) <= FF_OPTION_MAX_SIZE, "FFVulkanOptions size exceeds maximum allowed size");

@@ -53,7 +53,7 @@ const char* ffNetIOGetIoCounters(FFlist* result, FFNetIOOptions* options)
 
     FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
 
-    const char* defaultRouteIfName = ffNetifGetDefaultRouteIfName();
+    const char* defaultRouteIfName = ffNetifGetDefaultRouteV4()->ifName;
 
     if (options->defaultRouteOnly)
     {

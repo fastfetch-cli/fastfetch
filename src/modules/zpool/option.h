@@ -1,14 +1,13 @@
 #pragma once
 
-// This file will be included in "fastfetch.h", do NOT put unnecessary things here
-
 #include "common/option.h"
 #include "common/percent.h"
 
 typedef struct FFZpoolOptions
 {
-    FFModuleBaseInfo moduleInfo;
     FFModuleArgs moduleArgs;
 
     FFPercentageModuleConfig percent;
 } FFZpoolOptions;
+
+static_assert(sizeof(FFZpoolOptions) <= FF_OPTION_MAX_SIZE, "FFZpoolOptions size exceeds maximum allowed size");

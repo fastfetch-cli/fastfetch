@@ -4,8 +4,9 @@
 #include "modules/bootmgr/bootmgr.h"
 #include "util/stringUtils.h"
 
-void ffPrintBootmgr(FFBootmgrOptions* options)
+bool ffPrintBootmgr(FFBootmgrOptions* options)
 {
+    bool success = false;
     FFBootmgrResult bootmgr = {
         .name = ffStrbufCreate(),
         .firmware = ffStrbufCreate(),
@@ -16,77 +17,67 @@ void ffPrintBootmgr(FFBootmgrOptions* options)
     if(error)
     {
         ffPrintError(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
-    }
-
-    FF_STRBUF_AUTO_DESTROY firmwareName = ffStrbufCreateCopy(&bootmgr.firmware);
-    #ifndef __APPLE__
-    ffStrbufSubstrAfterLastC(&firmwareName, '\\');
-    #else
-    ffStrbufSubstrAfterLastC(&firmwareName, '/');
-    #endif
-
-    if(options->moduleArgs.outputFormat.length == 0)
-    {
-        ffPrintLogoAndKey(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&bootmgr.name, stdout);
-        if (firmwareName.length > 0)
-            printf(" - %s\n", firmwareName.chars);
-        else
-            putchar('\n');
+        goto exit;
     }
     else
     {
-        FF_PRINT_FORMAT_CHECKED(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
-            FF_FORMAT_ARG(bootmgr.name, "name"),
-            FF_FORMAT_ARG(bootmgr.firmware, "firmware-path"),
-            FF_FORMAT_ARG(firmwareName, "firmware-name"),
-            FF_FORMAT_ARG(bootmgr.secureBoot, "secure-boot"),
-            FF_FORMAT_ARG(bootmgr.order, "order"),
-        }));
-    }
+        FF_STRBUF_AUTO_DESTROY firmwareName = ffStrbufCreateCopy(&bootmgr.firmware);
+        #ifndef __APPLE__
+        ffStrbufSubstrAfterLastC(&firmwareName, '\\');
+        #else
+        ffStrbufSubstrAfterLastC(&firmwareName, '/');
+        #endif
 
+        if(options->moduleArgs.outputFormat.length == 0)
+        {
+            ffPrintLogoAndKey(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
+            ffStrbufWriteTo(&bootmgr.name, stdout);
+            if (firmwareName.length > 0)
+                printf(" - %s\n", firmwareName.chars);
+            else
+                putchar('\n');
+        }
+        else
+        {
+            FF_PRINT_FORMAT_CHECKED(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, ((FFformatarg[]) {
+                FF_FORMAT_ARG(bootmgr.name, "name"),
+                FF_FORMAT_ARG(bootmgr.firmware, "firmware-path"),
+                FF_FORMAT_ARG(firmwareName, "firmware-name"),
+                FF_FORMAT_ARG(bootmgr.secureBoot, "secure-boot"),
+                FF_FORMAT_ARG(bootmgr.order, "order"),
+            }));
+        }
+    }
+    success = true;
+
+exit:
     ffStrbufDestroy(&bootmgr.name);
     ffStrbufDestroy(&bootmgr.firmware);
-}
 
-bool ffParseBootmgrCommandOptions(FFBootmgrOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BOOTMGR_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return success;
 }
 
 void ffParseBootmgrJsonObject(FFBootmgrOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BOOTMGR_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateBootmgrJsonConfig(FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBootmgrOptions))) FFBootmgrOptions defaultOptions;
-    ffInitBootmgrOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFBootmgrResult bootmgr = {
         .name = ffStrbufCreate(),
         .firmware = ffStrbufCreate(),
@@ -105,16 +96,29 @@ void ffGenerateBootmgrJsonResult(FF_MAYBE_UNUSED FFBootmgrOptions* options, yyjs
     yyjson_mut_obj_add_strbuf(doc, obj, "firmware", &bootmgr.firmware);
     yyjson_mut_obj_add_uint(doc, obj, "order", bootmgr.order);
     yyjson_mut_obj_add_bool(doc, obj, "secureBoot", bootmgr.secureBoot);
+    success = true;
 
 exit:
     ffStrbufDestroy(&bootmgr.name);
     ffStrbufDestroy(&bootmgr.firmware);
+    return success;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBootmgrOptions(FFBootmgrOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBootmgrModuleInfo = {
     .name = FF_BOOTMGR_MODULE_NAME,
     .description = "Print information of 2nd-stage bootloader (name, firmware, etc)",
-    .parseCommandOptions = (void*) ffParseBootmgrCommandOptions,
+    .initOptions = (void*) ffInitBootmgrOptions,
+    .destroyOptions = (void*) ffDestroyBootmgrOptions,
     .parseJsonObject = (void*) ffParseBootmgrJsonObject,
     .printModule = (void*) ffPrintBootmgr,
     .generateJsonResult = (void*) ffGenerateBootmgrJsonResult,
@@ -127,14 +131,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Boot order", "order"},
     }))
 };
-
-void ffInitBootmgrOptions(FFBootmgrOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyBootmgrOptions(FFBootmgrOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -56,7 +56,7 @@ static void printDevice(FFBluetoothOptions* options, const FFBluetoothResult* de
     }
 }
 
-void ffPrintBluetooth(FFBluetoothOptions* options)
+bool ffPrintBluetooth(FFBluetoothOptions* options)
 {
     FF_LIST_AUTO_DESTROY devices = ffListCreate(sizeof (FFBluetoothResult));
     const char* error = ffDetectBluetooth(options, &devices);
@@ -64,29 +64,28 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
     if(error)
     {
         ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        return false;
     }
-    else
+
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothResult*));
+
+    FF_LIST_FOR_EACH(FFBluetoothResult, device, devices)
     {
-        FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFBluetoothResult*));
+        if(!device->connected && !options->showDisconnected)
+            continue;
 
-        FF_LIST_FOR_EACH(FFBluetoothResult, device, devices)
-        {
-            if(!device->connected && !options->showDisconnected)
-                continue;
+        *(FFBluetoothResult**)ffListAdd(&filtered) = device;
+    }
 
-            *(FFBluetoothResult**)ffListAdd(&filtered) = device;
-        }
+    if(filtered.length == 0)
+    {
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
+    }
 
-        if(filtered.length == 0)
-        {
-            ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No bluetooth devices found");
-        }
-
-        for(uint32_t i = 0; i < filtered.length; i++)
-        {
-            uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
-            printDevice(options, *FF_LIST_GET(FFBluetoothResult*, filtered, i), index);
-        }
+    for(uint32_t i = 0; i < filtered.length; i++)
+    {
+        uint8_t index = (uint8_t) (filtered.length == 1 ? 0 : i + 1);
+        printDevice(options, *FF_LIST_GET(FFBluetoothResult*, filtered, i), index);
     }
 
     FF_LIST_FOR_EACH(FFBluetoothResult, device, devices)
@@ -95,41 +94,19 @@ void ffPrintBluetooth(FFBluetoothOptions* options)
         ffStrbufDestroy(&device->type);
         ffStrbufDestroy(&device->address);
     }
-}
-
-bool ffParseBluetoothCommandOptions(FFBluetoothOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_BLUETOOTH_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "show-disconnected"))
-    {
-        options->showDisconnected = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "showDisconnected"))
+        if (unsafe_yyjson_equals_str(key, "showDisconnected"))
         {
             options->showDisconnected = yyjson_get_bool(val);
             continue;
@@ -138,24 +115,20 @@ void ffParseBluetoothJsonObject(FFBluetoothOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_BLUETOOTH_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateBluetoothJsonConfig(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyBluetoothOptions))) FFBluetoothOptions defaultOptions;
-    ffInitBluetoothOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "showDisconnected", options->showDisconnected);
 
-    if (options->showDisconnected != defaultOptions.showDisconnected)
-        yyjson_mut_obj_add_bool(doc, module, "showDisconnected", options->showDisconnected);
-
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY results = ffListCreate(sizeof(FFBluetoothResult));
 
@@ -163,7 +136,7 @@ void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -184,12 +157,26 @@ void ffGenerateBluetoothJsonResult(FFBluetoothOptions* options, yyjson_mut_doc* 
         ffStrbufDestroy(&device->type);
         ffStrbufDestroy(&device->address);
     }
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitBluetoothOptions(FFBluetoothOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+    options->showDisconnected = false;
+    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
+}
+
+void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffBluetoothModuleInfo = {
     .name = FF_BLUETOOTH_MODULE_NAME,
     .description = "List (connected) bluetooth devices",
-    .parseCommandOptions = (void*) ffParseBluetoothCommandOptions,
+    .initOptions = (void*) ffInitBluetoothOptions,
+    .destroyOptions = (void*) ffDestroyBluetoothOptions,
     .parseJsonObject = (void*) ffParseBluetoothJsonObject,
     .printModule = (void*) ffPrintBluetooth,
     .generateJsonResult = (void*) ffGenerateBluetoothJsonResult,
@@ -203,16 +190,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Battery percentage bar", "battery-percentage-bar"},
     }))
 };
-
-void ffInitBluetoothOptions(FFBluetoothOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-    options->showDisconnected = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
-}
-
-void ffDestroyBluetoothOptions(FFBluetoothOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

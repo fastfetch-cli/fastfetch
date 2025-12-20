@@ -1,6 +1,7 @@
 #include "displayserver.h"
 #include "common/settings.h"
 #include "common/processing.h"
+#include "linux/displayserver_linux.h"
 
 #include <math.h>
 
@@ -82,13 +83,10 @@ static void detectWithDumpsys(FFDisplayServerResult* ds)
 
             ffStrbufRecalculateLength(&name);
             FFDisplayResult* display = ffdsAppendDisplay(ds,
-                (uint32_t)width,
-                (uint32_t)height,
+                (uint32_t)width, (uint32_t)height,
                 refreshRate,
-                0,
-                0,
-                0,
-                0,
+                0, 0,
+                0, 0,
                 0,
                 0,
                 &name,
@@ -121,13 +119,10 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
         ffStrbufSubstrAfterFirstC(&buffer, ',');
         double scaleFactor = (double) ffStrbufToUInt(&buffer, 0) / 160.;
         FFDisplayResult* display = ffdsAppendDisplay(ds,
-            width,
-            height,
+            width, height,
             0,
-            (uint32_t) (width / scaleFactor + .5),
-            (uint32_t) (height / scaleFactor + .5),
-            0,
-            0,
+            (uint32_t) (width / scaleFactor + .5), (uint32_t) (height / scaleFactor + .5),
+            0, 0,
             0,
             0,
             NULL,
@@ -145,11 +140,79 @@ static bool detectWithGetprop(FFDisplayServerResult* ds)
     return false;
 }
 
+static bool detectDE(FFDisplayServerResult* ds)
+{
+    if (ffSettingsGetAndroidProperty("ro.vivo.os.build.display.id", &ds->dePrettyName)) // OriginOS 6
+    {
+        ffStrbufAppendC(&ds->dePrettyName, ' ');
+        ffSettingsGetAndroidProperty("ro.vivo.product.version", &ds->dePrettyName); // PD2505D_xxx
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.build.version.magic", &ds->dePrettyName) ||
+        ffSettingsGetAndroidProperty("ro.build.version.emui", &ds->dePrettyName))
+    {
+        ffStrbufReplaceAllC(&ds->dePrettyName, '_', ' ');
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.mi.os.version.name", &ds->dePrettyName))
+    {
+        // MiUI like
+        ffStrbufClear(&ds->dePrettyName);
+        ffSettingsGetAndroidProperty("ro.build.version.incremental", &ds->dePrettyName); // Detail version number
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "OS"))
+        {
+            ds->dePrettyName.chars[0] = 'S';
+            ds->dePrettyName.chars[1] = ' ';
+            ffStrbufPrependS(&ds->dePrettyName, "HyperO");
+        }
+        else if (ffStrbufStartsWithS(&ds->dePrettyName, "V"))
+        {
+            ds->dePrettyName.chars[0] = ' ';
+            ffStrbufPrependS(&ds->dePrettyName, "MiUI");
+        }
+        else
+            ffStrbufSetStatic(&ds->dePrettyName, "MiUI");
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.build.version.oplusrom", &ds->dePrettyName))
+    {
+        if (ffStrbufStartsWithS(&ds->dePrettyName, "V"))
+            ffStrbufSubstrAfter(&ds->dePrettyName, 0);
+        ffStrbufPrependS(&ds->dePrettyName, "ColorOS");
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.oxygen.version", &ds->dePrettyName))
+    {
+        ffStrbufPrependS(&ds->dePrettyName, "OxygenOS");
+        return true;
+    }
+    if (ffSettingsGetAndroidProperty("ro.build.display.id", &ds->dePrettyName) && ffStrbufStartsWithS(&ds->dePrettyName, "RedMagicOS"))
+    {
+        ffStrbufInsertNC(&ds->dePrettyName, strlen("RedMagicOS"), 1, ' ');
+        return true;
+    }
+
+    return false;
+}
+
 void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
 {
-    ffStrbufSetStatic(&ds->wmProcessName, "WindowManager");
-    ffStrbufSetStatic(&ds->wmPrettyName, "Window Manager");
+    const char* error = ffdsConnectXcbRandr(ds);
+    if (error)
+        error = ffdsConnectXrandr(ds);
+    if (!error)
+    {
+        ffdsDetectWMDE(ds);
+        return;
+    }
+
+    // https://source.android.com/docs/core/graphics/surfaceflinger-windowmanager
+    ffStrbufSetStatic(&ds->wmProcessName, "system_server");
+    ffStrbufSetStatic(&ds->wmPrettyName, "WindowManager"); // A system service managed by system_server
+    ffStrbufSetStatic(&ds->wmProtocolName, FF_WM_PROTOCOL_SURFACEFLINGER);
 
     if (!detectWithGetprop(ds))
         detectWithDumpsys(ds);
+
+    detectDE(ds);
 }

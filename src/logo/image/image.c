@@ -891,13 +891,13 @@ static bool printCachedPixel(FFLogoRequestData* requestData)
     if(requestData->type == FF_LOGO_TYPE_IMAGE_KITTY)
     {
         fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_COMPRESSED);
-        if(fd == FF_INVALID_FD)
+        if(!ffIsValidNativeFD(fd))
             fd = getCacheFD(requestData, FF_CACHE_FILE_KITTY_UNCOMPRESSED);
     }
     else if(requestData->type == FF_LOGO_TYPE_IMAGE_SIXEL)
         fd = getCacheFD(requestData, FF_CACHE_FILE_SIXEL);
 
-    if(fd == FF_INVALID_FD)
+    if(!ffIsValidNativeFD(fd))
         return false;
 
     ffPrintCharTimes('\n', options->paddingTop);

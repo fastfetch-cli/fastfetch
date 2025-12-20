@@ -103,7 +103,7 @@ static const char* detectWithCmApi(FFBatteryOptions* options, FFlist* results)
 
         battery->cycleCount = bi.CycleCount;
 
-        battery->temperature = 0.0/0.0;
+        battery->temperature = FF_BATTERY_TEMP_UNSET;
         if(options->temp)
         {
             bqi.InformationLevel = BatteryTemperature;

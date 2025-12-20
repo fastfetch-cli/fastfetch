@@ -1,11 +1,14 @@
 #include "common/printing.h"
 #include "common/jsonconfig.h"
-#include "common/parsing.h"
 #include "common/percent.h"
+#include "common/size.h"
 #include "common/time.h"
 #include "detection/disk/disk.h"
 #include "modules/disk/disk.h"
-#include "util/stringUtils.h"
+
+#ifndef _WIN32
+    #include <fnmatch.h>
+#endif
 
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
@@ -15,39 +18,50 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
 
     if(options->moduleArgs.key.length == 0)
     {
-        if(instance.config.display.pipe)
-            ffStrbufAppendF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
-        else
-        {
-            #ifdef __linux__
-            if (getenv("WSL_DISTRO_NAME") != NULL && getenv("WT_SESSION") != NULL)
-            {
-                if (ffStrbufEqualS(&disk->filesystem, "9p") && ffStrbufStartsWithS(&disk->mountpoint, "/mnt/"))
-                    ffStrbufAppendF(&key, "%s (\e]8;;file:///%c:/\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars[5], disk->mountpoint.chars);
-                else
-                    ffStrbufAppendF(&key, "%s (\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->mountpoint.chars);
-            }
-            else
-            #endif
-            ffStrbufAppendF(&key, "%s (\e]8;;file://%s\e\\%s\e]8;;\e\\)", FF_DISK_MODULE_NAME, disk->mountpoint.chars, disk->mountpoint.chars);
-        }
+        ffStrbufSetF(&key, "%s (%s)", FF_DISK_MODULE_NAME, disk->mountpoint.chars);
     }
     else
     {
+        FF_STRBUF_AUTO_DESTROY mountpointLink = ffStrbufCreate();
+        FF_STRBUF_AUTO_DESTROY nameLink = ffStrbufCreate();
+        #ifdef __linux__
+        if (getenv("WSL_DISTRO_NAME") != NULL && getenv("WT_SESSION") != NULL)
+        {
+            if (ffStrbufEqualS(&disk->filesystem, "9p") && ffStrbufStartsWithS(&disk->mountpoint, "/mnt/"))
+            {
+                ffStrbufSetF(&mountpointLink, "\e]8;;file:///%c:/\e\\%s\e]8;;\e\\", disk->mountpoint.chars[5], disk->mountpoint.chars);
+                ffStrbufSetF(&nameLink, "\e]8;;file:///%c:/\e\\%s\e]8;;\e\\", disk->mountpoint.chars[5], disk->name.chars);
+            }
+            else
+            {
+                ffStrbufSetF(&mountpointLink, "\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\", getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->mountpoint.chars);
+                ffStrbufSetF(&nameLink, "\e]8;;file:////wsl.localhost/%s%s\e\\%s\e]8;;\e\\", getenv("WSL_DISTRO_NAME"), disk->mountpoint.chars, disk->name.chars);
+            }
+        }
+        else
+        #endif
+        {
+            ffStrbufSetF(&mountpointLink, "\e]8;;file://%s\e\\%s\e]8;;\e\\", disk->mountpoint.chars, disk->mountpoint.chars);
+            ffStrbufSetF(&nameLink, "\e]8;;file://%s\e\\%s\e]8;;\e\\", disk->mountpoint.chars, disk->name.chars);
+        }
+
         FF_PARSE_FORMAT_STRING_CHECKED(&key, &options->moduleArgs.key, ((FFformatarg[]) {
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->name, "name"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
             FF_FORMAT_ARG(options->moduleArgs.keyIcon, "icon"),
             FF_FORMAT_ARG(index, "index"),
+            FF_FORMAT_ARG(disk->filesystem, "filesystem"),
+            FF_FORMAT_ARG(mountpointLink, "mountpoint-link"),
+            FF_FORMAT_ARG(nameLink, "name-link"),
         }));
     }
 
     FF_STRBUF_AUTO_DESTROY usedPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesUsed, &usedPretty);
+    ffSizeAppendNum(disk->bytesUsed, &usedPretty);
 
     FF_STRBUF_AUTO_DESTROY totalPretty = ffStrbufCreate();
-    ffParseSize(disk->bytesTotal, &totalPretty);
+    ffSizeAppendNum(disk->bytesTotal, &totalPretty);
 
     double bytesPercentage = disk->bytesTotal > 0 ? (double) disk->bytesUsed / (double) disk->bytesTotal * 100.0 : 0;
     FFPercentageTypeFlags percentType = options->percent.type == 0 ? instance.config.display.percentType : options->percent.type;
@@ -125,7 +139,14 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         bool isHidden = !!(disk->type & FF_DISK_VOLUME_TYPE_HIDDEN_BIT);
         bool isReadOnly = !!(disk->type & FF_DISK_VOLUME_TYPE_READONLY_BIT);
 
-        uint64_t duration = ffTimeGetNow() - disk->createTime;
+        FF_STRBUF_AUTO_DESTROY freePretty = ffStrbufCreate();
+        ffSizeAppendNum(disk->bytesFree, &freePretty);
+
+        FF_STRBUF_AUTO_DESTROY availPretty = ffStrbufCreate();
+        ffSizeAppendNum(disk->bytesAvailable, &availPretty);
+
+        uint64_t now = ffTimeGetNow();
+        uint64_t duration = now - disk->createTime;
         uint32_t milliseconds = (uint32_t) (duration % 1000);
         duration /= 1000;
         uint32_t seconds = (uint32_t) (duration % 60);
@@ -136,6 +157,7 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
         duration /= 24;
         uint32_t days = (uint32_t) duration;
 
+        FFTimeGetAgeResult age = ffTimeGetAge(disk->createTime, now);
         FF_PRINT_FORMAT_CHECKED(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY, ((FFformatarg[]) {
             FF_FORMAT_ARG(usedPretty, "size-used"),
             FF_FORMAT_ARG(totalPretty, "size-total"),
@@ -158,11 +180,16 @@ static void printDisk(FFDiskOptions* options, const FFDisk* disk, uint32_t index
             FF_FORMAT_ARG(milliseconds, "milliseconds"),
             FF_FORMAT_ARG(disk->mountpoint, "mountpoint"),
             FF_FORMAT_ARG(disk->mountFrom, "mount-from"),
+            FF_FORMAT_ARG(age.years, "years"),
+            FF_FORMAT_ARG(age.daysOfYear, "days-of-year"),
+            FF_FORMAT_ARG(age.yearsFraction, "years-fraction"),
+            FF_FORMAT_ARG(freePretty, "size-free"),
+            FF_FORMAT_ARG(availPretty, "size-available"),
         }));
     }
 }
 
-void ffPrintDisk(FFDiskOptions* options)
+bool ffPrintDisk(FFDiskOptions* options)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(options, &disks);
@@ -170,23 +197,22 @@ void ffPrintDisk(FFDiskOptions* options)
     if(error)
     {
         ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
+        return false;
     }
-    else
+
+    if(disks.length == 0)
     {
-        uint32_t index = 0;
-        FF_LIST_FOR_EACH(FFDisk, disk, disks)
-        {
-            if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
-                continue;
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No disks found");
+        return false;
+    }
 
-            if (options->hideFolders.length && ffDiskMatchMountpoint(&options->hideFolders, disk->mountpoint.chars))
-                continue;
+    uint32_t index = 0;
+    FF_LIST_FOR_EACH(FFDisk, disk, disks)
+    {
+        if(__builtin_expect(options->folders.length == 0, 1) && (disk->type & ~options->showTypes))
+            continue;
 
-            if (options->hideFS.length && ffStrbufMatchSeparated(&disk->filesystem, &options->hideFS, ':'))
-                continue;
-
-            printDisk(options, disk, ++index);
-        }
+        printDisk(options, disk, ++index);
     }
 
     FF_LIST_FOR_EACH(FFDisk, disk, disks)
@@ -196,134 +222,73 @@ void ffPrintDisk(FFDiskOptions* options)
         ffStrbufDestroy(&disk->filesystem);
         ffStrbufDestroy(&disk->name);
     }
+
+    return true;
 }
 
-bool ffParseDiskCommandOptions(FFDiskOptions* options, const char* key, const char* value)
+static bool setSeparatedList(FFstrbuf* strbuf, yyjson_val* val, char separator)
 {
-    const char* subKey = ffOptionTestPrefix(key, FF_DISK_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "folders"))
+    if (yyjson_is_str(val))
     {
-        ffOptionParseString(key, value, &options->folders);
+        ffStrbufSetJsonVal(strbuf, val);
         return true;
     }
-
-    if (ffStrEqualsIgnCase(subKey, "hide-folders"))
+    if (yyjson_is_arr(val))
     {
-        ffOptionParseString(key, value, &options->hideFolders);
+        ffStrbufClear(strbuf);
+        yyjson_val *elem;
+        size_t eidx, emax;
+        yyjson_arr_foreach(val, eidx, emax, elem)
+        {
+            if (yyjson_is_str(elem))
+            {
+                if (strbuf->length > 0)
+                    ffStrbufAppendC(strbuf, separator);
+                ffStrbufAppendJsonVal(strbuf, elem);
+            }
+        }
         return true;
     }
-
-    if (ffStrEqualsIgnCase(subKey, "hide-fs"))
-    {
-        ffOptionParseString(key, value, &options->hideFS);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-regular"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_REGULAR_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-external"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-hidden"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-subvolumes"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-readonly"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_READONLY_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "show-unknown"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->showTypes |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
-        else
-            options->showTypes &= ~FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "use-available"))
-    {
-        if (ffOptionParseBoolean(value))
-            options->calcType = FF_DISK_CALC_TYPE_AVAILABLE;
-        else
-            options->calcType = FF_DISK_CALC_TYPE_FREE;
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
     return false;
 }
 
 void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "folders"))
+        if (unsafe_yyjson_equals_str(key, "folders"))
         {
-            ffStrbufSetS(&options->folders, yyjson_get_str(val));
+            setSeparatedList(&options->folders, val, FF_DISK_FOLDER_SEPARATOR);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hideFolders"))
+        if (unsafe_yyjson_equals_str(key, "hideFolders"))
         {
-            ffStrbufSetS(&options->hideFolders, yyjson_get_str(val));
+            setSeparatedList(&options->hideFolders, val, FF_DISK_FOLDER_SEPARATOR);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hideFS"))
+        if (unsafe_yyjson_equals_str(key, "hideFS"))
         {
-            ffStrbufSetS(&options->hideFS, yyjson_get_str(val));
+            setSeparatedList(&options->hideFS, val, ':');
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showExternal"))
+        if (unsafe_yyjson_equals_str(key, "showRegular"))
+        {
+            if (yyjson_get_bool(val))
+                options->showTypes |= FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+            else
+                options->showTypes &= ~FF_DISK_VOLUME_TYPE_REGULAR_BIT;
+            continue;
+        }
+
+        if (unsafe_yyjson_equals_str(key, "showExternal"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_EXTERNAL_BIT;
@@ -332,7 +297,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showHidden"))
+        if (unsafe_yyjson_equals_str(key, "showHidden"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_HIDDEN_BIT;
@@ -341,7 +306,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showSubvolumes"))
+        if (unsafe_yyjson_equals_str(key, "showSubvolumes"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT;
@@ -350,7 +315,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showReadOnly"))
+        if (unsafe_yyjson_equals_str(key, "showReadOnly"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_READONLY_BIT;
@@ -359,7 +324,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "showUnknown"))
+        if (unsafe_yyjson_equals_str(key, "showUnknown"))
         {
             if (yyjson_get_bool(val))
                 options->showTypes |= FF_DISK_VOLUME_TYPE_UNKNOWN_BIT;
@@ -368,7 +333,7 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "useAvailable"))
+        if (unsafe_yyjson_equals_str(key, "useAvailable"))
         {
             if (yyjson_get_bool(val))
                 options->calcType = FF_DISK_CALC_TYPE_AVAILABLE;
@@ -380,59 +345,46 @@ void ffParseDiskJsonObject(FFDiskOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DISK_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateDiskJsonConfig(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDiskOptions))) FFDiskOptions defaultOptions;
-    ffInitDiskOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "showRegular", !!(options->showTypes & FF_DISK_VOLUME_TYPE_REGULAR_BIT));
 
-    if (defaultOptions.showTypes != options->showTypes)
-    {
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showExternal", true);
+    yyjson_mut_obj_add_bool(doc, module, "showExternal", !!(options->showTypes & FF_DISK_VOLUME_TYPE_EXTERNAL_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_HIDDEN_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showHidden", true);
+    yyjson_mut_obj_add_bool(doc, module, "showHidden", !!(options->showTypes & FF_DISK_VOLUME_TYPE_HIDDEN_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showSubvolumes", true);
+    yyjson_mut_obj_add_bool(doc, module, "showSubvolumes", !!(options->showTypes & FF_DISK_VOLUME_TYPE_SUBVOLUME_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_READONLY_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showReadOnly", true);
+    yyjson_mut_obj_add_bool(doc, module, "showReadOnly", !!(options->showTypes & FF_DISK_VOLUME_TYPE_READONLY_BIT));
 
-        if (options->showTypes & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT)
-            yyjson_mut_obj_add_bool(doc, module, "showUnknown", true);
-    }
+    yyjson_mut_obj_add_bool(doc, module, "showUnknown", !!(options->showTypes & FF_DISK_VOLUME_TYPE_UNKNOWN_BIT));
 
-    if (!ffStrbufEqual(&options->folders, &defaultOptions.folders))
-        yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
+    yyjson_mut_obj_add_strbuf(doc, module, "folders", &options->folders);
 
-    if (!ffStrbufEqual(&options->hideFolders, &defaultOptions.hideFolders))
-        yyjson_mut_obj_add_strbuf(doc, module, "hideFolders", &options->hideFolders);
+    yyjson_mut_obj_add_strbuf(doc, module, "hideFolders", &options->hideFolders);
 
-    if (!ffStrbufEqual(&options->hideFS, &defaultOptions.hideFS))
-        yyjson_mut_obj_add_strbuf(doc, module, "hideFS", &options->hideFS);
+    yyjson_mut_obj_add_strbuf(doc, module, "hideFS", &options->hideFS);
 
-    if (defaultOptions.calcType != options->calcType)
-        yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
+    yyjson_mut_obj_add_bool(doc, module, "useAvailable", options->calcType == FF_DISK_CALC_TYPE_AVAILABLE);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY disks = ffListCreate(sizeof (FFDisk));
     const char* error = ffDetectDisks(options, &disks);
 
     if(error)
     {
-        yyjson_mut_obj_add_str(doc, module, "result", error);
-        return;
+        yyjson_mut_obj_add_str(doc, module, "error", error);
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -491,12 +443,39 @@ void ffGenerateDiskJsonResult(FFDiskOptions* options, yyjson_mut_doc* doc, yyjso
         ffStrbufDestroy(&item->filesystem);
         ffStrbufDestroy(&item->name);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitDiskOptions(FFDiskOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    ffStrbufInit(&options->folders);
+    #if _WIN32 || __APPLE__ || __ANDROID__
+    ffStrbufInit(&options->hideFolders);
+    #else
+    ffStrbufInitS(&options->hideFolders, "/efi:/boot:/boot/*");
+    #endif
+    ffStrbufInit(&options->hideFS);
+    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
+    options->calcType = FF_DISK_CALC_TYPE_FREE;
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyDiskOptions(FFDiskOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+    ffStrbufDestroy(&options->folders);
+    ffStrbufDestroy(&options->hideFolders);
+    ffStrbufDestroy(&options->hideFS);
+}
+
+FFModuleBaseInfo ffDiskModuleInfo = {
     .name = FF_DISK_MODULE_NAME,
     .description = "Print partitions, space usage, file system, etc",
-    .parseCommandOptions = (void*) ffParseDiskCommandOptions,
+    .initOptions = (void*) ffInitDiskOptions,
+    .destroyOptions = (void*) ffDestroyDiskOptions,
     .parseJsonObject = (void*) ffParseDiskJsonObject,
     .printModule = (void*) ffPrintDisk,
     .generateJsonResult = (void*) ffGenerateDiskJsonResult,
@@ -523,30 +502,10 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Milliseconds after creation", "milliseconds"},
         {"Mount point / drive letter", "mountpoint"},
         {"Mount from (device path)", "mount-from"},
+        {"Years integer after creation", "years"},
+        {"Days of year after creation", "days-of-year"},
+        {"Years fraction after creation", "years-fraction"},
+        {"Size free", "size-free"},
+        {"Size available", "size-available"},
     }))
 };
-
-void ffInitDiskOptions(FFDiskOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    ffStrbufInit(&options->folders);
-    #if _WIN32 || __APPLE__ || __ANDROID__
-    ffStrbufInit(&options->hideFolders);
-    #else
-    ffStrbufInitStatic(&options->hideFolders, "/efi:/boot:/boot/efi:/boot/firmware");
-    #endif
-    ffStrbufInit(&options->hideFS);
-    options->showTypes = FF_DISK_VOLUME_TYPE_REGULAR_BIT | FF_DISK_VOLUME_TYPE_EXTERNAL_BIT | FF_DISK_VOLUME_TYPE_READONLY_BIT;
-    options->calcType = FF_DISK_CALC_TYPE_FREE;
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyDiskOptions(FFDiskOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-    ffStrbufDestroy(&options->folders);
-    ffStrbufDestroy(&options->hideFolders);
-    ffStrbufDestroy(&options->hideFS);
-}

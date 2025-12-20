@@ -1,9 +1,11 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_WIFI_MODULE_NAME "Wifi"
 
-void ffPrintWifi(FFWifiOptions* options);
+bool ffPrintWifi(FFWifiOptions* options);
 void ffInitWifiOptions(FFWifiOptions* options);
 void ffDestroyWifiOptions(FFWifiOptions* options);
+
+extern FFModuleBaseInfo ffWifiModuleInfo;

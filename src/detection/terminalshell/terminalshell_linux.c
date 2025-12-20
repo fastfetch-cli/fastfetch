@@ -31,13 +31,14 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
             userShellName = instance.state.platform.userShell.chars + index + 1;
     }
 
-    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, &tty) == NULL)
     {
         if (!ffStrbufEqualS(&result->processName, userShellName))
         {
             //Common programs that are between terminal and own process, but are not the shell
             if(
                 // tty < 0                                  || //A shell should connect to a tty
+                pid == 1 || // init/systemd
                 ffStrbufEqualS(&result->processName, "sh")                  || //This prevents us from detecting things like pipes and redirects, i hope nobody uses plain `sh` as shell
                 ffStrbufEqualS(&result->processName, "sudo")                ||
                 ffStrbufEqualS(&result->processName, "su")                  ||
@@ -50,13 +51,15 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
                 ffStrbufEqualS(&result->processName, "perf")                ||
                 ffStrbufEqualS(&result->processName, "guake-wrapped")       ||
                 ffStrbufEqualS(&result->processName, "time")                ||
-                ffStrbufContainS(&result->processName, "hyfetch")           || //when hyfetch uses fastfetch as backend
                 ffStrbufEqualS(&result->processName, "clifm")               || //https://github.com/leo-arch/clifm/issues/289
                 ffStrbufEqualS(&result->processName, "valgrind")            ||
-                ffStrbufEqualS(&result->processName, "fastfetch")           || //994
+                ffStrbufEqualS(&result->processName, "fastfetch")           || //#994
                 ffStrbufEqualS(&result->processName, "flashfetch")          ||
                 ffStrbufEqualS(&result->processName, "proot")               ||
                 ffStrbufEqualS(&result->processName, "script")              ||
+                #ifdef __linux__
+                ffStrbufEqualS(&result->processName, "run-parts")           ||
+                #endif
                 ffStrbufContainS(&result->processName, "debug")             ||
                 ffStrbufContainS(&result->processName, "command-not-")      ||
                 ffStrbufEndsWithS(&result->processName, ".sh")
@@ -74,17 +77,18 @@ static pid_t getShellInfo(FFShellResult* result, pid_t pid)
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
-    return ppid;
+    return pid > 1 ? ppid : 0;
 }
 
 static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
 {
     pid_t ppid = 0;
 
-    while (ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
+    while (pid > 1 && ffProcessGetBasicInfoLinux(pid, &result->processName, &ppid, NULL) == NULL)
     {
         //Known shells
         if (
+            pid == 1 || // init/systemd
             ffStrbufEqualS(&result->processName, "sudo")       ||
             ffStrbufEqualS(&result->processName, "su")         ||
             ffStrbufEqualS(&result->processName, "sh")         ||
@@ -109,10 +113,10 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
             ffStrbufEqualS(&result->processName, "chezmoi")    || // #762
             ffStrbufEqualS(&result->processName, "proot")      ||
             ffStrbufEqualS(&result->processName, "script")     ||
-            ffStrbufEqualS(&result->processName, "init")       ||
-            ffStrbufEqualS(&result->processName, "systemd")    ||
             #ifdef __linux__
+            ffStrbufStartsWithS(&result->processName, "Relay(")   || // Unknown process in WSL2
             ffStrbufStartsWithS(&result->processName, "flatpak-") || // #707
+            ffStrbufEqualS(&result->processName, "run-parts")  || // #2048
             #endif
             ffStrbufEndsWithS(&result->processName, ".sh")
         )
@@ -145,7 +149,7 @@ static pid_t getTerminalInfo(FFTerminalResult* result, pid_t pid)
         ffProcessGetInfoLinux(pid, &result->processName, &result->exe, &result->exeName, &result->exePath);
         break;
     }
-    return ppid;
+    return pid > 1 ? ppid : 0;
 }
 
 static bool getTerminalInfoByPidEnv(FFTerminalResult* result, const char* pidEnv)
@@ -241,7 +245,7 @@ static void getTerminalFromEnv(FFTerminalResult* result)
     }
     #endif
 
-    #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
+    #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__GNU__)
     //Konsole
     else if(
         getenv("KONSOLE_VERSION") != NULL
@@ -288,14 +292,14 @@ static void getUserShellFromEnv(FFShellResult* result)
     }
 }
 
-bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* exePath, FFstrbuf* version);
+bool fftsGetShellVersion(FFstrbuf* exe, const char* exeName, FFstrbuf* version);
 
 bool fftsGetTerminalVersion(FFstrbuf* processName, FFstrbuf* exe, FFstrbuf* version);
 
 static void setShellInfoDetails(FFShellResult* result)
 {
     ffStrbufClear(&result->version);
-    fftsGetShellVersion(&result->exe, result->exeName, &result->exePath, &result->version);
+    fftsGetShellVersion(result->exePath.length > 0 ? &result->exePath : &result->exe, result->exeName, &result->version);
 
     if(ffStrbufEqualS(&result->processName, "pwsh"))
         ffStrbufInitStatic(&result->prettyName, "PowerShell");
@@ -327,14 +331,19 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else if(ffStrbufStartsWithS(&result->processName, "screen-"))
         ffStrbufInitStatic(&result->prettyName, "screen");
     else if(ffStrbufEqualS(&result->processName, "sshd") || ffStrbufStartsWithS(&result->processName, "sshd-"))
-        ffStrbufInitCopy(&result->prettyName, &result->tty);
+    {
+        if (result->tty.length)
+            ffStrbufInitCopy(&result->prettyName, &result->tty);
+        else
+            ffStrbufSetStatic(&result->prettyName, "sshd");
+    }
 
     #if defined(__ANDROID__)
 
     else if(ffStrbufEqualS(&result->processName, "com.termux"))
         ffStrbufInitStatic(&result->prettyName, "Termux");
 
-    #elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
+    #elif defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__GNU__)
 
     else if(ffStrbufStartsWithS(&result->processName, "gnome-terminal"))
         ffStrbufInitStatic(&result->prettyName, "GNOME Terminal");
@@ -379,7 +388,7 @@ static void setTerminalInfoDetails(FFTerminalResult* result)
     else
         ffStrbufInitCopy(&result->prettyName, &result->processName);
 
-    fftsGetTerminalVersion(&result->processName, &result->exe, &result->version);
+    fftsGetTerminalVersion(&result->processName, result->exePath.length > 0 ? &result->exePath : &result->exe, &result->version);
 }
 
 #if defined(MAXPATH)

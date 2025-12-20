@@ -1,8 +1,9 @@
 #include "common/percent.h"
-#include "common/parsing.h"
 #include "common/printing.h"
 #include "common/jsonconfig.h"
 #include "common/temps.h"
+#include "common/size.h"
+#include "common/frequency.h"
 #include "detection/host/host.h"
 #include "detection/gpu/gpu.h"
 #include "modules/gpu/gpu.h"
@@ -42,10 +43,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         if(gpu->frequency > 0)
         {
             ffStrbufAppendS(&output, " @ ");
-            ffParseFrequency(gpu->frequency, &output);
+            ffFreqAppendNum(gpu->frequency, &output);
         }
 
-        if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
+        if(gpu->temperature != FF_GPU_TEMP_UNSET)
         {
             ffStrbufAppendS(&output, " - ");
             ffTempsAppendNum(gpu->temperature, &output, options->tempConfig, &options->moduleArgs);
@@ -59,10 +60,10 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
             {
                 if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
                 {
-                    ffParseSize(gpu->dedicated.used, &output);
+                    ffSizeAppendNum(gpu->dedicated.used, &output);
                     ffStrbufAppendS(&output, " / ");
                 }
-                ffParseSize(gpu->dedicated.total, &output);
+                ffSizeAppendNum(gpu->dedicated.total, &output);
             }
             if(gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
             {
@@ -94,8 +95,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY dUsed = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY dPercentNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY dPercentBar = ffStrbufCreate();
-        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.total, &dTotal);
-        if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->dedicated.used, &dUsed);
+        if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->dedicated.total, &dTotal);
+        if (gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->dedicated.used, &dUsed);
         if (gpu->dedicated.total != FF_GPU_VMEM_SIZE_UNSET && gpu->dedicated.used != FF_GPU_VMEM_SIZE_UNSET)
         {
             double percent = (double) gpu->dedicated.used / (double) gpu->dedicated.total * 100.0;
@@ -109,8 +110,8 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         FF_STRBUF_AUTO_DESTROY sUsed = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY sPercentNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY sPercentBar = ffStrbufCreate();
-        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.total, &sTotal);
-        if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffParseSize(gpu->shared.used, &sUsed);
+        if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->shared.total, &sTotal);
+        if (gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET) ffSizeAppendNum(gpu->shared.used, &sUsed);
         if (gpu->shared.total != FF_GPU_VMEM_SIZE_UNSET && gpu->shared.used != FF_GPU_VMEM_SIZE_UNSET)
         {
             double percent = (double) gpu->shared.used / (double) gpu->shared.total * 100.0;
@@ -121,11 +122,11 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
         }
 
         FF_STRBUF_AUTO_DESTROY frequency = ffStrbufCreate();
-        ffParseFrequency(gpu->frequency, &frequency);
+        ffFreqAppendNum(gpu->frequency, &frequency);
 
         FF_STRBUF_AUTO_DESTROY coreUsageNum = ffStrbufCreate();
         FF_STRBUF_AUTO_DESTROY coreUsageBar = ffStrbufCreate();
-        if (gpu->coreUsage == gpu->coreUsage) //FF_GPU_CORE_USAGE_UNSET
+        if (gpu->coreUsage != FF_GPU_CORE_USAGE_UNSET)
         {
             if (percentType & FF_PERCENTAGE_TYPE_NUM_BIT)
                 ffPercentAppendNum(&coreUsageNum, gpu->coreUsage, options->percent, false, &options->moduleArgs);
@@ -158,14 +159,14 @@ static void printGPUResult(FFGPUOptions* options, uint8_t index, const FFGPUResu
     }
 }
 
-void ffPrintGPU(FFGPUOptions* options)
+bool ffPrintGPU(FFGPUOptions* options)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);
     if (error)
     {
         ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     FF_LIST_AUTO_DESTROY selectedGPUs;
@@ -199,78 +200,29 @@ void ffPrintGPU(FFGPUOptions* options)
         ffStrbufDestroy(&gpu->platformApi);
         ffStrbufDestroy(&gpu->memoryType);
     }
-}
 
-bool ffParseGPUCommandOptions(FFGPUOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_GPU_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "driver-specific"))
-    {
-        options->driverSpecific = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "detection-method"))
-    {
-        options->detectionMethod = (FFGPUDetectionMethod) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "auto", FF_GPU_DETECTION_METHOD_AUTO },
-            { "pci", FF_GPU_DETECTION_METHOD_PCI },
-            { "vulkan", FF_GPU_DETECTION_METHOD_VULKAN },
-            { "opencl", FF_GPU_DETECTION_METHOD_OPENCL },
-            { "opengl", FF_GPU_DETECTION_METHOD_OPENGL },
-            {},
-        });
-        return true;
-    }
-
-    if (ffTempsParseCommandOptions(key, subKey, value, &options->temp, &options->tempConfig))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "hide-type"))
-    {
-        options->hideType = (FFGPUType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "none", FF_GPU_TYPE_NONE },
-            { "unknown", FF_GPU_TYPE_UNKNOWN },
-            { "integrated", FF_GPU_TYPE_INTEGRATED },
-            { "discrete", FF_GPU_TYPE_DISCRETE },
-            {},
-        });
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
         if (ffTempsParseJsonObject(key, val, &options->temp, &options->tempConfig))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "driverSpecific"))
+        if (unsafe_yyjson_equals_str(key, "driverSpecific"))
         {
             options->driverSpecific = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "detectionMethod"))
+        if (unsafe_yyjson_equals_str(key, "detectionMethod"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -282,100 +234,95 @@ void ffParseGPUJsonObject(FFGPUOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             else
                 options->detectionMethod = (FFGPUDetectionMethod) value;
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "hideType"))
+        if (unsafe_yyjson_equals_str(key, "hideType"))
         {
-            int value;
-            const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
-                { "none", FF_GPU_TYPE_NONE },
-                { "unknown", FF_GPU_TYPE_UNKNOWN },
-                { "integrated", FF_GPU_TYPE_INTEGRATED },
-                { "discrete", FF_GPU_TYPE_DISCRETE },
-                {},
-            });
-            if (error)
-                ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+            if (yyjson_is_null(val))
+                options->hideType = FF_GPU_TYPE_NONE;
             else
-                options->hideType = (FFGPUType) value;
+            {
+                int value;
+                const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
+                    { "none", FF_GPU_TYPE_NONE },
+                    { "unknown", FF_GPU_TYPE_UNKNOWN },
+                    { "integrated", FF_GPU_TYPE_INTEGRATED },
+                    { "discrete", FF_GPU_TYPE_DISCRETE },
+                    {},
+                });
+                if (error)
+                    ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
+                else
+                    options->hideType = (FFGPUType) value;
+            }
             continue;
         }
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_GPU_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateGPUJsonConfig(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyGPUOptions))) FFGPUOptions defaultOptions;
-    ffInitGPUOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
 
-    if (options->driverSpecific != defaultOptions.driverSpecific)
-        yyjson_mut_obj_add_bool(doc, module, "driverSpecific", options->driverSpecific);
-
-    if (options->detectionMethod != defaultOptions.detectionMethod)
+    switch (options->detectionMethod)
     {
-        switch (options->detectionMethod)
-        {
-            case FF_GPU_DETECTION_METHOD_AUTO:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "auto");
-                break;
-            case FF_GPU_DETECTION_METHOD_PCI:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "pci");
-                break;
-            case FF_GPU_DETECTION_METHOD_VULKAN:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "vulkan");
-                break;
-            case FF_GPU_DETECTION_METHOD_OPENCL:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opencl");
-                break;
-            case FF_GPU_DETECTION_METHOD_OPENGL:
-                yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opengl");
-                break;
-        }
+        case FF_GPU_DETECTION_METHOD_AUTO:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "auto");
+            break;
+        case FF_GPU_DETECTION_METHOD_PCI:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "pci");
+            break;
+        case FF_GPU_DETECTION_METHOD_VULKAN:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "vulkan");
+            break;
+        case FF_GPU_DETECTION_METHOD_OPENCL:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opencl");
+            break;
+        case FF_GPU_DETECTION_METHOD_OPENGL:
+            yyjson_mut_obj_add_str(doc, module, "detectionMethod", "opengl");
+            break;
     }
 
-    ffTempsGenerateJsonConfig(doc, module, defaultOptions.temp, defaultOptions.tempConfig, options->temp, options->tempConfig);
+    ffTempsGenerateJsonConfig(doc, module, options->temp, options->tempConfig);
 
-    if (options->hideType != defaultOptions.hideType)
+    switch (options->hideType)
     {
-        switch (options->hideType)
-        {
-            case FF_GPU_TYPE_NONE:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "none");
-                break;
-            case FF_GPU_TYPE_UNKNOWN:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "unknown");
-                break;
-            case FF_GPU_TYPE_INTEGRATED:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "integrated");
-                break;
-            case FF_GPU_TYPE_DISCRETE:
-                yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
-                break;
-        }
+        case FF_GPU_TYPE_NONE:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "none");
+            break;
+        case FF_GPU_TYPE_UNKNOWN:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "unknown");
+            break;
+        case FF_GPU_TYPE_INTEGRATED:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "integrated");
+            break;
+        case FF_GPU_TYPE_DISCRETE:
+            yyjson_mut_obj_add_str(doc, module, "hideType", "discrete");
+            break;
     }
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY gpus = ffListCreate(sizeof (FFGPUResult));
     const char* error = ffDetectGPU(options, &gpus);
     if (error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -393,7 +340,10 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         else
             yyjson_mut_obj_add_null(doc, obj, "coreCount");
 
-        yyjson_mut_obj_add_real(doc, obj, "coreUsage", gpu->coreUsage);
+        if (gpu->coreUsage != FF_GPU_CORE_USAGE_UNSET)
+            yyjson_mut_obj_add_real(doc, obj, "coreUsage", gpu->coreUsage);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "coreUsage");
 
         yyjson_mut_val* memoryObj = yyjson_mut_obj_add_obj(doc, obj, "memory");
 
@@ -426,7 +376,7 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         yyjson_mut_obj_add_strbuf(doc, obj, "driver", &gpu->driver);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &gpu->name);
 
-        if(gpu->temperature == gpu->temperature) //FF_GPU_TEMP_UNSET
+        if(gpu->temperature != FF_GPU_TEMP_UNSET)
             yyjson_mut_obj_add_real(doc, obj, "temperature", gpu->temperature);
         else
             yyjson_mut_obj_add_null(doc, obj, "temperature");
@@ -436,15 +386,21 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         {
             case FF_GPU_TYPE_INTEGRATED: type = "Integrated"; break;
             case FF_GPU_TYPE_DISCRETE: type = "Discrete"; break;
-            default: type = "Unknown"; break;
+            default: type = NULL; break;
         }
-        yyjson_mut_obj_add_str(doc, obj, "type", type);
+        if (type)
+            yyjson_mut_obj_add_str(doc, obj, "type", type);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "type");
 
         yyjson_mut_obj_add_strbuf(doc, obj, "vendor", &gpu->vendor);
 
         yyjson_mut_obj_add_strbuf(doc, obj, "platformApi", &gpu->platformApi);
 
-        yyjson_mut_obj_add_uint(doc, obj, "frequency", gpu->frequency);
+        if (gpu->frequency != FF_GPU_FREQUENCY_UNSET)
+            yyjson_mut_obj_add_uint(doc, obj, "frequency", gpu->frequency);
+        else
+            yyjson_mut_obj_add_null(doc, obj, "frequency");
 
         yyjson_mut_obj_add_uint(doc, obj, "deviceId", gpu->deviceId);
     }
@@ -457,12 +413,38 @@ void ffGenerateGPUJsonResult(FFGPUOptions* options, yyjson_mut_doc* doc, yyjson_
         ffStrbufDestroy(&gpu->platformApi);
         ffStrbufDestroy(&gpu->memoryType);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitGPUOptions(FFGPUOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
+
+    options->driverSpecific = false;
+    options->detectionMethod =
+        #if defined(__x86_64__) || defined(__i386__)
+        FF_GPU_DETECTION_METHOD_PCI
+        #else
+        FF_GPU_DETECTION_METHOD_AUTO
+        #endif
+    ;
+    options->temp = false;
+    options->hideType = FF_GPU_TYPE_NONE;
+    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+}
+
+void ffDestroyGPUOptions(FFGPUOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffGPUModuleInfo = {
     .name = FF_GPU_MODULE_NAME,
     .description = "Print GPU names, graphic memory size, type, etc",
-    .parseCommandOptions = (void*) ffParseGPUCommandOptions,
+    .initOptions = (void*) ffInitGPUOptions,
+    .destroyOptions = (void*) ffDestroyGPUOptions,
     .parseJsonObject = (void*) ffParseGPUJsonObject,
     .printModule = (void*) ffPrintGPU,
     .generateJsonResult = (void*) ffGenerateGPUJsonResult,
@@ -490,27 +472,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Memory type (Windows only)", "memory-type"},
     })),
 };
-
-void ffInitGPUOptions(FFGPUOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰾲");
-
-    options->driverSpecific = false;
-    options->detectionMethod =
-        #if defined(__x86_64__) || defined(__i386__)
-        FF_GPU_DETECTION_METHOD_PCI
-        #else
-        FF_GPU_DETECTION_METHOD_AUTO
-        #endif
-    ;
-    options->temp = false;
-    options->hideType = FF_GPU_TYPE_NONE;
-    options->tempConfig = (FFColorRangeConfig) { 60, 80 };
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-}
-
-void ffDestroyGPUOptions(FFGPUOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

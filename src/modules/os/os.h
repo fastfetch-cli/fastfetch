@@ -1,9 +1,11 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_OS_MODULE_NAME "OS"
 
-void ffPrintOS(FFOSOptions* options);
+bool ffPrintOS(FFOSOptions* options);
 void ffInitOSOptions(FFOSOptions* options);
 void ffDestroyOSOptions(FFOSOptions* options);
+
+extern FFModuleBaseInfo ffOSModuleInfo;

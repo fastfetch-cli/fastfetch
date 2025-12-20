@@ -15,26 +15,15 @@
     #define __attribute__(x)
 #endif
 
+#include "util/arrayUtils.h"
 #include "util/FFstrbuf.h"
 #include "util/FFlist.h"
 #include "util/platform/FFPlatform.h"
 #include "util/unused.h"
 
-#include "options/modules.h"
 #include "options/logo.h"
 #include "options/display.h"
 #include "options/general.h"
-
-#ifdef __has_builtin
-    #if __has_builtin(__is_array)
-        #define ARRAY_SIZE(x) ({ static_assert(__is_array(__typeof__(x)), "Must be an array"); (uint32_t) (sizeof(x) / sizeof(*(x))); })
-    #elif __has_builtin(__builtin_types_compatible_p)
-        #define ARRAY_SIZE(x) ({ static_assert(!__builtin_types_compatible_p(__typeof__(x), __typeof__(&*(x))), "Must not be a pointer"); (uint32_t) (sizeof(x) / sizeof(*(x))); })
-    #endif
-#endif
-#ifndef ARRAY_SIZE
-    #define ARRAY_SIZE(x) ((uint32_t) (sizeof(x) / sizeof(*(x))))
-#endif
 
 
 typedef struct FFconfig
@@ -42,7 +31,6 @@ typedef struct FFconfig
     FFOptionsLogo logo;
     FFOptionsDisplay display;
     FFOptionsGeneral general;
-    FFOptionsModules modules;
 } FFconfig;
 
 typedef struct FFstate
@@ -51,11 +39,14 @@ typedef struct FFstate
     uint32_t logoHeight;
     uint32_t keysHeight;
     bool terminalLightTheme;
+    bool titleFqdn;
 
     FFPlatform platform;
     yyjson_doc* configDoc;
     yyjson_mut_doc* resultDoc;
     FFstrbuf genConfigPath;
+    bool fullConfig;
+    uint32_t dynamicInterval;
 } FFstate;
 
 typedef struct FFinstance

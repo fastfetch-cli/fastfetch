@@ -66,8 +66,9 @@ static void printDevice(FFSoundOptions* options, const FFSoundDevice* device, ui
     }
 }
 
-void ffPrintSound(FFSoundOptions* options)
+bool ffPrintSound(FFSoundOptions* options)
 {
+    bool success = false;
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
 
     const char* error = ffDetectSound(&result);
@@ -75,81 +76,59 @@ void ffPrintSound(FFSoundOptions* options)
     if(error)
     {
         ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        goto exit;
     }
 
-    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFSoundDevice*));
-
-    FF_LIST_FOR_EACH(FFSoundDevice, device, result)
     {
-        switch (options->soundType)
+        FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFSoundDevice*));
+
+        FF_LIST_FOR_EACH(FFSoundDevice, device, result)
         {
-            case FF_SOUND_TYPE_MAIN: if (!device->main) continue; break;
-            case FF_SOUND_TYPE_ACTIVE: if (!device->active) continue; break;
-            case FF_SOUND_TYPE_ALL: break;
+            switch (options->soundType)
+            {
+                case FF_SOUND_TYPE_MAIN: if (!device->main) continue; break;
+                case FF_SOUND_TYPE_ACTIVE: if (!device->active) continue; break;
+                case FF_SOUND_TYPE_ALL: break;
+            }
+
+            *(FFSoundDevice**)ffListAdd(&filtered) = device;
         }
 
-        *(FFSoundDevice**)ffListAdd(&filtered) = device;
-    }
+        if(filtered.length == 0)
+        {
+            ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No active sound devices found");
+            goto exit;
+        }
 
-    if(filtered.length == 0)
-    {
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No active sound devices found");
-        return;
+        uint8_t index = 1;
+        FF_LIST_FOR_EACH(FFSoundDevice*, device, filtered)
+        {
+            printDevice(options, *device, filtered.length == 1 ? 0 : index++);
+        }
     }
+    success = true;
 
-    uint8_t index = 1;
-    FF_LIST_FOR_EACH(FFSoundDevice*, device, filtered)
-    {
-        printDevice(options, *device, filtered.length == 1 ? 0 : index++);
-    }
-
+exit:
     FF_LIST_FOR_EACH(FFSoundDevice, device, result)
     {
         ffStrbufDestroy(&device->identifier);
         ffStrbufDestroy(&device->name);
         ffStrbufDestroy(&device->platformApi);
     }
-}
 
-bool ffParseSoundCommandOptions(FFSoundOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_SOUND_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "sound-type"))
-    {
-        options->soundType = (FFSoundType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "main", FF_SOUND_TYPE_MAIN },
-            { "active", FF_SOUND_TYPE_ACTIVE },
-            { "all", FF_SOUND_TYPE_ALL },
-            {},
-        });
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
+    return success;
 }
 
 void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "soundType"))
+        if (unsafe_yyjson_equals_str(key, "soundType"))
         {
             int value;
             const char* error = ffJsonConfigParseEnum(val, &value, (FFKeyValuePair[]) {
@@ -159,7 +138,7 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
                 {},
             });
             if (error)
-                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", key, error);
+                ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Invalid %s value: %s", unsafe_yyjson_get_str(key), error);
             else
                 options->soundType = (FFSoundType) value;
             continue;
@@ -168,37 +147,31 @@ void ffParseSoundJsonObject(FFSoundOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_SOUND_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateSoundJsonConfig(FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroySoundOptions))) FFSoundOptions defaultOptions;
-    ffInitSoundOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
-
-    if (defaultOptions.soundType != options->soundType)
+    switch (options->soundType)
     {
-        switch (options->soundType)
-        {
-            case FF_SOUND_TYPE_MAIN:
-                yyjson_mut_obj_add_str(doc, module, "soundType", "main");
-                break;
-            case FF_SOUND_TYPE_ACTIVE:
-                yyjson_mut_obj_add_str(doc, module, "soundType", "active");
-                break;
-            case FF_SOUND_TYPE_ALL:
-                yyjson_mut_obj_add_str(doc, module, "soundType", "all");
-                break;
-        }
+        case FF_SOUND_TYPE_MAIN:
+            yyjson_mut_obj_add_str(doc, module, "soundType", "main");
+            break;
+        case FF_SOUND_TYPE_ACTIVE:
+            yyjson_mut_obj_add_str(doc, module, "soundType", "active");
+            break;
+        case FF_SOUND_TYPE_ALL:
+            yyjson_mut_obj_add_str(doc, module, "soundType", "all");
+            break;
     }
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
-void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY result = ffListCreate(sizeof(FFSoundDevice));
     const char* error = ffDetectSound(&result);
@@ -206,7 +179,7 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
 
     yyjson_mut_val* arr = yyjson_mut_obj_add_arr(doc, module, "result");
@@ -232,12 +205,28 @@ void ffGenerateSoundJsonResult(FF_MAYBE_UNUSED FFSoundOptions* options, yyjson_m
         ffStrbufDestroy(&device->name);
         ffStrbufDestroy(&device->platformApi);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitSoundOptions(FFSoundOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    options->soundType = FF_SOUND_TYPE_MAIN;
+    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
+}
+
+void ffDestroySoundOptions(FFSoundOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffSoundModuleInfo = {
     .name = FF_SOUND_MODULE_NAME,
     .description = "Print sound devices, volume, etc",
-    .parseCommandOptions = (void*) ffParseSoundCommandOptions,
+    .initOptions = (void*) ffInitSoundOptions,
+    .destroyOptions = (void*) ffDestroySoundOptions,
     .parseJsonObject = (void*) ffParseSoundJsonObject,
     .printModule = (void*) ffPrintSound,
     .generateJsonResult = (void*) ffGenerateSoundJsonResult,
@@ -251,17 +240,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Platform API used", "platform-api"},
     }))
 };
-
-void ffInitSoundOptions(FFSoundOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-
-    options->soundType = FF_SOUND_TYPE_MAIN;
-    options->percent = (FFPercentageModuleConfig) { 80, 90, 0 };
-}
-
-void ffDestroySoundOptions(FFSoundOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

@@ -13,6 +13,7 @@
 #include "intel_drm.h"
 #include "asahi_drm.h"
 #include <radeon_drm.h>
+#include <nouveau_drm.h>
 
 const char* ffDrmDetectRadeon(const FFGPUOptions* options, FFGPUResult* gpu, const char* renderPath)
 {
@@ -152,7 +153,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
 
     return NULL;
 #else
-    FF_UNUSED(gpu, renderPath);
+    FF_UNUSED(options, gpu, renderPath);
     return "Fastfetch is compiled without libdrm support";
 #endif
 }
@@ -305,14 +306,14 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd)
     struct drm_asahi_params_global paramsGlobal = {};
     if (ioctl(fd, DRM_IOCTL_ASAHI_GET_PARAMS, &(struct drm_asahi_get_params) {
         .param_group = DRM_ASAHI_GET_PARAMS,
-        .pointer = (uint64_t) &paramsGlobal,
+        .pointer = (uintptr_t) &paramsGlobal,
         .size = sizeof(paramsGlobal),
     }) >= 0)
     {
         // They removed `unstable_uabi_version` from the struct. Hopefully they won't introduce new ABI changes.
         gpu->coreCount = (int32_t) (paramsGlobal.num_clusters_total * paramsGlobal.num_cores_per_cluster);
         gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
-        gpu->deviceId = paramsGlobal.chip_id;
+        gpu->deviceId = ffGPUGeneral2Id(paramsGlobal.chip_id);
 
         if (!gpu->name.length)
         {
@@ -341,6 +342,29 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd)
     }
 
     return "Failed to query Asahi GPU information";
+}
+
+#ifndef DRM_IOCTL_NOUVEAU_GETPARAM
+#define DRM_IOCTL_NOUVEAU_GETPARAM DRM_IOWR(DRM_COMMAND_BASE + DRM_NOUVEAU_GETPARAM, struct drm_nouveau_getparam)
+#endif
+
+const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd)
+{
+    struct drm_nouveau_getparam getparam = { };
+
+    getparam.param = NOUVEAU_GETPARAM_FB_SIZE;
+    if (ioctl(fd, DRM_IOCTL_NOUVEAU_GETPARAM, &getparam) == 0)
+        gpu->dedicated.total = getparam.value;
+
+    getparam.param = NOUVEAU_GETPARAM_AGP_SIZE;
+    if (ioctl(fd, DRM_IOCTL_NOUVEAU_GETPARAM, &getparam) == 0)
+        gpu->shared.total = getparam.value;
+
+    getparam.param = NOUVEAU_GETPARAM_GRAPH_UNITS;
+    if (ioctl(fd, DRM_IOCTL_NOUVEAU_GETPARAM, &getparam) == 0 && getparam.value < INT32_MAX)
+        gpu->coreCount = (int32_t) getparam.value;
+
+    return NULL;
 }
 
 #endif // FF_HAVE_DRM

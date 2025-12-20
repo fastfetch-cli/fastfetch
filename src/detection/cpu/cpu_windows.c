@@ -17,7 +17,7 @@ static inline void ffPerfCloseQueryHandle(HANDLE* phQuery)
     }
 }
 
-const char* detectThermalTemp(double* result)
+const char* detectThermalTemp(const FFCPUOptions* options, double* result)
 {
     struct FFPerfQuerySpec
     {
@@ -34,6 +34,14 @@ const char* detectThermalTemp(double* result)
         },
         .Name = L"\\_TZ.CPUZ", // The standard(?) instance name for CPU temperature in the thermal provider
     };
+
+    if (options->tempSensor.length > 0)
+    {
+        int written = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, options->tempSensor.chars, (int) options->tempSensor.length, querySpec.Name, (int)(ARRAY_SIZE(querySpec.Name) - 1));
+        if (written == 0)
+            return "Invalid temp sensor string";
+        querySpec.Name[written] = L'\0';
+    }
 
     DWORD dataSize = 0;
     if (PerfEnumerateCounterSetInstances(NULL, &querySpec.Identifier.CounterSetGuid, NULL, 0, &dataSize) != ERROR_NOT_ENOUGH_MEMORY)
@@ -62,6 +70,9 @@ const char* detectThermalTemp(double* result)
 
         if (dataSize == 0)
         {
+            if (options->tempSensor.length > 0)
+                return "Unable to find CPU sensor";
+
             const wchar_t* instanceName = (const wchar_t*)((BYTE*)pHead + sizeof(*pHead));
             wcscpy(querySpec.Name, instanceName); // Use the first instance name if the specific one is not found
         }
@@ -102,12 +113,16 @@ const char* detectThermalTemp(double* result)
         if (pCounterData->dwDataSize == sizeof(int32_t))
         {
             DWORD* pCounterIds = (DWORD*)(pMultiCounters + 1);
+            int32_t value = *(int32_t*)(pCounterData + 1);
+            if (value == 0)
+                return "Temperature data is zero";
+
             switch (pCounterIds[iCounter]) {
             case 0: // Temperature
-                *result = *(int32_t*)(pCounterData + 1) - 273;
+                *result = value - 273;
                 break;
             case 3: // High Precision Temperature
-                *result = *(int32_t*)(pCounterData + 1) / 10.0 - 273;
+                *result = value / 10.0 - 273;
                 break;
             }
         }
@@ -226,6 +241,8 @@ static const char* detectNCores(FFCPUResult* cpu)
             ++cpu->coresPhysical;
         else if (ptr->Relationship == RelationProcessorPackage)
             ++cpu->packages;
+        else if (ptr->Relationship == RelationNumaNode)
+            ++cpu->numaNodes;
     }
 
     return NULL;
@@ -238,7 +255,8 @@ static const char* detectByRegistry(FFCPUResult* cpu)
         return "ffRegOpenKeyForRead(HKEY_LOCAL_MACHINE, L\"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0\", &hKey, NULL) failed";
 
     ffRegReadStrbuf(hKey, L"ProcessorNameString", &cpu->name, NULL);
-    ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL);
+    if (ffRegReadStrbuf(hKey, L"VendorIdentifier", &cpu->vendor, NULL))
+        ffStrbufTrimRightSpace(&cpu->vendor);
 
     if (cpu->coresLogical == 0)
     {
@@ -287,14 +305,14 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (error)
         return error;
 
-    ffCPUDetectSpeedByCpuid(cpu);
+    ffCPUDetectByCpuid(cpu);
     if (options->showPeCoreCount) detectCoreTypes(cpu);
 
     if (cpu->frequencyMax == 0)
         detectMaxSpeedBySmbios(cpu);
 
     if(options->temp)
-        detectThermalTemp(&cpu->temperature);
+        detectThermalTemp(options, &cpu->temperature);
 
     return NULL;
 }

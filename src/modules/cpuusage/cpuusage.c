@@ -7,7 +7,7 @@
 
 #define FF_CPUUSAGE_DISPLAY_NAME "CPU Usage"
 
-void ffPrintCPUUsage(FFCPUUsageOptions* options)
+bool ffPrintCPUUsage(FFCPUUsageOptions* options)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
     const char* error = ffGetCpuUsageResult(options, &percentages);
@@ -15,7 +15,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
     if(error)
     {
         ffPrintError(FF_CPUUSAGE_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        return false;
     }
 
     double maxValue = -999, minValue = 999, sumValue = 0;
@@ -28,7 +28,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         {
             sumValue += *percent;
 
-            #if WIN32
+            #if _WIN32
             // Windows may return values greater than 100%, cap them to 100%
             if (*percent > 100) *percent = 100;
             #endif
@@ -48,7 +48,7 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
         ++index;
     }
     double avgValue = sumValue / (double) valueCount;
-    #if WIN32
+    #if _WIN32
     // See above comment
     if (avgValue > 100) avgValue = 100;
     #endif
@@ -114,53 +114,26 @@ void ffPrintCPUUsage(FFCPUUsageOptions* options)
             FF_FORMAT_ARG(minBar, "min-bar"),
         }));
     }
-}
 
-bool ffParseCPUUsageCommandOptions(FFCPUUsageOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_CPUUSAGE_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    if (ffStrEqualsIgnCase(subKey, "separate"))
-    {
-        options->separate = ffOptionParseBoolean(value);
-        return true;
-    }
-
-    if (ffStrEqualsIgnCase(subKey, "wait-time"))
-    {
-        options->waitTime = ffOptionParseUInt32(key, value);
-        return true;
-    }
-
-    if (ffPercentParseCommandOptions(key, subKey, value, &options->percent))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        if (ffStrEqualsIgnCase(key, "separate"))
+        if (unsafe_yyjson_equals_str(key, "separate"))
         {
             options->separate = yyjson_get_bool(val);
             continue;
         }
 
-        if (ffStrEqualsIgnCase(key, "waitTime"))
+        if (unsafe_yyjson_equals_str(key, "waitTime"))
         {
             options->waitTime = (uint32_t) yyjson_get_uint(val);
             continue;
@@ -169,24 +142,22 @@ void ffParseCPUUsageJsonObject(FFCPUUsageOptions* options, yyjson_val* module)
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
 
-        ffPrintError(FF_CPUUSAGE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_CPUUSAGE_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateCPUUsageJsonConfig(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyCPUUsageOptions))) FFCPUUsageOptions defaultOptions;
-    ffInitCPUUsageOptions(&defaultOptions);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
 
-    if (options->separate != defaultOptions.separate)
-        yyjson_mut_obj_add_bool(doc, module, "separate", options->separate);
+    ffPercentGenerateJsonConfig(doc, module, options->percent);
 
-    ffPercentGenerateJsonConfig(doc, module, defaultOptions.percent, options->percent);
+    yyjson_mut_obj_add_uint(doc, module, "waitTime", options->waitTime);
 }
 
-void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     FF_LIST_AUTO_DESTROY percentages = ffListCreate(sizeof(double));
     const char* error = ffGetCpuUsageResult(options, &percentages);
@@ -194,19 +165,35 @@ void ffGenerateCPUUsageJsonResult(FFCPUUsageOptions* options, yyjson_mut_doc* do
     if(error)
     {
         yyjson_mut_obj_add_str(doc, module, "error", error);
-        return;
+        return false;
     }
     yyjson_mut_val* result = yyjson_mut_obj_add_arr(doc, module, "result");
     FF_LIST_FOR_EACH(double, percent, percentages)
     {
         yyjson_mut_arr_add_real(doc, result, *percent);
     }
+
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
+    options->separate = false;
+    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
+    options->waitTime = 200;
+}
+
+void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffCPUUsageModuleInfo = {
     .name = FF_CPUUSAGE_MODULE_NAME,
     .description = "Print CPU usage. Costs some time to collect data",
-    .parseCommandOptions = (void*) ffParseCPUUsageCommandOptions,
+    .initOptions = (void*) ffInitCPUUsageOptions,
+    .destroyOptions = (void*) ffDestroyCPUUsageOptions,
     .parseJsonObject = (void*) ffParseCPUUsageJsonObject,
     .printModule = (void*) ffPrintCPUUsage,
     .generateJsonResult = (void*) ffGenerateCPUUsageJsonResult,
@@ -222,17 +209,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"CPU usage (percentage bar, minimum)", "min-bar"},
     }))
 };
-
-void ffInitCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰓅");
-    options->separate = false;
-    options->percent = (FFPercentageModuleConfig) { 50, 80, 0 };
-    options->waitTime = 200;
-}
-
-void ffDestroyCPUUsageOptions(FFCPUUsageOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

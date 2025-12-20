@@ -4,8 +4,9 @@
 #include "modules/lm/lm.h"
 #include "util/stringUtils.h"
 
-void ffPrintLM(FFLMOptions* options)
+bool ffPrintLM(FFLMOptions* options)
 {
+    bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
     ffStrbufInit(&result.type);
@@ -15,13 +16,13 @@ void ffPrintLM(FFLMOptions* options)
     if(error)
     {
         ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "%s", error);
-        return;
+        goto exit;
     }
 
     if(result.service.length == 0)
     {
         ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "No LM service found");
-        return;
+        goto exit;
     }
 
     if(options->moduleArgs.outputFormat.length == 0)
@@ -42,48 +43,37 @@ void ffPrintLM(FFLMOptions* options)
             FF_FORMAT_ARG(result.version, "version"),
         }));
     }
+    success = true;
+
+exit:
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.version);
-}
 
-bool ffParseLMCommandOptions(FFLMOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_LM_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return success;
 }
 
 void ffParseLMJsonObject(FFLMOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_LM_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateLMJsonConfig(FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyLMOptions))) FFLMOptions defaultOptions;
-    ffInitLMOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
+    bool success = false;
     FFLMResult result;
     ffStrbufInit(&result.service);
     ffStrbufInit(&result.type);
@@ -106,17 +96,31 @@ void ffGenerateLMJsonResult(FF_MAYBE_UNUSED FFLMOptions* options, yyjson_mut_doc
     yyjson_mut_obj_add_strbuf(doc, obj, "service", &result.service);
     yyjson_mut_obj_add_strbuf(doc, obj, "type", &result.type);
     yyjson_mut_obj_add_strbuf(doc, obj, "version", &result.version);
+    success = true;
 
 exit:
     ffStrbufDestroy(&result.service);
     ffStrbufDestroy(&result.type);
     ffStrbufDestroy(&result.version);
+
+    return success;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitLMOptions(FFLMOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
+}
+
+void ffDestroyLMOptions(FFLMOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffLMModuleInfo = {
     .name = FF_LM_MODULE_NAME,
     .description = "Print login manager (desktop manager) name and version",
-    .parseCommandOptions = (void*) ffParseLMCommandOptions,
+    .initOptions = (void*) ffInitLMOptions,
+    .destroyOptions = (void*) ffDestroyLMOptions,
     .parseJsonObject = (void*) ffParseLMJsonObject,
     .printModule = (void*) ffPrintLM,
     .generateJsonResult = (void*) ffGenerateLMJsonResult,
@@ -127,14 +131,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"LM version", "version"},
     }))
 };
-
-void ffInitLMOptions(FFLMOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "󰧨");
-}
-
-void ffDestroyLMOptions(FFLMOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

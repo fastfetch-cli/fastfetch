@@ -6,8 +6,8 @@
     <string>fastfetch</string>
     <key>CFBundleName</key>
     <string>@PROJECT_NAME@</string>
-	<key>CFBundleShortVersionString</key>
-	<string>@PROJECT_VERSION@</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@PROJECT_VERSION@</string>
     <key>CFBundleDevelopmentRegion</key>
     <string>English</string>
     <key>NSBluetoothAlwaysUsageDescription</key>

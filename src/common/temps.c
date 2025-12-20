@@ -5,7 +5,7 @@
 
 void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig config, const FFModuleArgs* module)
 {
-    if (celsius != celsius) // ignores NaN
+    if (celsius == -DBL_MAX) // ignores invalid value
         return;
 
     const FFOptionsDisplay* options = &instance.config.display;
@@ -41,13 +41,16 @@ void ffTempsAppendNum(double celsius, FFstrbuf* buffer, FFColorRangeConfig confi
     {
         case FF_TEMPERATURE_UNIT_DEFAULT:
         case FF_TEMPERATURE_UNIT_CELSIUS:
-            ffStrbufAppendF(buffer, "%.*f°C", options->tempNdigits, celsius);
+            ffStrbufAppendF(buffer, "%.*f%s°C", options->tempNdigits, celsius,
+                options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
             break;
         case FF_TEMPERATURE_UNIT_FAHRENHEIT:
-            ffStrbufAppendF(buffer, "%.*f°F", options->tempNdigits, celsius * 1.8 + 32);
+            ffStrbufAppendF(buffer, "%.*f%s°F", options->tempNdigits, celsius * 1.8 + 32,
+                options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_ALWAYS ? " " : "");
             break;
         case FF_TEMPERATURE_UNIT_KELVIN:
-            ffStrbufAppendF(buffer, "%.*f K", options->tempNdigits, celsius + 273.15);
+            ffStrbufAppendF(buffer, "%.*f%sK", options->tempNdigits, celsius + 273.15,
+                options->tempSpaceBeforeUnit == FF_SPACE_BEFORE_UNIT_NEVER ? "" : " ");
             break;
     }
 
@@ -104,9 +107,9 @@ bool ffTempsParseCommandOptions(const char* key, const char* subkey, const char*
     return false;
 }
 
-bool ffTempsParseJsonObject(const char* key, yyjson_val* value, bool* useTemp, FFColorRangeConfig* config)
+bool ffTempsParseJsonObject(yyjson_val* key, yyjson_val* value, bool* useTemp, FFColorRangeConfig* config)
 {
-    if (!ffStrEqualsIgnCase(key, "temp"))
+    if (!unsafe_yyjson_equals_str(key, "temp"))
         return false;
 
     if (yyjson_is_bool(value))
@@ -123,7 +126,7 @@ bool ffTempsParseJsonObject(const char* key, yyjson_val* value, bool* useTemp, F
 
     if (!yyjson_is_obj(value))
     {
-        fprintf(stderr, "Error: usage: %s must be an object or a boolean\n", key);
+        fprintf(stderr, "Error: usage: %s must be an object or a boolean\n", unsafe_yyjson_get_str(key));
         exit(480);
     }
 
@@ -156,23 +159,14 @@ bool ffTempsParseJsonObject(const char* key, yyjson_val* value, bool* useTemp, F
     return true;
 }
 
-void ffTempsGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, FF_MAYBE_UNUSED bool defaultTemp, FFColorRangeConfig defaultConfig, bool temp, FFColorRangeConfig config)
+void ffTempsGenerateJsonConfig(yyjson_mut_doc* doc, yyjson_mut_val* module, bool temp, FFColorRangeConfig config)
 {
-    assert(defaultTemp == false); // assume defaultTemp is always false
-
     if (!temp)
-        return;
-
-    if (config.green != defaultConfig.green || config.yellow != defaultConfig.yellow)
-    {
-        yyjson_mut_val* temp = yyjson_mut_obj_add_obj(doc, module, "temp");
-        if (config.green != defaultConfig.green)
-            yyjson_mut_obj_add_uint(doc, temp, "green", config.green);
-        if (config.yellow != defaultConfig.yellow)
-            yyjson_mut_obj_add_uint(doc, temp, "yellow", config.yellow);
-    }
+        yyjson_mut_obj_add_bool(doc, module, "temp", false);
     else
     {
-        yyjson_mut_obj_add_bool(doc, module, "temp", true);
+        yyjson_mut_val* temp = yyjson_mut_obj_add_obj(doc, module, "temp");
+        yyjson_mut_obj_add_uint(doc, temp, "green", config.green);
+        yyjson_mut_obj_add_uint(doc, temp, "yellow", config.yellow);
     }
 }

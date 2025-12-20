@@ -1,5 +1,5 @@
-#include "fastfetch.h"
 #include "smc_temps.h"
+#include "util/apple/cf_helpers.h"
 #include "util/stringUtils.h"
 
 #include <stdint.h>
@@ -137,14 +137,11 @@ static const char *smcReadSmcVal(io_connect_t conn, const UInt32Char_t key, SmcV
 
 static const char *smcOpen(io_connect_t *conn)
 {
-    io_object_t device = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMC"));
+    FF_IOOBJECT_AUTO_RELEASE io_object_t device = IOServiceGetMatchingService(MACH_PORT_NULL, IOServiceMatching("AppleSMC"));
     if (!device)
         return "No SMC device found";
 
-    kern_return_t result = IOServiceOpen(device, mach_task_self(), 0, conn);
-    IOObjectRelease(device);
-
-    if (result != kIOReturnSuccess)
+    if (IOServiceOpen(device, mach_task_self(), 0, conn) != kIOReturnSuccess)
         return "IOServiceOpen() failed";
 
     return NULL;
@@ -280,15 +277,32 @@ static bool detectTemp(io_connect_t conn, const char* sensor, double* sum)
     return true;
 }
 
-const char* ffDetectSmcTemps(enum FFTempType type, double* result)
+static io_connect_t conn;
+
+const char* ffDetectSmcSpecificTemp(const char* sensor, double* result)
 {
-    static io_connect_t conn;
     if (!conn)
     {
         if (smcOpen(&conn) != NULL)
             conn = (io_connect_t) -1;
     }
-    else if (conn == (io_connect_t) -1)
+    if (conn == (io_connect_t) -1)
+        return "Could not open SMC connection";
+
+    if (!detectTemp(conn, sensor, result))
+        return "Could not read SMC temperature";
+
+    return NULL;
+}
+
+const char* ffDetectSmcTemps(enum FFTempType type, double* result)
+{
+    if (!conn)
+    {
+        if (smcOpen(&conn) != NULL)
+            conn = (io_connect_t) -1;
+    }
+    if (conn == (io_connect_t) -1)
         return "Could not open SMC connection";
 
     uint32_t count = 0;

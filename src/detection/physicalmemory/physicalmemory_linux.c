@@ -124,7 +124,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             ffStrbufSetS(&device->locator, ldevice);
 
         const char* formFactorNames[] = {
-            NULL,              // 0x00 (用于索引，实际上没有0x00的类型)
+            NULL,              // 0x00 (Placeholder for indexing)
             "Other",           // 0x01
             "Unknown",         // 0x02
             "SIMM",            // 0x03
@@ -148,7 +148,7 @@ const char* ffDetectPhysicalMemory(FFlist* result)
             ffStrbufSetF(&device->formFactor, "Unknown (%d)", (int) data->FormFactor);
 
         const char* memoryTypeNames[] = {
-            NULL,         // 0x00 (用于索引，实际上没有0x00的类型)
+            NULL,         // 0x00 (Placeholder for indexing)
             "Other",      // 0x01
             "Unknown",    // 0x02
             "DRAM",       // 0x03

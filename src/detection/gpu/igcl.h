@@ -120,8 +120,28 @@ typedef struct ctl_temp_handle_t* ctl_temp_handle_t;
 
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctlenumtemperaturesensors
 extern ctl_result_t ctlEnumTemperatureSensors(ctl_device_adapter_handle_t hDAhandle, uint32_t* pCount, ctl_temp_handle_t* phTemperature);
-// https://intel.github.io/drivers.gpu.control-library/Control/api.html#ctltemperaturegetstate
-extern ctl_result_t ctlTemperatureGetState(ctl_temp_handle_t hTemperature, double* pTemperature);
+// https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv427ctlTemperatureGetProperties17ctl_temp_handle_tP21ctl_temp_properties_t
+
+typedef enum ctl_temp_sensors_t
+{
+    CTL_TEMP_SENSORS_GLOBAL = 0,
+    CTL_TEMP_SENSORS_GPU = 1,
+    CTL_TEMP_SENSORS_MEMORY = 2,
+    CTL_TEMP_SENSORS_GLOBAL_MIN = 3,
+    CTL_TEMP_SENSORS_GPU_MIN = 4,
+    CTL_TEMP_SENSORS_MEMORY_MIN = 5,
+    CTL_TEMP_SENSORS_MAX
+} ctl_temp_sensors_t;
+
+typedef struct _ctl_temp_properties_t
+{
+    uint32_t Size;
+    uint8_t Version;
+    ctl_temp_sensors_t type;
+    double maxTemperature;
+} ctl_temp_properties_t;
+
+extern ctl_result_t ctlTemperatureGetProperties(ctl_temp_handle_t hTemperature, ctl_temp_properties_t* pTemperature);
 // https://intel.github.io/drivers.gpu.control-library/Control/api.html#_CPPv420ctlEnumMemoryModules27ctl_device_adapter_handle_tP8uint32_tP16ctl_mem_handle_t
 
 typedef struct ctl_mem_handle_t* ctl_mem_handle_t;

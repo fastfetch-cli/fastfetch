@@ -22,7 +22,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
 
         if (!state->tfo)
         {
-            #ifdef __linux__
+            #if __linux__ || __GNU__
             // Linux doesn't support sendto() on unconnected sockets
             FF_DEBUG("TCP Fast Open disabled, skipping");
             return "TCP Fast Open disabled";
@@ -34,7 +34,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
 
             #ifndef __APPLE__ // On macOS, TCP_FASTOPEN doesn't seem to be needed
             // Set TCP Fast Open
-            #ifdef __linux__
+            #if __linux__ || __GNU__
             int flag = 5; // the queue length of pending packets
             #else
             int flag = 1; // enable TCP Fast Open
@@ -50,7 +50,7 @@ static const char* tryNonThreadingFastPath(FFNetworkingState* state)
                 FF_DEBUG("Failed to set TCP_FASTOPEN option: %s", strerror(errno));
                 return "setsockopt(TCP_FASTOPEN) failed";
             } else {
-                #ifdef __linux__
+                #if __linux__ || __GNU__
                 FF_DEBUG("Successfully set TCP_FASTOPEN option, queue length: %d", flag);
                 #elif defined(__APPLE__)
                 FF_DEBUG("Successfully set TCP_FASTOPEN_FORCE_ENABLE option");
@@ -346,7 +346,7 @@ const char* ffNetworkingSendHttpRequest(FFNetworkingState* state, const char* ho
         FF_DEBUG("Multithreading mode enabled, creating connection thread");
         state->thread = ffThreadCreate(connectAndSendThreadMain, state);
         if (state->thread) {
-            FF_DEBUG("Thread creation successful: thread=%p", (void*)state->thread);
+            FF_DEBUG("Thread creation successful: thread=%p", (void*)(uintptr_t)state->thread);
             return NULL;
         }
         FF_DEBUG("Thread creation failed");

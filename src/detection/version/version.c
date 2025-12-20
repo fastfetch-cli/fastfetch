@@ -26,6 +26,8 @@
     #define FF_ARCHITECTURE "alpha"
 #elif defined(__hppa__)
     #define FF_ARCHITECTURE "hppa"
+#elif defined(__sh__)
+    #define FF_ARCHITECTURE "sh"
 #elif defined(__m68k__)
     #define FF_ARCHITECTURE "m68k"
 #else
@@ -43,9 +45,9 @@
 #elif defined(__FreeBSD__)
     #define FF_SYSNAME "FreeBSD"
 #elif defined(__APPLE__)
-    #define FF_SYSNAME "Darwin"
+    #define FF_SYSNAME "macOS"
 #elif defined(_WIN32)
-    #define FF_SYSNAME "WIN32"
+    #define FF_SYSNAME "Windows"
 #elif defined(__sun)
     #define FF_SYSNAME "SunOS"
 #elif defined(__OpenBSD__)
@@ -54,6 +56,8 @@
     #define FF_SYSNAME "NetBSD"
 #elif defined(__HAIKU__)
     #define FF_SYSNAME "Haiku"
+#elif defined(__GNU__)
+    #define FF_SYSNAME "GNU"
 #else
     #define FF_SYSNAME "Unknown"
 #endif

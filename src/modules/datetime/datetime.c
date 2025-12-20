@@ -38,7 +38,7 @@ typedef struct FFDateTimeResult
     char timezoneName[FASTFETCH_STRBUF_DEFAULT_ALLOC];
 } FFDateTimeResult;
 
-void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
+static void printDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
 {
     FFDateTimeResult result;
 
@@ -93,7 +93,7 @@ void ffPrintDateTimeFormat(struct tm* tm, const FFModuleArgs* moduleArgs)
     }));
 }
 
-void ffPrintDateTime(FFDateTimeOptions* options)
+bool ffPrintDateTime(FFDateTimeOptions* options)
 {
     uint64_t msNow = ffTimeGetNow();
     time_t sNow = (time_t) (msNow / 1000);
@@ -101,66 +101,62 @@ void ffPrintDateTime(FFDateTimeOptions* options)
 
     if(options->moduleArgs.outputFormat.length > 0)
     {
-        ffPrintDateTimeFormat(tm, &options->moduleArgs);
-        return;
+        printDateTimeFormat(tm, &options->moduleArgs);
+        return true;
     }
 
     char buffer[32];
     if (strftime(buffer, ARRAY_SIZE(buffer), "%F %T", tm) == 0) //yyyy-MM-dd HH:mm:ss
     {
         ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "strftime() failed");
-        return;
+        return false;
     }
 
     ffPrintLogoAndKey(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
 
     puts(buffer);
-}
-
-bool ffParseDateTimeCommandOptions(FFDateTimeOptions* options, const char* key, const char* value)
-{
-    const char* subKey = ffOptionTestPrefix(key, FF_DATETIME_MODULE_NAME);
-    if (!subKey) return false;
-    if (ffOptionParseModuleArgs(key, subKey, value, &options->moduleArgs))
-        return true;
-
-    return false;
+    return true;
 }
 
 void ffParseDateTimeJsonObject(FFDateTimeOptions* options, yyjson_val* module)
 {
-    yyjson_val *key_, *val;
+    yyjson_val *key, *val;
     size_t idx, max;
-    yyjson_obj_foreach(module, idx, max, key_, val)
+    yyjson_obj_foreach(module, idx, max, key, val)
     {
-        const char* key = yyjson_get_str(key_);
-        if(ffStrEqualsIgnCase(key, "type"))
-            continue;
-
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
-        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", key);
+        ffPrintError(FF_DATETIME_DISPLAY_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
 
 void ffGenerateDateTimeJsonConfig(FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
-    __attribute__((__cleanup__(ffDestroyDateTimeOptions))) FFDateTimeOptions defaultOptions;
-    ffInitDateTimeOptions(&defaultOptions);
-
-    ffJsonConfigGenerateModuleArgsConfig(doc, module, &defaultOptions.moduleArgs, &options->moduleArgs);
+    ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 }
 
-void ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
+bool ffGenerateDateTimeJsonResult(FF_MAYBE_UNUSED FFDateTimeOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     yyjson_mut_obj_add_strcpy(doc, module, "result", ffTimeToFullStr(ffTimeGetNow()));
+    return true;
 }
 
-static FFModuleBaseInfo ffModuleInfo = {
+void ffInitDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionInitModuleArg(&options->moduleArgs, "");
+}
+
+void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
+{
+    ffOptionDestroyModuleArg(&options->moduleArgs);
+}
+
+FFModuleBaseInfo ffDateTimeModuleInfo = {
     .name = FF_DATETIME_MODULE_NAME,
     .description = "Print current date and time",
-    .parseCommandOptions = (void*) ffParseDateTimeCommandOptions,
+    .initOptions = (void*) ffInitDateTimeOptions,
+    .destroyOptions = (void*) ffDestroyDateTimeOptions,
     .parseJsonObject = (void*) ffParseDateTimeJsonObject,
     .printModule = (void*) ffPrintDateTime,
     .generateJsonResult = (void*) ffGenerateDateTimeJsonResult,
@@ -191,14 +187,3 @@ static FFModuleBaseInfo ffModuleInfo = {
         {"Day in month with leading zero", "day-pretty"},
     }))
 };
-
-void ffInitDateTimeOptions(FFDateTimeOptions* options)
-{
-    options->moduleInfo = ffModuleInfo;
-    ffOptionInitModuleArg(&options->moduleArgs, "");
-}
-
-void ffDestroyDateTimeOptions(FFDateTimeOptions* options)
-{
-    ffOptionDestroyModuleArg(&options->moduleArgs);
-}

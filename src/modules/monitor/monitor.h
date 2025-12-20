@@ -1,9 +1,11 @@
 #pragma once
 
-#include "fastfetch.h"
+#include "option.h"
 
 #define FF_MONITOR_MODULE_NAME "Monitor"
 
-void ffPrintMonitor(FFMonitorOptions* options);
+bool ffPrintMonitor(FFMonitorOptions* options);
 void ffInitMonitorOptions(FFMonitorOptions* options);
 void ffDestroyMonitorOptions(FFMonitorOptions* options);
+
+extern FFModuleBaseInfo ffMonitorModuleInfo;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fastfetch.h"
+#include "modules/editor/option.h"
 
 typedef struct FFEditorResult
 {
