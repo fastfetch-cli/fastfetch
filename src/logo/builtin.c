@@ -3611,6 +3611,17 @@ static const FFlogo O[] = {
         .colorKeys = FF_COLOR_FG_GREEN,
         .colorTitle = FF_COLOR_FG_GREEN,
     },
+    // OpenSuseTumbleweed2
+    {
+        .names = {"opensuse-tumbleweed2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED2,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
     // openSUSESlowroll
     {
         .names = {"opensuse-slowroll", "opensuse-tumbleweed-slowroll"},
