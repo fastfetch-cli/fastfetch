@@ -13,6 +13,7 @@ extern "C" {
 #include <dxguids/dxguids.h>
 #include <utility>
 #include <cinttypes>
+#include <cstring>
 
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 
@@ -83,7 +84,9 @@ const char* ffGPUDetectByDirectX(FF_MAYBE_UNUSED const FFGPUOptions* options, FF
         if (SUCCEEDED(adapter->GetProperty(DXCoreAdapterProperty::InstanceLuid, sizeof(luid), &luid)))
         {
             static_assert(sizeof(luid) == sizeof(uint64_t), "LUID size mismatch");
-            gpu->deviceId = ffGPUGeneral2Id(*(uint64_t*)&luid);
+            uint64_t luidInt;
+            memcpy(&luidInt, &luid, sizeof(luid));
+            gpu->deviceId = ffGPUGeneral2Id(luidInt);
         }
 
         ffStrbufInit(&gpu->driver);
