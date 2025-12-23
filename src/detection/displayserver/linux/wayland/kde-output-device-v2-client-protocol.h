@@ -244,6 +244,10 @@ enum kde_output_device_v2_capability {
 	 * @since 18
 	 */
 	KDE_OUTPUT_DEVICE_V2_CAPABILITY_CUSTOM_MODES = 0x2000,
+	/**
+	 * @since 19
+	 */
+	KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS = 0x4000,
 };
 /**
  * @ingroup iface_kde_output_device_v2
@@ -289,6 +293,10 @@ enum kde_output_device_v2_capability {
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_CAPABILITY_CUSTOM_MODES_SINCE_VERSION 18
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_CAPABILITY_AUTO_BRIGHTNESS_SINCE_VERSION 19
 #endif /* KDE_OUTPUT_DEVICE_V2_CAPABILITY_ENUM */
 
 #ifndef KDE_OUTPUT_DEVICE_V2_VRR_POLICY_ENUM
@@ -820,6 +828,16 @@ struct kde_output_device_v2_listener {
 	void (*priority)(void *data,
 			 struct kde_output_device_v2 *kde_output_device_v2,
 			 uint32_t priority);
+	/**
+	 * whether or not automatic brightness is enabled
+	 *
+	 *
+	 * @param enabled 1 for enabled, 0 for disabled
+	 * @since 20
+	 */
+	void (*auto_brightness)(void *data,
+				struct kde_output_device_v2 *kde_output_device_v2,
+				uint32_t enabled);
 };
 
 /**
@@ -973,6 +991,10 @@ kde_output_device_v2_add_listener(struct kde_output_device_v2 *kde_output_device
  * @ingroup iface_kde_output_device_v2
  */
 #define KDE_OUTPUT_DEVICE_V2_PRIORITY_SINCE_VERSION 18
+/**
+ * @ingroup iface_kde_output_device_v2
+ */
+#define KDE_OUTPUT_DEVICE_V2_AUTO_BRIGHTNESS_SINCE_VERSION 20
 
 
 /** @ingroup iface_kde_output_device_v2 */
