@@ -46,7 +46,8 @@ static void fontInitPretty(FFfont* font)
     if(font->size.length > 0)
     {
         ffStrbufAppend(&font->pretty, &font->size);
-        ffStrbufAppendS(&font->pretty, "pt");
+        if (!ffStrbufEndsWithS(&font->size, "pt") && !ffStrbufEndsWithS(&font->size, "px"))
+            ffStrbufAppendS(&font->pretty, "pt");
 
         if(font->styles.length > 0)
             ffStrbufAppendS(&font->pretty, ", ");
@@ -238,9 +239,9 @@ void ffFontInitXlfd(FFfont* font, const char* xlfd)
 
                     char tmp[32];
                     if(deciPt % 10 == 0)
-                        snprintf(tmp, sizeof(tmp), "%ld", deciPt / 10);
+                        snprintf(tmp, sizeof(tmp), "%ldpt", deciPt / 10);
                     else
-                        snprintf(tmp, sizeof(tmp), "%ld.%ld", deciPt / 10, deciPt % 10);
+                        snprintf(tmp, sizeof(tmp), "%ld.%ldpt", deciPt / 10, deciPt % 10);
 
                     ffStrbufAppendS(&font->size, tmp);
                 }
@@ -259,7 +260,10 @@ void ffFontInitXlfd(FFfont* font, const char* xlfd)
                     }
 
                     if(ok && px > 0)
+                    {
                         ffStrbufAppendNS(&font->size, length, pstart);
+                        ffStrbufAppendS(&font->size, "px");
+                    }
                 }
             }
             else if(field >= 2 && field <= 5) // weight/slant/setwidth/addstyle
@@ -424,29 +428,15 @@ void ffFontInitXft(FFfont* font, const char* xft)
         const bool sizeEmpty = (font->size.length == 0);
         if(value.length > 0)
         {
-            if(keyLen == 4 && ffStrStartsWithIgnCase(keyStart, "size"))
+            if(
+                (keyLen == 4 && ffStrStartsWithIgnCase(keyStart, "size")) ||
+                (keyLen == 9 && ffStrStartsWithIgnCase(keyStart, "pixelsize"))
+            )
             {
-                if(sizeEmpty)
+                if(sizeEmpty && ffCharIsDigit(value.chars[0]))
                 {
-                    if(ffStrbufEndsWithS(&value, "px") || ffStrbufEndsWithS(&value, "pt"))
-                        ffStrbufSubstrBefore(&value, value.length - 2);
-
-                    if(ffCharIsDigit(value.chars[0]))
-                        ffStrbufAppend(&font->size, &value);
-                }
-            }
-            else if(
-                (keyLen == 9 && ffStrStartsWithIgnCase(keyStart, "pixelsize")) ||
-                (keyLen == 9 && ffStrStartsWithIgnCase(keyStart, "pointsize")) ||
-                (keyLen == 8 && ffStrStartsWithIgnCase(keyStart, "fontsize"))
-            ) {
-                if(sizeEmpty)
-                {
-                    if(ffStrbufEndsWithS(&value, "px") || ffStrbufEndsWithS(&value, "pt"))
-                        ffStrbufSubstrBefore(&value, value.length - 2);
-
-                    if(ffCharIsDigit(value.chars[0]))
-                        ffStrbufAppend(&font->size, &value);
+                    ffStrbufAppend(&font->size, &value);
+                    ffStrbufAppendS(&font->size, keyLen == 4 ? "pt" : "px");
                 }
             }
             else if(keyLen == 5 && ffStrStartsWithIgnCase(keyStart, "style"))

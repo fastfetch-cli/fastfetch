@@ -519,7 +519,9 @@ ffDetectTerminalFontPlatform
     #endif
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "termite"))
         detectFromConfigFile("termite/config", "font =", terminalFont);
-    else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "urxvt"))
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "rxvt")
+        || ffStrbufIgnCaseEqualS(&terminal->processName, "urxvt")
+        || ffStrbufIgnCaseEqualS(&terminal->processName, "urxvtd"))
         detectUrxvt(terminalFont);
     else
         return false;
