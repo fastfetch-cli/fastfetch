@@ -1,10 +1,10 @@
 #pragma once
 
+#include "common/processing.h"
 #include "fastfetch.h"
 #include "modules/packages/option.h"
 
-typedef struct FFPackagesResult
-{
+typedef struct FFPackagesResult {
     uint32_t amSystem;
     uint32_t amUser;
     uint32_t apk;
@@ -47,7 +47,7 @@ typedef struct FFPackagesResult
     uint32_t winget;
     uint32_t xbps;
 
-    uint32_t all; //Make sure this goes last
+    uint32_t all; // Make sure this goes last
 
     FFstrbuf pacmanBranch;
 } FFPackagesResult;
@@ -57,7 +57,17 @@ bool ffPackagesReadCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, const char*
 bool ffPackagesWriteCache(FFstrbuf* cacheDir, FFstrbuf* cacheContent, uint32_t num_elements);
 
 #if defined(__linux__) || defined(__APPLE__) || defined(__GNU__)
+void getNixPackagesMultiImpl(char* paths[], uint32_t counts[], FFProcessHandle handle[], uint8_t length);
 uint32_t ffPackagesGetNix(FFstrbuf* baseDir, const char* dirname);
+#define ffPackagesGetNixMulti(dirs, counts, N)                \
+    do {                                                      \
+        FFProcessHandle _handles[N];                          \
+        char* _paths[N];                                      \
+        for (uint8_t i = 0; i < N; i++) {                     \
+            _paths[i] = dirs[i]->chars;                       \
+        }                                                     \
+        getNixPackagesMultiImpl(_paths, counts, _handles, N); \
+    } while (0)
 #endif
 #ifndef _WIN32
 uint32_t ffPackagesGetNumElements(const char* dirname, bool isdir);
