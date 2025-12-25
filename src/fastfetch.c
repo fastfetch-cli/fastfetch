@@ -14,7 +14,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifdef WIN32
+#ifdef _WIN32
     #include "util/windows/getline.h"
 #endif
 
@@ -502,7 +502,20 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     if (parseJsoncFile(absolutePath.chars, flag)) return;
 
-    //Try to load as a relative path
+    //Try to load as a relative path with the config directory
+
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.configDirs)
+    {
+        ffStrbufSet(&absolutePath, path);
+        ffStrbufAppendS(&absolutePath, "fastfetch/");
+        ffStrbufAppendS(&absolutePath, value);
+        if (needExtension)
+            ffStrbufAppendS(&absolutePath, ".jsonc");
+
+        if (parseJsoncFile(absolutePath.chars, flag)) return;
+    }
+
+    //Try to load as a preset
 
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
@@ -515,7 +528,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         if (parseJsoncFile(absolutePath.chars, flag)) return;
     }
 
-    //Try to load as a relative path with the directory of fastfetch binary
+    //Try to load as a relative path with the directory of fastfetch binary, for Windows support
 
     if (instance.state.platform.exePath.length)
     {

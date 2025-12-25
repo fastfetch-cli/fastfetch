@@ -83,6 +83,13 @@ bool ffAppendFileBuffer(const char* fileName, FFstrbuf* buffer);
 FF_C_NONNULL(2, 3)
 bool ffAppendFileBufferRelative(FFNativeFD dfd, const char* fileName, FFstrbuf* buffer);
 
+FF_C_NONNULL(2)
+static inline bool ffReadFDBuffer(FFNativeFD fd, FFstrbuf* buffer)
+{
+    ffStrbufClear(buffer);
+    return ffAppendFDBuffer(fd, buffer);
+}
+
 FF_C_NONNULL(1, 2)
 static inline bool ffReadFileBuffer(const char* fileName, FFstrbuf* buffer)
 {
@@ -171,19 +178,27 @@ static inline void ffUnsuppressIO(bool* suppressed)
 
 void ffListFilesRecursively(const char* path, bool pretty);
 
+static inline bool ffIsValidNativeFD(FFNativeFD fd)
+{
+    #ifndef _WIN32
+        return fd >= 0;
+    #else
+        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
+        return fd != INVALID_HANDLE_VALUE && fd != NULL;
+    #endif
+}
+
 FF_C_NONNULL(1)
 static inline bool wrapClose(FFNativeFD* pfd)
 {
     assert(pfd);
 
-    #ifndef WIN32
-        if (*pfd < 0)
-            return false;
+    if (!ffIsValidNativeFD(*pfd))
+        return false;
+
+    #ifndef _WIN32
         close(*pfd);
     #else
-        // https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
-        if (*pfd == NULL || *pfd == INVALID_HANDLE_VALUE)
-            return false;
         CloseHandle(*pfd);
     #endif
 
@@ -246,4 +261,5 @@ bool ffRemoveFile(const char* fileName);
 #ifdef _WIN32
 // Only O_RDONLY is supported
 HANDLE openat(HANDLE dfd, const char* fileName, bool directory);
+HANDLE openatW(HANDLE dfd, const wchar_t* fileName, uint16_t fileNameLen, bool directory);
 #endif

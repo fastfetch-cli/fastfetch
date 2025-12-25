@@ -446,7 +446,6 @@ jobs:
           usesh: true
           prepare: |
             uname -a
-            pkg install pkg:/package/pkg
             pkg update --accept
             pkg install gcc14 cmake git pkg-config glib2 dbus sqlite-3 imagemagick
 

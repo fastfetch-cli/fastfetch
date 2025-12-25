@@ -34,6 +34,7 @@ typedef struct FFstrbuf
 static inline void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
+void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free);
@@ -121,7 +122,7 @@ static inline bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
  */
 static inline void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
 {
-    return ffStrbufGetdelimRestore(lineptr, n, '\n', buffer);
+    ffStrbufGetdelimRestore(lineptr, n, '\n', buffer);
 }
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
@@ -210,6 +211,11 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateF(const char* format, ...)
     va_end(arguments);
 
     return strbuf;
+}
+
+static inline void ffStrbufInitMoveS(FFstrbuf* strbuf, char* heapStr)
+{
+    ffStrbufInitMoveNS(strbuf, (uint32_t) strlen(heapStr), heapStr);
 }
 
 static inline void ffStrbufDestroy(FFstrbuf* strbuf)

@@ -28,7 +28,7 @@ bool ffPrintCPUUsage(FFCPUUsageOptions* options)
         {
             sumValue += *percent;
 
-            #if WIN32
+            #if _WIN32
             // Windows may return values greater than 100%, cap them to 100%
             if (*percent > 100) *percent = 100;
             #endif
@@ -48,7 +48,7 @@ bool ffPrintCPUUsage(FFCPUUsageOptions* options)
         ++index;
     }
     double avgValue = sumValue / (double) valueCount;
-    #if WIN32
+    #if _WIN32
     // See above comment
     if (avgValue > 100) avgValue = 100;
     #endif

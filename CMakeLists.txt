@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.55.1
+    VERSION 2.56.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
@@ -106,6 +106,7 @@ option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
+option(ENABLE_LIBZFS "Enable libzfs" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -1414,6 +1415,23 @@ elseif(GNU)
     target_compile_definitions(libfastfetch PUBLIC PATH_MAX=4096)
 endif()
 
+if(WIN32)
+    check_function_exists(_msize HAVE_MSVC_MSIZE)
+    if(HAVE_MSVC_MSIZE)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MSVC_MSIZE=1)
+    endif()
+else()
+    check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
+    if(HAVE_MALLOC_USABLE_SIZE)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MALLOC_USABLE_SIZE=1)
+    else()
+        check_function_exists(malloc_size HAVE_MALLOC_SIZE)
+        if(HAVE_MALLOC_SIZE)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MALLOC_SIZE=1)
+        endif()
+    endif()
+endif()
+
 if(FreeBSD OR OpenBSD OR NetBSD)
     include(CheckStructHasMember)
     set(CMAKE_REQUIRED_DEFINITIONS "-D_IFI_OQDROPS=1")
@@ -1615,6 +1633,15 @@ endif()
 if(ENABLE_EMBEDDED_AMDGPUIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
 endif()
+if(ENABLE_LIBZFS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_libraries(libfastfetch
+            PRIVATE "zfs"
+        )
+    endif()
+endif()
 
 if(LINUX)
     target_link_libraries(libfastfetch
@@ -1705,7 +1732,6 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
-        PRIVATE "nvpair"
         PRIVATE "devinfo"
     )
 elseif(GNU)

@@ -1,3 +1,69 @@
+# 2.56.1
+
+Features:
+* Improves compatibility with KDE Plasma 6.5 (#2093, Display)
+* Adds a `tempSensor` option to specify the sensor name used for CPU temperature detection (CPU)
+    * Example: `{ "type": "cpu", "tempSensor": "hwmon0" /* Use /sys/class/hwmon/hwmon0 for temperature detection */ }`
+* Refines Memory usage detection on macOS to match Activity Monitor more closely (Memory, macOS)
+* Minor optimizations
+
+Bugfixes:
+* Fixes cache line size detection (CPU, macOS)
+
+Logos:
+* Removes Opak
+* Updates GXDE
+
+# 2.56.0
+
+Features:
+* Enhances config file loading. `--config` and `-c` with relative path now also searches paths defined in `fastfetch --list-config-paths` (typically `~/.config/fastfetch/`)
+    * This allows users to use `fastfetch -c my-config` without needing to specify the full path.
+* Adds NUMA node count detection (CPU)
+    * Exposed via `{numa-nodes}` in custom format
+    * Supported on Linux, FreeBSD and Windows
+* Supports the newest Alacritty config format (#2070, TerminalFont)
+* Detects driver specific info for Zhaoxin GPUs (GPU, Linux)
+* Detects Android OEM UI for certain OSes (DE, Android)
+* Improves users detection on Linux (#2064, Users, Linux)
+    * Adds systemd fallback when utmp is unavailable
+    * Fixes resource leaks
+    * Always reports the newest session info
+* Adds kiss package manager support (#2072, Packages, Linux)
+* Reports `sshd` if `$SSH_TTY` is not available (Terminal)
+* Zpool module rewrite (#2051, Zpool)
+    * Adds new Zpool properties: allocated, guid, readOnly
+    * Zpool module now uses runtime lookup for properties to ensure portability
+    * Adds NetBSD (requires `sudo`) and macOS support
+* Adds `splitLines` option for Command module, which splits the output into sub modules, each containing one line of the output (Command)
+```
+* Command output:
+Line 1
+Line 2
+Line 3
+
+* Old behavior:
+Command: Line 1
+Line 2
+Line 3
+
+* With `"splitLines": true`:
+Command 1: Line 1
+Command 2: Line 2
+Command 3: Line 3
+```
+
+Bugfixes:
+* Fixes {m,o}ksh version detection on Linux (Shell)
+* Fixes Alacritty config parsing for TOML format (#2070, TerminalFont)
+* Improves builtin logo printing for piping and buffering (#2065, Logo)
+* Uses absolute path when detecting shell and terminal version if available (#2067, TerminalShell)
+
+Logos:
+* Updates Codex Linux logo (#2071)
+* Adds OS/2 Warp logo (#2062)
+* Adds Amiga logo (#2061)
+
 # 2.55.1
 
 Bugfixes:

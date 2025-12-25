@@ -39,7 +39,7 @@ static const FFlogo A[] = {
             FF_COLOR_FG_256 "36",
         },
     },
-    // Aeon
+    // AerynOS
     {
         .names = {"AerynOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_AERYNOS,
@@ -191,7 +191,7 @@ static const FFlogo A[] = {
             FF_COLOR_FG_YELLOW,
             FF_COLOR_FG_BLUE,
             FF_COLOR_FG_CYAN,
-    	    FF_COLOR_FG_LIGHT_YELLOW,
+            FF_COLOR_FG_LIGHT_YELLOW,
             FF_COLOR_FG_GREEN,
         }
     },
@@ -2157,7 +2157,7 @@ static const FFlogo G[] = {
     // GXDE
     {
         .names = {"GXDE"},
-        .lines = FASTFETCH_DATATEXT_LOGO_DEEPIN,
+        .lines = FASTFETCH_DATATEXT_LOGO_GXDE,
         .colors = {
             FF_COLOR_FG_RED,
         },
@@ -3455,12 +3455,6 @@ static const FFlogo O[] = {
             FF_COLOR_FG_LIGHT_BLACK,
         }
     },
-    // Opak
-    {
-        .names = {"Opak"},
-        .lines = FASTFETCH_DATATEXT_LOGO_OPAK,
-        .colors = {}, // #1070
-    },
     // OpenKylin
     {
         .names = {"openkylin", "open-kylin"},
@@ -3610,6 +3604,17 @@ static const FFlogo O[] = {
     {
         .names = {"opensuse-tumbleweed_old"},
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // OpenSuseTumbleweed2
+    {
+        .names = {"opensuse-tumbleweed2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED2,
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_DEFAULT,

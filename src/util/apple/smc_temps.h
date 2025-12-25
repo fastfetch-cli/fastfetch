@@ -30,4 +30,5 @@ enum FFTempType
     FF_TEMP_MEMORY,
 };
 
+const char* ffDetectSmcSpecificTemp(const char* sensor, double* result);
 const char* ffDetectSmcTemps(enum FFTempType type, double* result);
