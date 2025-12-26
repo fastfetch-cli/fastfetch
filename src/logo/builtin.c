@@ -5500,10 +5500,12 @@ static const FFlogo X[] = {
         .colors = {
             FF_COLOR_FG_256 "25",
             FF_COLOR_FG_DEFAULT,
-        },
-        // LAST
-        {},
-    };
+        }
+
+    },
+    // LAST
+    {},
+};
 
 static const FFlogo Y[] = {
     // YiffOS
