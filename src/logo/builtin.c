@@ -5237,6 +5237,18 @@ static const FFlogo V[] = {
             FF_COLOR_FG_DEFAULT,
         },
     },
+
+    // Viper
+    {
+        .names = {"Viper"},
+        .lines = FASTFETCH_DATATEXT_LOGO_VIPER,
+        .colors = {
+            FF_COLOR_FG_256 "15",
+            FF_COLOR_FG_256 "14",
+            FF_COLOR_FG_256 "16",
+        }
+    },
+
     // Vnux
     {
         .names = {"Vnux"},
@@ -5478,20 +5490,9 @@ static const FFlogo X[] = {
             FF_COLOR_FG_256 "25",
             FF_COLOR_FG_DEFAULT,
         },
-    },
-    //Xray_OS
-    {
-        .names = {"Xray_OS"},
-        .lines = FASTFETCH_DATATEXT_LOGO_XRAY_OS,
-        .colors = {
-            FF_COLOR_FG_256 "15",
-            FF_COLOR_FG_256 "14",
-            FF_COLOR_FG_256 "16",
-        }
-    },
-    // LAST
-    {},
-};
+        // LAST
+        {},
+    };
 
 static const FFlogo Y[] = {
     // YiffOS
