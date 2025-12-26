@@ -126,6 +126,7 @@ static FFModuleBaseInfo* R[] = {
 
 static FFModuleBaseInfo* S[] = {
     &ffSeparatorModuleInfo,
+    &ffSecurityModuleInfo,
     &ffShellModuleInfo,
     &ffSoundModuleInfo,
     &ffSwapModuleInfo,

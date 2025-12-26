@@ -149,10 +149,14 @@ else()
     message(STATUS "Threads type: disabled")
 endif()
 
-set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type -Werror=vla")
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    set(WARNING_FLAGS "-Wall -Wextra -Wconversion -Werror=uninitialized -Werror=return-type -Werror=vla")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
+else()
+    set(WARNING_FLAGS "")
+endif()
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WARNING_FLAGS} -Werror=incompatible-pointer-types -Werror=implicit-function-declaration -Werror=int-conversion")
 
 if(WIN32 OR Haiku OR ENABLE_DIRECTX_HEADERS)
     enable_language(CXX)
@@ -161,20 +165,27 @@ if(WIN32 OR Haiku OR ENABLE_DIRECTX_HEADERS)
 endif()
 
 if(WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--tsaware -Wl,--build-id -Wl,--subsystem,console:6.1,--major-os-version,6,--minor-os-version,1")
+    else()
+        # MSVC linker flags
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE,6.1")
+    endif()
 elseif(APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fobjc-arc")
 endif()
 
-set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
-if(ENABLE_ASAN)
-    message(STATUS "Address sanitizer enabled (DEBUG only)")
-    set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address")
-endif()
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG} -fstack-protector-all -fno-delete-null-pointer-checks")
-if(NOT WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -rdynamic")
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+    set(FASTFETCH_FLAGS_DEBUG "-fno-omit-frame-pointer")
+    if(ENABLE_ASAN)
+        message(STATUS "Address sanitizer enabled (DEBUG only)")
+        set(FASTFETCH_FLAGS_DEBUG "${FASTFETCH_FLAGS_DEBUG} -fsanitize=address")
+    endif()
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG}")
+    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${FASTFETCH_FLAGS_DEBUG} -fstack-protector-all -fno-delete-null-pointer-checks")
+    if(NOT WIN32)
+        set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -rdynamic")
+    endif()
 endif()
 
 if(ENABLE_LTO AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -467,6 +478,7 @@ set(LIBFASTFETCH_SRC
     src/modules/publicip/publicip.c
     src/modules/display/display.c
     src/modules/separator/separator.c
+    src/modules/security/security.c
     src/modules/shell/shell.c
     src/modules/sound/sound.c
     src/modules/swap/swap.c
@@ -514,6 +526,7 @@ if(LINUX)
         src/detection/board/board_linux.c
         src/detection/bootmgr/bootmgr_linux.c
         src/detection/brightness/brightness_linux.c
+        src/detection/security/security_linux.c
         src/detection/btrfs/btrfs_linux.c
         src/detection/chassis/chassis_linux.c
         src/detection/cpu/cpu_linux.c
@@ -600,6 +613,7 @@ elseif(ANDROID)
         src/detection/board/board_android.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
+        src/detection/security/security_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c
@@ -1002,6 +1016,7 @@ elseif(WIN32)
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_windows.c
         src/detection/brightness/brightness_windows.cpp
+        src/detection/security/security_windows.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_windows.c
@@ -1073,6 +1088,7 @@ elseif(SunOS)
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
+        src/detection/security/security_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_sunos.c
@@ -1154,6 +1170,7 @@ elseif(Haiku)
         src/detection/board/board_windows.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
+        src/detection/security/security_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_windows.c
         src/detection/cpu/cpu_haiku.c
@@ -1223,6 +1240,7 @@ elseif(GNU)
         src/detection/board/board_nosupport.c
         src/detection/bootmgr/bootmgr_nosupport.c
         src/detection/brightness/brightness_nosupport.c
+        src/detection/security/security_nosupport.c
         src/detection/btrfs/btrfs_nosupport.c
         src/detection/chassis/chassis_nosupport.c
         src/detection/cpu/cpu_linux.c

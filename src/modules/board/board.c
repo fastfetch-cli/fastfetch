@@ -29,9 +29,19 @@ bool ffPrintBoard(FFBoardOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(FF_BOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT);
-        ffStrbufWriteTo(&result.name, stdout);
-        if (result.version.length)
-            printf(" (%s)", result.version.chars);
+        if (result.vendor.length > 0)
+        {
+            ffStrbufWriteTo(&result.vendor, stdout);
+            putchar(' ');
+        }
+        if (result.version.length > 0)
+        {
+            ffStrbufWriteTo(&result.version, stdout);
+        }
+        else if (result.name.length > 0)
+        {
+            ffStrbufWriteTo(&result.name, stdout);
+        }
         putchar('\n');
     }
     else

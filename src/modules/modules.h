@@ -53,6 +53,7 @@
 #include "modules/processes/processes.h"
 #include "modules/publicip/publicip.h"
 #include "modules/separator/separator.h"
+#include "modules/security/security.h"
 #include "modules/shell/shell.h"
 #include "modules/sound/sound.h"
 #include "modules/swap/swap.h"

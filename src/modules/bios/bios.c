@@ -51,11 +51,13 @@ bool ffPrintBios(FFBiosOptions* options)
     if(options->moduleArgs.outputFormat.length == 0)
     {
         ffPrintLogoAndKey(key.chars, 0, &options->moduleArgs, FF_PRINT_TYPE_NO_CUSTOM_KEY);
+        if (bios.vendor.length > 0)
+        {
+            ffStrbufWriteTo(&bios.vendor, stdout);
+            putchar(' ');
+        }
         ffStrbufWriteTo(&bios.version, stdout);
-        if (bios.release.length)
-            printf(" (%s)\n", bios.release.chars);
-        else
-            putchar('\n');
+        putchar('\n');
     }
     else
     {
