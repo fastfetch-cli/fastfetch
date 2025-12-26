@@ -2340,10 +2340,11 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
-    // HydraPWK
+    // rebranding HydraPWK to NetHydra
+    // NetHydra
     {
-        .names = {"HydraPWK"},
-        .lines = FASTFETCH_DATATEXT_LOGO_HYDRAPWK,
+        .names = {"NetHydra"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NETHYDRA,
         .colors = {
             FF_COLOR_FG_RED,
             FF_COLOR_FG_DEFAULT,
