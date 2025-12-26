@@ -2340,15 +2340,6 @@ static const FFlogo H[] = {
         .colorKeys = FF_COLOR_FG_LIGHT_BLACK,
         .colorTitle = FF_COLOR_FG_DEFAULT,
     },
-    // HydraPWK
-    {
-        .names = {"HydraPWK"},
-        .lines = FASTFETCH_DATATEXT_LOGO_HYDRAPWK,
-        .colors = {
-            FF_COLOR_FG_RED,
-            FF_COLOR_FG_DEFAULT,
-        },
-    },
     // LAST
     {},
 };
@@ -3412,6 +3403,15 @@ static const FFlogo N[] = {
             FF_COLOR_FG_RED,
         },
     },
+    // NetHydra
+    {
+        .names = {"NetHydra"},
+        .lines = FASTFETCH_DATATEXT_LOGO_NETHYDRA,
+        .colors = {
+            FF_COLOR_FG_RED,
+            FF_COLOR_FG_DEFAULT,
+        },
+    },
     // LAST
     {},
 };
@@ -3604,6 +3604,17 @@ static const FFlogo O[] = {
     {
         .names = {"opensuse-tumbleweed_old"},
         .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED_OLD,
+        .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
+        .colors = {
+            FF_COLOR_FG_DEFAULT,
+        },
+        .colorKeys = FF_COLOR_FG_GREEN,
+        .colorTitle = FF_COLOR_FG_GREEN,
+    },
+    // OpenSuseTumbleweed2
+    {
+        .names = {"opensuse-tumbleweed2"},
+        .lines = FASTFETCH_DATATEXT_LOGO_OPENSUSE_TUMBLEWEED2,
         .type = FF_LOGO_LINE_TYPE_ALTER_BIT,
         .colors = {
             FF_COLOR_FG_DEFAULT,
