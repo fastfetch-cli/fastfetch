@@ -1,13 +1,24 @@
 cmake_minimum_required(VERSION 3.12.0) # target_link_libraries with OBJECT libs & project homepage url
 
 project(fastfetch
-    VERSION 2.51.1
+    VERSION 2.56.1
     LANGUAGES C
     DESCRIPTION "Fast neofetch-like system information tool"
     HOMEPAGE_URL "https://github.com/fastfetch-cli/fastfetch"
 )
 
 set(PROJECT_LICENSE "MIT license")
+
+if(DEFINED CMAKE_SYSTEM_PROCESSOR_OVERRIDE) # Used by github actions for i686 build
+    set(CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR_OVERRIDE} CACHE INTERNAL "")
+endif()
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR)
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(CMAKE_SYSTEM_PROCESSOR "amd64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
+endif()
+message(STATUS "Build for system processor: ${CMAKE_SYSTEM_PROCESSOR}")
 
 ###################
 # Target Platform #
@@ -81,8 +92,7 @@ cmake_dependent_option(ENABLE_DDCUTIL "Enable ddcutil" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_DIRECTX_HEADERS "Enable DirectX headers for WSL" ON "LINUX" OFF)
 cmake_dependent_option(ENABLE_ELF "Enable libelf" ON "LINUX OR ANDROID OR DragonFly OR Haiku OR GNU" OFF)
 cmake_dependent_option(ENABLE_THREADS "Enable multithreading" ON "Threads_FOUND" OFF)
-cmake_dependent_option(ENABLE_LIBZFS "Enable libzfs" ON "LINUX OR FreeBSD OR SunOS" OFF)
-cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "NetBSD OR OpenBSD" OFF)
+cmake_dependent_option(ENABLE_PCIACCESS "Enable libpciaccess" ON "GNU" OFF)
 
 option(ENABLE_ZLIB "Enable zlib" ON)
 option(ENABLE_SYSTEM_YYJSON "Use system provided (instead of fastfetch embedded) yyjson library" OFF)
@@ -95,6 +105,8 @@ option(IS_MUSL "Build with musl libc" OFF) # Used by Github Actions
 option(INSTALL_LICENSE "Install license into /usr/share/licenses" ON)
 option(ENABLE_EMBEDDED_PCIIDS "Embed pci.ids into fastfetch, requires `python`" OFF)
 option(ENABLE_EMBEDDED_AMDGPUIDS "Embed amdgpu.ids into fastfetch, requires `python`" OFF)
+option(ENABLE_WORDEXP "Enable using of wordexp(3) if available, instead of glob(3)" ON)
+option(ENABLE_LIBZFS "Enable libzfs" ON)
 
 set(BINARY_LINK_TYPE_OPTIONS dlopen dynamic static)
 set(BINARY_LINK_TYPE dlopen CACHE STRING "How to link fastfetch")
@@ -377,6 +389,7 @@ set(LIBFASTFETCH_SRC
     src/detection/chassis/chassis.c
     src/detection/cpu/cpu.c
     src/detection/cpuusage/cpuusage.c
+    src/detection/command/command.c
     src/detection/disk/disk.c
     src/detection/diskio/diskio.c
     src/detection/displayserver/displayserver.c
@@ -397,6 +410,7 @@ set(LIBFASTFETCH_SRC
     src/detection/version/version.c
     src/detection/vulkan/vulkan.c
     src/detection/weather/weather.c
+    src/detection/zpool/zpool.c
     src/logo/builtin.c
     src/logo/image/im6.c
     src/logo/image/im7.c
@@ -569,7 +583,6 @@ if(LINUX)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -643,7 +656,6 @@ elseif(ANDROID)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_android.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -726,7 +738,6 @@ elseif(FreeBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -782,7 +793,7 @@ elseif(NetBSD)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_nbsd.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nbsd.c
@@ -820,7 +831,6 @@ elseif(NetBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -866,7 +876,7 @@ elseif(OpenBSD)
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
         src/detection/gpu/gpu_pci.c
-        src/detection/gpu/gpu_general.c
+        src/detection/gpu/gpu_obsd.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_obsd.c
         src/detection/lm/lm_nosupport.c
@@ -903,7 +913,6 @@ elseif(OpenBSD)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_linux.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/smbiosHelper.c
@@ -963,7 +972,7 @@ elseif(APPLE)
         src/detection/terminalfont/terminalfont_apple.m
         src/detection/terminalshell/terminalshell_linux.c
         src/detection/terminalsize/terminalsize_linux.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_apple.c
         src/detection/tpm/tpm_apple.c
         src/detection/uptime/uptime_bsd.c
         src/detection/users/users_linux.c
@@ -973,7 +982,6 @@ elseif(APPLE)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_apple.m
         src/detection/camera/camera_apple.m
-        src/detection/zpool/zpool_nosupport.c
         src/util/apple/cf_helpers.c
         src/util/apple/osascript.m
         src/util/apple/smc_temps.c
@@ -1024,7 +1032,7 @@ elseif(WIN32)
         src/detection/physicalmemory/physicalmemory_linux.c
         src/detection/netio/netio_windows.c
         src/detection/opengl/opengl_windows.c
-        src/detection/os/os_windows.c
+        src/detection/os/os_windows.cpp
         src/detection/packages/packages_windows.c
         src/detection/poweradapter/poweradapter_nosupport.c
         src/detection/processes/processes_windows.c
@@ -1033,7 +1041,7 @@ elseif(WIN32)
         src/detection/terminalfont/terminalfont_windows.c
         src/detection/terminalshell/terminalshell_windows.c
         src/detection/terminalsize/terminalsize_windows.c
-        src/detection/theme/theme_nosupport.c
+        src/detection/theme/theme_windows.c
         src/detection/tpm/tpm_windows.c
         src/detection/uptime/uptime_windows.c
         src/detection/users/users_windows.c
@@ -1043,7 +1051,6 @@ elseif(WIN32)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_windows.c
         src/detection/camera/camera_windows.cpp
-        src/detection/zpool/zpool_nosupport.c
         src/util/windows/getline.c
         src/util/windows/com.cpp
         src/util/windows/registry.c
@@ -1132,7 +1139,6 @@ elseif(SunOS)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_linux.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
     )
@@ -1201,7 +1207,6 @@ elseif(Haiku)
         src/detection/de/de_nosupport.c
         src/detection/wmtheme/wmtheme_nosupport.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
         src/util/haiku/version.cpp
@@ -1242,7 +1247,7 @@ elseif(GNU)
         src/detection/displayserver/linux/xcb.c
         src/detection/displayserver/linux/xlib.c
         src/detection/font/font_linux.c
-        src/detection/gpu/gpu_nosupport.c
+        src/detection/gpu/gpu_general.c
         src/detection/gpu/gpu_pci.c
         src/detection/gtk_qt/gtk.c
         src/detection/host/host_nosupport.c
@@ -1281,7 +1286,6 @@ elseif(GNU)
         src/detection/de/de_linux.c
         src/detection/wmtheme/wmtheme_linux.c
         src/detection/camera/camera_nosupport.c
-        src/detection/zpool/zpool_nosupport.c
         src/util/platform/FFPlatform_unix.c
         src/util/binary_linux.c
    )
@@ -1304,10 +1308,7 @@ endif()
 include(CheckFunctionExists)
 check_function_exists(wcwidth HAVE_WCWIDTH)
 if(NOT HAVE_WCWIDTH)
-    list(APPEND LIBFASTFETCH_SRC src/3rdparty/mk_wcwidch/wcwidth.c)
-endif()
-if(LINUX)
-    check_function_exists(statx HAVE_STATX)
+    list(APPEND LIBFASTFETCH_SRC src/util/wcwidth.c)
 endif()
 if(NOT WIN32)
     check_function_exists(pipe2 HAVE_PIPE2)
@@ -1331,15 +1332,15 @@ add_library(libfastfetch OBJECT
 )
 
 if(yyjson_FOUND)
-    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON)
+    target_compile_definitions(libfastfetch PUBLIC FF_USE_SYSTEM_YYJSON=1)
     target_link_libraries(libfastfetch PUBLIC yyjson::yyjson)
     # `target_link_libraries(yyjson::yyjson)` sets rpath implicitly
-else()
-    # Used for dlopen finding dylibs installed by homebrew
-    # `/opt/homebrew/lib` is not on in dlopen search path by default
-    if(APPLE)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
-    endif()
+endif()
+
+# Used for dlopen finding dylibs installed by homebrew
+# `/opt/homebrew/lib` is not on in dlopen search path by default
+if(APPLE AND BINARY_LINK_TYPE STREQUAL "dlopen")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath,/opt/homebrew/lib -Wl,-rpath,/usr/local/lib")
 endif()
 
 if(ANDROID)
@@ -1414,6 +1415,23 @@ elseif(GNU)
     target_compile_definitions(libfastfetch PUBLIC PATH_MAX=4096)
 endif()
 
+if(WIN32)
+    check_function_exists(_msize HAVE_MSVC_MSIZE)
+    if(HAVE_MSVC_MSIZE)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MSVC_MSIZE=1)
+    endif()
+else()
+    check_function_exists(malloc_usable_size HAVE_MALLOC_USABLE_SIZE)
+    if(HAVE_MALLOC_USABLE_SIZE)
+        target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MALLOC_USABLE_SIZE=1)
+    else()
+        check_function_exists(malloc_size HAVE_MALLOC_SIZE)
+        if(HAVE_MALLOC_SIZE)
+            target_compile_definitions(libfastfetch PUBLIC FF_HAVE_MALLOC_SIZE=1)
+        endif()
+    endif()
+endif()
+
 if(FreeBSD OR OpenBSD OR NetBSD)
     include(CheckStructHasMember)
     set(CMAKE_REQUIRED_DEFINITIONS "-D_IFI_OQDROPS=1")
@@ -1422,10 +1440,6 @@ if(FreeBSD OR OpenBSD OR NetBSD)
     target_compile_definitions(libfastfetch PUBLIC _IFI_OQDROPS FF_HAVE_IFI_OQDROPS)
     endif()
     unset(CMAKE_REQUIRED_DEFINITIONS)
-endif()
-
-if(HAVE_STATX)
-    target_compile_definitions(libfastfetch PUBLIC FF_HAVE_STATX)
 endif()
 
 if(HAVE_WCWIDTH)
@@ -1605,24 +1619,6 @@ ff_lib_enable(PCIACCESS
     "pciaccess"
     "pciaccess"
 )
-# The system <libzfs.h> is only usable on SunOS. We provide our local copy of it so it's always available.
-if(ENABLE_LIBZFS)
-    if(BINARY_LINK_TYPE STREQUAL "dlopen")
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-    else()
-        set(CMAKE_REQUIRED_LIBRARIES_BACKUP ${CMAKE_REQUIRED_LIBRARIES})
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} zfs)
-        check_function_exists("libzfs_init" LIBZFS_FOUND)
-        set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACKUP})
-        if(NOT LIBZFS_FOUND)
-            message(STATUS "Library: missing: LIBZFS")
-        else()
-            message(STATUS "Library: found LIBZFS")
-            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
-            target_link_libraries(libfastfetch PRIVATE zfs)
-        endif()
-    endif()
-endif()
 
 if(ENABLE_THREADS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_THREADS=1)
@@ -1636,6 +1632,15 @@ if(ENABLE_EMBEDDED_PCIIDS)
 endif()
 if(ENABLE_EMBEDDED_AMDGPUIDS)
     target_compile_definitions(libfastfetch PRIVATE FF_HAVE_EMBEDDED_AMDGPUIDS=1)
+endif()
+if(ENABLE_LIBZFS)
+    target_compile_definitions(libfastfetch PRIVATE FF_HAVE_LIBZFS=1)
+
+    if(NOT BINARY_LINK_TYPE STREQUAL "dlopen")
+        target_link_libraries(libfastfetch
+            PRIVATE "zfs"
+        )
+    endif()
 endif()
 
 if(LINUX)
@@ -1685,11 +1690,10 @@ elseif(WIN32)
         PRIVATE "wtsapi32"
         PRIVATE "imagehlp"
         PRIVATE "cfgmgr32"
-        PRIVATE "winbrand"
         PRIVATE "propsys"
         PRIVATE "secur32"
     )
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
         # WoA only works on Windows 10 or higher
         target_link_libraries(libfastfetch
             PRIVATE "mincore"
@@ -1728,8 +1732,6 @@ elseif(SunOS)
         PRIVATE "socket"
         PRIVATE "kstat"
         PRIVATE "proc"
-        PRIVATE "zfs"
-        PRIVATE "nvpair"
         PRIVATE "devinfo"
     )
 elseif(GNU)
@@ -1740,17 +1742,20 @@ elseif(ANDROID)
     target_link_libraries(libfastfetch
         PRIVATE "m"
     )
-    CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
-    if(HAVE_LIBANDROID_WORDEXP_STATIC)
-        target_link_libraries(libfastfetch
-            PRIVATE -l:libandroid-wordexp.a
-        )
-    else()
-        CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
-        if(HAVE_LIBANDROID_WORDEXP)
+    if(ENABLE_WORDEXP)
+        # https://github.com/termux/termux-packages/pull/7056
+        CHECK_LIBRARY_EXISTS(-l:libandroid-wordexp.a wordexp "" HAVE_LIBANDROID_WORDEXP_STATIC)
+        if(HAVE_LIBANDROID_WORDEXP_STATIC)
             target_link_libraries(libfastfetch
-                PRIVATE android-wordexp
+                PRIVATE -l:libandroid-wordexp.a
             )
+        else()
+            CHECK_LIBRARY_EXISTS(android-wordexp wordexp "" HAVE_LIBANDROID_WORDEXP)
+            if(HAVE_LIBANDROID_WORDEXP)
+                target_link_libraries(libfastfetch
+                    PRIVATE android-wordexp
+                )
+            endif()
         endif()
     endif()
 elseif(Haiku)
@@ -1812,13 +1817,17 @@ if(NOT WIN32)
     if(HAVE_UTMPX)
         target_compile_definitions(libfastfetch PRIVATE FF_HAVE_UTMPX=1)
     endif()
-    CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
-    if(HAVE_WORDEXP)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+    if(ENABLE_WORDEXP)
+        CHECK_INCLUDE_FILE("wordexp.h" HAVE_WORDEXP)
+        if(HAVE_WORDEXP)
+            target_compile_definitions(libfastfetch PRIVATE FF_HAVE_WORDEXP=1)
+            message(STATUS "wordexp.h found, wordexp support enabled")
+        else()
+            set(ENABLE_WORDEXP OFF)
+        endif()
     endif()
-    CHECK_INCLUDE_FILE("glob.h" HAVE_GLOB)
-    if(HAVE_GLOB)
-        target_compile_definitions(libfastfetch PRIVATE FF_HAVE_GLOB=1)
+    if(NOT ENABLE_WORDEXP)
+        message(STATUS "wordexp.h not found or disabled, glob used instead")
     endif()
     if(ENABLE_THREADS AND CMAKE_USE_PTHREADS_INIT)
         CHECK_INCLUDE_FILE("pthread_np.h" HAVE_PTHREAD_NP)
@@ -2027,11 +2036,6 @@ install(
 ##################
 
 set(CPACK_GENERATOR "TGZ;ZIP")
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CMAKE_SYSTEM_PROCESSOR "amd64")
-elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(CMAKE_SYSTEM_PROCESSOR "aarch64")
-endif()
 if(APPLE)
     string(TOLOWER "${CMAKE_PROJECT_NAME}-macos-${CMAKE_SYSTEM_PROCESSOR}" CPACK_PACKAGE_FILE_NAME) # use macos instead of darwin
 elseif(IS_MUSL)
@@ -2078,7 +2082,7 @@ endif()
 
 set(CPACK_SET_DESTDIR ON)
 
-set(CPACK_PACKAGE_CONTACT "Linus Dierheimer <Linus@Dierheimer.de>")
+set(CPACK_PACKAGE_CONTACT "Carter Li <zhangsongcui@live.cn>")
 set(CPACK_PACKAGE_DESCRIPTION "\
 fastfetch is a neofetch-like tool for fetching system information and displaying them in a pretty way. \
 It is written mostly in C to achieve much better performance.\

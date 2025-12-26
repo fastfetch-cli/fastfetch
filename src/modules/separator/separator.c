@@ -9,27 +9,52 @@
 
 #include <locale.h>
 
-static inline uint32_t max(uint32_t a, uint32_t b)
+#if __SIZEOF_WCHAR_T__ == 4
+    static inline size_t mbrtoc32(uint32_t* restrict pc32, const char* restrict s, size_t n, mbstate_t* restrict ps)
+    {
+        return mbrtowc((wchar_t*) pc32, s, n, ps);
+    }
+#else
+    #include <uchar.h>
+#endif
+
+static uint8_t getMbrWidth(const char* mbstr, uint32_t length, const char** next, mbstate_t* state)
 {
-    return a > b ? a : b;
+    if (__builtin_expect((uint8_t) *mbstr < 0x80, true)) // ASCII fast path
+    {
+        if (next) *next = mbstr + 1;
+        return 1;
+    }
+
+    uint32_t c32;
+    uint32_t len = (uint32_t) mbrtoc32(&c32, mbstr, length, state);
+    if (len >= (uint32_t) -3)
+    {
+        // Invalid or incomplete multibyte sequence
+        if (next) *next = mbstr + 1;
+        return 1;
+    }
+
+    if (next) *next = mbstr + len;
+    int width = mk_wcwidth(c32);
+    return width < 0 ? 0 : (uint8_t) width;
 }
 
-static inline uint32_t getWcsWidth(const FFstrbuf* mbstr, wchar_t* wstr, mbstate_t* state)
+static uint32_t getWcsWidth(const FFstrbuf* mbstr)
 {
-    int result = 1;
-    for (uint32_t i = 0; i < mbstr->length; i++)
-    {
-        if (!isascii(mbstr->chars[i]))
-        {
-            result = 0;
-            break;
-        }
-    }
-    if (__builtin_expect(result, 1)) return mbstr->length;
+    mbstate_t state = {};
+    uint32_t remainLength = mbstr->length;
+    uint32_t result = 0;
 
-    const char* str = mbstr->chars;
-    uint32_t wstrLength = (uint32_t) mbsrtowcs(wstr, &str, mbstr->length, state);
-    result = mk_wcswidth(wstr, wstrLength);
+    const char* ptr = mbstr->chars;
+    while (remainLength > 0 && *ptr != '\0')
+    {
+        const char* lastPtr = NULL;
+        result += getMbrWidth(ptr, remainLength, &lastPtr, &state);
+        remainLength -= (uint32_t)(lastPtr - ptr);
+        ptr = lastPtr;
+    }
+
     return result > 0 ? (uint32_t) result : mbstr->length;
 }
 
@@ -40,13 +65,13 @@ bool ffPrintSeparator(FFSeparatorOptions* options)
     if(options->outputColor.length && !instance.config.display.pipe)
         ffPrintColor(&options->outputColor);
 
-    if (options->length > 0)
+    if (options->times > 0)
     {
         if(__builtin_expect(options->string.length == 1, 1))
-            ffPrintCharTimes(options->string.chars[0], options->length);
+            ffPrintCharTimes(options->string.chars[0], options->times);
         else
         {
-            for (uint32_t i = 0; i < options->length; i++)
+            for (uint32_t i = 0; i < options->times; i++)
             {
                 fputs(options->string.chars, stdout);
             }
@@ -55,14 +80,10 @@ bool ffPrintSeparator(FFSeparatorOptions* options)
     else
     {
         setlocale(LC_CTYPE, "");
-        mbstate_t state = {};
         const FFPlatform* platform = &instance.state.platform;
 
-        FF_AUTO_FREE wchar_t* wstr = malloc((max(
-            platform->userName.length, options->string.length) + 1) * sizeof(*wstr));
-
         uint32_t titleLength = 1 // @
-            + getWcsWidth(&platform->userName, wstr, &state) // user name
+            + getWcsWidth(&platform->userName) // user name
             + (instance.state.titleFqdn ? platform->hostName.length : ffStrbufFirstIndexC(&platform->hostName, '.')); // host name
 
         if(__builtin_expect(options->string.length == 1, 1))
@@ -71,7 +92,7 @@ bool ffPrintSeparator(FFSeparatorOptions* options)
         }
         else
         {
-            uint32_t wcsLength = getWcsWidth(&options->string, wstr, &state);
+            uint32_t wcsLength = getWcsWidth(&options->string);
 
             int remaining = (int) titleLength;
             //Write the whole separator as often as it fits fully into titleLength
@@ -84,24 +105,19 @@ bool ffPrintSeparator(FFSeparatorOptions* options)
                 if (wcsLength != options->string.length)
                 {
                     // Unicode chars
-                    for(int i = 0; remaining > 0; ++i)
+                    const char* ptr = options->string.chars;
+                    mbstate_t state = {};
+                    const char* next = NULL;
+                    while (remaining > 0 && *ptr != '\0')
                     {
-                        #ifdef __linux__
-                        // https://stackoverflow.com/questions/75126743/i-have-difficulties-with-putwchar-in-c#answer-75137784
-                        char wch[16] = "";
-                        uint32_t wchLength = (uint32_t) wcrtomb(wch, wstr[i], &state);
-                        fwrite(wch, wchLength, 1, stdout);
-                        #else
-                        putwchar(wstr[i]);
-                        #endif
-                        int width = mk_wcwidth(wstr[i]);
-                        remaining -= width < 0 ? 0 : width;
+                        remaining -= (int) getMbrWidth(ptr, (uint32_t)(options->string.length - (ptr - options->string.chars)), &next, &state);
+                        ptr = next;
                     }
+                    fwrite(options->string.chars, (size_t) (ptr - options->string.chars), 1, stdout);
                 }
                 else
                 {
-                    for(int i = 0; i < remaining; i++)
-                        putchar(options->string.chars[i]);
+                    fwrite(options->string.chars, (size_t) remaining, 1, stdout);
                 }
             }
         }
@@ -136,9 +152,15 @@ void ffParseSeparatorJsonObject(FFSeparatorOptions* options, yyjson_val* module)
             continue;
         }
 
+        if (unsafe_yyjson_equals_str(key, "times"))
+        {
+            options->times = (uint32_t) yyjson_get_uint(val);
+            continue;
+        }
+
         if (unsafe_yyjson_equals_str(key, "length"))
         {
-            options->length = (uint32_t) yyjson_get_uint(val);
+            ffPrintError(FF_SEPARATOR_MODULE_NAME, 0, NULL, FF_PRINT_TYPE_NO_CUSTOM_KEY, "The option length has been renamed to times.");
             continue;
         }
 
@@ -150,14 +172,14 @@ void ffGenerateSeparatorJsonConfig(FFSeparatorOptions* options, yyjson_mut_doc* 
 {
     yyjson_mut_obj_add_strbuf(doc, module, "string", &options->string);
     yyjson_mut_obj_add_strbuf(doc, module, "outputColor", &options->outputColor);
-    yyjson_mut_obj_add_uint(doc, module, "length", options->length);
+    yyjson_mut_obj_add_uint(doc, module, "times", options->times);
 }
 
 void ffInitSeparatorOptions(FFSeparatorOptions* options)
 {
     ffStrbufInitStatic(&options->string, "-");
     ffStrbufInit(&options->outputColor);
-    options->length = 0;
+    options->times = 0;
 }
 
 void ffDestroySeparatorOptions(FFSeparatorOptions* options)

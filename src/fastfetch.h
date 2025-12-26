@@ -46,6 +46,7 @@ typedef struct FFstate
     yyjson_mut_doc* resultDoc;
     FFstrbuf genConfigPath;
     bool fullConfig;
+    uint32_t dynamicInterval;
 } FFstate;
 
 typedef struct FFinstance

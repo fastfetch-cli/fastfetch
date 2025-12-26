@@ -15,11 +15,18 @@ extern const char* FF_GPU_VENDOR_NAME_AMD;
 extern const char* FF_GPU_VENDOR_NAME_INTEL;
 extern const char* FF_GPU_VENDOR_NAME_NVIDIA;
 extern const char* FF_GPU_VENDOR_NAME_MTHREADS;
+extern const char* FF_GPU_VENDOR_NAME_QUALCOMM;
+extern const char* FF_GPU_VENDOR_NAME_MTK;
 extern const char* FF_GPU_VENDOR_NAME_VMWARE;
 extern const char* FF_GPU_VENDOR_NAME_PARALLEL;
 extern const char* FF_GPU_VENDOR_NAME_MICROSOFT;
 extern const char* FF_GPU_VENDOR_NAME_REDHAT;
 extern const char* FF_GPU_VENDOR_NAME_ORACLE;
+extern const char* FF_GPU_VENDOR_NAME_BROADCOM;
+extern const char* FF_GPU_VENDOR_NAME_LOONGSON;
+extern const char* FF_GPU_VENDOR_NAME_JINGJIA_MICRO;
+extern const char* FF_GPU_VENDOR_NAME_HUAWEI;
+extern const char* FF_GPU_VENDOR_NAME_ZHAOXIN;
 
 typedef struct FFGPUMemory
 {
@@ -58,7 +65,7 @@ typedef struct FFGpuDriverPciBusId
     uint32_t func;
 } FFGpuDriverPciBusId;
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__HAIKU__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__sun) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__HAIKU__) || defined(__GNU__)
 void ffGPUFillVendorAndName(uint8_t subclass, uint16_t vendor, uint16_t device, FFGPUResult* gpu);
 void ffGPUQueryAmdGpuName(uint16_t deviceId, uint8_t revisionId, FFGPUResult* gpu);
 
@@ -73,3 +80,14 @@ const char* ffDrmDetectNouveau(FFGPUResult* gpu, int fd);
 
 const char* ffGPUDetectDriverSpecific(const FFGPUOptions* options, FFGPUResult* gpu, FFGpuDriverPciBusId pciBusId);
 #endif // defined(XXX)
+
+static inline uint64_t ffGPUPciAddr2Id(uint64_t domain, uint64_t bus, uint64_t device, uint64_t function)
+{
+    return (domain << 16) | (bus << 8) | (device << 3) | function;
+}
+
+static inline uint64_t ffGPUGeneral2Id(uint64_t originalId)
+{
+    // Note: originalId may already have the MSB set
+    return (1ULL << 63) | originalId;
+}

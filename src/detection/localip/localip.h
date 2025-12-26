@@ -3,6 +3,19 @@
 #include "fastfetch.h"
 #include "modules/localip/option.h"
 
+#ifndef IN6_IS_ADDR_GLOBAL
+#define IN6_IS_ADDR_GLOBAL(a) \
+        ((((const uint32_t *) (a))[0] & htonl(0x70000000)) == htonl(0x20000000))
+#endif
+#ifndef IN6_IS_ADDR_UNIQUE_LOCAL
+#define IN6_IS_ADDR_UNIQUE_LOCAL(a) \
+        ((((const uint32_t *) (a))[0] & htonl(0xfe000000)) == htonl(0xfc000000))
+#endif
+#ifndef IN6_IS_ADDR_LINKLOCAL
+#define IN6_IS_ADDR_LINKLOCAL(a) \
+        ((((const uint32_t *) (a))[0] & htonl(0xffc00000)) == htonl(0xfe800000))
+#endif
+
 typedef struct FFLocalIpResult
 {
     FFstrbuf name;

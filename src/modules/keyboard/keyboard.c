@@ -39,15 +39,44 @@ bool ffPrintKeyboard(FFKeyboardOptions* options)
         return false;
     }
 
-    uint8_t index = 0;
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFKeyboardDevice*));
     FF_LIST_FOR_EACH(FFKeyboardDevice, device, result)
     {
-        printDevice(options, device, result.length > 1 ? ++index : 0);
-        ffStrbufDestroy(&device->serial);
-        ffStrbufDestroy(&device->name);
+        bool ignored = false;
+        FF_LIST_FOR_EACH(FFstrbuf, ignore, options->ignores)
+        {
+            if(ffStrbufStartsWithIgnCase(&device->name, ignore))
+            {
+                ignored = true;
+                break;
+            }
+        }
+        if(!ignored)
+        {
+            FFKeyboardDevice** ptr = ffListAdd(&filtered);
+            *ptr = device;
+        }
     }
 
-    return true;
+    bool ret = true;
+    if(!filtered.length)
+    {
+        ffPrintError(FF_KEYBOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
+        ret = false;
+    }
+    else
+    {
+        uint8_t index = 0;
+        FF_LIST_FOR_EACH(FFKeyboardDevice*, pdevice, filtered)
+        {
+            FFKeyboardDevice* device = *pdevice;
+            printDevice(options, device, filtered.length > 1 ? ++index : 0);
+            ffStrbufDestroy(&device->serial);
+            ffStrbufDestroy(&device->name);
+        }
+    }
+
+    return ret;
 }
 
 void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
@@ -59,6 +88,21 @@ void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
 
+        if (unsafe_yyjson_equals_str(key, "ignores"))
+        {
+            yyjson_val *elem;
+            size_t eidx, emax;
+            yyjson_arr_foreach(val, eidx, emax, elem)
+            {
+                if (yyjson_is_str(elem))
+                {
+                    FFstrbuf* strbuf = ffListAdd(&options->ignores);
+                    ffStrbufInitJsonVal(strbuf, elem);
+                }
+            }
+            continue;
+        }
+
         ffPrintError(FF_KEYBOARD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "Unknown JSON key %s", unsafe_yyjson_get_str(key));
     }
 }
@@ -66,6 +110,13 @@ void ffParseKeyboardJsonObject(FFKeyboardOptions* options, yyjson_val* module)
 void ffGenerateKeyboardJsonConfig(FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
 {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
+
+    if (options->ignores.length > 0)
+    {
+        yyjson_mut_val* ignores = yyjson_mut_obj_add_arr(doc, module, "ignores");
+        FF_LIST_FOR_EACH(FFstrbuf, strbuf, options->ignores)
+            yyjson_mut_arr_append(ignores, yyjson_mut_strncpy(doc, strbuf->chars, strbuf->length));
+    }
 }
 
 bool ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yyjson_mut_doc* doc, yyjson_mut_val* module)
@@ -86,6 +137,17 @@ bool ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &device->serial);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &device->name);
+
+        bool ignored = false;
+        FF_LIST_FOR_EACH(FFstrbuf, ignore, options->ignores)
+        {
+            if(ffStrbufStartsWithIgnCase(&device->name, ignore))
+            {
+                ignored = true;
+                break;
+            }
+        }
+        yyjson_mut_obj_add_bool(doc, obj, "ignored", ignored);
     }
 
     FF_LIST_FOR_EACH(FFKeyboardDevice, device, result)
@@ -100,11 +162,17 @@ bool ffGenerateKeyboardJsonResult(FF_MAYBE_UNUSED FFKeyboardOptions* options, yy
 void ffInitKeyboardOptions(FFKeyboardOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "");
+
+    ffListInit(&options->ignores, sizeof(FFstrbuf));
 }
 
 void ffDestroyKeyboardOptions(FFKeyboardOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    FF_LIST_FOR_EACH(FFstrbuf, str, options->ignores)
+        ffStrbufDestroy(str);
+    ffListDestroy(&options->ignores);
 }
 
 FFModuleBaseInfo ffKeyboardModuleInfo = {

@@ -2,12 +2,14 @@
 #include "common/io/io.h"
 #include "common/printing.h"
 #include "common/processing.h"
+#include "detection/media/media.h"
 #include "detection/os/os.h"
 #include "detection/terminalshell/terminalshell.h"
 #include "util/textModifier.h"
 #include "util/stringUtils.h"
 
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef enum __attribute__((__packed__)) FFLogoSize
@@ -483,6 +485,15 @@ static bool updateLogoPath(void)
     if (ffStrbufEqualS(&options->source, "-")) // stdin
         return true;
 
+    if (ffStrbufIgnCaseEqualS(&options->source, "media-cover"))
+    {
+        const FFMediaResult* media = ffDetectMedia(true);
+        if (media->cover.length == 0)
+            return false;
+        ffStrbufSet(&options->source, &media->cover);
+        return true;
+    }
+
     FF_STRBUF_AUTO_DESTROY fullPath = ffStrbufCreate();
     if (ffPathExpandEnv(options->source.chars, &fullPath) && ffPathExists(fullPath.chars, FF_PATHTYPE_FILE))
     {
@@ -706,6 +717,9 @@ void ffLogoPrintLine(void)
     if(instance.state.logoWidth > 0)
         printf("\033[%uC", instance.state.logoWidth);
 
+    if (instance.state.dynamicInterval > 0)
+        fputs("\033[K", stdout);
+
     ++instance.state.keysHeight;
 }
 
@@ -719,22 +733,23 @@ void ffLogoPrintRemaining(void)
 void ffLogoBuiltinPrint(void)
 {
     FFOptionsLogo* options = &instance.config.logo;
+    options->position = FF_LOGO_POSITION_TOP;
+    options->paddingRight = 2; // empty line after logo printing
+    FF_STRBUF_AUTO_DESTROY buf = ffStrbufCreate();
 
     for(uint8_t ch = 0; ch < 26; ++ch)
     {
         for(const FFlogo* logo = ffLogoBuiltins[ch]; *logo->names; ++logo)
         {
-            printf("\033[%sm%s:\033[0m\n", logo->colors[0], logo->names[0]);
+            if (instance.config.display.pipe)
+                ffStrbufSetF(&buf, "%s:\n", logo->names[0]);
+            else
+                ffStrbufSetF(&buf, "\e[%sm%s:\e[0m\n", logo->colors[0], logo->names[0]);
+            ffWriteFDBuffer(FFUnixFD2NativeFD(STDOUT_FILENO), &buf);
             logoPrintStruct(logo);
-            ffLogoPrintRemaining();
 
-            //reset everything
-            instance.state.logoHeight = 0;
-            instance.state.keysHeight = 0;
             for(uint8_t i = 0; i < FASTFETCH_LOGO_MAX_COLORS; i++)
                 ffStrbufClear(&options->colors[i]);
-
-            putchar('\n');
         }
     }
 }

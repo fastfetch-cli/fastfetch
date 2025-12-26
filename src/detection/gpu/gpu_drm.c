@@ -153,7 +153,7 @@ const char* ffDrmDetectAmdgpu(const FFGPUOptions* options, FFGPUResult* gpu, con
 
     return NULL;
 #else
-    FF_UNUSED(gpu, renderPath);
+    FF_UNUSED(options, gpu, renderPath);
     return "Fastfetch is compiled without libdrm support";
 #endif
 }
@@ -313,7 +313,7 @@ const char* ffDrmDetectAsahi(FFGPUResult* gpu, int fd)
         // They removed `unstable_uabi_version` from the struct. Hopefully they won't introduce new ABI changes.
         gpu->coreCount = (int32_t) (paramsGlobal.num_clusters_total * paramsGlobal.num_cores_per_cluster);
         gpu->frequency = paramsGlobal.max_frequency_khz / 1000;
-        gpu->deviceId = paramsGlobal.chip_id;
+        gpu->deviceId = ffGPUGeneral2Id(paramsGlobal.chip_id);
 
         if (!gpu->name.length)
         {

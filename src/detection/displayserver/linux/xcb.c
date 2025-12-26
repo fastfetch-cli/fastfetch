@@ -215,8 +215,8 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
 
     FFDisplayResult* item = ffdsAppendDisplay(
         data->result,
-        (uint32_t) crtcInfoReply->width,
-        (uint32_t) crtcInfoReply->height,
+        (uint32_t) (currentMode ? currentMode->width : crtcInfoReply->width),
+        (uint32_t) (currentMode ? currentMode->height : crtcInfoReply->height),
         currentMode ? (double) currentMode->dot_clock / (double) ((uint32_t) currentMode->htotal * currentMode->vtotal) : 0,
         (uint32_t) (crtcInfoReply->width / scaleFactor + .5),
         (uint32_t) (crtcInfoReply->height / scaleFactor + .5),
@@ -230,7 +230,7 @@ static bool xcbRandrHandleOutput(XcbRandrData* data, xcb_randr_output_t output, 
         0,
         (uint32_t) outputInfoReply->mm_width,
         (uint32_t) outputInfoReply->mm_height,
-        "xcb-randr-crtc"
+        currentMode ? "xcb-randr-mode" : "xcb-randr-crtc"
     );
     if (item && edidLength)
     {

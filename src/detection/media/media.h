@@ -13,6 +13,8 @@ typedef struct FFMediaResult
     FFstrbuf album;
     FFstrbuf url;
     FFstrbuf status;
+    FFstrbuf cover;
+    bool removeCoverAfterUse;
 } FFMediaResult;
 
-const FFMediaResult* ffDetectMedia();
+const FFMediaResult* ffDetectMedia(bool saveCover);

@@ -3,6 +3,7 @@
 #include "common/init.h"
 #include "common/io/io.h"
 #include "common/jsonconfig.h"
+#include "common/time.h"
 #include "detection/version/version.h"
 #include "logo/logo.h"
 #include "util/stringUtils.h"
@@ -13,7 +14,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifdef WIN32
+#ifdef _WIN32
     #include "util/windows/getline.h"
 #endif
 
@@ -501,7 +502,20 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
 
     if (parseJsoncFile(absolutePath.chars, flag)) return;
 
-    //Try to load as a relative path
+    //Try to load as a relative path with the config directory
+
+    FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.configDirs)
+    {
+        ffStrbufSet(&absolutePath, path);
+        ffStrbufAppendS(&absolutePath, "fastfetch/");
+        ffStrbufAppendS(&absolutePath, value);
+        if (needExtension)
+            ffStrbufAppendS(&absolutePath, ".jsonc");
+
+        if (parseJsoncFile(absolutePath.chars, flag)) return;
+    }
+
+    //Try to load as a preset
 
     FF_LIST_FOR_EACH(FFstrbuf, path, instance.state.platform.dataDirs)
     {
@@ -514,7 +528,7 @@ static void optionParseConfigFile(FFdata* data, const char* key, const char* val
         if (parseJsoncFile(absolutePath.chars, flag)) return;
     }
 
-    //Try to load as a relative path with the directory of fastfetch binary
+    //Try to load as a relative path with the directory of fastfetch binary, for Windows support
 
     if (instance.state.platform.exePath.length)
     {
@@ -547,6 +561,26 @@ static void printVersion()
 {
     FFVersionResult* result = &ffVersionResult;
     printf("%s %s%s%s (%s)\n", result->projectName, result->version, result->versionTweak, result->debugMode ? "-debug" : "", result->architecture);
+}
+
+static void enableJsonOutput(bool enable)
+{
+    if (!enable)
+    {
+        if (instance.state.resultDoc)
+        {
+            yyjson_mut_doc_free(instance.state.resultDoc);
+            instance.state.resultDoc = NULL;
+        }
+    }
+    else
+    {
+        if (!instance.state.resultDoc)
+        {
+            instance.state.resultDoc = yyjson_mut_doc_new(NULL);
+            yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
+        }
+    }
 }
 
 static void parseCommand(FFdata* data, char* key, char* value)
@@ -640,30 +674,18 @@ static void parseCommand(FFdata* data, char* key, char* value)
         generateConfigFile(true, value, true);
     else if(ffStrEqualsIgnCase(key, "-c") || ffStrEqualsIgnCase(key, "--config"))
         optionParseConfigFile(data, key, value);
+    else if(ffStrEqualsIgnCase(key, "-j") || ffStrEqualsIgnCase(key, "--json"))
+        enableJsonOutput(ffOptionParseBoolean(value));
     else if(ffStrEqualsIgnCase(key, "--format"))
     {
-        switch (ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
-            { "default", 0},
-            { "json", 1 },
+        enableJsonOutput(!!ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
+            { "default", false},
+            { "json", true },
             {},
-        }))
-        {
-            case 0:
-                if (instance.state.resultDoc)
-                {
-                    yyjson_mut_doc_free(instance.state.resultDoc);
-                    instance.state.resultDoc = NULL;
-                }
-                break;
-            case 1:
-                if (!instance.state.resultDoc)
-                {
-                    instance.state.resultDoc = yyjson_mut_doc_new(NULL);
-                    yyjson_mut_doc_set_root(instance.state.resultDoc, yyjson_mut_arr(instance.state.resultDoc));
-                }
-                break;
-        }
+        }));
     }
+    else if(ffStrEqualsIgnCase(key, "--dynamic-interval"))
+        instance.state.dynamicInterval = ffOptionParseUInt32(key, value); // seconds to milliseconds
     else
         return;
 
@@ -749,7 +771,12 @@ static void run(FFdata* data)
     if (useJsonConfig)
         ffPrintJsonConfig(true /* prepare */, instance.state.resultDoc);
     else
+    {
+        //If we don't have a custom structure, use the default one
+        if(data->structure.length == 0)
+            ffStrbufAppendS(&data->structure, FASTFETCH_DATATEXT_STRUCTURE); // Cannot use `ffStrbufSetStatic` here because we will modify the string
         ffPrepareCommandOption(data);
+    }
 
     ffStart();
 
@@ -757,15 +784,31 @@ static void run(FFdata* data)
         if (!instance.config.display.noBuffer) fflush(stdout);
     #endif
 
-    if (useJsonConfig)
-        ffPrintJsonConfig(false, instance.state.resultDoc);
-    else
-        ffPrintCommandOption(data, instance.state.resultDoc);
+    while (true)
+    {
+        if (useJsonConfig)
+            ffPrintJsonConfig(false, instance.state.resultDoc);
+        else
+            ffPrintCommandOption(data, instance.state.resultDoc);
+
+        if (instance.state.dynamicInterval > 0)
+        {
+            fflush(stdout);
+            ffTimeSleep(instance.state.dynamicInterval);
+            fputs("\e[H", stdout);
+        }
+        else
+            break;
+    }
 
     if (instance.state.resultDoc)
         yyjson_mut_write_fp(stdout, instance.state.resultDoc, YYJSON_WRITE_INF_AND_NAN_AS_NULL | YYJSON_WRITE_PRETTY_TWO_SPACES | YYJSON_WRITE_NEWLINE_AT_END, NULL, NULL);
     else
+    {
+        if (instance.config.logo.printRemaining)
+            ffLogoPrintRemaining();
         ffFinish();
+    }
 }
 
 static void writeConfigFile(FFdata* data)
@@ -824,6 +867,12 @@ int main(int argc, char** argv)
     };
 
     parseArguments(&data, argc, argv, parseCommand);
+    if(instance.state.dynamicInterval && instance.state.resultDoc)
+    {
+        fprintf(stderr, "Error: --dynamic-interval cannot be used with --json\n");
+        exit(400);
+    }
+
     if(!data.configLoaded && !getenv("NO_CONFIG"))
         parseConfigFiles();
     parseArguments(&data, argc, argv, (void*) parseOption);

@@ -1,11 +1,13 @@
 #pragma once
 
 #include "common/option.h"
+#include "util/FFlist.h"
 
 typedef struct FFGamepadOptions
 {
     FFModuleArgs moduleArgs;
 
+    FFlist ignores; // List of FFstrbuf
     FFPercentageModuleConfig percent;
 } FFGamepadOptions;
 

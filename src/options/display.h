@@ -2,6 +2,7 @@
 
 #include "common/percent.h"
 #include "util/FFstrbuf.h"
+#include "util/FFlist.h"
 
 typedef enum __attribute__((__packed__)) FFSizeBinaryPrefixType
 {
@@ -28,8 +29,8 @@ typedef enum __attribute__((__packed__)) FFSpaceBeforeUnitType
 typedef enum __attribute__((__packed__)) FFFractionTrailingZerosType
 {
     FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT,
-    FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW,
-    FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE,
+    FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS,
+    FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER,
 } FFFractionTrailingZerosType;
 
 typedef struct FFOptionsDisplay

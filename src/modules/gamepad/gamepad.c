@@ -68,15 +68,48 @@ bool ffPrintGamepad(FFGamepadOptions* options)
         return false;
     }
 
-    uint8_t index = 0;
+    FF_LIST_AUTO_DESTROY filtered = ffListCreate(sizeof(FFGamepadDevice*));
     FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
     {
-        printDevice(options, device, result.length > 1 ? ++index : 0);
-        ffStrbufDestroy(&device->serial);
-        ffStrbufDestroy(&device->name);
+        bool ignored = false;
+        FF_LIST_FOR_EACH(FFstrbuf, ignore, options->ignores)
+        {
+            if(ffStrbufStartsWithIgnCase(&device->name, ignore))
+            {
+                ignored = true;
+                break;
+            }
+        }
+        if(!ignored)
+        {
+            FFGamepadDevice** ptr = ffListAdd(&filtered);
+            *ptr = device;
+        }
     }
 
-    return true;
+    bool ret = true;
+    if(!filtered.length)
+    {
+        ffPrintError(FF_GAMEPAD_MODULE_NAME, 0, &options->moduleArgs, FF_PRINT_TYPE_DEFAULT, "All devices are ignored");
+        ret = false;
+    }
+    else
+    {
+        uint8_t index = 0;
+        FF_LIST_FOR_EACH(FFGamepadDevice*, pdevice, filtered)
+        {
+            FFGamepadDevice* device = *pdevice;
+            printDevice(options, device, filtered.length > 1 ? ++index : 0);
+        }
+
+        FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
+        {
+            ffStrbufDestroy(&device->serial);
+            ffStrbufDestroy(&device->name);
+        }
+    }
+
+    return ret;
 }
 
 void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
@@ -87,6 +120,21 @@ void ffParseGamepadJsonObject(FFGamepadOptions* options, yyjson_val* module)
     {
         if (ffJsonConfigParseModuleArgs(key, val, &options->moduleArgs))
             continue;
+
+        if (unsafe_yyjson_equals_str(key, "ignores"))
+        {
+            yyjson_val *elem;
+            size_t eidx, emax;
+            yyjson_arr_foreach(val, eidx, emax, elem)
+            {
+                if (yyjson_is_str(elem))
+                {
+                    FFstrbuf* strbuf = ffListAdd(&options->ignores);
+                    ffStrbufInitJsonVal(strbuf, elem);
+                }
+            }
+            continue;
+        }
 
         if (ffPercentParseJsonObject(key, val, &options->percent))
             continue;
@@ -99,6 +147,12 @@ void ffGenerateGamepadJsonConfig(FFGamepadOptions* options, yyjson_mut_doc* doc,
 {
     ffJsonConfigGenerateModuleArgsConfig(doc, module, &options->moduleArgs);
 
+    if (options->ignores.length > 0)
+    {
+        yyjson_mut_val* ignores = yyjson_mut_obj_add_arr(doc, module, "ignores");
+        FF_LIST_FOR_EACH(FFstrbuf, strbuf, options->ignores)
+            yyjson_mut_arr_append(ignores, yyjson_mut_strncpy(doc, strbuf->chars, strbuf->length));
+    }
     ffPercentGenerateJsonConfig(doc, module, options->percent);
 }
 
@@ -120,6 +174,17 @@ bool ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
         yyjson_mut_val* obj = yyjson_mut_arr_add_obj(doc, arr);
         yyjson_mut_obj_add_strbuf(doc, obj, "serial", &device->serial);
         yyjson_mut_obj_add_strbuf(doc, obj, "name", &device->name);
+
+        bool ignored = false;
+        FF_LIST_FOR_EACH(FFstrbuf, ignore, options->ignores)
+        {
+            if(ffStrbufStartsWithIgnCase(&device->name, ignore))
+            {
+                ignored = true;
+                break;
+            }
+        }
+        yyjson_mut_obj_add_bool(doc, obj, "ignored", ignored);
     }
 
     FF_LIST_FOR_EACH(FFGamepadDevice, device, result)
@@ -134,12 +199,18 @@ bool ffGenerateGamepadJsonResult(FF_MAYBE_UNUSED FFGamepadOptions* options, yyjs
 void ffInitGamepadOptions(FFGamepadOptions* options)
 {
     ffOptionInitModuleArg(&options->moduleArgs, "󰺵");
+
+    ffListInit(&options->ignores, sizeof(FFstrbuf));
     options->percent = (FFPercentageModuleConfig) { 50, 20, 0 };
 }
 
 void ffDestroyGamepadOptions(FFGamepadOptions* options)
 {
     ffOptionDestroyModuleArg(&options->moduleArgs);
+
+    FF_LIST_FOR_EACH(FFstrbuf, str, options->ignores)
+        ffStrbufDestroy(str);
+    ffListDestroy(&options->ignores);
 }
 
 FFModuleBaseInfo ffGamepadModuleInfo = {

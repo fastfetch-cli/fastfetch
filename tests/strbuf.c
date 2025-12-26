@@ -229,9 +229,18 @@ int main(void)
 
     ffStrbufDestroy(&strbuf);
 
+    //initMoveS
+    {
+        char* heapStr = strdup("1234567890");
+        ffStrbufInitMoveS(&strbuf, heapStr);
+        VERIFY(ffStrbufEqualS(&strbuf, "1234567890"));
+        VERIFY(strbuf.allocated >= 11);
+        ffStrbufDestroy(&strbuf);
+    }
+
     //initF
     ffStrbufInitF(&strbuf, "%s", "1234567890123456789012345678901");
-    VERIFY(strbuf.allocated == 32);
+    VERIFY(strbuf.allocated >= 32);
     VERIFY(ffStrbufEqualS(&strbuf, "1234567890123456789012345678901"));
 
     //containC
@@ -663,6 +672,48 @@ int main(void)
         VERIFY(ffStrbufMatchSeparatedS(&strbuf, ":abc:", ':') == true);
         VERIFY(ffStrbufMatchSeparatedS(&strbuf, "abc:", ':') == true);
         VERIFY(ffStrbufMatchSeparatedS(&strbuf, ":abc", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, ":ABC", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedS(&strbuf, ":abcdef", ':') == false);
+    }
+
+    {
+        ffStrbufSetStatic(&strbuf, "ABC");
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "abc:def:ghi", ' ') == false);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "abc:def:ghi", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "def:ghi", ' ') == false);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "def:ghi", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "def", ':') == false);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "abc", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "", ' ') == false);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, ":abc:", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, "abc:", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, ":abc", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, ":ABC", ':') == true);
+        VERIFY(ffStrbufMatchSeparatedIgnCaseS(&strbuf, ":abcdef", ':') == false);
+    }
+
+    {
+        ffStrbufSetStatic(&strbuf, "abc:def:ghi");
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "abc", ' ') == false);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "abc", ':') == true);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "def", ' ') == false);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "def", ':') == true);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "DEF", ':') == false);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "a", ':') == false);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "e", ':') == false);
+        VERIFY(ffStrbufSeparatedContainS(&strbuf, "i", ':') == false);
+    }
+
+    {
+        ffStrbufSetStatic(&strbuf, "ABC:DEF:GHI");
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "abc", ' ') == false);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "abc", ':') == true);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "def", ' ') == false);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "def", ':') == true);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "DEF", ':') == true);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "a", ':') == false);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "e", ':') == false);
+        VERIFY(ffStrbufSeparatedContainIgnCaseS(&strbuf, "i", ':') == false);
     }
 
     {

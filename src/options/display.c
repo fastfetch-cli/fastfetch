@@ -420,8 +420,8 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         int value;
                         const char* error = ffJsonConfigParseEnum(trailingZeros, &value, (FFKeyValuePair[]) {
                             { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
-                            { "show", FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW },
-                            { "hide", FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE },
+                            { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+                            { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
                             {},
                         });
                         if (error) return error;
@@ -451,6 +451,11 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         { "string", FF_MODULE_KEY_TYPE_STRING },
                         { "icon", FF_MODULE_KEY_TYPE_ICON },
                         { "both", FF_MODULE_KEY_TYPE_BOTH },
+                        { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 },
+                        { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 },
+                        { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 },
+                        { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 },
+                        { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 },
                         {}
                     });
                     if (error) return error;
@@ -492,7 +497,6 @@ const char* ffOptionsParseDisplayJsonConfig(FFOptionsDisplay* options, yyjson_va
                         return "display.freq.ndigits must be between -1 and 9";
                     options->freqNdigits = (int8_t) val;
                 }
-                options->freqNdigits = (int8_t) yyjson_get_int(ndigits);
             }
 
             yyjson_val* spaceBeforeUnit = yyjson_obj_get(val, "spaceBeforeUnit");
@@ -613,6 +617,11 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
                 { "string", FF_MODULE_KEY_TYPE_STRING },
                 { "icon", FF_MODULE_KEY_TYPE_ICON },
                 { "both", FF_MODULE_KEY_TYPE_BOTH },
+                { "both-0", FF_MODULE_KEY_TYPE_BOTH_0 },
+                { "both-1", FF_MODULE_KEY_TYPE_BOTH_1 },
+                { "both-2", FF_MODULE_KEY_TYPE_BOTH_2 },
+                { "both-3", FF_MODULE_KEY_TYPE_BOTH_3 },
+                { "both-4", FF_MODULE_KEY_TYPE_BOTH_4 },
                 {}
             });
         }
@@ -756,8 +765,8 @@ bool ffOptionsParseDisplayCommandLine(FFOptionsDisplay* options, const char* key
     {
         options->fractionTrailingZeros = (FFFractionTrailingZerosType) ffOptionParseEnum(key, value, (FFKeyValuePair[]) {
             { "default", FF_FRACTION_TRAILING_ZEROS_TYPE_DEFAULT },
-            { "show", FF_FRACTION_TRAILING_ZEROS_TYPE_SHOW },
-            { "hide", FF_FRACTION_TRAILING_ZEROS_TYPE_HIDE },
+            { "always", FF_FRACTION_TRAILING_ZEROS_TYPE_ALWAYS },
+            { "never", FF_FRACTION_TRAILING_ZEROS_TYPE_NEVER },
             {},
         });
     }

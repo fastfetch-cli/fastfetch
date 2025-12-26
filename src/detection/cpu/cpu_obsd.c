@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <sys/sensors.h>
 
-static const char* detectCPUTemp(FFCPUResult* cpu)
+static const char* detectCPUTemp(const FFCPUOptions* options, FFCPUResult* cpu)
 {
     int mib[5] = {CTL_HW, HW_SENSORS, 0, SENSOR_TEMP, 0};
 
@@ -23,8 +23,16 @@ static const char* detectCPUTemp(FFCPUResult* cpu)
             return "sysctl(sensordev) failed";
         }
 
-        if (!ffStrStartsWith(sensordev.xname, "cpu"))
-            continue;
+        if (options->tempSensor.length > 0)
+        {
+            if (!ffStrbufEqualS(&options->tempSensor, sensordev.xname))
+                continue;
+        }
+        else
+        {
+            if (!ffStrStartsWith(sensordev.xname, "cpu"))
+                continue;
+        }
 
         for (mib[4] = 0; mib[4] < sensordev.maxnumt[SENSOR_TEMP]; mib[4]++)
         {
@@ -62,7 +70,7 @@ const char *ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
     if (cpuspeed > cpu->frequencyBase) cpu->frequencyBase = cpuspeed;
 
     cpu->temperature = FF_CPU_TEMP_UNSET;
-    if (options->temp) detectCPUTemp(cpu);
+    if (options->temp) detectCPUTemp(options, cpu);
 
     return NULL;
 }

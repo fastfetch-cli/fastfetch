@@ -1008,7 +1008,7 @@
                         },
                         "type": {
                             "type": "string",
-                            "description": "Set whether to show icon before string keys",
+                            "description": "Set whether to show builtin icon before string keys",
                             "oneOf": [
                                 {
                                     "const": "none",
@@ -1020,11 +1020,31 @@
                                 },
                                 {
                                     "const": "icon",
-                                    "description": "Show icon keys (requires newest nerd font)"
+                                    "description": "Show builtin icon (requires newest nerd font)"
                                 },
                                 {
                                     "const": "both",
-                                    "description": "Show both icon and string keys"
+                                    "description": "Show both icon and string keys (alias of `both-1`)"
+                                },
+                                {
+                                    "const": "both-0",
+                                    "description": "Show both icon and string with no spaces between them"
+                                },
+                                {
+                                    "const": "both-1",
+                                    "description": "Show both icon and string with a space between them"
+                                },
+                                {
+                                    "const": "both-2",
+                                    "description": "Show both icon and string with 2 spaces between them"
+                                },
+                                {
+                                    "const": "both-3",
+                                    "description": "Show both icon and string with 3 spaces between them"
+                                },
+                                {
+                                    "const": "both-4",
+                                    "description": "Show both icon and string with 4 spaces between them"
                                 }
                             ],
                             "default": "string"
@@ -1356,11 +1376,11 @@
                                     "description": "Use the behavior defined internally"
                                 },
                                 {
-                                    "const": "show",
+                                    "const": "always",
                                     "description": "Always keep trailing zeros"
                                 },
                                 {
-                                    "const": "hide",
+                                    "const": "never",
                                     "description": "Never keep trailing zeros"
                                 }
                             ],
@@ -1860,6 +1880,10 @@
                                     "temp": {
                                         "$ref": "#/$defs/temperature"
                                     },
+                                    "tempSensor": {
+                                        "description": "Set the temperature sensor to use for CPU temperature detection\n* Linux: `hwmon` or `thermal` path name (eg. `hwmon0`, `thermal_zone0)`\n* macOS: SMC sensor key (eg. `Tp01`)\n* Windows: thermal zone key (eg. `\\_TZ.CPUZ`)\n* FreeBSD: sysctl key (eg. `dev.cpu.0.temperature`)\n* NetBSD: sysmon sensor key (eg. `coretemp0`)",
+                                        "type": "string"
+                                    },
                                     "showPeCoreCount": {
                                         "description": "Detect and display CPU frequency of different core types (eg. Pcore and Ecore) if supported",
                                         "type": "boolean",
@@ -2080,6 +2104,21 @@
                                     "text": {
                                         "description": "Set the command text to be executed",
                                         "type": "string"
+                                    },
+                                    "useStdErr": {
+                                        "description": "Set if stderr should be used instead of stdout for command output",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "parallel": {
+                                        "description": "Set if the command should be executed in parallel with other commands\nImprove performance when using multiple commands, but may cause issues with some commands",
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "splitLines": {
+                                        "description": "Set if the command output should be split into multiple lines",
+                                        "type": "boolean",
+                                        "default": false
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -2307,17 +2346,60 @@
                                         "const": "disk"
                                     },
                                     "folders": {
-                                        "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options"
+                                        "description": "A list of folder paths for the disk output\nDefault: auto detection using mount-points\nThis option overrides other `show*` options",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon (semicolon on Windows) separated list of folder paths to get disk usage from",
+                                                "default": "/"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of folder paths to get disk usage from",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ]
                                     },
                                     "hideFolders": {
-                                        "type": "string",
-                                        "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output",
-                                        "default": "/efi:/boot:/boot/efi:/boot/firmware"
+                                        "description": "A list of folder paths (or glob patterns) to hide from the disk output",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon (semicolon on Windows) separated list of folder paths to hide from the disk output"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of folder paths to hide from the disk output",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ],
+                                        "default": "/efi:/boot:/boot/*"
                                     },
                                     "hideFS": {
-                                        "type": "string",
-                                        "description": "A colon separated file systems to hide from the disk output"
+                                        "description": "A list of file systems to hide from the disk output",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "description": "A colon separated list of file systems to hide from the disk output"
+                                            },
+                                            {
+                                                "type": "array",
+                                                "description": "An array of file systems to hide from the disk output",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "minItems": 1,
+                                                "uniqueItems": true
+                                            }
+                                        ]
                                     },
                                     "showRegular": {
                                         "type": "boolean",
@@ -2593,6 +2675,15 @@
                                         "const": "gamepad",
                                         "description": "List connected gamepads"
                                     },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
                                     "percent": {
                                         "$ref": "#/$defs/percent"
                                     },
@@ -2852,6 +2943,15 @@
                                         "const": "keyboard",
                                         "description": "List (connected) keyboards"
                                     },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    },
                                     "key": {
                                         "$ref": "#/$defs/key"
                                     },
@@ -2920,7 +3020,32 @@
                                     },
                                     "showIpv6": {
                                         "description": "Show IPv6 addresses",
-                                        "type": "boolean",
+                                        "oneOf": [
+                                            {
+                                                "const": true,
+                                                "description": "Show the most useful IPv6 addresses"
+                                            },
+                                            {
+                                                "const": false,
+                                                "description": "Do not show IPv6 addresses"
+                                            },
+                                            {
+                                                "const": "gua",
+                                                "description": "Show only global unicast IPv6 addresses (2000::/3)"
+                                            },
+                                            {
+                                                "const": "ula",
+                                                "description": "Show only unique local IPv6 addresses (fc00::/7)"
+                                            },
+                                            {
+                                                "const": "lla",
+                                                "description": "Show only link-local IPv6 addresses (fe80::/10)"
+                                            },
+                                            {
+                                                "const": "unknown",
+                                                "description": "Show only IPv6 addresses that are not gua, ula or lla"
+                                            }
+                                        ],
                                         "default": false
                                     },
                                     "showSpeed": {
@@ -3149,6 +3274,15 @@
                                     "type": {
                                         "const": "mouse",
                                         "description": "List connected mouses"
+                                    },
+                                    "ignores": {
+                                        "type": "array",
+                                        "description": "An array of case-insensitive device name prefixes to ignore",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
                                     },
                                     "key": {
                                         "$ref": "#/$defs/key"
@@ -3687,8 +3821,8 @@
                                         "description": "Set the color of the separator line",
                                         "$ref": "#/$defs/outputColor"
                                     },
-                                    "length": {
-                                        "description": "Set the length of the separator line, or 0 to auto-detect",
+                                    "times": {
+                                        "description": "Set the times of separator string to repeat, or 0 to auto-detect",
                                         "type": "integer",
                                         "minimum": 0,
                                         "default": 0

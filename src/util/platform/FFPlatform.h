@@ -9,7 +9,6 @@ typedef struct FFPlatformSysinfo
     FFstrbuf release;
     FFstrbuf version;
     FFstrbuf architecture;
-    FFstrbuf displayVersion;
     uint32_t pageSize;
 } FFPlatformSysinfo;
 

@@ -34,6 +34,7 @@ typedef struct FFstrbuf
 static inline void ffStrbufInit(FFstrbuf* strbuf);
 void ffStrbufInitA(FFstrbuf* strbuf, uint32_t allocate);
 void ffStrbufInitVF(FFstrbuf* strbuf, const char* format, va_list arguments);
+void ffStrbufInitMoveNS(FFstrbuf* strbuf, uint32_t length, char* heapStr);
 
 void ffStrbufEnsureFree(FFstrbuf* strbuf, uint32_t free);
 void ffStrbufEnsureFixedLengthFree(FFstrbuf* strbuf, uint32_t free);
@@ -96,10 +97,38 @@ FF_C_NODISCARD uint64_t ffStrbufToUInt(const FFstrbuf* strbuf, uint64_t defaultV
 void ffStrbufUpperCase(FFstrbuf* strbuf);
 void ffStrbufLowerCase(FFstrbuf* strbuf);
 
-bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer);
-void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer);
+bool ffStrbufGetdelim(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer);
+void ffStrbufGetdelimRestore(char** lineptr, size_t* n, char delimiter, FFstrbuf* buffer);
+
+/**
+ * @brief Read a line from a FFstrbuf.
+ *
+ * @details Behaves like getline(3) but reads from a FFstrbuf.
+ *
+ * @param[in,out] lineptr The pointer to a pointer that will be set to the start of the line.
+ *                         Can be NULL for the first call.
+ * @param[in,out] n The pointer to the size of the buffer of lineptr.
+ * @param[in] buffer The buffer to read from. The buffer must not be a string literal.
+ *
+ * @return true if a line has been read, false if the end of the buffer has been reached.
+ */
+static inline bool ffStrbufGetline(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    return ffStrbufGetdelim(lineptr, n, '\n', buffer);
+}
+/**
+ * @brief Restore the end of a line that was modified by ffStrbufGetline.
+ * @warning This function should be called before breaking an ffStrbufGetline loop.
+ */
+static inline void ffStrbufGetlineRestore(char** lineptr, size_t* n, FFstrbuf* buffer)
+{
+    ffStrbufGetdelimRestore(lineptr, n, '\n', buffer);
+}
 bool ffStrbufRemoveDupWhitespaces(FFstrbuf* strbuf);
 bool ffStrbufMatchSeparatedNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
+bool ffStrbufMatchSeparatedIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
+bool ffStrbufSeparatedContainNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
+bool ffStrbufSeparatedContainIgnCaseNS(const FFstrbuf* strbuf, uint32_t compLength, const char* comp, char separator);
 
 int ffStrbufAppendUtf32CodePoint(FFstrbuf* strbuf, uint32_t codepoint);
 
@@ -182,6 +211,11 @@ FF_C_NODISCARD static inline FFstrbuf ffStrbufCreateF(const char* format, ...)
     va_end(arguments);
 
     return strbuf;
+}
+
+static inline void ffStrbufInitMoveS(FFstrbuf* strbuf, char* heapStr)
+{
+    ffStrbufInitMoveNS(strbuf, (uint32_t) strlen(heapStr), heapStr);
 }
 
 static inline void ffStrbufDestroy(FFstrbuf* strbuf)
@@ -564,6 +598,36 @@ static inline bool ffStrbufMatchSeparatedS(const FFstrbuf* strbuf, const char* c
 static inline bool ffStrbufMatchSeparated(const FFstrbuf* strbuf, const FFstrbuf* comp, char separator)
 {
     return ffStrbufMatchSeparatedNS(strbuf, comp->length, comp->chars, separator);
+}
+
+static inline bool ffStrbufMatchSeparatedIgnCaseS(const FFstrbuf* strbuf, const char* comp, char separator)
+{
+    return ffStrbufMatchSeparatedIgnCaseNS(strbuf, (uint32_t) strlen(comp), comp, separator);
+}
+
+static inline bool ffStrbufMatchSeparatedIgnCase(const FFstrbuf* strbuf, const FFstrbuf* comp, char separator)
+{
+    return ffStrbufMatchSeparatedIgnCaseNS(strbuf, comp->length, comp->chars, separator);
+}
+
+static inline bool ffStrbufSeparatedContainS(const FFstrbuf* strbuf, const char* comp, char separator)
+{
+    return ffStrbufSeparatedContainNS(strbuf, (uint32_t) strlen(comp), comp, separator);
+}
+
+static inline bool ffStrbufSeparatedContain(const FFstrbuf* strbuf, const FFstrbuf* comp, char separator)
+{
+    return ffStrbufSeparatedContainNS(strbuf, comp->length, comp->chars, separator);
+}
+
+static inline bool ffStrbufSeparatedContainIgnCaseS(const FFstrbuf* strbuf, const char* comp, char separator)
+{
+    return ffStrbufSeparatedContainIgnCaseNS(strbuf, (uint32_t) strlen(comp), comp, separator);
+}
+
+static inline bool ffStrbufSeparatedContainIgnCase(const FFstrbuf* strbuf, const FFstrbuf* comp, char separator)
+{
+    return ffStrbufSeparatedContainIgnCaseNS(strbuf, comp->length, comp->chars, separator);
 }
 
 #define FF_STRBUF_AUTO_DESTROY FFstrbuf __attribute__((__cleanup__(ffStrbufDestroy)))

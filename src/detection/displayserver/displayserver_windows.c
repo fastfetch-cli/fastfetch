@@ -1,12 +1,9 @@
 #include "displayserver.h"
-#include "detection/os/os.h"
 #include "util/windows/unicode.h"
-#include "util/windows/registry.h"
-#include "util/mallocHelper.h"
 #include "util/edidHelper.h"
 
 #include <dwmapi.h>
-#include <WinUser.h>
+#include <winuser.h>
 #include <wchar.h>
 
 typedef struct FFMonitorInfo
@@ -232,6 +229,7 @@ static void detectDisplays(FFDisplayServerResult* ds)
                 }
                 if (edidLength > 0)
                     ffEdidGetSerialAndManufactureDate(edidData, &display->serial, &display->manufactureYear, &display->manufactureWeek);
+                display->drrStatus = path->flags & DISPLAYCONFIG_PATH_BOOST_REFRESH_RATE ? FF_DISPLAY_DRR_STATUS_ENABLED : FF_DISPLAY_DRR_STATUS_DISABLED;
             }
         }
     }
@@ -254,27 +252,4 @@ void ffConnectDisplayServerImpl(FFDisplayServerResult* ds)
     }
 
     detectDisplays(ds);
-
-    //https://github.com/hykilpikonna/hyfetch/blob/master/neofetch#L2067
-    const FFOSResult* os = ffDetectOS();
-    uint32_t ver = (uint32_t) ffStrbufToUInt(&os->version, 0);
-    if (ver > 1000)
-    {
-        // Windows Server
-        if (ver >= 2016)
-            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-        else if (ver >= 2012)
-            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
-        else
-            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
-    }
-    else
-    {
-        if (ver >= 10)
-            ffStrbufSetStatic(&ds->dePrettyName, "Fluent");
-        else if (ver >= 8)
-            ffStrbufSetStatic(&ds->dePrettyName, "Metro");
-        else
-            ffStrbufSetStatic(&ds->dePrettyName, "Aero");
-    }
 }

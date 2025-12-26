@@ -3,9 +3,14 @@
 #include "util/stringUtils.h"
 #include <kstat.h>
 
-static const char* detectCPUTempByKstat(kstat_ctl_t* kc, FFCPUResult* cpu)
+static const char* detectCPUTempByKstat(const FFCPUOptions* options, kstat_ctl_t* kc, FFCPUResult* cpu)
 {
     const char* possibleModules[] = {"temperature", "cpu_temp", "acpi_thermal", NULL};
+
+    if (options->tempSensor.length > 0) {
+        possibleModules[0] = options->tempSensor.chars;
+        possibleModules[1] = NULL;
+    }
 
     for (int i = 0; possibleModules[i] != NULL; i++) {
         kstat_t* ks = kstat_lookup(kc, possibleModules[i], -1, NULL);
@@ -141,7 +146,7 @@ const char* ffDetectCPUImpl(const FFCPUOptions* options, FFCPUResult* cpu)
 
     if (options->temp)
     {
-        if (detectCPUTempByKstat(kc, cpu) != NULL)
+        if (detectCPUTempByKstat(options, kc, cpu) != NULL)
             detectCPUTempByIpmiTool(cpu);
     }
 

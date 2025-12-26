@@ -8,8 +8,8 @@ typedef struct FFBtrfsDiskUsage
     uint64_t total;
     uint64_t used;
     const char* type;
-    bool dup;
-    uint8_t copies; // 1=single/raid0/raid5/raid6, 2=dup/raid1/raid10, 3=raid1c3, 4=raid1c4
+    const char* profile; // single / dup / raidx
+    uint8_t copies;
 } FFBtrfsDiskUsage;
 
 typedef struct FFBtrfsResult

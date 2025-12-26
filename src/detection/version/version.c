@@ -26,6 +26,8 @@
     #define FF_ARCHITECTURE "alpha"
 #elif defined(__hppa__)
     #define FF_ARCHITECTURE "hppa"
+#elif defined(__sh__)
+    #define FF_ARCHITECTURE "sh"
 #elif defined(__m68k__)
     #define FF_ARCHITECTURE "m68k"
 #else

@@ -89,7 +89,7 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
 
     uint8_t buffer[1024 * 16]; // 16 KB buffer should be sufficient
     uint32_t minMetric = UINT32_MAX;
-    int routeCount = 0;
+    FF_MAYBE_UNUSED int routeCount = 0;
 
     while (true)
     {
@@ -299,7 +299,7 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
 
     uint8_t buffer[1024 * 16]; // 16 KB buffer should be sufficient
     uint32_t minMetric = UINT32_MAX;
-    int routeCount = 0;
+    FF_MAYBE_UNUSED int routeCount = 0;
 
     while (true)
     {

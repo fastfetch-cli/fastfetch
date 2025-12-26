@@ -70,6 +70,10 @@ const char* ffDetectPublicIp(FFPublicIPOptions* options, FFPublicIpResult* resul
 
     FF_STRBUF_AUTO_DESTROY response = ffStrbufCreateA(4096);
     const char* error = ffNetworkingRecvHttpResponse(state, &response);
+
+    *state = (FFNetworkingState){};
+    *status = FF_UNITIALIZED;
+
     if (error == NULL)
         ffStrbufSubstrAfterFirstS(&response, "\r\n\r\n");
     else

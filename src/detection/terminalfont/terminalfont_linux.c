@@ -1,3 +1,4 @@
+#include "common/font.h"
 #include "terminalfont.h"
 #include "common/settings.h"
 #include "common/properties.h"
@@ -418,6 +419,41 @@ static void detectWestonTerminal(FFTerminalFontResult* terminalFont)
     ffFontInitValues(&terminalFont->font, font.chars, size.chars);
 }
 
+static void detectUrxvt(FFTerminalFontResult* terminalFont)
+{
+    FF_STRBUF_AUTO_DESTROY buffer = ffStrbufCreate();
+
+    if (!(ffParsePropFileHomeValues(".Xresources", 1, (FFpropquery[]) {
+        {"URxvt.font:", &buffer},
+    }) || ffParsePropFileHomeValues(".Xdefaults", 1, (FFpropquery[]) {
+        {"URxvt.font:", &buffer},
+    })))
+    {
+        ffStrbufAppendS(&terminalFont->error, "Could not find URxvt.font in .Xresources or .Xdefaults");
+        return;
+    }
+
+    uint32_t index = 0;
+
+    char* line = NULL;
+    size_t len = 0;
+    while (ffStrbufGetdelim(&line, &len, ',', &buffer))
+    {
+        FFfont* font = index == 0 ? &terminalFont->font : &terminalFont->fallback;
+        if (line[0] == '-')
+            ffFontInitXlfd(font, line);
+        else if (ffStrStartsWith(line, "xft:"))
+            ffFontInitXft(font, line + 4);
+        else
+        {
+            ffStrbufAppendF(&terminalFont->error, "Unknown URxvt font format: %s", line);
+            continue;
+        }
+        index++;
+        if (index > 1) break;
+    }
+}
+
 #ifdef __HAIKU__
 static void detectHaikuTerminal(FFTerminalFontResult* terminalFont)
 {
@@ -483,6 +519,10 @@ ffDetectTerminalFontPlatform
     #endif
     else if(ffStrbufStartsWithIgnCaseS(&terminal->processName, "termite"))
         detectFromConfigFile("termite/config", "font =", terminalFont);
+    else if(ffStrbufIgnCaseEqualS(&terminal->processName, "rxvt")
+        || ffStrbufIgnCaseEqualS(&terminal->processName, "urxvt")
+        || ffStrbufIgnCaseEqualS(&terminal->processName, "urxvtd"))
+        detectUrxvt(terminalFont);
     else
         return false;
     return true;

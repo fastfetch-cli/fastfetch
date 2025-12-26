@@ -8,11 +8,13 @@
 const char* ffCfStrGetString(CFTypeRef cf, FFstrbuf* result);
 const char* ffCfNumGetInt(CFTypeRef cf, int32_t* result);
 const char* ffCfNumGetInt64(CFTypeRef cf, int64_t* result);
+const char* ffCfDataGetDataAsString(CFTypeRef cf, FFstrbuf* result);
 const char* ffCfDictGetString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result);
 const char* ffCfDictGetBool(CFDictionaryRef dict, CFStringRef key, bool* result);
 const char* ffCfDictGetInt(CFDictionaryRef dict, CFStringRef key, int* result);
 const char* ffCfDictGetInt64(CFDictionaryRef dict, CFStringRef key, int64_t* result);
 const char* ffCfDictGetData(CFDictionaryRef dict, CFStringRef key, uint32_t offset, uint32_t size, uint8_t* result, uint32_t* length);
+const char* ffCfDictGetDataAsString(CFDictionaryRef dict, CFStringRef key, FFstrbuf* result);
 const char* ffCfDictGetDict(CFDictionaryRef dict, CFStringRef key, CFDictionaryRef* result);
 
 static inline CFNumberRef ffCfCreateInt(int value)
@@ -22,6 +24,7 @@ static inline CFNumberRef ffCfCreateInt(int value)
 
 static inline void cfReleaseWrapper(void* type)
 {
+    assert(type);
     if (*(CFTypeRef*) type)
         CFRelease(*(CFTypeRef*) type);
 }

@@ -15,11 +15,8 @@
 
 #if FF_HAVE_WORDEXP
     #include <wordexp.h>
-#elif FF_HAVE_GLOB
-    #warning "<wordexp.h> is not available, use <glob.h> instead"
-    #include <glob.h>
 #else
-    #warning "Neither <wordexp.h> nor <glob.h> is available"
+    #include <glob.h>
 #endif
 
 static void createSubfolders(const char* fileName)
@@ -136,14 +133,14 @@ bool ffAppendFileBufferRelative(int dfd, const char* fileName, FFstrbuf* buffer)
     return ffAppendFDBuffer(fd, buffer);
 }
 
-bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* out)
+bool ffPathExpandEnv(const char* in, FFstrbuf* out)
 {
     bool result = false;
 
-    #if FF_HAVE_WORDEXP // https://github.com/termux/termux-packages/pull/7056
+    #if FF_HAVE_WORDEXP
 
     wordexp_t exp;
-    if (wordexp(in, &exp, 0) != 0)
+    if (wordexp(in, &exp, 0) != 0) // WARN: 0 = no safety flags; command substitution allowed
         return false;
 
     if (exp.we_wordc >= 1)
@@ -154,16 +151,23 @@ bool ffPathExpandEnv(FF_MAYBE_UNUSED const char* in, FF_MAYBE_UNUSED FFstrbuf* o
 
     wordfree(&exp);
 
-    #elif FF_HAVE_GLOB
+    #else
 
     glob_t gb;
-    if (glob(in, GLOB_NOSORT | GLOB_TILDE, NULL, &gb) != 0)
+    if (glob(in, GLOB_NOSORT
+            #ifdef GLOB_TILDE
+            | GLOB_TILDE
+            #endif
+            #ifdef GLOB_BRACE
+            | GLOB_BRACE
+            #endif
+        , NULL, &gb) != 0)
         return false;
 
-    if (gb.gl_matchc >= 1)
+    if (gb.gl_pathc >= 1)
     {
         result = true;
-        ffStrbufSetS(out, gb.gl_pathv[gb.gl_matchc > 1 ? ffTimeGetNow() % gb.gl_matchc : 0]);
+        ffStrbufSetS(out, gb.gl_pathv[gb.gl_pathc > 1 ? ffTimeGetNow() % (unsigned) gb.gl_pathc : 0]);
     }
 
     globfree(&gb);
@@ -366,4 +370,9 @@ FFNativeFD ffGetNullFD(void)
         return hNullFile;
     hNullFile = open("/dev/null", O_WRONLY | O_CLOEXEC);
     return hNullFile;
+}
+
+bool ffRemoveFile(const char* fileName)
+{
+    return unlink(fileName) == 0;
 }
