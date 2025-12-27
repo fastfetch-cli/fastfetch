@@ -2964,8 +2964,11 @@
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
                                     },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
                                     "format": {
-                                        "$ref": "#/$defs/memoryFormat"
+                                        "$ref": "#/$defs/keyboardFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
@@ -3296,8 +3299,11 @@
                                     "keyWidth": {
                                         "$ref": "#/$defs/keyWidth"
                                     },
+                                    "outputColor": {
+                                        "$ref": "#/$defs/outputColor"
+                                    },
                                     "format": {
-                                        "$ref": "#/$defs/memoryFormat"
+                                        "$ref": "#/$defs/mouseFormat"
                                     },
                                     "condition": {
                                         "$ref": "#/$defs/conditions"
