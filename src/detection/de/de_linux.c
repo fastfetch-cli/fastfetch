@@ -234,6 +234,21 @@ static const char* getTrinity(FFstrbuf* result, FFDEOptions* options)
     return "All methods failed";
 }
 
+static const char* getCosmic(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* options)
+{
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        "cosmic-comp",
+        "--version",
+        NULL
+    }) == NULL) {
+        // cosmic-comp 0.1.0 (git commit fa88002ba41d2edec25dd7ffdee9719fbb928fc0)
+        ffStrbufSubstrBeforeLastC(result, ' ');
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "All methods failed";
+}
 
 const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOptions* options)
 {
@@ -257,6 +272,8 @@ const char* ffDetectDEVersion(const FFstrbuf* deName, FFstrbuf* result, FFDEOpti
         getUnity(result, options);
     else if (ffStrbufEqualS(deName, "trinity"))
         getTrinity(result, options);
+    else if (ffStrbufEqualS(deName, "COSMIC"))
+        getCosmic(result, options);
     else
         return "Unsupported DE";
     return NULL;
