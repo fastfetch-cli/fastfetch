@@ -162,6 +162,22 @@ static const char* getLabwc(FFstrbuf* result)
     return "Failed to run command `labwc --version`";
 }
 
+static const char* getNiri(FFstrbuf* result)
+{
+    if (ffProcessAppendStdOut(result, (char* const[]){
+        "niri",
+        "--version",
+        NULL
+    }) == NULL)
+    { // niri 25.11 (b35bcae)
+        ffStrbufSubstrBeforeLastC(result, ' ');
+        ffStrbufSubstrAfterFirstC(result, ' ');
+        return NULL;
+    }
+
+    return "Failed to run command `niri --version`";
+}
+
 #ifdef __linux__
 static const char* getWslg(FFstrbuf* result)
 {
@@ -298,6 +314,9 @@ const char* ffDetectWMVersion(const FFstrbuf* wmName, FFstrbuf* result, FF_MAYBE
 
     if (ffStrbufEqualS(wmName, "labwc"))
         return getLabwc(result);
+
+    if (ffStrbufEqualS(wmName, "niri"))
+        return getNiri(result);
 
     #if __linux__
     if (ffStrbufEqualS(wmName, "WSLg"))
