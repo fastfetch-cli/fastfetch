@@ -1402,15 +1402,15 @@ static const FFlogo D[] = {
         .colorKeys = FF_COLOR_FG_RED,
         .colorTitle = FF_COLOR_FG_RED,
     },
-    // Deepin
+    // deepin
     {
-        .names = {"Deepin", "deepin-linux"},
+        .names = {"deepin", "deepin-linux"},
         .lines = FASTFETCH_DATATEXT_LOGO_DEEPIN,
         .colors = {
-            FF_COLOR_FG_GREEN,
+            FF_COLOR_FG_BLUE,
         },
-        .colorKeys = FF_COLOR_FG_GREEN,
-        .colorTitle = FF_COLOR_FG_GREEN,
+        .colorKeys = FF_COLOR_FG_BLUE,
+        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // DesaOS
     {
