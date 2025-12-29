@@ -5147,10 +5147,10 @@ static const FFlogo U[] = {
         .names = {"UOS"},
         .lines = FASTFETCH_DATATEXT_LOGO_UOS,
         .colors = {
-            FF_COLOR_FG_RED,
+            FF_COLOR_FG_BLUE,
         },
         .colorKeys = FF_COLOR_FG_DEFAULT,
-        .colorTitle = FF_COLOR_FG_YELLOW,
+        .colorTitle = FF_COLOR_FG_BLUE,
     },
     // UrukOS
     {
