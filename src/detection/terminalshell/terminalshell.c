@@ -875,6 +875,9 @@ bool fftsGetTerminalVersion(FFstrbuf* processName, FF_MAYBE_UNUSED FFstrbuf* exe
     if(ffStrbufIgnCaseEqualS(processName, "termite"))
         return getTerminalVersionTermite(exe, version);
 
+    if(ffStrbufIgnCaseEqualS(processName, "cosmic-term"))
+        return getTerminalVersionTmux(exe, version);
+
     #endif
 
     #ifdef _WIN32
