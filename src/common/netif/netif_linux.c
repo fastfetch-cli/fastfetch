@@ -151,6 +151,12 @@ bool ffNetifGetDefaultRouteImplV4(FFNetifDefaultRouteResult* result)
                 continue;
             }
 
+            // Skip local/loopback routes
+            if (rtm->rtm_scope == RT_SCOPE_HOST || rtm->rtm_type == RTN_LOCAL) {
+                FF_DEBUG("Skipping local route #%d (scope=%d, type=%d)", routeCount, rtm->rtm_scope, rtm->rtm_type);
+                continue;
+            }
+
             FF_DEBUG("Processing IPv4 default route candidate #%d", routeCount);
             entry = (__typeof__(entry)) { }; // Default to zero metric (no RTA_PRIORITY found)
 
@@ -357,6 +363,12 @@ bool ffNetifGetDefaultRouteImplV6(FFNetifDefaultRouteResult* result)
 
             if (rtm->rtm_dst_len != 0) {
                 FF_DEBUG("Skipping non-default route #%d (dst_len=%d)", routeCount, rtm->rtm_dst_len);
+                continue;
+            }
+
+            // Skip local/loopback routes
+            if (rtm->rtm_scope == RT_SCOPE_HOST || rtm->rtm_type == RTN_LOCAL) {
+                FF_DEBUG("Skipping local route #%d (scope=%d, type=%d)", routeCount, rtm->rtm_scope, rtm->rtm_type);
                 continue;
             }
 
