@@ -242,8 +242,8 @@ static const char* getCosmic(FFstrbuf* result, FF_MAYBE_UNUSED FFDEOptions* opti
         NULL
     }) == NULL) {
         // cosmic-comp 0.1.0 (git commit fa88002ba41d2edec25dd7ffdee9719fbb928fc0)
-        ffStrbufSubstrBeforeLastC(result, ' ');
         ffStrbufSubstrAfterFirstC(result, ' ');
+        ffStrbufSubstrBeforeFirstC(result, ' ');
         return NULL;
     }
 
