@@ -288,6 +288,14 @@ static void detectXterm(FFTerminalFontResult* terminalFont)
     });
 
     if (fontName.length == 0)
+    {
+        ffParsePropFileHomeValues(".Xresources", 2, (FFpropquery[]) {
+            {"xterm.vt100.faceName:", &fontName},
+            {"xterm.vt100.faceSize:", &fontSize},
+        });
+    }
+
+    if (fontName.length == 0)
         ffStrbufAppendS(&fontName, "fixed");
     if (fontSize.length == 0)
         ffStrbufAppendS(&fontSize, "8.0");
